@@ -1,14 +1,14 @@
-library(Matrix)
-library(ggplot2)
-library(ggrepel)
-library(data.table)
+#library(Matrix)
+#library(ggplot2)
+#library(ggrepel)
+#library(data.table)
 #library(rray)
-library(parallel)
-library(tibble)
-library(dplyr)
-library(tidyr)
-library(basilisk)
-library(reticulate)
+#library(parallel)
+#library(tibble)
+#library(dplyr)
+#library(tidyr)
+#library(basilisk)
+#library(reticulate)
 
 
 ## Main functions
@@ -85,8 +85,16 @@ setMethod("initRaw","scCOTAN",
 #' "pca_cells" pca numeric data.
 #' @export
 #'
-#' @import stats
-#' ggplot2
+#' @import ggplot2
+#' dplyr
+#'
+#' @importFrom tibble rownames_to_column
+#' @importFrom stats hclust
+#' @importFrom stats cutree
+#' @importFrom parallel mclapply
+#' @importFrom Matrix rowMeans
+#' @importFrom Matrix colMeans
+#'
 #' @examples
 #' \dontrun{
 #' ttm = clean(obj, cells,mean_type = "normal")
@@ -94,7 +102,8 @@ setMethod("initRaw","scCOTAN",
 #' ttm$pca.cell.2}
 setGeneric("clean", function(object, cells, mean_type,iter=F) standardGeneric("clean"))
 setMethod("clean","scCOTAN",
-          clean_function <-function(object, cells, mean_type,iter) {
+          #clean_function <-
+              function(object, cells, mean_type,iter) {
               cells = cells[rowSums(cells)> round((length(colnames(raw))/1000*1), digits = 0),] # 3 per mille delle cellule
               object@raw = object@raw[rownames(cells), colnames(cells)]
               #fwrite(cells,paste(out_dir,"cells_",t,".csv", sep = ""))
@@ -290,7 +299,8 @@ setMethod("clean.sqrt","scCOTAN",
 #' cotan_analysis
 #' This is the main function that estimates the a vector to store all the negative binomial dispersion factors
 #' It need to be run after \code{\link }
-#' @param object
+#' @param object A COTAN object
+#' @importFrom parallel mclapply
 #'
 #' @return a COTAN object
 #' @export
@@ -301,13 +311,6 @@ setGeneric("cotan_analysis", function(object) standardGeneric("cotan_analysis"))
 setMethod("cotan_analysis","scCOTAN",
           function(object) {
               #---------------------------------------------
-
-              #source("../../R/functions.R")
-              fun_pzero <- function(a,mu){
-                  #a= as.numeric(a[,2])
-                  #print(a)
-                  (a <= 0)*(exp(-(1+abs(a))*mu)) + (a > 0)*(1+abs(a)*mu)^(-1/abs(a))
-              }
 
               fun_pzero_posi <- function(r,mu){ (1+r*mu)^(-1/r) }
 
@@ -364,7 +367,6 @@ setMethod("cotan_analysis","scCOTAN",
                   rownames(r) = x
                   return(r)
               }
-
 
               print("cotan analysis")
 
@@ -442,29 +444,6 @@ setMethod("hk_genes","scCOTAN",
               return(object)
           }
 )
-
-
-setGeneric("mu_est", function(object) standardGeneric("mu_est"))
-setMethod("mu_est","scCOTAN",
-          function(object) {
-              print("mu estimator creation")
-
-              #cells_means = colMeans(as.matrix(object@raw), dims = 1, na.rm = T)
-              #genes_means = rowMeans(as.matrix(object@raw), dims = 1, na.rm = T)
-              #means = mean(as.matrix(object@raw),na.rm = T )
-
-              #mu_estimator = (genes_means %*% t(cells_means)) /means
-              mu_estimator = object@lambda %*% t(object@nu)
-
-              rownames(mu_estimator) = rownames(object@raw)
-              #rownames(mu_estimator) = rownames(object@raw.norm)
-              #colnames(mu_estimator) = colnames(object@raw)
-
-              return(mu_estimator)
-          }
-)
-
-
 
 
 #' get.coex
@@ -584,69 +563,6 @@ setMethod("obs_yes_yes","scCOTAN",
 setGeneric("expected_ct", function(object) standardGeneric("expected_ct"))
 setMethod("expected_ct","scCOTAN",
           function(object) {
-              #---------------------------------------------
-              fun_pzero <- function(a,mu){
-                  #a= as.numeric(a[,2])
-                  #print(a)
-                  (a <= 0)*(exp(-(1+abs(a))*mu)) + (a > 0)*(1+abs(a)*mu)^(-1/abs(a))
-              }
-
-              fun_pzero_posi <- function(r,mu){ (1+r*mu)^(-1/r) }
-
-              fun_pzero_nega0 <- function(r,mu){ (exp(-(1-r)*mu))}
-
-              fun_dif_mu_zeros <- function(h,x,somma_zeri){
-                  if (h > 0) {
-                      sum(fun_pzero_posi(h,mu_estimator[x,])) - somma_zeri#/somma_zeri
-                  }else{
-                      sum(fun_pzero_nega0(h,mu_estimator[x,])) - somma_zeri#/somma_zeri
-                  }
-              }
-
-              fun_my_opt <- function(x){
-                  somma_zeri = sum(cells[x,] == 0)
-                  #somma_zeri = rowSums(cells[x,] == 0)
-                  a1 = 0
-                  u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
-                  a2 = a1
-                  u2 = u1
-                  if (u1 > 0) {
-                      a1 = a1 - 1
-                      u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
-                      while (u1 > 0) {
-                          a2 = a1
-                          u2 = u1
-                          a1 = 2 * a1
-                          u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
-                      }
-                  }else{
-                      a2 = 1
-                      u2 = fun_dif_mu_zeros(a2,x,somma_zeri)
-                      while (u2 < 0) {
-                          a1 = a2
-                          u1 =u2
-                          a2 = 2 * a2
-                          u2 = fun_dif_mu_zeros(a2,x,somma_zeri)
-                      }
-                  }
-                  a = (a1+a2)/2
-                  u = fun_dif_mu_zeros(a,x,somma_zeri)
-                  while (abs(u)>0.001) {
-                      if(u>0){
-                          a2 = a
-                          u2 = u
-                      }else{
-                          a1 = a
-                          u1 = u
-                      }
-                      a = (a1 + a2)/2
-                      u = fun_dif_mu_zeros(a,x,somma_zeri)
-                  }
-                  r = data.frame(a,u)
-                  rownames(r) = x
-                  return(r)
-              }
-
 
 
               cells=as.matrix(object@raw)

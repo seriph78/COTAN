@@ -1,3 +1,92 @@
+getPyPath <- function() system.file("inst","python", "python_PCA.py", package="COTAN",mustWork = T)
+
+
+setGeneric("fun_pzero", function(a,mu) standardGeneric("fun_pzero"))
+setMethod("fun_pzero","numeric",
+          function(a,mu) {
+              #---------------------------------------------
+              #fun_pzero <- function(a,mu){
+                  #a= as.numeric(a[,2])
+                  #print(a)
+                  (a <= 0)*(exp(-(1+abs(a))*mu)) + (a > 0)*(1+abs(a)*mu)^(-1/abs(a))
+              }
+)
+
+setGeneric("fun_pzero_posi", function(r,mu) standardGeneric("fun_pzero_posi"))
+setMethod("fun_pzero_posi","scCOTAN",
+              #fun_pzero_posi <-
+              function(r,mu){ (1+r*mu)^(-1/r) }
+          )
+
+setGeneric("fun_pzero_nega0", function(r,mu) standardGeneric("fun_pzero_nega0"))
+setMethod("fun_pzero_nega0","scCOTAN",
+              #fun_pzero_nega0 <-
+              function(r,mu){ (exp(-(1-r)*mu))}
+)
+
+setGeneric("fun_dif_mu_zeros", function(h,x,somma_zeri) standardGeneric("fun_dif_mu_zeros"))
+setMethod("fun_dif_mu_zeros","scCOTAN",
+              #fun_dif_mu_zeros <-
+              function(h,x,somma_zeri){
+                  if (h > 0) {
+                      sum(fun_pzero_posi(h,mu_estimator[x,])) - somma_zeri#/somma_zeri
+                  }else{
+                      sum(fun_pzero_nega0(h,mu_estimator[x,])) - somma_zeri#/somma_zeri
+                  }
+              }
+)
+
+setGeneric("fun_my_opt", function(x) standardGeneric("fun_my_opt"))
+setMethod("fun_my_opt","numeric",
+              #fun_my_opt <-
+              function(x){
+                  somma_zeri = sum(cells[x,] == 0)
+                  #somma_zeri = rowSums(cells[x,] == 0)
+                  a1 = 0
+                  u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
+                  a2 = a1
+                  u2 = u1
+                  if (u1 > 0) {
+                      a1 = a1 - 1
+                      u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
+                      while (u1 > 0) {
+                          a2 = a1
+                          u2 = u1
+                          a1 = 2 * a1
+                          u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
+                      }
+                  }else{
+                      a2 = 1
+                      u2 = fun_dif_mu_zeros(a2,x,somma_zeri)
+                      while (u2 < 0) {
+                          a1 = a2
+                          u1 =u2
+                          a2 = 2 * a2
+                          u2 = fun_dif_mu_zeros(a2,x,somma_zeri)
+                      }
+                  }
+                  a = (a1+a2)/2
+                  u = fun_dif_mu_zeros(a,x,somma_zeri)
+                  while (abs(u)>0.001) {
+                      if(u>0){
+                          a2 = a
+                          u2 = u
+                      }else{
+                          a1 = a
+                          u1 = u
+                      }
+                      a = (a1 + a2)/2
+                      u = fun_dif_mu_zeros(a,x,somma_zeri)
+                  }
+                  r = data.frame(a,u)
+                  rownames(r) = x
+                  return(r)
+              }
+)
+
+
+
+
 #' scCOTAN-class
 #' Define my COTAN structure
 #' @slot raw ANY. To store the raw data matrix
@@ -37,8 +126,8 @@ my_theme = theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5, vj
 
 #' spMat
 #' Internal function to convert the matrix in a sparce trinagolar matrix
-#' @param object
-#'
+#' @param object A COTAN object
+#' @importFrom Matrix forceSymmetric
 #' @return the entire COTAN object
 #' @noRd
 #'
@@ -64,8 +153,11 @@ setMethod("spMat","matrix",
 #'
 #' @return
 #' @import
-#' Matrix
 #' basilisk
+#' reticulate
+#'
+#' @importFrom Matrix rowMeans
+#' @importFrom Matrix colMeans
 #' @importFrom parallel mclapply
 #'
 #'
@@ -73,7 +165,7 @@ setGeneric("fun_linear", function(object, mean_type) standardGeneric("fun_linear
 setMethod("fun_linear","scCOTAN",
           #fun_linear =
           function(object, mean_type) {
-
+              #file.py <- system.file("inst","python", "python_PCA.py", package="COTAN",mustWork = T)
 
               print("Start estimation mu with linear method")
               print(dim(object@raw))
@@ -121,9 +213,9 @@ setMethod("fun_linear","scCOTAN",
               on.exit(basiliskStop(proc))
 
               t_to_clust = as.matrix(t_to_clust)
-              file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
+
               pca_cells <- basiliskRun(proc, function(arg1) {
-                  reticulate::source_python(file.py)
+                  reticulate::source_python(getPyPath())
                   output <- python_PCA(arg1)
 
                   # The return value MUST be a pure R object, i.e., no reticulate
@@ -158,10 +250,12 @@ setMethod("fun_linear","scCOTAN",
 #'
 #' @param object It is COTAN object
 #'
+#' @importFrom Matrix rowMeans
+#' @importFrom Matrix colMeans
 #' @return
 #' @import
-#' Matrix
 #' reticulate
+#' basilisk
 #'
 setGeneric("fun_sqrt", function(object) standardGeneric("fun_sqrt"))
 setMethod("fun_sqrt","scCOTAN",
@@ -427,4 +521,23 @@ setMethod("fun_linear_iter","scCOTAN",
           }
 )
 
+setGeneric("mu_est", function(object) standardGeneric("mu_est"))
+setMethod("mu_est","scCOTAN",
+          function(object) {
+              print("mu estimator creation")
+
+              #cells_means = colMeans(as.matrix(object@raw), dims = 1, na.rm = T)
+              #genes_means = rowMeans(as.matrix(object@raw), dims = 1, na.rm = T)
+              #means = mean(as.matrix(object@raw),na.rm = T )
+
+              #mu_estimator = (genes_means %*% t(cells_means)) /means
+              mu_estimator = object@lambda %*% t(object@nu)
+
+              rownames(mu_estimator) = rownames(object@raw)
+              #rownames(mu_estimator) = rownames(object@raw.norm)
+              #colnames(mu_estimator) = colnames(object@raw)
+
+              return(mu_estimator)
+          }
+)
 

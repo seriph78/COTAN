@@ -4,8 +4,8 @@ test_that("initialization", {
     obj.temp = scCOTAN(raw = read.csv(paste0(root,"raw.csv"), header = T,row.names = 1))
     obj.temp = initRaw(obj.temp,GEO=" " ,sc.method="10X",cond = "example")
 
-    file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
-    print(file.py)
+    #file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
+    print(getPyPath())
 
     expect_equal(obj.temp,readRDS(paste0(root,"obj.RDS")) )
 
@@ -49,13 +49,13 @@ test_that("cotan_coex_test", {
 test_that("python_PCA_test", {
     raw = read.csv(paste0(root,"raw.csv"), header = T,row.names = 1)
     #pca.raw = python_PCA(raw)
-    file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
+    #file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
 
     proc <- basiliskStart(my_env_cotan)
     on.exit(basiliskStop(proc))
 
     pca.raw <- basiliskRun(proc, function(arg1) {
-        reticulate::source_python(file.py)
+        reticulate::source_python(getPyPath())
         output <- python_PCA(arg1)
 
         # The return value MUST be a pure R object, i.e., no reticulate

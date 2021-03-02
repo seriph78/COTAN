@@ -9,7 +9,7 @@ It need to be run after \code{\link }}
 cotan_analysis(object)
 }
 \arguments{
-\item{object}{}
+\item{object}{A COTAN object}
 }
 \value{
 a COTAN object
