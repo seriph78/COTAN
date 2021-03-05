@@ -13,19 +13,19 @@ setMethod("fun_pzero","numeric",
 )
 
 setGeneric("fun_pzero_posi", function(r,mu) standardGeneric("fun_pzero_posi"))
-setMethod("fun_pzero_posi","scCOTAN",
+setMethod("fun_pzero_posi","numeric",
               #fun_pzero_posi <-
               function(r,mu){ (1+r*mu)^(-1/r) }
           )
 
 setGeneric("fun_pzero_nega0", function(r,mu) standardGeneric("fun_pzero_nega0"))
-setMethod("fun_pzero_nega0","scCOTAN",
+setMethod("fun_pzero_nega0","numeric",
               #fun_pzero_nega0 <-
               function(r,mu){ (exp(-(1-r)*mu))}
 )
 
 setGeneric("fun_dif_mu_zeros", function(h,x,somma_zeri) standardGeneric("fun_dif_mu_zeros"))
-setMethod("fun_dif_mu_zeros","scCOTAN",
+setMethod("fun_dif_mu_zeros","numeric",
               #fun_dif_mu_zeros <-
               function(h,x,somma_zeri){
                   if (h > 0) {
@@ -37,7 +37,7 @@ setMethod("fun_dif_mu_zeros","scCOTAN",
 )
 
 setGeneric("fun_my_opt", function(x) standardGeneric("fun_my_opt"))
-setMethod("fun_my_opt","numeric",
+setMethod("fun_my_opt","character",
               #fun_my_opt <-
               function(x){
                   somma_zeri = sum(cells[x,] == 0)
@@ -86,30 +86,6 @@ setMethod("fun_my_opt","numeric",
 
 
 
-
-#' scCOTAN-class
-#' Define my COTAN structure
-#' @slot raw ANY. To store the raw data matrix
-#' @slot raw.norm ANY. To store the raw data matrix divided for the cell efficiency estimated (nu)
-#' @slot coex ANY. The coex matrix (sparce)
-#' @slot nu vector.
-#' @slot lambda vector.
-#' @slot a vector.
-#' @slot hk vector.
-#' @slot n_cells numeric.
-#' @slot meta data.frame.
-#' @slot yes_yes ANY.
-#' @slot clusters vector.
-#' @slot cluster_data data.frame.
-#'
-#' @return
-#' @export
-#'
-#' @examples obj = scCOTAN(raw = raw) # with raw the raw data matrix with cells on colums and genes on rows
-scCOTAN <- setClass("scCOTAN", slots =
-                        c(raw="ANY",raw.norm="ANY", coex="ANY",
-                          nu="vector",lambda="vector",a="vector", hk = "vector", n_cells = "numeric",
-                          meta="data.frame",yes_yes="ANY", clusters="vector",cluster_data="data.frame"))
 
 
 
@@ -245,174 +221,6 @@ setMethod("fun_linear","scCOTAN",
 )
 
 
-#' fun_sqrt
-#' Internal function to estimeate the cell efficiency with the square root
-#'
-#' @param object It is COTAN object
-#'
-#' @importFrom Matrix rowMeans
-#' @importFrom Matrix colMeans
-#' @return
-#' @import
-#' reticulate
-#' basilisk
-#'
-setGeneric("fun_sqrt", function(object) standardGeneric("fun_sqrt"))
-setMethod("fun_sqrt","scCOTAN",
-          function(object){
-              library(propagate)
-              c1 = 6.5
-              c2 = 60
-              ## psi functions
-              psi <- function(x){
-                  val_psi <- x**2 + psi_1(x) * psi_2(x) + psi_3(x)
-                  return(val_psi)
-              }
-
-              psi_1 <- function(x){
-                  val_psi_1 = 1/4*x^7 + 3/32*x^5 + x - x^2/sqrt(2)
-                  return(val_psi_1)
-              }
-
-              psi_2 <- function(x){
-                  val_psi_2 = 1 / (x^7 + 1)
-                  return(val_psi_2)
-              }
-
-              psi_3 <- function(x){
-                  val_psi_3 = c2 * x^8 * exp(-c1*x)
-                  return(val_psi_3)
-              }
-
-              ## derivates of psi
-              first_der_psi <- function(x){
-                  f_psi = 2 * x + first_der_psi_1(x) * psi_2(x) + psi_1(x) * first_der_psi_2(x) + first_der_psi_3(x)
-                  return(f_psi)
-              }
-
-              sec_der_psi <- function(x){
-                  s_psi = 2 + sec_der_psi_1(x) * psi_2(x) + 2 * first_der_psi_1(x) * first_der_psi_2(x) + psi_1(x) * sec_der_psi_2(x) + sec_der_psi_3(x)
-                  return(s_psi)
-              }
-
-              first_der_psi_1 <- function(x){
-                  f_psi_1 = 7/4 * x^6 + 15/32 * x^4 + 1 - sqrt(2) * x
-                  return(f_psi_1)
-              }
-
-              sec_der_psi_1 <- function(x){
-                  s_psi_1 = 21/2 * x^5 + 15/8 * x^3 - sqrt(2)
-                  return(s_psi_1)
-              }
-
-              first_der_psi_2 <- function(x){
-                  f_psi_2 = -(7 * x^6)/(x^7 + 1)^2
-                  return(f_psi_2)
-              }
-
-              sec_der_psi_2 <- function(x){
-                  s_psi_2 = -(14 * x^5 * (3 - 4*x^7))/(x^7 + 1)^3
-                  return(s_psi_2)
-              }
-
-              first_der_psi_3 <- function(x){
-                  f_psi_3 = c2*(8*x^7 - c1*x^8)*exp(-c1*x)
-                  return(f_psi_3)
-              }
-
-              sec_der_psi_3 <- function(x){
-                  s_psi_3 = c2 * (56 * x^6 - 16 * c1 * x^7 + c1^2 * x^8) * exp(-c1*x)
-                  return(s_psi_3)
-              }
-
-              # tau
-              tau <- function(x){
-                  xtau = psi(x) - x^2
-                  return(xtau)
-              }
-
-              # lambda
-              lambda <-function(xi_star, mat_X){
-                  v = rowVarsC(mat_X)
-                  l_i = psi(xi_star) + 1/2 * sec_der_psi(xi_star)*(v - tau(xi_star))
-                  return(l_i)
-              }
-
-              # nu
-              R_star_j <- function(x_star_j, mat_X){
-                  v = colVarsC(mat_X)
-                  Rsj = psi(x_star_j) + 1/2 * sec_der_psi(x_star_j)*(v - tau(x_star_j))
-                  return(Rsj)
-              }
-
-              nu <- function(x_star_j,mat_X){
-                  m = length(colnames(mat_X))
-                  Rsj = R_star_j(x_star_j, mat_X)
-                  nu_j = Rsj/(sum(Rsj)/m)
-                  return(nu_j)
-              }
-
-
-              #library(reticulate)
-              #setwd("../seriph/COTAN-tool/")
-              #source_python(paste(surcedir,"python_PCA.py",sep = ""))
-
-              #print("Start estimation mu")
-              # Estimators computation
-              raw = object@raw
-
-              new_raw = sqrt(raw)
-
-              print("lambda i")
-              lambda_i = lambda(rowMeans(new_raw), new_raw)
-              lamba.data = data.frame("means"= rowMeans(new_raw), "var"=rowVarsC(new_raw))
-              print("nu est")
-              nu_est = nu(colMeans(new_raw),new_raw)
-              nu.data = data.frame("means"= colMeans(new_raw), "var"=colVarsC(new_raw))
-              print("mu estimator")
-              mu_estimator = outer(lambda_i,nu_est, "*")
-
-              object@nu = nu_est
-              object@lambda = lambda_i
-
-
-              gc()
-              # To insert an explorative analysis and check for strage cells (as blood) and cells with a too low efficiency (nu est)
-              to_clust <- t(t(as.matrix(raw)) * (1/as.vector(nu_est))) #raw counts divided for cell efficiency
-              colnames(to_clust) = colnames(raw)
-              t_to_clust = t(to_clust)
-              #start_time <- Sys.time()
-              t_to_clust = as.matrix(t_to_clust)
-              proc <- basiliskStart(my_env_cotan)
-              on.exit(basiliskStop(proc))
-              t_to_clust = as.matrix(t_to_clust)
-              print(getwd())
-              pca_cells <- basiliskRun(proc, function(arg1) {
-                  reticulate::source_python("../../inst/python/python_PCA.py")
-                  output <- python_PCA(arg1)
-
-                  # The return value MUST be a pure R object, i.e., no reticulate
-                  # Python objects, no pointers to shared memory.
-                  output
-              }, arg1=t_to_clust)
-              rownames(pca_cells)=rownames(t_to_clust)
-              #end_time <- Sys.time()
-              #print(paste("pca; time",end_time - start_time, sep = " " ))
-
-              #---- Mhalanobis distance
-              ppp = pca_cells
-              ppp = scale(ppp)
-              dist_cells = dist(ppp, method = "euclidean") # mhalanobis
-              colnames(pca_cells) = paste("PC",c(1:ncol(pca_cells)), sep = "")
-              pca_cells = as.data.frame(pca_cells)
-              output = list("dist_cells"=dist_cells, "to_clust"=to_clust,"pca_cells"=pca_cells, "t_to_clust"=t_to_clust,"mu_estimator"=mu_estimator, "object"=object,"nu.data"=nu.data,"lamba.data"= lamba.data)
-
-              #detach("package:reticulate", unload = TRUE)
-              detach("package:propagate", unload = TRUE)
-              return(output)
-          }
-
-)
 
 setGeneric("fun_linear_iter", function(object,mean_t) standardGeneric("fun_linear_iter"))
 setMethod("fun_linear_iter","scCOTAN",
@@ -541,3 +349,13 @@ setMethod("mu_est","scCOTAN",
           }
 )
 
+setGeneric("get.S", function(object) standardGeneric("get.S"))
+setMethod("get.S","scCOTAN",
+          function(object) {
+              print("function to generate S ")
+
+              S = (object@coex)^2 * object@n_cells
+
+              return(S)
+          }
+)

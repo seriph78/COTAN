@@ -43,7 +43,9 @@ test_that("cotan_analysis_test", {
 test_that("cotan_coex_test", {
     obj=readRDS(paste0(root,"Obj_out_cotan_an.RDS"))
     obj = get.coex(obj)
-    expect_equal( obj,readRDS(paste0(root,"Obj_out_cotan_coex.RDS")))
+    saved.obj = readRDS(paste0(root,"Obj_out_cotan_coex.RDS"))
+    saved.obj@coex = saved.obj@coex /sqrt(saved.obj@n_cells)
+    expect_equal( obj, saved.obj)
 })
 
 test_that("python_PCA_test", {
@@ -69,7 +71,21 @@ test_that("python_PCA_test", {
 
     pca.tb = (read.csv(paste0(root,"pca.mat.csv"),header = T,row.names = 1))
     expect_lt(sum((pca.raw[,1:4] - pca.tb[,1:4])**2),10**(-5))
+
     ### È molto strano! la PCA fatto così ha un qualche grado di randomness!
 })
 
+
+test_that("get_pval_test", {
+    object = readRDS(paste0(root,"Obj_out_cotan_coex.RDS"))
+    object@coex = object@coex/sqrt(object@n_cells) #Because this object was created
+    #with the old method and it was divided by sqrt(cell_number)
+    pval = get.pval(object)
+    pval.exp = data.table::fread(paste0(root,"p_val.csv"),header = T)
+    pval.exp = as.data.frame(pval.exp)
+    rownames(pval.exp) =pval.exp$V1
+    pval.exp = pval.exp[,2:ncol(pval.exp)]
+    expect_equal( as.data.frame(pval), pval.exp)
+
+})
 
