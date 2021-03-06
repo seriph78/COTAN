@@ -2,9 +2,7 @@
 % Please edit documentation in R/COTAN_main.R
 \name{cotan_analysis}
 \alias{cotan_analysis}
-\title{cotan_analysis
-This is the main function that estimates the a vector to store all the negative binomial
-dispersion factors. It need to be run after \code{\link{clean}}}
+\title{cotan_analysis}
 \usage{
 cotan_analysis(object)
 }
@@ -15,7 +13,6 @@ cotan_analysis(object)
 a COTAN object
 }
 \description{
-cotan_analysis
 This is the main function that estimates the a vector to store all the negative binomial
 dispersion factors. It need to be run after \code{\link{clean}}
 }

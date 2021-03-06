@@ -1,6 +1,7 @@
 ## Main functions
 
 #' scCOTAN-class
+#'
 #' Define my COTAN structure
 #' @slot raw ANY. To store the raw data matrix
 #' @slot raw.norm ANY. To store the raw data matrix divided for the cell efficiency estimated (nu)
@@ -26,6 +27,7 @@ setClass("scCOTAN", slots =
                           meta="data.frame",yes_yes="ANY", clusters="vector",cluster_data="data.frame")) -> scCOTAN
 
 #' initRaw
+#'
 #' It starts to fill some fields of cotan object.
 #' @param object the dataframe containing the raw data
 #' @param GEO a code reporting the GEO identification or other specific dataset code
@@ -63,10 +65,6 @@ setMethod("initRaw","scCOTAN",
 #' Main function that can be used to check and clean the dataset. It also produce (using the function fun_linear) and store
 #' the estimators for nu and lambda. It also fill the raw.norm (raw / nu) and n_cell (the initial number of cells in the dataset)
 #' @param object COTAN object
-#' @param cells matrix of 0/1
-#' @param mean_type the two possibilities are "normal" or "sqrt"
-#' @param iter boolean, if we want the iteration (normally not so defoult is False)
-#'
 #' @return a list of objects containing: "cl1" is the first cell cluster, "cl2" is the second cell cluster,
 #' "pca.cell.2" is a ggplot2 cell pca plot, "object" is the COTAN object with saved the estimated lambda and mu, "mu_estimator", "D"
 #' "pca_cells" pca numeric data.
@@ -84,27 +82,37 @@ setMethod("initRaw","scCOTAN",
 #'
 #' @examples
 #' \dontrun{
-#' ttm = clean(obj, cells,mean_type = "normal")
+#' ttm = clean(obj, cells)
 #' obj = ttm$object
 #' ttm$pca.cell.2
 #' }
-setGeneric("clean", function(object, cells, mean_type,iter=F) standardGeneric("clean"))
+setGeneric("clean", function(object) standardGeneric("clean"))
 setMethod("clean","scCOTAN",
           #clean_function <-
-              function(object, cells, mean_type,iter) {
-              cells = cells[rowSums(cells)> round((length(colnames(raw))/1000*1), digits = 0),] # 3 per mille delle cellule
+              function(object) {
+
+                  mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
+
+                  my_theme = theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
+                                   axis.text.y = element_text( size = 14, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
+                                   axis.title.x = element_text( size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),
+                                   axis.title.y = element_text( size = 14, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"))
+
+
+                cells = get.zero_one.cells(object)
+              #cells = cells[rowSums(cells)> round((length(colnames(raw))/1000*1), digits = 0),] # 3 per mille delle cellule
               object@raw = object@raw[rownames(cells), colnames(cells)]
               #fwrite(cells,paste(out_dir,"cells_",t,".csv", sep = ""))
               #save(n_it,file = paste(out_dir,"n_it_",t, sep = ""))
-              if(iter){
-                  list1 = fun_linear_iter(object, mean_type)
-              }else{
-                  list1 = fun_linear(object, mean_type)
-              }
+              #if(iter){
+               #   list1 = fun_linear_iter(object, mean_type)
+              #}else{
+                  list1 = fun_linear(object)
+              #}
 
-              object@meta[(nrow(object@meta)+1),1:2] = c("mean type:",mean_type)
-              object@meta[(nrow(object@meta)+1),1:2] = c("Iteration:",iter)
-              object@meta[(nrow(object@meta)+1),1:2] = c("Type of estimation:","linear")
+              #object@meta[(nrow(object@meta)+1),1:2] = c("mean type:",mean_type)
+              #object@meta[(nrow(object@meta)+1),1:2] = c("Iteration:",iter)
+              #object@meta[(nrow(object@meta)+1),1:2] = c("Type of estimation:","linear")
               # list1 = fun_iter_no_nu(cells = cells, raw = raw)
               gc()
 
@@ -191,11 +199,11 @@ setMethod("clean","scCOTAN",
 )
 
 #' cotan_analysis
+#'
 #' This is the main function that estimates the a vector to store all the negative binomial
 #' dispersion factors. It need to be run after \code{\link{clean}}
 #' @param object A COTAN object
 #' @importFrom parallel mclapply
-#'
 #' @return a COTAN object
 #' @export
 #' @examples
@@ -223,25 +231,28 @@ setMethod("cotan_analysis","scCOTAN",
               mu_estimator = mu_estimator[!rownames(mu_estimator) %in% hk,]
               cells = cells[!rownames(cells) %in% hk, ]
 
-
               mu_estimator = as.matrix(mu_estimator)
               print("start a minimization")
               gc()
               p=1
               tot = list()
+
+
               while(p <= length(rownames(mu_estimator))) {
-                  bb=Sys.time()
+                  #bb=Sys.time()
                   if((p+200) <= length(rownames(mu_estimator))){
-                      tot1 =  mclapply(rownames(mu_estimator)[p:(p+200)], fun_my_opt,mc.cores = 11)
+                      tot1 =  parallel::mclapply(rownames(mu_estimator)[p:(p+200)],
+                                       fun_my_opt, ce.mat= cells, mu_est= mu_estimator  ,mc.cores = 11)
 
                   }else{
                       print("Final trance!")
-                      tot1 = mclapply(rownames(mu_estimator)[p:length(rownames(mu_estimator))], fun_my_opt,mc.cores = 11)
+                      tot1 = parallel::mclapply(rownames(mu_estimator)[p:length(rownames(mu_estimator))],
+                                      fun_my_opt, ce.mat=cells, mu_est= mu_estimator  ,mc.cores = 11)
                   }
                   tot = append(tot, tot1)
                   p=p+200+1
                   if((p %% 10)==0){
-                      print(Sys.time()-bb)
+                      #print(Sys.time()-bb)
                       print(paste("Next gene:",rownames(mu_estimator)[p],"number",p, sep = " "))
                   }
               }
@@ -284,6 +295,7 @@ setMethod("hk_genes","scCOTAN",
 
 
 #' get.coex
+#'
 #' This function estimates and stores the coex*sqrt(n_cells) matrix in the coex field.
 #' It need to be run after \code{\link{cotan_analysis}}
 #' @param object
@@ -327,11 +339,12 @@ setMethod("get.coex","scCOTAN",
 
               coex = coex / sqrt(1/new_estimator_si_si + 1/new_estimator_no_no + 1/new_estimator_si_no + 1/new_estimator_no_si)
 
-              print("coex low values substituted with 0")
-              coex[abs(coex) <= 1]=0
+              #print("coex low values substituted with 0")
+              #coex[abs(coex) <= 1]=0
+              print("Diagonal coex values substituted with 0")
               diag(coex) = 0
               coex = coex / sqrt(object@n_cells)
-              object@coex = spMat(coex)
+              object@coex = coex
 
               return(object)
           }
@@ -435,11 +448,28 @@ setMethod("expected_ct","scCOTAN",
           }
 )
 
-
-
-setGeneric("get.pval", function(object, gene.set.col=c(),gene.set.row=c() ) standardGeneric("get.pval"))
+#' get.pval
+#'
+#' This function computes the p-values for genes in the COTAN oblect. It can be used genome-wide
+#' or setting some specific genes of interest. By default it computes the p-values using the S
+#' statistics (\eqn{\Chi^2})
+#' @param object a COTAN object
+#' @param gene.set.col an array of genes. It will be put in columns.
+#' If left empty the function will do it genome-wide.
+#' @param gene.set.row an array of genes. It will be put in rows.
+#' If left empty the function will do it genome-wide.
+#' @param type_stat By default it computes the S (\eqn{\Chi^{2}})
+#'
+#' @return a p-value matrix
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' obj = get.pval(obj,type_stat="S")
+#' }
+setGeneric("get.pval", function(object, gene.set.col=c(),gene.set.row=c(), type_stat="S" ) standardGeneric("get.pval"))
 setMethod("get.pval","scCOTAN",
-          function(object, gene.set.col=c(),gene.set.row=c()) {
+          function(object, gene.set.col=c(),gene.set.row=c(), type_stat="S") {
 
               print(gene.set.col)
 
@@ -463,9 +493,16 @@ setMethod("get.pval","scCOTAN",
 
               }
 
-              print(paste("Get p-values", cond.col, cond.row, sep = " "))
+            print(paste("Get p-values", cond.col, cond.row, sep = " "))
 
-              S = get.S(object)
+            if (type_stat == "S") {
+                print("Using function S")
+                S = get.S(object)
+            }else{
+                print("Using function G")
+                S = get.G(object)
+            }
+
 
               if(cond.col == "on a set of genes on columns"){
                   S = S[,colnames(S) %in% gene.set.col]

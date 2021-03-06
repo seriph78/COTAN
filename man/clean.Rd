@@ -4,16 +4,10 @@
 \alias{clean}
 \title{clean}
 \usage{
-clean(object, cells, mean_type, iter = F)
+clean(object)
 }
 \arguments{
 \item{object}{COTAN object}
-
-\item{cells}{matrix of 0/1}
-
-\item{mean_type}{the two possibilities are "normal" or "sqrt"}
-
-\item{iter}{boolean, if we want the iteration (normally not so defoult is False)}
 }
 \value{
 a list of objects containing: "cl1" is the first cell cluster, "cl2" is the second cell cluster,
@@ -26,7 +20,7 @@ the estimators for nu and lambda. It also fill the raw.norm (raw / nu) and n_cel
 }
 \examples{
 \dontrun{
-ttm = clean(obj, cells,mean_type = "normal")
+ttm = clean(obj, cells)
 obj = ttm$object
 ttm$pca.cell.2
 }

@@ -1,17 +1,18 @@
+
 #root = "../../"
 root = ""
 test_that("initialization", {
     obj.temp = scCOTAN(raw = read.csv(paste0(root,"raw.csv"), header = T,row.names = 1))
     obj.temp = initRaw(obj.temp,GEO=" " ,sc.method="10X",cond = "example")
 
-    #file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
-    print(getPyPath())
+    #system.file("inst","python", "python_PCA.py", package="COTAN")
+    #print(getPyPath())
 
     expect_equal(obj.temp,readRDS(paste0(root,"obj.RDS")) )
 
 })
 
-test_that("cleaning_normal", {
+test_that("cleaning", {
 
     obj.temp = readRDS(paste0(root,"obj.RDS"))
     cells =as.data.frame(as.matrix(obj.temp@raw))
@@ -19,8 +20,9 @@ test_that("cleaning_normal", {
     cells[cells > 0] <- 1
     cells[cells <= 0] <- 0
     #cells = cells[rowSums(cells)> round((length(colnames(obj.temp@raw))/1000*3), digits = 0),]
-    ttm = clean(obj.temp, cells,mean_type = "normal")
-    expect_equal(ttm$object,readRDS(paste0(root,"ttmobj2.RDS")))
+    ttm = clean(obj.temp)
+    equal = readRDS(paste0(root,"ttmobj2.RDS"))
+    expect_equal(ttm$object,equal)
 })
 
 test_that("mat_division", {
@@ -43,8 +45,9 @@ test_that("cotan_analysis_test", {
 test_that("cotan_coex_test", {
     obj=readRDS(paste0(root,"Obj_out_cotan_an.RDS"))
     obj = get.coex(obj)
-    saved.obj = readRDS(paste0(root,"Obj_out_cotan_coex.RDS"))
-    saved.obj@coex = saved.obj@coex /sqrt(saved.obj@n_cells)
+    saved.obj = readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
+    # To use only in case of old approximated data
+    #saved.obj@coex = saved.obj@coex /sqrt(saved.obj@n_cells)
     expect_equal( obj, saved.obj)
 })
 
@@ -56,8 +59,10 @@ test_that("python_PCA_test", {
     proc <- basiliskStart(my_env_cotan)
     on.exit(basiliskStop(proc))
 
+    file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = T)
+
     pca.raw <- basiliskRun(proc, function(arg1) {
-        reticulate::source_python(getPyPath())
+        reticulate::source_python(file.py)
         output <- python_PCA(arg1)
 
         # The return value MUST be a pure R object, i.e., no reticulate

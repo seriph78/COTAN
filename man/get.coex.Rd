@@ -2,9 +2,7 @@
 % Please edit documentation in R/COTAN_main.R
 \name{get.coex}
 \alias{get.coex}
-\title{get.coex
-This function estimates and stores the coex*sqrt(n_cells) matrix in the coex field.
-It need to be run after \code{\link{cotan_analysis}}}
+\title{get.coex}
 \usage{
 get.coex(object)
 }
@@ -15,7 +13,6 @@ get.coex(object)
 It returns a COTAN object
 }
 \description{
-get.coex
 This function estimates and stores the coex*sqrt(n_cells) matrix in the coex field.
 It need to be run after \code{\link{cotan_analysis}}
 }

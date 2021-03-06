@@ -4,13 +4,11 @@
 \name{scCOTAN-class}
 \alias{scCOTAN-class}
 \alias{scCOTAN}
-\title{scCOTAN-class
-Define my COTAN structure}
+\title{scCOTAN-class}
 \value{
 
 }
 \description{
-scCOTAN-class
 Define my COTAN structure
 }
 \section{Slots}{

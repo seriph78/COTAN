@@ -3,6 +3,7 @@
 export(clean)
 export(cotan_analysis)
 export(get.coex)
+export(get.pval)
 export(initRaw)
 exportClasses(scCOTAN)
 import(basilisk)

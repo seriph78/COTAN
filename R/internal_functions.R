@@ -1,4 +1,19 @@
-getPyPath <- function() system.file("inst","python", "python_PCA.py", package="COTAN",mustWork = T)
+
+setGeneric("get.zero_one.cells", function(object) standardGeneric("get.zero_one.cells"))
+setMethod("get.zero_one.cells","scCOTAN",
+          function(object) {
+              cells.0.1 =as.data.frame(as.matrix(object@raw))
+              #---------------------------------------------------
+              # Cells matrix : formed by row data matrix changed to 0-1 matrix
+              cells.0.1[cells.0.1 > 0] <- 1
+              cells.0.1[cells.0.1 <= 0] <- 0
+              # We want to discard genes having less than 3 not 0 counts over 1000 cells
+              cells.0.1 = cells.0.1[rowSums(cells.0.1) > round((length(colnames(object@raw))/1000*3), digits = 0),]
+              return(cells.0.1)
+          }
+)
+
+
 
 
 setGeneric("fun_pzero", function(a,mu) standardGeneric("fun_pzero"))
@@ -24,10 +39,10 @@ setMethod("fun_pzero_nega0","numeric",
               function(r,mu){ (exp(-(1-r)*mu))}
 )
 
-setGeneric("fun_dif_mu_zeros", function(h,x,somma_zeri) standardGeneric("fun_dif_mu_zeros"))
+setGeneric("fun_dif_mu_zeros", function(h,x,somma_zeri,mu_estimator) standardGeneric("fun_dif_mu_zeros"))
 setMethod("fun_dif_mu_zeros","numeric",
               #fun_dif_mu_zeros <-
-              function(h,x,somma_zeri){
+              function(h,x,somma_zeri,mu_estimator){
                   if (h > 0) {
                       sum(fun_pzero_posi(h,mu_estimator[x,])) - somma_zeri#/somma_zeri
                   }else{
@@ -36,37 +51,37 @@ setMethod("fun_dif_mu_zeros","numeric",
               }
 )
 
-setGeneric("fun_my_opt", function(x) standardGeneric("fun_my_opt"))
+setGeneric("fun_my_opt", function(x,ce.mat,mu_est) standardGeneric("fun_my_opt"))
 setMethod("fun_my_opt","character",
               #fun_my_opt <-
-              function(x){
-                  somma_zeri = sum(cells[x,] == 0)
-                  #somma_zeri = rowSums(cells[x,] == 0)
+              function(x,ce.mat,mu_est){
+                  somma_zeri = sum(ce.mat[x,] == 0)
+                  #somma_zeri = rowSums(ce.mat[x,] == 0)
                   a1 = 0
-                  u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
+                  u1 = fun_dif_mu_zeros(a1,x,somma_zeri,mu_est)
                   a2 = a1
                   u2 = u1
                   if (u1 > 0) {
                       a1 = a1 - 1
-                      u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
+                      u1 = fun_dif_mu_zeros(a1,x,somma_zeri,mu_est)
                       while (u1 > 0) {
                           a2 = a1
                           u2 = u1
                           a1 = 2 * a1
-                          u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
+                          u1 = fun_dif_mu_zeros(a1,x,somma_zeri,mu_est)
                       }
                   }else{
                       a2 = 1
-                      u2 = fun_dif_mu_zeros(a2,x,somma_zeri)
+                      u2 = fun_dif_mu_zeros(a2,x,somma_zeri,mu_est)
                       while (u2 < 0) {
                           a1 = a2
                           u1 =u2
                           a2 = 2 * a2
-                          u2 = fun_dif_mu_zeros(a2,x,somma_zeri)
+                          u2 = fun_dif_mu_zeros(a2,x,somma_zeri,mu_est)
                       }
                   }
                   a = (a1+a2)/2
-                  u = fun_dif_mu_zeros(a,x,somma_zeri)
+                  u = fun_dif_mu_zeros(a,x,somma_zeri,mu_est)
                   while (abs(u)>0.001) {
                       if(u>0){
                           a2 = a
@@ -76,7 +91,7 @@ setMethod("fun_my_opt","character",
                           u1 = u
                       }
                       a = (a1 + a2)/2
-                      u = fun_dif_mu_zeros(a,x,somma_zeri)
+                      u = fun_dif_mu_zeros(a,x,somma_zeri,mu_est)
                   }
                   r = data.frame(a,u)
                   rownames(r) = x
@@ -85,22 +100,8 @@ setMethod("fun_my_opt","character",
 )
 
 
-
-
-
-
-# internal functions
-
-mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
-my_theme = theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
-                 axis.text.y = element_text( size = 14, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
-                 axis.title.x = element_text( size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),
-                 axis.title.y = element_text( size = 14, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"))
-
-
-
-
 #' spMat
+#'
 #' Internal function to convert the matrix in a sparce trinagolar matrix
 #' @param object A COTAN object
 #' @importFrom Matrix forceSymmetric
@@ -123,10 +124,9 @@ setMethod("spMat","matrix",
 
 
 #' fun_linear
+#'
 #' Internal function to estimeate the cell efficiency
 #' @param object COTAN object
-#' @param mean_type string: "restricted" or "normal". Default is normal. The other was wsed only for tests.
-#'
 #' @return
 #' @import
 #' basilisk
@@ -137,11 +137,13 @@ setMethod("spMat","matrix",
 #' @importFrom parallel mclapply
 #'
 #'
-setGeneric("fun_linear", function(object, mean_type) standardGeneric("fun_linear"))
+setGeneric("fun_linear", function(object) standardGeneric("fun_linear"))
 setMethod("fun_linear","scCOTAN",
           #fun_linear =
-          function(object, mean_type) {
-              #file.py <- system.file("inst","python", "python_PCA.py", package="COTAN",mustWork = T)
+          function(object) {
+              #getPyPath <- function() system.file("inst","python", "python_PCA.py", package="COTAN",mustWork = T)
+
+              file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = T)
 
               print("Start estimation mu with linear method")
               print(dim(object@raw))
@@ -150,13 +152,13 @@ setMethod("fun_linear","scCOTAN",
               max.genes = names(sort(genes_means,decreasing = T)
                                 [round(length(genes_means)/2,digits = 0 ):round(length(genes_means)/4*3,digits = 0 )])
 
-              if (mean_type == "restricted") {
-                  print("cells mean type: restricted")
-                  cells_means = Matrix::colMeans(object@raw[rownames(object@raw) %in% max.genes,], dims = 1, na.rm = T)
-              }else{
-                  print("cells mean type: normal")
+              #if (mean_type == "restricted") {
+              #    print("cells mean type: restricted")
+              #    cells_means = Matrix::colMeans(object@raw[rownames(object@raw) %in% max.genes,], dims = 1, na.rm = T)
+              #}else{
+              #    print("cells mean type: normal")
                   cells_means = Matrix::colMeans(object@raw, dims = 1, na.rm = T)
-              }
+              #}
 
 
               means = mean(as.matrix(object@raw),na.rm = T )
@@ -191,7 +193,9 @@ setMethod("fun_linear","scCOTAN",
               t_to_clust = as.matrix(t_to_clust)
 
               pca_cells <- basiliskRun(proc, function(arg1) {
-                  reticulate::source_python(getPyPath())
+
+                  #reticulate::source_python(getPyPath())
+                  reticulate::source_python(file.py)
                   output <- python_PCA(arg1)
 
                   # The return value MUST be a pure R object, i.e., no reticulate
@@ -220,114 +224,6 @@ setMethod("fun_linear","scCOTAN",
 
 )
 
-
-
-setGeneric("fun_linear_iter", function(object,mean_t) standardGeneric("fun_linear_iter"))
-setMethod("fun_linear_iter","scCOTAN",
-          function(object, mean_t) {
-              # <- function(cells, raw){
-              #library(reticulate)
-
-              #source_python(paste(surcedir,"python_PCA.py",sep = ""))
-              cells=as.matrix(object@raw)
-              #---------------------------------------------------
-              # Cells matrix : formed by row data matrix changed to 0-1 matrix
-              cells[cells > 0] <- 1
-              cells[cells <= 0] <- 0
-
-              print("Start estimation mu with average method with iter")
-
-              object@raw = as.matrix(object@raw[rownames(cells),colnames(cells)])
-              new_object = object@raw
-
-              genes_on_off = (matrix(ncol = length(colnames(new_object)), nrow = length(rownames(new_object)),data = TRUE))
-              rownames(genes_on_off) = rownames(new_object)
-              colnames(genes_on_off) = colnames(new_object)
-              lambda_i = rowMeans(new_object, dims = 1, na.rm = T)
-              free_deg = 0
-              old_free_deg = 1
-              start_time <- Sys.time()
-              it =1
-              while (free_deg != old_free_deg) {
-                  start_time_it <- Sys.time()
-                  old_free_deg = free_deg
-
-                  cells_means = colMeans(new_object, dims = 1, na.rm = T)
-                  genes_means = rowMeans(new_object, dims = 1, na.rm = T)
-                  means = mean(new_object,na.rm = T )
-
-                  end_time <- Sys.time()
-                  print(paste("after means evaluation",end_time - start_time, sep = " "))
-                  mu_estimator = (genes_means %*% t(cells_means)) /means
-                  end_time <- Sys.time()
-                  print(paste("after putting together",end_time - start_time, sep = " "))
-                  rownames(mu_estimator) = names(genes_means)
-                  colnames(mu_estimator) = names(cells_means)
-                  #print(mu_estimator[1:3,1:3])
-                  mu_estimator = as.data.frame(mu_estimator)
-                  #print(mu_estimator[1:3,1:3])
-                  genes_on_off = genes_on_off & !(exp(-mu_estimator) < 10**-3 & object@raw[rownames(cells),colnames(cells)] == 0 ) #& object@raw[rownames(cells),] == 0 )
-
-                  free_deg = sum(genes_on_off == FALSE, na.rm = T)
-                  print(paste("free deg",free_deg, sep = " "))
-
-                  new_object[!genes_on_off] = mu_estimator[!genes_on_off]
-                  nu_est = colMeans(mu_estimator)/means
-
-                  end_time <- Sys.time()
-                  print(paste("after iteration",it,"time",end_time - start_time_it, sep = " "))
-                  it = it + 1
-                  gc()
-              }
-              end_time <- Sys.time()
-              print(paste("End estimation; time",end_time - start_time, sep = " " ))
-              gc()
-              # To insert an explorative analysis and check for strage cells (as blood) and cells with a too low efficiency (nu est)
-              start_time <- Sys.time()
-
-              to_clust <- t(t(as.matrix(object@raw)) * (1/as.vector(nu_est)))
-
-              end_time <- Sys.time()
-              print(paste("to clust; time",end_time - start_time, sep = " " ))
-
-              t_to_clust = t(to_clust)
-
-
-
-              t_to_clust = as.matrix(t_to_clust)
-              print(getwd())
-
-              pca_cells <- basiliskRun(proc, function(arg1) {
-                  reticulate::source_python("inst/python/python_PCA.py")
-                  output <- python_PCA(arg1)
-
-                  # The return value MUST be a pure R object, i.e., no reticulate
-                  # Python objects, no pointers to shared memory.
-                  output
-              }, arg1=t_to_clust)
-              rownames(pca_cells)=rownames(t_to_clust)
-
-              rownames(pca_cells)=rownames(t_to_clust)
-              end_time <- Sys.time()
-              print(paste("pca; time",end_time - start_time, sep = " " ))
-              #---- Mhalanobis distance
-              ppp = pca_cells
-              ppp = scale(ppp)
-              dist_cells = dist(ppp, method = "euclidean") # mhalanobis
-              colnames(pca_cells) = paste("PC",c(1:ncol(pca_cells)), sep = "")
-              pca_cells = as.data.frame(pca_cells)
-              #output = list("dist_cells"=dist_cells, "to_clust"=to_clust,"pca_cells"=pca_cells, "t_to_clust"=t_to_clust,"mu_estimator"=mu_estimator, "nu_est"=nu_est, "lambda_i"=lambda_i)#, "si_si"=si_si, "si_no"=si_no,"no_no"=no_no,"no_si"=no_si,"genes_on_off"=genes_on_off )
-
-              object@nu = nu_est
-              object@lambda = lambda_i
-
-              output = list("dist_cells"=dist_cells, "to_clust"=to_clust,"pca_cells"=pca_cells, "t_to_clust"=t_to_clust,"mu_estimator"=mu_estimator, "object"=object,"nu.data"=nu_est,"lamba.data"= lambda_i)
-
-              #detach("package:reticulate", unload = TRUE)
-              #detach("package:propagate", unload = TRUE)
-              return(output)
-          }
-)
 
 setGeneric("mu_est", function(object) standardGeneric("mu_est"))
 setMethod("mu_est","scCOTAN",
@@ -359,3 +255,43 @@ setMethod("get.S","scCOTAN",
               return(S)
           }
 )
+
+
+
+
+setGeneric("get.G", function(object) standardGeneric("get.G"))
+setMethod("get.G","scCOTAN",
+          function(object) {
+              print("function to generate G ")
+              hk = object@hk
+              ll = obs_ct(object)
+
+              object = ll$object
+
+              ll$no_yes= ll$no_yes[!rownames(ll$no_yes) %in% hk,!colnames(ll$no_yes) %in% hk]
+              ll$no_no = ll$no_no[!rownames(ll$no_no) %in% hk,!colnames(ll$no_no) %in% hk]
+              si_si = object@yes_yes[!rownames(object@yes_yes) %in% hk,!colnames(object@yes_yes) %in% hk]
+              ll$yes_no = ll$yes_no[!rownames(ll$yes_no) %in% hk,!colnames(ll$yes_no) %in% hk]
+
+              est = expected_ct(object)
+
+              new_estimator_si_si = as.matrix(est$estimator_yes_yes)
+              new_estimator_si_si[new_estimator_si_si < 1] <- 1
+              new_estimator_si_no = as.matrix(est$estimator_yes_no)
+              new_estimator_si_no[new_estimator_si_no < 1] <- 1
+              new_estimator_no_no = as.matrix(est$estimator_no_no)
+              new_estimator_no_no[new_estimator_no_no < 1] <- 1
+              new_estimator_no_si = as.matrix(est$estimator_no_yes)
+              new_estimator_no_si[new_estimator_no_si < 1] <- 1
+              print("G estimation")
+              G = 2 *
+                  (as.matrix(si_si)    * log( as.matrix(si_si)    / new_estimator_si_si) +
+                  as.matrix(ll$no_no)  * log( as.matrix(ll$no_no) / new_estimator_no_no) +
+                  as.matrix(ll$yes_no) * log( as.matrix(ll$yes_no)/ new_estimator_si_no) +
+                  as.matrix(ll$no_yes) * log( as.matrix(ll$no_yes)/ new_estimator_no_si) )
+
+
+              return(G)
+          }
+)
+

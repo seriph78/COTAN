@@ -33,8 +33,14 @@ Imports:
     reticulate  
 Suggests: 
     testthat (>= 3.0.0),
-    spelling
+    spelling,
+    knitr,
+    rmarkdown,
+    data.table,
+    R.utils,
+    Matrix
 Config/testthat/edition: 3
 SystemRequirements: 
     python
 Language: en-US
+VignetteBuilder: knitr

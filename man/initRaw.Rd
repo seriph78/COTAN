@@ -2,8 +2,7 @@
 % Please edit documentation in R/COTAN_main.R
 \name{initRaw}
 \alias{initRaw}
-\title{initRaw
-It starts to fill some fields of cotan object.}
+\title{initRaw}
 \usage{
 initRaw(object, GEO, sc.method = "10X", cond)
 }
@@ -20,7 +19,6 @@ initRaw(object, GEO, sc.method = "10X", cond)
 A COTAN object to store all information
 }
 \description{
-initRaw
 It starts to fill some fields of cotan object.
 }
 \examples{

@@ -2,20 +2,16 @@
 % Please edit documentation in R/internal_functions.R
 \name{fun_linear}
 \alias{fun_linear}
-\title{fun_linear
-Internal function to estimeate the cell efficiency}
+\title{fun_linear}
 \usage{
-fun_linear(object, mean_type)
+fun_linear(object)
 }
 \arguments{
 \item{object}{COTAN object}
-
-\item{mean_type}{string: "restricted" or "normal". Default is normal. The other was wsed only for tests.}
 }
 \value{
 
 }
 \description{
-fun_linear
 Internal function to estimeate the cell efficiency
 }
