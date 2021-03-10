@@ -1,0 +1,306 @@
+---
+title: "Gene_clustering"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Gene_clustering}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(COTAN)
+library(dendextend)
+library(ggrepel)
+library(Rtsne)
+library(plotly)
+library(tidyverse)
+library(htmlwidgets)
+library(MASS)
+```
+
+To demostrate how to do the gene clustering usign COTAN we begin importing the COTAN object that stores all elaborated data and, in this case, regarding a mouse embrionic cortex dataset (developmental stage E17.5).
+
+```{r}
+input_dir = "../data/"
+layers = list("L1"=c("Reln","Lhx5"), "L2/3"=c("Satb2","Cux1"), "L4"=c("Rorb","Sox5") , "L5/6"=c("Bcl11b","Fezf2") , "Prog"=c("Vim","Hes1"))
+objE17 = readRDS(file = paste(input_dir,"E17.5_cortex.cotan.RDS", sep = ""))
+```
+
+```{r}
+g.space = get.gene.coexpression.space(objE17, 
+                                      n.genes.for.marker = 25, 
+                                      primary.markers = unlist(layers))
+```
+```{r}
+g.space = as.data.frame(as.matrix(g.space))
+
+coex.pca.genes <- prcomp(t(g.space),
+                 center = TRUE,
+                 scale. = F) 
+
+fviz_eig(coex.pca.genes, addlabels=TRUE,ncp = 10)
+#fviz_eig(coex.pca.genes, choice = "eigenvalue", addlabels=TRUE)
+```
+Hierarchical clustering
+```{r}
+
+# clustering usign Ward method
+hc.norm = hclust(dist(g.space), method = "ward.D2")
+
+# and cut the tree into 5 clusters (for example)
+cut = cutree(hc.norm, k = 5, order_clusters_as_data = F)
+
+# It crates the tree
+dend <- as.dendrogram(hc.norm)
+
+# I can use a dataframe from the pca to store some data regarding the clustering
+pca_1 = as.data.frame(coex.pca.genes$rotation[,1:5])
+pca_1 = pca_1[order.dendrogram(dend),]
+
+
+mycolours <- c("genes related to L5/6" = "#3C5488FF","genes related to L2/3"="#F39B7FFF","genes related to Prog"="#4DBBD5FF","genes related to L1"="#E64B35FF","genes related to L4" = "#91D1C2FF", "not marked"="#B09C85FF")
+
+# save the cluster number into the dataframe
+pca_1$hclust = cut
+
+dend =branches_color(dend,k=7,col=c("#4DBBD5FF","#91D1C2FF","#F39B7FFF","#E64B35FF","#3C5488FF","#91D1C2FF","#B09C85FF" ),groupLabels = T)
+#dend =color_labels(dend,k=5,labels = rownames(pca_1),col=pca_1$colors)
+
+# plot the dendrogram with all anmes for secondary markers
+dend %>%
+  set("labels", ifelse(labels(dend) %in% rownames(pca_1)[rownames(pca_1) %in% colnames(as.matrix(g.space))], labels(dend), "")) %>%
+  #  set("branches_k_color", value = c("gray80","#4DBBD5FF","#91D1C2FF" ,"gray80","#F39B7FFF","#E64B35FF","#3C5488FF"), k = 7) %>%
+ plot(horiz=F, axes=T)#,ylim = c(0,80))
+
+```
+or just with primary markers
+
+```{r fig.width= 10}
+
+dend %>%
+set("labels", ifelse(labels(dend) %in% rownames(pca_1)[rownames(pca_1) %in% unlist(layers)], labels(dend), "")) %>%
+  set("branches_k_color", value = c("gray80","#4DBBD5FF","#91D1C2FF" ,"gray80","#F39B7FFF","#E64B35FF","#3C5488FF"), k = 7) %>%
+plot(horiz=F, axes=T,ylim = c(0,100))
+
+```
+
+Now we can plot the PCA
+```{r}
+# some more genes as landmarks
+controls =list("genes related to L5/6"=c("Foxp2","Tbr1"), "genes related to L2/3"=c("Mef2c"), "genes related to Prog"=c("Nes","Sox2") , "genes related to L1"=c() , "genes related to L4"=c()) 
+
+# dataframe to be able to label only primary markers and control genes
+textdf <- pca_1[rownames(pca_1) %in% c(unlist(layers),unlist(controls)) , ]
+
+ for (m in c(1:length(controls))) {
+  for (g in controls[[m]]) {
+    if(g %in% rownames(textdf)){
+      textdf[g,"highlight"] = names(controls[m])
+    } 
+  }
+}
+
+# deciding the colors
+mycolours <- c("genes related to L5/6" = "#3C5488FF","genes related to L2/3"="#F39B7FFF","genes related to Prog"="#4DBBD5FF","genes related to L1"="#E64B35FF","genes related to L4" = "#91D1C2FF", "not marked"="#B09C85FF")
+
+# to assing correcly the cluster number and the color
+mycolours2 = c("Reln","Satb2","Rorb","Bcl11b","Vim")
+names(mycolours2) = unique(cut[unlist(layers)])
+mycolours2[mycolours2 == "Reln"] = "#E64B35FF"
+mycolours2[mycolours2 == "Satb2"] = "#F39B7FFF"
+mycolours2[mycolours2 == "Rorb"] = "#91D1C2FF"
+mycolours2[mycolours2 == "Bcl11b"] = "#3C5488FF"
+mycolours2[mycolours2 == "Vim"] = "#4DBBD5FF"
+
+
+pca1 = ggplot(subset(pca_1,!hclust %in% unique(cut[unlist(layers)])  ), aes(x=PC1, y=PC2)) +  geom_point(alpha = 0.3,color = "#B09C85FF",size=1)
+
+#pca2 = pca1 + geom_point(data = subset(pca_1, highlight != "not marked" ), aes(x=PC1, y=PC2, colour=hclust),size=2.5,alpha = 0.9) 
+pca2 = pca1 + geom_point(data = subset(pca_1, hclust %in% unique(cut[unlist(layers)]) ), aes(x=PC1, y=PC2, colour=as.character(hclust)),size=1,alpha = 0.5) + 
+  scale_color_manual("Status", values = mycolours2)  +
+  scale_fill_manual("Status", values = mycolours2)  +
+  xlab("") + ylab("") +
+  geom_label_repel(data =textdf , aes(x = PC1, y = PC2, label = rownames(textdf),fill=as.character(hclust)),
+                   label.size = NA, 
+                   alpha = 0.5, 
+                   direction = "both",
+                   na.rm=TRUE,
+                   seed = 1234) +
+  geom_label_repel(data =textdf , aes(x = PC1, y = PC2, label = rownames(textdf)),
+                   label.size = NA, 
+                   segment.color = 'black',
+                   segment.size = 0.5,
+                   direction = "both",
+                   alpha = 1, 
+                   na.rm=TRUE,
+                   fill = NA,
+                   seed = 1234) +
+  ggtitle("PCA") +
+  theme_light(base_size=10) +
+    theme(axis.text.x=element_blank(),plot.title = element_text(size=14, 
+                                    face="italic", 
+                                    color="#3C5488FF",
+                                    hjust=0.01,
+                                    lineheight=1.2,margin = margin(t = 5, b = -15)),
+        axis.text.y=element_blank(),
+        legend.position = "none")  # titl)
+
+pca2 #+ geom_encircle(data = pca_1, aes(group=hclust)) 
+```
+
+t-SNE code and plot
+
+```{r}
+# run the t-SNE
+cl.genes.tsne = Rtsne(g.space ,initial_dims = 100, dims = 2, perplexity=30,eta = 200, verbose=F, max_iter = 3000,theta=0.4,num_threads = 10,pca_center = T, pca_scale = FALSE, normalize = T )
+
+d_tsne_1 = as.data.frame(cl.genes.tsne$Y)
+rownames(d_tsne_1) = rownames(g.space)
+
+d_tsne_1 = d_tsne_1[order.dendrogram(dend),]
+
+# save the cluster numebr inside a dataframe with the t-SNE information
+d_tsne_1$hclust = cut
+
+d_tsne_1$names = rownames(d_tsne_1)
+
+# as before to label only some genes
+textdf <- d_tsne_1[rownames(d_tsne_1) %in% c(unlist(layers),unlist(controls)),]
+
+for (m in c(1:length(controls))) {
+  for (g in controls[[m]]) {
+    if(g %in% rownames(textdf)){
+      textdf[g,"highlight"] = names(controls[m])
+    } 
+  }
+}
+
+
+ p1 = ggplot(subset(d_tsne_1,!hclust %in% unique(cut[unlist(layers)])), aes(x=V1, y=V2)) +  geom_point(alpha = 0.3, color = "#B09C85FF", size=1)
+
+p2 = p1 + geom_point(data = subset(d_tsne_1, hclust %in% unique(cut[unlist(layers)]) ), aes(x=V1, y=V2, colour=as.character(hclust)),size=1,alpha = 0.5) +
+    scale_color_manual("Status", values = mycolours2)  +
+  scale_fill_manual("Status", values = mycolours2)  +
+  xlab("") + ylab("")+
+  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = names,fill=as.character(hclust)),
+                   label.size = NA, 
+                   alpha = 0.5, 
+                   direction = "both",
+                   na.rm=TRUE,
+                   seed = 1234) +
+  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = names),
+                   label.size = NA, 
+                   segment.color = 'black',
+                   segment.size = 0.5,
+                   direction = "both",
+                   alpha = 1, 
+                   na.rm=TRUE,
+                   fill = NA,
+                   seed = 1234) +
+  ggtitle("t-SNE") +
+  theme_light(base_size=10) +
+  theme(axis.text.x=element_blank(),plot.title = element_text(size=14, 
+                                    face="italic", 
+                                    color="#3C5488FF",
+                                    hjust=0.01,
+                                    lineheight=1.2,margin = margin(t = 5, b = -15)),
+        axis.text.y=element_blank(),
+        legend.position = "none")  # titl)
+p2
+```
+Code to create an iteractive plot. This can be modified to be used with all the plots.
+
+```{r echo=TRUE}
+
+p = ggplot(d_tsne_1, aes(x=V1, y=V2, text= paste("gene: ",names))) +  
+  geom_point(size=2, aes(colour=as.character(hclust)), alpha=0.8) +
+  scale_color_manual("Status", values = mycolours2)  +
+  xlab("") + ylab("") +
+  ggtitle("t-SNE") +
+  theme_light(base_size=10) +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank())
+
+ggplotly(p)
+```
+
+Multidimensional scaling (MDS) and plot
+```{r}
+# run the MDS
+genes.dist.euc =  dist(g.space, method =  "euclidean")
+#fit <- isoMDS(genes.dist.euc) # not linear
+fit <- isoMDS(genes.dist.euc)
+
+fit.genes = as.data.frame(fit$points)
+
+fit.genes = fit.genes[order.dendrogram(dend),]
+
+fit.genes$hclust = cut
+
+
+fit.genes$names = rownames(fit.genes)
+
+mycolours3 <- c("cluster L5/6 markers" = "#3C5488FF","cluster L2/3 markers"="#F39B7FFF","cluster Prog markers"="#4DBBD5FF","cluster L1 markers"="#E64B35FF","cluster L4 markers" = "#91D1C2FF", "not identified cluster"="#B09C85FF")
+
+#fit.genes$hclust = factor(cutree(hc.norm, 7))
+used = vector()
+for (k in c(1:length(layers))) {
+  #print(k)
+  tt =as.numeric(cut[layers[[k]]][1])
+  fit.genes[fit.genes$hclust == tt,"cluster"] = paste("cluster",names(layers[k]),"markers", sep = " " )
+  used = c(used,cut[layers[[k]]][1])
+}
+
+fit.genes[fit.genes$hclust %in% (unique(fit.genes$hclust)[!unique(fit.genes$hclust) %in% used]),]$cluster = "not identified cluster"
+
+textdf <- fit.genes[rownames(fit.genes) %in% c(unlist(layers),unlist(controls)),]
+
+   f1 = ggplot(subset(fit.genes,!hclust %in% unique(cut[unlist(layers)]) ), aes(x=V1, y=V2)) +  geom_point(alpha = 0.3, color = "#B09C85FF", size=1)
+
+f2 = f1 + geom_point(data = subset(fit.genes, hclust %in% unique(cut[unlist(layers)]) ), 
+                     aes(x=V1, y=V2, colour=cluster), size=1,alpha = 0.5) +
+  scale_color_manual("Status", values = mycolours3)  +
+  scale_fill_manual("Status", values = mycolours3)  + 
+  xlab("") + ylab("")+
+  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = rownames(textdf),fill=cluster),
+                   label.size = NA, 
+                   alpha = 0.5, 
+                   direction ="both",
+                   na.rm=TRUE,
+                   seed = 1234, show.legend = FALSE) +
+  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = rownames(textdf)),
+                   label.size = NA, 
+                   segment.color = 'black',
+                   segment.size = 0.5,
+                   direction = "both",
+                   alpha = 1, 
+                   na.rm=TRUE,
+                   fill = NA,
+                   seed = 1234, show.legend = FALSE) +
+  ggtitle("MDS") +
+  theme_light(base_size=10) +
+  theme(axis.text.x=element_blank(),plot.title = element_text(size=14, 
+                                    face="italic", 
+                                    color="#3C5488FF",
+                                    hjust=0.01,
+                                    lineheight=1.2,margin = margin(t = 5, b = -15)),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(color = "#3C5488FF",face ="italic" ),
+        legend.position = "bottom")  # titl)
+
+
+f2 #+ geom_encircle(data = fit.genes, aes(group=`5_clusters`)) 
+```
+
+```{r}
+sessionInfo()
+```
+

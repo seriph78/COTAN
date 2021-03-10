@@ -3,3 +3,6 @@
 .RData
 .Ruserdata
 COTAN.Rproj
+inst/doc
+data/E17.5_cortex.cotan.RDS
+data/cleaning/*

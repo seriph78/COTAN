@@ -162,7 +162,6 @@ setMethod("fun_linear","scCOTAN",
 
 
               means = mean(as.matrix(object@raw),na.rm = T )
-              print("pippo")
               mu_estimator = (genes_means %*% t(cells_means)) /means
 
               rownames(mu_estimator) = names(genes_means)
@@ -386,29 +385,83 @@ setMethod("get.G","scCOTAN",
               ll$yes_no = ll$yes_no[!rownames(ll$yes_no) %in% hk,!colnames(ll$yes_no) %in% hk]
 
               est = expected_ct(object)
+              for (i in est) {
+                  if(any(i == 0 )){
+                      print("Some expected values are 0!")
+                      break()
+                  }
+              }
 
-              new_estimator_si_si = as.matrix(est$estimator_yes_yes)
-              new_estimator_si_si[new_estimator_si_si < 1] <- 1
-              new_estimator_si_no = as.matrix(est$estimator_yes_no)
-              new_estimator_si_no[new_estimator_si_no < 1] <- 1
-              new_estimator_no_no = as.matrix(est$estimator_no_no)
-              new_estimator_no_no[new_estimator_no_no < 1] <- 1
-              new_estimator_no_si = as.matrix(est$estimator_no_yes)
-              new_estimator_no_si[new_estimator_no_si < 1] <- 1
+              #new_estimator_si_si = as.matrix(est$estimator_yes_yes)
+              #new_estimator_si_si[new_estimator_si_si < 1] <- 1
+              #new_estimator_si_no = as.matrix(est$estimator_yes_no)
+              #new_estimator_si_no[new_estimator_si_no < 1] <- 1
+              #new_estimator_no_no = as.matrix(est$estimator_no_no)
+              #new_estimator_no_no[new_estimator_no_no < 1] <- 1
+              #new_estimator_no_si = as.matrix(est$estimator_no_yes)
+              #new_estimator_no_si[new_estimator_no_si < 1] <- 1
+
+
               print("G estimation")
               #G = 2 *
                 # (as.matrix(si_si)    * log( as.matrix(si_si)    / new_estimator_si_si) +
                 #  as.matrix(ll$no_no)  * log( as.matrix(ll$no_no) / new_estimator_no_no) +
                 #  as.matrix(ll$yes_no) * log( as.matrix(ll$yes_no)/ new_estimator_si_no) +
                 #  as.matrix(ll$no_yes) * log( as.matrix(ll$no_yes)/ new_estimator_no_si) )
-              G = 2 *
-                  (as.matrix(si_si)    * log( as.matrix(si_si)         / as.matrix(est$estimator_yes_yes)) +
-                       as.matrix(ll$no_no)  * log( as.matrix(ll$no_no) / as.matrix(est$estimator_no_no)) +
-                       as.matrix(ll$yes_no) * log( as.matrix(ll$yes_no)/ as.matrix(est$estimator_yes_no)) +
-                       as.matrix(ll$no_yes) * log( as.matrix(ll$no_yes)/ as.matrix(est$estimator_no_yes)) )
+              t1 = as.matrix(si_si)    * log( as.matrix(si_si)         / as.matrix(est$estimator_yes_yes))
+              t1[which(as.matrix(si_si) == 0)] = 0
+
+              t2 =     as.matrix(ll$no_no)  * log( as.matrix(ll$no_no) / as.matrix(est$estimator_no_no))
+              t2[which(as.matrix(ll$no_no) == 0)] = 0
+
+              t3 =     as.matrix(ll$yes_no) * log( as.matrix(ll$yes_no)/ as.matrix(est$estimator_yes_no))
+              t3[which(as.matrix(ll$yes_no) == 0)] = 0
+
+              t4 =     as.matrix(ll$no_yes) * log( as.matrix(ll$no_yes)/ as.matrix(est$estimator_no_yes))
+              t4[which(as.matrix(ll$no_yes) == 0)] = 0
+
+              G = 2 * (t1 + t2 + t3 + t4)
 
 
               return(G)
           }
 )
 
+
+setGeneric("get.S2", function(object) standardGeneric("get.S2"))
+setMethod("get.S2","scCOTAN",
+          function(object) {
+              print("function to generate S without denominator approximation ")
+              hk = object@hk
+              ll = obs_ct(object)
+
+              object = ll$object
+
+              ll$no_yes= ll$no_yes[!rownames(ll$no_yes) %in% hk,!colnames(ll$no_yes) %in% hk]
+              ll$no_no = ll$no_no[!rownames(ll$no_no) %in% hk,!colnames(ll$no_no) %in% hk]
+              si_si = object@yes_yes[!rownames(object@yes_yes) %in% hk,!colnames(object@yes_yes) %in% hk]
+              ll$yes_no = ll$yes_no[!rownames(ll$yes_no) %in% hk,!colnames(ll$yes_no) %in% hk]
+
+              est = expected_ct(object)
+
+              print("coex estimation")
+              coex = ((as.matrix(si_si) - as.matrix(est$estimator_yes_yes))/as.matrix(est$estimator_yes_yes)) +
+                  ((as.matrix(ll$no_no) - as.matrix(est$estimator_no_no))/as.matrix(est$estimator_no_no)) -
+                  ((as.matrix(ll$yes_no) - as.matrix(est$estimator_yes_no))/as.matrix(est$estimator_yes_no)) -
+                  ((as.matrix(ll$no_yes) - as.matrix(est$estimator_no_yes))/as.matrix(est$estimator_no_yes))
+
+              coex = coex / sqrt(  1/as.matrix(est$estimator_yes_yes) +
+                                     1/as.matrix(est$estimator_no_no) +
+                                     1/as.matrix(est$estimator_yes_no) +
+                                     1/as.matrix(est$estimator_no_yes))
+
+              #print("coex low values substituted with 0")
+              #coex[abs(coex) <= 1]=0
+              print("Diagonal coex values substituted with 0")
+              diag(coex) = 0
+              coex = coex / sqrt(object@n_cells)
+              S = (coex)^2 * object@n_cells
+
+              return(S)
+          }
+)

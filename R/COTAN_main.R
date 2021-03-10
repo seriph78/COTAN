@@ -383,9 +383,12 @@ setMethod("get.pval","scCOTAN",
             if (type_stat == "S") {
                 print("Using function S")
                 S = get.S(object)
-            }else{
+            }else if(type_stat == "G"){
                 print("Using function G")
                 S = get.G(object)
+            }else if(type_stat == "S2"){
+                print("Using function G")
+                S = get.S2(object)
             }
 
 
@@ -420,6 +423,8 @@ setMethod("get.pval","scCOTAN",
 #'
 #' @return a ggplot object
 #' @export
+#' @import ggplot2
+#' @import tidyr
 #'
 #' @examples
 setGeneric("plot.heatmap", function(p_val.tr = 0.05, df_genes , sets, conditions, dir) standardGeneric("plot.heatmap"))
@@ -565,11 +570,30 @@ setMethod("plot.heatmap","ANY",
 
 
 
-# Primary markers will be plotted as groups of rows. Marekers list will be plotted as columns.
-# If we want a plot like Fig 2 B, mark put symmetric = True, use only prim.markers and p_value = 0.001
-setGeneric("plot.general.heatmap", function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),markers.list= c(), dir,condition,p_value = 0.05, symmetric = T) standardGeneric("plot.general.heatmap"))
+#' plot.general.heatmap
+#'
+#' This function is used to plot an heatmap made using only some genes, as markers, and collecting all other genes correlated
+#' with these markers with a p-value smaller than the set treshold. Than all relations are plotted.
+#' Primary markers will be plotted as groups of rows. Marekers list will be plotted as columns.
+#' @param prim.markers A set of genes plottet as rows.
+#' @param markers.list A set of genes plotted as columns.
+#' @param dir The directory where the COTAN object is stored.
+#' @param condition The prefix for the COTAN object file.
+#' @param p_value The p-value treshold
+#' @param symmetric A boolean: default False. If True the union of prim.markers and marker.list
+#' is sets as both rows and column genes
+#'
+#' @return A ggplot2 object
+#' @import ComplexHeatmap
+#' @export
+#'
+#' @examples
+setGeneric("plot.general.heatmap", function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),markers.list= c(),
+                                            dir, condition,
+                                            p_value = 0.001,
+                                            symmetric = T) standardGeneric("plot.general.heatmap"))
 setMethod("plot.general.heatmap","vector",
-          function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),markers.list=c(), dir,condition,p_value = 0.05, symmetric = T) {
+          function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),markers.list=c(), dir,condition,p_value = 0.001, symmetric = T) {
               print("ploting a general heatmap")
               library(ComplexHeatmap)
               library(circlize)
@@ -699,6 +723,27 @@ setMethod("plot.general.heatmap","vector",
 
 
 
+#' get.gene.coexpression.space
+#'
+#'To make the GDI more specific, it may be desirable to restrict the set of genes against which
+#'GDI is computed to a selected subset V with the recommendation to include a
+#'consistent fraction of cell-identity genes, and possibly focusing on markers specific
+#'for the biological question of interest (for instance neural cortex layering markers).
+#'In this case we denote it as local differentiation index (LDI) relative to V.
+#'
+#' @param object The COTAN object.
+#' @param n.genes.for.marker The number of genes correlated with the primary markers that we want to consider.
+#' By default this is 25.
+#' @param primary.markers A vector of primary marker names.
+#'
+#' @return A dataframe
+#' @export
+#' @importFrom stats pchisq
+#' @importFrom Matrix rowSums
+#' @importFrom Matrix colMeans
+#' @examples
+#' obj = readRDS("../data/ERCC.cotan.RDS")
+#' df = get.gene.coexpression.space(obj, n.genes.for.marker = 10, primary.markers=c("HLA-DMB","HLA-DPA1","S100A6","S100A8"))
 setGeneric("get.gene.coexpression.space", function(object, n.genes.for.marker = 25, primary.markers) standardGeneric("get.gene.coexpression.space"))
 setMethod("get.gene.coexpression.space","scCOTAN",
           #da sistemare
@@ -759,6 +804,8 @@ setMethod("get.gene.coexpression.space","scCOTAN",
 
               to.plot.cl.genes = object@coex[rownames(object@coex) %in% genes.raw,colnames(object@coex) %in% all.genes.to.an]
 
+              to.plot.cl.genes = to.plot.cl.genes * sqrt(object@n_cells)
+
               to.plot.cl.genes = tanh(to.plot.cl.genes)
 
               return(to.plot.cl.genes)
@@ -774,14 +821,28 @@ setMethod("get.gene.coexpression.space","scCOTAN",
 #'
 #' @return A dataframe
 #' @export
+#' @importFrom stats pchisq
+#' @importFrom Matrix rowSums
+#' @importFrom Matrix colMeans
 #'
 #' @examples
-setGeneric("get.GDI", function(object) standardGeneric("get.GDI"))
+#' obj = readRDS("../data/ERCC.cotan.RDS")
+#' quant.p = get.GDI(obj)
+setGeneric("get.GDI", function(object,type="S") standardGeneric("get.GDI"))
 setMethod("get.GDI","scCOTAN",
-          function(object) {
+          function(object,type="S") {
               print("function to generate GDI dataframe")
-              S = get.S(object)
+              if (type=="S") {
+                  print("Using S")
+                  S = get.S(object)
+              }else if(type=="G"){
+                  print("Using G")
+                  S = get.G(object)
+              }
+
+
               S = as.data.frame(as.matrix(S))
+              #G = as.data.frame(as.matrix(G))
               CD.sorted <- apply(S,2,sort,decreasing=T)
               CD.sorted = CD.sorted[1:round(nrow(CD.sorted)/20, digits = 0),]
               CD.sorted = pchisq(as.matrix(CD.sorted), df=1, lower.tail=F)
@@ -830,14 +891,22 @@ setMethod("get.GDI","scCOTAN",
 #'
 #' @return A ggplot2 object
 #' @export
+#' @import ggplot2
 #'
 #' @examples
-setGeneric("plot.GDI", function(object, cond) standardGeneric("plot.GDI"))
+#' obj = readRDS("../data/ERCC.cotan.RDS")
+#' plot.GDI(obj, cond = "ERCC")
+setGeneric("plot.GDI", function(object, cond,type="S") standardGeneric("plot.GDI"))
 setMethod("plot.GDI","scCOTAN",
-          function(object, cond) {
+          function(object, cond,type="S") {
               print("GDI plot ")
+              if (type=="S") {
+                  GDI = get.GDI(object,type="S")
+              }else if(type=="G"){
+                  print("Using G")
+                  GDI = get.GDI(object,type="G")
+              }
 
-              GDI = get.GDI(object)
 
               si = 12
               plot =  ggplot(GDI, aes(x = sum.raw.norm, y = GDI)) +

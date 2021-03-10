@@ -94,3 +94,10 @@ test_that("get_pval_test", {
 
 })
 
+
+test_that("get_GDI_test", {
+    object = readRDS(paste0(root,"../../data/ERCC.cotan.RDS"))
+    GDI = get.GDI(object)
+    expect_equal(GDI, readRDS(paste0(root,"GDI.RDS")))
+
+})
