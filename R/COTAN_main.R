@@ -949,6 +949,11 @@ setMethod("plot.GDI","scCOTAN",
 #' @return It return the COTAN object. It will also store it direcly in the outpu directory
 #' @export
 #'
+#' @importFrom Matrix rowSums
+#' @importFrom Matrix colSums
+#' @import ggplot2
+#' @import ggrepel
+#' @import latex2exp
 #' @examples
 setGeneric("automatic.COTAN.object.creation", function(df, out_dir, GEO, sc.method, cond, mt = FALSE) standardGeneric("automatic.COTAN.object.creation"))
 setMethod("automatic.COTAN.object.creation","data.frame",
@@ -1049,9 +1054,9 @@ setMethod("automatic.COTAN.object.creation","data.frame",
               # saving the structure
               write.csv(data.frame("type" = c("tot_time","analysis_time","coex_time"),
                                    "times"= c(all.time,analysis_time,coex_time),"n.cells"=n_cells,"n.genes"=dim(obj@raw)[1]),
-                        file = paste(out_dir,t,"_times.RDS", sep = ""))
+                        file = paste(out_dir,t,"_times.csv", sep = ""))
 
-              print(paste0("Saving elaborated data locally at ", out_dir,t,".cotan.RDS",))
+              print(paste0("Saving elaborated data locally at ", out_dir,t,".cotan.RDS"))
               saveRDS(obj,file = paste(out_dir,t,".cotan.RDS", sep = ""))
 
               return(obj)
