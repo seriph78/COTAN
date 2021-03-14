@@ -4,7 +4,7 @@
 \alias{cotan_analysis}
 \title{cotan_analysis}
 \usage{
-cotan_analysis(object)
+cotan_analysis(object, cores = 11)
 }
 \arguments{
 \item{object}{A COTAN object}

@@ -15,27 +15,32 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
+
+library(factoextra)
 library(COTAN)
-library(dendextend)
+
+
 library(ggrepel)
 library(Rtsne)
 library(plotly)
 library(tidyverse)
 library(htmlwidgets)
 library(MASS)
+library(dendextend)
 ```
 
 To demostrate how to do the gene clustering usign COTAN we begin importing the COTAN object that stores all elaborated data and, in this case, regarding a mouse embrionic cortex dataset (developmental stage E17.5).
 
 ```{r}
-input_dir = "../data/"
+input_dir = "../../Cotan_paper/Data/"
 layers = list("L1"=c("Reln","Lhx5"), "L2/3"=c("Satb2","Cux1"), "L4"=c("Rorb","Sox5") , "L5/6"=c("Bcl11b","Fezf2") , "Prog"=c("Vim","Hes1"))
-objE17 = readRDS(file = paste(input_dir,"E17.5_cortex.cotan.RDS", sep = ""))
+#objE17 = readRDS(file = paste(input_dir,"E17.5_cortex.cotan.RDS", sep = ""))
+objE17 = readRDS(file = paste(input_dir,"E17.5_cortex_cleaned.cotan.RDS", sep = ""))
 ```
 
 ```{r}
 g.space = get.gene.coexpression.space(objE17, 
-                                      n.genes.for.marker = 25, 
+                                      n.genes.for.marker = 28,#25  
                                       primary.markers = unlist(layers))
 ```
 ```{r}
@@ -55,7 +60,7 @@ Hierarchical clustering
 hc.norm = hclust(dist(g.space), method = "ward.D2")
 
 # and cut the tree into 5 clusters (for example)
-cut = cutree(hc.norm, k = 5, order_clusters_as_data = F)
+cut = cutree(hc.norm, k = 7, order_clusters_as_data = F)
 
 # It crates the tree
 dend <- as.dendrogram(hc.norm)
@@ -72,6 +77,8 @@ pca_1$hclust = cut
 
 dend =branches_color(dend,k=7,col=c("#4DBBD5FF","#91D1C2FF","#F39B7FFF","#E64B35FF","#3C5488FF","#91D1C2FF","#B09C85FF" ),groupLabels = T)
 #dend =color_labels(dend,k=5,labels = rownames(pca_1),col=pca_1$colors)
+
+
 
 # plot the dendrogram with all anmes for secondary markers
 dend %>%
@@ -113,19 +120,24 @@ mycolours <- c("genes related to L5/6" = "#3C5488FF","genes related to L2/3"="#F
 # to assing correcly the cluster number and the color
 mycolours2 = c("Reln","Satb2","Rorb","Bcl11b","Vim")
 names(mycolours2) = unique(cut[unlist(layers)])
+
 mycolours2[mycolours2 == "Reln"] = "#E64B35FF"
 mycolours2[mycolours2 == "Satb2"] = "#F39B7FFF"
 mycolours2[mycolours2 == "Rorb"] = "#91D1C2FF"
 mycolours2[mycolours2 == "Bcl11b"] = "#3C5488FF"
 mycolours2[mycolours2 == "Vim"] = "#4DBBD5FF"
-
+color_to_add = unique(pca_1$hclust)[!unique(pca_1$hclust) %in% as.numeric(names(mycolours2))]
+names(color_to_add) = unique(pca_1$hclust)[!unique(pca_1$hclust) %in% as.numeric(names(mycolours2))]
+color_to_add[color_to_add %in% 
+                 unique(pca_1$hclust)[!unique(pca_1$hclust) %in% as.numeric(names(mycolours2))]] = "#B09C85FF"
+mycolours2 = c(mycolours2,color_to_add)
 
 pca1 = ggplot(subset(pca_1,!hclust %in% unique(cut[unlist(layers)])  ), aes(x=PC1, y=PC2)) +  geom_point(alpha = 0.3,color = "#B09C85FF",size=1)
 
 #pca2 = pca1 + geom_point(data = subset(pca_1, highlight != "not marked" ), aes(x=PC1, y=PC2, colour=hclust),size=2.5,alpha = 0.9) 
 pca2 = pca1 + geom_point(data = subset(pca_1, hclust %in% unique(cut[unlist(layers)]) ), aes(x=PC1, y=PC2, colour=as.character(hclust)),size=1,alpha = 0.5) + 
-  scale_color_manual("Status", values = mycolours2)  +
-  scale_fill_manual("Status", values = mycolours2)  +
+ scale_color_manual( "Status", values = mycolours2)  +
+  scale_fill_manual( "Status", values = mycolours2)  +
   xlab("") + ylab("") +
   geom_label_repel(data =textdf , aes(x = PC1, y = PC2, label = rownames(textdf),fill=as.character(hclust)),
                    label.size = NA, 

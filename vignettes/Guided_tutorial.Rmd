@@ -336,16 +336,43 @@ GDI_plot
 
 ```
 
+
+### Heatmaps
+
+For the Gene Pair Analysis, we can plot an heatmap with the coex values between two genes sets.
+To do so we need to define, in a list, the different gene sets (list.genes). Then in the function parameter sets we can decide which sets need to be considered (in the example from 1 to 3). In the condition parameter we should insert an array with each file name prefix to be considered (in the example, the file names is "E17.5_cortex").
+
+
 ```{r}
 list.genes = list("Ref.col"= PNGs, "NPGs"=NPGs, "Const."=hk )
 
 plot.heatmap(df_genes = list.genes,sets = c(1:3),conditions = "E17.5_cortex",dir = "../data/")
 ```
 
+We can also plot a general heatmap of coex values based on some markers like the following one.
+
 ```{r}
 plot.general.heatmap(prim.markers = PNGs, condition = "E17.5_cortex",dir = "../data/", p_value = 0.0001)
 ```
 
+
+### Get data tables
+
+Sometimes we can also be interested in the numbers present directly in the contingency tables for two specific genes. To get them we can use two functions:
+
+1. get.observed.ct to produce the observed data
+```{r}
+get.observed.ct(object = obj, g1 = "Cux1",g2 = "Dcx")
+```
+
+2. get.expected.ct to produce the expected values
+```{r}
+get.expected.ct(object = obj, g1 = "Cux1",g2 = "Dcx")
+```
+
+```{r}
+print(sessionInfo())
+```
 
 
 

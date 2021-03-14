@@ -209,9 +209,9 @@ setMethod("clean","scCOTAN",
 #' @examples
 #' \dontrun{obj = cotan_analysis(obj)
 #' }
-setGeneric("cotan_analysis", function(object) standardGeneric("cotan_analysis"))
+setGeneric("cotan_analysis", function(object, cores= 11) standardGeneric("cotan_analysis"))
 setMethod("cotan_analysis","scCOTAN",
-          function(object) {
+          function(object, cores= 11) {
 
               print("cotan analysis")
 
@@ -242,12 +242,12 @@ setMethod("cotan_analysis","scCOTAN",
                   #bb=Sys.time()
                   if((p+200) <= length(rownames(mu_estimator))){
                       tot1 =  parallel::mclapply(rownames(mu_estimator)[p:(p+200)],
-                                       fun_my_opt, ce.mat= cells, mu_est= mu_estimator  ,mc.cores = 11)
+                                       fun_my_opt, ce.mat= cells, mu_est= mu_estimator  ,mc.cores = cores)
 
                   }else{
                       print("Final trance!")
                       tot1 = parallel::mclapply(rownames(mu_estimator)[p:length(rownames(mu_estimator))],
-                                      fun_my_opt, ce.mat=cells, mu_est= mu_estimator  ,mc.cores = 11)
+                                      fun_my_opt, ce.mat=cells, mu_est= mu_estimator  ,mc.cores = cores)
                   }
                   tot = append(tot, tot1)
                   p=p+200+1
@@ -936,3 +936,125 @@ setMethod("plot.GDI","scCOTAN",
 )
 
 
+#' automatic.COTAN.object.creation
+#'
+#' @param df dataframe with the row counts
+#' @param out_dir directory for the output
+#' @param GEO GEO or other code that identify the dataset
+#' @param sc.method Type of single cell RNA-seq method used
+#' @param cond A string that will identify the sample or condition. It will be part of the final file name.
+#' @param mt A boolean (default FALSE). If true mithocondrial genes will be kept in the analysis,
+#' otherwise they will be removed.
+#'
+#' @return It return the COTAN object. It will also store it direcly in the outpu directory
+#' @export
+#'
+#' @examples
+setGeneric("automatic.COTAN.object.creation", function(df, out_dir, GEO, sc.method, cond, mt = FALSE) standardGeneric("automatic.COTAN.object.creation"))
+setMethod("automatic.COTAN.object.creation","data.frame",
+          function(df, out_dir, GEO, sc.method, cond, mt = FALSE) {
+              start_time_all <- Sys.time()
+
+              mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
+              my_theme = theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
+                               axis.text.y = element_text( size = 14, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
+                               axis.title.x = element_text( size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),
+                               axis.title.y = element_text( size = 14, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"))
+              obj = new("scCOTAN",raw = df)
+              obj = initRaw(obj,GEO = GEO ,sc.method = sc.method,cond = cond)
+              if (mt == FALSE) {
+                  genes_to_rem = rownames(obj@raw[grep('^mt', rownames(obj@raw)),]) #genes to remove : mithocondrial
+                  obj@raw = obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
+                  cells_to_rem = colnames(obj@raw[which(colSums(obj@raw) == 0)])
+                  obj@raw = obj@raw[,!colnames(obj@raw) %in% cells_to_rem]
+              }
+              t = cond
+
+              print(paste("Condition ",t,sep = ""))
+              #--------------------------------------
+              n_cells = length(colnames(obj@raw))
+              print(paste("n cells", n_cells, sep = " "))
+
+              n_it = 1
+
+              if(!file.exists(out_dir)){
+                  dir.create(file.path(out_dir))
+              }
+
+              if(!file.exists(paste(out_dir,"cleaning", sep = ""))){
+                  dir.create(file.path(out_dir, "cleaning"))
+              }
+
+              ttm = clean(obj)
+
+              obj = ttm$object
+
+              pdf(paste(out_dir,"cleaning/",t,"_",n_it,"_plots_without_cleaning.pdf", sep = ""))
+              ttm$pca.cell.2
+              ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
+                  geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ), aes(n,means,label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
+                                  nudge_y      = 0.05,
+                                  nudge_x      = 0.05,
+                                  direction    = "x",
+                                  angle        = 90,
+                                  vjust        = 0,
+                                  segment.size = 0.2)+
+                  ggtitle(label = "B cell group genes mean expression", subtitle = " - B group NOT removed -")+my_theme +
+                  theme(plot.title = element_text(color = "#3C5488FF", size = 20, face = "italic",vjust = - 10,hjust = 0.02 ),
+                        plot.subtitle = element_text(color = "darkred",vjust = - 15,hjust = 0.01 ))
+
+              dev.off()
+
+              nu_est = round(obj@nu, digits = 7)
+
+              plot.nu <-ggplot(ttm$pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
+
+              plot.nu = plot.nu + geom_point(size = 1,alpha= 0.8)+
+                  scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
+                                        midpoint = log(mean(nu_est)),name = TeX(" $ln (\\nu) $ "))+
+                  ggtitle("Cells PCA coloured by cells efficiency") +
+                  my_theme +  theme(plot.title = element_text(color = "#3C5488FF", size = 20),
+                                    legend.title=element_text(color = "#3C5488FF", size = 14,face = "italic"),
+                                    legend.text = element_text(color = "#3C5488FF", size = 11),
+                                    legend.key.width = unit(2, "mm"),
+                                    legend.position="right")
+
+              pdf(paste(out_dir,"cleaning/",t,"_plots_PCA_efficiency_colored.pdf", sep = ""))
+              plot.nu
+              dev.off()
+
+              nu_df = data.frame("nu"= sort(obj@nu), "n"=c(1:length(obj@nu)))
+
+              pdf(paste(out_dir,"cleaning/",t,"_plots_efficiency.pdf", sep = ""))
+              ggplot(nu_df, aes(x = n, y=nu)) + geom_point(colour = "#8491B4B2", size=1) +my_theme + #xlim(0,100)+
+                  annotate(geom="text", x=50, y=0.25, label="nothing to remove ", color="darkred")
+              dev.off()
+
+              analysis_time <- Sys.time()
+
+              print("Cotan analysis function started")
+              obj = cotan_analysis(obj)
+
+              coex_time <- Sys.time()
+              analysis_time <- coex_time - analysis_time
+
+              print("Cotan coex estimation started")
+              obj = get.coex(obj)
+
+              end_time <- Sys.time()
+
+              all.time = end_time - start_time_all
+
+              coex_time = end_time - coex_time
+              # saving the structure
+              write.csv(data.frame("type" = c("tot_time","analysis_time","coex_time"),
+                                   "times"= c(all.time,analysis_time,coex_time),"n.cells"=n_cells,"n.genes"=dim(obj@raw)[1]),
+                        file = paste(out_dir,t,"_times.RDS", sep = ""))
+
+              print(paste0("Saving elaborated data locally at ", out_dir,t,".cotan.RDS",))
+              saveRDS(obj,file = paste(out_dir,t,".cotan.RDS", sep = ""))
+
+              return(obj)
+
+          }
+)
