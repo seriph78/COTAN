@@ -35,8 +35,12 @@ my_theme = theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5, vj
 Download the dataset for mouse cortex E17.5.
 ```{r}
 data_dir = "../data/"
-download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/GSM2861nnn/GSM2861514/suppl/GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz",
+if (!file.exists(paste(data_dir,"E175_only_cortical_cells.txt.gz", sep = "/"))) {
+  download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/
+                samples/GSM2861nnn/GSM2861514/suppl/GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz",
               paste(data_dir,"E175_only_cortical_cells.txt.gz", sep = "/"),method = "wget", quiet = F)
+  
+}
 ```
 ```{r}
 data = as.data.frame(fread(paste(data_dir,"E175_only_cortical_cells.txt.gz", sep = "/"),sep = "\t"))
@@ -211,6 +215,7 @@ We also save the defined treshold in the metadata and re run the estimation
 obj@meta[(nrow(obj@meta)+1),1:2] = c("Threshold low UDE cells:",yset)
 
 to_rem = rownames(nu_df[which(nu_df$nu < yset),])
+obj@raw = obj@raw[, !colnames(obj@raw) %in% to_rem]
 ```
 
 Repeat the estimation after the cells are removed
@@ -375,11 +380,4 @@ print(sessionInfo())
 ```
 
 
-
-```{r}
-detach("package:data.table", unload = TRUE)
-detach("package:Matrix",unload = TRUE)
-detach("package:ggrepel", unload = TRUE)
-detach("package:latex2exp",unload = TRUE)
-```
 

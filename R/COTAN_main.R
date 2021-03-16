@@ -1063,3 +1063,120 @@ setMethod("automatic.COTAN.object.creation","data.frame",
 
           }
 )
+
+
+#' get.observed.ct
+#'
+#' This function is used to get the observed contingency table for a given pair of genes.
+#'
+#' @param object The cotan object
+#' @param g1 A gene
+#' @param g2 The other gene
+#'
+#' @return A contingecy table as dataframe
+#' @export
+#'
+#' @examples
+setGeneric("get.observed.ct", function(object,g1,g2) standardGeneric("get.observed.ct"))
+setMethod("get.observed.ct","scCOTAN",
+          function(object,g1,g2) {
+              #cells=obj@raw
+              #---------------------------------------------------
+              # Cells matrix : formed by row data matrix changed to 0-1 matrix
+              #cells[cells > 0] <- 1
+              #cells[cells <= 0] <- 0
+
+              si_si = object@yes_yes[g1,g2]
+              n_cells = object@n_cells
+
+              si_any = max(object@yes_yes[g1,])
+
+              any_si = max(object@yes_yes[g2,])
+              si_no = si_any - si_si
+              no_si = any_si - si_si
+              no_no = n_cells - (si_si + si_no + no_si)
+
+              ct = as.data.frame(matrix(ncol = 2,nrow = 2))
+              colnames(ct) = c(paste(g1,"yes",sep = "."),paste(g1,"no",sep = "."))
+              rownames(ct) = c(paste(g2,"yes",sep = "."),paste(g2,"no",sep = "."))
+              ct[1,1] = si_si
+              ct[1,2] = no_si
+              ct[2,2] = no_no
+              ct[2,1] = si_no
+
+              return(ct)
+
+          }
+)
+
+
+#' get.expected.ct
+#'
+#' This function is used to get the expected contingency table for a given pair of genes.
+#' @param object The cotan object
+#' @param g1 A gene
+#' @param g2 The other gene
+#'
+#' @return A contingecy table as dataframe
+#' @export
+#'
+#' @importFrom Matrix rowSums
+#' @importFrom Matrix colSums
+#'
+#' @examples
+setGeneric("get.expected.ct", function(object,g1,g2) standardGeneric("get.expected.ct"))
+setMethod("get.expected.ct","scCOTAN",
+          function(object,g1,g2) {
+              fun_pzero <- function(a,mu){
+                  #a= as.numeric(a[,2])
+                  #print(a)
+                  (a <= 0)*(exp(-(1+abs(a))*mu)) + (a > 0)*(1+abs(a)*mu)^(-1/abs(a))
+              }
+
+              if(g1 %in% object@hk | g2 %in% object@hk ){
+                  print("Error. A gene is constitutive!")
+                  break()
+              }
+              mu_estimator = object@lambda[c(g1,g2)] %*% t(object@nu)
+
+              cells=as.matrix(object@raw)[c(g1,g2),]
+              #---------------------------------------------------
+              # Cells matrix : formed by row data matrix changed to 0-1 matrix
+              cells[cells > 0] <- 1
+              cells[cells <= 0] <- 0
+
+              M = fun_pzero(object@a[c(g1,g2)],mu_estimator)
+              rownames(M) = c(g1,g2)
+              N = 1-M #fun_pzero(as.numeric(tot2[,2]),mu_estimator[,colnames(cells)])
+
+              n_zero_esti = rowSums(M) # estimated number of zeros for each genes
+              n_zero_obs = rowSums(cells[!rownames(cells) %in% object@hk,] == 0) # observed number of zeros for each genes
+              dist_zeros = sqrt(sum((n_zero_esti - n_zero_obs)^2))
+
+              #print(paste("The distance between estimated n of zeros and observed number of zero is", dist_zeros,"over", length(rownames(M)), sep = " "))
+
+              if(any(is.na(M))){
+                  print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = T),sep = " "))
+                  break()
+              }
+
+              gc()
+              estimator_no_no = M %*% t(M)
+              estimator_no_si = M %*% t(N)
+              estimator_si_no = t(estimator_no_si)
+              estimator_si_si = N %*% t(N)
+
+
+              ct = as.data.frame(matrix(ncol = 2,nrow = 2))
+              colnames(ct) = c(paste(g1,"yes",sep = "."),paste(g1,"no",sep = "."))
+              rownames(ct) = c(paste(g2,"yes",sep = "."),paste(g2,"no",sep = "."))
+              ct[1,1] = estimator_si_si[g1,g2]
+              ct[1,2] = estimator_no_si[g1,g2]
+              ct[2,2] = estimator_no_no[g1,g2]
+              ct[2,1] = estimator_si_no[g1,g2]
+
+              return(ct)
+
+          }
+)
+

@@ -18,8 +18,6 @@ knitr::opts_chunk$set(
 
 library(factoextra)
 library(COTAN)
-
-
 library(ggrepel)
 library(Rtsne)
 library(plotly)
