@@ -35,3 +35,13 @@ This function is used to plot an heatmap made using only some genes, as markers,
 with these markers with a p-value smaller than the set treshold. Than all relations are plotted.
 Primary markers will be plotted as groups of rows. Marekers list will be plotted as columns.
 }
+\examples{
+\dontrun{
+plot.general.heatmap(dir=input_dir,
+condition = "E17.5",
+prim.markers  = c("Mef2c","Mef2a","Mef2d"),
+symmetric = F,
+markers.list = c("Reln","Satb2","Cux1","Bcl11b","Tbr1","Sox5","Foxp2","Slc17a6","Slc17a7"),
+p_value = 0.05)
+}
+}

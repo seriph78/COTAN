@@ -117,7 +117,7 @@ setMethod("spMat","matrix",
               #---------------------------
 
               # To symmetrize
-              object =forceSymmetric(object,uplo="L")
+              #object =Matrix::forceSymmetric(object,uplo="L")
               return(object)
           }
 )

@@ -10,6 +10,9 @@ plot.GDI(object, cond, type = "S")
 \item{object}{A COTAN object}
 
 \item{cond}{A string correponding to the condition/sample (it is used only for the title)}
+
+\item{type}{Type of statistic to be used. Deafult is "S":
+Pearson's chi-squared test statistics. "G" is G-test statistics}
 }
 \value{
 A ggplot2 object

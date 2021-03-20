@@ -19,7 +19,9 @@
 #' @return
 #' @export
 #' @examples
-#' obj = new("scCOTAN",raw=read.csv("tests/testthat/raw.csv", header = T,row.names = 1 )) # with raw the raw data matrix with cells on colums and genes on rows
+#' file = "tests/testthat/raw.csv"
+#' obj = new("scCOTAN",raw=read.csv(file, header = T,row.names = 1 ))
+#'
 #'
 setClass("scCOTAN", slots =
                         c(raw="ANY",raw.norm="ANY", coex="ANY",
@@ -38,7 +40,8 @@ setClass("scCOTAN", slots =
 #' @export
 #' @examples
 #' obj = new("scCOTAN",raw=read.csv("tests/testthat/raw.csv", header = T,row.names = 1 ))
-#' obj = initRaw(obj,GEO="GSE95315" ,sc.method="10X",cond = "mouse dentate gyrus P0 subclustering of cl.2 - 0,1,2")
+#' obj = initRaw(obj,GEO="GSE95315" ,
+#' sc.method="10X",cond = "mouse dentate gyrus P0 subclustering of cl.2 - 0,1,2")
 #'
 setGeneric("initRaw", function(object,GEO,sc.method="10X", cond) standardGeneric("initRaw"))
 setMethod("initRaw","scCOTAN",
@@ -46,6 +49,10 @@ setMethod("initRaw","scCOTAN",
               print("Initializing S4 object")
               if(!attr(object@raw, "class")[1] == "dgCMatrix" | is.null(attr(object@raw, "class")) ){
                   object@raw = as(as.matrix(object@raw), "sparseMatrix")
+              }
+              if(! all((object@raw - round(object@raw)) == 0)){
+                print("WARNING! Input data contains not integer numbers!")
+
               }
               object@meta[1,1:2] = c("GEO:",GEO)
               object@meta[2,1:2] = c("scRNAseq method:",sc.method)
@@ -203,6 +210,7 @@ setMethod("clean","scCOTAN",
 #' This is the main function that estimates the a vector to store all the negative binomial
 #' dispersion factors. It need to be run after \code{\link{clean}}
 #' @param object A COTAN object
+#' @param cores number of cores to use. Default is 11.
 #' @importFrom parallel mclapply
 #' @return a COTAN object
 #' @export
@@ -326,7 +334,7 @@ setMethod("get.coex","scCOTAN",
               print("Diagonal coex values substituted with 0")
               diag(coex) = 0
               coex = coex / sqrt(object@n_cells)
-              object@coex = coex
+              object@coex = spMat(coex)
 
               return(object)
           }
@@ -348,6 +356,7 @@ setMethod("get.coex","scCOTAN",
 #' @return a p-value matrix
 #' @export
 #'
+#' @importFrom Matrix forceSymmetric
 #' @examples
 #' \dontrun{
 #' obj = get.pval(obj,type_stat="S")
@@ -355,7 +364,7 @@ setMethod("get.coex","scCOTAN",
 setGeneric("get.pval", function(object, gene.set.col=c(),gene.set.row=c(), type_stat="S" ) standardGeneric("get.pval"))
 setMethod("get.pval","scCOTAN",
           function(object, gene.set.col=c(),gene.set.row=c(), type_stat="S") {
-
+              object@coex = Matrix::forceSymmetric(object@coex, uplo="L" )
               print(gene.set.col)
 
               if (!is.null(gene.set.row)) {
@@ -422,11 +431,27 @@ setMethod("get.pval","scCOTAN",
 #' @param dir The directory in which are all COTAN files (corresponding to the previous prefixes)
 #'
 #' @return a ggplot object
+#' @importFrom Matrix forceSymmetric
 #' @export
 #' @import ggplot2
 #' @import tidyr
 #'
 #' @examples
+#' \dontrun{
+#' # some genes
+#' primary.markers = c("Tbr1","Tubb3","Neurod1", "Stmn1","Notch1","Vim","Sox2","Pax6","Hes5")
+#' a example of named list of different gene set
+#' gene.sets.list = list("primary.markers"=primary.markers,
+#'                    "2.Radial Glia" = c("Vim","Sox2","Pax6","Hes5","Hes1","Fabp7"),
+#'                    "PNGs"=c("Map2","Tubb3","Neurod1","Nefm","Nefl","Dcx","Tbr1"),
+#'                    "constitutive" = c("Calm1","Cox6b1","Ppia","Rpl18","Cox7c",
+#'                                       "Erh","H3f3a","Taf1b","Taf2",
+#'                                       "Gapdh","Actb", "Golph3", "Mtmr12",
+#'                                       "Zfr", "Sub1", "Tars", "Amacr"),
+#'                    "4.Mat.neu."= c("Map2","Rbfox3","Nefl","Nefh","Nefm","Mapt"))
+#' plot.heatmap(p_v = 0.05, df_genes =gene.sets.list ,
+#' sets =c(2,3,4,6) ,conditions =c("E11.5","E13.5","E14.5") ,dir = input_dir)
+#' }
 setGeneric("plot.heatmap", function(p_val.tr = 0.05, df_genes , sets, conditions, dir) standardGeneric("plot.heatmap"))
 setMethod("plot.heatmap","ANY",
           function(p_val.tr = 0.05, df_genes , sets, conditions, dir) {
@@ -445,6 +470,7 @@ setMethod("plot.heatmap","ANY",
               for(ET in conditions){
                   print(paste("Loading condition",ET,sep=" "))
                   obj = readRDS(paste(dir,ET,".cotan.RDS", sep = ""))
+                  obj@coex = Matrix::forceSymmetric(obj@coex, uplo="L" )
                   if(any(gr %in% rownames(obj@coex)) == F){
                       print(paste("primary markers all absent in ", ET, sep = " "))
                       break()
@@ -585,9 +611,20 @@ setMethod("plot.heatmap","ANY",
 #'
 #' @return A ggplot2 object
 #' @import ComplexHeatmap
+#' @importFrom grid gpar
+#' @importFrom circlize colorRamp2
+#' @importFrom Matrix forceSymmetric
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' plot.general.heatmap(dir=input_dir,
+#' condition = "E17.5",
+#' prim.markers  = c("Mef2c","Mef2a","Mef2d"),
+#' symmetric = F,
+#' markers.list = c("Reln","Satb2","Cux1","Bcl11b","Tbr1","Sox5","Foxp2","Slc17a6","Slc17a7"),
+#' p_value = 0.05)
+#' }
 setGeneric("plot.general.heatmap", function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),markers.list= c(),
                                             dir, condition,
                                             p_value = 0.001,
@@ -595,9 +632,7 @@ setGeneric("plot.general.heatmap", function(prim.markers =c("Satb2","Bcl11b","Cu
 setMethod("plot.general.heatmap","vector",
           function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),markers.list=c(), dir,condition,p_value = 0.001, symmetric = T) {
               print("ploting a general heatmap")
-              library(ComplexHeatmap)
-              library(circlize)
-              library(rlang)
+
               if(symmetric == T){
                   markers.list = as.list(c( unlist(prim.markers),unlist(markers.list)))
               }
@@ -609,7 +644,8 @@ setMethod("plot.general.heatmap","vector",
               }
 
               obj = readRDS(paste(dir,condition,".cotan.RDS", sep = ""))
-              coex = obj@coex
+              obj@coex = Matrix::forceSymmetric(obj@coex, uplo="L" )
+              coex = as.matrix(obj@coex)
               no_genes = unique(c(unlist(markers.list),prim.markers))[!unique(c(unlist(markers.list),prim.markers)) %in% colnames(coex)]
 
               if(!is_empty(no_genes)){
@@ -640,7 +676,7 @@ setMethod("plot.general.heatmap","vector",
                   coex = coex[rownames(coex) %in% genes.row,]
               }
 
-              coex = coex/sqrt(obj@n_cells)
+              #coex = coex#/sqrt(obj@n_cells)
               #coex = as.data.frame(as.matrix(coex))
               list.rows = c()
               for (m in unlist(markers.list)) {
@@ -693,12 +729,16 @@ setMethod("plot.general.heatmap","vector",
 
               to.plot <- coex[reorder_idx_row,reorder_idx_col]
 
-              col_fun = colorRamp2(c(round(quantile(as.matrix(to.plot),probs =0.001),digits = 3),
+              col_fun = circlize::colorRamp2(c(round(quantile(as.matrix(to.plot),probs =0.001),digits = 3),
                                      0,
                                      round(quantile(as.matrix(to.plot),probs =0.999),digits = 3)),
                                    c("#E64B35FF", "gray93", "#3C5488FF"))
 
-              part1 = Heatmap(as.matrix(to.plot),
+              #The next line is to set the columns and raws order
+              # need to be implemented
+              #cl.genes.rows$cl =factor(cl.genes.rows$cl,c("Reln","Satb2","Sox5","Bcl11b"))
+
+              part1 = ComplexHeatmap::Heatmap(as.matrix(to.plot),
                               cluster_rows = FALSE,
                               cluster_columns = F ,
                               row_split = cl.genes.rows$cl,
@@ -706,14 +746,15 @@ setMethod("plot.general.heatmap","vector",
                               col = col_fun,
                               show_row_names = FALSE,
                               show_column_names = F,
-                              column_title_gp = gpar(fill = "#8491B44C", font = 3, col= "#3C5488FF"),
-                              row_title_gp = gpar(fill = "#8491B44C",font = 3, col= "#3C5488FF"))
-              lgd = Legend(col_fun = col_fun, title = "coex",grid_width = unit(0.3, "cm"),
+                              column_title_gp = grid::gpar(fill = "#8491B44C", font = 3, col= "#3C5488FF"),
+                              row_title_gp = grid::gpar(fill = "#8491B44C",font = 3, col= "#3C5488FF"))
+              lgd = ComplexHeatmap::Legend(col_fun = col_fun, title = "coex",grid_width = unit(0.3, "cm"),
                            direction = "horizontal", title_position = "topcenter",
-                           title_gp = gpar(fontsize = 10, fontface = "bold",col="#3C5488FF"),
-                           labels_gp = gpar(col = "#3C5488FF", font = 3) )
+                           title_gp = grid::gpar(fontsize = 10, fontface = "bold",col="#3C5488FF"),
+                           labels_gp = grid::gpar(col = "#3C5488FF", font = 3) )
 
-              part1 = draw(part1,show_heatmap_legend = FALSE,
+              #part1 =
+                  ComplexHeatmap::draw(part1,show_heatmap_legend = FALSE,
                            annotation_legend_list = lgd,annotation_legend_side = "bottom")
 
 
@@ -741,9 +782,11 @@ setMethod("plot.general.heatmap","vector",
 #' @importFrom stats pchisq
 #' @importFrom Matrix rowSums
 #' @importFrom Matrix colMeans
+#' @importFrom Matrix forceSymmetric
 #' @examples
 #' obj = readRDS("../data/ERCC.cotan.RDS")
-#' df = get.gene.coexpression.space(obj, n.genes.for.marker = 10, primary.markers=c("HLA-DMB","HLA-DPA1","S100A6","S100A8"))
+#' df = get.gene.coexpression.space(obj, n.genes.for.marker = 10,
+#' primary.markers=c("HLA-DMB","HLA-DPA1","S100A6","S100A8"))
 setGeneric("get.gene.coexpression.space", function(object, n.genes.for.marker = 25, primary.markers) standardGeneric("get.gene.coexpression.space"))
 setMethod("get.gene.coexpression.space","scCOTAN",
           #da sistemare
@@ -751,6 +794,7 @@ setMethod("get.gene.coexpression.space","scCOTAN",
               print("calculating gene coexpression space: output tanh of reduced coex matrix" )
               #primary.markers = c("Reln","Lhx5","Cux1","Satb2","Rorb","Sox5","Fezf2","Bcl11b","Vim","Hes1")
               #n.genes.for.marker = 25
+              object@coex = Matrix::forceSymmetric(object@coex, uplo="L" )
 
               p.val.matrix = get.pval(object,gene.set.col = primary.markers)
               if(!length(primary.markers) == ncol(p.val.matrix)){
@@ -768,7 +812,7 @@ setMethod("get.gene.coexpression.space","scCOTAN",
                   all.genes.to.an =unique(all.genes.to.an)
               }
               all.genes.to.an =unique(c(all.genes.to.an,primary.markers))
-
+              print(paste0("Secondary markers:", length(all.genes.to.an)))
               tmp = p.val.matrix[all.genes.to.an,]
               for (m in primary.markers) {
                   tmp = as.data.frame(tmp[order(tmp[,m]),])
@@ -788,8 +832,12 @@ setMethod("get.gene.coexpression.space","scCOTAN",
               S = as.matrix(S)
 
               #quant.p.val2 = rowQuantiles((as.matrix(S)),probs =(1-15/ncol(S)) , na.rm = T) #0.975
+              #rank.genes$index = rowSums(rank.genes)
+              #rank.genes = rank.genes[order(rank.genes$index, decreasing = F),]
+              # This is the LDI 5%
               CD.sorted <- t(apply(t(S),2,sort,decreasing=T))
-              CD.sorted = CD.sorted[,1:round(ncol(CD.sorted)/20, digits = 0)]
+              #CD.sorted = CD.sorted[,1:round(ncol(CD.sorted)/5, digits = 0)] #20
+              CD.sorted = CD.sorted[,1:round(ncol(CD.sorted)/10, digits = 0)] #20
               CD.sorted = pchisq(as.matrix(CD.sorted), df=1, lower.tail=F)
 
               quant.p.val2 = rowMeans(CD.sorted)
@@ -798,8 +846,9 @@ setMethod("get.gene.coexpression.space","scCOTAN",
 
               quant.p.val2$names = rownames(quant.p.val2)
 
-              genes.raw = quant.p.val2[quant.p.val2$loc.GDI <= quantile(quant.p.val2$loc.GDI,probs = 0.1),]$names #0.9
-              genes.raw = unique(c(genes.raw, all.genes.to.an ))
+              quant.p.val2 = quant.p.val2[quant.p.val2$loc.GDI <= quantile(quant.p.val2$loc.GDI,probs = 0.1),] #0.9
+              genes.raw = quant.p.val2$names #0.9
+              #genes.raw = unique(c(genes.raw, all.genes.to.an ))
               # just to color
 
               to.plot.cl.genes = object@coex[rownames(object@coex) %in% genes.raw,colnames(object@coex) %in% all.genes.to.an]
@@ -807,6 +856,8 @@ setMethod("get.gene.coexpression.space","scCOTAN",
               to.plot.cl.genes = to.plot.cl.genes * sqrt(object@n_cells)
 
               to.plot.cl.genes = tanh(to.plot.cl.genes)
+              print(paste0("Columns (V set) number: ",dim(to.plot.cl.genes)[2],
+                           " Rows (U set) number: ",dim(to.plot.cl.genes)[1]))
 
               return(to.plot.cl.genes)
           }
@@ -818,12 +869,15 @@ setMethod("get.gene.coexpression.space","scCOTAN",
 #' This function produce a dataframe with the GDI for each genes.
 #'
 #' @param object A COTAN object
+#' @param type Type of statistic to be used. Deafult is "S":
+#' Pearson's chi-squared test statistics. "G" is G-test statistics
 #'
 #' @return A dataframe
 #' @export
 #' @importFrom stats pchisq
 #' @importFrom Matrix rowSums
 #' @importFrom Matrix colMeans
+#' @importFrom Matrix forceSymmetric
 #'
 #' @examples
 #' obj = readRDS("../data/ERCC.cotan.RDS")
@@ -831,6 +885,9 @@ setMethod("get.gene.coexpression.space","scCOTAN",
 setGeneric("get.GDI", function(object,type="S") standardGeneric("get.GDI"))
 setMethod("get.GDI","scCOTAN",
           function(object,type="S") {
+
+              object@coex = Matrix::forceSymmetric(object@coex, uplo="L" )
+
               print("function to generate GDI dataframe")
               if (type=="S") {
                   print("Using S")
@@ -888,10 +945,13 @@ setMethod("get.GDI","scCOTAN",
 #'
 #' @param object A COTAN object
 #' @param cond A string correponding to the condition/sample (it is used only for the title)
+#' @param type Type of statistic to be used. Deafult is "S":
+#' Pearson's chi-squared test statistics. "G" is G-test statistics
 #'
 #' @return A ggplot2 object
 #' @export
 #' @import ggplot2
+#' @importFrom Matrix forceSymmetric
 #'
 #' @examples
 #' obj = readRDS("../data/ERCC.cotan.RDS")
@@ -899,6 +959,9 @@ setMethod("get.GDI","scCOTAN",
 setGeneric("plot.GDI", function(object, cond,type="S") standardGeneric("plot.GDI"))
 setMethod("plot.GDI","scCOTAN",
           function(object, cond,type="S") {
+
+              object@coex = Matrix::forceSymmetric(object@coex, uplo="L" )
+
               print("GDI plot ")
               if (type=="S") {
                   GDI = get.GDI(object,type="S")
@@ -953,11 +1016,17 @@ setMethod("plot.GDI","scCOTAN",
 #' @importFrom Matrix colSums
 #' @import ggplot2
 #' @import ggrepel
-#' @import latex2exp
 #' @examples
-setGeneric("automatic.COTAN.object.creation", function(df, out_dir, GEO, sc.method, cond, mt = FALSE) standardGeneric("automatic.COTAN.object.creation"))
+#' \dontrun{
+#' obj = automatic.COTAN.object.creation(df=read.csv("/tests/testthat/raw.csv",header = T, row.names = 1),
+#' out_dir = "/tests/testthat/",
+#' GEO = "test_GOE",
+#' sc.method = "test_method",
+#' cond = "test")
+#' }
+setGeneric("automatic.COTAN.object.creation", function(df, out_dir, GEO, sc.method, cond, mt = FALSE, mt_prefix="^mt") standardGeneric("automatic.COTAN.object.creation"))
 setMethod("automatic.COTAN.object.creation","data.frame",
-          function(df, out_dir, GEO, sc.method, cond, mt = FALSE) {
+          function(df, out_dir, GEO, sc.method, cond, mt = FALSE, mt_prefix="^mt") {
               start_time_all <- Sys.time()
 
               mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
@@ -968,7 +1037,7 @@ setMethod("automatic.COTAN.object.creation","data.frame",
               obj = new("scCOTAN",raw = df)
               obj = initRaw(obj,GEO = GEO ,sc.method = sc.method,cond = cond)
               if (mt == FALSE) {
-                  genes_to_rem = rownames(obj@raw[grep('^mt', rownames(obj@raw)),]) #genes to remove : mithocondrial
+                  genes_to_rem = rownames(obj@raw[grep(mt_prefix, rownames(obj@raw)),])
                   obj@raw = obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
                   cells_to_rem = colnames(obj@raw[which(colSums(obj@raw) == 0)])
                   obj@raw = obj@raw[,!colnames(obj@raw) %in% cells_to_rem]
@@ -1016,7 +1085,7 @@ setMethod("automatic.COTAN.object.creation","data.frame",
 
               plot.nu = plot.nu + geom_point(size = 1,alpha= 0.8)+
                   scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
-                                        midpoint = log(mean(nu_est)),name = TeX(" $ln (\\nu) $ "))+
+                                        midpoint = log(mean(nu_est)),name = "ln(nu)")+
                   ggtitle("Cells PCA coloured by cells efficiency") +
                   my_theme +  theme(plot.title = element_text(color = "#3C5488FF", size = 20),
                                     legend.title=element_text(color = "#3C5488FF", size = 14,face = "italic"),
@@ -1042,6 +1111,7 @@ setMethod("automatic.COTAN.object.creation","data.frame",
 
               coex_time <- Sys.time()
               analysis_time <- coex_time - analysis_time
+              print(paste0("Only analysis time ", analysis_time))
 
               print("Cotan coex estimation started")
               obj = get.coex(obj)
@@ -1049,8 +1119,10 @@ setMethod("automatic.COTAN.object.creation","data.frame",
               end_time <- Sys.time()
 
               all.time = end_time - start_time_all
+              print(paste0("Total time ", all.time))
 
               coex_time = end_time - coex_time
+              print(paste0("Only coex time ",coex_time))
               # saving the structure
               write.csv(data.frame("type" = c("tot_time","analysis_time","coex_time"),
                                    "times"= c(all.time,analysis_time,coex_time),"n.cells"=n_cells,"n.genes"=dim(obj@raw)[1]),
@@ -1077,6 +1149,10 @@ setMethod("automatic.COTAN.object.creation","data.frame",
 #' @export
 #'
 #' @examples
+#' obj_test = readRDS(file = "../tests/testthat/test_cotan.RDS")
+#' g1 = rownames(obj@raw)[sample(2000, 1)]
+#' g2 = rownames(obj@raw)[sample(2000, 1)]
+#' get.observed.ct(object = obj_test, g1 = g1, g2 = g2)
 setGeneric("get.observed.ct", function(object,g1,g2) standardGeneric("get.observed.ct"))
 setMethod("get.observed.ct","scCOTAN",
           function(object,g1,g2) {
@@ -1124,6 +1200,10 @@ setMethod("get.observed.ct","scCOTAN",
 #' @importFrom Matrix colSums
 #'
 #' @examples
+#' obj_test = readRDS(file = "../tests/testthat/test_cotan.RDS")
+#' g1 = rownames(obj@raw)[sample(2000, 1)]
+#' g2 = rownames(obj@raw)[sample(2000, 1)]
+#' get.expected.ct(object = obj_test, g1 = g1, g2 = g2)
 setGeneric("get.expected.ct", function(object,g1,g2) standardGeneric("get.expected.ct"))
 setMethod("get.expected.ct","scCOTAN",
           function(object,g1,g2) {

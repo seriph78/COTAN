@@ -10,7 +10,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 7
 )
 options(rmarkdown.html_vignette.check_title = FALSE)
 ```
@@ -20,7 +22,13 @@ library(COTAN)
 library(data.table)
 library(Matrix)
 library(ggrepel)
-library(latex2exp)
+library(factoextra)
+library(Rtsne)
+library(plotly)
+library(tidyverse)
+library(htmlwidgets)
+library(MASS)
+library(dendextend)
 ```
 
 ```{r}
@@ -29,33 +37,37 @@ my_theme = theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5, vj
                  axis.text.y = element_text( size = 14, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
                  axis.title.x = element_text( size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),
                  axis.title.y = element_text( size = 14, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"))
+data_dir = "../inst/extdata/"
 ```
 
 
+
+```{r eval=FALSE, include=FALSE}
 Download the dataset for mouse cortex E17.5.
-```{r}
-data_dir = "../data/"
-if (!file.exists(paste(data_dir,"E175_only_cortical_cells.txt.gz", sep = "/"))) {
+if (!file.exists(paste("inst/extdata/","E175_only_cortical_cells.txt.gz", sep = "/"))) {
   download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/
                 samples/GSM2861nnn/GSM2861514/suppl/GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz",
               paste(data_dir,"E175_only_cortical_cells.txt.gz", sep = "/"),method = "wget", quiet = F)
   
 }
 ```
+
 ```{r}
-data = as.data.frame(fread(paste(data_dir,"E175_only_cortical_cells.txt.gz", sep = "/"),sep = "\t"))
+data = as.data.frame(fread(system.file("extdata", "E175_only_cortical_cells.txt.gz", 
+                                       package = "COTAN", mustWork = TRUE),
+                           sep = "\t"))
 data = as.data.frame(data)
 rownames(data) = data$V1
 data = data[,2:ncol(data)]
-data[1:10,1:10]
+data[1:5,1:5]
 ```
 
 Define a directory where the ouput will be stored.
 ```{r}
-out_dir = "../data/"
+out_dir = "../inst/extdata/"
 ```
 
-## Analitical pipeline
+# Analitical pipeline
 
 Inizialise the COTAN object with the row count table and the metadata for the experiment.
 
@@ -68,7 +80,7 @@ Now we can start the cleaning. Analysis requires and starts from a matrix of raw
 
 If we do not want to consider the mithocondrial genes we can remove them before starting the analysis.
 ```{r}
-genes_to_rem = rownames(obj@raw[grep('^mt', rownames(obj@raw)),]) #genes to remove : mithocondrial
+genes_to_rem = rownames(obj@raw[grep('^mt', rownames(obj@raw)),]) 
 obj@raw = obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
 cells_to_rem = colnames(obj@raw[which(colSums(obj@raw) == 0)])
 obj@raw = obj@raw[,!colnames(obj@raw) %in% cells_to_rem]
@@ -84,9 +96,8 @@ n_cells = length(colnames(obj@raw))
 print(paste("n cells", n_cells, sep = " "))
 
 n_it = 1
-
-#obj@raw = obj@raw[rownames(cells), colnames(cells)]
 ```
+
 ## Data cleaning
 First we create the directory to store all information regardin the data cleaning.
 ```{r}
@@ -140,6 +151,39 @@ obj = ttm$object
 ttm$pca.cell.2
 
 ```
+```{r echo=FALSE}
+pdf(paste(out_dir,"cleaning/",t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = ""))
+ttm$pca.cell.2
+ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
+  geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ), aes(n,means,label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
+                  nudge_y      = 0.05,
+                  nudge_x      = 0.05,
+                  direction    = "x",
+                  angle        = 90,
+                  vjust        = 0,
+                  segment.size = 0.2)+
+  ggtitle("B cell group genes mean expression")+my_theme +
+  theme(plot.title = element_text(color = "#3C5488FF", size = 20, face = "italic",vjust = - 5,hjust = 0.02 ))
+dev.off()
+
+if (length(ttm$cl1) < length(ttm$cl2)) {
+  to_rem = ttm$cl1
+}else{
+  to_rem = ttm$cl2
+}
+n_it = n_it+1
+obj@raw = obj@raw[,!colnames(obj@raw) %in% to_rem]
+#obj@raw = obj@raw[rownames(obj@raw) %in% rownames(cells),colnames(obj@raw) %in% colnames(cells)]
+gc()
+
+ttm = clean(obj)
+#ttm = clean.sqrt(obj, cells)
+obj = ttm$object
+
+ttm$pca.cell.2
+
+```
+
 
 Run this only in the last iteration, instead the previus code, when B cells group has not to be removed
 ```{r}
@@ -159,6 +203,7 @@ ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
 
 dev.off()
 ```
+
 To color the pca based on nu_j (so the cells' efficiency)
 
 ```{r}
@@ -168,7 +213,7 @@ plot.nu <-ggplot(ttm$pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
 
 plot.nu = plot.nu + geom_point(size = 1,alpha= 0.8)+
   scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
-                        midpoint = log(mean(nu_est)),name = TeX(" $ln (\\nu) $ "))+
+                        midpoint = log(mean(nu_est)),name = "ln(nu)")+
   ggtitle("Cells PCA coloured by cells efficiency") +
   my_theme +  theme(plot.title = element_text(color = "#3C5488FF", size = 20),
                     legend.title=element_text(color = "#3C5488FF", size = 14,face = "italic"),
@@ -182,6 +227,7 @@ dev.off()
 
 plot.nu
 ```
+
 The next part is use to remove the cells with efficiency too low.
 ```{r}
 nu_df = data.frame("nu"= sort(obj@nu), "n"=c(1:length(obj@nu)))
@@ -210,6 +256,7 @@ dev.off()
 
 plot.ude
 ```
+
 We also save the defined treshold in the metadata and re run the estimation
 ```{r}
 obj@meta[(nrow(obj@meta)+1),1:2] = c("Threshold low UDE cells:",yset)
@@ -242,7 +289,7 @@ nu_est = round(obj@nu, digits = 7)
 plot.nu <-ggplot(ttm$pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
 plot.nu = plot.nu + geom_point(size = 2,alpha= 0.8)+
   scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
-                        midpoint = log(mean(nu_est)),name = TeX(" $ln (\\nu) $ "))+
+                        midpoint = log(mean(nu_est)),name = "ln(nu)")+
   ggtitle("Cells PCA coloured by cells efficiency: last") +
   my_theme +  theme(plot.title = element_text(color = "#3C5488FF", size = 20),
                     legend.title=element_text(color = "#3C5488FF", size = 14,face = "italic"),
@@ -256,7 +303,10 @@ dev.off()
 
 plot.nu
 ```
-COTAN analysis: in this part all the contingency tables are computed and used to get the statistics (S)
+
+## COTAN analysis
+
+In this part all the contingency tables are computed and used to get the statistics (S)
 To storage efficincy of all the observed tables only the yes_yes is stored. 
 Note that if will be necessary re-coputing the yes-yes table, the yes-yes table should be cancelled before running cotan_analysis.
 
@@ -273,9 +323,9 @@ obj = get.coex(obj)
 saveRDS(obj,file = paste(out_dir,t,".cotan.RDS", sep = ""))
 ```
 
-## Analysis of the elaborated data
+# Analysis of the elaborated data
 
-### GDI
+## GDI
 
 The next function can directly plot the GDI for the dataset with the 1.5 threshold (in red) and the two higher quantiles (in blue). 
 
@@ -289,6 +339,7 @@ quant.p = get.GDI(obj)
 
 head(quant.p)
 ```
+
 In the third column of this dataframe is reported the percentage of cells expressing the gene.
 
 ```{r echo=TRUE}
@@ -342,7 +393,7 @@ GDI_plot
 ```
 
 
-### Heatmaps
+## Heatmaps
 
 For the Gene Pair Analysis, we can plot an heatmap with the coex values between two genes sets.
 To do so we need to define, in a list, the different gene sets (list.genes). Then in the function parameter sets we can decide which sets need to be considered (in the example from 1 to 3). In the condition parameter we should insert an array with each file name prefix to be considered (in the example, the file names is "E17.5_cortex").
@@ -351,17 +402,299 @@ To do so we need to define, in a list, the different gene sets (list.genes). The
 ```{r}
 list.genes = list("Ref.col"= PNGs, "NPGs"=NPGs, "Const."=hk )
 
-plot.heatmap(df_genes = list.genes,sets = c(1:3),conditions = "E17.5_cortex",dir = "../data/")
+plot.heatmap(df_genes = list.genes,sets = c(1:3),conditions = "E17.5_cortex",dir = "../inst/extdata/")
 ```
 
 We can also plot a general heatmap of coex values based on some markers like the following one.
 
 ```{r}
-plot.general.heatmap(prim.markers = PNGs, condition = "E17.5_cortex",dir = "../data/", p_value = 0.0001)
+plot.general.heatmap(prim.markers = PNGs, condition = "E17.5_cortex",dir = "../inst/extdata/", p_value = 0.0001)
+```
+
+## Gene clustering
+
+```{r}
+layers = list("L1"=c("Reln","Lhx5"), "L2/3"=c("Satb2","Cux1"), "L4"=c("Rorb","Sox5") , "L5/6"=c("Bcl11b","Fezf2") , "Prog"=c("Vim","Hes1"))
+
+g.space = get.gene.coexpression.space(obj, 
+                                      n.genes.for.marker = 28,#25  
+                                      primary.markers = unlist(layers))
+```
+```{r}
+g.space = as.data.frame(as.matrix(g.space))
+
+coex.pca.genes <- prcomp(t(g.space),
+                 center = TRUE,
+                 scale. = F) 
+
+fviz_eig(coex.pca.genes, addlabels=TRUE,ncp = 10)
+#fviz_eig(coex.pca.genes, choice = "eigenvalue", addlabels=TRUE)
+```
+
+Hierarchical clustering
+
+```{r}
+
+# clustering usign Ward method
+hc.norm = hclust(dist(g.space), method = "ward.D2")
+
+# and cut the tree into 5 clusters (for example)
+cut = cutree(hc.norm, k = 7, order_clusters_as_data = F)
+
+# It crates the tree
+dend <- as.dendrogram(hc.norm)
+
+# I can use a dataframe from the pca to store some data regarding the clustering
+pca_1 = as.data.frame(coex.pca.genes$rotation[,1:5])
+pca_1 = pca_1[order.dendrogram(dend),]
+
+
+mycolours <- c("genes related to L5/6" = "#3C5488FF","genes related to L2/3"="#F39B7FFF","genes related to Prog"="#4DBBD5FF","genes related to L1"="#E64B35FF","genes related to L4" = "#91D1C2FF", "not marked"="#B09C85FF")
+
+# save the cluster number into the dataframe
+pca_1$hclust = cut
+
+dend =branches_color(dend,k=7,col=c("#4DBBD5FF","#91D1C2FF","#F39B7FFF","#E64B35FF","#3C5488FF","#91D1C2FF","#B09C85FF" ),groupLabels = T)
+#dend =color_labels(dend,k=5,labels = rownames(pca_1),col=pca_1$colors)
+
+
+
+# plot the dendrogram with all anmes for secondary markers
+dend %>%
+  set("labels", ifelse(labels(dend) %in% rownames(pca_1)[rownames(pca_1) %in% colnames(as.matrix(g.space))], labels(dend), "")) %>%
+  #  set("branches_k_color", value = c("gray80","#4DBBD5FF","#91D1C2FF" ,"gray80","#F39B7FFF","#E64B35FF","#3C5488FF"), k = 7) %>%
+ plot(horiz=F, axes=T)#,ylim = c(0,80))
+
+```
+
+or just with primary markers
+
+```{r fig.width= 10}
+
+dend %>%
+set("labels", ifelse(labels(dend) %in% rownames(pca_1)[rownames(pca_1) %in% unlist(layers)], labels(dend), "")) %>%
+  set("branches_k_color", value = c("gray80","#4DBBD5FF","#91D1C2FF" ,"gray80","#F39B7FFF","#E64B35FF","#3C5488FF"), k = 7) %>%
+plot(horiz=F, axes=T,ylim = c(0,100))
+
+```
+
+Now we can plot the PCA
+```{r}
+# some more genes as landmarks
+controls =list("genes related to L5/6"=c("Foxp2","Tbr1"), "genes related to L2/3"=c("Mef2c"), "genes related to Prog"=c("Nes","Sox2") , "genes related to L1"=c() , "genes related to L4"=c()) 
+
+# dataframe to be able to label only primary markers and control genes
+textdf <- pca_1[rownames(pca_1) %in% c(unlist(layers),unlist(controls)) , ]
+
+ for (m in c(1:length(controls))) {
+  for (g in controls[[m]]) {
+    if(g %in% rownames(textdf)){
+      textdf[g,"highlight"] = names(controls[m])
+    } 
+  }
+}
+
+# deciding the colors
+mycolours <- c("genes related to L5/6" = "#3C5488FF","genes related to L2/3"="#F39B7FFF","genes related to Prog"="#4DBBD5FF","genes related to L1"="#E64B35FF","genes related to L4" = "#91D1C2FF", "not marked"="#B09C85FF")
+
+# to assing correcly the cluster number and the color
+mycolours2 = c("Reln","Satb2","Rorb","Bcl11b","Vim")
+names(mycolours2) = unique(cut[unlist(layers)])
+
+mycolours2[mycolours2 == "Reln"] = "#E64B35FF"
+mycolours2[mycolours2 == "Satb2"] = "#F39B7FFF"
+mycolours2[mycolours2 == "Rorb"] = "#91D1C2FF"
+mycolours2[mycolours2 == "Bcl11b"] = "#3C5488FF"
+mycolours2[mycolours2 == "Vim"] = "#4DBBD5FF"
+color_to_add = unique(pca_1$hclust)[!unique(pca_1$hclust) %in% as.numeric(names(mycolours2))]
+names(color_to_add) = unique(pca_1$hclust)[!unique(pca_1$hclust) %in% as.numeric(names(mycolours2))]
+color_to_add[color_to_add %in% 
+                 unique(pca_1$hclust)[!unique(pca_1$hclust) %in% as.numeric(names(mycolours2))]] = "#B09C85FF"
+mycolours2 = c(mycolours2,color_to_add)
+
+pca1 = ggplot(subset(pca_1,!hclust %in% unique(cut[unlist(layers)])  ), aes(x=PC1, y=PC2)) +  geom_point(alpha = 0.3,color = "#B09C85FF",size=1)
+
+#pca2 = pca1 + geom_point(data = subset(pca_1, highlight != "not marked" ), aes(x=PC1, y=PC2, colour=hclust),size=2.5,alpha = 0.9) 
+pca2 = pca1 + geom_point(data = subset(pca_1, hclust %in% unique(cut[unlist(layers)]) ), aes(x=PC1, y=PC2, colour=as.character(hclust)),size=1,alpha = 0.5) + 
+ scale_color_manual( "Status", values = mycolours2)  +
+  scale_fill_manual( "Status", values = mycolours2)  +
+  xlab("") + ylab("") +
+  geom_label_repel(data =textdf , aes(x = PC1, y = PC2, label = rownames(textdf),fill=as.character(hclust)),
+                   label.size = NA, 
+                   alpha = 0.5, 
+                   direction = "both",
+                   na.rm=TRUE,
+                   seed = 1234) +
+  geom_label_repel(data =textdf , aes(x = PC1, y = PC2, label = rownames(textdf)),
+                   label.size = NA, 
+                   segment.color = 'black',
+                   segment.size = 0.5,
+                   direction = "both",
+                   alpha = 1, 
+                   na.rm=TRUE,
+                   fill = NA,
+                   seed = 1234) +
+  ggtitle("PCA") +
+  theme_light(base_size=10) +
+    theme(axis.text.x=element_blank(),plot.title = element_text(size=14, 
+                                    face="italic", 
+                                    color="#3C5488FF",
+                                    hjust=0.01,
+                                    lineheight=1.2,margin = margin(t = 5, b = -15)),
+        axis.text.y=element_blank(),
+        legend.position = "none")  # titl)
+
+pca2 #+ geom_encircle(data = pca_1, aes(group=hclust)) 
+```
+
+t-SNE code and plot
+
+```{r}
+# run the t-SNE
+cl.genes.tsne = Rtsne(g.space ,initial_dims = 100, dims = 2, perplexity=30,eta = 200, verbose=F, max_iter = 3000,theta=0.4,num_threads = 10,pca_center = T, pca_scale = FALSE, normalize = T )
+
+d_tsne_1 = as.data.frame(cl.genes.tsne$Y)
+rownames(d_tsne_1) = rownames(g.space)
+
+d_tsne_1 = d_tsne_1[order.dendrogram(dend),]
+
+# save the cluster numebr inside a dataframe with the t-SNE information
+d_tsne_1$hclust = cut
+
+d_tsne_1$names = rownames(d_tsne_1)
+
+# as before to label only some genes
+textdf <- d_tsne_1[rownames(d_tsne_1) %in% c(unlist(layers),unlist(controls)),]
+
+for (m in c(1:length(controls))) {
+  for (g in controls[[m]]) {
+    if(g %in% rownames(textdf)){
+      textdf[g,"highlight"] = names(controls[m])
+    } 
+  }
+}
+
+
+ p1 = ggplot(subset(d_tsne_1,!hclust %in% unique(cut[unlist(layers)])), aes(x=V1, y=V2)) +  geom_point(alpha = 0.3, color = "#B09C85FF", size=1)
+
+p2 = p1 + geom_point(data = subset(d_tsne_1, hclust %in% unique(cut[unlist(layers)]) ), aes(x=V1, y=V2, colour=as.character(hclust)),size=1,alpha = 0.5) +
+    scale_color_manual("Status", values = mycolours2)  +
+  scale_fill_manual("Status", values = mycolours2)  +
+  xlab("") + ylab("")+
+  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = names,fill=as.character(hclust)),
+                   label.size = NA, 
+                   alpha = 0.5, 
+                   direction = "both",
+                   na.rm=TRUE,
+                   seed = 1234) +
+  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = names),
+                   label.size = NA, 
+                   segment.color = 'black',
+                   segment.size = 0.5,
+                   direction = "both",
+                   alpha = 1, 
+                   na.rm=TRUE,
+                   fill = NA,
+                   seed = 1234) +
+  ggtitle("t-SNE") +
+  theme_light(base_size=10) +
+  theme(axis.text.x=element_blank(),plot.title = element_text(size=14, 
+                                    face="italic", 
+                                    color="#3C5488FF",
+                                    hjust=0.01,
+                                    lineheight=1.2,margin = margin(t = 5, b = -15)),
+        axis.text.y=element_blank(),
+        legend.position = "none")  # titl)
+p2
+```
+
+Code to create an iteractive plot. This can be modified to be used with all the plots.
+
+```{r echo=TRUE}
+
+p = ggplot(d_tsne_1, aes(x=V1, y=V2, text= paste("gene: ",names))) +  
+  geom_point(size=2, aes(colour=as.character(hclust)), alpha=0.8) +
+  scale_color_manual("Status", values = mycolours2)  +
+  xlab("") + ylab("") +
+  ggtitle("t-SNE") +
+  theme_light(base_size=10) +
+  theme(axis.text.x=element_blank(),
+        axis.text.y=element_blank())
+
+ggplotly(p)
+```
+
+Multidimensional scaling (MDS) and plot
+```{r}
+# run the MDS
+genes.dist.euc =  dist(g.space, method =  "euclidean")
+#fit <- isoMDS(genes.dist.euc) # not linear
+fit <- isoMDS(genes.dist.euc)
+
+fit.genes = as.data.frame(fit$points)
+
+fit.genes = fit.genes[order.dendrogram(dend),]
+
+fit.genes$hclust = cut
+
+
+fit.genes$names = rownames(fit.genes)
+
+mycolours3 <- c("cluster L5/6 markers" = "#3C5488FF","cluster L2/3 markers"="#F39B7FFF","cluster Prog markers"="#4DBBD5FF","cluster L1 markers"="#E64B35FF","cluster L4 markers" = "#91D1C2FF", "not identified cluster"="#B09C85FF")
+
+#fit.genes$hclust = factor(cutree(hc.norm, 7))
+used = vector()
+for (k in c(1:length(layers))) {
+  #print(k)
+  tt =as.numeric(cut[layers[[k]]][1])
+  fit.genes[fit.genes$hclust == tt,"cluster"] = paste("cluster",names(layers[k]),"markers", sep = " " )
+  used = c(used,cut[layers[[k]]][1])
+}
+
+fit.genes[fit.genes$hclust %in% (unique(fit.genes$hclust)[!unique(fit.genes$hclust) %in% used]),]$cluster = "not identified cluster"
+
+textdf <- fit.genes[rownames(fit.genes) %in% c(unlist(layers),unlist(controls)),]
+
+   f1 = ggplot(subset(fit.genes,!hclust %in% unique(cut[unlist(layers)]) ), aes(x=V1, y=V2)) +  geom_point(alpha = 0.3, color = "#B09C85FF", size=1)
+
+f2 = f1 + geom_point(data = subset(fit.genes, hclust %in% unique(cut[unlist(layers)]) ), 
+                     aes(x=V1, y=V2, colour=cluster), size=1,alpha = 0.5) +
+  scale_color_manual("Status", values = mycolours3)  +
+  scale_fill_manual("Status", values = mycolours3)  + 
+  xlab("") + ylab("")+
+  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = rownames(textdf),fill=cluster),
+                   label.size = NA, 
+                   alpha = 0.5, 
+                   direction ="both",
+                   na.rm=TRUE,
+                   seed = 1234, show.legend = FALSE) +
+  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = rownames(textdf)),
+                   label.size = NA, 
+                   segment.color = 'black',
+                   segment.size = 0.5,
+                   direction = "both",
+                   alpha = 1, 
+                   na.rm=TRUE,
+                   fill = NA,
+                   seed = 1234, show.legend = FALSE) +
+  ggtitle("MDS") +
+  theme_light(base_size=10) +
+  theme(axis.text.x=element_blank(),plot.title = element_text(size=14, 
+                                    face="italic", 
+                                    color="#3C5488FF",
+                                    hjust=0.01,
+                                    lineheight=1.2,margin = margin(t = 5, b = -15)),
+        axis.text.y=element_blank(),
+        legend.title = element_blank(),
+        legend.text = element_text(color = "#3C5488FF",face ="italic" ),
+        legend.position = "bottom")  # titl)
+
+
+f2 #+ geom_encircle(data = fit.genes, aes(group=`5_clusters`)) 
 ```
 
 
-### Get data tables
+## Get data tables
 
 Sometimes we can also be interested in the numbers present directly in the contingency tables for two specific genes. To get them we can use two functions:
 
@@ -375,7 +708,14 @@ get.observed.ct(object = obj, g1 = "Cux1",g2 = "Dcx")
 get.expected.ct(object = obj, g1 = "Cux1",g2 = "Dcx")
 ```
 
+The next few lines are just to clean after compilation of the documentation.
 ```{r}
+if (file.exists(paste(out_dir,t,".cotan.RDS", sep = ""))) {
+  #Delete file if it exists
+  file.remove(paste(out_dir,t,".cotan.RDS", sep = ""))
+}
+unlink(paste(out_dir,"cleaning", sep = ""),recursive = T)
+
 print(sessionInfo())
 ```
 

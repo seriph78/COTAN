@@ -40,6 +40,8 @@ Define my COTAN structure
 }}
 
 \examples{
-obj = new("scCOTAN",raw=read.csv("tests/testthat/raw.csv", header = T,row.names = 1 )) # with raw the raw data matrix with cells on colums and genes on rows
+file = "tests/testthat/raw.csv"
+obj = new("scCOTAN",raw=read.csv(file, header = T,row.names = 1 ))
+
 
 }

@@ -23,3 +23,20 @@ a ggplot object
 \description{
 This is the function that create the heatmap of one or more COTAN object.
 }
+\examples{
+\dontrun{
+# some genes
+primary.markers = c("Tbr1","Tubb3","Neurod1", "Stmn1","Notch1","Vim","Sox2","Pax6","Hes5")
+a example of named list of different gene set
+gene.sets.list = list("primary.markers"=primary.markers,
+                   "2.Radial Glia" = c("Vim","Sox2","Pax6","Hes5","Hes1","Fabp7"),
+                   "PNGs"=c("Map2","Tubb3","Neurod1","Nefm","Nefl","Dcx","Tbr1"),
+                   "constitutive" = c("Calm1","Cox6b1","Ppia","Rpl18","Cox7c",
+                                      "Erh","H3f3a","Taf1b","Taf2",
+                                      "Gapdh","Actb", "Golph3", "Mtmr12",
+                                      "Zfr", "Sub1", "Tars", "Amacr"),
+                   "4.Mat.neu."= c("Map2","Rbfox3","Nefl","Nefh","Nefm","Mapt"))
+plot.heatmap(p_v = 0.05, df_genes =gene.sets.list ,
+sets =c(2,3,4,6) ,conditions =c("E11.5","E13.5","E14.5") ,dir = input_dir)
+}
+}

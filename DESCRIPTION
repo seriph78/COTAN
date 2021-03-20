@@ -27,26 +27,29 @@ Imports:
     data.table,
     parallel,
     tibble,
-    dplyr,
     tidyr,
     basilisk,
     reticulate,
     ComplexHeatmap,
-    latex2exp
+    circlize,
+    grid
 Suggests: 
     testthat (>= 3.0.0),
     spelling,
     knitr,
     rmarkdown,
-    data.table,
     R.utils,
-    Matrix,
     dendextend,
     Rtsne,
     plotly,
     tidyverse,
     htmlwidgets,
-    MASS
+    MASS,
+    factoextra,
+    Rtsne,
+    plotly,
+    htmlwidgets,
+    dendextend
 Config/testthat/edition: 3
 SystemRequirements: 
     python

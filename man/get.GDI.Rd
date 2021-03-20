@@ -8,6 +8,9 @@ get.GDI(object, type = "S")
 }
 \arguments{
 \item{object}{A COTAN object}
+
+\item{type}{Type of statistic to be used. Deafult is "S":
+Pearson's chi-squared test statistics. "G" is G-test statistics}
 }
 \value{
 A dataframe

@@ -23,6 +23,7 @@ It starts to fill some fields of cotan object.
 }
 \examples{
 obj = new("scCOTAN",raw=read.csv("tests/testthat/raw.csv", header = T,row.names = 1 ))
-obj = initRaw(obj,GEO="GSE95315" ,sc.method="10X",cond = "mouse dentate gyrus P0 subclustering of cl.2 - 0,1,2")
+obj = initRaw(obj,GEO="GSE95315" ,
+sc.method="10X",cond = "mouse dentate gyrus P0 subclustering of cl.2 - 0,1,2")
 
 }

@@ -4,7 +4,15 @@
 \alias{automatic.COTAN.object.creation}
 \title{automatic.COTAN.object.creation}
 \usage{
-automatic.COTAN.object.creation(df, out_dir, GEO, sc.method, cond, mt = FALSE)
+automatic.COTAN.object.creation(
+  df,
+  out_dir,
+  GEO,
+  sc.method,
+  cond,
+  mt = FALSE,
+  mt_prefix = "^mt"
+)
 }
 \arguments{
 \item{df}{dataframe with the row counts}
@@ -25,4 +33,13 @@ It return the COTAN object. It will also store it direcly in the outpu directory
 }
 \description{
 automatic.COTAN.object.creation
+}
+\examples{
+\dontrun{
+obj = automatic.COTAN.object.creation(df=read.csv("/tests/testthat/raw.csv",header = T, row.names = 1),
+out_dir = "/tests/testthat/",
+GEO = "test_GOE",
+sc.method = "test_method",
+cond = "test")
+}
 }

@@ -26,5 +26,6 @@ In this case we denote it as local differentiation index (LDI) relative to V.
 }
 \examples{
 obj = readRDS("../data/ERCC.cotan.RDS")
-df = get.gene.coexpression.space(obj, n.genes.for.marker = 10, primary.markers=c("HLA-DMB","HLA-DPA1","S100A6","S100A8"))
+df = get.gene.coexpression.space(obj, n.genes.for.marker = 10,
+primary.markers=c("HLA-DMB","HLA-DPA1","S100A6","S100A8"))
 }

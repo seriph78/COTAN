@@ -8,6 +8,8 @@ cotan_analysis(object, cores = 11)
 }
 \arguments{
 \item{object}{A COTAN object}
+
+\item{cores}{number of cores to use. Default is 11.}
 }
 \value{
 a COTAN object
