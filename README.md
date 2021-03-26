@@ -3,7 +3,7 @@ Estimating co-expression of cell identity factors in single-cell transcriptomes 
 
 Some examples on real datasets can be found at https://seriph78.github.io/Cotan_paper/index.html
 
-This current version can be installed ar R package usign devtools. Currently the installation was tested on Linux, Windows and Mac but there is one muticore function (mclapply) that is not supported under Windows so there can be some problems.
+This current version can be installed as R package using devtools. Currently the installation was tested on Linux, Windows and Mac but there is one multicore function (mclapply) that is not supported under Windows so there can be some problems.
 
 ## Installation
 
