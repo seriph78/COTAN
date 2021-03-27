@@ -318,7 +318,7 @@ head(quant.p)
 
 In the third column of this dataframe is reported the percentage of cells expressing the gene.
 
-Next we can define some gene sets (in this case three) that we want to specifically lable in the GDI plot.
+Next we can define some gene sets (in this case three) that we want to specifically label in the GDI plot.
 
 ```{r echo=TRUE}
 AA=c("ERCC-00012","ERCC-00013","ERCC-00014") 

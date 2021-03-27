@@ -354,13 +354,13 @@ setMethod("get.coex","scCOTAN",
 #'
 #' This function computes the p-values for genes in the COTAN object. It can be used genome-wide
 #' or setting some specific genes of interest. By default it computes the p-values using the S
-#' statistics (\eqn{\Chi^2})
+#' statistics (\eqn{\chi^{2}})
 #' @param object a COTAN object
 #' @param gene.set.col an array of genes. It will be put in columns.
 #' If left empty the function will do it genome-wide.
 #' @param gene.set.row an array of genes. It will be put in rows.
 #' If left empty the function will do it genome-wide.
-#' @param type_stat By default it computes the S (\eqn{\Chi^{2}})
+#' @param type_stat By default it computes the S (\eqn{\chi^{2}})
 #'
 #' @return a p-value matrix
 #' @export

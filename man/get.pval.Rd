@@ -18,7 +18,7 @@ If left empty the function will do it genome-wide.}
 \item{gene.set.row}{an array of genes. It will be put in rows.
 If left empty the function will do it genome-wide.}
 
-\item{type_stat}{By default it computes the S (\eqn{\Chi^{2}})}
+\item{type_stat}{By default it computes the S (\eqn{\chi^{2}})}
 }
 \value{
 a p-value matrix
@@ -26,7 +26,7 @@ a p-value matrix
 \description{
 This function computes the p-values for genes in the COTAN object. It can be used genome-wide
 or setting some specific genes of interest. By default it computes the p-values using the S
-statistics (\eqn{\Chi^2})
+statistics (\eqn{\chi^{2}})
 }
 \examples{
 \dontrun{
