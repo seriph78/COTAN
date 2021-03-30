@@ -2,7 +2,7 @@
 title: "Guided tutorial"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Guided_tutorial}
+  %\VignetteIndexEntry{Guided tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   fig.width = 7,
   fig.height = 7
 )
-options(rmarkdown.html_vignette.check_title = FALSE)
+#options(rmarkdown.html_vignette.check_title = FALSE)
 ```
 
 ```{r setup}
@@ -52,33 +52,39 @@ if (!file.exists(paste("inst/extdata/","E175_only_cortical_cells.txt.gz", sep = 
 }
 ```
 
+This is just an example on a toy dataset. If the user want to try on a real dataset it can be used the previous command to download it and the next commented line to use it as input data.
+There are also available online many other examples at [link](https://seriph78.github.io/Cotan_paper/index.html).
+
 ```{r}
-data = as.data.frame(fread(system.file("extdata", "E175_only_cortical_cells.txt.gz", 
-                                       package = "COTAN", mustWork = TRUE),
-                           sep = "\t"))
+#data = as.data.frame(fread(system.file("extdata", "E175_only_cortical_cells.txt.gz", 
+                                       #package = "COTAN", mustWork = TRUE),sep = "\t"))
+data = as.data.frame(fread(system.file("extdata", "ercc.csv", 
+                                       package = "COTAN", mustWork = TRUE),sep = ","))
+
 data = as.data.frame(data)
 rownames(data) = data$V1
 data = data[,2:ncol(data)]
 data[1:5,1:5]
 ```
 
-Define a directory where the ouput will be stored.
+Define a directory where the output will be stored.
 ```{r}
 out_dir = "../inst/extdata/"
 ```
 
-# Analitical pipeline
+# Analytical pipeline
 
 Inizialise the COTAN object with the row count table and the metadata for the experiment.
 
 ```{r}
 obj = new("scCOTAN",raw = data)
-obj = initRaw(obj,GEO="GSM2861514" ,sc.method="Drop_seq",cond = "mouse cortex E17.5")
+#obj = initRaw(obj,GEO="GSM2861514" ,sc.method="Drop_seq",cond = "mouse cortex E17.5")
+obj = initRaw(obj,GEO="ERCC" ,sc.method="10X",cond = "negative ERCC dataset")
 ```
 
 Now we can start the cleaning. Analysis requires and starts from a matrix of raw UMI counts after removing possible cell doublets or multiplets and low quality or dying cells (with too high mtRNA percentage, easily done with Seurat or other tools).
 
-If we do not want to consider the mithocondrial genes we can remove them before starting the analysis.
+If we do not want to consider the mitochondrial genes we can remove them before starting the analysis.
 ```{r}
 genes_to_rem = rownames(obj@raw[grep('^mt', rownames(obj@raw)),]) 
 obj@raw = obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
@@ -88,7 +94,8 @@ obj@raw = obj@raw[,!colnames(obj@raw) %in% cells_to_rem]
 We want also to define a prefix to identify the sample.
 
 ```{r}
-t = "E17.5_cortex"
+#t = "E17.5_cortex"
+t = "ERCC"
 
 print(paste("Condition ",t,sep = ""))
 #--------------------------------------
@@ -99,7 +106,7 @@ n_it = 1
 ```
 
 ## Data cleaning
-First we create the directory to store all information regardin the data cleaning.
+First we create the directory to store all information regarding the data cleaning.
 ```{r}
 if(!file.exists(out_dir)){
   dir.create(file.path(out_dir))
@@ -119,39 +126,7 @@ ttm$pca.cell.2
 ```
 
 Run this when B cells need to be removed.
-```{r}
-pdf(paste(out_dir,"cleaning/",t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = ""))
-ttm$pca.cell.2
-ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
-  geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ), aes(n,means,label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
-                  nudge_y      = 0.05,
-                  nudge_x      = 0.05,
-                  direction    = "x",
-                  angle        = 90,
-                  vjust        = 0,
-                  segment.size = 0.2)+
-  ggtitle("B cell group genes mean expression")+my_theme +
-  theme(plot.title = element_text(color = "#3C5488FF", size = 20, face = "italic",vjust = - 5,hjust = 0.02 ))
-dev.off()
-
-if (length(ttm$cl1) < length(ttm$cl2)) {
-  to_rem = ttm$cl1
-}else{
-  to_rem = ttm$cl2
-}
-n_it = n_it+1
-obj@raw = obj@raw[,!colnames(obj@raw) %in% to_rem]
-#obj@raw = obj@raw[rownames(obj@raw) %in% rownames(cells),colnames(obj@raw) %in% colnames(cells)]
-gc()
-
-ttm = clean(obj)
-#ttm = clean.sqrt(obj, cells)
-obj = ttm$object
-
-ttm$pca.cell.2
-
-```
-```{r echo=FALSE}
+```{r eval=FALSE, include=TRUE}
 pdf(paste(out_dir,"cleaning/",t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = ""))
 ttm$pca.cell.2
 ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
@@ -185,7 +160,8 @@ ttm$pca.cell.2
 ```
 
 
-Run this only in the last iteration, instead the previus code, when B cells group has not to be removed
+
+Run this only in the last iteration, instead the previous code, when B cells group has not to be removed
 ```{r}
 pdf(paste(out_dir,"cleaning/",t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = ""))
 ttm$pca.cell.2
@@ -238,9 +214,9 @@ ggplot(nu_df, aes(x = n, y=nu)) +
 
 ```
 
-We can zoom on the smalest values and, if we detect a clear elbow, we can decide to remove the cells.
+We can zoom on the smallest values and, if we detect a clear elbow, we can decide to remove the cells.
 ```{r}
-yset = 0.38#threshold to remove low UDE cells
+yset = 0.4#threshold to remove low UDE cells
 plot.ude <- ggplot(nu_df, aes(x = n, y=nu)) + 
     geom_point(colour = "#8491B4B2", size=1) + 
     my_theme + ylim(0,1) + xlim(0,400) +
@@ -257,7 +233,7 @@ dev.off()
 plot.ude
 ```
 
-We also save the defined treshold in the metadata and re run the estimation
+We also save the defined threshold in the metadata and re run the estimation
 ```{r}
 obj@meta[(nrow(obj@meta)+1),1:2] = c("Threshold low UDE cells:",yset)
 
@@ -307,12 +283,12 @@ plot.nu
 ## COTAN analysis
 
 In this part all the contingency tables are computed and used to get the statistics (S)
-To storage efficincy of all the observed tables only the yes_yes is stored. 
-Note that if will be necessary re-coputing the yes-yes table, the yes-yes table should be cancelled before running cotan_analysis.
+To storage efficiency of all the observed tables only the yes_yes is stored. 
+Note that if will be necessary re-computing the yes-yes table, the yes-yes table should be cancelled before running cotan_analysis.
 
 ```{r}
 # obj@yes_yes = c()
-obj = cotan_analysis(obj)
+obj = cotan_analysis(obj,cores = 2)
 ```
 
 COEX evaluation and storing 
@@ -330,10 +306,10 @@ saveRDS(obj,file = paste(out_dir,t,".cotan.RDS", sep = ""))
 The next function can directly plot the GDI for the dataset with the 1.5 threshold (in red) and the two higher quantiles (in blue). 
 
 ```{r}
-plot.GDI(obj, cond = "E17.5")
+plot_GDI(obj, cond = "ERCC")
 ```
 
-If a more complex plot is needed, or if we want to analize mor in detail the GDI data, we can get direcly the GDI dataframe. 
+If a more complex plot is needed, or if we want to analyze more in detail the GDI data, we can get directly the GDI dataframe. 
 ```{r echo=TRUE}
 quant.p = get.GDI(obj)
 
@@ -342,19 +318,21 @@ head(quant.p)
 
 In the third column of this dataframe is reported the percentage of cells expressing the gene.
 
+Next we can define some gene sets (in this case three) that we want to specifically lable in the GDI plot.
+
 ```{r echo=TRUE}
-NPGs=c("Nes","Vim","Sox2","Sox1","Notch1", "Hes1","Hes5","Pax6") #,"Hes3"
-PNGs=c("Map2","Tubb3","Neurod1","Nefm","Nefl","Dcx","Tbr1")
-hk=c("Calm1","Cox6b1","Ppia","Rpl18","Cox7c","Erh","H3f3a","Taf1b","Taf2","Gapdh","Actb","Golph3", "Mtmr12", "Zfr", "Sub1", "Tars", "Amacr")
+AA=c("ERCC-00012","ERCC-00013","ERCC-00014") 
+BB=c("ERCC-00016","ERCC-00017","ERCC-00019")
+CC=c("ERCC-00022","ERCC-00024","ERCC-00028")
 
 text.size = 12
 
-quant.p$highlight = with(quant.p, ifelse(rownames(quant.p) %in% NPGs, "NPGs",
-                                                 ifelse(rownames(quant.p) %in% hk,"Constitutive" ,
-                                                               ifelse(rownames(quant.p) %in% PNGs,"PNGs" , "normal"))))
+quant.p$highlight = with(quant.p, ifelse(rownames(quant.p) %in% AA, "AA",
+                                                 ifelse(rownames(quant.p) %in% CC,"Constitutive" ,
+                                                               ifelse(rownames(quant.p) %in% BB,"BB" , "normal"))))
 
-textdf <- quant.p[rownames(quant.p) %in% c(NPGs,hk,PNGs), ]
-mycolours <- c("Constitutive" = "#00A087FF","NPGs"="#E64B35FF","PNGs"="#F39B7FFF","normal" = "#8491B4B2")
+textdf <- quant.p[rownames(quant.p) %in% c(AA,CC,BB), ]
+mycolours <- c("Con" = "#00A087FF","AA"="#E64B35FF","BB"="#F39B7FFF","normal" = "#8491B4B2")
 f1 = ggplot(subset(quant.p,highlight == "normal" ), aes(x=sum.raw.norm, y=GDI)) +  geom_point(alpha = 0.1, color = "#8491B4B2", size=2.5)
 GDI_plot = f1 +  geom_point(data = subset(quant.p,highlight != "normal"  ), aes(x=sum.raw.norm, y=GDI, colour=highlight),size=2.5,alpha = 0.8) +
   geom_hline(yintercept=quantile(quant.p$GDI)[4], linetype="dashed", color = "darkblue") +
@@ -400,297 +378,15 @@ To do so we need to define, in a list, the different gene sets (list.genes). The
 
 
 ```{r}
-list.genes = list("Ref.col"= PNGs, "NPGs"=NPGs, "Const."=hk )
+list.genes = list("Ref.col"= BB, "AA"=AA, "Const."=CC )
 
-plot.heatmap(df_genes = list.genes,sets = c(1:3),conditions = "E17.5_cortex",dir = "../inst/extdata/")
+plot_heatmap(df_genes = list.genes,sets = c(1:3),conditions = "ERCC",dir = "../inst/extdata/")
 ```
 
 We can also plot a general heatmap of coex values based on some markers like the following one.
 
 ```{r}
-plot.general.heatmap(prim.markers = PNGs, condition = "E17.5_cortex",dir = "../inst/extdata/", p_value = 0.0001)
-```
-
-## Gene clustering
-
-```{r}
-layers = list("L1"=c("Reln","Lhx5"), "L2/3"=c("Satb2","Cux1"), "L4"=c("Rorb","Sox5") , "L5/6"=c("Bcl11b","Fezf2") , "Prog"=c("Vim","Hes1"))
-
-g.space = get.gene.coexpression.space(obj, 
-                                      n.genes.for.marker = 28,#25  
-                                      primary.markers = unlist(layers))
-```
-```{r}
-g.space = as.data.frame(as.matrix(g.space))
-
-coex.pca.genes <- prcomp(t(g.space),
-                 center = TRUE,
-                 scale. = F) 
-
-fviz_eig(coex.pca.genes, addlabels=TRUE,ncp = 10)
-#fviz_eig(coex.pca.genes, choice = "eigenvalue", addlabels=TRUE)
-```
-
-Hierarchical clustering
-
-```{r}
-
-# clustering usign Ward method
-hc.norm = hclust(dist(g.space), method = "ward.D2")
-
-# and cut the tree into 5 clusters (for example)
-cut = cutree(hc.norm, k = 7, order_clusters_as_data = F)
-
-# It crates the tree
-dend <- as.dendrogram(hc.norm)
-
-# I can use a dataframe from the pca to store some data regarding the clustering
-pca_1 = as.data.frame(coex.pca.genes$rotation[,1:5])
-pca_1 = pca_1[order.dendrogram(dend),]
-
-
-mycolours <- c("genes related to L5/6" = "#3C5488FF","genes related to L2/3"="#F39B7FFF","genes related to Prog"="#4DBBD5FF","genes related to L1"="#E64B35FF","genes related to L4" = "#91D1C2FF", "not marked"="#B09C85FF")
-
-# save the cluster number into the dataframe
-pca_1$hclust = cut
-
-dend =branches_color(dend,k=7,col=c("#4DBBD5FF","#91D1C2FF","#F39B7FFF","#E64B35FF","#3C5488FF","#91D1C2FF","#B09C85FF" ),groupLabels = T)
-#dend =color_labels(dend,k=5,labels = rownames(pca_1),col=pca_1$colors)
-
-
-
-# plot the dendrogram with all anmes for secondary markers
-dend %>%
-  set("labels", ifelse(labels(dend) %in% rownames(pca_1)[rownames(pca_1) %in% colnames(as.matrix(g.space))], labels(dend), "")) %>%
-  #  set("branches_k_color", value = c("gray80","#4DBBD5FF","#91D1C2FF" ,"gray80","#F39B7FFF","#E64B35FF","#3C5488FF"), k = 7) %>%
- plot(horiz=F, axes=T)#,ylim = c(0,80))
-
-```
-
-or just with primary markers
-
-```{r fig.width= 10}
-
-dend %>%
-set("labels", ifelse(labels(dend) %in% rownames(pca_1)[rownames(pca_1) %in% unlist(layers)], labels(dend), "")) %>%
-  set("branches_k_color", value = c("gray80","#4DBBD5FF","#91D1C2FF" ,"gray80","#F39B7FFF","#E64B35FF","#3C5488FF"), k = 7) %>%
-plot(horiz=F, axes=T,ylim = c(0,100))
-
-```
-
-Now we can plot the PCA
-```{r}
-# some more genes as landmarks
-controls =list("genes related to L5/6"=c("Foxp2","Tbr1"), "genes related to L2/3"=c("Mef2c"), "genes related to Prog"=c("Nes","Sox2") , "genes related to L1"=c() , "genes related to L4"=c()) 
-
-# dataframe to be able to label only primary markers and control genes
-textdf <- pca_1[rownames(pca_1) %in% c(unlist(layers),unlist(controls)) , ]
-
- for (m in c(1:length(controls))) {
-  for (g in controls[[m]]) {
-    if(g %in% rownames(textdf)){
-      textdf[g,"highlight"] = names(controls[m])
-    } 
-  }
-}
-
-# deciding the colors
-mycolours <- c("genes related to L5/6" = "#3C5488FF","genes related to L2/3"="#F39B7FFF","genes related to Prog"="#4DBBD5FF","genes related to L1"="#E64B35FF","genes related to L4" = "#91D1C2FF", "not marked"="#B09C85FF")
-
-# to assing correcly the cluster number and the color
-mycolours2 = c("Reln","Satb2","Rorb","Bcl11b","Vim")
-names(mycolours2) = unique(cut[unlist(layers)])
-
-mycolours2[mycolours2 == "Reln"] = "#E64B35FF"
-mycolours2[mycolours2 == "Satb2"] = "#F39B7FFF"
-mycolours2[mycolours2 == "Rorb"] = "#91D1C2FF"
-mycolours2[mycolours2 == "Bcl11b"] = "#3C5488FF"
-mycolours2[mycolours2 == "Vim"] = "#4DBBD5FF"
-color_to_add = unique(pca_1$hclust)[!unique(pca_1$hclust) %in% as.numeric(names(mycolours2))]
-names(color_to_add) = unique(pca_1$hclust)[!unique(pca_1$hclust) %in% as.numeric(names(mycolours2))]
-color_to_add[color_to_add %in% 
-                 unique(pca_1$hclust)[!unique(pca_1$hclust) %in% as.numeric(names(mycolours2))]] = "#B09C85FF"
-mycolours2 = c(mycolours2,color_to_add)
-
-pca1 = ggplot(subset(pca_1,!hclust %in% unique(cut[unlist(layers)])  ), aes(x=PC1, y=PC2)) +  geom_point(alpha = 0.3,color = "#B09C85FF",size=1)
-
-#pca2 = pca1 + geom_point(data = subset(pca_1, highlight != "not marked" ), aes(x=PC1, y=PC2, colour=hclust),size=2.5,alpha = 0.9) 
-pca2 = pca1 + geom_point(data = subset(pca_1, hclust %in% unique(cut[unlist(layers)]) ), aes(x=PC1, y=PC2, colour=as.character(hclust)),size=1,alpha = 0.5) + 
- scale_color_manual( "Status", values = mycolours2)  +
-  scale_fill_manual( "Status", values = mycolours2)  +
-  xlab("") + ylab("") +
-  geom_label_repel(data =textdf , aes(x = PC1, y = PC2, label = rownames(textdf),fill=as.character(hclust)),
-                   label.size = NA, 
-                   alpha = 0.5, 
-                   direction = "both",
-                   na.rm=TRUE,
-                   seed = 1234) +
-  geom_label_repel(data =textdf , aes(x = PC1, y = PC2, label = rownames(textdf)),
-                   label.size = NA, 
-                   segment.color = 'black',
-                   segment.size = 0.5,
-                   direction = "both",
-                   alpha = 1, 
-                   na.rm=TRUE,
-                   fill = NA,
-                   seed = 1234) +
-  ggtitle("PCA") +
-  theme_light(base_size=10) +
-    theme(axis.text.x=element_blank(),plot.title = element_text(size=14, 
-                                    face="italic", 
-                                    color="#3C5488FF",
-                                    hjust=0.01,
-                                    lineheight=1.2,margin = margin(t = 5, b = -15)),
-        axis.text.y=element_blank(),
-        legend.position = "none")  # titl)
-
-pca2 #+ geom_encircle(data = pca_1, aes(group=hclust)) 
-```
-
-t-SNE code and plot
-
-```{r}
-# run the t-SNE
-cl.genes.tsne = Rtsne(g.space ,initial_dims = 100, dims = 2, perplexity=30,eta = 200, verbose=F, max_iter = 3000,theta=0.4,num_threads = 10,pca_center = T, pca_scale = FALSE, normalize = T )
-
-d_tsne_1 = as.data.frame(cl.genes.tsne$Y)
-rownames(d_tsne_1) = rownames(g.space)
-
-d_tsne_1 = d_tsne_1[order.dendrogram(dend),]
-
-# save the cluster numebr inside a dataframe with the t-SNE information
-d_tsne_1$hclust = cut
-
-d_tsne_1$names = rownames(d_tsne_1)
-
-# as before to label only some genes
-textdf <- d_tsne_1[rownames(d_tsne_1) %in% c(unlist(layers),unlist(controls)),]
-
-for (m in c(1:length(controls))) {
-  for (g in controls[[m]]) {
-    if(g %in% rownames(textdf)){
-      textdf[g,"highlight"] = names(controls[m])
-    } 
-  }
-}
-
-
- p1 = ggplot(subset(d_tsne_1,!hclust %in% unique(cut[unlist(layers)])), aes(x=V1, y=V2)) +  geom_point(alpha = 0.3, color = "#B09C85FF", size=1)
-
-p2 = p1 + geom_point(data = subset(d_tsne_1, hclust %in% unique(cut[unlist(layers)]) ), aes(x=V1, y=V2, colour=as.character(hclust)),size=1,alpha = 0.5) +
-    scale_color_manual("Status", values = mycolours2)  +
-  scale_fill_manual("Status", values = mycolours2)  +
-  xlab("") + ylab("")+
-  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = names,fill=as.character(hclust)),
-                   label.size = NA, 
-                   alpha = 0.5, 
-                   direction = "both",
-                   na.rm=TRUE,
-                   seed = 1234) +
-  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = names),
-                   label.size = NA, 
-                   segment.color = 'black',
-                   segment.size = 0.5,
-                   direction = "both",
-                   alpha = 1, 
-                   na.rm=TRUE,
-                   fill = NA,
-                   seed = 1234) +
-  ggtitle("t-SNE") +
-  theme_light(base_size=10) +
-  theme(axis.text.x=element_blank(),plot.title = element_text(size=14, 
-                                    face="italic", 
-                                    color="#3C5488FF",
-                                    hjust=0.01,
-                                    lineheight=1.2,margin = margin(t = 5, b = -15)),
-        axis.text.y=element_blank(),
-        legend.position = "none")  # titl)
-p2
-```
-
-Code to create an iteractive plot. This can be modified to be used with all the plots.
-
-```{r echo=TRUE}
-
-p = ggplot(d_tsne_1, aes(x=V1, y=V2, text= paste("gene: ",names))) +  
-  geom_point(size=2, aes(colour=as.character(hclust)), alpha=0.8) +
-  scale_color_manual("Status", values = mycolours2)  +
-  xlab("") + ylab("") +
-  ggtitle("t-SNE") +
-  theme_light(base_size=10) +
-  theme(axis.text.x=element_blank(),
-        axis.text.y=element_blank())
-
-ggplotly(p)
-```
-
-Multidimensional scaling (MDS) and plot
-```{r}
-# run the MDS
-genes.dist.euc =  dist(g.space, method =  "euclidean")
-#fit <- isoMDS(genes.dist.euc) # not linear
-fit <- isoMDS(genes.dist.euc)
-
-fit.genes = as.data.frame(fit$points)
-
-fit.genes = fit.genes[order.dendrogram(dend),]
-
-fit.genes$hclust = cut
-
-
-fit.genes$names = rownames(fit.genes)
-
-mycolours3 <- c("cluster L5/6 markers" = "#3C5488FF","cluster L2/3 markers"="#F39B7FFF","cluster Prog markers"="#4DBBD5FF","cluster L1 markers"="#E64B35FF","cluster L4 markers" = "#91D1C2FF", "not identified cluster"="#B09C85FF")
-
-#fit.genes$hclust = factor(cutree(hc.norm, 7))
-used = vector()
-for (k in c(1:length(layers))) {
-  #print(k)
-  tt =as.numeric(cut[layers[[k]]][1])
-  fit.genes[fit.genes$hclust == tt,"cluster"] = paste("cluster",names(layers[k]),"markers", sep = " " )
-  used = c(used,cut[layers[[k]]][1])
-}
-
-fit.genes[fit.genes$hclust %in% (unique(fit.genes$hclust)[!unique(fit.genes$hclust) %in% used]),]$cluster = "not identified cluster"
-
-textdf <- fit.genes[rownames(fit.genes) %in% c(unlist(layers),unlist(controls)),]
-
-   f1 = ggplot(subset(fit.genes,!hclust %in% unique(cut[unlist(layers)]) ), aes(x=V1, y=V2)) +  geom_point(alpha = 0.3, color = "#B09C85FF", size=1)
-
-f2 = f1 + geom_point(data = subset(fit.genes, hclust %in% unique(cut[unlist(layers)]) ), 
-                     aes(x=V1, y=V2, colour=cluster), size=1,alpha = 0.5) +
-  scale_color_manual("Status", values = mycolours3)  +
-  scale_fill_manual("Status", values = mycolours3)  + 
-  xlab("") + ylab("")+
-  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = rownames(textdf),fill=cluster),
-                   label.size = NA, 
-                   alpha = 0.5, 
-                   direction ="both",
-                   na.rm=TRUE,
-                   seed = 1234, show.legend = FALSE) +
-  geom_label_repel(data =textdf , aes(x = V1, y = V2, label = rownames(textdf)),
-                   label.size = NA, 
-                   segment.color = 'black',
-                   segment.size = 0.5,
-                   direction = "both",
-                   alpha = 1, 
-                   na.rm=TRUE,
-                   fill = NA,
-                   seed = 1234, show.legend = FALSE) +
-  ggtitle("MDS") +
-  theme_light(base_size=10) +
-  theme(axis.text.x=element_blank(),plot.title = element_text(size=14, 
-                                    face="italic", 
-                                    color="#3C5488FF",
-                                    hjust=0.01,
-                                    lineheight=1.2,margin = margin(t = 5, b = -15)),
-        axis.text.y=element_blank(),
-        legend.title = element_blank(),
-        legend.text = element_text(color = "#3C5488FF",face ="italic" ),
-        legend.position = "bottom")  # titl)
-
-
-f2 #+ geom_encircle(data = fit.genes, aes(group=`5_clusters`)) 
+plot_general.heatmap(prim.markers = c("ERCC-00014","ERCC-00019"), condition = "ERCC",dir = "../inst/extdata/", p_value = 0.05,)
 ```
 
 
@@ -700,12 +396,12 @@ Sometimes we can also be interested in the numbers present directly in the conti
 
 1. get.observed.ct to produce the observed data
 ```{r}
-get.observed.ct(object = obj, g1 = "Cux1",g2 = "Dcx")
+get.observed.ct(object = obj, g1 = "ERCC-00014",g2 = "ERCC-00019")
 ```
 
 2. get.expected.ct to produce the expected values
 ```{r}
-get.expected.ct(object = obj, g1 = "Cux1",g2 = "Dcx")
+get.expected.ct(object = obj, g1 = "ERCC-00014",g2 = "ERCC-00019")
 ```
 
 The next few lines are just to clean after compilation of the documentation.

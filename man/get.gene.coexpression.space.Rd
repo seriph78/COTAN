@@ -2,9 +2,12 @@
 % Please edit documentation in R/COTAN_main.R
 \name{get.gene.coexpression.space}
 \alias{get.gene.coexpression.space}
+\alias{get.gene.coexpression.space,scCOTAN-method}
 \title{get.gene.coexpression.space}
 \usage{
 get.gene.coexpression.space(object, n.genes.for.marker = 25, primary.markers)
+
+\S4method{get.gene.coexpression.space}{scCOTAN}(object, n.genes.for.marker = 25, primary.markers)
 }
 \arguments{
 \item{object}{The COTAN object.}
@@ -25,7 +28,7 @@ for the biological question of interest (for instance neural cortex layering mar
 In this case we denote it as local differentiation index (LDI) relative to V.
 }
 \examples{
-obj = readRDS("../data/ERCC.cotan.RDS")
-df = get.gene.coexpression.space(obj, n.genes.for.marker = 10,
-primary.markers=c("HLA-DMB","HLA-DPA1","S100A6","S100A8"))
+data("ERCC.cotan")
+df = get.gene.coexpression.space(ERCC.cotan, n.genes.for.marker = 10,
+primary.markers=rownames(ERCC.cotan@raw[sample(nrow(ERCC.cotan@raw),5),]))
 }

@@ -2,9 +2,12 @@
 % Please edit documentation in R/COTAN_main.R
 \name{get.pval}
 \alias{get.pval}
+\alias{get.pval,scCOTAN-method}
 \title{get.pval}
 \usage{
 get.pval(object, gene.set.col = c(), gene.set.row = c(), type_stat = "S")
+
+\S4method{get.pval}{scCOTAN}(object, gene.set.col = c(), gene.set.row = c(), type_stat = "S")
 }
 \arguments{
 \item{object}{a COTAN object}
@@ -21,7 +24,7 @@ If left empty the function will do it genome-wide.}
 a p-value matrix
 }
 \description{
-This function computes the p-values for genes in the COTAN oblect. It can be used genome-wide
+This function computes the p-values for genes in the COTAN object. It can be used genome-wide
 or setting some specific genes of interest. By default it computes the p-values using the S
 statistics (\eqn{\Chi^2})
 }

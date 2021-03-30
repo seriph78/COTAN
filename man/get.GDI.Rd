@@ -2,14 +2,17 @@
 % Please edit documentation in R/COTAN_main.R
 \name{get.GDI}
 \alias{get.GDI}
+\alias{get.GDI,scCOTAN-method}
 \title{get.GDI}
 \usage{
 get.GDI(object, type = "S")
+
+\S4method{get.GDI}{scCOTAN}(object, type = "S")
 }
 \arguments{
 \item{object}{A COTAN object}
 
-\item{type}{Type of statistic to be used. Deafult is "S":
+\item{type}{Type of statistic to be used. Default is "S":
 Pearson's chi-squared test statistics. "G" is G-test statistics}
 }
 \value{
@@ -19,6 +22,6 @@ A dataframe
 This function produce a dataframe with the GDI for each genes.
 }
 \examples{
-obj = readRDS("../data/ERCC.cotan.RDS")
-quant.p = get.GDI(obj)
+data("Obj_out_cotan_coex_not_approx")
+quant.p = get.GDI(Obj_out_cotan_coex_not_approx)
 }

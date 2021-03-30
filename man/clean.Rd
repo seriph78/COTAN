@@ -2,9 +2,12 @@
 % Please edit documentation in R/COTAN_main.R
 \name{clean}
 \alias{clean}
+\alias{clean,scCOTAN-method}
 \title{clean}
 \usage{
 clean(object)
+
+\S4method{clean}{scCOTAN}(object)
 }
 \arguments{
 \item{object}{COTAN object}

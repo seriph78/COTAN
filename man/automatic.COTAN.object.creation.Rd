@@ -2,9 +2,20 @@
 % Please edit documentation in R/COTAN_main.R
 \name{automatic.COTAN.object.creation}
 \alias{automatic.COTAN.object.creation}
+\alias{automatic.COTAN.object.creation,data.frame-method}
 \title{automatic.COTAN.object.creation}
 \usage{
 automatic.COTAN.object.creation(
+  df,
+  out_dir,
+  GEO,
+  sc.method,
+  cond,
+  mt = FALSE,
+  mt_prefix = "^mt"
+)
+
+\S4method{automatic.COTAN.object.creation}{data.frame}(
   df,
   out_dir,
   GEO,
@@ -25,20 +36,23 @@ automatic.COTAN.object.creation(
 
 \item{cond}{A string that will identify the sample or condition. It will be part of the final file name.}
 
-\item{mt}{A boolean (default FALSE). If true mithocondrial genes will be kept in the analysis,
+\item{mt}{A boolean (default FALSE). If true mitochondrial  genes will be kept in the analysis,
 otherwise they will be removed.}
+
+\item{mt_prefix}{is the prefix that identify the mitochondrial  genes (default is the mouse prefix: "^mt")}
 }
 \value{
-It return the COTAN object. It will also store it direcly in the outpu directory
+It return the COTAN object. It will also store it directly in the output directory
 }
 \description{
 automatic.COTAN.object.creation
 }
 \examples{
 \dontrun{
-obj = automatic.COTAN.object.creation(df=read.csv("/tests/testthat/raw.csv",header = T, row.names = 1),
-out_dir = "/tests/testthat/",
-GEO = "test_GOE",
+data("raw")
+obj = automatic.COTAN.object.creation(df= raw,
+out_dir = "/inst/extdata/",
+GEO = "test_GEO",
 sc.method = "test_method",
 cond = "test")
 }

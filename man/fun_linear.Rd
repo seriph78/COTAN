@@ -13,5 +13,5 @@ fun_linear(object)
 
 }
 \description{
-Internal function to estimeate the cell efficiency
+Internal function to estimate the cell efficiency
 }

@@ -2,12 +2,15 @@
 % Please edit documentation in R/COTAN_main.R
 \name{get.coex}
 \alias{get.coex}
+\alias{get.coex,scCOTAN-method}
 \title{get.coex}
 \usage{
 get.coex(object)
+
+\S4method{get.coex}{scCOTAN}(object)
 }
 \arguments{
-\item{object}{}
+\item{object}{A COTAN object}
 }
 \value{
 It returns a COTAN object

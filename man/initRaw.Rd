@@ -2,9 +2,12 @@
 % Please edit documentation in R/COTAN_main.R
 \name{initRaw}
 \alias{initRaw}
+\alias{initRaw,scCOTAN-method}
 \title{initRaw}
 \usage{
 initRaw(object, GEO, sc.method = "10X", cond)
+
+\S4method{initRaw}{scCOTAN}(object, GEO, sc.method = "10X", cond)
 }
 \arguments{
 \item{object}{the dataframe containing the raw data}
@@ -13,7 +16,7 @@ initRaw(object, GEO, sc.method = "10X", cond)
 
 \item{sc.method}{a string reporting the method used for the sequencing}
 
-\item{cond}{a string reporting the specific sampe condition or time point}
+\item{cond}{a string reporting the specific sample condition or time point}
 }
 \value{
 A COTAN object to store all information
@@ -22,8 +25,10 @@ A COTAN object to store all information
 It starts to fill some fields of cotan object.
 }
 \examples{
-obj = new("scCOTAN",raw=read.csv("tests/testthat/raw.csv", header = T,row.names = 1 ))
+\dontrun{
+data("raw")
+obj = new("scCOTAN",raw = as.data.frame(raw))
 obj = initRaw(obj,GEO="GSE95315" ,
-sc.method="10X",cond = "mouse dentate gyrus P0 subclustering of cl.2 - 0,1,2")
-
+sc.method="10X",cond = "mouse dentate gyrus")
+}
 }

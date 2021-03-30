@@ -40,8 +40,9 @@ Define my COTAN structure
 }}
 
 \examples{
-file = "tests/testthat/raw.csv"
-obj = new("scCOTAN",raw=read.csv(file, header = T,row.names = 1 ))
+#file = system.file("inst/extdata/","raw.RDS",package = "COTAN")
+raw = data("raw")
+obj = new("scCOTAN",raw = raw)
 
 
 }

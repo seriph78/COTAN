@@ -1,0 +1,13 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+data\cleaning\*
+data\E17*
+.RData
+.Rhistory
+.gitignore
+vignettes/.gitignore
+..Rcheck
+.Rproj.user
+.git
+COTAN/.Rproj.user/shared/notebooks/*
+^data-raw$

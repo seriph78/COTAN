@@ -2,9 +2,12 @@
 % Please edit documentation in R/COTAN_main.R
 \name{get.observed.ct}
 \alias{get.observed.ct}
+\alias{get.observed.ct,scCOTAN-method}
 \title{get.observed.ct}
 \usage{
 get.observed.ct(object, g1, g2)
+
+\S4method{get.observed.ct}{scCOTAN}(object, g1, g2)
 }
 \arguments{
 \item{object}{The cotan object}
@@ -14,14 +17,14 @@ get.observed.ct(object, g1, g2)
 \item{g2}{The other gene}
 }
 \value{
-A contingecy table as dataframe
+A contingency table as dataframe
 }
 \description{
 This function is used to get the observed contingency table for a given pair of genes.
 }
 \examples{
-obj_test = readRDS(file = "../tests/testthat/test_cotan.RDS")
-g1 = rownames(obj@raw)[sample(2000, 1)]
-g2 = rownames(obj@raw)[sample(2000, 1)]
-get.observed.ct(object = obj_test, g1 = g1, g2 = g2)
+data("Obj_out_cotan_coex_not_approx")
+g1 = rownames(Obj_out_cotan_coex_not_approx@raw)[sample(2000, 1)]
+g2 = rownames(Obj_out_cotan_coex_not_approx@raw)[sample(2000, 1)]
+get.observed.ct(object = Obj_out_cotan_coex_not_approx, g1 = g1, g2 = g2)
 }

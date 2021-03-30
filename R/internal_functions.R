@@ -125,7 +125,7 @@ setMethod("spMat","matrix",
 
 #' fun_linear
 #'
-#' Internal function to estimeate the cell efficiency
+#' Internal function to estimate the cell efficiency
 #' @param object COTAN object
 #' @return
 #' @import
@@ -134,14 +134,12 @@ setMethod("spMat","matrix",
 #'
 #' @importFrom Matrix rowMeans
 #' @importFrom Matrix colMeans
-#' @importFrom parallel mclapply
-#'
+#' @importFrom stats dist
 #'
 setGeneric("fun_linear", function(object) standardGeneric("fun_linear"))
 setMethod("fun_linear","scCOTAN",
           #fun_linear =
           function(object) {
-              #getPyPath <- function() system.file("inst","python", "python_PCA.py", package="COTAN",mustWork = T)
 
               file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = T)
 
@@ -152,14 +150,7 @@ setMethod("fun_linear","scCOTAN",
               max.genes = names(sort(genes_means,decreasing = T)
                                 [round(length(genes_means)/2,digits = 0 ):round(length(genes_means)/4*3,digits = 0 )])
 
-              #if (mean_type == "restricted") {
-              #    print("cells mean type: restricted")
-              #    cells_means = Matrix::colMeans(object@raw[rownames(object@raw) %in% max.genes,], dims = 1, na.rm = T)
-              #}else{
-              #    print("cells mean type: normal")
                   cells_means = Matrix::colMeans(object@raw, dims = 1, na.rm = T)
-              #}
-
 
               means = mean(as.matrix(object@raw),na.rm = T )
               mu_estimator = (genes_means %*% t(cells_means)) /means
@@ -202,20 +193,16 @@ setMethod("fun_linear","scCOTAN",
                   output
               }, arg1=t_to_clust)
 
-              #pca_cells = python_PCA(as.matrix(t_to_clust))
               rownames(pca_cells)=rownames(t_to_clust)
-              #end_time <- Sys.time()
-              #print(paste("pca; time",end_time - start_time, sep = " " ))
-              #dist_cells = dist(t_to_clust, method = "euclidean")
-              #---- Mhalanobis distance
+
               ppp = pca_cells
               ppp = scale(ppp)
-              dist_cells = dist(ppp, method = "euclidean") # mhalanobis
+              dist_cells = stats::dist(ppp, method = "euclidean") # mhalanobis
               colnames(pca_cells) = paste("PC",c(1:ncol(pca_cells)), sep = "")
               pca_cells = as.data.frame(pca_cells)
 
               output = list("dist_cells"=dist_cells, "to_clust"=to_clust,"pca_cells"=pca_cells, "t_to_clust"=t_to_clust,"mu_estimator"=mu_estimator, "object"=object)#, "si_si"=si_si, "si_no"=si_no,"no_no"=no_no,"no_si"=no_si,"genes_on_off"=genes_on_off )
-              #detach("package:reticulate", unload = TRUE)
+
               return(output)
 
 
@@ -349,8 +336,9 @@ setMethod("expected_ct","scCOTAN",
               print(paste("The distance between estimated n of zeros and observed number of zero is", dist_zeros,"over", length(rownames(M)), sep = " "))
 
               if(any(is.na(M))){
-                  print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = T),sep = " "))
-                  break()
+                  #print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = T),sep = " "))
+                  #break()
+                  stop(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = T),sep = " "))
               }
 
               gc()
@@ -387,8 +375,9 @@ setMethod("get.G","scCOTAN",
               est = expected_ct(object)
               for (i in est) {
                   if(any(i == 0 )){
-                      print("Some expected values are 0!")
-                      break()
+                      #print("Some expected values are 0!")
+                      #break()
+                      stop("Some expected values are 0!")
                   }
               }
 

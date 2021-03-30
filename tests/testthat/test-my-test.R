@@ -2,7 +2,11 @@
 #root = "../../"
 root = ""
 test_that("initialization", {
-    obj.temp = scCOTAN(raw = read.csv(paste0(root,"raw.csv"), header = T,row.names = 1))
+    #raw = read.csv(paste0(root,"raw.csv"),header = T,row.names = 1)
+    raw = readRDS(paste0(root,"raw.RDS"))
+    #raw = system.file("testthat", "raw.csv", package = "COTAN", mustWork = TRUE)
+    #raw = read.csv(raw , header = T, row.names = 1)
+    obj.temp = scCOTAN(raw = raw)
     obj.temp = initRaw(obj.temp,GEO=" " ,sc.method="10X",cond = "example")
 
     #system.file("inst","python", "python_PCA.py", package="COTAN")
@@ -21,8 +25,11 @@ test_that("cleaning", {
     cells[cells <= 0] <- 0
     #cells = cells[rowSums(cells)> round((length(colnames(obj.temp@raw))/1000*3), digits = 0),]
     ttm = clean(obj.temp)
-    equal = readRDS(paste0(root,"ttmobj2.RDS"))
-    expect_equal(ttm$object,equal)
+    #equal = readRDS(paste0(root,"ttmobj2.RDS"))
+    equal = readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
+    expect_equal(ttm$object@raw.norm,equal@raw.norm)
+    expect_equal(ttm$object@nu,equal@nu)
+
 })
 
 test_that("mat_division", {
@@ -37,13 +44,19 @@ test_that("mat_division", {
 
 
 test_that("cotan_analysis_test", {
-    obj=readRDS(paste0(root,"ttmobj2.RDS"))
-    obj = cotan_analysis(obj)
-    expect_equal( obj,readRDS(paste0(root,"Obj_out_cotan_an.RDS")))
+    #obj=readRDS(paste0(root,"ttmobj2.RDS"))
+    obj=readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
+    obj = cotan_analysis(obj,cores = 2)
+    exp = readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
+    expect_equal( obj@a,exp@a)
+    expect_equal( obj@nu ,exp@nu)
+    expect_equal( obj@lambda,exp@lambda)
 })
 
 test_that("cotan_coex_test", {
-    obj=readRDS(paste0(root,"Obj_out_cotan_an.RDS"))
+    obj=readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
+    obj@yes_yes = c()
+    obj@coex = c()
     obj = get.coex(obj)
     saved.obj = readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
     # To use only in case of old approximated data
@@ -52,7 +65,7 @@ test_that("cotan_coex_test", {
 })
 
 test_that("python_PCA_test", {
-    raw = read.csv(paste0(root,"raw.csv"), header = T,row.names = 1)
+    raw = readRDS(paste0(root,"raw.RDS"))
     #pca.raw = python_PCA(raw)
     #file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
 
@@ -82,21 +95,25 @@ test_that("python_PCA_test", {
 
 
 test_that("get_pval_test", {
-    object = readRDS(paste0(root,"Obj_out_cotan_coex.RDS"))
+    object = readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
     object@coex = object@coex/sqrt(object@n_cells) #Because this object was created
     #with the old method and it was divided by sqrt(cell_number)
-    pval = get.pval(object)
-    pval.exp = data.table::fread(paste0(root,"p_val.csv"),header = T)
-    pval.exp = as.data.frame(pval.exp)
-    rownames(pval.exp) =pval.exp$V1
-    pval.exp = pval.exp[,2:ncol(pval.exp)]
-    expect_equal( as.data.frame(pval), pval.exp)
+    pval = get.pval(object, gene.set.col = rownames(object@raw)[1:100], rownames(object@raw)[1:100])
+    pval.exp = readRDS(paste0(root,"pval.RDS"))
+    #pval.exp = as.data.frame(pval.exp)
+    #rownames(pval.exp) =pval.exp$V1
+    #pval.exp = pval.exp[,2:ncol(pval.exp)]
+    expect_equal( pval, pval.exp)
 
 })
 
 
 test_that("get_GDI_test", {
-    object = readRDS(paste0(root,"../../data/ERCC.cotan.RDS"))
+    #ph = base::system.file("./tests/testthat", "ERCC.cotan.RDS",
+     #           package = "COTAN", mustWork = TRUE)
+    #gdi = base::system.file("tests/testthat", "GDI.RDS",
+     #                package = "COTAN", mustWork = TRUE)
+    object = readRDS(paste0(root,"ERCC.cotan.RDS"))
     GDI = get.GDI(object)
     expect_equal(GDI, readRDS(paste0(root,"GDI.RDS")))
 

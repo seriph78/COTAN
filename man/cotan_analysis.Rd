@@ -2,9 +2,12 @@
 % Please edit documentation in R/COTAN_main.R
 \name{cotan_analysis}
 \alias{cotan_analysis}
+\alias{cotan_analysis,scCOTAN-method}
 \title{cotan_analysis}
 \usage{
 cotan_analysis(object, cores = 11)
+
+\S4method{cotan_analysis}{scCOTAN}(object, cores = 11)
 }
 \arguments{
 \item{object}{A COTAN object}
