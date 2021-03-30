@@ -520,7 +520,7 @@ setMethod("plot_heatmap","ANY",
                   df.temp.pval <- pivot_longer(p_val, cols=1:(ncol(p_val)-1), names_to = "g1", values_to = "p_val")
 
                   coex = obj@coex[rownames(obj@coex) %in% ge,colnames(obj@coex) %in% gr]
-                  coex = coex / sqrt(obj@n_cells)
+                  #coex = coex / sqrt(obj@n_cells)
                   coex = as.data.frame(as.matrix(coex))
                   #this to add some eventually effective housekeeping genes
                   if (any(ge %in% obj@hk)) {
