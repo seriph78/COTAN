@@ -1,16 +1,14 @@
 Package: COTAN
 Type: Package
 Title: COexpression Tables ANalysis 
-Version: 0.1.0
-Author: Silvia Giulia Galfrè, Francesco Morandin, Marco Pietrosanto, Federico Cremisi, Manuela Helmer-Citterich
+Version: 0.1.1
 Authors@R: c(
   person("Galfrè", "Silvia Giulia",email = "silvia.galfre@uniroma1.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
   person("Morandin","Francesco", email = "francesco.morandin@unipr.it", role = "aut",comment = c(ORCID = "0000-0002-2022-2300")),
   person("Pietrosanto","Marco", role = "aut",comment = c(ORCID = "0000-0001-5129-6065")),
   person("Cremisi","Federico", role = "aut",comment = c(ORCID = "0000-0003-4925-2703")),
   person("Helmer-Citterich","Manuela", role = "aut",comment = c(ORCID = "0000-0001-9530-7504")))
-Maintainer: Galfrè Silvia Giulia <silvia.galfre@uniroma1.it>
-Description: COTAN is a statistical and computational method to analyze the co-expression of 
+Description: Statistical and computational method to analyze the co-expression of 
     gene pairs at single cell level. It provides the foundation for single-cell gene 
     interactome analysis. The basic idea is studying the zero UMI counts’ distribution 
     instead of focusing on positive counts; this is done with a generalized contingency 
@@ -23,7 +21,7 @@ Description: COTAN is a statistical and computational method to analyze the co-e
     of gene interactions and becoming a new tool to identify cell-identity marker genes.
 URL: https://github.com/seriph78/COTAN
 BugReports: https://github.com/seriph78/COTAN/issues
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.0)
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.1.1
@@ -34,6 +32,7 @@ Imports:
     Matrix,
     ggplot2,
     ggrepel,
+    stats,
     parallel,
     tibble,
     tidyr,
@@ -64,5 +63,10 @@ Config/testthat/edition: 3
 SystemRequirements: 
     python
 Language: en-US
+biocViews: 
+    SystemsBiology, 
+    Transcriptomics,
+    GeneExpression,
+    SingleCell
 VignetteBuilder: knitr
 LazyData: true

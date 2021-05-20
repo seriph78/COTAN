@@ -14,7 +14,8 @@ plot_heatmap(p_val.tr = 0.05, df_genes, sets, conditions, dir)
 
 \item{df_genes}{this is a list of gene array. The first array will define genes in the columns.}
 
-\item{sets}{This is a numeric array indicating from which fields of the previous list will be considered}
+\item{sets}{This is a numeric array indicating from which fields of the previous list
+will be considered}
 
 \item{conditions}{An array of prefixes indicating the different files.}
 

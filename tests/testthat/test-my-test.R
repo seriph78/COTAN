@@ -4,8 +4,7 @@ root = ""
 test_that("initialization", {
     #raw = read.csv(paste0(root,"raw.csv"),header = T,row.names = 1)
     raw = readRDS(paste0(root,"raw.RDS"))
-    #raw = system.file("testthat", "raw.csv", package = "COTAN", mustWork = TRUE)
-    #raw = read.csv(raw , header = T, row.names = 1)
+
     obj.temp = scCOTAN(raw = raw)
     obj.temp = initRaw(obj.temp,GEO=" " ,sc.method="10X",cond = "example")
 
@@ -34,10 +33,10 @@ test_that("cleaning", {
 
 test_that("mat_division", {
 
-    mat1 = read.csv(paste0(root,"mat1.csv"),header = T,row.names = 1)
-    nu1 = read.csv(paste0(root,"nu1.csv"),header = T,row.names = 1)
+    mat1 = utils::read.csv(paste0(root,"mat1.csv"),header = T,row.names = 1)
+    nu1 = utils::read.csv(paste0(root,"nu1.csv"),header = T,row.names = 1)
     nu1 =nu1$x
-    res =  read.csv(paste0(root,"res.1csv"),header = T,row.names = 1)
+    res =  utils::read.csv(paste0(root,"res.1csv"),header = T,row.names = 1)
 
     expect_equal( (t(t(mat1) * (1/nu1))),as.matrix(res))
 })
@@ -87,7 +86,7 @@ test_that("python_PCA_test", {
     colnames(pca.raw)=paste0("PC_", c(1:10))
     pca.raw =as.data.frame(round(pca.raw, digits = 14))
 
-    pca.tb = (read.csv(paste0(root,"pca.mat.csv"),header = T,row.names = 1))
+    pca.tb = (utils::read.csv(paste0(root,"pca.mat.csv"),header = T,row.names = 1))
     expect_lt(sum((pca.raw[,1:4] - pca.tb[,1:4])**2),10**(-5))
 
     ### È molto strano! la PCA fatto così ha un qualche grado di randomness!
@@ -109,10 +108,6 @@ test_that("get_pval_test", {
 
 
 test_that("get_GDI_test", {
-    #ph = base::system.file("./tests/testthat", "ERCC.cotan.RDS",
-     #           package = "COTAN", mustWork = TRUE)
-    #gdi = base::system.file("tests/testthat", "GDI.RDS",
-     #                package = "COTAN", mustWork = TRUE)
     object = readRDS(paste0(root,"ERCC.cotan.RDS"))
     GDI = get.GDI(object)
     expect_equal(GDI, readRDS(paste0(root,"GDI.RDS")))

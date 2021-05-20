@@ -34,7 +34,7 @@ plot_general.heatmap(
 
 \item{p_value}{The p-value threshold}
 
-\item{symmetric}{A boolean: default False. If True the union of prim.markers and marker.list
+\item{symmetric}{A boolean: default F. If T the union of prim.markers and marker.list
 is sets as both rows and column genes}
 }
 \value{

@@ -7,14 +7,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r, include = F}
 knitr::opts_chunk$set(
-  collapse = TRUE,
+  collapse = T,
   comment = "#>",
   fig.width = 7,
   fig.height = 7
 )
-#options(rmarkdown.html_vignette.check_title = FALSE)
+#options(rmarkdown.html_vignette.check_title = F)
 ```
 
 ```{r setup}
@@ -37,12 +37,12 @@ my_theme = theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5, vj
                  axis.text.y = element_text( size = 14, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
                  axis.title.x = element_text( size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),
                  axis.title.y = element_text( size = 14, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"))
-data_dir = "../inst/extdata/"
+data_dir = tempdir()
 ```
 
 
 
-```{r eval=FALSE, include=FALSE}
+```{r eval=F, include=F}
 Download the dataset for mouse cortex E17.5.
 if (!file.exists(paste("inst/extdata/","E175_only_cortical_cells.txt.gz", sep = "/"))) {
   download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/
@@ -57,9 +57,9 @@ There are also available online many other examples at [link](https://seriph78.g
 
 ```{r}
 #data = as.data.frame(fread(system.file("extdata", "E175_only_cortical_cells.txt.gz", 
-                                       #package = "COTAN", mustWork = TRUE),sep = "\t"))
+                                       #package = "COTAN", mustWork = T),sep = "\t"))
 data = as.data.frame(fread(system.file("extdata", "ercc.csv", 
-                                       package = "COTAN", mustWork = TRUE),sep = ","))
+                                       package = "COTAN", mustWork = T),sep = ","))
 
 data = as.data.frame(data)
 rownames(data) = data$V1
@@ -69,7 +69,8 @@ data[1:5,1:5]
 
 Define a directory where the output will be stored.
 ```{r}
-out_dir = "../inst/extdata/"
+#out_dir = out_dir
+out_dir = tempdir()
 ```
 
 # Analytical pipeline
@@ -126,8 +127,8 @@ ttm$pca.cell.2
 ```
 
 Run this when B cells need to be removed.
-```{r eval=FALSE, include=TRUE}
-pdf(paste(out_dir,"cleaning/",t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = ""))
+```{r eval=F, include=T}
+pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = "")))
 ttm$pca.cell.2
 ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
   geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ), aes(n,means,label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
@@ -163,7 +164,7 @@ ttm$pca.cell.2
 
 Run this only in the last iteration, instead the previous code, when B cells group has not to be removed
 ```{r}
-pdf(paste(out_dir,"cleaning/",t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = ""))
+pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = "")))
 ttm$pca.cell.2
 ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
   geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ), aes(n,means,label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
@@ -197,7 +198,7 @@ plot.nu = plot.nu + geom_point(size = 1,alpha= 0.8)+
                     legend.key.width = unit(2, "mm"),
                     legend.position="right")
 
-pdf(paste(out_dir,"cleaning/",t,"_plots_PCA_efficiency_colored.pdf", sep = ""))
+pdf(file.path(out_dir,"cleaning",paste(t,"_plots_PCA_efficiency_colored.pdf", sep = "")))
 plot.nu
 dev.off()
 
@@ -226,7 +227,7 @@ plot.ude <- ggplot(nu_df, aes(x = n, y=nu)) +
              color="darkred", size=4.5)
 
 
-pdf(paste(out_dir,"cleaning/",t,"_plots_efficiency.pdf", sep = ""))
+pdf(file.path(out_dir,"cleaning",paste(t,"_plots_efficiency.pdf", sep = "")))
 plot.ude
 dev.off()
 
@@ -252,7 +253,7 @@ ttm$pca.cell.2
 In case we do not want to remove anything, we can run:
 
 ```{r}
-pdf(paste(out_dir,"cleaning/",t,"_plots_efficiency.pdf", sep = ""))
+pdf(file.path(out_dir,"cleaning",paste(t,"_plots_efficiency.pdf", sep = "")))
 ggplot(nu_df, aes(x = n, y=nu)) + geom_point(colour = "#8491B4B2", size=1) +my_theme + #xlim(0,100)+
   annotate(geom="text", x=50, y=0.25, label="nothing to remove ", color="darkred")
 dev.off()
@@ -273,7 +274,7 @@ plot.nu = plot.nu + geom_point(size = 2,alpha= 0.8)+
                     legend.key.width = unit(2, "mm"),
                     legend.position="right")
 
-pdf(paste(out_dir,"cleaning/",t,"_plots_PCA_efficiency_colored_FINAL.pdf", sep = ""))
+pdf(file.path(out_dir,"cleaning",paste(t,"_plots_PCA_efficiency_colored_FINAL.pdf", sep = "")))
 plot.nu
 dev.off()
 
@@ -310,7 +311,7 @@ plot_GDI(obj, cond = "ERCC")
 ```
 
 If a more complex plot is needed, or if we want to analyze more in detail the GDI data, we can get directly the GDI dataframe. 
-```{r echo=TRUE}
+```{r echo=T}
 quant.p = get.GDI(obj)
 
 head(quant.p)
@@ -320,7 +321,7 @@ In the third column of this dataframe is reported the percentage of cells expres
 
 Next we can define some gene sets (in this case three) that we want to specifically label in the GDI plot.
 
-```{r echo=TRUE}
+```{r echo=T}
 AA=c("ERCC-00012","ERCC-00013","ERCC-00014") 
 BB=c("ERCC-00016","ERCC-00017","ERCC-00019")
 CC=c("ERCC-00022","ERCC-00024","ERCC-00028")
@@ -345,7 +346,7 @@ GDI_plot = f1 +  geom_point(data = subset(quant.p,highlight != "normal"  ), aes(
                    label.size = NA, 
                    alpha = 0.5, 
                    direction ="both",
-                   na.rm=TRUE,
+                   na.rm=T,
                    seed = 1234) +
   geom_label_repel(data =textdf , aes(x=sum.raw.norm, y=GDI, label = rownames(textdf)),
                    label.size = NA, 
@@ -353,7 +354,7 @@ GDI_plot = f1 +  geom_point(data = subset(quant.p,highlight != "normal"  ), aes(
                    segment.size = 0.5,
                    direction = "both",
                    alpha = 0.8, 
-                   na.rm=TRUE,
+                   na.rm=T,
                    fill = NA,
                    seed = 1234) +
   theme(axis.text.x = element_text(size = text.size, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
@@ -380,13 +381,13 @@ To do so we need to define, in a list, the different gene sets (list.genes). The
 ```{r}
 list.genes = list("Ref.col"= BB, "AA"=AA, "Const."=CC )
 
-plot_heatmap(df_genes = list.genes,sets = c(1:3),conditions = "ERCC",dir = "../inst/extdata/")
+plot_heatmap(df_genes = list.genes,sets = c(1:3),conditions = "ERCC",dir = out_dir)
 ```
 
 We can also plot a general heatmap of coex values based on some markers like the following one.
 
 ```{r}
-plot_general.heatmap(prim.markers = c("ERCC-00014","ERCC-00019"), condition = "ERCC",dir = "../inst/extdata/", p_value = 0.05,)
+plot_general.heatmap(prim.markers = c("ERCC-00014","ERCC-00019"), condition = "ERCC",dir = out_dir, p_value = 0.05,)
 ```
 
 

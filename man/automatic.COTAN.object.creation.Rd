@@ -11,7 +11,7 @@ automatic.COTAN.object.creation(
   GEO,
   sc.method,
   cond,
-  mt = FALSE,
+  mt = F,
   mt_prefix = "^mt"
 )
 
@@ -21,7 +21,7 @@ automatic.COTAN.object.creation(
   GEO,
   sc.method,
   cond,
-  mt = FALSE,
+  mt = F,
   mt_prefix = "^mt"
 )
 }
@@ -34,12 +34,14 @@ automatic.COTAN.object.creation(
 
 \item{sc.method}{Type of single cell RNA-seq method used}
 
-\item{cond}{A string that will identify the sample or condition. It will be part of the final file name.}
+\item{cond}{A string that will identify the sample or condition. It will be part of the
+final file name.}
 
-\item{mt}{A boolean (default FALSE). If true mitochondrial  genes will be kept in the analysis,
+\item{mt}{A boolean (default F). If T mitochondrial  genes will be kept in the analysis,
 otherwise they will be removed.}
 
-\item{mt_prefix}{is the prefix that identify the mitochondrial  genes (default is the mouse prefix: "^mt")}
+\item{mt_prefix}{is the prefix that identify the mitochondrial  genes (default is the mouse
+prefix: "^mt")}
 }
 \value{
 It return the COTAN object. It will also store it directly in the output directory
@@ -48,12 +50,12 @@ It return the COTAN object. It will also store it directly in the output directo
 automatic.COTAN.object.creation
 }
 \examples{
-\dontrun{
+
 data("raw")
 obj = automatic.COTAN.object.creation(df= raw,
-out_dir = "/inst/extdata/",
+out_dir =  tempdir(),
 GEO = "test_GEO",
 sc.method = "test_method",
 cond = "test")
-}
+
 }

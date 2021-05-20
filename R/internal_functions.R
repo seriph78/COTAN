@@ -8,7 +8,8 @@ setMethod("get.zero_one.cells","scCOTAN",
               cells.0.1[cells.0.1 > 0] <- 1
               cells.0.1[cells.0.1 <= 0] <- 0
               # We want to discard genes having less than 3 not 0 counts over 1000 cells
-              cells.0.1 = cells.0.1[rowSums(cells.0.1) > round((length(colnames(object@raw))/1000*3), digits = 0),]
+              cells.0.1 = cells.0.1[rowSums(cells.0.1) > round((length(colnames(object@raw))/1000*3),
+                                                               digits = 0),]
               return(cells.0.1)
           }
 )
@@ -39,7 +40,8 @@ setMethod("fun_pzero_nega0","numeric",
               function(r,mu){ (exp(-(1-r)*mu))}
 )
 
-setGeneric("fun_dif_mu_zeros", function(h,x,somma_zeri,mu_estimator) standardGeneric("fun_dif_mu_zeros"))
+setGeneric("fun_dif_mu_zeros", function(h,x,somma_zeri,mu_estimator)
+    standardGeneric("fun_dif_mu_zeros"))
 setMethod("fun_dif_mu_zeros","numeric",
               #fun_dif_mu_zeros <-
               function(h,x,somma_zeri,mu_estimator){
@@ -127,7 +129,8 @@ setMethod("spMat","matrix",
 #'
 #' Internal function to estimate the cell efficiency
 #' @param object COTAN object
-#' @return
+#' @return a list of object (dist_cells, to_clust, pca_cells,
+#' t_to_clust, mu_estimator, object)
 #' @import
 #' basilisk
 #' reticulate
@@ -148,7 +151,8 @@ setMethod("fun_linear","scCOTAN",
               genes_means = Matrix::rowMeans(object@raw, dims = 1, na.rm = T)
 
               max.genes = names(sort(genes_means,decreasing = T)
-                                [round(length(genes_means)/2,digits = 0 ):round(length(genes_means)/4*3,digits = 0 )])
+                                [round(length(genes_means)/2,digits = 0 ):round(length(genes_means)/4*3,
+                                                                                digits = 0 )])
 
                   cells_means = Matrix::colMeans(object@raw, dims = 1, na.rm = T)
 
@@ -161,18 +165,14 @@ setMethod("fun_linear","scCOTAN",
               object@nu = colMeans(mu_estimator)/means
               object@lambda = genes_means
 
-              #print(paste("End estimation; time",end_time - start_time, sep = " " ))
+
               gc()
-              # To insert an explorative analysis and check for strage cells (as blood) and cells with a too low efficiency (nu est)
+              # To insert an explorative analysis and check for strage cells (as blood)
+              #and cells with a too low efficiency (nu est)
               #start_time <- Sys.time()
 
               to_clust <- t(t(as.matrix(object@raw)) * (1/as.vector(object@nu)))
-              #to_clust <- as(as.matrix(to_clust), "sparseMatrix")
 
-
-              #end_time <- Sys.time()
-              #print(paste("to clust; time",end_time - start_time, sep = " " ))
-              #object@raw.norm = to_clust
               t_to_clust = t(to_clust)
 
               #start_time <- Sys.time()
@@ -201,7 +201,8 @@ setMethod("fun_linear","scCOTAN",
               colnames(pca_cells) = paste("PC",c(1:ncol(pca_cells)), sep = "")
               pca_cells = as.data.frame(pca_cells)
 
-              output = list("dist_cells"=dist_cells, "to_clust"=to_clust,"pca_cells"=pca_cells, "t_to_clust"=t_to_clust,"mu_estimator"=mu_estimator, "object"=object)#, "si_si"=si_si, "si_no"=si_no,"no_no"=no_no,"no_si"=no_si,"genes_on_off"=genes_on_off )
+              output = list("dist_cells"=dist_cells, "to_clust"=to_clust,"pca_cells"=pca_cells,
+                            "t_to_clust"=t_to_clust,"mu_estimator"=mu_estimator, "object"=object)
 
               return(output)
 
@@ -273,7 +274,7 @@ setMethod("obs_ct","scCOTAN",
               print("Generating contingency tables for observed data")
               somma = rowSums(cells)
               somma = as.matrix(somma)
-              si_any = do.call("cbind", replicate(length(rownames(somma)), somma, simplify = FALSE))
+              si_any = do.call("cbind", replicate(length(rownames(somma)), somma, simplify = F))
               #rm(somma) = object@yes_yes
               colnames(si_any) = rownames(si_any)
               if (is.null(object@yes_yes)) {
@@ -333,7 +334,8 @@ setMethod("expected_ct","scCOTAN",
               n_zero_obs = rowSums(cells[!rownames(cells) %in% object@hk,] == 0) # observed number of zeros for each genes
               dist_zeros = sqrt(sum((n_zero_esti - n_zero_obs)^2))
 
-              print(paste("The distance between estimated n of zeros and observed number of zero is", dist_zeros,"over", length(rownames(M)), sep = " "))
+              print(paste("The distance between estimated n of zeros and observed number of zero is",
+                          dist_zeros,"over", length(rownames(M)), sep = " "))
 
               if(any(is.na(M))){
                   #print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = T),sep = " "))
@@ -351,7 +353,8 @@ setMethod("expected_ct","scCOTAN",
               #rm(M)
               #rm(N)
 
-              out = list("estimator_no_no"=estimator_no_no, "estimator_no_yes"=estimator_no_si,"estimator_yes_no"=estimator_si_no,"estimator_yes_yes"=estimator_si_si)
+              out = list("estimator_no_no"=estimator_no_no, "estimator_no_yes"=estimator_no_si,
+                         "estimator_yes_no"=estimator_si_no,"estimator_yes_yes"=estimator_si_si)
 
               return(out)
           }
@@ -397,16 +400,20 @@ setMethod("get.G","scCOTAN",
                 #  as.matrix(ll$no_no)  * log( as.matrix(ll$no_no) / new_estimator_no_no) +
                 #  as.matrix(ll$yes_no) * log( as.matrix(ll$yes_no)/ new_estimator_si_no) +
                 #  as.matrix(ll$no_yes) * log( as.matrix(ll$no_yes)/ new_estimator_no_si) )
-              t1 = as.matrix(si_si)    * log( as.matrix(si_si)         / as.matrix(est$estimator_yes_yes))
+              t1 = as.matrix(si_si)    * log( as.matrix(si_si)         /
+                                                  as.matrix(est$estimator_yes_yes))
               t1[which(as.matrix(si_si) == 0)] = 0
 
-              t2 =     as.matrix(ll$no_no)  * log( as.matrix(ll$no_no) / as.matrix(est$estimator_no_no))
+              t2 =     as.matrix(ll$no_no)  * log( as.matrix(ll$no_no) /
+                                                       as.matrix(est$estimator_no_no))
               t2[which(as.matrix(ll$no_no) == 0)] = 0
 
-              t3 =     as.matrix(ll$yes_no) * log( as.matrix(ll$yes_no)/ as.matrix(est$estimator_yes_no))
+              t3 =     as.matrix(ll$yes_no) * log( as.matrix(ll$yes_no)/
+                                                       as.matrix(est$estimator_yes_no))
               t3[which(as.matrix(ll$yes_no) == 0)] = 0
 
-              t4 =     as.matrix(ll$no_yes) * log( as.matrix(ll$no_yes)/ as.matrix(est$estimator_no_yes))
+              t4 =     as.matrix(ll$no_yes) * log( as.matrix(ll$no_yes)/
+                                                       as.matrix(est$estimator_no_yes))
               t4[which(as.matrix(ll$no_yes) == 0)] = 0
 
               G = 2 * (t1 + t2 + t3 + t4)
@@ -434,10 +441,14 @@ setMethod("get.S2","scCOTAN",
               est = expected_ct(object)
 
               print("coex estimation")
-              coex = ((as.matrix(si_si) - as.matrix(est$estimator_yes_yes))/as.matrix(est$estimator_yes_yes)) +
-                  ((as.matrix(ll$no_no) - as.matrix(est$estimator_no_no))/as.matrix(est$estimator_no_no)) -
-                  ((as.matrix(ll$yes_no) - as.matrix(est$estimator_yes_no))/as.matrix(est$estimator_yes_no)) -
-                  ((as.matrix(ll$no_yes) - as.matrix(est$estimator_no_yes))/as.matrix(est$estimator_no_yes))
+              coex = ((as.matrix(si_si) - as.matrix(est$estimator_yes_yes))/
+                          as.matrix(est$estimator_yes_yes)) +
+                  ((as.matrix(ll$no_no) - as.matrix(est$estimator_no_no))/
+                       as.matrix(est$estimator_no_no)) -
+                  ((as.matrix(ll$yes_no) - as.matrix(est$estimator_yes_no))/
+                       as.matrix(est$estimator_yes_no)) -
+                  ((as.matrix(ll$no_yes) - as.matrix(est$estimator_no_yes))/
+                       as.matrix(est$estimator_no_yes))
 
               coex = coex / sqrt(  1/as.matrix(est$estimator_yes_yes) +
                                      1/as.matrix(est$estimator_no_no) +

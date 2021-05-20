@@ -6,7 +6,7 @@
 \alias{scCOTAN}
 \title{scCOTAN-class}
 \value{
-
+the cobject class
 }
 \description{
 Define my COTAN structure
@@ -40,8 +40,8 @@ Define my COTAN structure
 }}
 
 \examples{
-#file = system.file("inst/extdata/","raw.RDS",package = "COTAN")
-raw = data("raw")
+
+data("raw")
 obj = new("scCOTAN",raw = raw)
 
 

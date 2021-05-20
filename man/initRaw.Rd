@@ -25,10 +25,10 @@ A COTAN object to store all information
 It starts to fill some fields of cotan object.
 }
 \examples{
-\dontrun{
+
 data("raw")
-obj = new("scCOTAN",raw = as.data.frame(raw))
-obj = initRaw(obj,GEO="GSE95315" ,
-sc.method="10X",cond = "mouse dentate gyrus")
-}
+obj = new("scCOTAN", raw = raw)
+obj = initRaw(obj, GEO="code" , sc.method="10X",cond = "mouse dataset")
+
+
 }

@@ -5,9 +5,9 @@
 \alias{cotan_analysis,scCOTAN-method}
 \title{cotan_analysis}
 \usage{
-cotan_analysis(object, cores = 11)
+cotan_analysis(object, cores = 1)
 
-\S4method{cotan_analysis}{scCOTAN}(object, cores = 11)
+\S4method{cotan_analysis}{scCOTAN}(object, cores = 1)
 }
 \arguments{
 \item{object}{A COTAN object}
@@ -22,6 +22,7 @@ This is the main function that estimates the a vector to store all the negative 
 dispersion factors. It need to be run after \code{\link{clean}}
 }
 \examples{
-\dontrun{obj = cotan_analysis(obj)
-}
+data("ERCC.cotan")
+ERCC.cotan = cotan_analysis(ERCC.cotan)
+
 }

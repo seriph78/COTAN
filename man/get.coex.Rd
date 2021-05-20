@@ -20,7 +20,8 @@ This function estimates and stores the coex*sqrt(n_cells) matrix in the coex fie
 It need to be run after \code{\link{cotan_analysis}}
 }
 \examples{
-\dontrun{
-obj = get.coex(obj)
-}
+
+data("ERCC.cotan")
+obj = get.coex(ERCC.cotan)
+
 }

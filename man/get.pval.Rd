@@ -29,7 +29,8 @@ or setting some specific genes of interest. By default it computes the p-values 
 statistics (\eqn{\chi^{2}})
 }
 \examples{
-\dontrun{
-obj = get.pval(obj,type_stat="S")
-}
+
+data("ERCC.cotan")
+ERCC.cotan = get.pval(ERCC.cotan,type_stat="S")
+
 }

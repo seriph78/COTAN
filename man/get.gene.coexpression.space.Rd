@@ -12,7 +12,8 @@ get.gene.coexpression.space(object, n.genes.for.marker = 25, primary.markers)
 \arguments{
 \item{object}{The COTAN object.}
 
-\item{n.genes.for.marker}{The number of genes correlated with the primary markers that we want to consider.
+\item{n.genes.for.marker}{The number of genes correlated with the primary markers that
+we want to consider.
 By default this is 25.}
 
 \item{primary.markers}{A vector of primary marker names.}
