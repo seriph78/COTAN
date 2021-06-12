@@ -1,77 +1,88 @@
-
-#root = "../../"
+tm = tempdir()
+stopifnot(file.exists(tm))
+#root = "tests/testthat/"
 root = ""
-test_that("initialization", {
-    #raw = read.csv(paste0(root,"raw.csv"),header = T,row.names = 1)
-    raw = readRDS(paste0(root,"raw.RDS"))
+test_that("1.initialization", {
+    #raw = read.csv(file.path(getwd(),"raw.csv"),header = T,row.names = 1)
+    #raw = readRDS(file.path(getwd(),"raw.RDS"))
+    #raw = readRDS("tests/testthat/raw.RDS")
+    utils::data("ERCCraw", package = "COTAN")
+    #print(data[1:5,1:5])
+    rownames(data) = data$V1
+    data = data[,2:ncol(data)]
+    obj.temp = new("scCOTAN",raw = data)
+    obj.temp = initRaw(object = obj.temp,GEO="V" ,sc.method="10X",cond = "example")
 
-    obj.temp = scCOTAN(raw = raw)
-    obj.temp = initRaw(obj.temp,GEO=" " ,sc.method="10X",cond = "example")
 
-    #system.file("inst","python", "python_PCA.py", package="COTAN")
-    #print(getPyPath())
-
-    expect_equal(obj.temp,readRDS(paste0(root,"obj.RDS")) )
+    #expect_equal(obj.temp,readRDS(file.path(getwd(),"obj.RDS")) )
+    expect_s4_class(obj.temp,"scCOTAN")
 
 })
 
-test_that("cleaning", {
+test_that("2.cleaning", {
 
-    obj.temp = readRDS(paste0(root,"obj.RDS"))
-    cells =as.data.frame(as.matrix(obj.temp@raw))
+    #obj.temp = readRDS(file.path(getwd(),"obj.RDS"))
+    utils::data("raw.dataset", package = "COTAN")
+
+    obj.temp = new("scCOTAN",raw = raw.dataset)
+    obj.temp = initRaw(object = obj.temp,GEO=" " ,sc.method="10X",cond = "example")
     #---------------------------------------------------
-    cells[cells > 0] <- 1
-    cells[cells <= 0] <- 0
-    #cells = cells[rowSums(cells)> round((length(colnames(obj.temp@raw))/1000*3), digits = 0),]
+
     ttm = clean(obj.temp)
-    #equal = readRDS(paste0(root,"ttmobj2.RDS"))
-    equal = readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
-    expect_equal(ttm$object@raw.norm,equal@raw.norm)
-    expect_equal(ttm$object@nu,equal@nu)
+    stopifnot(file.exists(tm))
+    saveRDS(ttm$object, file = file.path(tm,"temp.RDS") )
+    raw.norm = readRDS(file.path(getwd(),"raw.norm.RDS"))
+    nu = readRDS(file.path(getwd(),"nu.RDS"))
+    expect_equal(as.matrix(ttm$object@raw.norm),raw.norm)
+    expect_equal(as.matrix(ttm$object@nu),nu)
 
 })
 
 test_that("mat_division", {
+    utils::data("raw.dataset", package = "COTAN")
+    #print(raw.dataset[1:5,1:5])
+    #raw = readRDS(file.path(getwd(),"raw.RDS"))
+    nu = readRDS(file.path(getwd(),"nu.RDS"))
+    raw.norm = readRDS(file.path(getwd(),"raw.norm.RDS"))
 
-    mat1 = utils::read.csv(paste0(root,"mat1.csv"),header = T,row.names = 1)
-    nu1 = utils::read.csv(paste0(root,"nu1.csv"),header = T,row.names = 1)
-    nu1 =nu1$x
-    res =  utils::read.csv(paste0(root,"res.1csv"),header = T,row.names = 1)
-
-    expect_equal( (t(t(mat1) * (1/nu1))),as.matrix(res))
+    expect_equal( (t(t(raw.dataset) * (1/nu[,1]))),as.matrix(raw.norm) )
 })
 
 
-test_that("cotan_analysis_test", {
-    #obj=readRDS(paste0(root,"ttmobj2.RDS"))
-    obj=readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
+test_that("3.cotan_analysis_test", {
+
+    obj=readRDS(file.path(tm,"temp.RDS"))
     obj = cotan_analysis(obj,cores = 2)
-    exp = readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
-    expect_equal( obj@a,exp@a)
-    expect_equal( obj@nu ,exp@nu)
-    expect_equal( obj@lambda,exp@lambda)
+
+    a = readRDS(file.path(getwd(),"a.RDS"))
+    nu = readRDS(file.path(getwd(),"nu.RDS"))
+    lambda = readRDS(file.path(getwd(),"lambda.RDS"))
+    saveRDS(obj, file = file.path(tm,"temp.RDS") )
+    expect_equal(as.matrix(obj@a), a)
+    expect_equal( as.matrix(obj@nu) , nu)
+    expect_equal( as.matrix(obj@lambda), lambda)
 })
 
-test_that("cotan_coex_test", {
-    obj=readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
-    obj@yes_yes = c()
-    obj@coex = c()
+
+test_that("4.cotan_coex_test", {
+    obj=readRDS(file.path(tm,"temp.RDS"))
+
     obj = get.coex(obj)
-    saved.obj = readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
-    # To use only in case of old approximated data
-    #saved.obj@coex = saved.obj@coex /sqrt(saved.obj@n_cells)
-    expect_equal( obj, saved.obj)
+
+    coex = readRDS(file.path(getwd(),"coex.RDS"))
+    saveRDS(obj, file = file.path(tm,"temp.RDS") )
+    expect_equal( as.matrix(obj@coex[1:500,1:200]), as.matrix(coex))
 })
 
 test_that("python_PCA_test", {
-    raw = readRDS(paste0(root,"raw.RDS"))
-    #pca.raw = python_PCA(raw)
+    #raw = readRDS(file.path(getwd(),"raw.RDS"))
+    utils::data("raw.dataset", package = "COTAN")
     #file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
 
     proc <- basiliskStart(my_env_cotan)
     on.exit(basiliskStop(proc))
 
-    file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = T)
+file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = TRUE)
 
     pca.raw <- basiliskRun(proc, function(arg1) {
         reticulate::source_python(file.py)
@@ -80,25 +91,27 @@ test_that("python_PCA_test", {
         # The return value MUST be a pure R object, i.e., no reticulate
         # Python objects, no pointers to shared memory.
         output
-    }, arg1=raw)
+    }, arg1=raw.dataset)
 
-    rownames(pca.raw)=rownames(raw)
+    rownames(pca.raw)=rownames(raw.dataset)
     colnames(pca.raw)=paste0("PC_", c(1:10))
     pca.raw =as.data.frame(round(pca.raw, digits = 14))
+    pca.tb = readRDS(file.path(getwd(),"pca.mat.RDS"))
 
-    pca.tb = (utils::read.csv(paste0(root,"pca.mat.csv"),header = T,row.names = 1))
-    expect_lt(sum((pca.raw[,1:4] - pca.tb[,1:4])**2),10**(-5))
+    expect_equal( pca.raw$PC_1, pca.tb$PC_1)
+    expect_equal( pca.raw$PC_2, pca.tb$PC_2)
 
-    ### È molto strano! la PCA fatto così ha un qualche grado di randomness!
 })
 
 
-test_that("get_pval_test", {
-    object = readRDS(paste0(root,"Obj_out_cotan_coex_not_approx.RDS"))
+test_that("5.get_pval_test", {
+    object=readRDS(file.path(tm,"temp.RDS"))
+    #object = readRDS(file.path(getwd(),"Obj_out_cotan_coex_not_approx.RDS"))
     object@coex = object@coex/sqrt(object@n_cells) #Because this object was created
     #with the old method and it was divided by sqrt(cell_number)
     pval = get.pval(object, gene.set.col = rownames(object@raw)[1:100], rownames(object@raw)[1:100])
-    pval.exp = readRDS(paste0(root,"pval.RDS"))
+    #pval.exp = readRDS(file.path(getwd(),"pval.RDS"))
+    pval.exp =readRDS(file.path(getwd(),"pval.RDS"))
     #pval.exp = as.data.frame(pval.exp)
     #rownames(pval.exp) =pval.exp$V1
     #pval.exp = pval.exp[,2:ncol(pval.exp)]
@@ -108,8 +121,9 @@ test_that("get_pval_test", {
 
 
 test_that("get_GDI_test", {
-    object = readRDS(paste0(root,"ERCC.cotan.RDS"))
-    GDI = get.GDI(object)
-    expect_equal(GDI, readRDS(paste0(root,"GDI.RDS")))
+    #object = readRDS(file.path(getwd(),"ERCC.cotan.RDS"))
+    utils::data("ERCC.cotan", package = "COTAN")
+    GDI = get.GDI(ERCC.cotan)
+    expect_equal(GDI, readRDS(file.path(getwd(),"GDI.RDS")))
 
 })

@@ -23,8 +23,8 @@ A contingency table as dataframe
 This function is used to get the observed contingency table for a given pair of genes.
 }
 \examples{
-data("Obj_out_cotan_coex_not_approx")
-g1 = rownames(Obj_out_cotan_coex_not_approx@raw)[sample(2000, 1)]
-g2 = rownames(Obj_out_cotan_coex_not_approx@raw)[sample(2000, 1)]
-get.observed.ct(object = Obj_out_cotan_coex_not_approx, g1 = g1, g2 = g2)
+data("ERCC.cotan")
+g1 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+g2 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+get.observed.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 }

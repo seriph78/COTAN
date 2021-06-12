@@ -6,7 +6,7 @@
 \alias{scCOTAN}
 \title{scCOTAN-class}
 \value{
-the cobject class
+the object class
 }
 \description{
 Define my COTAN structure
@@ -16,7 +16,8 @@ Define my COTAN structure
 \describe{
 \item{\code{raw}}{ANY. To store the raw data matrix}
 
-\item{\code{raw.norm}}{ANY. To store the raw data matrix divided for the cell efficiency estimated (nu)}
+\item{\code{raw.norm}}{ANY. To store the raw data matrix divided for the cell
+efficiency estimated (nu)}
 
 \item{\code{coex}}{ANY. The coex matrix (sparce)}
 
@@ -41,8 +42,8 @@ Define my COTAN structure
 
 \examples{
 
-data("raw")
-obj = new("scCOTAN",raw = raw)
+data("ERCCraw")
+obj = new("scCOTAN",raw = data)
 
 
 }

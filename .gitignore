@@ -1,8 +1,13 @@
 .Rproj.user
 .Rhistory
+.rhistory
 .RData
 .Ruserdata
 COTAN.Rproj
+COTAN.rproj
 inst/doc
 data/E17.5_cortex.cotan.RDS
 data/cleaning/*
+*.tar.gz
+*.Rproj
+.rhistory

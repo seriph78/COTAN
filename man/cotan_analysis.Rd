@@ -18,7 +18,8 @@ cotan_analysis(object, cores = 1)
 a COTAN object
 }
 \description{
-This is the main function that estimates the a vector to store all the negative binomial
+This is the main function that estimates the a vector to store all the
+negative binomial
 dispersion factors. It need to be run after \code{\link{clean}}
 }
 \examples{

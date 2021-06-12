@@ -11,8 +11,9 @@ automatic.COTAN.object.creation(
   GEO,
   sc.method,
   cond,
-  mt = F,
-  mt_prefix = "^mt"
+  mt = FALSE,
+  mt_prefix = "^mt",
+  cores = 1
 )
 
 \S4method{automatic.COTAN.object.creation}{data.frame}(
@@ -21,8 +22,9 @@ automatic.COTAN.object.creation(
   GEO,
   sc.method,
   cond,
-  mt = F,
-  mt_prefix = "^mt"
+  mt = FALSE,
+  mt_prefix = "^mt",
+  cores = 1
 )
 }
 \arguments{
@@ -42,6 +44,8 @@ otherwise they will be removed.}
 
 \item{mt_prefix}{is the prefix that identify the mitochondrial  genes (default is the mouse
 prefix: "^mt")}
+
+\item{cores}{number of cores to be used}
 }
 \value{
 It return the COTAN object. It will also store it directly in the output directory
@@ -51,7 +55,7 @@ automatic.COTAN.object.creation
 }
 \examples{
 
-data("raw")
+data("raw.dataset")
 obj = automatic.COTAN.object.creation(df= raw,
 out_dir =  tempdir(),
 GEO = "test_GEO",

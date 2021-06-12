@@ -7,9 +7,9 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = F}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = T,
+  collapse = TRUE,
   comment = "#>",
   fig.width = 7,
   fig.height = 7
@@ -24,6 +24,7 @@ library(Matrix)
 library(ggrepel)
 library(factoextra)
 library(Rtsne)
+library(utils)
 library(plotly)
 library(tidyverse)
 library(htmlwidgets)
@@ -42,12 +43,12 @@ data_dir = tempdir()
 
 
 
-```{r eval=F, include=F}
+```{r eval=FALSE, include=FALSE}
 Download the dataset for mouse cortex E17.5.
 if (!file.exists(paste("inst/extdata/","E175_only_cortical_cells.txt.gz", sep = "/"))) {
   download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/
                 samples/GSM2861nnn/GSM2861514/suppl/GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz",
-              paste(data_dir,"E175_only_cortical_cells.txt.gz", sep = "/"),method = "wget", quiet = F)
+              paste(data_dir,"E175_only_cortical_cells.txt.gz", sep = "/"),method = "wget", quiet = FALSE)
   
 }
 ```
@@ -56,10 +57,8 @@ This is just an example on a toy dataset. If the user want to try on a real data
 There are also available online many other examples at [link](https://seriph78.github.io/Cotan_paper/index.html).
 
 ```{r}
-#data = as.data.frame(fread(system.file("extdata", "E175_only_cortical_cells.txt.gz", 
-                                       #package = "COTAN", mustWork = T),sep = "\t"))
-data = as.data.frame(fread(system.file("extdata", "ercc.csv", 
-                                       package = "COTAN", mustWork = T),sep = ","))
+#load(system.file("data", "ERCCraw.rda", package = "COTAN", mustWork = TRUE))
+data("ERCCraw", package = "COTAN")
 
 data = as.data.frame(data)
 rownames(data) = data$V1
@@ -346,7 +345,7 @@ GDI_plot = f1 +  geom_point(data = subset(quant.p,highlight != "normal"  ), aes(
                    label.size = NA, 
                    alpha = 0.5, 
                    direction ="both",
-                   na.rm=T,
+                   na.rm=TRUE,
                    seed = 1234) +
   geom_label_repel(data =textdf , aes(x=sum.raw.norm, y=GDI, label = rownames(textdf)),
                    label.size = NA, 
@@ -354,7 +353,7 @@ GDI_plot = f1 +  geom_point(data = subset(quant.p,highlight != "normal"  ), aes(
                    segment.size = 0.5,
                    direction = "both",
                    alpha = 0.8, 
-                   na.rm=T,
+                   na.rm=TRUE,
                    fill = NA,
                    seed = 1234) +
   theme(axis.text.x = element_text(size = text.size, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
@@ -411,7 +410,7 @@ if (file.exists(paste(out_dir,t,".cotan.RDS", sep = ""))) {
   #Delete file if it exists
   file.remove(paste(out_dir,t,".cotan.RDS", sep = ""))
 }
-unlink(paste(out_dir,"cleaning", sep = ""),recursive = T)
+unlink(paste(out_dir,"cleaning", sep = ""),recursive = TRUE)
 
 print(sessionInfo())
 ```

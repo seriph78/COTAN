@@ -11,7 +11,7 @@ plot_general.heatmap(
   dir,
   condition,
   p_value = 0.001,
-  symmetric = T
+  symmetric = TRUE
 )
 
 \S4method{plot_general.heatmap}{ANY}(
@@ -20,7 +20,7 @@ plot_general.heatmap(
   dir,
   condition,
   p_value = 0.001,
-  symmetric = T
+  symmetric = TRUE
 )
 }
 \arguments{
@@ -51,7 +51,7 @@ Primary markers will be plotted as groups of rows. Markers list will be plotted 
 plot_general.heatmap(dir=input_dir,
 condition = "E17.5",
 prim.markers  = c("Mef2c","Mef2a","Mef2d"),
-symmetric = F,
+symmetric = FALSE,
 markers.list = c("Reln","Satb2","Cux1","Bcl11b","Tbr1","Sox5","Foxp2","Slc17a6","Slc17a7"),
 p_value = 0.05)
 }

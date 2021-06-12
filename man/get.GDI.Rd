@@ -22,6 +22,6 @@ A dataframe
 This function produce a dataframe with the GDI for each genes.
 }
 \examples{
-data("Obj_out_cotan_coex_not_approx")
-quant.p = get.GDI(Obj_out_cotan_coex_not_approx)
+data("ERCC.cotan")
+quant.p = get.GDI(ERCC.cotan)
 }

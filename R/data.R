@@ -5,8 +5,7 @@
 #' @format A data frame with 2000 genes and 815 cells:
 #'
 #' @source GEO GSM2861514
-"raw"
-
+"raw.dataset"
 
 #' COTAN object
 #'
@@ -27,12 +26,29 @@
 #' @source \url{https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/ercc?}
 "ERCC.cotan"
 
-#' COTAN elaborated dataset
+#' Raw ERCC dataset
 #'
-#' The raw dataset elaborated
+#' ERCC dataset
 #'
-#' @format The same structure as ERCC dataset
+#' @format A data frame
+#'
+#' @source ERCC
+"ERCCraw"
+
+#' Raw sample dataset
+#'
+#' A subsample of a real sc-RNAseq dataset
+#'
+#' @format A data frame with 2000 genes and 815 cells:
 #'
 #' @source GEO GSM2861514
-"Obj_out_cotan_coex_not_approx"
+"raw"
 
+#' Raw ERCC dataset
+#'
+#' ERCC dataset
+#'
+#' @format A data frame
+#'
+#' @source ERCC
+"data"

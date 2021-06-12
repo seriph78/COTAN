@@ -10,9 +10,10 @@ initRaw(object, GEO, sc.method = "10X", cond)
 \S4method{initRaw}{scCOTAN}(object, GEO, sc.method = "10X", cond)
 }
 \arguments{
-\item{object}{the dataframe containing the raw data}
+\item{object}{the dataframe containing the raw data: it should be a data.frame, not a matrix.}
 
-\item{GEO}{a code reporting the GEO identification or other specific dataset code}
+\item{GEO}{a code reporting the GEO identification or other specific dataset
+code}
 
 \item{sc.method}{a string reporting the method used for the sequencing}
 
@@ -26,7 +27,7 @@ It starts to fill some fields of cotan object.
 }
 \examples{
 
-data("raw")
+data("raw.dataset")
 obj = new("scCOTAN", raw = raw)
 obj = initRaw(obj, GEO="code" , sc.method="10X",cond = "mouse dataset")
 

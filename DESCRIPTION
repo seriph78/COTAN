@@ -21,7 +21,7 @@ Description: Statistical and computational method to analyze the co-expression o
     of gene interactions and becoming a new tool to identify cell-identity marker genes.
 URL: https://github.com/seriph78/COTAN
 BugReports: https://github.com/seriph78/COTAN/issues
-Depends: R (>= 4.0)
+Depends: R (>= 4.1)
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.1.1
@@ -69,4 +69,3 @@ biocViews:
     GeneExpression,
     SingleCell
 VignetteBuilder: knitr
-LazyData: true

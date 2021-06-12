@@ -114,7 +114,7 @@ setGeneric("spMat", function(object) standardGeneric("spMat"))
 setMethod("spMat","matrix",
           function(object){
               #object =as.matrix(object)
-              object[upper.tri(object,diag = F)] = 0
+              object[upper.tri(object,diag = FALSE)] = 0
               object = as(object, "triangularMatrix")
               #---------------------------
 
@@ -144,19 +144,19 @@ setMethod("fun_linear","scCOTAN",
           #fun_linear =
           function(object) {
 
-              file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = T)
+              file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = TRUE)
 
               print("Start estimation mu with linear method")
               print(dim(object@raw))
-              genes_means = Matrix::rowMeans(object@raw, dims = 1, na.rm = T)
+              genes_means = Matrix::rowMeans(object@raw, dims = 1, na.rm = TRUE)
 
-              max.genes = names(sort(genes_means,decreasing = T)
+              max.genes = names(sort(genes_means,decreasing = TRUE)
                                 [round(length(genes_means)/2,digits = 0 ):round(length(genes_means)/4*3,
                                                                                 digits = 0 )])
 
-                  cells_means = Matrix::colMeans(object@raw, dims = 1, na.rm = T)
+                  cells_means = Matrix::colMeans(object@raw, dims = 1, na.rm = TRUE)
 
-              means = mean(as.matrix(object@raw),na.rm = T )
+              means = mean(as.matrix(object@raw),na.rm = TRUE )
               mu_estimator = (genes_means %*% t(cells_means)) /means
 
               rownames(mu_estimator) = names(genes_means)
@@ -217,9 +217,9 @@ setMethod("mu_est","scCOTAN",
           function(object) {
               print("mu estimator creation")
 
-              #cells_means = colMeans(as.matrix(object@raw), dims = 1, na.rm = T)
-              #genes_means = rowMeans(as.matrix(object@raw), dims = 1, na.rm = T)
-              #means = mean(as.matrix(object@raw),na.rm = T )
+              #cells_means = colMeans(as.matrix(object@raw), dims = 1, na.rm = TRUE)
+              #genes_means = rowMeans(as.matrix(object@raw), dims = 1, na.rm = TRUE)
+              #means = mean(as.matrix(object@raw),na.rm = TRUE )
 
               #mu_estimator = (genes_means %*% t(cells_means)) /means
               mu_estimator = object@lambda %*% t(object@nu)
@@ -274,7 +274,7 @@ setMethod("obs_ct","scCOTAN",
               print("Generating contingency tables for observed data")
               somma = rowSums(cells)
               somma = as.matrix(somma)
-              si_any = do.call("cbind", replicate(length(rownames(somma)), somma, simplify = F))
+              si_any = do.call("cbind", replicate(length(rownames(somma)), somma, simplify = FALSE))
               #rm(somma) = object@yes_yes
               colnames(si_any) = rownames(si_any)
               if (is.null(object@yes_yes)) {
@@ -338,9 +338,9 @@ setMethod("expected_ct","scCOTAN",
                           dist_zeros,"over", length(rownames(M)), sep = " "))
 
               if(any(is.na(M))){
-                  #print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = T),sep = " "))
+                  #print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = TRUE),sep = " "))
                   #break()
-                  stop(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = T),sep = " "))
+                  stop(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = TRUE),sep = " "))
               }
 
               gc()

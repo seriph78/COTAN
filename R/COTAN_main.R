@@ -4,7 +4,8 @@
 #'
 #' Define my COTAN structure
 #' @slot raw ANY. To store the raw data matrix
-#' @slot raw.norm ANY. To store the raw data matrix divided for the cell efficiency estimated (nu)
+#' @slot raw.norm ANY. To store the raw data matrix divided for the cell
+#' efficiency estimated (nu)
 #' @slot coex ANY. The coex matrix (sparce)
 #' @slot nu vector.
 #' @slot lambda vector.
@@ -20,21 +21,23 @@
 #' @export
 #' @examples
 #'
-#' data("raw")
-#' obj = new("scCOTAN",raw = raw)
+#' data("ERCCraw")
+#' obj = new("scCOTAN",raw = data)
 #'
 #'
 setClass("scCOTAN", slots =
                         c(raw="ANY",raw.norm="ANY", coex="ANY",
-                          nu="vector",lambda="vector",a="vector", hk = "vector", n_cells = "numeric",
-                          meta="data.frame",yes_yes="ANY", clusters="vector",
-                          cluster_data="data.frame")) -> scCOTAN
+                            nu="vector",lambda="vector",a="vector",
+                            hk = "vector", n_cells = "numeric",
+                            meta="data.frame",yes_yes="ANY", clusters="vector",
+                            cluster_data="data.frame")) -> scCOTAN
 
 #' initRaw
 #'
 #' It starts to fill some fields of cotan object.
-#' @param object the dataframe containing the raw data
-#' @param GEO a code reporting the GEO identification or other specific dataset code
+#' @param object the dataframe containing the raw data: it should be a data.frame, not a matrix.
+#' @param GEO a code reporting the GEO identification or other specific dataset
+#' code
 #' @param sc.method a string reporting the method used for the sequencing
 #' @param cond a string reporting the specific sample condition or time point
 #'
@@ -44,46 +47,53 @@ setClass("scCOTAN", slots =
 #' @rdname initRaw
 #' @examples
 #'
-#' data("raw")
+#' data("raw.dataset")
 #' obj = new("scCOTAN", raw = raw)
 #' obj = initRaw(obj, GEO="code" , sc.method="10X",cond = "mouse dataset")
 #'
 #'
-setGeneric("initRaw", function(object,GEO,sc.method="10X", cond) standardGeneric("initRaw"))
+setGeneric("initRaw", function(object,GEO,sc.method="10X", cond)
+    standardGeneric("initRaw"))
 #' @rdname initRaw
 setMethod("initRaw","scCOTAN",
-          function(object,GEO,sc.method,cond) {
-              print("Initializing S4 object")
-              if(!attr(object@raw, "class")[1] == "dgCMatrix" | is.null(attr(object@raw, "class")) ){
-                  object@raw = methods::as(as.matrix(object@raw), "sparseMatrix")
-              }
-              if(! all((object@raw - round(object@raw)) == 0)){
-                print("WARNING! Input data contains not integer numbers!")
+            function(object,GEO,sc.method,cond) {
+                print("Initializing S4 object")
+                if( (!attr(object@raw, "class")[1] == "dgCMatrix") |
+                   is.null(attr(object@raw, "class")) ){
+                    object@raw = methods::as(as.matrix(object@raw),
+                                             "sparseMatrix")
+                }
+                if(! all((object@raw - round(object@raw)) == 0)){
+                    print("WARNING! Input data contains not integer numbers!")
 
-              }
-              object@meta[1,1:2] = c("GEO:",GEO)
-              object@meta[2,1:2] = c("scRNAseq method:",sc.method)
-              object@meta[3,1] = "starting n. of cells:"
-              object@meta[3,2] = ncol(object@raw)
-              object@meta[4,1:2] = c("Condition sample:",cond)
+                }
+                object@meta[1,1:2] = c("GEO:",GEO)
+                object@meta[2,1:2] = c("scRNAseq method:",sc.method)
+                object@meta[3,1] = "starting n. of cells:"
+                object@meta[3,2] = ncol(object@raw)
+                object@meta[4,1:2] = c("Condition sample:",cond)
 
               #object@clusters = rep(NA,ncol(object@raw))
               #names(object@clusters)=colnames(object@raw)
-              return(object)
+                return(object)
           }
 )
 
 
 #' clean
 #'
-#' Main function that can be used to check and clean the dataset. It also produce
+#' Main function that can be used to check and clean the dataset. It also
+#' produce
 #' (using the function fun_linear) and store
-#' the estimators for nu and lambda. It also fill the raw.norm (raw / nu) and n_cell
+#' the estimators for nu and lambda. It also fill the raw.norm (raw / nu) and
+#' n_cell
 #' (the initial number of cells in the dataset)
 #' @param object COTAN object
-#' @return a list of objects containing: "cl1" is the first cell cluster, "cl2" is the
+#' @return a list of objects containing: "cl1" is the first cell cluster, "cl2"
+#' is the
 #' second cell cluster,
-#' "pca.cell.2" is a ggplot2 cell pca plot, "object" is the COTAN object with saved the
+#' "pca.cell.2" is a ggplot2 cell pca plot, "object" is the COTAN object with
+#' saved the
 #' estimated lambda and mu, "mu_estimator", "D"
 #' "pca_cells" pca numeric data.
 #' @export
@@ -111,18 +121,24 @@ setMethod("clean","scCOTAN",
 
                  mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
 
-                 my_theme = theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5,
+                 my_theme = theme(axis.text.x = element_text(size = 14,
+                                                             angle = 0, hjust = .5,
                                                              vjust = .5,
-                                                              face = "plain", colour ="#3C5488FF" ),
+                                                              face = "plain",
+                                                             colour ="#3C5488FF" ),
                                    axis.text.y = element_text( size = 14, angle = 0, hjust = 0,
                                                                vjust = .5,
-                                                               face = "plain", colour ="#3C5488FF"),
-                                   axis.title.x = element_text( size = 14, angle = 0, hjust = .5,
+                                                               face = "plain",
+                                                               colour ="#3C5488FF"),
+                                   axis.title.x = element_text( size = 14,
+                                                                angle = 0, hjust = .5,
                                                                 vjust = 0,
-                                                                face = "plain", colour ="#3C5488FF"),
+                                                                face = "plain",
+                                                                colour ="#3C5488FF"),
                                    axis.title.y = element_text( size = 14, angle = 90, hjust = .5,
                                                                 vjust = .5,
-                                                                face = "plain", colour ="#3C5488FF"))
+                                                                face = "plain",
+                                                                colour ="#3C5488FF"))
 
 
                 cells = get.zero_one.cells(object)
@@ -141,7 +157,8 @@ setMethod("clean","scCOTAN",
                 to_clust = list1$to_clust
 
 
-                raw_norm <- t(t(as.matrix(object@raw)) * (1/(as.vector(object@nu))))
+                raw_norm <- t(t(as.matrix(object@raw)) *
+                                  (1/(as.vector(object@nu))))
                 #raw_norm <- as.matrix(object@raw) %b/% matrix(as.vector(object@nu), nrow = 1)
                 raw_norm <- as(as.matrix(raw_norm), "sparseMatrix")
 
@@ -180,16 +197,18 @@ setMethod("clean","scCOTAN",
                 colnames(B)=cl2
                 B = rownames_to_column(B)
                 if (dim(B)[2]>2) {
-                  B = B[order(rowMeans(B[,2:length(colnames(B))]),decreasing = T), ]
+                  B = B[order(rowMeans(B[,2:length(colnames(B))]),
+                              decreasing = TRUE), ]
                 }else{
-                  B = B[order(B[,2],decreasing = T), ]
+                  B = B[order(B[,2],decreasing = TRUE), ]
                 }
 
                 print(utils::head(B, 15))
 
                 C = arrange(B,rowMeans(B[2:length(colnames(B))]))
                 rownames(C) = C$rowname
-                D = data.frame("means"=rowMeans(C[2:length(colnames(C))]),"n"=NA )
+                D = data.frame("means"=rowMeans(C[2:length(colnames(C))]),
+                               "n"=NA )
                 D = D[D$means>0,]
                 D$n = c(1:length(D$means))
 
@@ -198,23 +217,26 @@ setMethod("clean","scCOTAN",
 
                 pca_cells = cbind(pca_cells,"groups"=t_to_clust$groups)
 
-                pca.cell.1 = ggplot(subset(pca_cells,groups == "A" ), aes(x=PC1, y=PC2,
-                                                                          colour =groups)) +
+                pca.cell.1 = ggplot(subset(pca_cells,groups == "A" ),
+                                    aes(x=PC1, y=PC2,colour =groups)) +
                   geom_point(alpha = 0.5, size=3)
 
-                pca.cell.2=  pca.cell.1 + geom_point(data = subset(pca_cells, groups != "A" ),
-                                                   aes(x=PC1, y=PC2,colour =groups),
+                pca.cell.2=  pca.cell.1 + geom_point(data = subset(pca_cells,
+                            groups != "A" ),aes(x=PC1, y=PC2,colour =groups),
                                                    alpha = 0.8, size=3)+
                   scale_color_manual("groups", values = mycolours)  +
                   my_theme + theme(legend.title = element_blank(),
-                                   legend.text = element_text( size = 12,color = "#3C5488FF",
-                                                               face ="italic" ),
+                                   legend.text = element_text( size = 12,
+                                                            color = "#3C5488FF",
+                                                            face ="italic" ),
                                    legend.position="bottom")
 
                 object@n_cells = length(colnames(object@raw))
 
-                output = list("cl1"=cl1,"cl2"=cl2,"pca.cell.2"=pca.cell.2,"object"=object,
-                              "mu_estimator"=mu_estimator, "D"=D, "pca_cells"=pca_cells)
+                output = list("cl1"=cl1,"cl2"=cl2,"pca.cell.2"=pca.cell.2,
+                              "object"=object,
+                              "mu_estimator"=mu_estimator, "D"=D,
+                              "pca_cells"=pca_cells)
                 return(output)
           }
 )
@@ -222,7 +244,8 @@ setMethod("clean","scCOTAN",
 
 #' cotan_analysis
 #'
-#' This is the main function that estimates the a vector to store all the negative binomial
+#' This is the main function that estimates the a vector to store all the
+#' negative binomial
 #' dispersion factors. It need to be run after \code{\link{clean}}
 #' @param object A COTAN object
 #' @param cores number of cores to use. Default is 11.
@@ -234,7 +257,8 @@ setMethod("clean","scCOTAN",
 #' data("ERCC.cotan")
 #' ERCC.cotan = cotan_analysis(ERCC.cotan)
 #'
-setGeneric("cotan_analysis", function(object, cores= 1) standardGeneric("cotan_analysis"))
+setGeneric("cotan_analysis", function(object, cores= 1)
+    standardGeneric("cotan_analysis"))
 #' @rdname cotan_analysis
 setMethod("cotan_analysis","scCOTAN",
           function(object, cores= 1) {
@@ -439,7 +463,7 @@ setMethod("get.pval","scCOTAN",
               }
 
 
-              p_value = pchisq(as.matrix(S), df=1, lower.tail=F)
+              p_value = pchisq(as.matrix(S), df=1, lower.tail=FALSE)
 
 
               return(p_value)
@@ -502,10 +526,11 @@ setMethod("plot_heatmap","ANY",
                   print(paste("Loading condition",ET,sep=" "))
                   obj = readRDS(paste(dir,ET,".cotan.RDS", sep = ""))
                   obj@coex = Matrix::forceSymmetric(obj@coex, uplo="L" )
-                  if(any(gr %in% rownames(obj@coex)) == F){
+                  if(any(gr %in% rownames(obj@coex)) == FALSE){
                       #print(paste("primary markers all absent in ", ET, sep = " "))
                       #break()
-                      stop(paste("primary markers all absent in ", ET, sep = " "))
+                      paste0("primary markers all absent in ", ET)
+                      stop()
 
                   }
                   p_val = get.pval(obj,gene.set.col = gr, gene.set.row = ge)
@@ -536,7 +561,9 @@ setMethod("plot_heatmap","ANY",
                   #------------------------
 
                   p_val$g2 = as.vector(rownames(p_val))
-                  df.temp.pval <- pivot_longer(p_val, cols=1:(ncol(p_val)-1), names_to = "g1",
+                  #df.temp.pval <- pivot_longer(p_val, cols=1:(ncol(p_val)-1), names_to = "g1",
+                  #                             values_to = "p_val")
+                  df.temp.pval <- pivot_longer(p_val, cols=seq_along(colnames(p_val))-1, names_to = "g1",
                                                values_to = "p_val")
 
                   coex = obj@coex[rownames(obj@coex) %in% ge,colnames(obj@coex) %in% gr]
@@ -556,8 +583,12 @@ setMethod("plot_heatmap","ANY",
 
                   coex$g2 = as.vector(rownames(coex))
 
-                  df.temp.coex <- pivot_longer(coex, cols=1:(ncol(p_val)-1), names_to = "g1",
+                  df.temp.coex <- pivot_longer(coex, cols=seq_along(colnames(p_val))-1, names_to = "g1",
                                                values_to = "coex")
+
+
+                  #df.temp.coex <- pivot_longer(coex, cols=1:(ncol(p_val)-1), names_to = "g1",
+                   #                            values_to = "coex")
 
                   df.temp = merge(df.temp.coex, df.temp.pval)
                   df.temp$time = ET
@@ -604,13 +635,13 @@ setMethod("plot_heatmap","ANY",
 
               }
 
-              print(paste("min coex:",min(df.to.print$coex, na.rm = T), "max coex",
-                          max(df.to.print$coex, na.rm = T),sep = " "))
+              print(paste("min coex:",min(df.to.print$coex, na.rm = TRUE), "max coex",
+                          max(df.to.print$coex, na.rm = TRUE),sep = " "))
 
               heatmap = ggplot(data = subset(df.to.print,type %in%  names(df_genes)[sets] ),
                                aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
 
-                  geom_tile(aes(fill = coex),colour = "black", show.legend = T) +
+                  geom_tile(aes(fill = coex),colour = "black", show.legend = TRUE) +
                   facet_grid( type ~ g1  ,scales = "free", space = "free") +
                   scale_fill_gradient2(low = "#E64B35FF", mid = "gray93",   high = "#3C5488FF",
                                        midpoint = 0,
@@ -666,7 +697,7 @@ setMethod("plot_heatmap","ANY",
 #' plot_general.heatmap(dir=input_dir,
 #' condition = "E17.5",
 #' prim.markers  = c("Mef2c","Mef2a","Mef2d"),
-#' symmetric = F,
+#' symmetric = FALSE,
 #' markers.list = c("Reln","Satb2","Cux1","Bcl11b","Tbr1","Sox5","Foxp2","Slc17a6","Slc17a7"),
 #' p_value = 0.05)
 #' }
@@ -674,14 +705,14 @@ setGeneric("plot_general.heatmap", function(prim.markers =c("Satb2","Bcl11b","Cu
                                             markers.list= c(),
                                             dir, condition,
                                             p_value = 0.001,
-                                            symmetric = T) standardGeneric("plot_general.heatmap"))
+                                            symmetric = TRUE) standardGeneric("plot_general.heatmap"))
 #' @rdname plot_general.heatmap
 setMethod("plot_general.heatmap","ANY",
           function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),markers.list=c(), dir,
-                   condition,p_value = 0.001, symmetric = T) {
+                   condition,p_value = 0.001, symmetric = TRUE) {
               print("ploting a general heatmap")
 
-              if(symmetric == T){
+              if(symmetric == TRUE){
                   markers.list = as.list(c( unlist(prim.markers),unlist(markers.list)))
               }
 
@@ -711,7 +742,7 @@ setMethod("plot_general.heatmap","ANY",
               genes.row = names(pval.red[pval.red < p_value])
               genes.row = unique(c(colnames(coex),genes.row))
 
-              if(symmetric == T){
+              if(symmetric == TRUE){
                   coex = obj@coex
 
                   coex = as.data.frame(as.matrix(coex))
@@ -756,7 +787,7 @@ setMethod("plot_general.heatmap","ANY",
               reorder_idx_row <- match(cl.genes.rows$gene,rownames(coex))
 
 
-              if (symmetric == T) {
+              if (symmetric == TRUE) {
                   cl.genes.cols = data.frame()
                   for (ll in names(list.rows)) {
                       tmp = data.frame("genes"=list.rows[[ll]],"cl"=rep(ll,length(list.rows[[ll]])))
@@ -789,13 +820,13 @@ setMethod("plot_general.heatmap","ANY",
               #cl.genes.rows$cl =factor(cl.genes.rows$cl,c("Reln","Satb2","Sox5","Bcl11b"))
 
               part1 = ComplexHeatmap::Heatmap(as.matrix(to.plot),
-                              cluster_rows = F,
-                              cluster_columns = F ,
+                              cluster_rows = FALSE,
+                              cluster_columns = FALSE ,
                               row_split = cl.genes.rows$cl,
                               column_split = cl.genes.cols$cl ,
                               col = col_fun,
-                              show_row_names = F,
-                              show_column_names = F,
+                              show_row_names = FALSE,
+                              show_column_names = FALSE,
                               column_title_gp = grid::gpar(fill = "#8491B44C", font = 3,
                                                            col= "#3C5488FF"),
                               row_title_gp = grid::gpar(fill = "#8491B44C",font = 3, col= "#3C5488FF"))
@@ -806,7 +837,7 @@ setMethod("plot_general.heatmap","ANY",
                            labels_gp = grid::gpar(col = "#3C5488FF", font = 3) )
 
               #part1 =
-                  ComplexHeatmap::draw(part1,show_heatmap_legend = F,
+                  ComplexHeatmap::draw(part1,show_heatmap_legend = FALSE,
                            annotation_legend_list = lgd,annotation_legend_side = "bottom")
 
 
@@ -862,7 +893,8 @@ setMethod("get.gene.coexpression.space","scCOTAN",
               all.genes.to.an = vector()
               for (m in primary.markers) {
                   #print(m)
-                  tm =rownames(p.val.matrix[order(p.val.matrix[,m]),])[1:n.genes.for.marker]
+                  #tm =rownames(p.val.matrix[order(p.val.matrix[,m]),])[1:n.genes.for.marker]
+                  tm =rownames(p.val.matrix[order(p.val.matrix[,m]),])[seq_len(n.genes.for.marker)]
                   all.genes.to.an = c(all.genes.to.an,tm)
                   all.genes.to.an =unique(all.genes.to.an)
               }
@@ -871,28 +903,28 @@ setMethod("get.gene.coexpression.space","scCOTAN",
               tmp = p.val.matrix[all.genes.to.an,]
               for (m in primary.markers) {
                   tmp = as.data.frame(tmp[order(tmp[,m]),])
-                  tmp$rank = c(1:nrow(tmp))
+                  #tmp$rank = c(1:nrow(tmp))
+                  tmp$rank = c(seq_len(nrow(tmp)))
                   colnames(tmp)[ncol(tmp)] = paste("rank",m,sep = ".")
               }
               rank.genes = tmp[,(length(primary.markers)+1):ncol(tmp)]
-              for (c in c(1:length(colnames(rank.genes)))) {
-                  colnames(rank.genes)[c] =strsplit(colnames(rank.genes)[c], split='.',
-                                                    fixed = T)[[1]][2]
-              }
+            #for (c in c(1:length(colnames(rank.genes)))) {
+            for (c in seq_along(colnames(rank.genes))) {
+                colnames(rank.genes)[c] =strsplit(colnames(rank.genes)[c], split='.',
+                                                    fixed = TRUE)[[1]][2]
+                }
 
               S = get.S(object)
 
               S = S[,colnames(S) %in% all.genes.to.an]
               S = as.matrix(S)
 
-              #quant.p.val2 = rowQuantiles((as.matrix(S)),probs =(1-15/ncol(S)) , na.rm = T) #0.975
-              #rank.genes$index = rowSums(rank.genes)
-              #rank.genes = rank.genes[order(rank.genes$index, decreasing = F),]
+
               # This is the LDI 5%
-              CD.sorted <- t(apply(t(S),2,sort,decreasing=T))
+              CD.sorted <- t(apply(t(S),2,sort,decreasing=TRUE))
               #CD.sorted = CD.sorted[,1:round(ncol(CD.sorted)/5, digits = 0)] #20
               CD.sorted = CD.sorted[,1:round(ncol(CD.sorted)/10, digits = 0)] #20
-              CD.sorted = pchisq(as.matrix(CD.sorted), df=1, lower.tail=F)
+              CD.sorted = pchisq(as.matrix(CD.sorted), df=1, lower.tail=FALSE)
 
               quant.p.val2 = rowMeans(CD.sorted)
               quant.p.val2 =as.data.frame(quant.p.val2)
@@ -936,8 +968,8 @@ setMethod("get.gene.coexpression.space","scCOTAN",
 #' @importFrom Matrix forceSymmetric
 #' @rdname get.GDI
 #' @examples
-#' data("Obj_out_cotan_coex_not_approx")
-#' quant.p = get.GDI(Obj_out_cotan_coex_not_approx)
+#' data("ERCC.cotan")
+#' quant.p = get.GDI(ERCC.cotan)
 setGeneric("get.GDI", function(object,type="S") standardGeneric("get.GDI"))
 #' @rdname get.GDI
 setMethod("get.GDI","scCOTAN",
@@ -957,20 +989,18 @@ setMethod("get.GDI","scCOTAN",
 
               S = as.data.frame(as.matrix(S))
               #G = as.data.frame(as.matrix(G))
-              CD.sorted <- apply(S,2,sort,decreasing=T)
+              CD.sorted <- apply(S,2,sort,decreasing=TRUE)
               CD.sorted = CD.sorted[1:round(nrow(CD.sorted)/20, digits = 0),]
-              CD.sorted = pchisq(as.matrix(CD.sorted), df=1, lower.tail=F)
+              CD.sorted = pchisq(as.matrix(CD.sorted), df=1, lower.tail=FALSE)
 
-              #CD.sorted <- apply(S,2,sort,decreasing=T)
-              #CD.sorted = CD.sorted[1:round(nrow(CD.sorted)/20, digits = 0),]
-              #CD.sorted = pchisq(as.matrix(CD.sorted), df=1, lower.tail=F)
+
 
               GDI = colMeans(CD.sorted)
               #GDI = colMeans(CD.sorted)
               GDI =as.data.frame(GDI)
               colnames(GDI) = "mean.pval"
 
-              #GDI$perc.0.1 = as.vector(pchisq(as.matrix(GDI), df=1, lower.tail=F))
+
 
               sum.raw.norm = log(rowSums(as.matrix(object@raw.norm)))
 
@@ -980,10 +1010,10 @@ setMethod("get.GDI","scCOTAN",
 
               exp.cells = (rowSums(cells)/object@n_cells)*100
 
-              GDI =  merge(GDI, as.data.frame(sum.raw.norm), by="row.names",all.x=T)
+              GDI =  merge(GDI, as.data.frame(sum.raw.norm), by="row.names",all.x=TRUE)
               rownames(GDI)= GDI$Row.names
               GDI =  GDI[,2:ncol(GDI)]
-              GDI =  merge(GDI, as.data.frame(exp.cells), by="row.names",all.x=T)
+              GDI =  merge(GDI, as.data.frame(exp.cells), by="row.names",all.x=TRUE)
               rownames(GDI)= GDI$Row.names
               GDI$log.mean.p = -log(GDI$mean.pval)
               GDI$GDI = log(GDI$log.mean.p)
@@ -1086,7 +1116,7 @@ setMethod("plot_GDI","scCOTAN",
 #' @rdname automatic.COTAN.object.creation
 #' @examples
 #'
-#' data("raw")
+#' data("raw.dataset")
 #' obj = automatic.COTAN.object.creation(df= raw,
 #' out_dir =  tempdir(),
 #' GEO = "test_GEO",
@@ -1094,11 +1124,11 @@ setMethod("plot_GDI","scCOTAN",
 #' cond = "test")
 #'
 setGeneric("automatic.COTAN.object.creation", function(df, out_dir, GEO, sc.method,
-                                                       cond, mt = F, mt_prefix="^mt", cores = 1)
+                                                       cond, mt = FALSE, mt_prefix="^mt", cores = 1)
     standardGeneric("automatic.COTAN.object.creation"))
 #' @rdname automatic.COTAN.object.creation
 setMethod("automatic.COTAN.object.creation","data.frame",
-          function(df, out_dir, GEO, sc.method, cond, mt = F, mt_prefix="^mt", cores = 1) {
+          function(df, out_dir, GEO, sc.method, cond, mt = FALSE, mt_prefix="^mt", cores = 1) {
               start_time_all <- Sys.time()
 
               mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
@@ -1116,7 +1146,7 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                                                             face = "plain", colour ="#3C5488FF"))
               obj = methods::new("scCOTAN",raw = df)
               obj = initRaw(obj,GEO = GEO ,sc.method = sc.method,cond = cond)
-              if (mt == F) {
+              if (mt == FALSE) {
                   genes_to_rem = rownames(obj@raw[grep(mt_prefix, rownames(obj@raw)),])
                   obj@raw = obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
                   cells_to_rem = colnames(obj@raw[which(colSums(obj@raw) == 0)])
@@ -1247,10 +1277,10 @@ setMethod("automatic.COTAN.object.creation","data.frame",
 #' @export
 #' @rdname get.observed.ct
 #' @examples
-#' data("Obj_out_cotan_coex_not_approx")
-#' g1 = rownames(Obj_out_cotan_coex_not_approx@raw)[sample(2000, 1)]
-#' g2 = rownames(Obj_out_cotan_coex_not_approx@raw)[sample(2000, 1)]
-#' get.observed.ct(object = Obj_out_cotan_coex_not_approx, g1 = g1, g2 = g2)
+#' data("ERCC.cotan")
+#' g1 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+#' g2 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+#' get.observed.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.observed.ct", function(object,g1,g2) standardGeneric("get.observed.ct"))
 #' @rdname get.observed.ct
 setMethod("get.observed.ct","scCOTAN",
@@ -1299,10 +1329,17 @@ setMethod("get.observed.ct","scCOTAN",
 #' @importFrom Matrix colSums
 #' @rdname get.expected.ct
 #' @examples
-#' data("Obj_out_cotan_coex_not_approx")
-#' g1 = rownames(Obj_out_cotan_coex_not_approx@raw)[sample(2000, 1)]
-#' g2 = rownames(Obj_out_cotan_coex_not_approx@raw)[sample(2000, 1)]
-#' get.expected.ct(object = Obj_out_cotan_coex_not_approx, g1 = g1, g2 = g2)
+#' data("ERCC.cotan")
+#' g1 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+#' g2 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+#' while (g1 %in% ERCC.cotan@hk) {
+#'g1 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+#'}
+#'
+#'while (g2 %in% ERCC.cotan@hk) {
+#'    g2 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+#'}
+#' get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.expected.ct", function(object,g1,g2) standardGeneric("get.expected.ct"))
 #' @rdname get.expected.ct
 setMethod("get.expected.ct","scCOTAN",
@@ -1338,9 +1375,9 @@ setMethod("get.expected.ct","scCOTAN",
 
 
               if(any(is.na(M))){
-                  #print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = T),sep = " "))
+                  #print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = TRUE),sep = " "))
                   #break()
-                  stop(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = T),sep = " "))
+                  stop(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = TRUE),sep = " "))
               }
 
               gc()
