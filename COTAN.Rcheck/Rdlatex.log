@@ -1,0 +1,378 @@
+Hmm ... looks like a package
+Warning in texi2dvi(file = file, pdf = TRUE, clean = clean, quiet = quiet,  :
+  texi2dvi script/program not available, using emulation
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./Rd2.tex
+LaTeX2e <2020-10-01> patch level 2
+L3 programming layer <2020-12-07> xparse <2020-03-03>
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/book.cls
+Document Class: book 2020/04/10 v1.4m Standard LaTeX document class
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/bk10.clo))
+(/usr/share/R/share/texmf/tex/latex/Rd.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/ifthen.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/tools/longtable.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/tools/bm.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/alltt.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/tools/verbatim.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/url/url.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/textcomp.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/inconsolata/zi4.sty
+`inconsolata-zi4' v1.12, 2019/05/17 Text macros for Inconsolata (msharpe)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/xkeyval/keyval.tex)))))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/graphics/color.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/infwarerr/infwarerr.sty))
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/pdfescape/pdfescape.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/etexcmds/etexcmds.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty))
+)
+
+Package hyperref Warning: Option `hyperindex' has already been used,
+(hyperref)                setting the option has no effect on input line 377.
+
+
+Package hyperref Warning: Option `pagebackref' has already been used,
+(hyperref)                setting the option has no effect on input line 377.
+
+) (/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/makeidx.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/inputenc.sty)
+Writing index file Rd2.idx
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+No file Rd2.aux.
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/nameref.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/refcount/refcount.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+)) (/home/seriph/.TinyTeX/texmf-dist/tex/latex/inconsolata/ot1zi4.fd) [1{/home/
+seriph/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+
+LaTeX Font Warning: Font shape `OML/zi4/m/n' undefined
+(Font)              using `OML/cmm/m/it' instead
+(Font)              for symbol `textless' on input line 56.
+
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/inconsolata/ts1zi4.fd) [2] [3]
+[4]
+Overfull \hbox (6.28088pt too wide) in paragraph at lines 249--250
+[][][]$\OT1/zi4/m/n/10 https : / / support . 10xgenomics . com / single-[]cell-
+[]gene-[]expression / datasets / 1 . 1 . 0 / ercc?$[][] 
+[5] [6] [7] [8] [9] [10] [11] [12]
+Overfull \hbox (11.27475pt too wide) in paragraph at lines 685--685
+ []\OT1/zi4/m/n/9 markers.list = c("Reln","Satb2","Cux1","Bcl11b","Tbr1","Sox5"
+,"Foxp2","Slc17a6","Slc17a7"),[] 
+
+Overfull \hbox (5.27168pt too wide) in paragraph at lines 731--731
+ []\OT1/zi4/m/n/9 primary.markers = c("Tbr1","Tubb3","Neurod1", "Stmn1","Notch1
+","Vim","Sox2","Pax6","Hes5")[] 
+[13] [14]
+No file Rd2.ind.
+[15] (./Rd2.aux)
+
+Package rerunfilecheck Warning: File `Rd2.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+ )
+(see the transcript file for additional information){/home/seriph/.TinyTeX/texm
+f-dist/fonts/enc/dvips/inconsolata/i4-ts1.enc}{/home/seriph/.TinyTeX/texmf-dist
+/fonts/enc/dvips/inconsolata/i4-ot1-0.enc}</home/seriph/.TinyTeX/texmf-dist/fon
+ts/type1/public/inconsolata/Inconsolata-zi4r.pfb></home/seriph/.TinyTeX/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></home/seriph/.TinyTeX/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmbx12.pfb></home/seriph/.TinyTeX/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmmi10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmr10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmr12.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmr7.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmsl10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmss12.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmti10.pfb>
+Output written on Rd2.pdf (15 pages, 158459 bytes).
+Transcript written on Rd2.log.
+This is makeindex, version 2.15 [TeX Live 2017] (kpathsea + Thai support).
+Scanning input file Rd2.idx....done (37 entries accepted, 0 rejected).
+Sorting entries....done (196 comparisons).
+Generating output file Rd2.ind....done (82 lines written, 0 warnings).
+Output written in Rd2.ind.
+Transcript written in Rd2.ilg.
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./Rd2.tex
+LaTeX2e <2020-10-01> patch level 2
+L3 programming layer <2020-12-07> xparse <2020-03-03>
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/book.cls
+Document Class: book 2020/04/10 v1.4m Standard LaTeX document class
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/bk10.clo))
+(/usr/share/R/share/texmf/tex/latex/Rd.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/ifthen.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/tools/longtable.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/tools/bm.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/alltt.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/tools/verbatim.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/url/url.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/textcomp.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/inconsolata/zi4.sty
+`inconsolata-zi4' v1.12, 2019/05/17 Text macros for Inconsolata (msharpe)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/xkeyval/keyval.tex)))))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/graphics/color.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/infwarerr/infwarerr.sty))
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/pdfescape/pdfescape.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/etexcmds/etexcmds.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty))
+)
+
+Package hyperref Warning: Option `hyperindex' has already been used,
+(hyperref)                setting the option has no effect on input line 377.
+
+
+Package hyperref Warning: Option `pagebackref' has already been used,
+(hyperref)                setting the option has no effect on input line 377.
+
+) (/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/makeidx.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/inputenc.sty)
+Writing index file Rd2.idx
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+(./Rd2.aux) (/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/nameref.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/refcount/refcount.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+)) (./Rd2.out) (./Rd2.out)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/inconsolata/ot1zi4.fd) [1{/home/ser
+iph/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+
+LaTeX Font Warning: Font shape `OML/zi4/m/n' undefined
+(Font)              using `OML/cmm/m/it' instead
+(Font)              for symbol `textless' on input line 56.
+
+(./Rd2.toc) [2]
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/inconsolata/ts1zi4.fd) [3] [4]
+Overfull \hbox (6.28088pt too wide) in paragraph at lines 249--250
+[][][]$\OT1/zi4/m/n/10 https : / / support . 10xgenomics . com / single-[]cell-
+[]gene-[]expression / datasets / 1 . 1 . 0 / ercc?$[][] 
+[5] [6] [7] [8] [9] [10] [11] [12] [13]
+Overfull \hbox (11.27475pt too wide) in paragraph at lines 685--685
+ []\OT1/zi4/m/n/9 markers.list = c("Reln","Satb2","Cux1","Bcl11b","Tbr1","Sox5"
+,"Foxp2","Slc17a6","Slc17a7"),[] 
+
+Overfull \hbox (5.27168pt too wide) in paragraph at lines 731--731
+ []\OT1/zi4/m/n/9 primary.markers = c("Tbr1","Tubb3","Neurod1", "Stmn1","Notch1
+","Vim","Sox2","Pax6","Hes5")[] 
+[14] [15] (./Rd2.ind [16]
+
+LaTeX Font Warning: Font shape `OT1/zi4/m/it' undefined
+(Font)              using `OT1/zi4/m/n' instead on input line 11.
+
+
+Overfull \hbox (55.8567pt too wide) in paragraph at lines 11--13
+[]\OT1/zi4/m/n/10 automatic.COTAN.object.creation,data.frame-method 
+
+Overfull \hbox (18.43166pt too wide) in paragraph at lines 11--13
+\OT1/cmr/m/it/10 (\OT1/zi4/m/n/10 automatic.COTAN.object.creation\OT1/cmr/m/it/
+10 )\OT1/cmr/m/n/10 , 
+
+Overfull \hbox (20.8567pt too wide) in paragraph at lines 45--47
+[]\OT1/zi4/m/it/10 get.gene.coexpression.space,scCOTAN-method 
+[17]) (./Rd2.aux)
+
+Package rerunfilecheck Warning: File `Rd2.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+ )
+(see the transcript file for additional information){/home/seriph/.TinyTeX/texm
+f-dist/fonts/enc/dvips/inconsolata/i4-ts1.enc}{/home/seriph/.TinyTeX/texmf-dist
+/fonts/enc/dvips/inconsolata/i4-ot1-0.enc}</home/seriph/.TinyTeX/texmf-dist/fon
+ts/type1/public/inconsolata/Inconsolata-zi4r.pfb></home/seriph/.TinyTeX/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></home/seriph/.TinyTeX/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmbx12.pfb></home/seriph/.TinyTeX/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmmi10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmr10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmr12.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmr7.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmsl10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmss12.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmsy10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmti10.pfb>
+Output written on Rd2.pdf (17 pages, 172589 bytes).
+Transcript written on Rd2.log.
+This is makeindex, version 2.15 [TeX Live 2017] (kpathsea + Thai support).
+Scanning input file Rd2.idx....done (37 entries accepted, 0 rejected).
+Sorting entries....done (196 comparisons).
+Generating output file Rd2.ind....done (82 lines written, 1 warning).
+Output written in Rd2.ind.
+Transcript written in Rd2.ilg.
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020) (preloaded format=pdflatex)
+ restricted \write18 enabled.
+entering extended mode
+(./Rd2.tex
+LaTeX2e <2020-10-01> patch level 2
+L3 programming layer <2020-12-07> xparse <2020-03-03>
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/book.cls
+Document Class: book 2020/04/10 v1.4m Standard LaTeX document class
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/bk10.clo))
+(/usr/share/R/share/texmf/tex/latex/Rd.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/ifthen.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/tools/longtable.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/tools/bm.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/alltt.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/tools/verbatim.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/url/url.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/textcomp.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/inconsolata/zi4.sty
+`inconsolata-zi4' v1.12, 2019/05/17 Text macros for Inconsolata (msharpe)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/xkeyval/xkeyval.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/xkeyval/xkeyval.tex
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/xkeyval/xkvutils.tex
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/xkeyval/keyval.tex)))))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/graphics/color.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/graphics-def/pdftex.def))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/iftex/iftex.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/infwarerr/infwarerr.sty))
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/pdfescape/pdfescape.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/auxhook/auxhook.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/etexcmds/etexcmds.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/atbegshi-ltx.sty))
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/atveryend-ltx.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty))
+)
+
+Package hyperref Warning: Option `hyperindex' has already been used,
+(hyperref)                setting the option has no effect on input line 377.
+
+
+Package hyperref Warning: Option `pagebackref' has already been used,
+(hyperref)                setting the option has no effect on input line 377.
+
+) (/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/makeidx.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/base/inputenc.sty)
+Writing index file Rd2.idx
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def)
+(./Rd2.aux) (/home/seriph/.TinyTeX/texmf-dist/tex/latex/hyperref/nameref.sty
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/refcount/refcount.sty)
+(/home/seriph/.TinyTeX/texmf-dist/tex/generic/gettitlestring/gettitlestring.sty
+)) (./Rd2.out) (./Rd2.out)
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/inconsolata/ot1zi4.fd) [1{/home/ser
+iph/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+
+LaTeX Font Warning: Font shape `OML/zi4/m/n' undefined
+(Font)              using `OML/cmm/m/it' instead
+(Font)              for symbol `textless' on input line 56.
+
+(./Rd2.toc) [2]
+(/home/seriph/.TinyTeX/texmf-dist/tex/latex/inconsolata/ts1zi4.fd) [3] [4]
+[5]
+Overfull \hbox (6.28088pt too wide) in paragraph at lines 249--250
+[][][]$\OT1/zi4/m/n/10 https : / / support . 10xgenomics . com / single-[]cell-
+[]gene-[]expression / datasets / 1 . 1 . 0 / ercc?$[][] 
+[6] [7] [8] [9] [10] [11] [12] [13]
+Overfull \hbox (11.27475pt too wide) in paragraph at lines 685--685
+ []\OT1/zi4/m/n/9 markers.list = c("Reln","Satb2","Cux1","Bcl11b","Tbr1","Sox5"
+,"Foxp2","Slc17a6","Slc17a7"),[] 
+
+Overfull \hbox (5.27168pt too wide) in paragraph at lines 731--731
+ []\OT1/zi4/m/n/9 primary.markers = c("Tbr1","Tubb3","Neurod1", "Stmn1","Notch1
+","Vim","Sox2","Pax6","Hes5")[] 
+[14] [15] (./Rd2.ind [16]
+
+LaTeX Font Warning: Font shape `OT1/zi4/m/it' undefined
+(Font)              using `OT1/zi4/m/n' instead on input line 11.
+
+
+Overfull \hbox (55.8567pt too wide) in paragraph at lines 11--13
+[]\OT1/zi4/m/n/10 automatic.COTAN.object.creation,data.frame-method 
+
+Overfull \hbox (18.43166pt too wide) in paragraph at lines 11--13
+\OT1/cmr/m/it/10 (\OT1/zi4/m/n/10 automatic.COTAN.object.creation\OT1/cmr/m/it/
+10 )\OT1/cmr/m/n/10 , 
+
+Overfull \hbox (20.8567pt too wide) in paragraph at lines 45--47
+[]\OT1/zi4/m/it/10 get.gene.coexpression.space,scCOTAN-method 
+[17]) (./Rd2.aux)
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+ )
+(see the transcript file for additional information){/home/seriph/.TinyTeX/texm
+f-dist/fonts/enc/dvips/inconsolata/i4-ts1.enc}{/home/seriph/.TinyTeX/texmf-dist
+/fonts/enc/dvips/inconsolata/i4-ot1-0.enc}</home/seriph/.TinyTeX/texmf-dist/fon
+ts/type1/public/inconsolata/Inconsolata-zi4r.pfb></home/seriph/.TinyTeX/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></home/seriph/.TinyTeX/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmbx12.pfb></home/seriph/.TinyTeX/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmmi10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts
+/type1/public/amsfonts/cm/cmr10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/typ
+e1/public/amsfonts/cm/cmr12.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/p
+ublic/amsfonts/cm/cmr7.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmsl10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public/am
+sfonts/cm/cmss12.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public/amsfo
+nts/cm/cmsy10.pfb></home/seriph/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmti10.pfb>
+Output written on Rd2.pdf (17 pages, 172787 bytes).
+Transcript written on Rd2.log.
+Saving output to ‘COTAN-manual.pdf’ ...
+Done
+You may want to clean up by 'rm -Rf /tmp/RtmpDPomUj/Rd2pdf5a5785d77cf'

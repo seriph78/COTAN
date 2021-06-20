@@ -1,0 +1,109 @@
+
+R version 4.1.0 (2021-05-18) -- "Camp Pontanezen"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> Sys.setenv(R_TESTS="")
+> library(testthat)
+> library(COTAN)
+> test_check("COTAN")
+[1] "Initializing S4 object"
+[1] "Initializing S4 object"
+[1] "Start estimation mu with linear method"
+[1] 2000  815
+      rowname CTATTGATCAAA GCCGAGTAAGTC CACGCCGTCCCA TAAATACGTTAT GCGGAGCCTCCT
+1834   Tuba1a    30.128165    57.823526    36.613679     8.304301     54.92052
+1119     Nnat    73.168400    43.104810    46.784146    18.684677     51.86938
+1787   Tmsb10    20.444112    14.718716    11.187513    16.608602     10.67899
+1788   Tmsb4x     2.152012     7.359358    26.443213     6.228226      3.05114
+1841    Tubb5    11.836065    10.513368    13.221606     0.000000      9.15342
+1837   Tubb2b     5.380029    10.513368     7.119327     2.076075     10.67899
+51       Actb    11.836065    15.770052     9.153420     4.152151     13.73013
+801  Hsp90ab1     5.380029     6.308021     6.102280    16.608602      6.10228
+1838    Tubb3     5.380029    11.564705     2.034093     0.000000     13.73013
+917    Malat1     5.380029    10.513368     3.051140    31.141129      6.10228
+1694    Stmn2     9.684053     3.154010     4.068187     2.076075      0.00000
+1460    Rpl32     2.152012    13.667379     8.136373    12.456452      6.10228
+653     Gap43     0.000000     3.154010     0.000000     0.000000      4.57671
+1513     Rtn1     7.532041     1.051337    15.255700     0.000000      4.57671
+248     Calm1     3.228018     1.051337     3.051140     4.152151      4.57671
+     GGTGCTCATAGA CCTTCCACACTG TCCATTCAACTG
+1834    14.796038    45.960822    33.698830
+1119     9.247524     7.070896    11.232943
+1787    18.495048    37.122203    26.959064
+1788    14.796038     7.070896    29.205652
+1841    11.097029    12.374068    20.219298
+1837    14.796038    15.909515    13.479532
+51       3.699010     3.535448    13.479532
+801      9.247524     3.535448    13.479532
+1838     7.398019    21.212687     2.246589
+917      5.548514     1.767724     0.000000
+1694     5.548514    24.748135    13.479532
+1460    11.097029     1.767724     2.246589
+653     25.893067     5.303172    15.726120
+1513     5.548514    10.606344     8.986355
+248      1.849505    14.141792    15.726120
+[1] "cotan analysis"
+[1] "mu estimator creation"
+[1] "save effective constitutive genes"
+[1] "start a minimization"
+[1] "Next gene: Trim2 number 1810"
+[1] "Final trance!"
+[1] "a min: -0.08001708984375 | a max 24.5703125 | negative a %: 2.4"
+[1] "coex dataframe creation"
+[1] "Generating contingency tables for observed data"
+[1] "creation of observed yes/yes contingency table"
+[1] "mu estimator creation"
+[1] "expected contingency tables creation"
+[1] "The distance between estimated n of zeros and observed number of zero is 0.0241643297635298 over 2000"
+[1] "Done"
+[1] "coex estimation"
+[1] "Diagonal coex values substituted with 0"
+  [1] "0610009D07Rik" "0610010F05Rik" "1110001J03Rik" "1110004F10Rik"
+  [5] "1110008F13Rik" "1110038B12Rik" "1500011B03Rik" "1500012F01Rik"
+  [9] "1700020I14Rik" "1700021F05Rik" "1700025G04Rik" "1810022K09Rik"
+ [13] "1810037I17Rik" "2010107E04Rik" "2010107G23Rik" "2210016L21Rik"
+ [17] "2310036O22Rik" "2410002F23Rik" "2410006H16Rik" "2410015M20Rik"
+ [21] "2410066E13Rik" "2610017I09Rik" "2610203C20Rik" "2700029M09Rik"
+ [25] "2700060E02Rik" "2700094K13Rik" "2810004N23Rik" "2810008D09Rik"
+ [29] "2810428I15Rik" "2900011O08Rik" "4833420G17Rik" "4833439L19Rik"
+ [33] "4921524J17Rik" "4930506M07Rik" "4931428F04Rik" "6330403K07Rik"
+ [37] "9130024F11Rik" "9330159F19Rik" "A030009H04Rik" "Aamp"         
+ [41] "Abcf1"         "Abr"           "Abracl"        "Acat1"        
+ [45] "Acat2"         "Acbd5"         "Acbd6"         "Acin1"        
+ [49] "Aco2"          "Acot7"         "Actb"          "Actl6b"       
+ [53] "Actr10"        "Actr1a"        "Actr2"         "Actr3"        
+ [57] "Adam10"        "Add1"          "Add2"          "Adh5"         
+ [61] "Adprh"         "Adss"          "Aes"           "Aff4"         
+ [65] "Aggf1"         "Agrn"          "Ahi1"          "Ahsa1"        
+ [69] "Ahsa2"         "Aimp1"         "Akap8"         "Akap8l"       
+ [73] "Akap9"         "Akirin2"       "Akr1a1"        "Akt3"         
+ [77] "Aldoa"         "Aldoc"         "Alg2"          "Amer2"        
+ [81] "Anapc11"       "Anapc13"       "Anapc16"       "Anapc5"       
+ [85] "Ank2"          "Ank3"          "Ankra2"        "Ankrd10"      
+ [89] "Ankrd11"       "Ankrd12"       "Ankrd32"       "Anp32a"       
+ [93] "Anp32b"        "Anp32e"        "Ap1m1"         "Ap1s1"        
+ [97] "Ap2m1"         "Ap2s1"         "Ap3b2"         "Apba2"        
+[1] "Get p-values on a set of genes on columns on a set of genes on rows"
+[1] "Using function S"
+[1] "function to generate S "
+[1] "function to generate GDI dataframe"
+[1] "Using S"
+[1] "function to generate S "
+[ FAIL 0 | WARN 0 | SKIP 0 | PASS 12 ]
+> 
+> proc.time()
+   user  system elapsed 
+ 40.007  58.187  27.972 
