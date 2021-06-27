@@ -264,6 +264,10 @@ setMethod("cotan_analysis","scCOTAN",
           function(object, cores= 1) {
 
               print("cotan analysis")
+              if (Sys.info()['sysname'] == "Windows") {
+                  print("On windows the numebr of cores used will be 1! Multicore is not supported.")
+                  cores= 1
+              }
 
               cells=as.matrix(object@raw)
               #---------------------------------------------------
