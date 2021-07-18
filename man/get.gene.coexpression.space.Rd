@@ -31,5 +31,5 @@ In this case we denote it as local differentiation index (LDI) relative to V.
 \examples{
 data("ERCC.cotan")
 df = get.gene.coexpression.space(ERCC.cotan, n.genes.for.marker = 10,
-primary.markers=rownames(ERCC.cotan@raw[sample(nrow(ERCC.cotan@raw),5),]))
+primary.markers=get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)),5)])
 }

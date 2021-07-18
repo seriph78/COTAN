@@ -198,7 +198,7 @@ setMethod("fun_linear","scCOTAN",
               ppp = pca_cells
               ppp = scale(ppp)
               dist_cells = stats::dist(ppp, method = "euclidean") # mhalanobis
-              colnames(pca_cells) = paste("PC",c(1:ncol(pca_cells)), sep = "")
+              colnames(pca_cells) = paste("PC",seq_len(ncol(pca_cells)), sep = "")
               pca_cells = as.data.frame(pca_cells)
 
               output = list("dist_cells"=dist_cells, "to_clust"=to_clust,"pca_cells"=pca_cells,
@@ -337,11 +337,10 @@ setMethod("expected_ct","scCOTAN",
               print(paste("The distance between estimated n of zeros and observed number of zero is",
                           dist_zeros,"over", length(rownames(M)), sep = " "))
 
-              if(any(is.na(M))){
-                  #print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = TRUE),sep = " "))
-                  #break()
-                  stop(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = TRUE),sep = " "))
-              }
+              #if(any(is.na(M))){
+               #   stop("Errore: some Na in matrix M ", which(is.na(M),arr.ind = TRUE))
+              #}
+              stopifnot("Errore: some Na in matrix M " = !any(is.na(M)))
 
               gc()
               estimator_no_no = M %*% t(M)
@@ -377,21 +376,13 @@ setMethod("get.G","scCOTAN",
 
               est = expected_ct(object)
               for (i in est) {
-                  if(any(i == 0 )){
-                      #print("Some expected values are 0!")
-                      #break()
-                      stop("Some expected values are 0!")
-                  }
+                  stopifnot("Some expected values are 0!" = !any(i == 0 ))
+                  #if(any(i == 0 )){
+                   #   stop("Some expected values are 0!")
+                  #}
               }
 
-              #new_estimator_si_si = as.matrix(est$estimator_yes_yes)
-              #new_estimator_si_si[new_estimator_si_si < 1] <- 1
-              #new_estimator_si_no = as.matrix(est$estimator_yes_no)
-              #new_estimator_si_no[new_estimator_si_no < 1] <- 1
-              #new_estimator_no_no = as.matrix(est$estimator_no_no)
-              #new_estimator_no_no[new_estimator_no_no < 1] <- 1
-              #new_estimator_no_si = as.matrix(est$estimator_no_yes)
-              #new_estimator_no_si[new_estimator_no_si < 1] <- 1
+
 
 
               print("G estimation")

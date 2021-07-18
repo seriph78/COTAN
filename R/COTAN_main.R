@@ -67,11 +67,11 @@ setMethod("initRaw","scCOTAN",
                     print("WARNING! Input data contains not integer numbers!")
 
                 }
-                object@meta[1,1:2] = c("GEO:",GEO)
-                object@meta[2,1:2] = c("scRNAseq method:",sc.method)
+                object@meta[1,seq_len(2)] = c("GEO:",GEO)
+                object@meta[2,seq_len(2)] = c("scRNAseq method:",sc.method)
                 object@meta[3,1] = "starting n. of cells:"
                 object@meta[3,2] = ncol(object@raw)
-                object@meta[4,1:2] = c("Condition sample:",cond)
+                object@meta[4,seq_len(2)] = c("Condition sample:",cond)
 
               #object@clusters = rep(NA,ncol(object@raw))
               #names(object@clusters)=colnames(object@raw)
@@ -210,7 +210,8 @@ setMethod("clean","scCOTAN",
                 D = data.frame("means"=rowMeans(C[2:length(colnames(C))]),
                                "n"=NA )
                 D = D[D$means>0,]
-                D$n = c(1:length(D$means))
+                #D$n = c(1:length(D$means))
+                D$n = seq_along(D$means)
 
                 # check if the pca plot is clean enought and from the printed genes,
                 #if the smalest group of cells are caratterised by particular genes
@@ -426,13 +427,15 @@ setMethod("get.pval","scCOTAN",
 
                   # a set for rows, not Genome Wide
                   cond.row = "on a set of genes on rows"
-                  if (is.null(gene.set.col)) {
-                      #print("Error: can't have genome wide on columns and not rows! Use a
-                      #subset on gene.set.col, not on rows.")
-                      #break()
-                      stop("Error: can't have genome wide on columns and not rows! Use a
-                           subset on gene.set.col, not on rows.")
-                  }
+
+                  stopifnot("can't have genome wide on columns and not rows! Use a
+                           subset on gene.set.col, not on rows." = !is.null(gene.set.col))
+
+                  #if (is.null(gene.set.col)) {
+                  #    stop("Error: can't have genome wide on columns and not rows! Use a
+                  #         subset on gene.set.col, not on rows.")
+                  #}
+
                   cond.col = "on a set of genes on columns"
 
               }else{
@@ -875,7 +878,7 @@ setMethod("plot_general.heatmap","ANY",
 #' @examples
 #' data("ERCC.cotan")
 #' df = get.gene.coexpression.space(ERCC.cotan, n.genes.for.marker = 10,
-#' primary.markers=rownames(ERCC.cotan@raw[sample(nrow(ERCC.cotan@raw),5),]))
+#' primary.markers=get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)),5)])
 setGeneric("get.gene.coexpression.space", function(object, n.genes.for.marker = 25, primary.markers)
     standardGeneric("get.gene.coexpression.space"))
 #' @rdname get.gene.coexpression.space
@@ -927,7 +930,8 @@ setMethod("get.gene.coexpression.space","scCOTAN",
               # This is the LDI 5%
               CD.sorted <- t(apply(t(S),2,sort,decreasing=TRUE))
               #CD.sorted = CD.sorted[,1:round(ncol(CD.sorted)/5, digits = 0)] #20
-              CD.sorted = CD.sorted[,1:round(ncol(CD.sorted)/10, digits = 0)] #20
+              rg = round(ncol(CD.sorted)/10, digits = 0)
+              CD.sorted = CD.sorted[,seq_len(rg)] #20
               CD.sorted = pchisq(as.matrix(CD.sorted), df=1, lower.tail=FALSE)
 
               quant.p.val2 = rowMeans(CD.sorted)
@@ -994,7 +998,8 @@ setMethod("get.GDI","scCOTAN",
               S = as.data.frame(as.matrix(S))
               #G = as.data.frame(as.matrix(G))
               CD.sorted <- apply(S,2,sort,decreasing=TRUE)
-              CD.sorted = CD.sorted[1:round(nrow(CD.sorted)/20, digits = 0),]
+              rg =round(nrow(CD.sorted)/20, digits = 0)
+              CD.sorted = CD.sorted[seq_len(rg),]
               CD.sorted = pchisq(as.matrix(CD.sorted), df=1, lower.tail=FALSE)
 
 
@@ -1219,7 +1224,7 @@ setMethod("automatic.COTAN.object.creation","data.frame",
               plot_nu
               dev.off()
 
-              nu_df = data.frame("nu"= sort(obj@nu), "n"=c(1:length(obj@nu)))
+              nu_df = data.frame("nu"= sort(obj@nu), "n"=seq_along(obj@nu))
 
               #pdf(paste(out_dir,"cleaning/",t,"_plots_efficiency.pdf", sep = ""))
               pdf(file.path(out_dir,"cleaning",paste(t,"_plots_efficiency.pdf", sep = "")))
@@ -1282,8 +1287,8 @@ setMethod("automatic.COTAN.object.creation","data.frame",
 #' @rdname get.observed.ct
 #' @examples
 #' data("ERCC.cotan")
-#' g1 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
-#' g2 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+#' g1 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+#' g2 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 #' get.observed.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.observed.ct", function(object,g1,g2) standardGeneric("get.observed.ct"))
 #' @rdname get.observed.ct
@@ -1334,14 +1339,14 @@ setMethod("get.observed.ct","scCOTAN",
 #' @rdname get.expected.ct
 #' @examples
 #' data("ERCC.cotan")
-#' g1 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
-#' g2 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
-#' while (g1 %in% ERCC.cotan@hk) {
-#'g1 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+#' g1 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+#' g2 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+#' while (g1 %in% get.constitutive.genes(ERCC.cotan)) {
+#'g1 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 #'}
 #'
-#'while (g2 %in% ERCC.cotan@hk) {
-#'    g2 = rownames(ERCC.cotan@raw)[sample(nrow(ERCC.cotan@raw), 1)]
+#'while (g2 %in% get.constitutive.genes(ERCC.cotan)) {
+#'    g2 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 #'}
 #' get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.expected.ct", function(object,g1,g2) standardGeneric("get.expected.ct"))
@@ -1354,11 +1359,10 @@ setMethod("get.expected.ct","scCOTAN",
                   (a <= 0)*(exp(-(1+abs(a))*mu)) + (a > 0)*(1+abs(a)*mu)^(-1/abs(a))
               }
 
-              if(g1 %in% object@hk | g2 %in% object@hk ){
-                  #print("Error. A gene is constitutive!")
-                  #break()
-                  stop("Error. A gene is constitutive!")
-              }
+              stopifnot("a gene is constitutive!"= !(g1 %in% object@hk | g2 %in% object@hk) )
+              #if(g1 %in% object@hk | g2 %in% object@hk ){
+              #    stop("Error. A gene is constitutive!")
+              #}
               mu_estimator = object@lambda[c(g1,g2)] %*% t(object@nu)
 
               cells=as.matrix(object@raw)[c(g1,g2),]
@@ -1377,12 +1381,10 @@ setMethod("get.expected.ct","scCOTAN",
               dist_zeros = sqrt(sum((n_zero_esti - n_zero_obs)^2))
 
 
-
-              if(any(is.na(M))){
-                  #print(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = TRUE),sep = " "))
-                  #break()
-                  stop(paste("Errore: some Na in matrix M", which(is.na(M),arr.ind = TRUE),sep = " "))
-              }
+              stopifnot("Errore: some Na in matrix M " = !any(is.na(M)))
+              #if(any(is.na(M))){
+               #   stop("Errore: some Na in matrix M ", which(is.na(M),arr.ind = TRUE))
+              #}
 
               gc()
               estimator_no_no = M %*% t(M)
@@ -1404,3 +1406,276 @@ setMethod("get.expected.ct","scCOTAN",
           }
 )
 
+#' get.constitutive.genes
+#' This function return the genes expressed in all cells in the dataset.
+#'
+#' @param object A COTAN object
+#'
+#' @return an array containing all genes expressed in all cells
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.constitutive.genes(ERCC.cotan)
+#'
+setGeneric("get.constitutive.genes", function(object) standardGeneric("get.constitutive.genes"))
+#' @rdname get.constitutive.genes
+setMethod("get.constitutive.genes","scCOTAN",
+          function(object) {
+            gg = object@hk
+
+            return(gg)
+
+          }
+)
+
+#' get.genes
+#'
+#' This function extract all genes in the dataset.
+#'
+#' @param object A COTAN object
+#'
+#' @return a gene array
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.genes(ERCC.cotan)[1:10]
+setGeneric("get.genes", function(object) standardGeneric("get.genes"))
+#' @rdname get.genes
+setMethod("get.genes","scCOTAN",
+          function(object) {
+              gg = rownames(object@raw)
+
+              return(gg)
+
+          }
+)
+
+
+#' get.metadata
+#'
+#' This function extract the meta date stored for the dataset.
+#'
+#' @param object A COTAN object
+#'
+#' @return the metatdata dataframe
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.metadata(ERCC.cotan)
+setGeneric("get.metadata", function(object) standardGeneric("get.metadata"))
+#' @rdname get.metadata
+setMethod("get.metadata","scCOTAN",
+          function(object) {
+              meta = object@meta
+              return(meta)
+          }
+)
+
+
+#' get.rawdata
+#'
+#' This function extract the raw count table.
+#'
+#' @param object A COTAN object
+#'
+#' @return the raw count dataframe
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.rawdata(ERCC.cotan)[1:10,1:10]
+setGeneric("get.rawdata", function(object) standardGeneric("get.rawdata"))
+#' @rdname get.rawdata
+setMethod("get.rawdata","scCOTAN",
+          function(object) {
+              meta = object@raw
+              return(meta)
+          }
+)
+
+
+#' get.normdata
+#'
+#' This function extract the normalized count table.
+#'
+#' @param object A COTAN object
+#'
+#' @return the normalized count dataframe (divided by nu).
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.normdata(ERCC.cotan)[1:10,1:10]
+setGeneric("get.normdata", function(object) standardGeneric("get.normdata"))
+#' @rdname get.normdata
+setMethod("get.normdata","scCOTAN",
+          function(object) {
+              meta = object@raw.norm
+              return(meta)
+          }
+)
+
+
+#' get.nu
+#'
+#' This function extract the nu array.
+#'
+#' @param object A COTAN object
+#'
+#' @return the nu array.
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.nu(ERCC.cotan)[1:10]
+setGeneric("get.nu", function(object) standardGeneric("get.nu"))
+#' @rdname get.nu
+setMethod("get.nu","scCOTAN",
+          function(object) {
+              meta = object@nu
+              return(meta)
+          }
+)
+
+#' get.lambda
+#'
+#' This function extract the lambda array (mean expression for each gene).
+#'
+#' @param object A COTAN object
+#'
+#' @return the lambda array.
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.lambda(ERCC.cotan)[1:10]
+setGeneric("get.lambda", function(object) standardGeneric("get.lambda"))
+#' @rdname get.lambda
+setMethod("get.lambda","scCOTAN",
+          function(object) {
+              meta = object@lambda
+              return(meta)
+          }
+)
+
+
+
+#' get.a
+#'
+#' This function extract the a array.
+#'
+#' @param object A COTAN object
+#'
+#' @return the a array.
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.a(ERCC.cotan)[1:10]
+setGeneric("get.a", function(object) standardGeneric("get.a"))
+#' @rdname get.a
+setMethod("get.a","scCOTAN",
+          function(object) {
+              meta = object@a
+              return(meta)
+          }
+)
+
+
+#' get.cell.number
+#'
+#' This function extract number of analysed cells.
+#'
+#' @param object A COTAN object
+#'
+#' @return the cell number value.
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.cell.number(ERCC.cotan)
+setGeneric("get.cell.number", function(object) standardGeneric("get.cell.number"))
+#' @rdname get.cell.number
+setMethod("get.cell.number","scCOTAN",
+          function(object) {
+              num = object@n_cells
+              return(num)
+          }
+)
+
+
+
+#' get.cell.size
+#'
+#' This finction extract the cell raw libray size.
+#'
+#' @param object A COTAN object
+#'
+#' @return an array with the library sizes
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' get.cell.size(ERCC.cotan)[1:10]
+setGeneric("get.cell.size", function(object) standardGeneric("get.cell.size"))
+#' @rdname get.cell.size
+setMethod("get.cell.size","scCOTAN",
+          function(object) {
+              num = colSums(object@raw)
+              return(num)
+          }
+)
+
+
+#' drop.genes.cells
+#'
+#' This finction remove an array of genes and/or cells from the original object raw matrix.
+#'
+#' @param object a COTAN object
+#' @param genes an array of gene names
+#' @param cells an array of cell names
+#'
+#' @return the original object but with the raw matrix without the indicated cells and/or genes.
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' genes.to.rem = names(get.genes(ERCC.cotan)[1:10])
+#' cells.to.rem = names(get.cell.size(ERCC.cotan)[1:10])
+#' ERCC.cotan = drop.genes.cells(ERCC.cotan,genes.to.rem,cells.to.rem )
+setGeneric("drop.genes.cells", function(object, genes, cells) standardGeneric("drop.genes.cells"))
+#' @rdname drop.genes.cells
+setMethod("drop.genes.cells","scCOTAN",
+          function(object, genes, cells) {
+              object@raw = object@raw[!rownames(object@raw) %in% genes,]
+              object@raw = object@raw[,!colnames(object@raw) %in% cells]
+              return(object)
+          }
+)
+
+#' add.row.to.meta
+#'
+#' This function is usefull to add a line of information to the infomration dataframe (metadata).
+#'
+#' @param object a COTAN object
+#' @param text.line an array containing the information
+#'
+#' @return the updated COTAN object
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' text = c("Test", "This is a test")
+#' ERCC.cotan = add.row.to.meta(ERCC.cotan, text)
+#' get.metadata(ERCC.cotan)
+setGeneric("add.row.to.meta", function(object, text.line) standardGeneric("add.row.to.meta"))
+#' @rdname add.row.to.meta
+setMethod("add.row.to.meta","scCOTAN",
+          function(object, text.line) {
+              object@meta[(nrow(object@meta)+1),seq_len(length(text.line))] = text.line
+              return(object)
+          }
+)

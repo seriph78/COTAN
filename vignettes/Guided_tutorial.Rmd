@@ -86,10 +86,9 @@ Now we can start the cleaning. Analysis requires and starts from a matrix of raw
 
 If we do not want to consider the mitochondrial genes we can remove them before starting the analysis.
 ```{r}
-genes_to_rem = rownames(obj@raw[grep('^mt', rownames(obj@raw)),]) 
-obj@raw = obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
-cells_to_rem = colnames(obj@raw[which(colSums(obj@raw) == 0)])
-obj@raw = obj@raw[,!colnames(obj@raw) %in% cells_to_rem]
+genes_to_rem = get.genes(obj)[grep('^mt', get.genes(obj))] 
+cells_to_rem = names(get.cell.size(obj)[which(get.cell.size(obj) == 0)])
+obj = drop.genes.cells(obj,genes_to_rem,cells_to_rem )
 ```
 We want also to define a prefix to identify the sample.
 
@@ -99,7 +98,7 @@ t = "ERCC"
 
 print(paste("Condition ",t,sep = ""))
 #--------------------------------------
-n_cells = length(colnames(obj@raw))
+n_cells = length(get.cell.size(object = obj))
 print(paste("n cells", n_cells, sep = " "))
 
 n_it = 1
@@ -147,8 +146,8 @@ if (length(ttm$cl1) < length(ttm$cl2)) {
   to_rem = ttm$cl2
 }
 n_it = n_it+1
-obj@raw = obj@raw[,!colnames(obj@raw) %in% to_rem]
-#obj@raw = obj@raw[rownames(obj@raw) %in% rownames(cells),colnames(obj@raw) %in% colnames(cells)]
+obj = drop.genes.cells(object = obj,genes = c(),cells = to_rem)
+
 gc()
 
 ttm = clean(obj)
@@ -183,7 +182,7 @@ dev.off()
 To color the pca based on nu_j (so the cells' efficiency)
 
 ```{r}
-nu_est = round(obj@nu, digits = 7)
+nu_est = round(get.nu(object = obj), digits = 7)
 
 plot.nu <-ggplot(ttm$pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
 
@@ -206,7 +205,7 @@ plot.nu
 
 The next part is use to remove the cells with efficiency too low.
 ```{r}
-nu_df = data.frame("nu"= sort(obj@nu), "n"=c(1:length(obj@nu)))
+nu_df = data.frame("nu"= sort(get.nu(obj)), "n"=c(1:length(get.nu(obj))))
 
 ggplot(nu_df, aes(x = n, y=nu)) + 
     geom_point(colour = "#8491B4B2", size=1)+
@@ -235,10 +234,11 @@ plot.ude
 
 We also save the defined threshold in the metadata and re run the estimation
 ```{r}
-obj@meta[(nrow(obj@meta)+1),1:2] = c("Threshold low UDE cells:",yset)
+add.row.to.meta(obj,c("Threshold low UDE cells:",yset)) 
 
 to_rem = rownames(nu_df[which(nu_df$nu < yset),])
-obj@raw = obj@raw[, !colnames(obj@raw) %in% to_rem]
+
+obj = drop.genes.cells(object = obj, genes = c(),cells =  to_rem)
 ```
 
 Repeat the estimation after the cells are removed
@@ -261,7 +261,7 @@ dev.off()
 Just to check again, we plot the final efficiency colored PCA
 
 ```{r}
-nu_est = round(obj@nu, digits = 7)
+nu_est = round(get.nu(object = obj), digits = 7)
 plot.nu <-ggplot(ttm$pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
 plot.nu = plot.nu + geom_point(size = 2,alpha= 0.8)+
   scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
@@ -287,7 +287,6 @@ To storage efficiency of all the observed tables only the yes_yes is stored.
 Note that if will be necessary re-computing the yes-yes table, the yes-yes table should be cancelled before running cotan_analysis.
 
 ```{r}
-# obj@yes_yes = c()
 obj = cotan_analysis(obj,cores = 2)
 ```
 
