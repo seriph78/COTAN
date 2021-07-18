@@ -11,8 +11,8 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 7,
-  fig.height = 7
+  fig.width = 6,
+  fig.height = 6
 )
 #options(rmarkdown.html_vignette.check_title = F)
 ```
@@ -234,7 +234,7 @@ plot.ude
 
 We also save the defined threshold in the metadata and re run the estimation
 ```{r}
-add.row.to.meta(obj,c("Threshold low UDE cells:",yset)) 
+obj = add.row.to.meta(obj,c("Threshold low UDE cells:",yset)) 
 
 to_rem = rownames(nu_df[which(nu_df$nu < yset),])
 
