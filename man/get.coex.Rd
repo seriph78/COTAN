@@ -22,6 +22,6 @@ It need to be run after \code{\link{cotan_analysis}}
 \examples{
 
 data("ERCC.cotan")
-obj = get.coex(ERCC.cotan)
+obj <- get.coex(ERCC.cotan)
 
 }

@@ -24,14 +24,14 @@ This function is used to get the expected contingency table for a given pair of 
 }
 \examples{
 data("ERCC.cotan")
-g1 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
-g2 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+g1 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+g2 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 while (g1 \%in\% get.constitutive.genes(ERCC.cotan)) {
-g1 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+g1 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 }
 
 while (g2 \%in\% get.constitutive.genes(ERCC.cotan)) {
-   g2 = get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+   g2 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 }
 get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 }

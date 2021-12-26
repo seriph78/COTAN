@@ -43,7 +43,7 @@ efficiency estimated (nu)}
 \examples{
 
 data("ERCCraw")
-obj = new("scCOTAN",raw = data)
+obj <- new("scCOTAN",raw = data)
 
 
 }

@@ -22,7 +22,7 @@ This function is usefull to add a line of information to the infomration datafra
 }
 \examples{
 data("ERCC.cotan")
-text = c("Test", "This is a test")
-ERCC.cotan = add.row.to.meta(ERCC.cotan, text)
+text <- c("Test", "This is a test")
+ERCC.cotan <- add.row.to.meta(ERCC.cotan, text)
 get.metadata(ERCC.cotan)
 }

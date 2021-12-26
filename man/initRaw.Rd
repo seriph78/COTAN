@@ -28,8 +28,8 @@ It starts to fill some fields of cotan object.
 \examples{
 
 data("raw.dataset")
-obj = new("scCOTAN", raw = raw.dataset)
-obj = initRaw(obj, GEO="code" , sc.method="10X",cond = "mouse dataset")
+obj <- new("scCOTAN", raw = raw.dataset)
+obj <- initRaw(obj, GEO="code" , sc.method="10X",cond = "mouse dataset")
 
 
 }

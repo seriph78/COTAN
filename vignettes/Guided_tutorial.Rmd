@@ -1,10 +1,23 @@
 ---
 title: "Guided tutorial"
-output: rmarkdown::html_vignette
+author: 
+- name: "Silvia Giulia Galfrè"
+  affiliation: "Department of Biology, University of Rome Tor Vergata"
+- name: "Francesco Morandin"
+  affiliation: "Department of Mathematical, Physical and Computer Sciences, University of Parma"
+- name: "Marco  Pietrosanto"
+  affiliation: "Department of Biology, University of Rome Tor Vergata"
+- name: "Federico Cremisi"
+  affiliation: "Scuola Normale Superiore di Pisa"
+- name: "Manuela Helmer-Citterich"
+  affiliation: "Department of Biology, University of Rome Tor Vergata"
+package: COTAN
+output: 
+    BiocStyle::html_document
 vignette: >
   %\VignetteIndexEntry{Guided tutorial}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteEncoding{UTF-8} 
 ---
 
 ```{r, include = FALSE}

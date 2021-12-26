@@ -47,12 +47,15 @@ with these markers with a p-value smaller than the set threshold. Than all relat
 Primary markers will be plotted as groups of rows. Markers list will be plotted as columns.
 }
 \examples{
-\dontrun{
-plot_general.heatmap(dir=input_dir,
-condition = "E17.5",
-prim.markers  = c("Mef2c","Mef2a","Mef2d"),
-symmetric = FALSE,
-markers.list = c("Reln","Satb2","Cux1","Bcl11b","Tbr1","Sox5","Foxp2","Slc17a6","Slc17a7"),
-p_value = 0.05)
-}
+data("ERCC.cotan")
+data_dir <- tempdir()
+saveRDS(ERCC.cotan, file = file.path(data_dir,"ERCC.cotan.RDS"))
+# some genes
+primary.markers <- c("ERCC-00154","ERCC-00156","ERCC-00164")
+#a example of named list of different gene set
+gene.sets.list <- list("primary.markers"=primary.markers,
+                   "2.R" = c("ERCC-00170","ERCC-00158"),
+                   "3.S"=c("ERCC-00160","ERCC-00162"))
+plot_general.heatmap(prim.markers = primary.markers, p_value = 0.05, markers.list =gene.sets.list ,
+condition ="ERCC" ,dir = paste0(data_dir,"/"))
 }

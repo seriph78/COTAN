@@ -31,6 +31,6 @@ statistics (\eqn{\chi^{2}})
 \examples{
 
 data("ERCC.cotan")
-ERCC.cotan = get.pval(ERCC.cotan,type_stat="S")
+ERCC.cotan <- get.pval(ERCC.cotan,type_stat="S")
 
 }

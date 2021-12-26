@@ -23,5 +23,5 @@ This function produce a dataframe with the GDI for each genes.
 }
 \examples{
 data("ERCC.cotan")
-quant.p = get.GDI(ERCC.cotan)
+quant.p <- get.GDI(ERCC.cotan)
 }
