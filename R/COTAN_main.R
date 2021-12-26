@@ -67,12 +67,14 @@ setMethod("initRaw","scCOTAN",
                     print("WARNING! Input data contains not integer numbers!")
 
                 }
-                object@meta[1,seq_len(2)]  <-  c("GEO:",GEO)
-                object@meta[2,seq_len(2)]  <-  c("scRNAseq method:",sc.method)
-                object@meta[3,1]  <-  "starting n. of cells:"
-                object@meta[3,2]  <-  ncol(object@raw)
-                object@meta[4,seq_len(2)]  <-  c("Condition sample:",cond)
+                object@meta[1,seq_len(2)] = c("GEO:",GEO)
+                object@meta[2,seq_len(2)] = c("scRNAseq method:",sc.method)
+                object@meta[3,1] = "starting n. of cells:"
+                object@meta[3,2] = ncol(object@raw)
+                object@meta[4,seq_len(2)] = c("Condition sample:",cond)
 
+              object@clusters = rep(NA,ncol(object@raw))
+              names(object@clusters)=colnames(object@raw)
                 return(object)
           }
 )
@@ -1116,8 +1118,8 @@ setMethod("automatic.COTAN.object.creation","data.frame",
 
               pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_without_cleaning.pdf",
                                                      sep = "")))
-              ttm$pca.cell.2
-              ggplot(ttm$D, aes(x=n,y= means)) + geom_point() +
+              plot(ttm$pca.cell.2)
+              plot.fig = ggplot(ttm$D, aes(x=n,y= means)) + geom_point() +
                   geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ),
                                   aes(n, means, label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
                                   nudge_y      = 0.05,
@@ -1130,8 +1132,10 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                               " - B group NOT removed -")+
                   my_theme + theme(plot.title = element_text(color = "#3C5488FF",
                                                   size = 20, face = "italic",
-                                                  vjust = - 10,hjust = 0.02 ),
-                        plot_subtitle = element_text(color = "darkred",vjust = - 15,hjust = 0.01 ))
+                                                  vjust = - 10,hjust = 0.02 )#,
+                        #plot_subtitle = element_text(color = "darkred",vjust = - 15,hjust = 0.01 )
+                        )
+              plot(plot.fig)
 
               dev.off()
 
@@ -1151,14 +1155,15 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                                     legend.position="right")
 
               pdf(file.path(out_dir,"cleaning",paste(t,"_plots_PCA_efficiency_colored.pdf", sep = "")))
-              plot_nu
+              plot(plot_nu)
               dev.off()
 
               nu_df <- data.frame("nu"= sort(obj@nu), "n"=seq_along(obj@nu))
 
               pdf(file.path(out_dir,"cleaning",paste(t,"_plots_efficiency.pdf", sep = "")))
-              ggplot(nu_df, aes(x = n, y=nu)) + geom_point(colour = "#8491B4B2", size=1) +my_theme +
+              plot(ggplot(nu_df, aes(x = n, y=nu)) + geom_point(colour = "#8491B4B2", size=1) +my_theme +
                   annotate(geom="text", x=50, y=0.25, label="nothing to remove ", color="darkred")
+              )
               dev.off()
 
               analysis_time <- Sys.time()
@@ -1479,11 +1484,10 @@ setMethod("cotan_on_cluster_DE","ANY",
             cells=as.matrix(obj@raw)
             cells_set = unlist(cells_list[condition])
             
-            if (! all(cells_set %in% colnames(cells))) {
-              errorCondition("ERROR. Some cells are not present!")
-              
-            }
-            
+            #if (! all(cells_set %in% colnames(cells))) {
+             # errorCondition("ERROR. Some cells are not present!")
+             # }
+            stopifnot("ERROR. Some cells are not present!"=  all(cells_set %in% colnames(cells)) )
             
             # Cells matrix : formed by row data matrix changed to 0-1 matrix
             cells[cells > 0] <- 1
@@ -1517,6 +1521,7 @@ setMethod("cotan_on_cluster_DE","ANY",
               print("Problems with estimators!")
             }
             
+            
             exp_yes = rowSums(cells)
             exp_no =obj@n_cells - exp_yes 
             if( sum(yes_in+yes_out-exp_yes) != 0 |  sum(no_in+no_out-exp_no) != 0 ){
@@ -1546,11 +1551,6 @@ setMethod("cotan_on_cluster_DE","ANY",
               break()
             }
             
-            #rm(dif_no_in)
-            #rm(dif_yes_out)
-            #rm(dif_no_out)
-            #rm(dif_yes_in)
-            #gc()
             
             print("Calculating p values")
             p_value = as.data.frame(pchisq(as.matrix(S), df=1, lower.tail=F))
@@ -1592,9 +1592,9 @@ setMethod("cotan_on_cluster_DE","ANY",
             #if (all(is.na(obj@cluster_data[,1])) & dim(obj@cluster_data)[2]>2 ) {
             #  obj@cluster_data = obj@cluster_data[,2:ncol(obj@cluster_data)]
             }
-            #cluster_data = 
+            obj@cluster_data = cluster_data[,2:ncol(cluster_data)] 
             
-            return(list(obj,cluster_data,cluster_pval))
+            return(list(obj,cluster_pval))
           }
 )           
 
@@ -1766,10 +1766,10 @@ setMethod("get.cell.size","scCOTAN",
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' genes.to.rem <- names(get.genes(ERCC.cotan)[1:10])
-#' cells.to.rem <- names(get.cell.size(ERCC.cotan)[1:10])
-#' ERCC.cotan <- drop.genes.cells(ERCC.cotan,genes.to.rem,cells.to.rem )
-setGeneric("drop.genes.cells", function(object, genes, cells) standardGeneric("drop.genes.cells"))
+#' genes.to.rem = names(get.genes(ERCC.cotan)[1:10])
+#' cells.to.rem = names(get.cell.size(ERCC.cotan)[1:10])
+#' ERCC.cotan = drop.genes.cells(ERCC.cotan,genes.to.rem,cells.to.rem )
+setGeneric("drop.genes.cells", function(object, genes = c(), cells = c()) standardGeneric("drop.genes.cells"))
 #' @rdname drop.genes.cells
 setMethod("drop.genes.cells","scCOTAN",
           function(object, genes, cells) {
@@ -1795,6 +1795,8 @@ setMethod("drop.genes.cells","scCOTAN",
 #' ERCC.cotan <- add.row.to.meta(ERCC.cotan, text)
 #' get.metadata(ERCC.cotan)
 setGeneric("add.row.to.meta", function(object, text.line) standardGeneric("add.row.to.meta"))
+#' @param scCOTAN 
+#'
 #' @rdname add.row.to.meta
 setMethod("add.row.to.meta","scCOTAN",
           function(object, text.line) {
@@ -1802,3 +1804,4 @@ setMethod("add.row.to.meta","scCOTAN",
               return(object)
           }
 )
+

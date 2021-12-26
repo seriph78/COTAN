@@ -1,7 +1,7 @@
 Package: COTAN
 Type: Package
 Title: COexpression Tables ANalysis 
-Version: 0.99.10
+Version: 0.99.11
 Authors@R: c(
   person("Galfrè", "Silvia Giulia",email = "silvia.galfre@uniroma1.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
   person("Morandin","Francesco", email = "francesco.morandin@unipr.it", role = "aut",comment = c(ORCID = "0000-0002-2022-2300")),
@@ -10,7 +10,7 @@ Authors@R: c(
   person("Helmer-Citterich","Manuela", role = "aut",comment = c(ORCID = "0000-0001-9530-7504")))
 Description: Statistical and computational method to analyze the co-expression of 
     gene pairs at single cell level. It provides the foundation for single-cell gene 
-    interactome analysis. The basic idea is studying the zero UMI counts’ distribution 
+    interactome analysis. The basic idea is studying the zero UMI counts' distribution 
     instead of focusing on positive counts; this is done with a generalized contingency 
     tables framework. COTAN can effectively assess the correlated or anti-correlated 
     expression of gene pairs. It provides a numerical index related to the correlation and an 

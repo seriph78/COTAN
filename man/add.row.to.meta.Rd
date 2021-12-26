@@ -13,6 +13,8 @@ add.row.to.meta(object, text.line)
 \item{object}{a COTAN object}
 
 \item{text.line}{an array containing the information}
+
+\item{scCOTAN}{}
 }
 \value{
 the updated COTAN object
