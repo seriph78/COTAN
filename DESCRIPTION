@@ -35,6 +35,7 @@ Imports:
     stats,
     parallel,
     tibble,
+    Seurat,
     tidyr,
     basilisk,
     reticulate,

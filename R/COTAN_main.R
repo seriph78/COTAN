@@ -351,14 +351,23 @@ setMethod("get.coex","scCOTAN",
               ll <- obs_ct(object)
 
               object <- ll$object
+              ll$object <- NA
+              gc()
+              ll$no_no <- ll$no_no[!rownames(ll$no_no) %in% hk,
+                                   !colnames(ll$no_no) %in% hk]
+              ll$yes_no <- ll$yes_no[!rownames(ll$yes_no) %in% hk,
+                                   !colnames(ll$yes_no) %in% hk]
+              ll$no_yes <- t(ll$yes_no)
+              #ll$no_yes <- ll$no_yes[!rownames(ll$no_yes) %in% hk,
+               #                    !colnames(ll$no_yes) %in% hk]
 
-              ll$no_yes<- ll$no_yes[!rownames(ll$no_yes) %in% hk,!colnames(ll$no_yes) %in% hk]
-              ll$no_no <- ll$no_no[!rownames(ll$no_no) %in% hk,!colnames(ll$no_no) %in% hk]
+
               si_si <- object@yes_yes[!rownames(object@yes_yes) %in% hk,!colnames(object@yes_yes)
                                      %in% hk]
-              ll$yes_no <- ll$yes_no[!rownames(ll$yes_no) %in% hk,!colnames(ll$yes_no) %in% hk]
 
               est <- expected_ct(object)
+              est$estimator_no_yes <- NA
+              gc()
 
               new_estimator_si_si <- as.matrix(est$estimator_yes_yes)
               new_estimator_si_si[new_estimator_si_si < 1] <- 1
@@ -366,21 +375,39 @@ setMethod("get.coex","scCOTAN",
               new_estimator_si_no[new_estimator_si_no < 1] <- 1
               new_estimator_no_no <- as.matrix(est$estimator_no_no)
               new_estimator_no_no[new_estimator_no_no < 1] <- 1
-              new_estimator_no_si <- as.matrix(est$estimator_no_yes)
-              new_estimator_no_si[new_estimator_no_si < 1] <- 1
+              #new_estimator_no_si <- as.matrix(est$estimator_no_yes)
+              #new_estimator_no_si[new_estimator_no_si < 1] <- 1
+              new_estimator_no_si <- t(new_estimator_si_no)
+
+
+
               print("coex estimation")
               coex <- ((as.matrix(si_si) - as.matrix(est$estimator_yes_yes))/new_estimator_si_si) +
                   ((as.matrix(ll$no_no) - as.matrix(est$estimator_no_no))/new_estimator_no_no) -
                   ((as.matrix(ll$yes_no) - as.matrix(est$estimator_yes_no))/new_estimator_si_no) -
-                  ((as.matrix(ll$no_yes) - as.matrix(est$estimator_no_yes))/new_estimator_no_si)
+                  ((as.matrix(ll$no_yes) - as.matrix(t(est$estimator_yes_no)))/new_estimator_no_si)
 
-              coex <- coex / sqrt(1/new_estimator_si_si + 1/new_estimator_no_no + 1/
-                                     new_estimator_si_no + 1/new_estimator_no_si)
+              print("Cleaning RAM 1")
+              rm(ll)
+              rm(est)
+              gc()
+              sum.for.div <- (1/new_estimator_si_si + 1/new_estimator_no_no + 1/
+                  new_estimator_si_no + 1/new_estimator_no_si)
+              print("Cleaning RAM 2")
+              rm(new_estimator_si_si)
+              rm(new_estimator_no_no)
+              rm(new_estimator_si_no)
+              rm(new_estimator_no_si)
+              gc()
+
+              coex <- coex / sqrt(sum.for.div)
 
               print("Diagonal coex values substituted with 0")
               diag(coex) <- 0
               coex <- coex / sqrt(object@n_cells)
               object@coex <- spMat(coex)
+              rm(coex)
+              gc()
 
               return(object)
           }
@@ -1033,178 +1060,6 @@ setMethod("plot_GDI","scCOTAN",
 )
 
 
-#' automatic.COTAN.object.creation
-#'
-#' @param df dataframe with the row counts
-#' @param out_dir directory for the output
-#' @param GEO GEO or other code that identify the dataset
-#' @param sc.method Type of single cell RNA-seq method used
-#' @param cond A string that will identify the sample or condition. It will be part of the
-#' final file name.
-#' @param cores number of cores to be used
-#' @param mt A boolean (default F). If T mitochondrial  genes will be kept in the analysis,
-#' otherwise they will be removed.
-#' @param mt_prefix is the prefix that identify the mitochondrial  genes (default is the mouse
-#' prefix: "^mt")
-#' @return It return the COTAN object. It will also store it directly in the output directory
-#' @export
-#'
-#' @importFrom Matrix rowSums
-#' @importFrom Matrix colSums
-#' @importFrom utils write.csv
-#' @importFrom methods new
-#' @import grDevices
-#' @import ggplot2
-#' @import ggrepel
-#' @rdname automatic.COTAN.object.creation
-#' @examples
-#'
-#' data("raw.dataset")
-#' obj <- automatic.COTAN.object.creation(df= raw.dataset,
-#' out_dir =  tempdir(),
-#' GEO = "test_GEO",
-#' sc.method = "test_method",
-#' cond = "test")
-#'
-setGeneric("automatic.COTAN.object.creation", function(df, out_dir, GEO, sc.method,
-                                                       cond, mt = FALSE, mt_prefix="^mt", cores = 1)
-    standardGeneric("automatic.COTAN.object.creation"))
-#' @rdname automatic.COTAN.object.creation
-setMethod("automatic.COTAN.object.creation","data.frame",
-          function(df, out_dir, GEO, sc.method, cond, mt = FALSE, mt_prefix="^mt", cores = 1) {
-              start_time_all <- Sys.time()
-
-              mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
-              my_theme <- theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5,
-                                                          vjust = .5,
-                                                          face = "plain", colour ="#3C5488FF" ),
-                               axis.text.y = element_text( size = 14, angle = 0, hjust = 0,
-                                                           vjust = .5,
-                                                           face = "plain", colour ="#3C5488FF"),
-                               axis.title.x = element_text( size = 14, angle = 0, hjust = .5,
-                                                            vjust = 0,
-                                                            face = "plain", colour ="#3C5488FF"),
-                               axis.title.y = element_text( size = 14, angle = 90, hjust = .5,
-                                                            vjust = .5,
-                                                            face = "plain", colour ="#3C5488FF"))
-              obj <- methods::new("scCOTAN",raw = df)
-              obj <- initRaw(obj,GEO = GEO ,sc.method = sc.method,cond = cond)
-              if (mt == FALSE) {
-                  genes_to_rem <- rownames(obj@raw[grep(mt_prefix, rownames(obj@raw)),])
-                  obj@raw <- obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
-                  cells_to_rem <- colnames(obj@raw[which(colSums(obj@raw) == 0)])
-                  obj@raw <- obj@raw[,!colnames(obj@raw) %in% cells_to_rem]
-              }
-              t <- cond
-
-              print(paste("Condition ",t,sep = ""))
-              #--------------------------------------
-              n_cells <- length(colnames(obj@raw))
-              print(paste("n cells", n_cells, sep = " "))
-
-              n_it <- 1
-
-              if(!file.exists(out_dir)){
-                  dir.create(file.path(out_dir))
-              }
-
-              if(!file.exists(paste(out_dir,"cleaning", sep = ""))){
-                  dir.create(file.path(out_dir, "cleaning"))
-              }
-
-              ttm <- clean(obj)
-
-              obj <- ttm$object
-
-              pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_without_cleaning.pdf",
-                                                     sep = "")))
-              plot(ttm$pca.cell.2)
-              plot.fig = ggplot(ttm$D, aes(x=n,y= means)) + geom_point() +
-                  geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ),
-                                  aes(n, means, label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
-                                  nudge_y      = 0.05,
-                                  nudge_x      = 0.05,
-                                  direction    = "x",
-                                  angle        = 90,
-                                  vjust        = 0,
-                                  segment.size = 0.2)+
-                  ggtitle(label = "B cell group genes mean expression", subtitle =
-                              " - B group NOT removed -")+
-                  my_theme + theme(plot.title = element_text(color = "#3C5488FF",
-                                                  size = 20, face = "italic",
-                                                  vjust = - 10,hjust = 0.02 )#,
-                        #plot_subtitle = element_text(color = "darkred",vjust = - 15,hjust = 0.01 )
-                        )
-              plot(plot.fig)
-
-              dev.off()
-
-              nu_est <- round(obj@nu, digits = 7)
-
-              plot_nu <-ggplot(ttm$pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
-
-              plot_nu <- plot_nu + geom_point(size = 1,alpha= 0.8)+
-                  scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
-                                        midpoint = log(mean(nu_est)),name = "ln(nu)")+
-                  ggtitle("Cells PCA coloured by cells efficiency") +
-                  my_theme +  theme(plot.title = element_text(color = "#3C5488FF", size = 20),
-                                    legend.title=element_text(color = "#3C5488FF", size = 14,
-                                                              face = "italic"),
-                                    legend.text = element_text(color = "#3C5488FF", size = 11),
-                                    legend.key.width = unit(2, "mm"),
-                                    legend.position="right")
-
-              pdf(file.path(out_dir,"cleaning",paste(t,"_plots_PCA_efficiency_colored.pdf", sep = "")))
-              plot(plot_nu)
-              dev.off()
-
-              nu_df <- data.frame("nu"= sort(obj@nu), "n"=seq_along(obj@nu))
-
-              pdf(file.path(out_dir,"cleaning",paste(t,"_plots_efficiency.pdf", sep = "")))
-              plot(ggplot(nu_df, aes(x = n, y=nu)) + geom_point(colour = "#8491B4B2", size=1) +my_theme +
-                  annotate(geom="text", x=50, y=0.25, label="nothing to remove ", color="darkred")
-              )
-              dev.off()
-
-              analysis_time <- Sys.time()
-
-              print("Cotan analysis function started")
-              obj <- cotan_analysis(obj,cores = cores)
-
-              coex_time <- Sys.time()
-              analysis_time <- difftime(Sys.time(), analysis_time, units = "mins")
-
-              print(paste0("Only analysis time ", analysis_time))
-
-              print("Cotan coex estimation started")
-              obj <- get.coex(obj)
-
-              end_time <- Sys.time()
-
-              all.time <-  difftime(end_time, start_time_all, units = "mins")
-              print(paste0("Total time ", all.time))
-
-              coex_time <- difftime(end_time, coex_time, units = "mins")
-
-              print(paste0("Only coex time ",coex_time))
-
-              utils::write.csv(data.frame("type" = c("tot_time","analysis_time","coex_time"),
-                                   "times"=
-                                       c(as.numeric(all.time),
-                                         as.numeric(analysis_time),
-                                         as.numeric(coex_time) ),
-                                   "n.cells"=n_cells,"n.genes"=dim(obj@raw)[1]),
-                        file = file.path(out_dir, paste(t,"_times.csv", sep = "")))
-
-              print(paste0("Saving elaborated data locally at ", out_dir,t,".cotan.RDS"))
-              saveRDS(obj,file = file.path(out_dir,paste(t,".cotan.RDS", sep = "")))
-
-              return(obj)
-
-          }
-)
-
-
 #' get.observed.ct
 #'
 #' This function is used to get the observed contingency table for a given pair of genes.
@@ -1276,7 +1131,7 @@ setMethod("get.observed.ct","scCOTAN",
 #'}
 #' get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.expected.ct", function(object,g1,g2) standardGeneric("get.expected.ct"))
-#' @param scCOTAN 
+#' @param scCOTAN
 #'
 #' @rdname get.expected.ct
 setMethod("get.expected.ct","scCOTAN",
@@ -1394,209 +1249,6 @@ setMethod("get.metadata","scCOTAN",
 )
 
 
-#' cotan_on_cluster_DE
-#' Next method is used to do the differential expression analysis using COTAN contingency tables
-#' on the cluster checked with the previous method
-#'
-#' @param obj A COTAN object
-#' @param cells_list a list with all the cells divided for each group. Name of each element in the list will 
-#' be the condition o cell population or cluster number, the arraz will contain all the cell codes (as in the 
-#' raw matrix column names).
-#'
-#' @return
-#' @export
-#'
-#' @examples
-setGeneric("cotan_on_cluster_DE", function(obj, cells_list) standardGeneric("cotan_on_cluster_DE"))
-setMethod("cotan_on_cluster_DE","ANY",
-          function(obj, cells_list) {
-            
-            #---------------------------------------------
-            fun_pzero <- function(a,mu){
-              #a= as.numeric(a[,2])
-              #print(a)
-              (a <= 0)*(exp(-(1+abs(a))*mu)) + (a > 0)*(1+abs(a)*mu)^(-1/abs(a))
-            }
-            
-            fun_pzero_posi <- function(r,mu){ (1+r*mu)^(-1/r) }
-            
-            fun_pzero_nega0 <- function(r,mu){ (exp(-(1-r)*mu))}
-            
-            fun_dif_mu_zeros <- function(h,x,somma_zeri){
-              if (h > 0) {
-                sum(fun_pzero_posi(h,mu_estimator[x,])) - somma_zeri#/somma_zeri  
-              }else{
-                sum(fun_pzero_nega0(h,mu_estimator[x,])) - somma_zeri#/somma_zeri  
-              }
-            }
-            
-            fun_my_opt <- function(x){
-              somma_zeri = sum(cells[x,] == 0)
-              #somma_zeri = rowSums(cells[x,] == 0)
-              a1 = 0
-              u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
-              a2 = a1
-              u2 = u1
-              if (u1 > 0) {
-                a1 = a1 - 1
-                u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
-                while (u1 > 0) {
-                  a2 = a1
-                  u2 = u1
-                  a1 = 2 * a1
-                  u1 = fun_dif_mu_zeros(a1,x,somma_zeri)
-                }
-              }else{
-                a2 = 1
-                u2 = fun_dif_mu_zeros(a2,x,somma_zeri)
-                while (u2 < 0) {
-                  a1 = a2
-                  u1 =u2
-                  a2 = 2 * a2
-                  u2 = fun_dif_mu_zeros(a2,x,somma_zeri)
-                }
-              }
-              a = (a1+a2)/2
-              u = fun_dif_mu_zeros(a,x,somma_zeri)
-              while (abs(u)>0.001) {
-                if(u>0){
-                  a2 = a
-                  u2 = u
-                }else{
-                  a1 = a
-                  u1 = u
-                }
-                a = (a1 + a2)/2
-                u = fun_dif_mu_zeros(a,x,somma_zeri)
-              }
-              r = data.frame(a,u)
-              rownames(r) = x
-              return(r)
-            }
-            
-            #cells=as.matrix(obj@raw)     
-            cluster_data = data.frame()
-            cluster_pval = data.frame()
-            # cells_set  > set of cell code corresponding to cluster
-        for (condition in names(cells_list)) {
-             print(paste("cluster",condition, sep=" "))
-            #n_set = c
-            cells=as.matrix(obj@raw)
-            cells_set = unlist(cells_list[condition])
-            
-            #if (! all(cells_set %in% colnames(cells))) {
-             # errorCondition("ERROR. Some cells are not present!")
-             # }
-            stopifnot("ERROR. Some cells are not present!"=  all(cells_set %in% colnames(cells)) )
-            
-            # Cells matrix : formed by row data matrix changed to 0-1 matrix
-            cells[cells > 0] <- 1
-            cells[cells <= 0] <- 0
-            
-            mu_estimator = mu_est(obj)
-            
-            hk = obj@hk
-            
-            
-            mu_estimator = mu_estimator[!rownames(mu_estimator) %in% hk,]
-            cells = cells[!rownames(cells) %in% hk, ]
-            
-            yes_in = rowSums(cells[,colnames(cells) %in% cells_set])
-            yes_out = rowSums(cells[,!colnames(cells) %in% cells_set])
-            no_in = rowSums(1 - cells[,colnames(cells) %in% cells_set])
-            no_out = rowSums(1 - cells[,!colnames(cells) %in% cells_set])
-            
-            
-            
-            M = fun_pzero(obj@a,mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
-            estimator_no_in = rowSums(M[,colnames(cells) %in% cells_set])
-            estimator_no_out = rowSums(M[,!colnames(cells) %in% cells_set])
-            
-            N = 1-M 
-            estimator_yes_in = rowSums(N[,colnames(cells) %in% cells_set])
-            estimator_yes_out = rowSums(N[,!colnames(cells) %in% cells_set])
-            
-            if( (sum(((yes_in+no_in)-(estimator_no_in+estimator_yes_in))**2)+
-                 sum(((yes_out+no_out)-(estimator_yes_out+estimator_no_out))**2)) > 0.0001){
-              print("Problems with estimators!")
-            }
-            
-            
-            exp_yes = rowSums(cells)
-            exp_no =obj@n_cells - exp_yes 
-            if( sum(yes_in+yes_out-exp_yes) != 0 |  sum(no_in+no_out-exp_no) != 0 ){
-              print("Problems with observed counts!")
-            }
-            
-            
-            new_estimator_no_in = estimator_no_in
-            new_estimator_no_in[new_estimator_no_in < 1] <- 1
-            new_estimator_no_out = estimator_no_out
-            new_estimator_no_out[new_estimator_no_out < 1] <- 1
-            
-            new_estimator_yes_in = estimator_yes_in
-            new_estimator_yes_in[new_estimator_yes_in < 1] <- 1
-            new_estimator_yes_out = estimator_yes_out
-            new_estimator_yes_out[new_estimator_yes_out < 1] <- 1
-            
-            dif_no_in = (as.matrix(no_in) - estimator_no_in)**2/new_estimator_no_in
-            dif_no_out = (as.matrix(no_out) - estimator_no_out)**2/new_estimator_no_out
-            dif_yes_in = (as.matrix(yes_in) - estimator_yes_in)**2/new_estimator_yes_in
-            dif_yes_out = (as.matrix(yes_out) - estimator_yes_out)**2/new_estimator_yes_out
-            
-            S = dif_no_in + dif_no_out + dif_yes_in + dif_yes_out
-            
-            if(any(is.na(S))){
-             print(paste("Errore: some Na in matrix S", which(is.na(S),arr.ind = T),sep = " "))
-              break()
-            }
-            
-            
-            print("Calculating p values")
-            p_value = as.data.frame(pchisq(as.matrix(S), df=1, lower.tail=F))
-            
-            #p_value$V1= p.adjust(p_value$V1)
-            #S1 = (coex)^2 * obj@n_cells
-            #p_value = as.data.frame(round(p_value, digits = 6))
-            #write.csv(p_value, paste(out_dir,t,"_",comp,"p_value_set",n_set,"_vs_comp.csv", sep = ""))
-            #write.csv(S, paste(out_dir,t,"_",comp,"S_matrix",n_set,"_vs_comp.csv", sep = ""))
-            #rm(S)
-            gc()
-            #write.csv(estimator_si_si, paste(wdir,out_dir,"estimator_si_si_",t,".csv", sep = ""))
-            
-            coex = ((as.matrix(yes_in) - as.matrix(estimator_yes_in))/as.matrix(new_estimator_yes_in)) + 
-              ((as.matrix(no_out) - as.matrix(estimator_no_out))/as.matrix(new_estimator_no_out)) - 
-              ((as.matrix(yes_out) - as.matrix(estimator_yes_out))/as.matrix(new_estimator_yes_out)) - 
-              ((as.matrix(no_in) - as.matrix(estimator_no_in))/as.matrix(new_estimator_no_in))
-            
-            coex = coex / sqrt(1/new_estimator_yes_in + 1/new_estimator_no_in + 1/new_estimator_yes_out + 1/new_estimator_no_out)
-            
-            coex = coex/sqrt(obj@n_cells)
-            coex = as.data.frame(coex)
-            
-            colnames(coex)=paste("cl.",condition,sep = "")
-            colnames(p_value)=paste("cl.",condition,sep = "")
-            #to insert gene names when the dataframe is empty
-            
-            if (dim(cluster_data)[1] == 0) {
-              cluster_data = as.data.frame(matrix(nrow = nrow(obj@coex)))
-              rownames(cluster_data)=rownames(obj@coex)
-              cluster_pval = as.data.frame(matrix(nrow = nrow(obj@coex)))
-              rownames(cluster_pval)=rownames(obj@coex)
-            }
-            
-            cluster_data = cbind(cluster_data,coex)
-            cluster_pval = cbind(cluster_pval,p_value)
-            
-            # to remove the first column on NA when the data frame is bigger than nX2
-            #if (all(is.na(obj@cluster_data[,1])) & dim(obj@cluster_data)[2]>2 ) {
-            #  obj@cluster_data = obj@cluster_data[,2:ncol(obj@cluster_data)]
-            }
-            obj@cluster_data = cluster_data[,2:ncol(cluster_data)] 
-            
-            return(list(obj,cluster_pval))
-          }
-)           
 
 #' get.rawdata
 #'
@@ -1795,7 +1447,7 @@ setMethod("drop.genes.cells","scCOTAN",
 #' ERCC.cotan <- add.row.to.meta(ERCC.cotan, text)
 #' get.metadata(ERCC.cotan)
 setGeneric("add.row.to.meta", function(object, text.line) standardGeneric("add.row.to.meta"))
-#' @param scCOTAN 
+#' @param scCOTAN
 #'
 #' @rdname add.row.to.meta
 setMethod("add.row.to.meta","scCOTAN",
