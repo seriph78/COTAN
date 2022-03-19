@@ -127,3 +127,34 @@ test_that("get_GDI_test", {
     expect_equal(GDI, readRDS(file.path(getwd(),"GDI.RDS")))
 
 })
+
+
+test_that("vec2mat_rfast_test", {
+    mat <- matrix(0,nrow = 5, ncol = 5)
+    mat <- Rfast::lower_tri.assign(mat,c(1:15),diag = T)
+    mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
+
+    colnames(mat) <- paste0("col.",c(1:5))
+    rownames(mat) <- paste0("row.",c(1:5))
+
+    v <- mat2vec_rfast(mat)
+
+    expect_equal(mat, vec2mat_rfast(v))
+
+})
+
+test_that("mat2vec_rfast_test", {
+    vec <- c(1:15)
+    names.v <- c()
+    for (d in c(1:5)) {
+        temp <- paste0(c(d:5),"|",d)
+        names.v <- c(names.v,temp)
+    }
+    names.v
+    names(vec) <- names.v
+
+    m <- vec2mat_rfast(vec)
+
+    expect_equal(vec, mat2vec_rfast(m))
+
+})
