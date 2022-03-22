@@ -328,90 +328,6 @@ setMethod("cotan_analysis","scCOTAN",
 )
 
 
-#' get.coex
-#'
-#' This function estimates and stores the coex*sqrt(n_cells) matrix in the coex field.
-#' It need to be run after \code{\link{cotan_analysis}}
-#' @param object A COTAN object
-#'
-#' @return It returns a COTAN object
-#' @export
-#' @rdname get.coex
-#' @examples
-#'
-#' data("ERCC.cotan")
-#' obj <- get.coex(ERCC.cotan)
-#'
-setGeneric("get.coex", function(object) standardGeneric("get.coex"))
-#' @rdname get.coex
-setMethod("get.coex","scCOTAN",
-          function(object) {
-              print("coex dataframe creation")
-              hk <- object@hk
-              ll <- obs_ct(object)
-
-              object <- ll$object
-              ll$object <- NA
-              gc()
-              ll$no_no <- ll$no_no[!rownames(ll$no_no) %in% hk,
-                                   !colnames(ll$no_no) %in% hk]
-              ll$yes_no <- ll$yes_no[!rownames(ll$yes_no) %in% hk,
-                                   !colnames(ll$yes_no) %in% hk]
-              ll$no_yes <- t(ll$yes_no)
-              #ll$no_yes <- ll$no_yes[!rownames(ll$no_yes) %in% hk,
-               #                    !colnames(ll$no_yes) %in% hk]
-
-
-              si_si <- object@yes_yes[!rownames(object@yes_yes) %in% hk,!colnames(object@yes_yes)
-                                     %in% hk]
-
-              est <- expected_ct(object)
-              est$estimator_no_yes <- NA
-              gc()
-
-              new_estimator_si_si <- as.matrix(est$estimator_yes_yes)
-              new_estimator_si_si[new_estimator_si_si < 1] <- 1
-              new_estimator_si_no <- as.matrix(est$estimator_yes_no)
-              new_estimator_si_no[new_estimator_si_no < 1] <- 1
-              new_estimator_no_no <- as.matrix(est$estimator_no_no)
-              new_estimator_no_no[new_estimator_no_no < 1] <- 1
-              #new_estimator_no_si <- as.matrix(est$estimator_no_yes)
-              #new_estimator_no_si[new_estimator_no_si < 1] <- 1
-              new_estimator_no_si <- t(new_estimator_si_no)
-
-
-
-              print("coex estimation")
-              coex <- ((as.matrix(si_si) - as.matrix(est$estimator_yes_yes))/new_estimator_si_si) +
-                  ((as.matrix(ll$no_no) - as.matrix(est$estimator_no_no))/new_estimator_no_no) -
-                  ((as.matrix(ll$yes_no) - as.matrix(est$estimator_yes_no))/new_estimator_si_no) -
-                  ((as.matrix(ll$no_yes) - as.matrix(t(est$estimator_yes_no)))/new_estimator_no_si)
-
-              print("Cleaning RAM 1")
-              rm(ll)
-              rm(est)
-              gc()
-              sum.for.div <- (1/new_estimator_si_si + 1/new_estimator_no_no + 1/
-                  new_estimator_si_no + 1/new_estimator_no_si)
-              print("Cleaning RAM 2")
-              rm(new_estimator_si_si)
-              rm(new_estimator_no_no)
-              rm(new_estimator_si_no)
-              rm(new_estimator_no_si)
-              gc()
-
-              coex <- coex / sqrt(sum.for.div)
-
-              print("Diagonal coex values substituted with 0")
-              diag(coex) <- 0
-              coex <- coex / sqrt(object@n_cells)
-              object@coex <- spMat(coex)
-              rm(coex)
-              gc()
-
-              return(object)
-          }
-)
 
 
 #' get.pval
@@ -541,7 +457,7 @@ setMethod("plot_heatmap","ANY",
               for(ET in conditions){
                   print(paste("Loading condition",ET,sep=" "))
                   obj <- readRDS(paste(dir,ET,".cotan.RDS", sep = ""))
-                  obj@coex = Matrix::forceSymmetric(obj@coex, uplo="L" )
+                  obj@coex <- Matrix::forceSymmetric(obj@coex, uplo="L" )
                   if(any(gr %in% rownames(obj@coex)) == FALSE){
                       paste0("primary markers all absent in ", ET)
                       stop()
@@ -834,100 +750,6 @@ setMethod("plot_general.heatmap","ANY",
 
 
 
-#' get.gene.coexpression.space
-#'
-#'To make the GDI more specific, it may be desirable to restrict the set of genes against which
-#'GDI is computed to a selected subset V with the recommendation to include a
-#'consistent fraction of cell-identity genes, and possibly focusing on markers specific
-#'for the biological question of interest (for instance neural cortex layering markers).
-#'In this case we denote it as local differentiation index (LDI) relative to V.
-#'
-#' @param object The COTAN object.
-#' @param n.genes.for.marker The number of genes correlated with the primary markers that
-#' we want to consider.
-#' By default this is 25.
-#' @param primary.markers A vector of primary marker names.
-#'
-#' @return A dataframe
-#' @export
-#' @importFrom stats quantile
-#' @importFrom Matrix rowSums
-#' @importFrom Matrix colMeans
-#' @importFrom Matrix forceSymmetric
-#' @rdname get.gene.coexpression.space
-#' @examples
-#' data("ERCC.cotan")
-#' df <- get.gene.coexpression.space(ERCC.cotan, n.genes.for.marker = 10,
-#' primary.markers=get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)),5)])
-setGeneric("get.gene.coexpression.space", function(object, n.genes.for.marker = 25, primary.markers)
-    standardGeneric("get.gene.coexpression.space"))
-#' @rdname get.gene.coexpression.space
-setMethod("get.gene.coexpression.space","scCOTAN",
-          #da sistemare
-          function(object, n.genes.for.marker = 25, primary.markers) {
-              print("calculating gene coexpression space: output tanh of reduced coex matrix" )
-
-              object@coex <- Matrix::forceSymmetric(object@coex, uplo="L" )
-
-              p.val.matrix <- get.pval(object,gene.set.col = primary.markers)
-              if(!length(primary.markers) == ncol(p.val.matrix)){
-                  print(paste("Gene", primary.markers[!primary.markers %in% colnames(p.val.matrix)],
-                              "not present!", sep = " "))
-                  primary.markers <- primary.markers[primary.markers %in% colnames(p.val.matrix)]
-              }
-
-
-              all.genes.to.an <- vector()
-              for (m in primary.markers) {
-                  tm <-rownames(p.val.matrix[order(p.val.matrix[,m]),])[seq_len(n.genes.for.marker)]
-                  all.genes.to.an <- c(all.genes.to.an,tm)
-                  all.genes.to.an <-unique(all.genes.to.an)
-              }
-              all.genes.to.an <- unique(c(all.genes.to.an,primary.markers))
-              print(paste0("Secondary markers:", length(all.genes.to.an)))
-              tmp <- p.val.matrix[all.genes.to.an,]
-              for (m in primary.markers) {
-                  tmp <- as.data.frame(tmp[order(tmp[,m]),])
-                  tmp$rank <- c(seq_len(nrow(tmp)))
-                  colnames(tmp)[ncol(tmp)] <- paste("rank",m,sep = ".")
-              }
-              rank.genes <- tmp[,(length(primary.markers)+1):ncol(tmp)]
-            for (c in seq_along(colnames(rank.genes))) {
-                colnames(rank.genes)[c] <- strsplit(colnames(rank.genes)[c], split='.',
-                                                    fixed = TRUE)[[1]][2]
-                }
-
-              S <- get.S(object)
-              S <- S[,colnames(S) %in% all.genes.to.an]
-              S <- as.matrix(S)
-
-              CD.sorted <- t(apply(t(S),2,sort,decreasing=TRUE))
-              rg <- round(ncol(CD.sorted)/10, digits = 0)
-              CD.sorted <- CD.sorted[,seq_len(rg)] #20
-              CD.sorted <- pchisq(as.matrix(CD.sorted), df=1, lower.tail=FALSE)
-
-              quant.p.val2 <- rowMeans(CD.sorted)
-              quant.p.val2 <- as.data.frame(quant.p.val2)
-              colnames(quant.p.val2) <- "loc.GDI"
-
-              quant.p.val2$names <- rownames(quant.p.val2)
-
-              quant.p.val2 <- quant.p.val2[quant.p.val2$loc.GDI <=
-                                              stats::quantile(quant.p.val2$loc.GDI,probs = 0.1),]
-              genes.raw<- quant.p.val2$names
-
-              to.plot_cl.genes <- object@coex[rownames(object@coex) %in%
-                                                 genes.raw,colnames(object@coex) %in% all.genes.to.an]
-
-              to.plot_cl.genes <- to.plot_cl.genes * sqrt(object@n_cells)
-
-              to.plot_cl.genes <- tanh(to.plot_cl.genes)
-              print(paste0("Columns (V set) number: ",dim(to.plot_cl.genes)[2],
-                           " Rows (U set) number: ",dim(to.plot_cl.genes)[1]))
-
-              return(to.plot_cl.genes)
-          }
-)
 
 
 #' get.GDI

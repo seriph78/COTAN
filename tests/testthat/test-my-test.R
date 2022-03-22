@@ -129,29 +129,42 @@ test_that("get_GDI_test", {
 })
 
 
-test_that("vec2mat_rfast_test", {
+test_that("vec2mat_rfast_test1", {
     mat <- matrix(0,nrow = 5, ncol = 5)
     mat <- Rfast::lower_tri.assign(mat,c(1:15),diag = T)
     mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
 
-    colnames(mat) <- paste0("col.",c(1:5))
+    colnames(mat) <- paste0("row.",c(1:5))
     rownames(mat) <- paste0("row.",c(1:5))
 
     v <- mat2vec_rfast(mat)
 
-    expect_equal(mat, vec2mat_rfast(v))
+    expect_equal(mat, vec2mat_rfast(v,genes = "all"))
+
+})
+
+test_that("vec2mat_rfast_test2", {
+    mat <- matrix(0,nrow = 10, ncol = 10)
+    mat <- Rfast::lower_tri.assign(mat,c(1:55),diag = T)
+    mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
+
+    colnames(mat) <- paste0("row.",c(1:10))
+    rownames(mat) <- paste0("row.",c(1:10))
+
+    v <- mat2vec_rfast(mat)
+
+    genes <- c("row.7","row.5","row.9")
+
+    expect_equal(mat[,genes], vec2mat_rfast(v,genes = genes))
 
 })
 
 test_that("mat2vec_rfast_test", {
     vec <- c(1:15)
-    names.v <- c()
-    for (d in c(1:5)) {
-        temp <- paste0(c(d:5),"|",d)
-        names.v <- c(names.v,temp)
-    }
+    names.v <- paste0("raw",c(1:5))
+
     names.v
-    names(vec) <- names.v
+    vec <- list("genes"=names.v, "coex.values"=vec)
 
     m <- vec2mat_rfast(vec)
 
