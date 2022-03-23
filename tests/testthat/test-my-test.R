@@ -69,9 +69,14 @@ test_that("4.cotan_coex_test", {
 
     obj = get.coex(obj)
 
-    coex = readRDS(file.path(getwd(),"coex.RDS"))
+    coex_test = readRDS(file.path(getwd(),"new_coex.RDS"))
+    coex <- vec2mat_rfast(obj@coex,genes = coex_test$genes)
+
+    coex <- mat2vec_rfast(coex[coex_test$genes,coex_test$genes])
+
     saveRDS(obj, file = file.path(tm,"temp.RDS") )
-    expect_equal( as.matrix(obj@coex[1:500,1:200]), as.matrix(coex))
+
+    expect_equal(coex, coex_test)
 })
 
 test_that("python_PCA_test", {
@@ -153,7 +158,7 @@ test_that("vec2mat_rfast_test2", {
 
     v <- mat2vec_rfast(mat)
 
-    genes <- c("row.7","row.5","row.9")
+    genes <- c("row.1","row.2","row.9")
 
     expect_equal(mat[,genes], vec2mat_rfast(v,genes = genes))
 
