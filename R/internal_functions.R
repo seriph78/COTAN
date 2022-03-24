@@ -202,7 +202,9 @@ setGeneric("get.S", function(object) standardGeneric("get.S"))
 setMethod("get.S","scCOTAN",
           function(object) {
               print("function to generate S ")
-              S <- (object@coex)^2 * object@n_cells
+              #S <- (object@coex)^2 * object@n_cells
+              S <- (object@coex$values)^2 * object@n_cells
+              S <- list("genes"=object@coex$genes,"values"=S)
               return(S)
           }
 )
@@ -233,7 +235,7 @@ setMethod("obs_ct","scCOTAN",
               #---------------------------------------------------
               # Cells matrix : formed by row data matrix changed to 0-1 matrix
               cells[cells > 0] <- 1
-              cells[cells <= 0] <- 0
+              #cells[cells <= 0] <- 0
               cells <- as.matrix(cells)
               print("Generating contingency tables for observed data")
               somma <- rowSums(cells)
@@ -266,7 +268,7 @@ setMethod("obs_yes_yes","scCOTAN",
               #---------------------------------------------------
               # Cells matrix : formed by row data matrix changed to 0-1 matrix
               cells[cells > 0] <- 1
-              cells[cells <= 0] <- 0
+              #cells[cells <= 0] <- 0
 
               si_si <- as.matrix(cells) %*% t(as.matrix(cells))
               object@yes_yes <- as(as.matrix(si_si), "sparseMatrix")
@@ -358,41 +360,3 @@ setMethod("get.G","scCOTAN",
 )
 
 
-setGeneric("get.S2", function(object) standardGeneric("get.S2"))
-setMethod("get.S2","scCOTAN",
-          function(object) {
-              print("function to generate S without denominator approximation ")
-              hk <- object@hk
-              ll <- obs_ct(object)
-
-              object <- ll$object
-
-              ll$no_yes<- ll$no_yes[!rownames(ll$no_yes) %in% hk,!colnames(ll$no_yes) %in% hk]
-              ll$no_no <- ll$no_no[!rownames(ll$no_no) %in% hk,!colnames(ll$no_no) %in% hk]
-              si_si <- object@yes_yes[!rownames(object@yes_yes) %in% hk,!colnames(object@yes_yes) %in% hk]
-              ll$yes_no <- ll$yes_no[!rownames(ll$yes_no) %in% hk,!colnames(ll$yes_no) %in% hk]
-
-              est <- expected_ct(object)
-
-              print("coex estimation")
-              coex <- ((as.matrix(si_si) - as.matrix(est$estimator_yes_yes))/
-                          as.matrix(est$estimator_yes_yes)) +
-                  ((as.matrix(ll$no_no) - as.matrix(est$estimator_no_no))/
-                       as.matrix(est$estimator_no_no)) -
-                  ((as.matrix(ll$yes_no) - as.matrix(est$estimator_yes_no))/
-                       as.matrix(est$estimator_yes_no)) -
-                  ((as.matrix(ll$no_yes) - as.matrix(est$estimator_no_yes))/
-                       as.matrix(est$estimator_no_yes))
-
-              coex <- coex / sqrt(  1/as.matrix(est$estimator_yes_yes) +
-                                     1/as.matrix(est$estimator_no_no) +
-                                     1/as.matrix(est$estimator_yes_no) +
-                                     1/as.matrix(est$estimator_no_yes))
-
-              print("Diagonal coex values substituted with 0")
-              diag(coex) <- 0
-              coex <- coex / sqrt(object@n_cells)
-              S <- (coex)^2 * object@n_cells
-              return(S)
-          }
-)

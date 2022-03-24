@@ -330,83 +330,6 @@ setMethod("cotan_analysis","scCOTAN",
 
 
 
-#' get.pval
-#'
-#' This function computes the p-values for genes in the COTAN object. It can be used genome-wide
-#' or setting some specific genes of interest. By default it computes the p-values using the S
-#' statistics (\eqn{\chi^{2}})
-#' @param object a COTAN object
-#' @param gene.set.col an array of genes. It will be put in columns.
-#' If left empty the function will do it genome-wide.
-#' @param gene.set.row an array of genes. It will be put in rows.
-#' If left empty the function will do it genome-wide.
-#' @param type_stat By default it computes the S (\eqn{\chi^{2}})
-#'
-#' @return a p-value matrix
-#' @export
-#' @rdname get.pval
-#' @importFrom Matrix forceSymmetric
-#' @examples
-#'
-#' data("ERCC.cotan")
-#' ERCC.cotan <- get.pval(ERCC.cotan,type_stat="S")
-#'
-setGeneric("get.pval", function(object, gene.set.col=c(),gene.set.row=c(), type_stat="S" )
-    standardGeneric("get.pval"))
-#' @rdname get.pval
-setMethod("get.pval","scCOTAN",
-          function(object, gene.set.col=c(),gene.set.row=c(), type_stat="S") {
-              object@coex <- Matrix::forceSymmetric(object@coex, uplo="L" )
-              print(gene.set.col)
-
-              if (!is.null(gene.set.row)) {
-
-                  # a set for rows, not Genome Wide
-                  cond.row <- "on a set of genes on rows"
-
-                  stopifnot("can't have genome wide on columns and not rows! Use a
-                           subset on gene.set.col, not on rows." = !is.null(gene.set.col))
-
-                  cond.col <- "on a set of genes on columns"
-
-              }else{
-                  cond.row <- "genome wide on rows"
-                  if (is.null(gene.set.col)) {
-                      cond.col <- "genome wide on columns"
-                  }else{
-                      cond.col <- "on a set of genes on columns"
-                  }
-
-              }
-
-            print(paste("Get p-values", cond.col, cond.row, sep = " "))
-
-            if (type_stat == "S") {
-                print("Using function S")
-                S <- get.S(object)
-            }else if(type_stat == "G"){
-                print("Using function G")
-                S <- get.G(object)
-            }else if(type_stat == "S2"){
-                print("Using function G")
-                S <- get.S2(object)
-            }
-
-
-              if(cond.col == "on a set of genes on columns"){
-                  S <- S[,colnames(S) %in% gene.set.col]
-              }
-              if(cond.row == "on a set of genes on rows"){
-                  S <- S[rownames(S) %in% gene.set.row,]
-              }
-
-
-              p_value <- pchisq(as.matrix(S), df=1, lower.tail=FALSE)
-
-
-              return(p_value)
-          }
-)
 
 
 #' plot_heatmap
@@ -457,8 +380,8 @@ setMethod("plot_heatmap","ANY",
               for(ET in conditions){
                   print(paste("Loading condition",ET,sep=" "))
                   obj <- readRDS(paste(dir,ET,".cotan.RDS", sep = ""))
-                  obj@coex <- Matrix::forceSymmetric(obj@coex, uplo="L" )
-                  if(any(gr %in% rownames(obj@coex)) == FALSE){
+                  #obj@coex <- Matrix::forceSymmetric(obj@coex, uplo="L" )
+                  if(any(gr %in% obj@coex$genes) == FALSE){
                       paste0("primary markers all absent in ", ET)
                       stop()
 
@@ -492,8 +415,11 @@ setMethod("plot_heatmap","ANY",
                   df.temp.pval <- pivot_longer(p_val, cols=seq_along(colnames(p_val))-1, names_to = "g1",
                                                values_to = "p_val")
 
-                  coex <- obj@coex[rownames(obj@coex) %in% ge,colnames(obj@coex) %in% gr]
-                  coex <- as.data.frame(as.matrix(coex))
+                  #coex <- obj@coex[rownames(obj@coex) %in% ge,colnames(obj@coex) %in% gr]
+                  #coex <- as.data.frame(as.matrix(coex))
+                  coex <- vec2mat_rfast(obj@coex, genes = gr)
+                  diag(coex) <- 0
+                  coex <- coex[rownames(coex) %in% ge,]
                   #this to add some eventually effective housekeeping genes
                   if (any(ge %in% obj@hk)) {
                       temp.hk.rows <- 0
@@ -506,6 +432,7 @@ setMethod("plot_heatmap","ANY",
                   }
                   #---------------------------------------------------------
 
+                  coex <- as.data.frame(coex)
                   coex$g2 <- as.vector(rownames(coex))
 
                   df.temp.coex <- pivot_longer(coex, cols=seq_along(colnames(p_val))-1, names_to = "g1",
@@ -752,71 +679,6 @@ setMethod("plot_general.heatmap","ANY",
 
 
 
-#' get.GDI
-#'
-#' This function produce a dataframe with the GDI for each genes.
-#'
-#' @param object A COTAN object
-#' @param type Type of statistic to be used. Default is "S":
-#' Pearson's chi-squared test statistics. "G" is G-test statistics
-#'
-#' @return A dataframe
-#' @export
-#' @importFrom stats pchisq
-#' @importFrom Matrix rowSums
-#' @importFrom Matrix colMeans
-#' @importFrom Matrix forceSymmetric
-#' @rdname get.GDI
-#' @examples
-#' data("ERCC.cotan")
-#' quant.p <- get.GDI(ERCC.cotan)
-setGeneric("get.GDI", function(object,type="S") standardGeneric("get.GDI"))
-#' @rdname get.GDI
-setMethod("get.GDI","scCOTAN",
-          function(object,type="S") {
-
-              object@coex <- Matrix::forceSymmetric(object@coex, uplo="L" )
-
-              print("function to generate GDI dataframe")
-              if (type=="S") {
-                  print("Using S")
-                  S <- get.S(object)
-              }else if(type=="G"){
-                  print("Using G")
-                  S <- get.G(object)
-              }
-
-
-              S <- as.data.frame(as.matrix(S))
-              CD.sorted <- apply(S,2,sort,decreasing=TRUE)
-              rg <- round(nrow(CD.sorted)/20, digits = 0)
-              CD.sorted <- CD.sorted[seq_len(rg),]
-              CD.sorted <- pchisq(as.matrix(CD.sorted), df=1, lower.tail=FALSE)
-
-              GDI <- colMeans(CD.sorted)
-              GDI <-as.data.frame(GDI)
-              colnames(GDI) <- "mean.pval"
-
-              sum.raw.norm <- log(rowSums(as.matrix(object@raw.norm)))
-
-              cells<-as.matrix(object@raw)
-              cells[cells > 0] <- 1
-              cells[cells <= 0] <- 0
-
-              exp.cells <- (rowSums(cells)/object@n_cells)*100
-
-              GDI <-  merge(GDI, as.data.frame(sum.raw.norm), by="row.names",all.x=TRUE)
-              rownames(GDI) <- GDI$Row.names
-              GDI <-  GDI[,2:ncol(GDI)]
-              GDI <-  merge(GDI, as.data.frame(exp.cells), by="row.names",all.x=TRUE)
-              rownames(GDI) <- GDI$Row.names
-              GDI$log.mean.p <- -log(GDI$mean.pval)
-              GDI$GDI <- log(GDI$log.mean.p)
-              GDI <- GDI[,c("sum.raw.norm","GDI","exp.cells")]
-
-              return(GDI)
-          }
-)
 
 
 #' plot_GDI
@@ -842,7 +704,7 @@ setGeneric("plot_GDI", function(object, cond,type="S") standardGeneric("plot_GDI
 setMethod("plot_GDI","scCOTAN",
           function(object, cond,type="S") {
 
-              object@coex <- Matrix::forceSymmetric(object@coex, uplo="L" )
+              #object@coex <- Matrix::forceSymmetric(object@coex, uplo="L" )
 
               print("GDI plot ")
               if (type=="S") {

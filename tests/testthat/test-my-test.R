@@ -76,7 +76,14 @@ test_that("4.cotan_coex_test", {
 
     saveRDS(obj, file = file.path(tm,"temp.RDS") )
 
-    expect_equal(coex, coex_test)
+    error <- sqrt(mean((coex$values - coex_test$values)^2))
+
+    if(error < 0.001 & error > 10^(-4) ){
+        warning("Error difference grater than 0.0001!")
+    }
+
+
+    expect_true(error < 10^(-3))
 })
 
 test_that("python_PCA_test", {
@@ -111,16 +118,21 @@ file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = TRUE)
 
 test_that("5.get_pval_test", {
     object=readRDS(file.path(tm,"temp.RDS"))
-    #object = readRDS(file.path(getwd(),"Obj_out_cotan_coex_not_approx.RDS"))
-    object@coex = object@coex/sqrt(object@n_cells) #Because this object was created
-    #with the old method and it was divided by sqrt(cell_number)
-    pval = get.pval(object, gene.set.col = rownames(object@raw)[1:100], rownames(object@raw)[1:100])
-    #pval.exp = readRDS(file.path(getwd(),"pval.RDS"))
+
+    pval = get.pval(object, gene.set.col = rownames(object@raw)[1:100],gene.set.row = rownames(object@raw)[1:100])
+
     pval.exp =readRDS(file.path(getwd(),"pval.RDS"))
-    #pval.exp = as.data.frame(pval.exp)
-    #rownames(pval.exp) =pval.exp$V1
-    #pval.exp = pval.exp[,2:ncol(pval.exp)]
-    expect_equal( pval, pval.exp)
+
+    error <- sqrt(mean((log(pval+10^(-10)) - log(pval.exp+10^(-10)))^2))
+    error_max <- max(abs(log(pval+10^(-10)) - log(pval.exp+10^(-10))))
+
+    if(error < 0.01 & error > 0.001 ){
+        warning("Error difference grater than 0.001!")
+    }
+
+    expect_true(error < 10^(-2))
+    expect_true(error_max < 10^(-1))
+
 
 })
 
@@ -169,7 +181,7 @@ test_that("mat2vec_rfast_test", {
     names.v <- paste0("raw",c(1:5))
 
     names.v
-    vec <- list("genes"=names.v, "coex.values"=vec)
+    vec <- list("genes"=names.v, "values"=vec)
 
     m <- vec2mat_rfast(vec)
 
