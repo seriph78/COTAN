@@ -129,6 +129,7 @@ setGeneric("fun_linear", function(object) standardGeneric("fun_linear"))
 setMethod("fun_linear","scCOTAN",
 
           function(object) {
+              python_PCA <- NULL
 
               file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = TRUE)
 

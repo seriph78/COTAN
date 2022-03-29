@@ -5,7 +5,7 @@
 \alias{get.subset,scCOTAN-method}
 \title{get.subset}
 \usage{
-get.subset(object, cluster.names, ...)
+get.subset(object, cluster.names)
 
 \S4method{get.subset}{scCOTAN}(object, cluster.names)
 }

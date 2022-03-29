@@ -35,7 +35,6 @@ Imports:
     stats,
     parallel,
     tibble,
-    Seurat,
     tidyr,
     basilisk,
     reticulate,
@@ -72,3 +71,4 @@ biocViews:
     GeneExpression,
     SingleCell
 VignetteBuilder: knitr
+LazyData: false

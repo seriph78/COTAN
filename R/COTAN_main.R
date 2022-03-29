@@ -139,6 +139,7 @@ setMethod("clean","scCOTAN",
                                                                 vjust = .5,
                                                                 face = "plain",
                                                                 colour ="#3C5488FF"))
+                 pc1 <- PC2 <- PC1 <- NULL
 
 
                 cells  <-  get.zero_one.cells(object)
@@ -369,28 +370,28 @@ setGeneric("plot_heatmap", function(p_val.tr = 0.05, df_genes , sets, conditions
 #' @rdname plot_heatmap
 setMethod("plot_heatmap","ANY",
           function(p_val.tr = 0.05, df_genes , sets, conditions, dir) {
+              time <- g2 <- NULL
               print("plot heatmap")
-
               gr <- df_genes[[1]]
-
               ge <- unique(array(sort(unlist(df_genes[sets]))))
-
               df.to.print <- data.frame()
-
               for(ET in conditions){
                   print(paste("Loading condition",ET,sep=" "))
                   obj <- readRDS(paste(dir,ET,".cotan.RDS", sep = ""))
-                  #obj@coex <- Matrix::forceSymmetric(obj@coex, uplo="L" )
+                  if(is(class(obj@coex)[1], "dtCMatrix")){
+                      print("COTAN object in the old format! Converting...")
+                      obj <- get.coex(obj)
+                      print(paste("Saving as new file as ",dir,ET,"new.cotan.RDS", sep = ""))
+                      saveRDS(obj,paste(dir,ET,"new.cotan.RDS", sep = ""))
+                  }
                   if(any(gr %in% obj@coex$genes) == FALSE){
                       paste0("primary markers all absent in ", ET)
                       stop()
-
                   }
                   p_val <- get.pval(obj,gene.set.col = gr, gene.set.row = ge)
                   p_val <- as.data.frame(p_val)
 
                   #this to add some eventually effective housekeeping genes
-
                   if (any(ge %in% obj@hk)) {
                       genes.to.add <- ge[ge %in% obj@hk]
                       temp.hk.rows <- as.data.frame(matrix(ncol = ncol(p_val), nrow =
@@ -412,11 +413,8 @@ setMethod("plot_heatmap","ANY",
                   }
 
                   p_val$g2 <- as.vector(rownames(p_val))
-                  df.temp.pval <- pivot_longer(p_val, cols=seq_along(colnames(p_val))-1, names_to = "g1",
-                                               values_to = "p_val")
+                  df.temp.pval <- pivot_longer(p_val, cols=seq_along(colnames(p_val))-1, names_to = "g1", values_to = "p_val")
 
-                  #coex <- obj@coex[rownames(obj@coex) %in% ge,colnames(obj@coex) %in% gr]
-                  #coex <- as.data.frame(as.matrix(coex))
                   coex <- vec2mat_rfast(obj@coex, genes = gr)
                   diag(coex) <- 0
                   coex <- coex[rownames(coex) %in% ge,]
@@ -431,20 +429,15 @@ setMethod("plot_heatmap","ANY",
                       coex <- cbind(coex,temp.hk.cols)
                   }
                   #---------------------------------------------------------
-
                   coex <- as.data.frame(coex)
                   coex$g2 <- as.vector(rownames(coex))
-
-                  df.temp.coex <- pivot_longer(coex, cols=seq_along(colnames(p_val))-1, names_to = "g1",
-                                               values_to = "coex")
-
+                  df.temp.coex <- pivot_longer(coex, cols=seq_along(colnames(p_val))-1, names_to = "g1", values_to = "coex")
                   df.temp <- merge(df.temp.coex, df.temp.pval)
                   df.temp$time <- ET
                   df.temp$type <- NA
                   df.temp$absent <- NA
                   df.temp2 <- data.frame()
                   for (type in names(df_genes)[sets]) {
-
                       for (g1 in gr) {
                           tt <- df.temp[df.temp$g2 %in% df_genes[[type]] & df.temp$g1 == g1, ]
                           #control if the subset is smaller than the number of wanted genes
@@ -460,28 +453,17 @@ setMethod("plot_heatmap","ANY",
                               tt <- rbind(tt,t.rows)
                           }
                           tt$type <- type
-
                           df.temp2 <-rbind(df.temp2,tt)
-
                       }
                       print(type)
-
                   }
                   df.temp <- df.temp2
-                  df.temp$t_hk <- ifelse((df.temp$g2  %in% obj@hk) | (df.temp$g1  %in% obj@hk),
-                                        "hk", "n")
-
+                  df.temp$t_hk <- ifelse((df.temp$g2  %in% obj@hk) | (df.temp$g1  %in% obj@hk),"hk", "n")
                   df.temp[df.temp$p_val > p_val.tr,]$coex <- 0
-
                   df.to.print <-  rbind(df.to.print,df.temp)
-
               }
-
-              print(paste("min coex:",min(df.to.print$coex, na.rm = TRUE), "max coex",
-                          max(df.to.print$coex, na.rm = TRUE),sep = " "))
-
-              heatmap <- ggplot(data = subset(df.to.print,type %in%  names(df_genes)[sets] ),
-                               aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
+              print(paste("min coex:",min(df.to.print$coex, na.rm = TRUE), "max coex",max(df.to.print$coex, na.rm = TRUE),sep = " "))
+              heatmap <- ggplot(data = subset(df.to.print,type %in%  names(df_genes)[sets] ),aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
                   geom_tile(aes(fill = coex),colour = "black", show.legend = TRUE) +
                   facet_grid( type ~ g1  ,scales = "free", space = "free") +
                   scale_fill_gradient2(low = "#E64B35FF", mid = "gray93",   high = "#3C5488FF",
@@ -500,7 +482,6 @@ setMethod("plot_heatmap","ANY",
                         legend.position = "bottom",
                         legend.title=element_blank(),
                         legend.key.height = unit(2, "mm"))
-
               heatmap
               return(heatmap)
           }
@@ -552,6 +533,7 @@ setMethod("plot_general.heatmap","ANY",
           function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),markers.list=c(), dir,
                    condition,p_value = 0.001, symmetric = TRUE) {
               print("ploting a general heatmap")
+              ET <- NULL
 
               if(symmetric == TRUE){
                   markers.list <- as.list(c( unlist(prim.markers),unlist(markers.list)))
@@ -564,34 +546,39 @@ setMethod("plot_general.heatmap","ANY",
               }
 
               obj <- readRDS(paste(dir,condition,".cotan.RDS", sep = ""))
-              obj@coex <- Matrix::forceSymmetric(obj@coex, uplo="L" )
-              coex <- as.matrix(obj@coex)
+
+              if(is(class(obj@coex)[1], "dtCMatrix")){
+                  print("COTAN object in the old format! Converting...")
+                  obj <- get.coex(obj)
+                  print(paste("Saving as new file as ",dir,ET,"new.cotan.RDS", sep = ""))
+                  saveRDS(obj,paste(dir,ET,"new.cotan.RDS", sep = ""))
+
+              }
+
               no_genes <- unique(c(unlist(markers.list),prim.markers))[!unique(c(unlist(markers.list),
                                                                                 prim.markers))
-                                                                      %in% colnames(coex)]
+                                                                       %in% obj@coex$genes]
 
               if(! rlang::is_empty(no_genes)){
                   print(paste(no_genes,"not present!",sep = " "))
               }
 
-              coex <- coex[,colnames(coex) %in% unique(c(unlist(markers.list),prim.markers)) ]
-              coex <- as.data.frame(as.matrix(coex))
+              pval <- get.pval(object = obj)
+              diag(pval) <- 1
+              pval <- pval[,unique(c(unlist(markers.list),prim.markers))]
 
-              pval <- get.pval(object = obj,gene.set.col = unique(c(unlist(markers.list),prim.markers)))
               pval.red <- apply(pval, 1, FUN=min)
               genes.row <- names(pval.red[pval.red < p_value])
-              genes.row <- unique(c(colnames(coex),genes.row))
 
+              genes.row <- unique(c(unique(c(unlist(markers.list),prim.markers)),genes.row))
+              pval <- as.data.frame(pval)
+
+              coex <- vec2mat_rfast(obj@coex)
+              diag(coex) <- 0
               if(symmetric == TRUE){
-                  coex <- obj@coex
-
-                  coex <- as.data.frame(as.matrix(coex))
-
                   coex <- coex[rownames(coex) %in% genes.row, colnames(coex) %in%  genes.row]
 
               }else{
-                  coex <- obj@coex
-                  coex <- as.data.frame(as.matrix(coex))
 
                   coex <- coex[rownames(coex) %in% genes.row,]
               }
@@ -652,7 +639,6 @@ setMethod("plot_general.heatmap","ANY",
 
               #The next line is to set the columns and raws order
               #need to be implemented
-
               part1 <- ComplexHeatmap::Heatmap(as.matrix(to.plot),
                               cluster_rows = FALSE,
                               cluster_columns = FALSE ,
@@ -674,11 +660,6 @@ setMethod("plot_general.heatmap","ANY",
 
           }
 )
-
-
-
-
-
 
 
 #' plot_GDI
@@ -703,8 +684,15 @@ setGeneric("plot_GDI", function(object, cond,type="S") standardGeneric("plot_GDI
 #' @rdname plot_GDI
 setMethod("plot_GDI","scCOTAN",
           function(object, cond,type="S") {
+              ET <- sum.raw.norm <- NULL
 
-              #object@coex <- Matrix::forceSymmetric(object@coex, uplo="L" )
+              if(is(class(object@coex)[1], "dtCMatrix")){
+                  print("COTAN object in the old format! Converting...")
+                  object <- get.coex(object)
+                  print(paste("Saving as new file as ",dir,ET,"new.cotan.RDS", sep = ""))
+                  saveRDS(object,paste(dir,ET,"new.cotan.RDS", sep = ""))
+
+              }
 
               print("GDI plot ")
               if (type=="S") {
@@ -815,8 +803,6 @@ setMethod("get.observed.ct","scCOTAN",
 #'}
 #' get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.expected.ct", function(object,g1,g2) standardGeneric("get.expected.ct"))
-#' @param scCOTAN
-#'
 #' @rdname get.expected.ct
 setMethod("get.expected.ct","scCOTAN",
           function(object,g1,g2) {
@@ -1117,7 +1103,7 @@ setMethod("drop.genes.cells","scCOTAN",
 
 #' add.row.to.meta
 #'
-#' This function is usefull to add a line of information to the infomration dataframe (metadata).
+#' This function is used to add a line of information to the information data frame (metadata).
 #'
 #' @param object a COTAN object
 #' @param text.line an array containing the information
@@ -1131,8 +1117,6 @@ setMethod("drop.genes.cells","scCOTAN",
 #' ERCC.cotan <- add.row.to.meta(ERCC.cotan, text)
 #' get.metadata(ERCC.cotan)
 setGeneric("add.row.to.meta", function(object, text.line) standardGeneric("add.row.to.meta"))
-#' @param scCOTAN
-#'
 #' @rdname add.row.to.meta
 setMethod("add.row.to.meta","scCOTAN",
           function(object, text.line) {

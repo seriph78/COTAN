@@ -86,7 +86,7 @@ function(x,genes="all"){
 #' @rdname mat2vec_rfast
 #' @examples
 #' mat <- matrix(0,nrow = 10, ncol = 10)
-#' mat <- Rfast::lower_tri.assign(mat,c(1:55),diag = T)
+#' mat <- Rfast::lower_tri.assign(mat,c(1:55),diag = TRUE)
 #' mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
 #' v <- mat2vec_rfast(mat)
 setGeneric("mat2vec_rfast", function(mat) standardGeneric("mat2vec_rfast"))
@@ -94,7 +94,7 @@ setGeneric("mat2vec_rfast", function(mat) standardGeneric("mat2vec_rfast"))
 setMethod("mat2vec_rfast","matrix",
 function(mat){
  if(! dim(mat)[1] == dim(mat)[2] ) stop('The matrix is not simmetric!')
- v <- Rfast::lower_tri(mat,diag = T)
+ v <- Rfast::lower_tri(mat,diag = TRUE)
  names.v <- rownames(mat)
  v=list("genes"=rownames(mat),"values"=v)
  return(v)

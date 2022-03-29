@@ -15,8 +15,6 @@ get.expected.ct(object, g1, g2)
 \item{g1}{A gene}
 
 \item{g2}{The other gene}
-
-\item{scCOTAN}{}
 }
 \value{
 A contingency table as dataframe

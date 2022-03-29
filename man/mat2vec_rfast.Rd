@@ -20,7 +20,7 @@ mat2vec_rfast
 }
 \examples{
 mat <- matrix(0,nrow = 10, ncol = 10)
-mat <- Rfast::lower_tri.assign(mat,c(1:55),diag = T)
+mat <- Rfast::lower_tri.assign(mat,c(1:55),diag = TRUE)
 mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
 v <- mat2vec_rfast(mat)
 }

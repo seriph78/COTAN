@@ -24,10 +24,10 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.width = 6,
-  fig.height = 6
+  fig.width = 5,
+  fig.height = 5
 )
-#options(rmarkdown.html_vignette.check_title = F)
+
 ```
 
 ```{r setup}
@@ -70,7 +70,6 @@ This is just an example on a toy dataset. If the user want to try on a real data
 There are also available online many other examples at [link](https://seriph78.github.io/Cotan_paper/index.html).
 
 ```{r}
-#load(system.file("data", "ERCCraw.rda", package = "COTAN", mustWork = TRUE))
 data("ERCCraw", package = "COTAN")
 
 ERCCraw = as.data.frame(ERCCraw)
@@ -81,8 +80,7 @@ ERCCraw[1:5,1:5]
 
 Define a directory where the output will be stored.
 ```{r}
-#out_dir = out_dir
-out_dir = tempdir()
+out_dir <- paste0(tempdir(),"/")
 ```
 
 # Analytical pipeline
@@ -138,7 +136,7 @@ ttm$pca.cell.2
 ```
 
 Run this when B cells need to be removed.
-```{r eval=F, include=T}
+```{r eval=FALSE, include=TRUE}
 pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = "")))
 ttm$pca.cell.2
 ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
@@ -322,7 +320,8 @@ plot_GDI(obj, cond = "ERCC")
 ```
 
 If a more complex plot is needed, or if we want to analyze more in detail the GDI data, we can get directly the GDI dataframe. 
-```{r echo=T}
+
+```{r}
 quant.p = get.GDI(obj)
 
 head(quant.p)
@@ -332,7 +331,7 @@ In the third column of this dataframe is reported the percentage of cells expres
 
 Next we can define some gene sets (in this case three) that we want to specifically label in the GDI plot.
 
-```{r echo=T}
+```{r echo=TRUE}
 AA=c("ERCC-00012","ERCC-00013","ERCC-00014") 
 BB=c("ERCC-00016","ERCC-00017","ERCC-00019")
 CC=c("ERCC-00022","ERCC-00024","ERCC-00028")
@@ -353,7 +352,7 @@ GDI_plot = f1 +  geom_point(data = subset(quant.p,highlight != "normal"  ), aes(
   scale_color_manual("Status", values = mycolours)  +
   scale_fill_manual("Status", values = mycolours)  +
   xlab("log normalized counts")+ylab("GDI")+
-  geom_label_repel(data =textdf , aes(x=sum.raw.norm, y=GDI, label = rownames(textdf),fill=highlight),
+  geom_label_repel(data = textdf , aes(x=sum.raw.norm, y=GDI, label = rownames(textdf),fill=highlight),
                    label.size = NA, 
                    alpha = 0.5, 
                    direction ="both",
@@ -374,7 +373,7 @@ GDI_plot = f1 +  geom_point(data = subset(quant.p,highlight != "normal"  ), aes(
         axis.title.y = element_text( size = text.size, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"),
         legend.title = element_blank(),
         legend.text = element_text(color = "#3C5488FF",face ="italic" ),
-        legend.position = "bottom")  # titl)
+        legend.position = "bottom") 
 legend <- cowplot::get_legend(GDI_plot)
 GDI_plot =GDI_plot + theme(
         legend.position = "none") 
@@ -398,9 +397,11 @@ plot_heatmap(df_genes = list.genes,sets = c(1:3),conditions = "ERCC",dir = out_d
 We can also plot a general heatmap of coex values based on some markers like the following one.
 
 ```{r}
-plot_general.heatmap(prim.markers = c("ERCC-00014","ERCC-00019"), condition = "ERCC",dir = out_dir, p_value = 0.05,)
+plot_general.heatmap(prim.markers = c("ERCC-00014","ERCC-00019"), condition = "ERCC",dir = out_dir, p_value = 0.05)
 ```
-
+```{r}
+plot_general.heatmap(prim.markers = c("ERCC-00014","ERCC-00019"),markers.list =c("ERCC-00084" ,"ERCC-00085" ,"ERCC-00086") ,symmetric = FALSE, condition = "ERCC",dir = out_dir, p_value = 0.05)
+```
 
 ## Get data tables
 
@@ -408,13 +409,27 @@ Sometimes we can also be interested in the numbers present directly in the conti
 
 1. get.observed.ct to produce the observed data
 ```{r}
-get.observed.ct(object = obj, g1 = "ERCC-00014",g2 = "ERCC-00019")
+ get.observed.ct(object = obj, g1 = "ERCC-00014",g2 = "ERCC-00019")
 ```
 
 2. get.expected.ct to produce the expected values
 ```{r}
 get.expected.ct(object = obj, g1 = "ERCC-00014",g2 = "ERCC-00019")
 ```
+
+Another useful function is extract.coex. This can be used to extract the whole or a partial coex matrix from a COTAN object.  
+```{r}
+# For the whole matrix
+coex <- extract.coex(object = obj)
+coex[1:5,1:5]
+```
+
+```{r}
+# For a partial matrix
+coex <- extract.coex(object = obj,genes = c("ERCC-00017", "ERCC-00019", "ERCC-00024", "ERCC-00025", "ERCC-00028", "ERCC-00031"))
+head(coex)
+```
+
 
 The next few lines are just to clean after compilation of the documentation.
 ```{r}

@@ -39,6 +39,8 @@ setMethod("automatic.COTAN.object.creation","data.frame",
           function(df, out_dir, GEO, sc.method, cond, mt = FALSE, mt_prefix="^mt", cores = 1) {
               start_time_all <- Sys.time()
 
+              means <- PC1 <- PC2 <- nu <- NULL
+
               mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
               my_theme <- theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5,
                                                            vjust = .5,

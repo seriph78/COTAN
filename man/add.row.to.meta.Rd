@@ -13,14 +13,12 @@ add.row.to.meta(object, text.line)
 \item{object}{a COTAN object}
 
 \item{text.line}{an array containing the information}
-
-\item{scCOTAN}{}
 }
 \value{
 the updated COTAN object
 }
 \description{
-This function is usefull to add a line of information to the infomration dataframe (metadata).
+This function is used to add a line of information to the information data frame (metadata).
 }
 \examples{
 data("ERCC.cotan")

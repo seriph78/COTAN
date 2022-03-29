@@ -21,8 +21,6 @@ setGeneric("get.GDI", function(object,type="S") standardGeneric("get.GDI"))
 setMethod("get.GDI","scCOTAN",
           function(object,type="S") {
 
-              #object@coex <- Matrix::forceSymmetric(object@coex, uplo="L" )
-
               print("function to generate GDI dataframe")
               if (type=="S") {
                   print("Using S")
@@ -34,7 +32,6 @@ setMethod("get.GDI","scCOTAN",
 
               S <- vec2mat_rfast(S)
               diag(S) <- 0
-              #S <- as.data.frame(as.matrix(S))
               CD.sorted <- apply(S,2,sort,decreasing=TRUE)
               rg <- round(nrow(CD.sorted)/20, digits = 0)
               CD.sorted <- CD.sorted[seq_len(rg),]

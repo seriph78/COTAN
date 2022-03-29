@@ -10,7 +10,7 @@
 #'
 #' @examples
 #' data("ERCC.cotan")
-setGeneric("get.subset", function(object, cluster.names,...) standardGeneric("get.subset"))
+setGeneric("get.subset", function(object, cluster.names) standardGeneric("get.subset"))
 #' @rdname get.subset
 setMethod("get.subset","scCOTAN",
           function(object,cluster.names) {
