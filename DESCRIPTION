@@ -42,9 +42,13 @@ Imports:
     circlize,
     grid,
     scales,
+    RColorBrewer,
     utils,
     rlang,
-    Rfast
+    Rfast,
+    Seurat,
+    dendextend,
+    factoextra
 Suggests: 
     testthat (>= 3.0.0),
     spelling,

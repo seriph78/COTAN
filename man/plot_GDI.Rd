@@ -5,17 +5,21 @@
 \alias{plot_GDI,scCOTAN-method}
 \title{plot_GDI}
 \usage{
-plot_GDI(object, cond, type = "S")
+plot_GDI(object, cond = NULL, genes = NULL, type = "S", GDI.df = NULL)
 
-\S4method{plot_GDI}{scCOTAN}(object, cond, type = "S")
+\S4method{plot_GDI}{scCOTAN}(object, cond = NULL, genes = NULL, type = "S", GDI.df = NULL)
 }
 \arguments{
 \item{object}{A COTAN object}
 
-\item{cond}{A string corresponding to the condition/sample (it is used only for the title)}
+\item{cond}{A string corresponding to the condition/sample (it is used only for the title). Default is empty.}
+
+\item{genes}{a named list of genes to label. Each array will have different color. Default is empty.}
 
 \item{type}{Type of statistic to be used. Default is "S":
 Pearson's chi-squared test statistics. "G" is G-test statistics}
+
+\item{GDI.df}{when the GDI data frame was already calculated, it can be put here to speed up the process. Default is NULL.}
 }
 \value{
 A ggplot2 object

@@ -20,7 +20,7 @@ drop.genes.cells(object, genes = c(), cells = c())
 the original object but with the raw matrix without the indicated cells and/or genes.
 }
 \description{
-This finction remove an array of genes and/or cells from the original object raw matrix.
+This function remove an array of genes and/or cells from the original object raw matrix.
 }
 \examples{
 data("ERCC.cotan")

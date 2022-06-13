@@ -38,7 +38,6 @@ setMethod("get.gene.coexpression.space","scCOTAN",
                   primary.markers <- primary.markers[primary.markers %in% colnames(p.val.matrix)]
               }
 
-
               all.genes.to.an <- vector()
               for (m in primary.markers) {
                   tm <-rownames(p.val.matrix[order(p.val.matrix[,m]),])[seq_len(n.genes.for.marker)]

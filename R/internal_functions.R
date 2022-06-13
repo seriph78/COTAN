@@ -203,7 +203,10 @@ setGeneric("get.S", function(object) standardGeneric("get.S"))
 setMethod("get.S","scCOTAN",
           function(object) {
               print("function to generate S ")
-              #S <- (object@coex)^2 * object@n_cells
+              if(is(class(object@coex)[1], "dtCMatrix") | (as.vector(class(object@coex)) %in% "dtCMatrix")){
+                  print("COTAN object in the old format! Converting...")
+                  object <- get.coex(object)
+              }
               S <- (object@coex$values)^2 * object@n_cells
               S <- list("genes"=object@coex$genes,"values"=S)
               return(S)
