@@ -7,12 +7,16 @@
 #' be the condition o cell population or cluster number, the arraz will contain all the cell codes (as in the
 #' raw matrix column names).
 #'
-#' @return
+#' @return a list with two objects: the first is a scCOTAN with the new 
+#' object with also the correlation matrix for the genes in each cluster (obj@cluster_data), 
+#' the second is the p-values matrix. 
 #' @export
 #'
 #' @examples
-setGeneric("DEA_on_clusters", function(obj, cells_list) standardGeneric("DEA_on_clusters"))
-setMethod("DEA_on_clusters","ANY",
+setGeneric("DEA_on_clusters", function(obj, cells_list) 
+  standardGeneric("DEA_on_clusters"))
+#' @rdname DEA_on_clusters
+setMethod("DEA_on_clusters","scCOTAN",
           function(obj, cells_list) {
 
               #---------------------------------------------
@@ -80,6 +84,7 @@ setMethod("DEA_on_clusters","ANY",
               cluster_pval = data.frame()
               # cells_set  > set of cell code corresponding to cluster
               for (condition in names(cells_list)) {
+                gc()
                   print(paste("cluster",condition, sep=" "))
                   cells=as.matrix(obj@raw)
                   cells_set = unlist(cells_list[condition])
@@ -140,6 +145,9 @@ setMethod("DEA_on_clusters","ANY",
                   dif_yes_out = (as.matrix(yes_out) - estimator_yes_out)**2/new_estimator_yes_out
 
                   S = dif_no_in + dif_no_out + dif_yes_in + dif_yes_out
+                  
+                  rm(dif_yes_out,dif_no_in,dif_no_out,dif_yes_in)
+                  gc()
 
                   if(any(is.na(S))){
                       print(paste("Errore: some Na in matrix S", which(is.na(S),arr.ind = T),sep = " "))
@@ -156,6 +164,10 @@ setMethod("DEA_on_clusters","ANY",
                       ((as.matrix(no_out) - as.matrix(estimator_no_out))/as.matrix(new_estimator_no_out)) -
                       ((as.matrix(yes_out) - as.matrix(estimator_yes_out))/as.matrix(new_estimator_yes_out)) -
                       ((as.matrix(no_in) - as.matrix(estimator_no_in))/as.matrix(new_estimator_no_in))
+                  
+                  rm(yes_in, yes_out,no_out,no_in)
+                  rm(estimator_yes_out,estimator_yes_in, estimator_no_out, estimator_no_in)
+                  gc()
 
                   coex = coex / sqrt(1/new_estimator_yes_in + 1/new_estimator_no_in + 1/new_estimator_yes_out + 1/new_estimator_no_out)
 

@@ -8,6 +8,7 @@
 automatic.COTAN.object.creation(
   df,
   out_dir,
+  save.obj = "NO",
   GEO,
   sc.method,
   cond,
@@ -19,6 +20,7 @@ automatic.COTAN.object.creation(
 \S4method{automatic.COTAN.object.creation}{data.frame}(
   df,
   out_dir,
+  save.obj = "NO",
   GEO,
   sc.method,
   cond,
@@ -31,6 +33,8 @@ automatic.COTAN.object.creation(
 \item{df}{dataframe with the row counts}
 
 \item{out_dir}{directory for the output}
+
+\item{save.obj}{the created object is not automatically writen on disk (default NO). If "Yes" the object is written in out_dir}
 
 \item{GEO}{GEO or other code that identify the dataset}
 

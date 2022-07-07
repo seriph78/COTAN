@@ -7,6 +7,8 @@
 #' @param data.raw raw data matrix
 #' @param out_dir path to the output directory
 #' @param cond string defining the condition
+#' @param cores number of cores used
+#' 
 #' @import Seurat
 #' @import ggrepel
 #' @import ggplot2
@@ -14,7 +16,7 @@
 #' @export
 #'
 #' @examples
-setGeneric("cluster_homogeneity", function(data.seurat,data.raw,out_dir, cond, cores=10) standardGeneric("cluster_homogeneity"))
+setGeneric("cluster_homogeneity", function(data.seurat,data.raw,out_dir, cond, cores=1) standardGeneric("cluster_homogeneity"))
 #' @rdname cluster_homogeneity
 setMethod("cluster_homogeneity","Seurat",
           function(data.seurat,data.raw,out_dir, cond, cores){

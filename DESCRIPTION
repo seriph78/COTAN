@@ -24,15 +24,15 @@ BugReports: https://github.com/seriph78/COTAN/issues
 Depends: R (>= 4.1)
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
 Imports:
+    stats,
     dplyr,
     methods,
     grDevices,
     Matrix,
     ggplot2,
     ggrepel,
-    stats,
     parallel,
     tibble,
     tidyr,
@@ -46,12 +46,14 @@ Imports:
     utils,
     rlang,
     Rfast,
+    stringr,
     Seurat,
-    dendextend,
-    factoextra
+    factoextra,
+    dendextend
 Suggests: 
     testthat (>= 3.0.0),
     spelling,
+    dendextend,
     knitr,
     data.table,
     R.utils,
@@ -59,10 +61,8 @@ Suggests:
     rmarkdown,
     htmlwidgets,
     MASS,
-    factoextra,
     Rtsne,
     plotly,
-    dendextend,
     BiocStyle,
     cowplot
 Config/testthat/edition: 3

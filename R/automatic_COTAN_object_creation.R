@@ -2,6 +2,7 @@
 #'
 #' @param df dataframe with the row counts
 #' @param out_dir directory for the output
+#' @param save.obj the created object is not automatically writen on disk (default NO). If "Yes" the object is written in out_dir
 #' @param GEO GEO or other code that identify the dataset
 #' @param sc.method Type of single cell RNA-seq method used
 #' @param cond A string that will identify the sample or condition. It will be part of the
@@ -31,12 +32,12 @@
 #' sc.method = "test_method",
 #' cond = "test")
 #'
-setGeneric("automatic.COTAN.object.creation", function(df, out_dir, GEO, sc.method,
+setGeneric("automatic.COTAN.object.creation", function(df, out_dir,save.obj="NO", GEO, sc.method,
                                                        cond, mt = FALSE, mt_prefix="^mt", cores = 1)
     standardGeneric("automatic.COTAN.object.creation"))
 #' @rdname automatic.COTAN.object.creation
 setMethod("automatic.COTAN.object.creation","data.frame",
-          function(df, out_dir, GEO, sc.method, cond, mt = FALSE, mt_prefix="^mt", cores = 1) {
+          function(df, out_dir,save.obj = "NO", GEO, sc.method, cond, mt = FALSE, mt_prefix="^mt", cores = 1) {
               start_time_all <- Sys.time()
 
               means <- PC1 <- PC2 <- nu <- NULL
@@ -163,9 +164,11 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                                           "n.cells"=n_cells,"n.genes"=dim(obj@raw)[1]),
                                file = file.path(out_dir, paste(t,"_times.csv", sep = "")))
 
+              
+              if(save.obj == "yes"){
               print(paste0("Saving elaborated data locally at ", out_dir,t,".cotan.RDS"))
               saveRDS(obj,file = file.path(out_dir,paste(t,".cotan.RDS", sep = "")))
-
+              }
               return(obj)
 
           }

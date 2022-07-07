@@ -2,11 +2,14 @@
 % Please edit documentation in R/cotan_on_cluster_DE.R
 \name{DEA_on_clusters}
 \alias{DEA_on_clusters}
+\alias{DEA_on_clusters,scCOTAN-method}
 \title{DEA_on_clusters
 Next method is used to do the differential expression analysis using COTAN contingency tables
 on the cluster checked with the previous method}
 \usage{
 DEA_on_clusters(obj, cells_list)
+
+\S4method{DEA_on_clusters}{scCOTAN}(obj, cells_list)
 }
 \arguments{
 \item{obj}{A COTAN object}
@@ -16,7 +19,9 @@ be the condition o cell population or cluster number, the arraz will contain all
 raw matrix column names).}
 }
 \value{
-
+a list with two objects: the first is a scCOTAN with the new 
+object with also the correlation matrix for the genes in each cluster (obj@cluster_data), 
+the second is the p-values matrix.
 }
 \description{
 DEA_on_clusters

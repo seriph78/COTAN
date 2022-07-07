@@ -7,7 +7,10 @@
 #' @param distance type of distance to use (default "cosine"... "euclidean" is also available)
 #' @param hclust.method default is "ward.D2" but can be any method defined by hclust function
 #' @import factoextra
-#' @import dendextend
+#' @importFrom dendextend color_labels
+#' @importFrom dendextend set
+#' @importFrom stringr str_split
+#' @importFrom dendextend color_branches
 #' @importFrom stats hclust
 #' @importFrom stats cutree
 #' @importFrom RColorBrewer brewer.pal
@@ -21,7 +24,6 @@ setGeneric("get.gene.clusters", function(obj,list.group.markers,n.markers =25, k
 #' @rdname get.gene.clusters
 setMethod("get.gene.clusters","scCOTAN",
  function(obj,list.group.markers,n.markers =25, k.cuts = 6,distance = "cosine",hclust.method="ward.D2"){
-    #list.group.markers <- list("L1"=c("Reln","Lhx5"), "L2/3"=c("Satb2","Cux1"), "L4"=c("Rorb","Sox5") , "L5/6"=c("Bcl11b","Fezf2") , "Prog"=c("Vim","Hes1"))
 
     g.space <- get.gene.coexpression.space(obj,
                                           n.genes.for.marker = n.markers,
@@ -44,7 +46,7 @@ setMethod("get.gene.clusters","scCOTAN",
     pca_1 <- as.data.frame(coex.pca.genes$rotation[,1:10])
     pca_1 <- pca_1[order.dendrogram(dend),]
 
-    cut <- cutree(hc.norm, k = k.cuts)
+    cut <- stats::cutree(hc.norm, k = k.cuts)
 
     tmp <- get.pval(object = obj,gene.set.col =unlist(list.group.markers),gene.set.row = colnames(g.space))
 
@@ -127,15 +129,10 @@ setMethod("get.gene.clusters","scCOTAN",
         }
     }
 
-    dend <- color_branches(dend, k = k.cuts,col = unique(pca_1[,c("hclust","col_branches")])[,2],
+    dend <- dendextend::color_branches(dend, k = k.cuts,col = unique(pca_1[,c("hclust","col_branches")])[,2],
                            groupLabels = unique(pca_1[,c("hclust","groupLabels")])[,2])
 
-    dend <- color_labels(dend,labels = rownames(pca_1),col=pca_1$colors)
-
-    #dend %>%
-     #   dendextend::set("labels", ifelse(labels(dend) %in% rownames(pca_1)[rownames(pca_1) %in% colnames(g.space)] ,labels(dend),"")) %>%
-        #dendextend::set("labels", ifelse(labels(dend) %in% unlist(list.group.markers) ,labels(dend),"")) %>%
-      #  plot(horiz=F, axes=T,ylim = c(0,20))
+    dend <- dendextend::color_labels(dend,labels = rownames(pca_1),col=pca_1$colors)
 
     return(list("g.space"=g.space, "plot.eig"=plot.eig,
                 "pca_clusters"=pca_1,"tree_plot"=dend,"g.space"=g.space))

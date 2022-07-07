@@ -5,9 +5,9 @@
 \alias{cluster_homogeneity,Seurat-method}
 \title{cluster_homogeneity}
 \usage{
-cluster_homogeneity(data.seurat, data.raw, out_dir, cond, cores = 10)
+cluster_homogeneity(data.seurat, data.raw, out_dir, cond, cores = 1)
 
-\S4method{cluster_homogeneity}{Seurat}(data.seurat, data.raw, out_dir, cond, cores = 10)
+\S4method{cluster_homogeneity}{Seurat}(data.seurat, data.raw, out_dir, cond, cores = 1)
 }
 \arguments{
 \item{data.seurat}{a Seurat object with clusters already estimated}
@@ -17,6 +17,8 @@ cluster_homogeneity(data.seurat, data.raw, out_dir, cond, cores = 10)
 \item{out_dir}{path to the output directory}
 
 \item{cond}{string defining the condition}
+
+\item{cores}{number of cores used}
 }
 \value{
 an array of cells that need to be re-clustered

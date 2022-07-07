@@ -42,7 +42,7 @@ library(plotly)
 library(tidyverse)
 library(htmlwidgets)
 library(MASS)
-library(dendextend)
+#library(dendextend)
 ```
 
 ```{r}
