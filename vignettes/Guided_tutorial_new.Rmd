@@ -1,5 +1,5 @@
 ---
-title: "Guided tutorial"
+title: "Guided tutorial new"
 author: 
 - name: "Silvia Giulia Galfrè"
   affiliation: "Department of Biology, University of Rome Tor Vergata"
@@ -70,12 +70,12 @@ This is just an example on a toy dataset. If the user want to try on a real data
 There are also available online many other examples at [link](https://seriph78.github.io/Cotan_paper/index.html).
 
 ```{r}
-data("ERCCraw", package = "COTAN")
+data("test.dataset.col", package = "COTAN")
 
-ERCCraw = as.data.frame(ERCCraw)
-rownames(ERCCraw) = ERCCraw$V1
-ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
-ERCCraw[1:5,1:5]
+#ERCCraw = as.data.frame(ERCCraw)
+#rownames(ERCCraw) = ERCCraw$V1
+#ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
+#ERCCraw[1:5,1:5]
 ```
 
 Define a directory where the output will be stored.
@@ -88,9 +88,9 @@ out_dir <- paste0(tempdir(),"/")
 Inizialise the COTAN object with the row count table and the metadata for the experiment.
 
 ```{r}
-obj = new("scCOTAN",raw = ERCCraw)
+obj = new("scCOTAN",raw = test.dataset.col)
 #obj = initRaw(obj,GEO="GSM2861514" ,sc.method="Drop_seq",cond = "mouse cortex E17.5")
-obj = initRaw(obj,GEO="ERCC" ,sc.method="10X",cond = "negative ERCC dataset")
+obj = initRaw(obj,GEO="test" ,sc.method="10X",cond = "test_dataset")
 ```
 
 Now we can start the cleaning. Analysis requires and starts from a matrix of raw UMI counts after removing possible cell doublets or multiplets and low quality or dying cells (with too high mtRNA percentage, easily done with Seurat or other tools).
@@ -105,7 +105,7 @@ We want also to define a prefix to identify the sample.
 
 ```{r}
 #t = "E17.5_cortex"
-t = "ERCC"
+t = "test"
 
 print(paste("Condition ",t,sep = ""))
 #--------------------------------------
@@ -134,21 +134,15 @@ obj = ttm$object
 
 ttm$pca.cell.2
 ```
+```{r}
+ttm$genes.plot
+```
 
 Run this when B cells need to be removed.
-```{r eval=FALSE, include=TRUE}
+```{r eval=TRUE, include=TRUE}
 pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = "")))
 ttm$pca.cell.2
-ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
-  geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ), aes(n,means,label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
-                  nudge_y      = 0.05,
-                  nudge_x      = 0.05,
-                  direction    = "x",
-                  angle        = 90,
-                  vjust        = 0,
-                  segment.size = 0.2)+
-  ggtitle("B cell group genes mean expression")+my_theme +
-  theme(plot.title = element_text(color = "#3C5488FF", size = 20, face = "italic",vjust = - 5,hjust = 0.02 ))
+ttm$genes.plot
 dev.off()
 
 if (length(ttm$cl1) < length(ttm$cl2)) {
@@ -162,30 +156,20 @@ obj = drop.genes.cells(object = obj,genes = c(),cells = to_rem)
 gc()
 
 ttm = clean(obj)
-#ttm = clean.sqrt(obj, cells)
 obj = ttm$object
 
 ttm$pca.cell.2
 
 ```
-
-
+```{r}
+ttm$genes.plot
+```
 
 Run this only in the last iteration, instead the previous code, when B cells group has not to be removed
 ```{r}
 pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = "")))
 ttm$pca.cell.2
-ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
-  geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ), aes(n,means,label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
-                  nudge_y      = 0.05,
-                  nudge_x      = 0.05,
-                  direction    = "x",
-                  angle        = 90,
-                  vjust        = 0,
-                  segment.size = 0.2)+
-  ggtitle(label = "B cell group genes mean expression", subtitle = " - B group NOT removed -")+my_theme +
-  theme(plot.title = element_text(color = "#3C5488FF", size = 20, face = "italic",vjust = - 10,hjust = 0.02 ),
-        plot.subtitle = element_text(color = "darkred",vjust = - 15,hjust = 0.01 ))
+ttm$genes.plot
 
 dev.off()
 ```
@@ -193,19 +177,7 @@ dev.off()
 To color the pca based on nu_j (so the cells' efficiency)
 
 ```{r}
-nu_est = round(get.nu(object = obj), digits = 7)
 
-plot.nu <-ggplot(ttm$pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
-
-plot.nu = plot.nu + geom_point(size = 1,alpha= 0.8)+
-  scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
-                        midpoint = log(mean(nu_est)),name = "ln(nu)")+
-  ggtitle("Cells PCA coloured by cells efficiency") +
-  my_theme +  theme(plot.title = element_text(color = "#3C5488FF", size = 20),
-                    legend.title=element_text(color = "#3C5488FF", size = 14,face = "italic"),
-                    legend.text = element_text(color = "#3C5488FF", size = 11),
-                    legend.key.width = unit(2, "mm"),
-                    legend.position="right")
 
 pdf(file.path(out_dir,"cleaning",paste(t,"_plots_PCA_efficiency_colored.pdf", sep = "")))
 plot.nu

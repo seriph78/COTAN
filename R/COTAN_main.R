@@ -108,6 +108,7 @@ setMethod("initRaw","scCOTAN",
 #' @importFrom stats cutree
 #'
 #' @importFrom Matrix rowMeans
+#' @importFrom Matrix t
 #' @importFrom utils head
 #' @importFrom Matrix colMeans
 #' @rdname clean
@@ -141,32 +142,43 @@ setMethod("clean","scCOTAN",
                                                                 vjust = .5,
                                                                 face = "plain",
                                                                 colour ="#3C5488FF"))
+                 print("Starting")
                  pc1 <- PC2 <- PC1 <- NULL
 
 
                 cells  <-  get.zero_one.cells(object)
-
+                
                 object@raw  <-  object@raw[rownames(cells), colnames(cells)]
+                print("Cells/genes selection done")
+                rm(cells)
+                gc()
 
                 list1  <- fun_linear(object)
+                print("Fun linear DONE")
 
-                gc()
 
                 dist_cells  <- list1$dist_cells
                 pca_cells  <-  list1$pca_cells
                 t_to_clust  <-  as.matrix(list1$t_to_clust)
-                mu_estimator  <-  list1$mu_estimator
+                #mu_estimator  <-  list1$mu_estimator
                 object  <-  list1$object
                 to_clust <-  list1$to_clust
+                rm(list1)
+                gc()
 
-
-                raw_norm <- t(t(as.matrix(object@raw)) *
+                raw_norm <- Matrix::t(Matrix::t(object@raw) *
                                   (1/(as.vector(object@nu))))
-                raw_norm <- as(as.matrix(raw_norm), "sparseMatrix")
+                #raw_norm <- as(as.matrix(raw_norm), "sparseMatrix")
+                
+                print("raw_norm DONE")
 
                 object@raw.norm <- raw_norm
+                rm(raw_norm)
+                gc()
 
                 hc_cells <- hclust(dist_cells, method = "complete")
+                
+                print("hclust DONE")
 
                 groups <- cutree(hc_cells, k=2)
 
@@ -191,8 +203,10 @@ setMethod("clean","scCOTAN",
                 t_to_clust <- cbind(as.data.frame(t_to_clust),groups)
 
               # ---- next: to check which genes are specific for the B group of cells
-                to_clust <- as.matrix(to_clust)
                 B <- as.data.frame(to_clust[,colnames(to_clust) %in% cl2])
+                rm(to_clust)
+                gc()
+                
                 colnames(B)<-cl2
                 B <- rownames_to_column(B)
                 if (dim(B)[2]>2) {
@@ -214,6 +228,7 @@ setMethod("clean","scCOTAN",
                 #check if the pca plot is clean enought and from the printed genes,
                 #if the smalest group of cells are caratterised by particular genes
 
+                print("PCA start")
                 pca_cells  <-  cbind(pca_cells,"groups"=t_to_clust$groups)
 
                 pca.cell.1  <-  ggplot(subset(pca_cells,groups == "A" ),
@@ -229,16 +244,50 @@ setMethod("clean","scCOTAN",
                                                             color = "#3C5488FF",
                                                             face ="italic" ),
                                    legend.position="bottom")
+                print("PCA done")
 
                 object@n_cells  <-  length(colnames(object@raw))
+                
+
+                #genes plot 
+                pl <- ggplot(D, aes(x=n,y=means)) + geom_point() +
+                  geom_text_repel(data=subset(D, n > (max(D$n) - 15) ), aes(n,means,label=rownames(D[D$n > (max(D$n)- 15),])),
+                                  nudge_y      = 0.05,
+                                  nudge_x      = 0.05,
+                                  direction    = "x",
+                                  angle        = 90,
+                                  vjust        = 0,
+                                  segment.size = 0.2)+
+                  ggtitle(label = "B cell group genes mean expression")+my_theme +
+                  theme(plot.title = element_text(color = "#3C5488FF", size = 20, face = "italic",vjust = - 1,hjust = 0.02 ),
+                        plot.subtitle = element_text(color = "darkred",vjust = - 15,hjust = 0.01 ))
+                
+              
+                # UDE/nu plot
+                nu_est = round(get.nu(object = obj), digits = 7)
+                
+                plot.nu <-ggplot(pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
+                
+                plot.nu = plot.nu + geom_point(size = 1,alpha= 0.8)+
+                  scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
+                                        midpoint = log(mean(nu_est)),name = "ln(nu)")+
+                  ggtitle("Cells PCA coloured by cells efficiency") +
+                  my_theme +  theme(plot.title = element_text(color = "#3C5488FF", size = 20),
+                                    legend.title=element_text(color = "#3C5488FF", size = 14,face = "italic"),
+                                    legend.text = element_text(color = "#3C5488FF", size = 11),
+                                    legend.key.width = unit(2, "mm"),
+                                    legend.position="right")
+                
 
                 output  <- list("cl1"=cl1,
                                 "cl2"=cl2,
                                 "pca.cell.2"=pca.cell.2,
                                 "object"=object,
-                                "mu_estimator"=mu_estimator,
+                                #"mu_estimator"=mu_estimator,
                                 "D"=D,
-                                "pca_cells"=pca_cells)
+                                "pca_cells"=pca_cells,
+                                "genes.plot"=pl,
+                                "UDE.plot"= plot.nu)
                 return(output)
           }
 )
@@ -271,11 +320,11 @@ setMethod("cotan_analysis","scCOTAN",
                   cores= 1
               }
 
-              cells  <-  as.matrix(object@raw)
+              cells  <-  object@raw
               #---------------------------------------------------
               # Cells matrix : formed by row data matrix changed to 0-1 matrix
               cells[cells > 0] <- 1
-              cells[cells <= 0] <- 0
+              #cells[cells <= 0] <- 0
 
               # exlude the effective ubiqutarius genes and saved in a separate file
               mu_estimator <- mu_est(object)
@@ -663,100 +712,6 @@ setMethod("plot_general.heatmap","ANY",
           }
 )
 
-
-#' plot_GDI
-#'
-#' This function directly evaluate and plot the GDI for a sample.
-#'
-#' @param object A COTAN object
-#' @param cond A string corresponding to the condition/sample (it is used only for the title). Default is empty.
-#' @param type Type of statistic to be used. Default is "S":
-#' Pearson's chi-squared test statistics. "G" is G-test statistics
-#' @param genes a named list of genes to label. Each array will have different color. Default is empty.
-#' @param GDI.df when the GDI data frame was already calculated, it can be put here to speed up the process. Default is NULL.
-#' @return A ggplot2 object
-#' @export
-#' @import ggplot2
-#' @import RColorBrewer
-#' @import ggrepel
-#' @importFrom  stats quantile
-#' @importFrom Matrix forceSymmetric
-#' @rdname plot_GDI
-#' @examples
-#' data("ERCC.cotan")
-#' plot_GDI(ERCC.cotan, cond = "ERCC")
-setGeneric("plot_GDI", function(object, cond = NULL,genes = NULL,type="S", GDI.df = NULL) standardGeneric("plot_GDI"))
-#' @rdname plot_GDI
-setMethod("plot_GDI","scCOTAN",
-          function(object, cond, genes, type="S",GDI.df) {
-              ET <- sum.raw.norm <- NULL
-
-              if(is(class(object@coex)[1], "dtCMatrix")){
-                  print("COTAN object in the old format! Converting...")
-                  object <- get.coex(object)
-                  print(paste("Saving as new file as ",dir,ET,"new.cotan.RDS", sep = ""))
-                  saveRDS(object,paste(dir,ET,"new.cotan.RDS", sep = ""))
-
-              }
-
-              print("GDI plot ")
-              if (is.null(GDI.df)) {
-                  if (type=="S") {
-                      GDI <- get.GDI(object,type="S")
-                  }else if(type=="G"){
-                      print("Using G")
-                      GDI <- get.GDI(object,type="G")
-                  }
-
-              }else{
-                  GDI <- GDI.df
-              }
-
-              text.size <- 10
-              GDI$colors <- "none"
-              for (n in names(genes)) {
-                  GDI[rownames(GDI) %in% genes[[n]],]$colors <- n
-
-              }
-
-              qual_col_pals = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 'qual',]
-              col_vector = unlist(mapply(RColorBrewer::brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
-
-              mycolours <- col_vector[seq_along(names(genes))]
-              names(mycolours) <- names(genes)
-
-              base.plot <- ggplot(subset(GDI,colors == "none" ), aes(x=sum.raw.norm, y=GDI)) +  geom_point(alpha = 0.3, color = "#8491B4B2", size=2.5)
-
-              textdf <- GDI[!GDI$colors == "none",]
-
-              #############
-
-              GDI_plot = base.plot +  geom_point(data = subset(GDI,colors != "none"  ), aes(x=sum.raw.norm, y=GDI, colour=colors),size=2.5,alpha = 0.8) +
-                  geom_hline(yintercept=quantile(GDI$GDI)[4], linetype="dashed", color = "darkblue") +
-                  geom_hline(yintercept=quantile(GDI$GDI)[3], linetype="dashed", color = "darkblue") +
-                  geom_hline(yintercept=1.5, linetype="dotted", color = "red", size= 0.5) +
-                  scale_color_manual("Status", values = mycolours)  +
-                  scale_fill_manual("Status", values = mycolours)  +
-                  xlab("log normalized counts")+ylab("GDI")+
-                  geom_label_repel(data =textdf , aes(x=sum.raw.norm, y=GDI, label = rownames(textdf),fill=colors),
-                                   label.size = NA,max.overlaps = 40,
-                                   alpha = 0.8,
-                                   direction ="both",
-                                   na.rm=TRUE,
-                                   seed = 1234) +
-                  ggtitle(paste("GDI plot ",cond, sep = " "))+
-                  theme(axis.text.x = element_text(size = text.size, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
-                        axis.text.y = element_text( size = text.size, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
-                        axis.title.x = element_text( size = text.size, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),
-                        axis.title.y = element_text( size = text.size, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"),
-                        legend.title = element_blank(),
-                        legend.text = element_text(color = "#3C5488FF",face ="italic" ),
-                        legend.position = "right")
-
-              return(GDI_plot)
-
-          }
-)
 
 
 #' get.observed.ct

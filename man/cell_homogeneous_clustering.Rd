@@ -2,7 +2,7 @@
 % Please edit documentation in R/cell_homogeneous_clustering.R
 \name{cell_homogeneous_clustering}
 \alias{cell_homogeneous_clustering}
-\alias{cell_homogeneous_clustering,Seurat-method}
+\alias{cell_homogeneous_clustering,character-method}
 \title{cell_homogeneous_clustering}
 \usage{
 cell_homogeneous_clustering(
@@ -16,7 +16,7 @@ cell_homogeneous_clustering(
   sc.method
 )
 
-\S4method{cell_homogeneous_clustering}{Seurat}(
+\S4method{cell_homogeneous_clustering}{character}(
   cond,
   out_dir,
   in_dir,

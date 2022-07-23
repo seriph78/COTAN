@@ -188,3 +188,6 @@ test_that("mat2vec_rfast_test", {
     expect_equal(vec, mat2vec_rfast(m))
 
 })
+
+
+

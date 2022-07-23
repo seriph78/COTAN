@@ -1,7 +1,8 @@
 #' cluster_homogeneity
 #'
 #' # Function that takes a seurat object and the whole raw data (after cleaning).
-#' It runs cotan on each cluster and check if the GDI is lower than 1.5. If it is too high,
+#' It runs cotan on each cluster and check if the GDI is lower than 1.5 for the 99% of genes. 
+#' If it is too high,
 #' the cluster is not uniform and so it save the cells in an array to cluster again.
 #' @param data.seurat a Seurat object with clusters already estimated
 #' @param data.raw raw data matrix

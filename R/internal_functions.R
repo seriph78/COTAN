@@ -2,11 +2,12 @@
 setGeneric("get.zero_one.cells", function(object) standardGeneric("get.zero_one.cells"))
 setMethod("get.zero_one.cells","scCOTAN",
           function(object) {
-              cells.0.1 = as.data.frame(as.matrix(object@raw))
+              #cells.0.1 = as.data.frame(as.matrix(object@raw))
+              cells.0.1 <- object@raw
               #---------------------------------------------------
               # Cells matrix : formed by row data matrix changed to 0-1 matrix
               cells.0.1[cells.0.1 > 0] <- 1
-              cells.0.1[cells.0.1 <= 0] <- 0
+              #cells.0.1[cells.0.1 <= 0] <- 0
               # We want to discard genes having less than 3 not 0 counts over 1000 cells
               cells.0.1 <- cells.0.1[rowSums(cells.0.1) > round((length(colnames(object@raw))/1000*3),
                                                                digits = 0),]
@@ -123,6 +124,8 @@ setMethod("spMat","matrix",
 #'
 #' @importFrom Matrix rowMeans
 #' @importFrom Matrix colMeans
+#' @importFrom Matrix mean
+#' @importFrom Matrix t
 #' @importFrom stats dist
 #'
 setGeneric("fun_linear", function(object) standardGeneric("fun_linear"))
@@ -143,7 +146,9 @@ setMethod("fun_linear","scCOTAN",
 
               cells_means <- Matrix::colMeans(object@raw, dims = 1, na.rm = TRUE)
 
-             means <- mean(as.matrix(object@raw),na.rm = TRUE )
+              #means <- mean(as.matrix(object@raw),na.rm = TRUE )
+              means <- Matrix::mean(object@raw )
+              
               mu_estimator <- (genes_means %*% t(cells_means)) /means
 
               rownames(mu_estimator) <- names(genes_means)
@@ -154,12 +159,17 @@ setMethod("fun_linear","scCOTAN",
               # To insert an explorative analysis and check for strage cells (as blood)
               #and cells with a too low efficiency (nu est)
 
-              to_clust <- t(t(as.matrix(object@raw)) * (1/as.vector(object@nu)))
-
-              t_to_clust <- t(to_clust)
+              #to_clust <- t(t(as.matrix(object@raw)) * (1/as.vector(object@nu)))
+              ########
+              #Togliere as.matrix e testare!
+              to_clust <- Matrix::t(Matrix::t(object@raw) * (1/as.vector(object@nu)))
+              
+              t_to_clust <- Matrix::t(to_clust)
               #to import using Basilisk
               proc <- basiliskStart(my_env_cotan)
               on.exit(basiliskStop(proc))
+              ########
+              #Togliere as.matrix e testare!
               t_to_clust <- as.matrix(t_to_clust)
 
               pca_cells <- basiliskRun(proc, function(arg1) {
@@ -171,12 +181,15 @@ setMethod("fun_linear","scCOTAN",
                   # Python objects, no pointers to shared memory.
                   output
               }, arg1=t_to_clust)
+              gc()
 
              rownames(pca_cells) <- rownames(t_to_clust)
 
               ppp <- pca_cells
               ppp <- scale(ppp)
               dist_cells <- stats::dist(ppp, method = "euclidean") # mhalanobis
+              rm(ppp)
+              gc()
               colnames(pca_cells) <- paste("PC",seq_len(ncol(pca_cells)), sep = "")
               pca_cells <- as.data.frame(pca_cells)
 
@@ -218,11 +231,12 @@ setGeneric("hk_genes", function(object) standardGeneric("hk_genes"))
 setMethod("hk_genes","scCOTAN",
           function(object) {
               print("save effective constitutive genes")
-              cells=as.matrix(object@raw)
+              #cells=as.matrix(object@raw)
+              cells=object@raw
               #---------------------------------------------------
               # Cells matrix : formed by row data matrix changed to 0-1 matrix
               cells[cells > 0] <- 1
-              cells[cells <= 0] <- 0
+              #cells[cells <= 0] <- 0
 
               hk <- names(which(rowSums(cells) == length(colnames(cells))))
               object@hk <- hk
@@ -235,12 +249,12 @@ setMethod("hk_genes","scCOTAN",
 setGeneric("obs_ct", function(object) standardGeneric("obs_ct"))
 setMethod("obs_ct","scCOTAN",
           function(object) {
-              cells <- as.matrix(object@raw)
+              cells <- object@raw
               #---------------------------------------------------
               # Cells matrix : formed by row data matrix changed to 0-1 matrix
               cells[cells > 0] <- 1
               #cells[cells <= 0] <- 0
-              cells <- as.matrix(cells)
+              cells <- cells
               print("Generating contingency tables for observed data")
               somma <- rowSums(cells)
               somma <- as.matrix(somma)
@@ -268,14 +282,14 @@ setMethod("obs_yes_yes","scCOTAN",
           function(object) {
               print("creation of observed yes/yes contingency table")
 
-              cells <- as.matrix(object@raw)
+              cells <- object@raw
               #---------------------------------------------------
               # Cells matrix : formed by row data matrix changed to 0-1 matrix
               cells[cells > 0] <- 1
               #cells[cells <= 0] <- 0
 
-              si_si <- as.matrix(cells) %*% t(as.matrix(cells))
-              object@yes_yes <- as(as.matrix(si_si), "sparseMatrix")
+              si_si <- cells %*% Matrix::t(cells)
+              object@yes_yes <- si_si#as(si_si, "sparseMatrix")
               return(object)
           }
 )
@@ -289,7 +303,7 @@ setMethod("expected_ct","scCOTAN",
               #---------------------------------------------------
               # Cells matrix : formed by row data matrix changed to 0-1 matrix
               cells[cells > 0] <- 1
-              cells[cells <= 0] <- 0
+              #cells[cells <= 0] <- 0
 
               mu_estimator <- mu_est(object)
               mu_estimator <- mu_estimator[!rownames(mu_estimator) %in% object@hk,]

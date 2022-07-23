@@ -7,9 +7,9 @@
 Next method is used to do the differential expression analysis using COTAN contingency tables
 on the cluster checked with the previous method}
 \usage{
-DEA_on_clusters(obj, cells_list)
+DEA_on_clusters(obj, cells_list = NULL)
 
-\S4method{DEA_on_clusters}{scCOTAN}(obj, cells_list)
+\S4method{DEA_on_clusters}{scCOTAN}(obj, cells_list = NULL)
 }
 \arguments{
 \item{obj}{A COTAN object}

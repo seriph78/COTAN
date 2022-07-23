@@ -21,7 +21,7 @@ setGeneric("cell_homogeneous_clustering", function(cond,out_dir,in_dir,cores=1, 
                                                    GEO, sc.method )
   standardGeneric("cell_homogeneous_clustering"))
 #' @rdname cell_homogeneous_clustering
-setMethod("cell_homogeneous_clustering","Seurat",
+setMethod("cell_homogeneous_clustering","character",
  function(cond,out_dir,in_dir,cores, dataset_name,dataset_type){
   
   out_dir_root <- paste0(out_dir,cond,"/")
@@ -51,11 +51,13 @@ setMethod("cell_homogeneous_clustering","Seurat",
     all.genes <- rownames(srat)
     srat <- ScaleData(srat, features = all.genes)
     srat <- RunPCA(srat, features = VariableFeatures(object = srat))
+    
+    data.raw <- srat@assays$RNA@counts
       
   }else if(dataset_type == "DF"){
-    DF <- read.csv(paste0(in_dir,dataset_name))
+    data.raw <- read.csv(paste0(in_dir,dataset_name))
     
-    srat <- CreateSeuratObject(counts = as.data.frame(DF), project = cond, 
+    srat <- CreateSeuratObject(counts = as.data.frame(data.raw), project = cond, 
                                min.cells = 3, min.features = 200)
     srat <- NormalizeData(srat)
     srat <- FindVariableFeatures(srat, selection.method = "vst", nfeatures = 2000)
@@ -63,8 +65,9 @@ setMethod("cell_homogeneous_clustering","Seurat",
     srat <- ScaleData(srat, features = all.genes)
     srat <- RunPCA(srat, features = VariableFeatures(object = srat))
     
-    obj <- new("scCOTAN",raw = as.data.frame(DF) )
+    obj <- new("scCOTAN",raw = data.raw )
     obj = initRaw(obj,GEO = GEO ,sc.method= sc.method,cond = cond)
+    
   }
   
   out_dir <- out_dir_root
@@ -221,8 +224,7 @@ setMethod("cell_homogeneous_clustering","Seurat",
     
     
     print("Saving the COTAN dataset")  
-    saveRDS(obj,paste(out_dir_root,"obj_",cond,"in_cotan.RDS",sep = ""))
-    print(paste0("Left to recluster: ", (length(to_recluster)-1), " cells."))
+     print(paste0("Left to recluster: ", (length(to_recluster)-1), " cells."))
     write.csv(to_recluster,paste(out_dir_root,"to_recluster_",cond,"tot.csv",sep = ""),row.names = F)
     
     #if(length(obj@clusters) != (n_cells + length(to_recluster_old) - length(to_recluster)) ){
@@ -231,6 +233,18 @@ setMethod("cell_homogeneous_clustering","Seurat",
     #}
     
   }
+  
+  obj@meta <- rbind(obj@meta,c("n. cells left out by clustering:", (length(to_recluster)-1)))
+  
+  if ( (obj@n_cells - (length(to_recluster)-1)) !=  dim(obj@raw)[2]) {
+    print("Problems with the cell number! Check!")
+  }
+  
+  obj@n_cells <- dim(obj@raw)[2]
+  
+  saveRDS(obj,paste(out_dir_root,"obj_",cond,".cotan.RDS",sep = ""))
+  
+  
   
   #--------------------------
   cotan <- obj@clusters
