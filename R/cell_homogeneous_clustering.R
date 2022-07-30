@@ -279,7 +279,14 @@ setMethod("cell_homogeneous_clustering","character",
     break
   }
   
-  print("Saving the Seurat dataset")
+  print("Cluster, UMAP and Saving the Seurat dataset")
+  
+  srat <- FindNeighbors(srat, dims = 1:25)
+  srat <- FindClusters(srat, resolution = 0.5,algorithm = 2)
+  srat <- RunUMAP(srat,umap.method = "uwot",metric = "cosine", 
+                        dims = 1:25)
+  
+  
   saveRDS(srat,paste(out_dir_root,"Seurat_obj_",cond,"_with_cotan_clusters.RDS",sep = ""))
   rm(srat)
   gc()
