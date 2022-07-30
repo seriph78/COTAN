@@ -43,8 +43,8 @@ function(x,genes="all"){
                 p <- p +1
 
             }
-
-
+            if(pos.gene < length(x$genes)){
+            
             #linear part
             start.reading.position <- 1
             i <- 1
@@ -63,6 +63,9 @@ function(x,genes="all"){
             end.reading.position
 
             temp.array <- c(temp.array,x$values[(start.reading.position):end.reading.position])
+            
+            
+            }
             m[,x$genes[pos.gene]] <- temp.array
         }
 

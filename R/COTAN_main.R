@@ -264,7 +264,7 @@ setMethod("clean","scCOTAN",
                 
               
                 # UDE/nu plot
-                nu_est = round(get.nu(object = obj), digits = 7)
+                nu_est = round(get.nu(object = object), digits = 7)
                 
                 plot.nu <-ggplot(pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
                 

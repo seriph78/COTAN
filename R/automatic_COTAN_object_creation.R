@@ -8,10 +8,6 @@
 #' @param cond A string that will identify the sample or condition. It will be part of the
 #' final file name.
 #' @param cores number of cores to be used
-#' @param mt A boolean (default F). If T mitochondrial  genes will be kept in the analysis,
-#' otherwise they will be removed.
-#' @param mt_prefix is the prefix that identify the mitochondrial  genes (default is the mouse
-#' prefix: "^mt")
 #' @return It return the COTAN object. It will also store it directly in the output directory
 #' @export
 #'
@@ -33,11 +29,15 @@
 #' cond = "test")
 #'
 setGeneric("automatic.COTAN.object.creation", function(df, out_dir,save.obj="NO", GEO, sc.method,
-                                                       cond, mt = FALSE, mt_prefix="^mt", cores = 1)
+                                                       cond, 
+                                                       #mt = FALSE, mt_prefix="^mt", 
+                                                       cores = 1)
     standardGeneric("automatic.COTAN.object.creation"))
 #' @rdname automatic.COTAN.object.creation
 setMethod("automatic.COTAN.object.creation","data.frame",
-          function(df, out_dir,save.obj = "NO", GEO, sc.method, cond, mt = FALSE, mt_prefix="^mt", cores = 1) {
+          function(df, out_dir,save.obj = "NO", GEO, sc.method, cond, 
+                   #mt = FALSE, mt_prefix="^mt", 
+                   cores = 1) {
               start_time_all <- Sys.time()
 
               means <- PC1 <- PC2 <- nu <- NULL
@@ -57,12 +57,12 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                                                              face = "plain", colour ="#3C5488FF"))
               obj <- methods::new("scCOTAN",raw = df)
               obj <- initRaw(obj,GEO = GEO ,sc.method = sc.method,cond = cond)
-              if (mt == FALSE) {
-                  genes_to_rem <- rownames(obj@raw[grep(mt_prefix, rownames(obj@raw)),])
-                  obj@raw <- obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
-                  cells_to_rem <- colnames(obj@raw[which(colSums(obj@raw) == 0)])
-                  obj@raw <- obj@raw[,!colnames(obj@raw) %in% cells_to_rem]
-              }
+              #if (mt == FALSE) {
+              #    genes_to_rem <- rownames(obj@raw[grep(mt_prefix, rownames(obj@raw)),])
+              #    obj@raw <- obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
+              #    cells_to_rem <- colnames(obj@raw[which(colSums(obj@raw) == 0)])
+              #    obj@raw <- obj@raw[,!colnames(obj@raw) %in% cells_to_rem]
+              #}
               t <- cond
 
               print(paste("Condition ",t,sep = ""))
@@ -165,7 +165,7 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                                file = file.path(out_dir, paste(t,"_times.csv", sep = "")))
 
               
-              if(save.obj == "yes"){
+              if(save.obj == "yes" | save.obj == "Yes" | save.obj == "YES"){
               print(paste0("Saving elaborated data locally at ", out_dir,t,".cotan.RDS"))
               saveRDS(obj,file = file.path(out_dir,paste(t,".cotan.RDS", sep = "")))
               }

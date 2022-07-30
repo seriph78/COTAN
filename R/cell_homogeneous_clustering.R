@@ -24,12 +24,15 @@ setGeneric("cell_homogeneous_clustering", function(cond,out_dir,in_dir,cores=1, 
 setMethod("cell_homogeneous_clustering","character",
  function(cond,out_dir,in_dir,cores, dataset_name,dataset_type){
   
-  out_dir_root <- paste0(out_dir,cond,"/")
+  out_dir_root <- paste0(out_dir,"/",cond,"/")
   if(!file.exists(out_dir_root)){
     dir.create(file.path(out_dir_root))
     
   }
-  dir.create(file.path(paste(out_dir_root,"cleaning",sep = "" )))
+  if(!file.exists(paste(out_dir_root,"cleaning",sep = "" ))){
+    dir.create(file.path(paste(out_dir_root,"cleaning",sep = "" )))
+    
+  }
   
   #To load the seurat object crated
   
@@ -45,20 +48,21 @@ setMethod("cell_homogeneous_clustering","character",
     obj <- readRDS(paste0(in_dir,dataset_name))
     
     srat <- CreateSeuratObject(counts = as.data.frame(obj@raw), project = cond, 
-                               min.cells = 3, min.features = 200)
+                               min.cells = 3, min.features = 2)
     srat <- NormalizeData(srat)
     srat <- FindVariableFeatures(srat, selection.method = "vst", nfeatures = 2000)
     all.genes <- rownames(srat)
     srat <- ScaleData(srat, features = all.genes)
     srat <- RunPCA(srat, features = VariableFeatures(object = srat))
     
-    data.raw <- srat@assays$RNA@counts
+    data.raw <- as.data.frame(obj@raw)
       
   }else if(dataset_type == "DF"){
     data.raw <- read.csv(paste0(in_dir,dataset_name))
     
     srat <- CreateSeuratObject(counts = as.data.frame(data.raw), project = cond, 
-                               min.cells = 3, min.features = 200)
+                               min.cells = 3, min.features = 2) # pay attention to these two parameters!
+    # They can create discrepancy in cell numbers between seurat and COTAN
     srat <- NormalizeData(srat)
     srat <- FindVariableFeatures(srat, selection.method = "vst", nfeatures = 2000)
     all.genes <- rownames(srat)
@@ -69,6 +73,7 @@ setMethod("cell_homogeneous_clustering","character",
     obj = initRaw(obj,GEO = GEO ,sc.method= sc.method,cond = cond)
     
   }
+  
   
   out_dir <- out_dir_root
   
@@ -82,8 +87,11 @@ setMethod("cell_homogeneous_clustering","character",
   #tmp_meta = srat@meta.data[names(obj@clusters[!names(obj@clusters) %in% to_recluster]),]
   tmp_meta <- srat@meta.data[!rownames(srat@meta.data) %in% to_recluster,]
   
+  print("Prova test 1")
+  
   # To save the already defined clusters
   obj@clusters[rownames(tmp_meta)] <- as.vector(tmp_meta$seurat_clusters)
+  
   
   saveRDS(obj,paste(out_dir_root,"obj_",cond,".cotan.RDS",sep = ""))
   write.csv(to_recluster,paste(out_dir_root,"to_recluster_",cond,"tot.csv",sep = ""),row.names = F)
@@ -102,15 +110,19 @@ setMethod("cell_homogeneous_clustering","character",
     
     print(paste("Length array cells to re-cluster:",length(to_recluster[!is.na(to_recluster)]),"round:",round, sep = " "))
     #data.raw = as.data.frame(obj@raw)
-    seurat.obj <- CreateSeuratObject(counts = (data.raw[,colnames(data.raw) %in% to_recluster]), project = "reclustering", min.cells = 3, min.features = 200)
+    seurat.obj <- CreateSeuratObject(counts = (data.raw[,colnames(data.raw) %in% to_recluster]), 
+                                     project = "reclustering", min.cells = 1, min.features = 2)
     #print(dim(seurat.obj))
-    seurat.obj <- NormalizeData(seurat.obj, normalization.method = "LogNormalize", scale.factor = 10000)
+    seurat.obj <- NormalizeData(seurat.obj, normalization.method = "LogNormalize", 
+                                scale.factor = 10000)
     
-    seurat.obj <- FindVariableFeatures(seurat.obj, selection.method = "vst", nfeatures = 2000)
+    seurat.obj <- FindVariableFeatures(seurat.obj, selection.method = "vst", 
+                                       nfeatures = 2000)
     all.genes <- rownames(seurat.obj)
     seurat.obj <- ScaleData(seurat.obj, features = all.genes)
     
-    seurat.obj <- RunPCA(seurat.obj,npcs = min(c(50,(nrow(seurat.obj@meta.data)-1))), features = VariableFeatures(object = seurat.obj))
+    seurat.obj <- RunPCA(seurat.obj,npcs = min(c(50,(nrow(seurat.obj@meta.data)-1))), 
+                         features = VariableFeatures(object = seurat.obj))
     seurat.obj <- FindNeighbors(seurat.obj, dims = 1:min(c(50,(nrow(seurat.obj@meta.data)-1))))
     
     seurat.obj <- FindClusters(seurat.obj, resolution = 1.1,algorithm = 2)
@@ -121,26 +133,28 @@ setMethod("cell_homogeneous_clustering","character",
       print("We try to cluster with 1.5 of resolution")
       seurat.obj.tmp1 <- FindClusters(seurat.obj, resolution = 1.5, algorithm = 2,group.singletons = F)
       
-      sum_cl =t(summary(seurat.obj.tmp1@meta.data$seurat_clusters))
+      sum_cl <- t(summary(seurat.obj.tmp1@meta.data$seurat_clusters))
       if(!"singleton" %in% colnames(sum_cl)){
         print("No singletons (1) !")
-        seurat.obj =seurat.obj.tmp1
+        seurat.obj <- seurat.obj.tmp1
       }else if( (sum_cl[1,"singleton"]< sum(sum_cl[1,]/2) )) {
-        seurat.obj =seurat.obj.tmp1
+        seurat.obj <- seurat.obj.tmp1
       }
       
     }
     
-    seurat.obj <- RunUMAP(seurat.obj, dims = 1:min(c(50,(nrow(seurat.obj@meta.data)-1))))
+    seurat.obj <- RunUMAP(seurat.obj,umap.method = "uwot",metric = "cosine", 
+                          dims = 1:min(c(50,(nrow(seurat.obj@meta.data)-1))))
     
-    out_dir =paste(out_dir_root,"round.",round,"/", sep = "")
+    out_dir <- paste(out_dir_root,"round.",round,"/", sep = "")
     
     if(!file.exists(out_dir)){
       dir.create(file.path(out_dir))
       dir.create(file.path(paste(out_dir,"cleaning",sep = "" )))
     }
+    print(paste0("PDF UMAP! ", out_dir, "pdf_umap.pdf"))
     pdf(paste0(out_dir,"pdf_umap.pdf"))
-    print(DimPlot(seurat.obj, reduction = "umap",label = TRUE))
+    DimPlot(seurat.obj, reduction = "umap",label = TRUE)
     dev.off()
     #obj2@clusters =
     to_recluster_old = to_recluster
@@ -157,7 +171,8 @@ setMethod("cell_homogeneous_clustering","character",
       }else if (sum_cl[1,"singleton"]< sum(sum_cl[1,]/2)) {
         seurat.obj =seurat.obj.tmp2
       }
-      seurat.obj <- RunUMAP(seurat.obj, dims = 1:min(c(50,(nrow(seurat.obj@meta.data)-1))))
+      seurat.obj <- RunUMAP(seurat.obj,umap.method = "uwot",metric = "cosine", 
+                            dims = 1:min(c(50,(nrow(seurat.obj@meta.data)-1))))
       
       out_dir =paste(out_dir_root,"round.",round,"/", sep = "")
       
@@ -165,25 +180,24 @@ setMethod("cell_homogeneous_clustering","character",
         dir.create(file.path(out_dir))
         dir.create(file.path(paste(out_dir,"cleaning",sep = "" )))
       }
+      print("Print UMAP pdf 2 ")
       pdf(paste(out_dir,"pdf_umap.pdf"))
-      print(DimPlot(seurat.obj, reduction = "umap",label = TRUE))
+      DimPlot(seurat.obj, reduction = "umap",label = TRUE)
       dev.off()
       #obj2@clusters =
       to_recluster_old = to_recluster
       to_recluster = cluster_homogeneity(seurat.obj,data.raw,out_dir,cond = cond,cores = 11)
     }
     
-    if (length(to_recluster_old)==length(to_recluster)) {
-      print(paste0("NO new possible clusters! Cell left:",length(to_recluster), " They will be removed!"))
+    if (length(to_recluster_old)==length(to_recluster) | length(to_recluster) <= 25) {
+      print(paste0("NO new possible clusters! Cell left: ",(length(to_recluster)-1), " They will be removed!"))
       obj@raw = obj@raw[,!colnames(obj@raw) %in% to_recluster]
       obj@clusters = obj@clusters[names(obj@clusters) %in% colnames(obj@raw)]
-      if (any(is.na(obj@clusters))) {
-        print("Problems! Some NA left!")
-      }
       
-      saveRDS(obj,paste(out_dir_root,"obj_",cond,"_in_cotan.RDS",sep = ""))
+      
+      saveRDS(obj,paste(out_dir_root,"obj_",cond,".cotan.RDS",sep = ""))
       write.csv(to_recluster,paste(out_dir_root,"to_recluster_",cond,"tot.csv",sep = ""),row.names = F)
-      break
+    #  break # da togliere
       
     }
     # Next line store the number of cluster that are ok to be saved.
@@ -223,7 +237,7 @@ setMethod("cell_homogeneous_clustering","character",
     
     
     
-    print("Saving the COTAN dataset")  
+    print("Saving left cells.")  
      print(paste0("Left to recluster: ", (length(to_recluster)-1), " cells."))
     write.csv(to_recluster,paste(out_dir_root,"to_recluster_",cond,"tot.csv",sep = ""),row.names = F)
     
@@ -232,6 +246,10 @@ setMethod("cell_homogeneous_clustering","character",
     #  break
     #}
     
+  } # End while
+  
+  if (any(is.na(obj@clusters))) {
+    print("Problems! Some NA left!")
   }
   
   obj@meta <- rbind(obj@meta,c("n. cells left out by clustering:", (length(to_recluster)-1)))
@@ -241,10 +259,6 @@ setMethod("cell_homogeneous_clustering","character",
   }
   
   obj@n_cells <- dim(obj@raw)[2]
-  
-  saveRDS(obj,paste(out_dir_root,"obj_",cond,".cotan.RDS",sep = ""))
-  
-  
   
   #--------------------------
   cotan <- obj@clusters
@@ -260,9 +274,34 @@ setMethod("cell_homogeneous_clustering","character",
   
   srat <- subset(srat, subset = cotan >= 0 )
   
+  if (!dim(srat)[2] == dim(obj@raw)[2]) {
+    print("Problem! Dimensions!")
+    break
+  }
   
   print("Saving the Seurat dataset")
   saveRDS(srat,paste(out_dir_root,"Seurat_obj_",cond,"_with_cotan_clusters.RDS",sep = ""))
+  rm(srat)
+  gc()
+  #Re estimation of all parameters after cells removing
+  if((length(to_recluster)-1) > 0){
+    print("Estimate again parameters after cells dropping")
+    ttm <- clean(obj)
+    print("Claening step done")
+    obj <- ttm$object
+    rm(ttm)
+    gc()
+    obj <- cotan_analysis(obj,cores = cores)
+    print("Analysis step done")
+    gc()
+    saveRDS(obj,paste(out_dir_root,"obj_",cond,".cotan.RDS",sep = ""))
+    print("Coex estimation last step started")
+    obj <- get.coex(obj)
+    print("Coex estimation last step done")
+    gc()
+  }
+  
+  saveRDS(obj,paste(out_dir_root,"obj_",cond,".cotan.RDS",sep = ""))
   return(obj)
   
  }

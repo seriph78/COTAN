@@ -12,8 +12,6 @@ automatic.COTAN.object.creation(
   GEO,
   sc.method,
   cond,
-  mt = FALSE,
-  mt_prefix = "^mt",
   cores = 1
 )
 
@@ -24,8 +22,6 @@ automatic.COTAN.object.creation(
   GEO,
   sc.method,
   cond,
-  mt = FALSE,
-  mt_prefix = "^mt",
   cores = 1
 )
 }
@@ -42,12 +38,6 @@ automatic.COTAN.object.creation(
 
 \item{cond}{A string that will identify the sample or condition. It will be part of the
 final file name.}
-
-\item{mt}{A boolean (default F). If T mitochondrial  genes will be kept in the analysis,
-otherwise they will be removed.}
-
-\item{mt_prefix}{is the prefix that identify the mitochondrial  genes (default is the mouse
-prefix: "^mt")}
 
 \item{cores}{number of cores to be used}
 }

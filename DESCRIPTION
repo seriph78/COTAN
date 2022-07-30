@@ -53,7 +53,6 @@ Imports:
 Suggests: 
     testthat (>= 3.0.0),
     spelling,
-    dendextend,
     knitr,
     data.table,
     R.utils,

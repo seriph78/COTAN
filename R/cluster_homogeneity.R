@@ -21,6 +21,7 @@ setGeneric("cluster_homogeneity", function(data.seurat,data.raw,out_dir, cond, c
 #' @rdname cluster_homogeneity
 setMethod("cluster_homogeneity","Seurat",
           function(data.seurat,data.raw,out_dir, cond, cores){
+            
             options(ggrepel.max.overlaps = Inf)
             # This detect the number of clusters
             mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
@@ -43,9 +44,9 @@ setMethod("cluster_homogeneity","Seurat",
               obj = initRaw(obj,GEO="" ,sc.method=" ",cond = paste("temp.",cond, "clustered by Seurat", sep=" "))
 
               #obj = readRDS(paste(out_dir,t,".cotan.RDS", sep = ""))
-              genes_to_rem = get.genes(obj)[grep('^mt', get.genes(obj))]
+              
               cells_to_rem = names(get.cell.size(obj)[which(get.cell.size(obj) == 0)])
-              obj = drop.genes.cells(obj,genes_to_rem,cells_to_rem )
+              obj = drop.genes.cells(obj, cells = cells_to_rem )
 
               print(paste("Condition ",t,sep = ""))
               #--------------------------------------
@@ -68,50 +69,19 @@ setMethod("cluster_homogeneity","Seurat",
                 ttm$pca.cell.2
 
                 #---------- run this when B cells are to be removed
-                pdf(paste(out_dir,"cleaning/",t,"_",n_it,"_plots.pdf", sep = ""))
+                pdf(paste(out_dir,"/",t,"_",n_it,"_plots.pdf", sep = ""))
 
                 plot(ttm$pca.cell.2)
+                plot(ttm$genes.plot)
+                plot(ttm$UDE.plot)
 
-                plot(
-                  ggplot(ttm$D, aes(x=n,y=means)) + geom_point() +
-                    geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ), aes(n,means,label=rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
-                                    nudge_y      = 0.05,
-                                    nudge_x      = 0.05,
-                                    direction    = "x",
-                                    angle        = 90,
-                                    vjust        = 0,
-                                    segment.size = 0.2)+
-                    ggtitle("B cell group genes mean expression")+my_theme +
-                    theme(plot.title = element_text(color = "#3C5488FF", size = 20, face = "italic",vjust = - 5,hjust = 0.02 ))
-                )
-                dev.off()
-
-
-                nu_est = round(get.nu(object = obj), digits = 7)
-
-                p<-ggplot(ttm$pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
-
-
-                pdf(paste(out_dir,"cleaning/",t,"_plots_PCA_efficiency_colored.pdf", sep = ""))
-                # or tiff("plot.tiff")
-                plot(
-                  p+geom_point(size = 1,alpha= 0.8)+
-                    scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
-                                          midpoint = log(mean(nu_est)),name = "ln(nu)")+
-                    ggtitle("Cells PCA coloured by cells efficiency") +
-                    my_theme +  theme(plot.title = element_text(color = "#3C5488FF", size = 20),
-                                      legend.title=element_text(color = "#3C5488FF", size = 14,face = "italic"),
-                                      legend.text = element_text(color = "#3C5488FF", size = 11),
-                                      legend.key.width = unit(2, "mm"),
-                                      legend.position="right")
-                )
-                dev.off()
 
                 nu_df = data.frame("nu"= sort(obj@nu), "n"=c(1:length(obj@nu)))
 
-                pdf(paste(out_dir,"cleaning/",t,"_plots_efficiency.pdf", sep = ""))
+            
                 plot(ggplot(nu_df, aes(x = n, y=nu)) + geom_point(colour = "#8491B4B2", size=1)+my_theme )
-                dev.off()
+                
+                #dev.off()
 
                 obj = hk_genes(obj)
 
@@ -124,13 +94,7 @@ setMethod("cluster_homogeneity","Seurat",
                 obj = get.coex(obj)
 
                 gc()
-                # saving the structure
-                #saveRDS(obj,file = paste(out_dir,t,".cotan.RDS", sep = ""))
-
-                #}
-
-                #for (cl in c(0:tot.clusters)) {#tot.clusters
-                #obj = readRDS(paste(out_dir,cond,"_cl.", cl,".cotan.RDS",sep = ""))
+               
                 GDI_data_wt1 = get.GDI(obj)
 
                 #obj = readRDS(paste(out_dir,cond,"_cl.", cl,".cotan.RDS",sep = ""))
@@ -143,54 +107,22 @@ setMethod("cluster_homogeneity","Seurat",
                   write.csv(cells_to_cluster, file = paste(out_dir,"to_recluster_",cond,"_cl.",cl,".csv",sep = ""))
                   to_rec = c(to_rec,cells_to_cluster)
                 }
+                
+                
+                genes.to.label = rownames(GDI_data_wt1[order(GDI_data_wt1$GDI,decreasing = T),][1:20,])
 
-
-                GDI_data_wt1$color = "normal"
-                genes.to.label = GDI_data_wt1[order(GDI_data_wt1$GDI,decreasing = T),][1:20,]
-
-                #genes.to.label = rbind(genes.to.label,GDI_data_wt1[more_genes,])
-                genes.to.label$color = "dif"
-                #genes.to.label[more_genes,]$color = "mk"
-                GDI_data_wt1[rownames(genes.to.label),]$color = "dif"
-                #GDI_data_wt1[more_genes,]$color = "mk"
-
-                # from here it is just a plot example
-                mycolours <- c("dif" = "#3C5488B2","normal"="#F39B7FE5","hk"="#7E6148B2","mk"="#E64B35B2")
-
-                f1 = ggplot( subset(GDI_data_wt1,!rownames(GDI_data_wt1) %in% unique(rownames(genes.to.label))),  aes(x=sum.raw.norm, y=GDI)) +  geom_point(alpha = 0.4, color = "#8491B4B2", size=2)
-
-                si=12
-                GDI_plot_wt1 = f1 + geom_point(data = subset(GDI_data_wt1,rownames(GDI_data_wt1) %in% c(rownames(genes.to.label),"Lhx1os","5330434G04Rik")),aes(x=sum.raw.norm, y=GDI, color=color),alpha = 1, size=2)+
-                  #geom_hline(yintercept=quantile(GDI$GDI)[4], linetype="dashed", color = "darkblue") +
-                  #geom_hline(yintercept=quantile(GDI$GDI)[3], linetype="dashed", color = "darkblue") +
-                  geom_hline(yintercept=1.5, linetype="dotted", color = "#3C5488B2", size= 0.5) +
-                  scale_color_manual("color", values = mycolours)  +
-                  scale_fill_manual("color", values = mycolours)  +
-                  xlab("log normalized counts")+ylab("GDI")+
-                  geom_label_repel(data =genes.to.label , aes(x=sum.raw.norm, y=GDI, label = rownames(genes.to.label),
-                                                              fill=color),
-                                   label.size = NA,
-                                   alpha = 0.5,
-                                   direction = "both",
-                                   na.rm=TRUE,
-                                   seed = 1234) +
-                  theme(axis.text.x = element_text(size = si, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
-                        axis.text.y = element_text( size = si, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
-                        axis.title.x = element_text( size = si, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),
-                        axis.title.y = element_text( size = si, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"),
-                        legend.title = element_blank(),
-                        legend.text = element_text(color = "#3C5488FF",face ="italic" ),
-                        legend.position = "none")  +ggtitle(paste("Cluster n.",cl,"N.cells",obj@n_cells,sep = " "))
-
-
-                pdf(paste(out_dir,cond,"_cl.",cl, ".GDI_plots.pdf", sep = ""), onefile=TRUE)
+                #pdf(paste(out_dir,cond,"_cl.",cl, ".GDI_plots.pdf", sep = ""), onefile=TRUE)
                 #my.plots[[(cl+1)]] <-
-                plot(GDI_plot_wt1)
-                graphics.off()
+                plot(plot_GDI(obj, genes = list("top 20 GDI genes"=genes.to.label)))
+                
+                dev.off()
                 #graphics.off()
+                rm(obj)
+                gc()
               }
 
             }
+            
 
             cells.to.add = rownames(data.seurat@meta.data[data.seurat@meta.data$seurat_clusters == "singleton",])
             if (length(cells.to.add)>0) {
