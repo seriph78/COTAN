@@ -155,7 +155,7 @@ test_that("mat2vec_rfast_test", {
 
 test_that("cell_homogeneous_clustering", {
   #obj <- readRDS(file.path(tm,"temp.RDS"))
-  temp <- cell_homogeneous_clustering(cond = "test",out_dir = paste0(tm,"/"), in_dir = paste0(tm,"/"), cores = 2, 
+  temp <- cell_homogeneous_clustering(cond = "test",out_dir = paste0(tm,"/"), in_dir = paste0(tm,"/"), cores = 1, 
                                       dataset_type = "COTAN", dataset_name = "temp.RDS", 
                                       GEO = "test",sc.method ="10X"
                                       )
@@ -186,9 +186,9 @@ test_that("DEA_on_clusters_test", {
 
 test_that("merge_cell.clusters.test", {
   obj <- readRDS(file.path(tm,"temp.RDS"))
-  obj <- merge_cell.clusters(obj = obj,cond = "test",cores=10,out_dir_root = paste0(tm,"/"),
+  obj <- merge_cell.clusters(obj = obj,cond = "test",cores=1,out_dir_root = paste0(tm,"/"),
                              srat = "Seurat_obj_test_with_cotan_clusters.RDS" ,out_dir = paste0(tm,"/") ,GEO = "test",
-                             sc.method = "10X",mt = FALSE, mt_prefix="^MT")
+                             sc.method = "10X")#,mt = FALSE, mt_prefix="^MT")
   
   #saveRDS(temp, file = file.path(tm,"temp.RDS") )
   cluster_data <- readRDS(file.path(getwd(),"cluster_data_marged.RDS"))
