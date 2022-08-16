@@ -1,190 +1,179 @@
-tm = tempdir()
+tm <- tempdir()
 stopifnot(file.exists(tm))
-#root = "tests/testthat/"
-root = ""
+# root = "tests/testthat/"
+root <- ""
 test_that("1.initialization", {
-    #raw = read.csv(file.path(getwd(),"raw.csv"),header = T,row.names = 1)
-    #raw = readRDS(file.path(getwd(),"raw.RDS"))
-    #raw = readRDS("tests/testthat/raw.RDS")
-    utils::data("ERCCraw", package = "COTAN")
-    #print(data[1:5,1:5])
-    rownames(ERCCraw) = ERCCraw$V1
-    ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
-    obj.temp = new("scCOTAN",raw = ERCCraw)
-    obj.temp = initRaw(object = obj.temp,GEO="V" ,sc.method="10X",cond = "example")
+  # raw = read.csv(file.path(getwd(),"raw.csv"),header = T,row.names = 1)
+  # raw = readRDS(file.path(getwd(),"raw.RDS"))
+  # raw = readRDS("tests/testthat/raw.RDS")
+  utils::data("ERCCraw", package = "COTAN")
+  # print(data[1:5,1:5])
+  rownames(ERCCraw) <- ERCCraw$V1
+  ERCCraw <- ERCCraw[, 2:ncol(ERCCraw)]
+  obj.temp <- new("scCOTAN", raw = ERCCraw)
+  obj.temp <- initRaw(object = obj.temp, GEO = "V", sc.method = "10X", cond = "example")
 
 
-    #expect_equal(obj.temp,readRDS(file.path(getwd(),"obj.RDS")) )
-    expect_s4_class(obj.temp,"scCOTAN")
-
+  # expect_equal(obj.temp,readRDS(file.path(getwd(),"obj.RDS")) )
+  expect_s4_class(obj.temp, "scCOTAN")
 })
 
 test_that("2.cleaning", {
+  # obj.temp = readRDS(file.path(getwd(),"obj.RDS"))
+  utils::data("raw.dataset", package = "COTAN")
 
-    #obj.temp = readRDS(file.path(getwd(),"obj.RDS"))
-    utils::data("raw.dataset", package = "COTAN")
+  obj.temp <- new("scCOTAN", raw = raw.dataset)
+  obj.temp <- initRaw(object = obj.temp, GEO = " ", sc.method = "10X", cond = "example")
+  #---------------------------------------------------
 
-    obj.temp = new("scCOTAN",raw = raw.dataset)
-    obj.temp = initRaw(object = obj.temp,GEO=" " ,sc.method="10X",cond = "example")
-    #---------------------------------------------------
-
-    ttm = clean(obj.temp)
-    stopifnot(file.exists(tm))
-    saveRDS(ttm$object, file = file.path(tm,"temp.RDS") )
-    raw.norm = readRDS(file.path(getwd(),"raw.norm.RDS"))
-    nu = readRDS(file.path(getwd(),"nu.RDS"))
-    expect_equal(as.matrix(ttm$object@raw.norm),raw.norm)
-    expect_equal(as.matrix(ttm$object@nu),nu)
-
+  ttm <- clean(obj.temp)
+  stopifnot(file.exists(tm))
+  saveRDS(ttm$object, file = file.path(tm, "temp.RDS"))
+  raw.norm <- readRDS(file.path(getwd(), "raw.norm.RDS"))
+  nu <- readRDS(file.path(getwd(), "nu.RDS"))
+  expect_equal(as.matrix(ttm$object@raw.norm), raw.norm)
+  expect_equal(as.matrix(ttm$object@nu), nu)
 })
 
 test_that("mat_division", {
-    utils::data("raw.dataset", package = "COTAN")
-    #print(raw.dataset[1:5,1:5])
-    #raw = readRDS(file.path(getwd(),"raw.RDS"))
-    nu = readRDS(file.path(getwd(),"nu.RDS"))
-    raw.norm = readRDS(file.path(getwd(),"raw.norm.RDS"))
+  utils::data("raw.dataset", package = "COTAN")
+  # print(raw.dataset[1:5,1:5])
+  # raw = readRDS(file.path(getwd(),"raw.RDS"))
+  nu <- readRDS(file.path(getwd(), "nu.RDS"))
+  raw.norm <- readRDS(file.path(getwd(), "raw.norm.RDS"))
 
-    expect_equal( (t(t(raw.dataset) * (1/nu[,1]))),as.matrix(raw.norm) )
+  expect_equal((t(t(raw.dataset) * (1 / nu[, 1]))), as.matrix(raw.norm))
 })
 
 
 test_that("3.cotan_analysis_test", {
+  obj <- readRDS(file.path(tm, "temp.RDS"))
+  obj <- cotan_analysis(obj, cores = 2)
 
-    obj=readRDS(file.path(tm,"temp.RDS"))
-    obj = cotan_analysis(obj,cores = 2)
-
-    a = readRDS(file.path(getwd(),"a.RDS"))
-    nu = readRDS(file.path(getwd(),"nu.RDS"))
-    lambda = readRDS(file.path(getwd(),"lambda.RDS"))
-    saveRDS(obj, file = file.path(tm,"temp.RDS") )
-    expect_equal(as.matrix(obj@a), a)
-    expect_equal( as.matrix(obj@nu) , nu)
-    expect_equal( as.matrix(obj@lambda), lambda)
+  a <- readRDS(file.path(getwd(), "a.RDS"))
+  nu <- readRDS(file.path(getwd(), "nu.RDS"))
+  lambda <- readRDS(file.path(getwd(), "lambda.RDS"))
+  saveRDS(obj, file = file.path(tm, "temp.RDS"))
+  expect_equal(as.matrix(obj@a), a)
+  expect_equal(as.matrix(obj@nu), nu)
+  expect_equal(as.matrix(obj@lambda), lambda)
 })
 
 
 test_that("4.cotan_coex_test", {
-    obj=readRDS(file.path(tm,"temp.RDS"))
+  obj <- readRDS(file.path(tm, "temp.RDS"))
 
-    obj = get.coex(obj)
+  obj <- get.coex(obj)
 
-    coex_test = readRDS(file.path(getwd(),"new_coex.RDS"))
-    coex <- vec2mat_rfast(obj@coex,genes = coex_test$genes)
+  coex_test <- readRDS(file.path(getwd(), "new_coex.RDS"))
+  coex <- vec2mat_rfast(obj@coex, genes = coex_test$genes)
 
-    coex <- mat2vec_rfast(coex[coex_test$genes,coex_test$genes])
+  coex <- mat2vec_rfast(coex[coex_test$genes, coex_test$genes])
 
-    saveRDS(obj, file = file.path(tm,"temp.RDS") )
+  saveRDS(obj, file = file.path(tm, "temp.RDS"))
 
-    error <- sqrt(mean((coex$values - coex_test$values)^2))
+  error <- sqrt(mean((coex$values - coex_test$values)^2))
 
-    if(error < 0.001 & error > 10^(-4) ){
-        warning("Error difference grater than 0.0001!")
-    }
+  if (error < 0.001 & error > 10^(-4)) {
+    warning("Error difference grater than 0.0001!")
+  }
 
 
-    expect_true(error < 10^(-3))
+  expect_true(error < 10^(-3))
 })
 
 test_that("python_PCA_test", {
-    #raw = readRDS(file.path(getwd(),"raw.RDS"))
-    utils::data("raw.dataset", package = "COTAN")
-    #file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
+  # raw = readRDS(file.path(getwd(),"raw.RDS"))
+  utils::data("raw.dataset", package = "COTAN")
+  # file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
 
-    proc <- basiliskStart(my_env_cotan)
-    on.exit(basiliskStop(proc))
+  proc <- basiliskStart(my_env_cotan)
+  on.exit(basiliskStop(proc))
 
-file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = TRUE)
+  file.py <- system.file("python/python_PCA.py", package = "COTAN", mustWork = TRUE)
 
-    pca.raw <- basiliskRun(proc, function(arg1) {
-        reticulate::source_python(file.py)
-        output <- python_PCA(arg1)
+  pca.raw <- basiliskRun(proc, function(arg1) {
+    reticulate::source_python(file.py)
+    output <- python_PCA(arg1)
 
-        # The return value MUST be a pure R object, i.e., no reticulate
-        # Python objects, no pointers to shared memory.
-        output
-    }, arg1=raw.dataset)
+    # The return value MUST be a pure R object, i.e., no reticulate
+    # Python objects, no pointers to shared memory.
+    output
+  }, arg1 = raw.dataset)
 
-    rownames(pca.raw)=rownames(raw.dataset)
-    colnames(pca.raw)=paste0("PC_", c(1:10))
-    pca.raw =as.data.frame(round(pca.raw, digits = 14))
-    pca.tb = readRDS(file.path(getwd(),"pca.mat.RDS"))
+  rownames(pca.raw) <- rownames(raw.dataset)
+  colnames(pca.raw) <- paste0("PC_", c(1:10))
+  pca.raw <- as.data.frame(round(pca.raw, digits = 14))
+  pca.tb <- readRDS(file.path(getwd(), "pca.mat.RDS"))
 
-    expect_equal( pca.raw$PC_1, pca.tb$PC_1)
-    expect_equal( pca.raw$PC_2, pca.tb$PC_2)
-
+  expect_equal(pca.raw$PC_1, pca.tb$PC_1)
+  expect_equal(pca.raw$PC_2, pca.tb$PC_2)
 })
 
 
 test_that("5.get_pval_test", {
-    object=readRDS(file.path(tm,"temp.RDS"))
+  object <- readRDS(file.path(tm, "temp.RDS"))
 
-    pval = get.pval(object, gene.set.col = rownames(object@raw)[1:100],gene.set.row = rownames(object@raw)[1:100])
+  pval <- get.pval(object, gene.set.col = rownames(object@raw)[1:100], gene.set.row = rownames(object@raw)[1:100])
 
-    pval.exp =readRDS(file.path(getwd(),"pval.RDS"))
+  pval.exp <- readRDS(file.path(getwd(), "pval.RDS"))
 
-    error <- sqrt(mean((log(pval+10^(-10)) - log(pval.exp+10^(-10)))^2))
-    error_max <- max(abs(log(pval+10^(-10)) - log(pval.exp+10^(-10))))
+  error <- sqrt(mean((log(pval + 10^(-10)) - log(pval.exp + 10^(-10)))^2))
+  error_max <- max(abs(log(pval + 10^(-10)) - log(pval.exp + 10^(-10))))
 
-    if(error < 0.01 & error > 0.001 ){
-        warning("Error difference grater than 0.001!")
-    }
+  if (error < 0.01 & error > 0.001) {
+    warning("Error difference grater than 0.001!")
+  }
 
-    expect_true(error < 10^(-2))
-    expect_true(error_max < 10^(-1))
-
-
+  expect_true(error < 10^(-2))
+  expect_true(error_max < 10^(-1))
 })
 
 
 test_that("get_GDI_test", {
-    #object = readRDS(file.path(getwd(),"ERCC.cotan.RDS"))
-    utils::data("ERCC.cotan", package = "COTAN")
-    GDI = get.GDI(ERCC.cotan)
-    expect_equal(GDI, readRDS(file.path(getwd(),"GDI.RDS")))
-
+  # object = readRDS(file.path(getwd(),"ERCC.cotan.RDS"))
+  utils::data("ERCC.cotan", package = "COTAN")
+  GDI <- get.GDI(ERCC.cotan)
+  expect_equal(GDI, readRDS(file.path(getwd(), "GDI.RDS")))
 })
 
 
 test_that("vec2mat_rfast_test1", {
-    mat <- matrix(0,nrow = 5, ncol = 5)
-    mat <- Rfast::lower_tri.assign(mat,c(1:15),diag = T)
-    mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
+  mat <- matrix(0, nrow = 5, ncol = 5)
+  mat <- Rfast::lower_tri.assign(mat, c(1:15), diag = T)
+  mat <- Rfast::upper_tri.assign(mat, v = Rfast::upper_tri(Rfast::transpose(mat)))
 
-    colnames(mat) <- paste0("row.",c(1:5))
-    rownames(mat) <- paste0("row.",c(1:5))
+  colnames(mat) <- paste0("row.", c(1:5))
+  rownames(mat) <- paste0("row.", c(1:5))
 
-    v <- mat2vec_rfast(mat)
+  v <- mat2vec_rfast(mat)
 
-    expect_equal(mat, vec2mat_rfast(v,genes = "all"))
-
+  expect_equal(mat, vec2mat_rfast(v, genes = "all"))
 })
 
 test_that("vec2mat_rfast_test2", {
-    mat <- matrix(0,nrow = 10, ncol = 10)
-    mat <- Rfast::lower_tri.assign(mat,c(1:55),diag = T)
-    mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
+  mat <- matrix(0, nrow = 10, ncol = 10)
+  mat <- Rfast::lower_tri.assign(mat, c(1:55), diag = T)
+  mat <- Rfast::upper_tri.assign(mat, v = Rfast::upper_tri(Rfast::transpose(mat)))
 
-    colnames(mat) <- paste0("row.",c(1:10))
-    rownames(mat) <- paste0("row.",c(1:10))
+  colnames(mat) <- paste0("row.", c(1:10))
+  rownames(mat) <- paste0("row.", c(1:10))
 
-    v <- mat2vec_rfast(mat)
+  v <- mat2vec_rfast(mat)
 
-    genes <- c("row.1","row.2","row.9")
+  genes <- c("row.1", "row.2", "row.9")
 
-    expect_equal(mat[,genes], vec2mat_rfast(v,genes = genes))
-
+  expect_equal(mat[, genes], vec2mat_rfast(v, genes = genes))
 })
 
 test_that("mat2vec_rfast_test", {
-    vec <- c(1:15)
-    names.v <- paste0("raw",c(1:5))
+  vec <- c(1:15)
+  names.v <- paste0("raw", c(1:5))
 
-    names.v
-    vec <- list("genes"=names.v, "values"=vec)
+  names.v
+  vec <- list("genes" = names.v, "values" = vec)
 
-    m <- vec2mat_rfast(vec)
+  m <- vec2mat_rfast(vec)
 
-    expect_equal(vec, mat2vec_rfast(m))
-
+  expect_equal(vec, mat2vec_rfast(m))
 })

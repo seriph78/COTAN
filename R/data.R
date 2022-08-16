@@ -13,7 +13,7 @@
 #'   \item{hk}{genes expressed in all cells}
 #'   \item{n_cells}{final number of cells}
 #'   \item{meta}{meta data}
-#'}
+#' }
 #' @source \url{https://support.10xgenomics.com/single-cell-gene-expression/datasets/1.1.0/ercc?}
 "ERCC.cotan"
 

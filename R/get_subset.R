@@ -12,10 +12,11 @@
 #' data("ERCC.cotan")
 setGeneric("get.subset", function(object, cluster.names) standardGeneric("get.subset"))
 #' @rdname get.subset
-setMethod("get.subset","scCOTAN",
-          function(object,cluster.names) {
-              meta = object@raw
-              meta = meta[,colnames(meta) %in% names(object@clusters[object@clusters %in% cluster.names])]
-              return(as.data.frame(meta))
-          }
+setMethod(
+  "get.subset", "scCOTAN",
+  function(object, cluster.names) {
+    meta <- object@raw
+    meta <- meta[, colnames(meta) %in% names(object@clusters[object@clusters %in% cluster.names])]
+    return(as.data.frame(meta))
+  }
 )

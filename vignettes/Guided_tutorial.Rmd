@@ -134,6 +134,15 @@ obj = ttm$object
 
 ttm$pca.cell.2
 ```
+```{r}
+Mymean <- mean(obj@raw, na.rm=TRUE)
+CMeans <- colMeans(obj@raw, na.rm=TRUE)
+CNu    <- CMeans / Mymean
+
+obj@nu[1:3]
+CNu[1:3]
+
+```
 
 Run this when B cells need to be removed.
 ```{r eval=FALSE, include=TRUE}

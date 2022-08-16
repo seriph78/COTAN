@@ -13,12 +13,11 @@
 #' coex <- extract.coex(ERCC.cotan)
 setGeneric("extract.coex", function(object, genes = "all") standardGeneric("extract.coex"))
 #' @rdname extract.coex
-setMethod("extract.coex","scCOTAN",
-          function(object,genes = "all") {
-              vect <- object@coex
-              coex <- vec2mat_rfast(vect,genes = genes)
-              return(coex)
-          }
+setMethod(
+  "extract.coex", "scCOTAN",
+  function(object, genes = "all") {
+    vect <- object@coex
+    coex <- vec2mat_rfast(vect, genes = genes)
+    return(coex)
+  }
 )
-
-
