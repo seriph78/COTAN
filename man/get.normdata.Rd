@@ -20,5 +20,5 @@ This function extract the normalized count table.
 }
 \examples{
 data("ERCC.cotan")
-get.normdata(ERCC.cotan)[1:10,1:10]
+get.normdata(ERCC.cotan)[1:10, 1:10]
 }

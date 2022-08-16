@@ -24,6 +24,6 @@ dispersion factors. It need to be run after \code{\link{clean}}
 }
 \examples{
 data("ERCC.cotan")
-ERCC.cotan  <- cotan_analysis(ERCC.cotan)
+ERCC.cotan <- cotan_analysis(ERCC.cotan)
 
 }

@@ -31,6 +31,6 @@ n_cell
 }
 \examples{
 data("ERCC.cotan")
-ttm  <- clean(ERCC.cotan)
+ttm <- clean(ERCC.cotan)
 
 }

@@ -50,10 +50,12 @@ automatic.COTAN.object.creation
 \examples{
 
 data("raw.dataset")
-obj <- automatic.COTAN.object.creation(df= raw.dataset,
-out_dir =  tempdir(),
-GEO = "test_GEO",
-sc.method = "test_method",
-cond = "test")
+obj <- automatic.COTAN.object.creation(
+  df = raw.dataset,
+  out_dir = tempdir(),
+  GEO = "test_GEO",
+  sc.method = "test_method",
+  cond = "test"
+)
 
 }

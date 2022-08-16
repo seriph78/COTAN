@@ -22,15 +22,18 @@
 #' @examples
 #'
 #' data("ERCCraw")
-#' obj <- new("scCOTAN",raw = data)
+#' obj <- new("scCOTAN", raw = data)
 #'
-#'
-setClass("scCOTAN", slots =
-                        c(raw="ANY",raw.norm="ANY", coex="ANY",
-                            nu="vector",lambda="vector",a="vector",
-                            hk = "vector", n_cells = "numeric",
-                            meta="data.frame",yes_yes="ANY", clusters="vector",
-                            cluster_data="data.frame")) -> scCOTAN
+setClass("scCOTAN",
+  slots =
+    c(
+      raw = "ANY", raw.norm = "ANY", coex = "ANY",
+      nu = "vector", lambda = "vector", a = "vector",
+      hk = "vector", n_cells = "numeric",
+      meta = "data.frame", yes_yes = "ANY", clusters = "vector",
+      cluster_data = "data.frame"
+    )
+) -> scCOTAN
 
 #' initRaw
 #'
@@ -49,11 +52,11 @@ setClass("scCOTAN", slots =
 #'
 #' data("raw.dataset")
 #' obj <- new("scCOTAN", raw = raw.dataset)
-#' obj <- initRaw(obj, GEO="code" , sc.method="10X",cond = "mouse dataset")
+#' obj <- initRaw(obj, GEO = "code", sc.method = "10X", cond = "mouse dataset")
 #'
-#'
-setGeneric("initRaw", function(object,GEO,sc.method="10X", cond)
-    standardGeneric("initRaw"))
+setGeneric("initRaw", function(object, GEO, sc.method = "10X", cond) {
+  standardGeneric("initRaw")
+})
 #' @rdname initRaw
 setMethod("initRaw","scCOTAN",
             function(object,GEO,sc.method,cond) {
@@ -114,7 +117,7 @@ setMethod("initRaw","scCOTAN",
 #' @rdname clean
 #' @examples
 #' data("ERCC.cotan")
-#' ttm  <- clean(ERCC.cotan)
+#' ttm <- clean(ERCC.cotan)
 #'
 setGeneric("clean", function(object) standardGeneric("clean"))
 #' @rdname clean
@@ -316,10 +319,11 @@ setMethod("clean","scCOTAN",
 #' @rdname cotan_analysis
 #' @examples
 #' data("ERCC.cotan")
-#' ERCC.cotan  <- cotan_analysis(ERCC.cotan)
+#' ERCC.cotan <- cotan_analysis(ERCC.cotan)
 #'
-setGeneric("cotan_analysis", function(object, cores= 1)
-    standardGeneric("cotan_analysis"))
+setGeneric("cotan_analysis", function(object, cores = 1) {
+  standardGeneric("cotan_analysis")
+})
 #' @rdname cotan_analysis
 setMethod("cotan_analysis","scCOTAN",
           function(object, cores= 1) {
@@ -416,136 +420,152 @@ setMethod("cotan_analysis","scCOTAN",
 #' @examples
 #' data("ERCC.cotan")
 #' data_dir <- tempdir()
-#' saveRDS(ERCC.cotan, file = file.path(data_dir,"ERCC.cotan.RDS"))
+#' saveRDS(ERCC.cotan, file = file.path(data_dir, "ERCC.cotan.RDS"))
 #' # some genes
-#' primary.markers <- c("ERCC-00154","ERCC-00156","ERCC-00164")
-#' #a example of named list of different gene set
-#' gene.sets.list <- list("primary.markers"=primary.markers,
-#'                    "2.R" = c("ERCC-00170","ERCC-00158"),
-#'                    "3.S"=c("ERCC-00160","ERCC-00162"))
-#' plot_heatmap(p_v = 0.05, df_genes =gene.sets.list ,
-#' sets =c(2,3) ,conditions =c("ERCC") ,dir = paste0(data_dir,"/"))
+#' primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
+#' # a example of named list of different gene set
+#' gene.sets.list <- list(
+#'   "primary.markers" = primary.markers,
+#'   "2.R" = c("ERCC-00170", "ERCC-00158"),
+#'   "3.S" = c("ERCC-00160", "ERCC-00162")
+#' )
+#' plot_heatmap(
+#'   p_v = 0.05, df_genes = gene.sets.list,
+#'   sets = c(2, 3), conditions = c("ERCC"), dir = paste0(data_dir, "/")
+#' )
 #'
-setGeneric("plot_heatmap", function(p_val.tr = 0.05, df_genes , sets, conditions, dir)
-    standardGeneric("plot_heatmap"))
+setGeneric("plot_heatmap", function(p_val.tr = 0.05, df_genes, sets, conditions, dir) {
+  standardGeneric("plot_heatmap")
+})
 #' @rdname plot_heatmap
-setMethod("plot_heatmap","ANY",
-          function(p_val.tr = 0.05, df_genes , sets, conditions, dir) {
-              time <- g2 <- NULL
-              print("plot heatmap")
-              gr <- df_genes[[1]]
-              ge <- unique(array(sort(unlist(df_genes[sets]))))
-              df.to.print <- data.frame()
-              for(ET in conditions){
-                  print(paste("Loading condition",ET,sep=" "))
-                  obj <- readRDS(paste(dir,ET,".cotan.RDS", sep = ""))
-                  if(is(class(obj@coex)[1], "dtCMatrix") | (as.vector(class(obj@coex)) %in% "dtCMatrix")){
-                      print("COTAN object in the old format! Converting...")
-                      obj <- get.coex(obj)
-                      print(paste("Saving as new file as ",dir,ET,"new.cotan.RDS", sep = ""))
-                      saveRDS(obj,paste(dir,ET,"new.cotan.RDS", sep = ""))
-                  }
-                  if(any(gr %in% obj@coex$genes) == FALSE){
-                      paste0("primary markers all absent in ", ET)
-                      stop()
-                  }
-                  p_val <- get.pval(obj,gene.set.col = gr, gene.set.row = ge)
-                  p_val <- as.data.frame(p_val)
+setMethod(
+  "plot_heatmap", "ANY",
+  function(p_val.tr = 0.05, df_genes, sets, conditions, dir) {
+    time <- g2 <- NULL
+    print("plot heatmap")
+    gr <- df_genes[[1]]
+    ge <- unique(array(sort(unlist(df_genes[sets]))))
+    df.to.print <- data.frame()
+    for (ET in conditions) {
+      print(paste("Loading condition", ET, sep = " "))
+      obj <- readRDS(paste(dir, ET, ".cotan.RDS", sep = ""))
+      if (is(class(obj@coex)[1], "dtCMatrix")) {
+        print("COTAN object in the old format! Converting...")
+        obj <- get.coex(obj)
+        print(paste("Saving as new file as ", dir, ET, "new.cotan.RDS", sep = ""))
+        saveRDS(obj, paste(dir, ET, "new.cotan.RDS", sep = ""))
+      }
+      if (any(gr %in% obj@coex$genes) == FALSE) {
+        paste0("primary markers all absent in ", ET)
+        stop()
+      }
+      p_val <- get.pval(obj, gene.set.col = gr, gene.set.row = ge)
+      p_val <- as.data.frame(p_val)
 
-                  #this to add some eventually effective housekeeping genes
-                  if (any(ge %in% obj@hk)) {
-                      genes.to.add <- ge[ge %in% obj@hk]
-                      temp.hk.rows <- as.data.frame(matrix(ncol = ncol(p_val), nrow =
-                                                              length(genes.to.add)))
-                      rownames(temp.hk.rows) <- genes.to.add
-                      colnames(temp.hk.rows) <- colnames(p_val)
-                      temp.hk.rows <- 1
-                      p_val <- rbind(p_val,temp.hk.rows)
-                  }
+      # this to add some eventually effective housekeeping genes
+      if (any(ge %in% obj@hk)) {
+        genes.to.add <- ge[ge %in% obj@hk]
+        temp.hk.rows <- as.data.frame(matrix(
+          ncol = ncol(p_val), nrow =
+            length(genes.to.add)
+        ))
+        rownames(temp.hk.rows) <- genes.to.add
+        colnames(temp.hk.rows) <- colnames(p_val)
+        temp.hk.rows <- 1
+        p_val <- rbind(p_val, temp.hk.rows)
+      }
 
-                  if (any(gr %in% obj@hk)) {
-                      genes.to.add <- gr[gr %in% obj@hk]
-                      temp.hk.cols <- as.data.frame(matrix(ncol = length(genes.to.add), nrow =
-                                                              nrow(p_val) ))
-                      colnames(temp.hk.cols) <- genes.to.add
-                      rownames(temp.hk.cols) <- rownames(p_val)
-                      temp.hk.cols <- 1
-                      p_val <- cbind(p_val,temp.hk.cols)
-                  }
+      if (any(gr %in% obj@hk)) {
+        genes.to.add <- gr[gr %in% obj@hk]
+        temp.hk.cols <- as.data.frame(matrix(
+          ncol = length(genes.to.add), nrow =
+            nrow(p_val)
+        ))
+        colnames(temp.hk.cols) <- genes.to.add
+        rownames(temp.hk.cols) <- rownames(p_val)
+        temp.hk.cols <- 1
+        p_val <- cbind(p_val, temp.hk.cols)
+      }
 
-                  p_val$g2 <- as.vector(rownames(p_val))
-                  df.temp.pval <- pivot_longer(p_val, cols=seq_along(colnames(p_val))-1, names_to = "g1", values_to = "p_val")
+      p_val$g2 <- as.vector(rownames(p_val))
+      df.temp.pval <- pivot_longer(p_val, cols = seq_along(colnames(p_val)) - 1, names_to = "g1", values_to = "p_val")
 
-                  coex <- vec2mat_rfast(obj@coex, genes = gr)
-                  diag(coex) <- 0
-                  coex <- coex[rownames(coex) %in% ge,]
-                  #this to add some eventually effective housekeeping genes
-                  if (any(ge %in% obj@hk)) {
-                      temp.hk.rows <- 0
-                      coex <- rbind(coex,temp.hk.rows)
-                  }
+      coex <- vec2mat_rfast(obj@coex, genes = gr)
+      diag(coex) <- 0
+      coex <- coex[rownames(coex) %in% ge, ]
+      # this to add some eventually effective housekeeping genes
+      if (any(ge %in% obj@hk)) {
+        temp.hk.rows <- 0
+        coex <- rbind(coex, temp.hk.rows)
+      }
 
-                  if (any(gr %in% obj@hk)) {
-                      temp.hk.cols <- 0
-                      coex <- cbind(coex,temp.hk.cols)
-                  }
-                  #---------------------------------------------------------
-                  coex <- as.data.frame(coex)
-                  coex$g2 <- as.vector(rownames(coex))
-                  df.temp.coex <- pivot_longer(coex, cols=seq_along(colnames(p_val))-1, names_to = "g1", values_to = "coex")
-                  df.temp <- merge(df.temp.coex, df.temp.pval)
-                  df.temp$time <- ET
-                  df.temp$type <- NA
-                  df.temp$absent <- NA
-                  df.temp2 <- data.frame()
-                  for (type in names(df_genes)[sets]) {
-                      for (g1 in gr) {
-                          tt <- df.temp[df.temp$g2 %in% df_genes[[type]] & df.temp$g1 == g1, ]
-                          #control if the subset is smaller than the number of wanted genes
-                          if(dim(tt)[1] < length(df_genes[[type]])){
-                              n.row <- length(df_genes[[type]]) - dim(tt)[1]
-                              t.rows <- as.data.frame(matrix(nrow = n.row, ncol=7))
-                              colnames(t.rows) <- colnames(tt)
-                              t.rows[,"g1"]<-g1
-                              t.rows[,"time"]<- ET
-                              t.rows[,"absent"]<- "yes"
-                              t.rows[,"p_val"]<- 1
-                              t.rows[,"g2"]<-df_genes[[type]][!df_genes[[type]] %in% tt$g2]
-                              tt <- rbind(tt,t.rows)
-                          }
-                          tt$type <- type
-                          df.temp2 <-rbind(df.temp2,tt)
-                      }
-                      print(type)
-                  }
-                  df.temp <- df.temp2
-                  df.temp$t_hk <- ifelse((df.temp$g2  %in% obj@hk) | (df.temp$g1  %in% obj@hk),"hk", "n")
-                  df.temp[df.temp$p_val > p_val.tr,]$coex <- 0
-                  df.to.print <-  rbind(df.to.print,df.temp)
-              }
-              print(paste("min coex:",min(df.to.print$coex, na.rm = TRUE), "max coex",max(df.to.print$coex, na.rm = TRUE),sep = " "))
-              heatmap <- ggplot(data = subset(df.to.print,type %in%  names(df_genes)[sets] ),aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
-                  geom_tile(aes(fill = coex),colour = "black", show.legend = TRUE) +
-                  facet_grid( type ~ g1  ,scales = "free", space = "free") +
-                  scale_fill_gradient2(low = "#E64B35FF", mid = "gray93",   high = "#3C5488FF",
-                                       midpoint = 0,
-                                       na.value = "grey80", space = "Lab", guide = "colourbar",
-                                       aesthetics = "fill", oob=scales::squish)+
-                  theme(axis.title.x = element_blank(),
-                        panel.spacing = unit(0, "lines"),
-                        strip.background = element_rect(fill="#8491B44C"),
-                        strip.text.y  = element_text(size = 9, colour = "#3C5488FF"),
-                        strip.text.x  = element_text(size = 9,angle= 90 ,colour = "#3C5488FF"),
-                        axis.title.y = element_blank(),
-                        axis.text.y = element_text( size = 9, angle = 0, hjust = 0, vjust = .5,
-                                                    face = "plain", colour ="#3C5488FF"),
-                        legend.text = element_text(color = "#3C5488FF",face ="italic" ),
-                        legend.position = "bottom",
-                        legend.title=element_blank(),
-                        legend.key.height = unit(2, "mm"))
-              heatmap
-              return(heatmap)
+      if (any(gr %in% obj@hk)) {
+        temp.hk.cols <- 0
+        coex <- cbind(coex, temp.hk.cols)
+      }
+      #---------------------------------------------------------
+      coex <- as.data.frame(coex)
+      coex$g2 <- as.vector(rownames(coex))
+      df.temp.coex <- pivot_longer(coex, cols = seq_along(colnames(p_val)) - 1, names_to = "g1", values_to = "coex")
+      df.temp <- merge(df.temp.coex, df.temp.pval)
+      df.temp$time <- ET
+      df.temp$type <- NA
+      df.temp$absent <- NA
+      df.temp2 <- data.frame()
+      for (type in names(df_genes)[sets]) {
+        for (g1 in gr) {
+          tt <- df.temp[df.temp$g2 %in% df_genes[[type]] & df.temp$g1 == g1, ]
+          # control if the subset is smaller than the number of wanted genes
+          if (dim(tt)[1] < length(df_genes[[type]])) {
+            n.row <- length(df_genes[[type]]) - dim(tt)[1]
+            t.rows <- as.data.frame(matrix(nrow = n.row, ncol = 7))
+            colnames(t.rows) <- colnames(tt)
+            t.rows[, "g1"] <- g1
+            t.rows[, "time"] <- ET
+            t.rows[, "absent"] <- "yes"
+            t.rows[, "p_val"] <- 1
+            t.rows[, "g2"] <- df_genes[[type]][!df_genes[[type]] %in% tt$g2]
+            tt <- rbind(tt, t.rows)
           }
+          tt$type <- type
+          df.temp2 <- rbind(df.temp2, tt)
+        }
+        print(type)
+      }
+      df.temp <- df.temp2
+      df.temp$t_hk <- ifelse((df.temp$g2 %in% obj@hk) | (df.temp$g1 %in% obj@hk), "hk", "n")
+      df.temp[df.temp$p_val > p_val.tr, ]$coex <- 0
+      df.to.print <- rbind(df.to.print, df.temp)
+    }
+    print(paste("min coex:", min(df.to.print$coex, na.rm = TRUE), "max coex", max(df.to.print$coex, na.rm = TRUE), sep = " "))
+    heatmap <- ggplot(data = subset(df.to.print, type %in% names(df_genes)[sets]), aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
+      geom_tile(aes(fill = coex), colour = "black", show.legend = TRUE) +
+      facet_grid(type ~ g1, scales = "free", space = "free") +
+      scale_fill_gradient2(
+        low = "#E64B35FF", mid = "gray93", high = "#3C5488FF",
+        midpoint = 0,
+        na.value = "grey80", space = "Lab", guide = "colourbar",
+        aesthetics = "fill", oob = scales::squish
+      ) +
+      theme(
+        axis.title.x = element_blank(),
+        panel.spacing = unit(0, "lines"),
+        strip.background = element_rect(fill = "#8491B44C"),
+        strip.text.y = element_text(size = 9, colour = "#3C5488FF"),
+        strip.text.x = element_text(size = 9, angle = 90, colour = "#3C5488FF"),
+        axis.title.y = element_blank(),
+        axis.text.y = element_text(
+          size = 9, angle = 0, hjust = 0, vjust = .5,
+          face = "plain", colour = "#3C5488FF"
+        ),
+        legend.text = element_text(color = "#3C5488FF", face = "italic"),
+        legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.key.height = unit(2, "mm")
+      )
+    heatmap
+    return(heatmap)
+  }
 )
 
 
@@ -575,153 +595,250 @@ setMethod("plot_heatmap","ANY",
 #' @examples
 #' data("ERCC.cotan")
 #' data_dir <- tempdir()
-#' saveRDS(ERCC.cotan, file = file.path(data_dir,"ERCC.cotan.RDS"))
+#' saveRDS(ERCC.cotan, file = file.path(data_dir, "ERCC.cotan.RDS"))
 #' # some genes
-#' primary.markers <- c("ERCC-00154","ERCC-00156","ERCC-00164")
-#' #a example of named list of different gene set
-#' gene.sets.list <- list("primary.markers"=primary.markers,
-#'                    "2.R" = c("ERCC-00170","ERCC-00158"),
-#'                    "3.S"=c("ERCC-00160","ERCC-00162"))
-#' plot_general.heatmap(prim.markers = primary.markers, p_value = 0.05, markers.list =gene.sets.list ,
-#' condition ="ERCC" ,dir = paste0(data_dir,"/"))
-setGeneric("plot_general.heatmap", function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),
-                                            markers.list= c(),
+#' primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
+#' # a example of named list of different gene set
+#' gene.sets.list <- list(
+#'   "primary.markers" = primary.markers,
+#'   "2.R" = c("ERCC-00170", "ERCC-00158"),
+#'   "3.S" = c("ERCC-00160", "ERCC-00162")
+#' )
+#' plot_general.heatmap(
+#'   prim.markers = primary.markers, p_value = 0.05, markers.list = gene.sets.list,
+#'   condition = "ERCC", dir = paste0(data_dir, "/")
+#' )
+setGeneric("plot_general.heatmap", function(prim.markers = c("Satb2", "Bcl11b", "Cux1", "Fezf2", "Tbr1"),
+                                            markers.list = c(),
                                             dir, condition,
                                             p_value = 0.001,
-                                            symmetric = TRUE) standardGeneric("plot_general.heatmap"))
+                                            symmetric = TRUE) {
+  standardGeneric("plot_general.heatmap")
+})
 #' @rdname plot_general.heatmap
-setMethod("plot_general.heatmap","ANY",
-          function(prim.markers =c("Satb2","Bcl11b","Cux1","Fezf2","Tbr1"),markers.list=c(), dir,
-                   condition,p_value = 0.001, symmetric = TRUE) {
-              print("ploting a general heatmap")
-              ET <- NULL
+setMethod(
+  "plot_general.heatmap", "ANY",
+  function(prim.markers = c("Satb2", "Bcl11b", "Cux1", "Fezf2", "Tbr1"), markers.list = c(), dir,
+           condition, p_value = 0.001, symmetric = TRUE) {
+    print("ploting a general heatmap")
+    ET <- NULL
 
-              if(symmetric == TRUE){
-                  markers.list <- as.list(c( unlist(prim.markers),unlist(markers.list)))
-              }
+    if (symmetric == TRUE) {
+      markers.list <- as.list(c(unlist(prim.markers), unlist(markers.list)))
+    }
 
-              if (is.null(markers.list)) {
-                  markers.list <- as.list(prim.markers)
-              }else{
-                  markers.list <- as.list(markers.list)
-              }
+    if (is.null(markers.list)) {
+      markers.list <- as.list(prim.markers)
+    } else {
+      markers.list <- as.list(markers.list)
+    }
 
-              obj <- readRDS(paste(dir,condition,".cotan.RDS", sep = ""))
+    obj <- readRDS(paste(dir, condition, ".cotan.RDS", sep = ""))
 
-              if(is(class(obj@coex)[1], "dtCMatrix") | (as.vector(class(obj@coex)) %in% "dtCMatrix")){
-                  print("COTAN object in the old format! Converting...")
-                  obj <- get.coex(obj)
-                  print(paste("Saving as new file as ",dir,ET,"new.cotan.RDS", sep = ""))
-                  saveRDS(obj,paste(dir,ET,"new.cotan.RDS", sep = ""))
+    if (is(class(obj@coex)[1], "dtCMatrix")) {
+      print("COTAN object in the old format! Converting...")
+      obj <- get.coex(obj)
+      print(paste("Saving as new file as ", dir, ET, "new.cotan.RDS", sep = ""))
+      saveRDS(obj, paste(dir, ET, "new.cotan.RDS", sep = ""))
+    }
 
-              }
+    no_genes <- unique(c(unlist(markers.list), prim.markers))[!unique(c(
+      unlist(markers.list),
+      prim.markers
+    ))
+    %in% obj@coex$genes]
 
-              no_genes <- unique(c(unlist(markers.list),prim.markers))[!unique(c(unlist(markers.list),
-                                                                                prim.markers))
-                                                                       %in% obj@coex$genes]
+    if (!rlang::is_empty(no_genes)) {
+      print(paste(no_genes, "not present!", sep = " "))
+    }
 
-              if(! rlang::is_empty(no_genes)){
-                  print(paste(no_genes,"not present!",sep = " "))
-              }
+    pval <- get.pval(object = obj)
+    diag(pval) <- 1
+    pval <- pval[, unique(c(unlist(markers.list), prim.markers))]
 
-              pval <- get.pval(object = obj)
-              diag(pval) <- 1
-              pval <- pval[,unique(c(unlist(markers.list),prim.markers))]
+    pval.red <- apply(pval, 1, FUN = min)
+    genes.row <- names(pval.red[pval.red < p_value])
 
-              pval.red <- apply(pval, 1, FUN=min)
-              genes.row <- names(pval.red[pval.red < p_value])
+    genes.row <- unique(c(unique(c(unlist(markers.list), prim.markers)), genes.row))
+    pval <- as.data.frame(pval)
 
-              genes.row <- unique(c(unique(c(unlist(markers.list),prim.markers)),genes.row))
-              pval <- as.data.frame(pval)
+    coex <- vec2mat_rfast(obj@coex)
+    diag(coex) <- 0
+    if (symmetric == TRUE) {
+      coex <- coex[rownames(coex) %in% genes.row, colnames(coex) %in% genes.row]
+    } else {
+      coex <- coex[rownames(coex) %in% genes.row, ]
+    }
 
-              coex <- vec2mat_rfast(obj@coex)
-              diag(coex) <- 0
-              if(symmetric == TRUE){
-                  coex <- coex[rownames(coex) %in% genes.row, colnames(coex) %in%  genes.row]
+    list.rows <- c()
+    for (m in unlist(markers.list)) {
+      genes <- rownames(pval[pval[, m] < p_value, ])
+      genes <- genes[genes %in% rownames(coex[coex[, m] > 0, ])]
+      list.rows[[m]] <- genes
+    }
 
-              }else{
+    list.cols <- c()
+    for (m in prim.markers) {
+      genes <- rownames(pval[pval[, m] < p_value, ])
+      genes <- genes[genes %in% rownames(coex[coex[, m] > 0, ])]
+      list.cols[[m]] <- genes
+    }
 
-                  coex <- coex[rownames(coex) %in% genes.row,]
-              }
+    cl.genes.rows <- c()
+    for (ll in names(list.rows)) {
+      tmp <- data.frame("genes" = list.rows[[ll]], "cl" = rep(ll, length(list.rows[[ll]])))
+      cl.genes.rows <- rbind(cl.genes.rows, tmp)
+    }
 
-              list.rows <- c()
-              for (m in unlist(markers.list)) {
-                  genes <- rownames(pval[pval[,m] < p_value,])
-                  genes <- genes[genes %in% rownames(coex[coex[,m] > 0,]) ]
-                  list.rows[[m]]<-genes
+    cl.genes.rows <- cl.genes.rows[cl.genes.rows$genes %in% rownames(coex), ]
 
-              }
-
-              list.cols <- c()
-              for (m in prim.markers) {
-                  genes <- rownames(pval[pval[,m] < p_value,])
-                  genes <- genes[genes %in% rownames(coex[coex[,m] > 0,]) ]
-                  list.cols[[m]]<-genes
-
-              }
-
-              cl.genes.rows <- c()
-              for (ll in names(list.rows)) {
-                  tmp <- data.frame("genes"=list.rows[[ll]],"cl" = rep(ll,length(list.rows[[ll]])))
-                  cl.genes.rows <- rbind(cl.genes.rows,tmp)
-              }
-
-              cl.genes.rows <- cl.genes.rows[cl.genes.rows$genes %in% rownames(coex),]
-
-              reorder_idx_row <- match(cl.genes.rows$gene,rownames(coex))
+    reorder_idx_row <- match(cl.genes.rows$gene, rownames(coex))
 
 
-              if (symmetric == TRUE) {
-                  cl.genes.cols <- data.frame()
-                  for (ll in names(list.rows)) {
-                      tmp <- data.frame("genes"=list.rows[[ll]],"cl"=rep(ll,length(list.rows[[ll]])))
-                      cl.genes.cols <- rbind(cl.genes.cols,tmp)
-                  }
-              }else{
-                  cl.genes.cols <- data.frame()
-                  for (ll in names(list.cols)) {
-                      tmp <- data.frame("genes"=list.cols[[ll]],"cl"=rep(ll,length(list.cols[[ll]])))
-                      cl.genes.cols <- rbind(cl.genes.cols,tmp)
-                  }
+    if (symmetric == TRUE) {
+      cl.genes.cols <- data.frame()
+      for (ll in names(list.rows)) {
+        tmp <- data.frame("genes" = list.rows[[ll]], "cl" = rep(ll, length(list.rows[[ll]])))
+        cl.genes.cols <- rbind(cl.genes.cols, tmp)
+      }
+    } else {
+      cl.genes.cols <- data.frame()
+      for (ll in names(list.cols)) {
+        tmp <- data.frame("genes" = list.cols[[ll]], "cl" = rep(ll, length(list.cols[[ll]])))
+        cl.genes.cols <- rbind(cl.genes.cols, tmp)
+      }
+    }
+    cl.genes.cols <- cl.genes.cols[cl.genes.cols$genes %in% colnames(coex), ]
 
-              }
-              cl.genes.cols <- cl.genes.cols[cl.genes.cols$genes %in% colnames(coex),]
-
-              reorder_idx_col <- match(cl.genes.cols$gene,colnames(coex))
+    reorder_idx_col <- match(cl.genes.cols$gene, colnames(coex))
 
 
-              to.plot <- coex[reorder_idx_row,reorder_idx_col]
+    to.plot <- coex[reorder_idx_row, reorder_idx_col]
 
-              col_fun <- circlize::colorRamp2(c(round(stats::quantile(as.matrix(to.plot),probs =0.001),
-                                                     digits = 3),0,
-                                     round(stats::quantile(as.matrix(to.plot),probs =0.999),
-                                           digits = 3)),
-                                   c("#E64B35FF", "gray93", "#3C5488FF"))
+    col_fun <- circlize::colorRamp2(
+      c(
+        round(stats::quantile(as.matrix(to.plot), probs = 0.001),
+          digits = 3
+        ), 0,
+        round(stats::quantile(as.matrix(to.plot), probs = 0.999),
+          digits = 3
+        )
+      ),
+      c("#E64B35FF", "gray93", "#3C5488FF")
+    )
 
-              #The next line is to set the columns and raws order
-              #need to be implemented
-              part1 <- ComplexHeatmap::Heatmap(as.matrix(to.plot),
-                              cluster_rows = FALSE,
-                              cluster_columns = FALSE ,
-                              row_split = cl.genes.rows$cl,
-                              column_split = cl.genes.cols$cl ,
-                              col = col_fun,
-                              show_row_names = FALSE,
-                              show_column_names = FALSE,
-                              column_title_gp = grid::gpar(fill = "#8491B44C", font = 3,
-                                                           col= "#3C5488FF"),
-                              row_title_gp = grid::gpar(fill = "#8491B44C",font = 3, col= "#3C5488FF"))
-              lgd <- ComplexHeatmap::Legend(col_fun = col_fun, title = "coex",grid_width =
-                                               unit(0.3, "cm"),
-                           direction = "horizontal", title_position = "topcenter",
-                           title_gp = grid::gpar(fontsize = 10, fontface = "bold",col="#3C5488FF"),
-                           labels_gp = grid::gpar(col = "#3C5488FF", font = 3) )
-                  ComplexHeatmap::draw(part1,show_heatmap_legend = FALSE,
-                           annotation_legend_list = lgd,annotation_legend_side = "bottom")
-
-          }
+    # The next line is to set the columns and raws order
+    # need to be implemented
+    part1 <- ComplexHeatmap::Heatmap(as.matrix(to.plot),
+      cluster_rows = FALSE,
+      cluster_columns = FALSE,
+      row_split = cl.genes.rows$cl,
+      column_split = cl.genes.cols$cl,
+      col = col_fun,
+      show_row_names = FALSE,
+      show_column_names = FALSE,
+      column_title_gp = grid::gpar(
+        fill = "#8491B44C", font = 3,
+        col = "#3C5488FF"
+      ),
+      row_title_gp = grid::gpar(fill = "#8491B44C", font = 3, col = "#3C5488FF")
+    )
+    lgd <- ComplexHeatmap::Legend(
+      col_fun = col_fun, title = "coex", grid_width =
+        unit(0.3, "cm"),
+      direction = "horizontal", title_position = "topcenter",
+      title_gp = grid::gpar(fontsize = 10, fontface = "bold", col = "#3C5488FF"),
+      labels_gp = grid::gpar(col = "#3C5488FF", font = 3)
+    )
+    ComplexHeatmap::draw(part1,
+      show_heatmap_legend = FALSE,
+      annotation_legend_list = lgd, annotation_legend_side = "bottom"
+    )
+  }
 )
 
+
+#' plot_GDI
+#'
+#' This function directly evaluate and plot the GDI for a sample.
+#'
+#' @param object A COTAN object
+#' @param cond A string corresponding to the condition/sample (it is used only for the title)
+#' @param type Type of statistic to be used. Default is "S":
+#' Pearson's chi-squared test statistics. "G" is G-test statistics
+#'
+#' @return A ggplot2 object
+#' @export
+#' @import ggplot2
+#' @importFrom  stats quantile
+#' @importFrom Matrix forceSymmetric
+#' @rdname plot_GDI
+#' @examples
+#' data("ERCC.cotan")
+#' plot_GDI(ERCC.cotan, cond = "ERCC")
+setGeneric("plot_GDI", function(object, cond, type = "S") standardGeneric("plot_GDI"))
+#' @rdname plot_GDI
+setMethod(
+  "plot_GDI", "scCOTAN",
+  function(object, cond, type = "S") {
+    ET <- sum.raw.norm <- NULL
+
+    if (is(class(object@coex)[1], "dtCMatrix")) {
+      print("COTAN object in the old format! Converting...")
+      object <- get.coex(object)
+      print(paste("Saving as new file as ", dir, ET, "new.cotan.RDS", sep = ""))
+      saveRDS(object, paste(dir, ET, "new.cotan.RDS", sep = ""))
+    }
+
+    print("GDI plot ")
+    if (type == "S") {
+      GDI <- get.GDI(object, type = "S")
+    } else if (type == "G") {
+      print("Using G")
+      GDI <- get.GDI(object, type = "G")
+    }
+
+    si <- 12
+    plot <- ggplot(GDI, aes(x = sum.raw.norm, y = GDI)) +
+      geom_point(size = 2, alpha = 0.5, color = "#8491B4B2") +
+      geom_hline(yintercept = 1.5, linetype = "dotted", color = "darkred", size = 1) +
+      geom_hline(
+        yintercept = stats::quantile(GDI$GDI)[4], linetype = "dashed",
+        color = "darkblue"
+      ) +
+      geom_hline(
+        yintercept = stats::quantile(GDI$GDI)[3], linetype = "dashed",
+        color = "darkblue"
+      ) +
+      xlab("log normalized reads sum") +
+      ylab("global p val index (GDI)") +
+      ggtitle(paste("GDI ", cond, sep = " ")) +
+      theme(
+        axis.text.x = element_text(
+          size = si, angle = 0, hjust = .5, vjust = .5,
+          face = "plain", colour = "#3C5488FF"
+        ),
+        axis.text.y = element_text(
+          size = si, angle = 0, hjust = 0, vjust = .5,
+          face = "plain", colour = "#3C5488FF"
+        ),
+        axis.title.x = element_text(
+          size = si, angle = 0, hjust = .5, vjust = 0,
+          face = "plain", colour = "#3C5488FF"
+        ),
+        axis.title.y = element_text(
+          size = si, angle = 90, hjust = .5, vjust = .5,
+          face = "plain", colour = "#3C5488FF"
+        ),
+        legend.title = element_blank(),
+        plot.title = element_text(color = "#3C5488FF", size = 14, face = "bold.italic"),
+        legend.text = element_text(color = "#3C5488FF", face = "italic"),
+        legend.position = "bottom"
+      )
+
+    return(plot)
+  }
+)
 
 
 #' get.observed.ct
@@ -740,32 +857,31 @@ setMethod("plot_general.heatmap","ANY",
 #' g1 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 #' g2 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 #' get.observed.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
-setGeneric("get.observed.ct", function(object,g1,g2) standardGeneric("get.observed.ct"))
+setGeneric("get.observed.ct", function(object, g1, g2) standardGeneric("get.observed.ct"))
 #' @rdname get.observed.ct
-setMethod("get.observed.ct","scCOTAN",
-          function(object,g1,g2) {
+setMethod(
+  "get.observed.ct", "scCOTAN",
+  function(object, g1, g2) {
+    si_si <- object@yes_yes[g1, g2]
+    n_cells <- object@n_cells
 
-              si_si <- object@yes_yes[g1,g2]
-              n_cells <- object@n_cells
+    si_any <- max(object@yes_yes[g1, ])
 
-              si_any <- max(object@yes_yes[g1,])
+    any_si <- max(object@yes_yes[g2, ])
+    si_no <- si_any - si_si
+    no_si <- any_si - si_si
+    no_no <- n_cells - (si_si + si_no + no_si)
 
-              any_si <- max(object@yes_yes[g2,])
-              si_no <- si_any - si_si
-              no_si <- any_si - si_si
-              no_no <- n_cells - (si_si + si_no + no_si)
+    ct <- as.data.frame(matrix(ncol = 2, nrow = 2))
+    colnames(ct) <- c(paste(g1, "yes", sep = "."), paste(g1, "no", sep = "."))
+    rownames(ct) <- c(paste(g2, "yes", sep = "."), paste(g2, "no", sep = "."))
+    ct[1, 1] <- si_si
+    ct[1, 2] <- no_si
+    ct[2, 2] <- no_no
+    ct[2, 1] <- si_no
 
-              ct <- as.data.frame(matrix(ncol = 2,nrow = 2))
-              colnames(ct) <- c(paste(g1,"yes",sep = "."),paste(g1,"no",sep = "."))
-              rownames(ct) <- c(paste(g2,"yes",sep = "."),paste(g2,"no",sep = "."))
-              ct[1,1] <- si_si
-              ct[1,2] <- no_si
-              ct[2,2] <- no_no
-              ct[2,1] <- si_no
-
-              return(ct)
-
-          }
+    return(ct)
+  }
 )
 
 
@@ -787,60 +903,59 @@ setMethod("get.observed.ct","scCOTAN",
 #' g1 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 #' g2 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
 #' while (g1 %in% get.constitutive.genes(ERCC.cotan)) {
-#'g1 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
-#'}
+#'   g1 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+#' }
 #'
-#'while (g2 %in% get.constitutive.genes(ERCC.cotan)) {
-#'    g2 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
-#'}
+#' while (g2 %in% get.constitutive.genes(ERCC.cotan)) {
+#'   g2 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+#' }
 #' get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
-setGeneric("get.expected.ct", function(object,g1,g2) standardGeneric("get.expected.ct"))
+setGeneric("get.expected.ct", function(object, g1, g2) standardGeneric("get.expected.ct"))
 #' @rdname get.expected.ct
-setMethod("get.expected.ct","scCOTAN",
-          function(object,g1,g2) {
-              fun_pzero <- function(a,mu){
+setMethod(
+  "get.expected.ct", "scCOTAN",
+  function(object, g1, g2) {
+    fun_pzero <- function(a, mu) {
+      (a <= 0) * (exp(-(1 + abs(a)) * mu)) + (a > 0) * (1 + abs(a) * mu)^(-1 / abs(a))
+    }
 
-                  (a <= 0)*(exp(-(1+abs(a))*mu)) + (a > 0)*(1+abs(a)*mu)^(-1/abs(a))
-              }
+    stopifnot("a gene is constitutive!" = !(g1 %in% object@hk | g2 %in% object@hk))
 
-              stopifnot("a gene is constitutive!"= !(g1 %in% object@hk | g2 %in% object@hk) )
+    mu_estimator <- object@lambda[c(g1, g2)] %*% t(object@nu)
 
-              mu_estimator <- object@lambda[c(g1,g2)] %*% t(object@nu)
+    cells <- as.matrix(object@raw)[c(g1, g2), ]
+    #---------------------------------------------------
 
-              cells <- as.matrix(object@raw)[c(g1,g2),]
-              #---------------------------------------------------
+    cells[cells > 0] <- 1
+    cells[cells <= 0] <- 0
 
-              cells[cells > 0] <- 1
-              cells[cells <= 0] <- 0
+    M <- fun_pzero(object@a[c(g1, g2)], mu_estimator)
+    rownames(M) <- c(g1, g2)
+    N <- 1 - M
 
-              M <- fun_pzero(object@a[c(g1,g2)],mu_estimator)
-              rownames(M) <- c(g1,g2)
-              N <- 1-M
+    n_zero_esti <- rowSums(M)
+    n_zero_obs <- rowSums(cells[!rownames(cells) %in% object@hk, ] == 0)
 
-              n_zero_esti <- rowSums(M)
-              n_zero_obs <- rowSums(cells[!rownames(cells) %in% object@hk,] == 0)
+    dist_zeros <- sqrt(sum((n_zero_esti - n_zero_obs)^2))
+    stopifnot("Errore: some Na in matrix M " = !any(is.na(M)))
 
-              dist_zeros <- sqrt(sum((n_zero_esti - n_zero_obs)^2))
-              stopifnot("Errore: some Na in matrix M " = !any(is.na(M)))
-
-              gc()
-              estimator_no_no <- M %*% t(M)
-              estimator_no_si <- M %*% t(N)
-              estimator_si_no <- t(estimator_no_si)
-              estimator_si_si <- N %*% t(N)
+    gc()
+    estimator_no_no <- M %*% t(M)
+    estimator_no_si <- M %*% t(N)
+    estimator_si_no <- t(estimator_no_si)
+    estimator_si_si <- N %*% t(N)
 
 
-              ct <- as.data.frame(matrix(ncol = 2,nrow = 2))
-              colnames(ct) <- c(paste(g1,"yes",sep = "."),paste(g1,"no",sep = "."))
-              rownames(ct) <- c(paste(g2,"yes",sep = "."),paste(g2,"no",sep = "."))
-              ct[1,1] <- estimator_si_si[g1,g2]
-              ct[1,2] <- estimator_no_si[g1,g2]
-              ct[2,2] <- estimator_no_no[g1,g2]
-              ct[2,1] <- estimator_si_no[g1,g2]
+    ct <- as.data.frame(matrix(ncol = 2, nrow = 2))
+    colnames(ct) <- c(paste(g1, "yes", sep = "."), paste(g1, "no", sep = "."))
+    rownames(ct) <- c(paste(g2, "yes", sep = "."), paste(g2, "no", sep = "."))
+    ct[1, 1] <- estimator_si_si[g1, g2]
+    ct[1, 2] <- estimator_no_si[g1, g2]
+    ct[2, 2] <- estimator_no_no[g1, g2]
+    ct[2, 1] <- estimator_si_no[g1, g2]
 
-              return(ct)
-
-          }
+    return(ct)
+  }
 )
 
 
@@ -858,13 +973,13 @@ setMethod("get.expected.ct","scCOTAN",
 #'
 setGeneric("get.constitutive.genes", function(object) standardGeneric("get.constitutive.genes"))
 #' @rdname get.constitutive.genes
-setMethod("get.constitutive.genes","scCOTAN",
-          function(object) {
-            gg <- object@hk
+setMethod(
+  "get.constitutive.genes", "scCOTAN",
+  function(object) {
+    gg <- object@hk
 
-            return(gg)
-
-          }
+    return(gg)
+  }
 )
 
 #' get.genes
@@ -881,11 +996,12 @@ setMethod("get.constitutive.genes","scCOTAN",
 #' get.genes(ERCC.cotan)[1:10]
 setGeneric("get.genes", function(object) standardGeneric("get.genes"))
 #' @rdname get.genes
-setMethod("get.genes","scCOTAN",
-          function(object) {
-              gg<- rownames(object@raw)
-              return(gg)
-          }
+setMethod(
+  "get.genes", "scCOTAN",
+  function(object) {
+    gg <- rownames(object@raw)
+    return(gg)
+  }
 )
 
 
@@ -903,11 +1019,12 @@ setMethod("get.genes","scCOTAN",
 #' get.metadata(ERCC.cotan)
 setGeneric("get.metadata", function(object) standardGeneric("get.metadata"))
 #' @rdname get.metadata
-setMethod("get.metadata","scCOTAN",
-          function(object) {
-              meta <- object@meta
-              return(meta)
-          }
+setMethod(
+  "get.metadata", "scCOTAN",
+  function(object) {
+    meta <- object@meta
+    return(meta)
+  }
 )
 
 
@@ -923,14 +1040,15 @@ setMethod("get.metadata","scCOTAN",
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' get.rawdata(ERCC.cotan)[1:10,1:10]
+#' get.rawdata(ERCC.cotan)[1:10, 1:10]
 setGeneric("get.rawdata", function(object) standardGeneric("get.rawdata"))
 #' @rdname get.rawdata
-setMethod("get.rawdata","scCOTAN",
-          function(object) {
-              meta <- object@raw
-              return(meta)
-          }
+setMethod(
+  "get.rawdata", "scCOTAN",
+  function(object) {
+    meta <- object@raw
+    return(meta)
+  }
 )
 
 
@@ -945,14 +1063,15 @@ setMethod("get.rawdata","scCOTAN",
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' get.normdata(ERCC.cotan)[1:10,1:10]
+#' get.normdata(ERCC.cotan)[1:10, 1:10]
 setGeneric("get.normdata", function(object) standardGeneric("get.normdata"))
 #' @rdname get.normdata
-setMethod("get.normdata","scCOTAN",
-          function(object) {
-              meta <- object@raw.norm
-              return(meta)
-          }
+setMethod(
+  "get.normdata", "scCOTAN",
+  function(object) {
+    meta <- object@raw.norm
+    return(meta)
+  }
 )
 
 
@@ -970,11 +1089,12 @@ setMethod("get.normdata","scCOTAN",
 #' get.nu(ERCC.cotan)[1:10]
 setGeneric("get.nu", function(object) standardGeneric("get.nu"))
 #' @rdname get.nu
-setMethod("get.nu","scCOTAN",
-          function(object) {
-              meta <- object@nu
-              return(meta)
-          }
+setMethod(
+  "get.nu", "scCOTAN",
+  function(object) {
+    meta <- object@nu
+    return(meta)
+  }
 )
 
 #' get.lambda
@@ -991,11 +1111,12 @@ setMethod("get.nu","scCOTAN",
 #' get.lambda(ERCC.cotan)[1:10]
 setGeneric("get.lambda", function(object) standardGeneric("get.lambda"))
 #' @rdname get.lambda
-setMethod("get.lambda","scCOTAN",
-          function(object) {
-              meta <- object@lambda
-              return(meta)
-          }
+setMethod(
+  "get.lambda", "scCOTAN",
+  function(object) {
+    meta <- object@lambda
+    return(meta)
+  }
 )
 
 
@@ -1014,11 +1135,12 @@ setMethod("get.lambda","scCOTAN",
 #' get.a(ERCC.cotan)[1:10]
 setGeneric("get.a", function(object) standardGeneric("get.a"))
 #' @rdname get.a
-setMethod("get.a","scCOTAN",
-          function(object) {
-              meta <- object@a
-              return(meta)
-          }
+setMethod(
+  "get.a", "scCOTAN",
+  function(object) {
+    meta <- object@a
+    return(meta)
+  }
 )
 
 
@@ -1036,11 +1158,12 @@ setMethod("get.a","scCOTAN",
 #' get.cell.number(ERCC.cotan)
 setGeneric("get.cell.number", function(object) standardGeneric("get.cell.number"))
 #' @rdname get.cell.number
-setMethod("get.cell.number","scCOTAN",
-          function(object) {
-              num <- object@n_cells
-              return(num)
-          }
+setMethod(
+  "get.cell.number", "scCOTAN",
+  function(object) {
+    num <- object@n_cells
+    return(num)
+  }
 )
 
 
@@ -1059,11 +1182,12 @@ setMethod("get.cell.number","scCOTAN",
 #' get.cell.size(ERCC.cotan)[1:10]
 setGeneric("get.cell.size", function(object) standardGeneric("get.cell.size"))
 #' @rdname get.cell.size
-setMethod("get.cell.size","scCOTAN",
-          function(object) {
-              num <- colSums(object@raw)
-              return(num)
-          }
+setMethod(
+  "get.cell.size", "scCOTAN",
+  function(object) {
+    num <- colSums(object@raw)
+    return(num)
+  }
 )
 
 
@@ -1080,17 +1204,18 @@ setMethod("get.cell.size","scCOTAN",
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' genes.to.rem = names(get.genes(ERCC.cotan)[1:10])
-#' cells.to.rem = names(get.cell.size(ERCC.cotan)[1:10])
-#' ERCC.cotan = drop.genes.cells(ERCC.cotan,genes.to.rem,cells.to.rem )
+#' genes.to.rem <- names(get.genes(ERCC.cotan)[1:10])
+#' cells.to.rem <- names(get.cell.size(ERCC.cotan)[1:10])
+#' ERCC.cotan <- drop.genes.cells(ERCC.cotan, genes.to.rem, cells.to.rem)
 setGeneric("drop.genes.cells", function(object, genes = c(), cells = c()) standardGeneric("drop.genes.cells"))
 #' @rdname drop.genes.cells
-setMethod("drop.genes.cells","scCOTAN",
-          function(object, genes, cells) {
-              object@raw <- object@raw[!rownames(object@raw) %in% genes,]
-              object@raw <- object@raw[,!colnames(object@raw) %in% cells]
-              return(object)
-          }
+setMethod(
+  "drop.genes.cells", "scCOTAN",
+  function(object, genes, cells) {
+    object@raw <- object@raw[!rownames(object@raw) %in% genes, ]
+    object@raw <- object@raw[, !colnames(object@raw) %in% cells]
+    return(object)
+  }
 )
 
 #' add.row.to.meta
@@ -1110,10 +1235,10 @@ setMethod("drop.genes.cells","scCOTAN",
 #' get.metadata(ERCC.cotan)
 setGeneric("add.row.to.meta", function(object, text.line) standardGeneric("add.row.to.meta"))
 #' @rdname add.row.to.meta
-setMethod("add.row.to.meta","scCOTAN",
-          function(object, text.line) {
-              object@meta[(nrow(object@meta)+1),seq_len(length(text.line))] <- text.line
-              return(object)
-          }
+setMethod(
+  "add.row.to.meta", "scCOTAN",
+  function(object, text.line) {
+    object@meta[(nrow(object@meta) + 1), seq_len(length(text.line))] <- text.line
+    return(object)
+  }
 )
-

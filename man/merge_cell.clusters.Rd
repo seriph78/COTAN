@@ -36,8 +36,7 @@ merge_cell.clusters(
 
 \item{srat}{the Seurat object for the same data set (the name should be "cond")}
 
-\item{out_dir}{path to the directory in which there is the Seurat object and 
-where the output will be stored}
+\item{out_dir}{path to a directory for output path to the directory in which there is the Seurat object}
 
 \item{GEO}{GEO or other data set code}
 

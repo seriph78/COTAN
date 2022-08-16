@@ -20,5 +20,5 @@ This function extract the raw count table.
 }
 \examples{
 data("ERCC.cotan")
-get.rawdata(ERCC.cotan)[1:10,1:10]
+get.rawdata(ERCC.cotan)[1:10, 1:10]
 }

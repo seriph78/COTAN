@@ -30,14 +30,18 @@ This is the function that create the heatmap of one or more COTAN object.
 \examples{
 data("ERCC.cotan")
 data_dir <- tempdir()
-saveRDS(ERCC.cotan, file = file.path(data_dir,"ERCC.cotan.RDS"))
+saveRDS(ERCC.cotan, file = file.path(data_dir, "ERCC.cotan.RDS"))
 # some genes
-primary.markers <- c("ERCC-00154","ERCC-00156","ERCC-00164")
-#a example of named list of different gene set
-gene.sets.list <- list("primary.markers"=primary.markers,
-                   "2.R" = c("ERCC-00170","ERCC-00158"),
-                   "3.S"=c("ERCC-00160","ERCC-00162"))
-plot_heatmap(p_v = 0.05, df_genes =gene.sets.list ,
-sets =c(2,3) ,conditions =c("ERCC") ,dir = paste0(data_dir,"/"))
+primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
+# a example of named list of different gene set
+gene.sets.list <- list(
+  "primary.markers" = primary.markers,
+  "2.R" = c("ERCC-00170", "ERCC-00158"),
+  "3.S" = c("ERCC-00160", "ERCC-00162")
+)
+plot_heatmap(
+  p_v = 0.05, df_genes = gene.sets.list,
+  sets = c(2, 3), conditions = c("ERCC"), dir = paste0(data_dir, "/")
+)
 
 }

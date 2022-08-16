@@ -22,11 +22,13 @@
 #' @examples
 #'
 #' data("raw.dataset")
-#' obj <- automatic.COTAN.object.creation(df= raw.dataset,
-#' out_dir =  tempdir(),
-#' GEO = "test_GEO",
-#' sc.method = "test_method",
-#' cond = "test")
+#' obj <- automatic.COTAN.object.creation(
+#'   df = raw.dataset,
+#'   out_dir = tempdir(),
+#'   GEO = "test_GEO",
+#'   sc.method = "test_method",
+#'   cond = "test"
+#' )
 #'
 setGeneric("automatic.COTAN.object.creation", function(df, out_dir,save.obj="NO", GEO, sc.method,
                                                        cond, 
@@ -172,4 +174,5 @@ setMethod("automatic.COTAN.object.creation","data.frame",
               return(obj)
 
           }
+
 )

@@ -49,13 +49,17 @@ Primary markers will be plotted as groups of rows. Markers list will be plotted 
 \examples{
 data("ERCC.cotan")
 data_dir <- tempdir()
-saveRDS(ERCC.cotan, file = file.path(data_dir,"ERCC.cotan.RDS"))
+saveRDS(ERCC.cotan, file = file.path(data_dir, "ERCC.cotan.RDS"))
 # some genes
-primary.markers <- c("ERCC-00154","ERCC-00156","ERCC-00164")
-#a example of named list of different gene set
-gene.sets.list <- list("primary.markers"=primary.markers,
-                   "2.R" = c("ERCC-00170","ERCC-00158"),
-                   "3.S"=c("ERCC-00160","ERCC-00162"))
-plot_general.heatmap(prim.markers = primary.markers, p_value = 0.05, markers.list =gene.sets.list ,
-condition ="ERCC" ,dir = paste0(data_dir,"/"))
+primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
+# a example of named list of different gene set
+gene.sets.list <- list(
+  "primary.markers" = primary.markers,
+  "2.R" = c("ERCC-00170", "ERCC-00158"),
+  "3.S" = c("ERCC-00160", "ERCC-00162")
+)
+plot_general.heatmap(
+  prim.markers = primary.markers, p_value = 0.05, markers.list = gene.sets.list,
+  condition = "ERCC", dir = paste0(data_dir, "/")
+)
 }

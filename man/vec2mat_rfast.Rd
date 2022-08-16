@@ -21,8 +21,8 @@ a dataframe
 vec2mat_rfast
 }
 \examples{
-v <- list("genes" = paste0("gene.",c(1:10)),"values"=c(1:55))
-genes <- c("gene.3","gene.4","gene.7")
-df <- vec2mat_rfast(v,genes)
+v <- list("genes" = paste0("gene.", c(1:10)), "values" = c(1:55))
+genes <- c("gene.3", "gene.4", "gene.7")
+df <- vec2mat_rfast(v, genes)
 df2 <- vec2mat_rfast(v)
 }
