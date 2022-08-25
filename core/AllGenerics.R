@@ -1,4 +1,9 @@
 setGeneric(
+  "coex",
+  function(objCOTAN) standardGeneric("coex")
+)
+
+setGeneric(
   "estimateDispertionBisection",
   function(objCOTAN, cores = 1, step = 200) 
     standardGeneric("estimateDispertionBisection")
@@ -10,8 +15,8 @@ setGeneric(
 )
 
 setGeneric(
-  "houseKeepingGenes",
-  function(objCOTAN) standardGeneric("houseKeepingGenes")
+  "housekeepingGenes",
+  function(objCOTAN) standardGeneric("housekeepingGenes")
 )
 
 setGeneric(
@@ -34,8 +39,7 @@ setGeneric(
   function(objCOTAN) standardGeneric("estimateMu")
 )
 
-
-## get and set
+#-------------------------------------- get and set
 setGeneric(
   "getLambda",
   function(objCOTAN) standardGeneric("getLambda")
@@ -46,15 +50,13 @@ setGeneric(
   function(objCOTAN) standardGeneric("getNu")
 )
 
-# private
+#-------------------------------------- private
 setGeneric(
-  "dispertionBisection",
-  function(genes, zeroOneMatrix, muEstimator, threshold = 0.001) 
-    standardGeneric("dispertionBisection")
+  "expectedContingencyTables",
+  function(objCOTAN) standardGeneric("expectedContingencyTables")
 )
 
 setGeneric(
-  "diffZeros",
-  function(disp, sumZeros, muEstimatorCell) 
-    standardGeneric("diffZeros")
+  "observedContingencyYY", 
+  function(objCOTAN) standardGeneric("observedContingencyYY")
 )

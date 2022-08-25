@@ -20,8 +20,8 @@ setMethod(
 
     # house keeping genes
     # this genes are removed from zeroOneMatrix and muEstimator
-    if (is_empty(objCOTAN@hKGenes)) {
-      objCOTAN <- houseKeepingGenes(objCOTAN)
+    if (is_empty(objCOTAN@hkGenes)) {
+      objCOTAN <- housekeepingGenes(objCOTAN)
     }
 
     # taken the information if the values are greater than 0 or not
@@ -29,11 +29,11 @@ setMethod(
     zeroOneMatrix[zeroOneMatrix > 0] <- 1
     zeroOneMatrix[zeroOneMatrix <= 0] <- 0
     zeroOneMatrix <-
-      zeroOneMatrix[!rownames(zeroOneMatrix) %in% objCOTAN@hKGenes, ]
+      zeroOneMatrix[!rownames(zeroOneMatrix) %in% objCOTAN@hkGenes, ]
 
     # estimator of mu
     muEstimator <- estimateMu(objCOTAN)
-    muEstimator <- muEstimator[!rownames(muEstimator) %in% objCOTAN@hKGenes, ]
+    muEstimator <- muEstimator[!rownames(muEstimator) %in% objCOTAN@hkGenes, ]
     muEstimator <- as.matrix(muEstimator)
 
     # tot accumulates the results calculated in parallel
@@ -73,7 +73,7 @@ setMethod(
       tot2 <- rbind(tot2, tot[[j]])
     }
     
-    objCOTAN@dispertion <- tot2$a
+    objCOTAN@dispertion <- tot2$dispertion
     names(objCOTAN@dispertion) <- rownames(tot2)
     
     return(objCOTAN)
