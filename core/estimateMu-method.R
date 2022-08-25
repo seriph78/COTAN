@@ -1,4 +1,5 @@
 # estimate vector mu
+#' @export
 setMethod(
   "estimateMu",
   "COTAN",

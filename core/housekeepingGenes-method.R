@@ -1,8 +1,8 @@
-# determines the houseKeepingGenes vector of a COTAN object
+# determines the housekeepingGenes vector of a COTAN object
 #' @export
 
 setMethod(
-  "houseKeepingGenes",
+  "housekeepingGenes",
   "COTAN",
   function(objCOTAN) {
     cells <- as.matrix(objCOTAN@raw)
@@ -12,7 +12,7 @@ setMethod(
     cells[cells <= 0] <- 0
 
     # name of the genes with positive UMI count in every single cell
-    objCOTAN@hKGenes <- names(which(rowSums(cells) == length(colnames(cells))))
+    objCOTAN@hkGenes <- names(which(rowSums(cells) == length(colnames(cells))))
     
     return(objCOTAN)
   }
