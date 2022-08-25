@@ -1,6 +1,6 @@
 #' extract.coex
 #'
-#' This function extract a complete or a prtial coex matrix from the COTAN object.
+#' This function extract a complete or a partial coex matrix from the COTAN object.
 #'
 #' @param object A COTAN object
 #' @param genes A vector of gene names. These will be on the columns of the final data frame. By defaults the function will use all genes.
