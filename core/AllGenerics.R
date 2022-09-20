@@ -1,12 +1,17 @@
 setGeneric(
+  "estimateNuBisection",
+  function(objCOTAN, threshold = 0.001) standardGeneric("estimateNuBisection")
+)
+
+setGeneric(
   "coex",
   function(objCOTAN) standardGeneric("coex")
 )
 
 setGeneric(
-  "estimateDispertionBisection",
+  "estimateDispersionBisection",
   function(objCOTAN, cores = 1, step = 200) 
-    standardGeneric("estimateDispertionBisection")
+    standardGeneric("estimateDispersionBisection")
 )
 
 setGeneric(
@@ -58,5 +63,5 @@ setGeneric(
 
 setGeneric(
   "observedContingencyYY", 
-  function(objCOTAN) standardGeneric("observedContingencyYY")
+  function(objCOTAN, cells = FALSE) standardGeneric("observedContingencyYY")
 )
