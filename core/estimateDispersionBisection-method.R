@@ -1,15 +1,15 @@
-#' estimateDispertionBisection
+#' estimatedispersionBisection
 #'
-#' estimates by bisection the 'dispertion' field of a COTAN object
+#' estimates by bisection the 'dispersion' field of a COTAN object
 #' @param objCOTAN a COTAN object
 #' @param cores number of cores to use. Default is 1
 #' @param step number of genes taken into account at each application. 
 #' Default is 200
-#' of 'dispertionBisection' for parallel computing
+#' of 'dispersionBisection' for parallel computing
 #' @return A COTAN object
 #' @export
 setMethod(
-  "estimateDispertionBisection",
+  "estimateDispersionBisection",
   "COTAN",
   function(objCOTAN, cores, step) {
     if (Sys.info()["sysname"] == "Windows") {
@@ -48,7 +48,7 @@ setMethod(
         # parallel computing
         toAppend <- parallel::mclapply(
           rownames(muEstimator)[i:(i + step)], # vector
-          dispertionBisection, # function
+          dispersionBisection, # function
           zeroOneMatrix = zeroOneMatrix, # parameter
           muEstimator = muEstimator, # parameter
           mc.cores = cores # cores
@@ -57,7 +57,7 @@ setMethod(
         # last block
         toAppend <- parallel::mclapply(
           rownames(muEstimator)[i:limit], # vector
-          dispertionBisection, # function
+          dispersionBisection, # function
           zeroOneMatrix = zeroOneMatrix, # parameter
           muEstimator = muEstimator, # parameter
           mc.cores = cores # cores
@@ -73,8 +73,8 @@ setMethod(
       tot2 <- rbind(tot2, tot[[j]])
     }
     
-    objCOTAN@dispertion <- tot2$dispertion
-    names(objCOTAN@dispertion) <- rownames(tot2)
+    objCOTAN@dispersion <- tot2$dispersion
+    names(objCOTAN@dispersion) <- rownames(tot2)
     
     return(objCOTAN)
   }

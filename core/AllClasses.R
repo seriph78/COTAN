@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #' Definition of COTAN class
 #' @slot raw raw UMI count matrix 𝑛×𝑚 (gene number × cell number)
 #' @slot rawNorm raw UMI count matrix divided by UDE, 𝑛×𝑚
@@ -14,18 +13,20 @@
 #' @slot metaCells data.frame
 #' @slot clustersCoex coex
 setClass("COTAN",
-  slots = c(
-    raw        = "dgCMatrix",
-    rawNorm    = "dgCMatrix",
-    coex       = "ANY",
-    nu         = "vector",
-    lambda     = "vector",
-    dispertion = "vector",
-    hkGenes    = "vector",
-    nCells     = "numeric",
-    metaDataset  = "data.frame",
-    metaCells    = "data.frame",
-    clustersCoex = "list"  )
+         slots = c(
+           raw          = "dgCMatrix",
+           rawNorm      = "dgCMatrix",
+           coex         = "ANY",
+           cellsCoex    = "ANY",
+           nu           = "vector",
+           lambda       = "vector",
+           dispersion   = "vector",
+           hkGenes      = "vector",
+           nCells       = "numeric",
+           metaDataset  = "data.frame",
+           metaCells    = "data.frame",
+           clustersCoex = "list"
+         )
 )
 
 # constructor of the COTAN CLASS
