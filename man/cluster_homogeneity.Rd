@@ -2,12 +2,12 @@
 % Please edit documentation in R/cluster_homogeneity.R
 \name{cluster_homogeneity}
 \alias{cluster_homogeneity}
-\alias{cluster_homogeneity,Seurat-method}
+\alias{cluster_homogeneity,scCOTAN-method}
 \title{cluster_homogeneity}
 \usage{
 cluster_homogeneity(data.seurat, data.raw, out_dir, cond, cores = 1)
 
-\S4method{cluster_homogeneity}{Seurat}(data.seurat, data.raw, out_dir, cond, cores = 1)
+\S4method{cluster_homogeneity}{scCOTAN}(data.seurat, data.raw, out_dir, cond, cores = 1)
 }
 \arguments{
 \item{data.seurat}{a Seurat object with clusters already estimated}

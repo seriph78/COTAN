@@ -19,7 +19,7 @@
 #' @examples
 setGeneric("cluster_homogeneity", function(data.seurat,data.raw,out_dir, cond, cores=1) standardGeneric("cluster_homogeneity"))
 #' @rdname cluster_homogeneity
-setMethod("cluster_homogeneity","Seurat",
+setMethod("cluster_homogeneity","scCOTAN",
           function(data.seurat,data.raw,out_dir, cond, cores){
             
             options(ggrepel.max.overlaps = Inf)
