@@ -6,21 +6,23 @@
 setMethod(
   "coex",
   "COTAN",
-  function(objCOTAN) {
+  function(objCOTAN, cells) {
     objCOTAN <- nCells(objCOTAN)
     
-    observedYY <- observedContingencyYY(objCOTAN)
+    observedYY <- observedContingencyYY(objCOTAN, cells)
 
-    # remove the genes in housekeepingGenes
-    observedYY <- observedYY[
-      !rownames(observedYY) %in% objCOTAN@hkGenes,
-      !colnames(observedYY) %in% objCOTAN@hkGenes
-    ]
-
+    if(!cells){
+      # remove the genes in housekeepingGenes
+      observedYY <- observedYY[
+        !rownames(observedYY) %in% objCOTAN@hkGenes,
+        !colnames(observedYY) %in% objCOTAN@hkGenes
+      ]
+    }
+    
     observedYY <- mat2vec_rfast(as.matrix(observedYY))
 
     # four estimators: expectedYY, expectedYN, expectedNY, expectedNN
-    expectedTable <- expectedContingencyTables(objCOTAN)
+    expectedTable <- expectedContingencyTables(objCOTAN, cells)
 
     expectedYY <- mat2vec_rfast(expectedTable$expectedYY)
     expectedYY$values[expectedYY$values < 1] <- 1
@@ -45,7 +47,12 @@ setMethod(
     coex <- (observedYY$values -
       mat2vec_rfast(as.matrix(expectedTable$expectedYY))$values)
     coex <- coex * sqrt(sumForDiv)
-    coex <- coex / sqrt(objCOTAN@nCells)
+    
+    if (cells){
+      coex <- coex / sqrt(nrow(objCOTAN@raw)) # divided by radq(n)
+    } else {
+      coex <- coex / sqrt(objCOTAN@nCells) # divided by radq(m)
+    }
     
     coex <- list("genes" = observedYY$genes, "values" = coex)
     objCOTAN@coex <- coex

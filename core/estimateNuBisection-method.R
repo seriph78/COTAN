@@ -32,6 +32,11 @@ setMethod(
 
       leftNu <- objCOTAN@nu[i]
       leftDiffZero <- numZeroEst - numZeroObs
+      
+      # if nu[i] produces a difference of zeros equals to 0, skip
+      if (abs(leftDiffZero) < threshold) {
+        next
+      }
 
       rightNu <- leftNu
       rightDiffZero <- leftDiffZero

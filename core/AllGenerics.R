@@ -5,7 +5,7 @@ setGeneric(
 
 setGeneric(
   "coex",
-  function(objCOTAN) standardGeneric("coex")
+  function(objCOTAN, cells = FALSE) standardGeneric("coex")
 )
 
 setGeneric(
@@ -58,7 +58,7 @@ setGeneric(
 #-------------------------------------- private
 setGeneric(
   "expectedContingencyTables",
-  function(objCOTAN) standardGeneric("expectedContingencyTables")
+  function(objCOTAN, cells = FALSE) standardGeneric("expectedContingencyTables")
 )
 
 setGeneric(
