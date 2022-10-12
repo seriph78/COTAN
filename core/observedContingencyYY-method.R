@@ -1,4 +1,7 @@
 #' calculate observed yes/yes field of contingency table
+#' @param objCOTAN A COTAN object
+#' @param cells Boolean, if true, the function works for the cells, 
+#' otherwise for the genes 
 setMethod(
   "observedContingencyYY", 
   "COTAN",

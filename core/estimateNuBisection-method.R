@@ -1,3 +1,8 @@
+#' estimates by bisection the 'nu' field of a COTAN object
+#' @param objCOTAN a COTAN object
+#' @param threshold real value close to zero 
+#' @return A COTAN object
+#' @export
 setMethod(
   "estimateNuBisection",
   "COTAN",
@@ -21,9 +26,8 @@ setMethod(
     # vector of zeros
     diffZero <- numeric(objCOTAN@nCells)
 
-    # looking for the positive and negative value for bisection for each nu
-    # element
     for (i in seq(1, objCOTAN@nCells)) {
+      # estimation
       numZeroEst <- sum(funProbZero(
         objCOTAN@dispersion,
         objCOTAN@nu[i] * objCOTAN@lambda
@@ -31,19 +35,25 @@ setMethod(
       numZeroObs <- sum(zeroOne[, i] == 0)
 
       leftNu <- objCOTAN@nu[i]
+      
+      #difference of zeros
       leftDiffZero <- numZeroEst - numZeroObs
       
       # if nu[i] produces a difference of zeros equals to 0, skip
       if (abs(leftDiffZero) < threshold) {
         next
       }
-
+      
+      # Two values of nu are required to perform bisection, one that generates a 
+      # positive value and the other positive in the difference of zeros
       rightNu <- leftNu
       rightDiffZero <- leftDiffZero
 
       if (numZeroEst - numZeroObs < 0) {
         # we move the two values until leftNu produces a positive leftDiffZero
-        leftNu <- leftNu / 2
+        leftNu <- leftNu / 2 # move leftNu
+        
+        # estimation
         leftDiffZero <- sum(funProbZero(
           objCOTAN@dispersion,
           leftNu * objCOTAN@lambda
@@ -53,10 +63,12 @@ setMethod(
         while (leftDiffZero < 0) {
           # leftNu still produces a negative difference in the number of zeros,
           # but it is more accurate than rightNu
-          rightNu <- leftNu
+          rightNu <- leftNu # move rightNu
           rightDiffZero <- leftDiffZero
 
-          leftNu <- leftNu / 2
+          leftNu <- leftNu / 2 # move leftNu
+          
+          # estimation
           leftDiffZero <- sum(funProbZero(
             objCOTAN@dispersion,
             leftNu * objCOTAN@lambda
@@ -67,7 +79,9 @@ setMethod(
         # we move the two values until rightNu produces a positive rightDiffZero
         leftDiffZero <- numZeroEst - numZeroObs
 
-        rightNu <- rightNu * 2
+        rightNu <- rightNu * 2 # move rightNu
+        
+        # estimation 
         rightDiffZero <- sum(funProbZero(
           objCOTAN@dispersion,
           rightNu * objCOTAN@lambda
@@ -77,10 +91,12 @@ setMethod(
         while (rightDiffZero > 0) {
           # rightNU still produces a positive difference in the number of zeros,
           # but it is more accurate than leftNu
-          leftNu <- rightNu
+          leftNu <- rightNu # move leftNu
           leftDiffZero <- rightDiffZero
 
-          rightNu <- rightNu * 2
+          rightNu <- rightNu * 2 # move rigthNu
+          
+          # estimation
           rightDiffZero <- sum(funProbZero(
             objCOTAN@dispersion,
             rightNu * objCOTAN@lambda
@@ -89,8 +105,10 @@ setMethod(
         }
       }
 
-      # bisection
+      # bisection starts here
       middleNu <- (leftNu + rightNu) / 2
+      
+      # estimation
       middleDiffZero <- sum(funProbZero(
         objCOTAN@dispersion,
         middleNu * objCOTAN@lambda
@@ -107,6 +125,8 @@ setMethod(
         }
 
         middleNu <- (leftNu + rightNu) / 2
+        
+        # estimation
         middleDiffZero <- sum(funProbZero(
           objCOTAN@dispersion,
           middleNu * objCOTAN@lambda

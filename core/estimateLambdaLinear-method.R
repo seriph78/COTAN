@@ -1,4 +1,5 @@
 # linear estimator of lambda
+#' @param objCOTAN a COTAN object
 #' @export
 setMethod(
   "estimateLambdaLinear",

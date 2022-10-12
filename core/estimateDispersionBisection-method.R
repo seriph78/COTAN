@@ -1,5 +1,3 @@
-#' estimatedispersionBisection
-#'
 #' estimates by bisection the 'dispersion' field of a COTAN object
 #' @param objCOTAN a COTAN object
 #' @param cores number of cores to use. Default is 1
