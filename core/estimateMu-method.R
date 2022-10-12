@@ -1,4 +1,5 @@
 # estimate vector mu
+#' @param objCOTAN a COTAN object
 #' @export
 setMethod(
   "estimateMu",

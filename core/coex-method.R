@@ -1,5 +1,7 @@
 #' This function estimates and stores the coex matrix in the coex field.
-#' @param object A COTAN object
+#' @param objCOTAN A COTAN object
+#' @param cells Boolean, if true, the function works for the cells, 
+#' otherwise for the genes 
 #'
 #' @return It returns a COTAN object
 #' @export
@@ -8,7 +10,9 @@ setMethod(
   "COTAN",
   function(objCOTAN, cells) {
     objCOTAN <- nCells(objCOTAN)
+    objCOTAN <- housekeepingGenes(objCOTAN)
     
+    # observed yes/yes contingency table
     observedYY <- observedContingencyYY(objCOTAN, cells)
 
     if(!cells){
