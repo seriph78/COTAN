@@ -1,0 +1,76 @@
+The purpose of this tutorial is to demonstrate the use 
+of the COTAN framework refactor
+
+In this example a dataset was used for which the clusters with which to group 
+the cells were already known
+```{r}
+yoc <- readRDS('/home/putty05/data/youngOld.RDS')
+```
+
+import all source files from /core, a temporarily separate directory 
+from the rest of the code
+```{r}
+options(warn=-1)
+setwd("/home/putty05/COTAN/core/")
+options(warn=0)
+
+# list of all source files
+sourceFiles <- list.files(path = ".", pattern = "*.R", all.files = TRUE)
+
+# invisible() suppress the output of sapply
+invisible(sapply(sourceFiles, source)) 
+```
+
+creation of the COTAN object and initialization of the initial parameters
+```{r}
+objCOTAN <- COTAN(raw=yoc@raw)
+objCOTAN <- nCells(objCOTAN)
+objCOTAN <- housekeepingGenes(objCOTAN)
+
+objCOTAN@raw <- objCOTAN@raw[!rownames(objCOTAN@raw) %in% objCOTAN@hkGenes, ]
+
+objCOTAN <- estimateLambdaLinear(objCOTAN)
+objCOTAN <- estimateNuLinear(objCOTAN) 
+muEst <- estimateMu(objCOTAN)
+objCOTAN <- rawNorm(objCOTAN)
+```
+
+[PART A] Estimation by bisection of the 'dispersion' parameter
+```{r}
+startTime <- Sys.time()
+
+objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 8)
+
+endTime <- Sys.time()
+print(endTime - startTime)
+```
+
+[PART B]Estimation by bisection of the 'nu' parameter
+```{r}
+startTime <- Sys.time()
+
+objCOTAN <- estimateNuBisection(objCOTAN)
+
+endTime <- Sys.time()
+print(endTime - startTime)
+```
+To converge, the 'dispersion' nu 'parameters must be estimated by bisection 
+twice: execute [PART A] and PART[B] twice
+
+obtain the coex matrix for the cells
+```{r}
+startTime <- Sys.time()
+
+objCOTAN <- coex(objCOTAN, cells = TRUE) # coex for cells
+
+endTime <- Sys.time()
+print(endTime - startTime)
+```
+
+Coex heatmap for clustered cells
+
+```{r}
+# names(yoc@clusters) contains the cell names
+plotCellsHeatmap(objCOTAN, clusters = yoc@clusters)
+```
+
