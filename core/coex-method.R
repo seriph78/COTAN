@@ -1,4 +1,6 @@
-#' This function estimates and stores the coex matrix in the coex field.
+#' This function estimates and stores the coex matrix in the coex field if the 
+#' parameter 'cells' is FALSE, otherwise it estimates and stores the cellsCoex 
+#' matrix in the cellsCoex field
 #' @param objCOTAN A COTAN object
 #' @param cells Boolean, if true, the function works for the cells, 
 #' otherwise for the genes 
@@ -59,7 +61,13 @@ setMethod(
     }
     
     coex <- list("genes" = observedYY$genes, "values" = coex)
-    objCOTAN@coex <- coex
+    
+    if(cells){
+      objCOTAN@cellsCoex <- coex
+    }else{
+      objCOTAN@coex <- coex
+    }
+      
     return(objCOTAN)
   }
 )

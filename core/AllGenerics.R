@@ -1,4 +1,9 @@
 setGeneric(
+  "plotCellsHeatmap",
+  function(objCOTAN, cellsName, clusters) standardGeneric("plotCellsHeatmap")
+)
+
+setGeneric(
   "estimateNuBisection",
   function(objCOTAN, threshold = 0.001) standardGeneric("estimateNuBisection")
 )
