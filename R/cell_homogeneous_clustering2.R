@@ -8,8 +8,6 @@
 #' @param in_dir directory in which there is the Seurat object
 #' @param cores number of cores (NB for windows system no more that 1 can be used)
 #' @param dataset_name Seurat object file name
-#' @param dataset_type Type of data set in input: "Seurat" if it is a Seurat data set saved as RDS,"COTAN" 
-#' if it is a COTAN object, "DF"if it is a data frame saved as csv. 
 #' @param GEO GEO or other dataset official code
 #' @param sc.method single cell method used fot the experiment 
 #' @import Seurat
@@ -17,12 +15,12 @@
 #' @export 
 #'
 #' @examples
-setGeneric("cell_homogeneous_clustering", function(cond,out_dir,in_dir,cores=1, dataset_name,dataset_type,
+setGeneric("cell_homogeneous_clustering", function(cond,out_dir,in_dir,cores=1, dataset_name,
                                                    GEO, sc.method )
   standardGeneric("cell_homogeneous_clustering"))
 #' @rdname cell_homogeneous_clustering
-setMethod("cell_homogeneous_clustering","scCOTAN",
- function(cond,out_dir,in_dir,cores, dataset_name,dataset_type){
+setMethod("cell_homogeneous_clustering","character",
+ function(cond,out_dir,in_dir,cores, dataset_name){
   
   out_dir_root <- paste0(out_dir,"/",cond,"/")
   if(!file.exists(out_dir_root)){
