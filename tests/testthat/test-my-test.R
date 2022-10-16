@@ -40,8 +40,6 @@ test_that("2.cleaning", {
 
 test_that("mat_division", {
     utils::data("raw.dataset", package = "COTAN")
-    #print(raw.dataset[1:5,1:5])
-    #raw = readRDS(file.path(getwd(),"raw.RDS"))
     nu = readRDS(file.path(getwd(),"nu.RDS"))
     raw.norm = readRDS(file.path(getwd(),"raw.norm.RDS"))
 
@@ -86,32 +84,30 @@ test_that("4.cotan_coex_test", {
     expect_true(error < 10^(-3))
 })
 
-test_that("python_PCA_test", {
-    #raw = readRDS(file.path(getwd(),"raw.RDS"))
+test_that("PCA_test", {
+    
     utils::data("raw.dataset", package = "COTAN")
-    #file.py <- system.file("inst","python", "python_PCA.py", package="COTAN")
-
-    proc <- basiliskStart(my_env_cotan)
-    on.exit(basiliskStop(proc))
-
-file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = TRUE)
-
-    pca.raw <- basiliskRun(proc, function(arg1) {
-        reticulate::source_python(file.py)
-        output <- python_PCA(arg1)
-
-        # The return value MUST be a pure R object, i.e., no reticulate
-        # Python objects, no pointers to shared memory.
-        output
-    }, arg1=raw.dataset)
-
-    rownames(pca.raw)=rownames(raw.dataset)
-    colnames(pca.raw)=paste0("PC_", c(1:10))
-    pca.raw =as.data.frame(round(pca.raw, digits = 14))
-    pca.tb = readRDS(file.path(getwd(),"pca.mat.RDS"))
-
-    expect_equal( pca.raw$PC_1, pca.tb$PC_1)
-    expect_equal( pca.raw$PC_2, pca.tb$PC_2)
+    pca <- irlba::prcomp_irlba(raw.dataset, n=5)
+  
+    pca.raw <- pca$x
+    rm(pca) 
+  
+    rownames(pca.raw) <- rownames(raw.dataset)
+    colnames(pca.raw) <- paste0("PC_", c(1:5))
+    pca.tb = readRDS(file.path(getwd(),"pca.tb.RDS"))
+    
+    correlation1.value <- cor(pca.raw[,1], pca.tb[,1])
+    correlation2.value <- cor(pca.raw[,2], pca.tb[,2])
+    pca.tb[,1] <- correlation1.value*pca.tb[,1]
+    pca.tb[,2] <- correlation2.value*pca.tb[,2]
+    x1 <- pca.raw[rownames(pca.tb),1] - pca.tb[,1]
+    x2 <- pca.raw[rownames(pca.tb),2] - pca.tb[,2]
+    
+    dist1 <- sqrt(sum(x1^2))
+    dist2 <- sqrt(sum(x2^2))
+    
+    expect_true(dist1 < 10^(-4))
+    expect_true(dist2 < 10^(-4))
 
 })
 
