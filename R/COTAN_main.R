@@ -152,20 +152,22 @@ setMethod("clean","scCOTAN",
 
                 dist_cells  <- list1$dist_cells
                 pca_cells  <-  list1$pca_cells
-                t_to_clust  <-  as.matrix(list1$t_to_clust)
                 mu_estimator  <-  list1$mu_estimator
                 object  <-  list1$object
                 to_clust <-  list1$to_clust
 
 
-                raw_norm <- t(t(as.matrix(object@raw)) *
+                raw_norm <- Matrix::t(Matrix::t(object@raw) *
                                   (1/(as.vector(object@nu))))
-                raw_norm <- as(as.matrix(raw_norm), "sparseMatrix")
-
                 object@raw.norm <- raw_norm
+                rm(raw_norm)
+                gc()
+                
+                print("starting hclust")
 
                 hc_cells <- hclust(dist_cells, method = "complete")
-
+                gc()
+                
                 groups <- cutree(hc_cells, k=2)
 
                 if(length(groups[groups == 1]) < length(groups[groups == 2])  ){
@@ -184,12 +186,20 @@ setMethod("clean","scCOTAN",
                   cl2  <-  names(which(cutree(hc_cells, k = 2) == 1))
                   cl1  <-  names(which(cutree(hc_cells, k = 2) == 2))
                 }
+                
+                t_to_clust <- Matrix::t(to_clust)
+                t_to_clust <- round(t_to_clust,digits = 4)
+                t_to_clust <- as.data.frame(as.matrix(t_to_clust))
 
-
-                t_to_clust <- cbind(as.data.frame(t_to_clust),groups)
-
+                if (identical(rownames(t_to_clust),names(groups))) {
+                  t_to_clust <- cbind(t_to_clust,groups)
+                  
+                }else{
+                  stop("Error in the cell names")
+                }
+                
               # ---- next: to check which genes are specific for the B group of cells
-                to_clust <- as.matrix(to_clust)
+                to_clust <- as.matrix(round(to_clust,digits = 4))
                 B <- as.data.frame(to_clust[,colnames(to_clust) %in% cl2])
                 colnames(B)<-cl2
                 B <- rownames_to_column(B)
@@ -200,7 +210,7 @@ setMethod("clean","scCOTAN",
                   B <- B[order(B[,2],decreasing = TRUE), ]
                 }
 
-                print(utils::head(B, 15))
+                #print(utils::head(B, 15))
 
                 C <-  arrange(B,rowMeans(B[2:length(colnames(B))]))
                 rownames(C) <-  C$rowname

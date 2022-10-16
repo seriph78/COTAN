@@ -24,7 +24,7 @@ BugReports: https://github.com/seriph78/COTAN/issues
 Depends: R (>= 4.1)
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0
 Imports:
     dplyr,
     methods,
@@ -36,8 +36,7 @@ Imports:
     parallel,
     tibble,
     tidyr,
-    basilisk,
-    reticulate,
+    irlba,
     ComplexHeatmap,
     circlize,
     grid,
@@ -62,8 +61,6 @@ Suggests:
     BiocStyle,
     cowplot
 Config/testthat/edition: 3
-SystemRequirements: 
-    python
 Language: en-US
 biocViews: 
     SystemsBiology, 
