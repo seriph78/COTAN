@@ -82,6 +82,34 @@ test_that("4.cotan_coex_test", {
     #expect_true(error < 10^(-3))
 })
 
+test_that("PCA_test", {
+  
+  utils::data("raw.dataset", package = "COTAN")
+  pca <- irlba::prcomp_irlba(raw.dataset, n=5)
+  
+  pca.raw <- pca$x
+  rm(pca) 
+  
+  rownames(pca.raw) <- rownames(raw.dataset)
+  colnames(pca.raw) <- paste0("PC_", c(1:5))
+  pca.tb = readRDS(file.path(getwd(),"pca.tb.RDS"))
+  
+  correlation1.value <- cor(pca.raw[,1], pca.tb[,1])
+  correlation2.value <- cor(pca.raw[,2], pca.tb[,2])
+  pca.tb[,1] <- correlation1.value*pca.tb[,1]
+  pca.tb[,2] <- correlation2.value*pca.tb[,2]
+  x1 <- pca.raw[rownames(pca.tb),1] - pca.tb[,1]
+  x2 <- pca.raw[rownames(pca.tb),2] - pca.tb[,2]
+  
+  dist1 <- sqrt(sum(x1^2))
+  dist2 <- sqrt(sum(x2^2))
+  
+  expect_true(dist1 < 10^(-4))
+  expect_true(dist2 < 10^(-4))
+  
+})
+
+
 
 test_that("5.get_pval_test", {
     object <- readRDS(file.path(tm,"temp.RDS"))

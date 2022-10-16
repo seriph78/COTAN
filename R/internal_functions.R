@@ -118,11 +118,9 @@ setMethod("spMat","matrix",
 #' @param object COTAN object
 #' @return a list of object (dist_cells, to_clust, pca_cells,
 #' t_to_clust, mu_estimator, object)
-#' @import
-#' basilisk
-#' reticulate
 #'
 #' @importFrom Matrix rowMeans
+#' @importFrom irlba prcomp_irlba
 #' @importFrom Matrix colMeans
 #' @importFrom Matrix mean
 #' @importFrom Matrix t
@@ -132,10 +130,7 @@ setGeneric("fun_linear", function(object) standardGeneric("fun_linear"))
 setMethod("fun_linear","scCOTAN",
 
           function(object) {
-              python_PCA <- NULL
-
-              file.py <- system.file("python/python_PCA.py", package="COTAN",mustWork = TRUE)
-
+              
               print("Start estimation mu with linear method")
               print(dim(object@raw))
               genes_means <- Matrix::rowMeans(object@raw, dims = 1, na.rm = TRUE)
@@ -159,42 +154,32 @@ setMethod("fun_linear","scCOTAN",
               # To insert an explorative analysis and check for strage cells (as blood)
               #and cells with a too low efficiency (nu est)
 
-              #to_clust <- t(t(as.matrix(object@raw)) * (1/as.vector(object@nu)))
-              ########
-              #Togliere as.matrix e testare!
+
               to_clust <- Matrix::t(Matrix::t(object@raw) * (1/as.vector(object@nu)))
               
-              t_to_clust <- Matrix::t(to_clust)
-              #to import using Basilisk
-              proc <- basiliskStart(my_env_cotan)
-              on.exit(basiliskStop(proc))
-              ########
-              #Togliere as.matrix e testare!
-              t_to_clust <- as.matrix(t_to_clust)
+              print("Start PCA")
 
-              pca_cells <- basiliskRun(proc, function(arg1) {
 
-                  reticulate::source_python(file.py)
-                  output <- python_PCA(arg1)
-
-                  # The return value MUST be a pure R object, i.e., no reticulate
-                  # Python objects, no pointers to shared memory.
-                  output
-              }, arg1=t_to_clust)
+              p1 <- irlba::prcomp_irlba(Matrix::t(to_clust), n=5)
+              
+              pca_cells <- p1$x
+              rm(p1) 
               gc()
 
-             rownames(pca_cells) <- rownames(t_to_clust)
+             rownames(pca_cells) <- colnames(to_clust)
 
               ppp <- pca_cells
               ppp <- scale(ppp)
               dist_cells <- stats::dist(ppp, method = "euclidean") # mhalanobis
+
+
               rm(ppp)
               gc()
-              colnames(pca_cells) <- paste("PC",seq_len(ncol(pca_cells)), sep = "")
+              
               pca_cells <- as.data.frame(pca_cells)
 
               output <- list("dist_cells"=dist_cells, "to_clust"=to_clust,"pca_cells"=pca_cells,
-                            "t_to_clust"=t_to_clust,"mu_estimator"=mu_estimator, "object"=object)
+                           "mu_estimator"=mu_estimator, "object"=object)
 
               return(output)
           }

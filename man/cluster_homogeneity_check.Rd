@@ -5,9 +5,9 @@
 \alias{cluster_homogeneity_check,scCOTAN-method}
 \title{cluster_homogeneity_check}
 \usage{
-cluster_homogeneity_check(obj, cells, out_dir, cores = 10, code)
+cluster_homogeneity_check(obj, cells, out_dir, cores = 1, code)
 
-\S4method{cluster_homogeneity_check}{scCOTAN}(obj, cells, out_dir, cores = 10, code)
+\S4method{cluster_homogeneity_check}{scCOTAN}(obj, cells, out_dir, cores = 1, code)
 }
 \arguments{
 \item{obj}{a COTAN object}

@@ -36,8 +36,7 @@ Imports:
     parallel,
     tibble,
     tidyr,
-    basilisk,
-    reticulate,
+    irlba,
     ComplexHeatmap,
     circlize,
     grid,
@@ -65,8 +64,6 @@ Suggests:
     BiocStyle,
     cowplot
 Config/testthat/edition: 3
-SystemRequirements: 
-    python
 Language: en-US
 biocViews: 
     SystemsBiology, 

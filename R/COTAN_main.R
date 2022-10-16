@@ -159,27 +159,28 @@ setMethod("clean","scCOTAN",
 
                 dist_cells  <- list1$dist_cells
                 pca_cells  <-  list1$pca_cells
-                t_to_clust  <-  as.matrix(list1$t_to_clust)
+                
+                #t_to_clust  <-  as.matrix(list1$t_to_clust)
                 #mu_estimator  <-  list1$mu_estimator
+
                 object  <-  list1$object
                 to_clust <-  list1$to_clust
                 rm(list1)
                 gc()
 
+
+
                 raw_norm <- Matrix::t(Matrix::t(object@raw) *
                                   (1/(as.vector(object@nu))))
-                #raw_norm <- as(as.matrix(raw_norm), "sparseMatrix")
-                
-                print("raw_norm DONE")
-
                 object@raw.norm <- raw_norm
                 rm(raw_norm)
                 gc()
+                
+                print("starting hclust")
 
                 hc_cells <- hclust(dist_cells, method = "complete")
+                gc()
                 
-                print("hclust DONE")
-
                 groups <- cutree(hc_cells, k=2)
 
                 if(length(groups[groups == 1]) < length(groups[groups == 2])  ){
@@ -198,11 +199,22 @@ setMethod("clean","scCOTAN",
                   cl2  <-  names(which(cutree(hc_cells, k = 2) == 1))
                   cl1  <-  names(which(cutree(hc_cells, k = 2) == 2))
                 }
+                
+                t_to_clust <- Matrix::t(to_clust)
+                t_to_clust <- round(t_to_clust,digits = 4)
+                t_to_clust <- as.data.frame(as.matrix(t_to_clust))
 
-
-                t_to_clust <- cbind(as.data.frame(t_to_clust),groups)
-
+                if (identical(rownames(t_to_clust),names(groups))) {
+                  t_to_clust <- cbind(t_to_clust,groups)
+                  
+                }else{
+                  stop("Error in the cell names")
+                }
+                
               # ---- next: to check which genes are specific for the B group of cells
+
+                to_clust <- as.matrix(round(to_clust,digits = 4))
+                
                 B <- as.data.frame(to_clust[,colnames(to_clust) %in% cl2])
                 rm(to_clust)
                 gc()
