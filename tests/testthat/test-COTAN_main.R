@@ -1,5 +1,6 @@
 tm = tempdir()
 stopifnot(file.exists(tm))
+
 #root = "tests/testthat/"
 root = ""
 genes.names.test <- readRDS(file.path(getwd(),"genes.names.test.RDS"))
@@ -155,45 +156,126 @@ test_that("mat2vec_rfast_test", {
 
 test_that("cell_homogeneous_clustering", {
   #obj <- readRDS(file.path(tm,"temp.RDS"))
-  temp <- cell_homogeneous_clustering(cond = "test",out_dir = paste0(tm,"/"), in_dir = paste0(tm,"/"), cores = 1, 
-                                      dataset_type = "COTAN", dataset_name = "temp.RDS", 
+  temp <- cell_homogeneous_clustering(cond = "test",out_dir = paste0(tm,"/"), in_dir = paste0(tm,"/"), 
+                                      cores = 12, 
+                                       dataset_name = "temp.RDS", 
                                       GEO = "test",sc.method ="10X"
                                       )
   saveRDS(temp, file = file.path(tm,"temp.RDS") )
-  clusters <- readRDS(file.path(getwd(),"clusters1.RDS"))
+  #clusters <- readRDS(file.path(getwd(),"clusters1.RDS"))
   
-  expect_equal(temp@clusters, clusters)
+  #expect_equal(temp@clusters, clusters)
+  ####################################
   
-})
-
-
-test_that("DEA_on_clusters_test", {
-  obj <- readRDS(file.path(tm,"temp.RDS"))
-  temp <- DEA_on_clusters(obj)
-  saveRDS(temp[[1]], file = file.path(tm,"temp.RDS") )
+  # Test the low GDI (homogeneity) for each defined clusters 
   
-  pval.cl <- readRDS(file.path(getwd(),"pval.test.cluster1.RDS"))
-
-  error <- sum((temp[[2]][genes.names.test,] - pval.cl)**2, na.rm = T)
-  if(error > 0.001 ){
-    warning("Error difference grater than 0.001!")
+  ####################################
+  
+  for (cl in sample(unique(temp@clusters),size = 5)) {
+    cells.to_test <-  names(temp@clusters[temp@clusters == cl])
+    #temp.obj <- cluster_homogeneity_check(obj = obj,cells = cells.to_test,
+     #                                     out_dir = paste0(tm,"/"),
+    #                                      cores = cores,
+     #                                     code = 12)
+    
+    temp.obj <- temp@raw[,colnames(temp@raw) %in% cells.to_test]
+    
+    temp.obj <- new("scCOTAN",raw = temp.obj)
+    temp.obj <- initRaw(temp.obj,GEO="" ,sc.method=" ",cond = "temp.clustered")
+    
+    n_cells <- length(get.cell.size(object = temp.obj))
+    
+    ttm <- clean(temp.obj)
+    
+    temp.obj <- ttm$object
+    temp.obj <- hk_genes(temp.obj)
+    temp.obj <- cotan_analysis(temp.obj, cores = 12)
+    gc()
+    temp.obj <- get.coex(temp.obj)
+    gc()
+    GDI_data <- get.GDI(temp.obj)
+    
+    expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
+    
   }
   
-  expect_true(error < 10^(-2))
-
+  
 })
+
+#test_that("DEA_on_clusters_test", {
+#  obj <- readRDS(file.path(tm,"temp.RDS"))
+#  temp <- DEA_on_clusters(obj)
+#  saveRDS(temp[[1]], file = file.path(tm,"temp.RDS") )
+  
+#  pval.cl <- readRDS(file.path(getwd(),"pval.test.cluster1.RDS"))
+  
+#  error <- sum((temp[[2]][genes.names.test,] - pval.cl)**2, na.rm = T)
+#  if(error > 0.001 ){
+#    warning("Error difference grater than 0.001!")
+#  }
+  
+#  expect_true(error < 10^(-2))
+  
+#})
+
+
 
 
 test_that("merge_cell.clusters.test", {
-  obj <- readRDS(file.path(tm,"temp.RDS"))
-  obj <- merge_cell.clusters(obj = obj,cond = "test",cores=1,out_dir_root = paste0(tm,"/"),
-                             srat = "Seurat_obj_test_with_cotan_clusters.RDS" ,out_dir = paste0(tm,"/") ,GEO = "test",
+  temp <- readRDS(file.path(tm,"temp.RDS"))
+  temp <- DEA_on_clusters(temp)
+  temp <- temp[[1]]
+  
+  initial.cluster.number <- dim(temp@cluster_data)[2]
+  temp <- merge_cell.clusters(obj = temp,
+                              cond = "test",
+                              cores=12,
+                              out_dir_root = paste0(tm,"/"),
+                             srat = "Seurat_obj_test_with_cotan_clusters.RDS" ,
+                             out_dir = paste0(tm,"/") ,
+                             GEO = "test",
                              sc.method = "10X")#,mt = FALSE, mt_prefix="^MT")
   
+  final.cluster.number <- dim(temp@cluster_data)[2]
+  expect_true(final.cluster.number < initial.cluster.number)
   #saveRDS(temp, file = file.path(tm,"temp.RDS") )
-  cluster_data <- readRDS(file.path(getwd(),"cluster_data_marged.RDS"))
+  #cluster_data <- readRDS(file.path(getwd(),"cluster_data_marged.RDS"))
   
-  expect_equal(obj@cluster_data[genes.names.test,], cluster_data)
+  #expect_equal(obj@cluster_data[genes.names.test,], cluster_data)
+
+  for (cl in unique(temp@clusters)) {
+    cells.to_test <-  names(temp@clusters[temp@clusters == cl])
+    #temp.obj <- cluster_homogeneity_check(obj = obj,cells = cells.to_test,
+    #                                     out_dir = paste0(tm,"/"),
+    #                                      cores = cores,
+    #                                     code = 12)
+    
+    temp.obj <- temp@raw[,colnames(temp@raw) %in% cells.to_test]
+    
+    temp.obj <- new("scCOTAN",raw = temp.obj)
+    temp.obj <- initRaw(temp.obj,GEO="" ,sc.method=" ",cond = "temp.clustered")
+    
+    n_cells <- length(get.cell.size(object = temp.obj))
+    
+    ttm <- clean(temp.obj)
+    
+    temp.obj <- ttm$object
+    temp.obj <- hk_genes(temp.obj)
+    temp.obj <- cotan_analysis(temp.obj, cores = 12)
+    gc()
+    temp.obj <- get.coex(temp.obj)
+    gc()
+    GDI_data <- get.GDI(temp.obj)
+    
+    expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
+    
+  }
   
+  
+    
 })
+
+
+
+
 

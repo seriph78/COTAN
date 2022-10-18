@@ -14,6 +14,15 @@
 #' @param GEO GEO or other data set code
 #' @param sc.method scRNAseq method
 #' @param markers a list of marker genes. Default NULL
+#' 
+#' @importFrom Matrix t
+#' @importFrom Matrix rowSums
+#' @importFrom stats dist
+#' @importFrom stats hclust
+#' @importFrom stats as.dendrogram
+#' @importFrom dendextend get_nodes_attr
+#' @importFrom stringr str_remove
+#' @import ggplot2
 #'
 #' @return a COTAN object 
 #' @export
@@ -52,9 +61,9 @@ setMethod("merge_cell.clusters","scCOTAN",
               cluster_data <- obj@cluster_data
               
               ######## This is the best: cosine dissimilarity
-              Matrix <- as.matrix(t(cluster_data))
-              sim <- Matrix / sqrt(rowSums(Matrix * Matrix))
-              sim <- sim %*% t(sim)
+              Matrix <- as.matrix(Matrix::t(cluster_data))
+              sim <- Matrix / sqrt(Matrix::rowSums(Matrix * Matrix))
+              sim <- sim %*% Matrix::t(sim)
               D_sim <- stats::as.dist(1 - sim)
               tree <- stats::hclust(D_sim,method = "ward.D2")
               #plot(tree)

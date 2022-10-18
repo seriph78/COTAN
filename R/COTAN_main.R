@@ -216,7 +216,7 @@ setMethod("clean","scCOTAN",
                   B <- B[order(B[,2],decreasing = TRUE), ]
                 }
 
-                print(utils::head(B, 15))
+                #print(utils::head(B, 15))
 
                 C <-  arrange(B,rowMeans(B[2:length(colnames(B))]))
                 rownames(C) <-  C$rowname
@@ -228,7 +228,6 @@ setMethod("clean","scCOTAN",
                 #check if the pca plot is clean enought and from the printed genes,
                 #if the smalest group of cells are caratterised by particular genes
 
-                print("PCA start")
                 pca_cells  <-  cbind(pca_cells,"groups"=t_to_clust$groups)
 
                 pca.cell.1  <-  ggplot(subset(pca_cells,groups == "A" ),
@@ -244,7 +243,6 @@ setMethod("clean","scCOTAN",
                                                             color = "#3C5488FF",
                                                             face ="italic" ),
                                    legend.position="bottom")
-                print("PCA done")
 
                 object@n_cells  <-  length(colnames(object@raw))
                 

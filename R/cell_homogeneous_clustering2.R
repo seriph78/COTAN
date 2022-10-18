@@ -11,6 +11,7 @@
 #' @param GEO GEO or other dataset official code
 #' @param sc.method single cell method used fot the experiment 
 #' @import Seurat
+#' @importFrom stringr str_detect
 #' @return the scCOTAN object and it saves, in the out_dir, the Seurat elaborated data file
 #' @export 
 #'
@@ -66,9 +67,9 @@ setMethod("cell_homogeneous_clustering","character",
     )
   }
     
-  homog.clusters <- to_recluster_new[str_detect(to_recluster_new,pattern = "Cluster")]
+  homog.clusters <- to_recluster_new[stringr::str_detect(to_recluster_new,pattern = "Cluster")]
   print(paste(homog.clusters,collapse = " "))
-  to_recluster_new <- to_recluster_new[str_detect(to_recluster_new,pattern = "Cluster",negate = T)]
+  to_recluster_new <- to_recluster_new[stringr::str_detect(to_recluster_new,pattern = "Cluster",negate = T)]
   to_recluster_new <- to_recluster_new[2:length(to_recluster_new)]
   
   #clusters.to.recluster <- unique(srat@meta.data[rownames(srat@meta.data) %in% to_recluster_new,]$seurat_clusters)
@@ -177,10 +178,10 @@ setMethod("cell_homogeneous_clustering","character",
         )
       }
     }
-    homog.clusters <- to_recluster_new[str_detect(to_recluster_new,pattern = "Cluster")]
+    homog.clusters <- to_recluster_new[stringr::str_detect(to_recluster_new,pattern = "Cluster")]
     number.cls.old <- length(unique(seurat.obj$seurat_clusters))- (length(homog.clusters)-1)
-    to_recluster_new <- to_recluster_new[str_detect(to_recluster_new,pattern = "Cluster",negate = T)]
-    to_recluster_new <- to_recluster_new[2:length(to_recluster_new)]
+    to_recluster_new <- to_recluster_new[stringr::str_detect(to_recluster_new,pattern = "Cluster",negate = T)]
+    to_recluster_new <- to_recluster_new[!is.na(to_recluster_new)]
     
     #clusters.to.recluster <- unique(seurat.obj@meta.data[rownames(seurat.obj@meta.data) %in% to_recluster_new,]$seurat_clusters)
     
@@ -248,6 +249,7 @@ setMethod("cell_homogeneous_clustering","character",
         names(obj@clusters) <- rownames(df.cell.clustering)
       }else{
         errorCondition("Problems between obj@raw and clustered cells!")
+        break
       }
       saveRDS(obj,paste(out_dir_root,"obj_",cond,".cotan.RDS",sep = ""))
     }
@@ -305,7 +307,7 @@ setMethod("cell_homogeneous_clustering","character",
   rm(srat)
   gc()
   #Re estimation of all parameters after cells removing
-  if((length(to_recluster_new)-1) > 0){
+  if((length(to_recluster_new)) > 0){
     print("Estimate again parameters after cells dropping")
     ttm <- clean(obj)
     print("Claening step done")
