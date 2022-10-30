@@ -8,9 +8,8 @@
 #' @param obj COTAN object
 #' @param cond sample condition name
 #' @param cores number cores used
-#' @param out_dir_root path to the directory in which there is the Seurat object
 #' @param srat the Seurat object for the same data set (the name should be "cond")
-#' @param out_dir path to a directory for output
+#' @param out_dir path to a directory for output path to the directory in which there is the Seurat object
 #' @param GEO GEO or other data set code
 #' @param sc.method scRNAseq method
 #' @param markers a list of marker genes. Default NULL
@@ -28,16 +27,16 @@
 #' @export
 #'
 #' @examples
-setGeneric("merge_cell.clusters", function(obj,cond,cores=1,out_dir_root,srat,out_dir ,GEO,
+setGeneric("merge_cell.clusters", function(obj,cond,cores=1,srat,out_dir ,GEO,
                                            sc.method,#mt = FALSE, mt_prefix="^mt", 
                                            markers = NULL) standardGeneric("merge_cell.clusters"))
 #' @rdname merge_cell.clusters
 setMethod("merge_cell.clusters","scCOTAN",
-         function(obj,cond,cores,out_dir_root,srat,out_dir ,GEO,
+         function(obj,cond,cores,srat,out_dir ,GEO,
                    sc.method,#mt, #mt_prefix, 
                   markers){
             
-           srat <- readRDS(paste0(out_dir_root,"/",cond,"/",srat))
+           srat <- readRDS(paste0(out_dir,srat))
            
            #Check if there are NA left clusters
            
@@ -84,8 +83,13 @@ setMethod("merge_cell.clusters","scCOTAN",
               print(paste0("Created leafs id form marging: ",
                            paste(dendextend::get_nodes_attr(dend,"label",id = id ),collapse=" ")))
               
-              dir <- paste0(out_dir_root,"leafs_merge/")
-              if(!file.exists(paste0(out_dir_root,"leafs_merge/"))){
+              dir <- paste0(out_dir,"cond/","leafs_merge/")
+              if(!file.exists(paste0(out_dir,"cond"))){
+                dir.create(paste0(out_dir,"cond"))
+              }
+              
+              
+              if(!file.exists(dir)){
                 dir.create(dir)
               }
               
@@ -179,7 +183,7 @@ setMethod("merge_cell.clusters","scCOTAN",
                 gc()
               }
               
-              saveRDS(srat,paste(out_dir_root,"Seurat_obj_",cond,"_with_cotan_clusters_merged.RDS",sep = ""))
+              saveRDS(srat,paste(out_dir,"Seurat_obj_",cond,"_with_cotan_clusters_merged.RDS",sep = ""))
               #srat <- readRDS(paste(out_dir_root,"Seurat_obj_",cond,"_with_cotan_clusters_merged.RDS",sep = ""))
               gc()
               
@@ -212,7 +216,7 @@ setMethod("merge_cell.clusters","scCOTAN",
               obj_list = DEA_on_clusters(obj,list.clusters)
               gc()
               
-              srat <- readRDS(paste(out_dir_root,"Seurat_obj_",cond,"_with_cotan_clusters_merged.RDS",sep = ""))
+              srat <- readRDS(paste(out_dir,"Seurat_obj_",cond,"_with_cotan_clusters_merged.RDS",sep = ""))
               obj = obj_list[[1]]
               
               p_value = obj_list[[2]]
@@ -220,16 +224,16 @@ setMethod("merge_cell.clusters","scCOTAN",
               rm(obj_list)
               gc()
               
-              write.csv(p_value,file = paste(out_dir_root,"p_values_clusters_merged.csv", sep = ""))
-              write.csv(obj@cluster_data,file = paste(out_dir_root,"coex_clusters_merged.csv", sep = ""))
+              write.csv(p_value,file = paste(out_dir,cond,"/p_values_clusters_merged.csv", sep = ""))
+              write.csv(obj@cluster_data,file = paste(out_dir,cond,"/coex_clusters_merged.csv", sep = ""))
               if (!is.null(markers)) {
-                write.csv(p_value[unlist(markers),],file = paste(out_dir_root,"p_values_clusters_merged_markers.csv", sep = ""))
-                write.csv(obj@cluster_data[unlist(markers),],file = paste(out_dir_root,"coex_clusters_merged_markers.csv", sep = ""))
+                write.csv(p_value[unlist(markers),],file = paste(out_dir,cond,"/p_values_clusters_merged_markers.csv", sep = ""))
+                write.csv(obj@cluster_data[unlist(markers),],file = paste(out_dir,cond,"/coex_clusters_merged_markers.csv", sep = ""))
                 
               }
               
             }
-            saveRDS(obj,file = paste(out_dir_root,cond,"_merged_cotan.RDS", sep = ""))
+            saveRDS(obj,file = paste(out_dir,cond,"_merged_cotan.RDS", sep = ""))
             
             return(obj)
             

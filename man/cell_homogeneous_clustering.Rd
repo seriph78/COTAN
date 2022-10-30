@@ -26,7 +26,7 @@ cell_homogeneous_clustering(
 
 \item{cores}{number of cores (NB for windows system no more that 1 can be used)}
 
-\item{dataset_name}{Seurat object file name}
+\item{dataset_name}{COTAN object file name}
 
 \item{GEO}{GEO or other dataset official code}
 

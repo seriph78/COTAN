@@ -258,7 +258,7 @@ test_that("merge_cell.clusters.test", {
   temp <- merge_cell.clusters(obj = temp,
                               cond = "test",
                               cores=12,
-                              out_dir_root = paste0(tm,"/"),
+                              #out_dir_root = paste0(tm,"/"),
                              srat = "Seurat_obj_test_with_cotan_clusters.RDS" ,
                              out_dir = paste0(tm,"/") ,
                              GEO = "test",

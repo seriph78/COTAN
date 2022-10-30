@@ -9,7 +9,6 @@ merge_cell.clusters(
   obj,
   cond,
   cores = 1,
-  out_dir_root,
   srat,
   out_dir,
   GEO,
@@ -21,7 +20,6 @@ merge_cell.clusters(
   obj,
   cond,
   cores = 1,
-  out_dir_root,
   srat,
   out_dir,
   GEO,
@@ -36,11 +34,10 @@ merge_cell.clusters(
 
 \item{cores}{number cores used}
 
-\item{out_dir_root}{path to the directory in which there is the Seurat object}
-
 \item{srat}{the Seurat object for the same data set (the name should be "cond")}
 
-\item{out_dir}{path to a directory for output}
+\item{out_dir}{path to the directory in which there is the Seurat object and 
+where the output will be stored}
 
 \item{GEO}{GEO or other data set code}
 
