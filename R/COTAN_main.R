@@ -1,39 +1,5 @@
 ## Main functions
 
-#' scCOTAN-class
-#'
-#' Define my COTAN structure
-#' @slot raw ANY. To store the raw data matrix
-#' @slot raw.norm ANY. To store the raw data matrix divided for the cell
-#' efficiency estimated (nu)
-#' @slot coex ANY. The coex matrix (sparce)
-#' @slot nu vector.
-#' @slot lambda vector.
-#' @slot a vector.
-#' @slot hk vector.
-#' @slot n_cells numeric.
-#' @slot meta data.frame.
-#' @slot yes_yes ANY.
-#' @slot clusters vector.
-#' @slot cluster_data data.frame.
-#'
-#' @return the object class
-#' @export
-#' @examples
-#'
-#' data("ERCCraw")
-#' obj <- new("scCOTAN", raw = data)
-#'
-setClass("scCOTAN",
-  slots =
-    c(
-      raw = "ANY", raw.norm = "ANY", coex = "ANY",
-      nu = "vector", lambda = "vector", a = "vector",
-      hk = "vector", n_cells = "numeric",
-      meta = "data.frame", yes_yes = "ANY", clusters = "vector",
-      cluster_data = "data.frame"
-    )
-) -> scCOTAN
 
 #' initRaw
 #'
@@ -341,7 +307,7 @@ setMethod("cotan_analysis","scCOTAN",
               #cells[cells <= 0] <- 0
 
               # exlude the effective ubiqutarius genes and saved in a separate file
-              mu_estimator <- mu_est(object)
+              mu_estimator <- estimateMu(object)
 
               object <- hk_genes(object)
 

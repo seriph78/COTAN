@@ -18,7 +18,7 @@ extract.coex(object, genes = "all")
 the coex values data frame
 }
 \description{
-This function extract a complete or a prtial coex matrix from the COTAN object.
+This function extract a complete or a partial coex matrix from the COTAN object.
 }
 \examples{
 data("ERCC.cotan")

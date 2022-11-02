@@ -32,7 +32,7 @@ setMethod("get.clusters.delta.expression","scCOTAN",
     increased.expression.tot <- data.frame()
     
     cells <- obj@raw
-    mu_estimator <- mu_est(obj)
+    mu_estimator <- estimateMu(obj)
     
     hk <- obj@hk
     

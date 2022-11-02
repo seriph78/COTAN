@@ -192,17 +192,6 @@ function(object) {
 )
 
 
-setGeneric("mu_est", function(object) standardGeneric("mu_est"))
-setMethod(
-  "mu_est", "scCOTAN",
-  function(object) {
-    print("mu estimator creation")
-    mu_estimator <- object@lambda %*% t(object@nu)
-    rownames(mu_estimator) <- rownames(object@raw)
-    return(mu_estimator)
-  }
-)
-
 setGeneric("get.S", function(object) standardGeneric("get.S"))
 setMethod("get.S","scCOTAN",
   function(object) {
@@ -292,7 +281,7 @@ setMethod("expected_ct","scCOTAN",
     # Cells matrix : formed by row data matrix changed to 0-1 matrix
     cells[cells > 0] <- 1
 
-    mu_estimator <- mu_est(object)
+    mu_estimator <- estimateMu(object)
     mu_estimator <- mu_estimator[!rownames(mu_estimator) %in% object@hk,]
     print("expected contingency tables creation")
 

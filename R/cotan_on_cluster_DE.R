@@ -94,7 +94,7 @@ setMethod("DEA_on_clusters","scCOTAN",
               cells<-obj@raw
               #cells[cells > 0] <- 1
               
-              mu_estimator <- mu_est(obj)
+              mu_estimator <- estimateMu(obj)
               
               hk <- obj@hk
               
