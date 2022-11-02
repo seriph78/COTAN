@@ -27,20 +27,12 @@ mitochondrial.percentage.plot <- function(obj, split.pattern = " ", n.col=2, gen
   sizes$sample <- stringr::str_split(rownames(sizes),
                                      pattern = split.pattern,simplify = T)[,n.col]
   mit.genes <- as.data.frame(obj@raw[rownames(obj@raw) %in% 
-<<<<<<< HEAD
                          rownames(obj@raw)[stringr::str_detect(rownames(obj@raw),pattern = "^MT-")],])
   #colnames(mit.genes) <- rownames(obj@raw)[stringr::str_detect(rownames(obj@raw),pattern = "^MT-")]
   if(!identical(colnames(mit.genes),rownames(sizes))){
     print("Problem cell oreder!")
   }
   mit.genes <- t(mit.genes)
-=======
-                         rownames(obj@raw)[str_detect(rownames(obj@raw),pattern = "^MT-")],])
-  colnames(mit.genes) <- rownames(obj@raw)[str_detect(rownames(obj@raw),pattern = "^MT-")]
-  if(!identical(rownames(mit.genes),rownames(sizes))){
-    print("Problem cell oreder!")
-  }
->>>>>>> In cotan-class changed a few fields. Added documentation. In houseKeepingGenes() removed a useless line and added a check for the nCells field in the object.
   sizes$sum.mit <- Matrix::rowSums(mit.genes)
   sizes$mit.percentage <- round(sizes$sum.mit/sizes$sizes*100,digits = 2)
   
@@ -57,11 +49,7 @@ mitochondrial.percentage.plot <- function(obj, split.pattern = " ", n.col=2, gen
          x = "") +
     scale_y_continuous(expand = c(0, 0)) +
     #ylim(0,max(sizes$sizes))+
-<<<<<<< HEAD
     ggthemes::theme_tufte()+
-=======
-    theme_tufte()+
->>>>>>> In cotan-class changed a few fields. Added documentation. In houseKeepingGenes() removed a useless line and added a check for the nCells field in the object.
     theme(legend.position = "none")#,
   #axis.text.x=element_blank(),
   #axis.ticks.x=element_blank())

@@ -29,18 +29,11 @@ scatter.plot <- function(obj,split.pattern = " ", n.col=2, split.samples = F){
   gene.size <- Matrix::colSums(obj@raw > 0)
   to.plot <- cbind(lib.size, gene.size)
   to.plot <- as.data.frame(to.plot)
-<<<<<<< HEAD
   to.plot$sample <- stringr::str_split(rownames(to.plot),pattern = split.pattern,simplify = T)[,n.col]
   
   plot <- ggplot(to.plot, aes(x=lib.size,y=gene.size, color = sample)) + geom_point(size = 0.5, alpha= 0.8)+
     ggthemes::theme_tufte()+
-=======
-  to.plot$sample <- str_split(rownames(to.plot),pattern = split.pattern,simplify = T)[,n.col]
-  
-  plot <- ggplot(to.plot, aes(x=lib.size,y=gene.size, color = sample)) + geom_point(size = 0.5, alpha= 0.8)+
-    theme_tufte()+
->>>>>>> In cotan-class changed a few fields. Added documentation. In houseKeepingGenes() removed a useless line and added a check for the nCells field in the object.
-    labs(title = "Scatter plot of library size VS gene detected for each cell", 
+   labs(title = "Scatter plot of library size VS gene detected for each cell", 
          y = "Gene number",
          x = "Library size (UMI)") + 
     scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
@@ -53,8 +46,4 @@ scatter.plot <- function(obj,split.pattern = " ", n.col=2, split.samples = F){
   }
   
   return(plot)
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> In cotan-class changed a few fields. Added documentation. In houseKeepingGenes() removed a useless line and added a check for the nCells field in the object.
