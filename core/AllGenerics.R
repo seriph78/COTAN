@@ -1,4 +1,8 @@
 setGeneric(
+  "GDI", 
+  function(objCOTAN, test = "chiSquare") standardGeneric("GDI"))
+
+setGeneric(
   "plotCellsHeatmap",
   function(objCOTAN, cellsName, clusters) standardGeneric("plotCellsHeatmap")
 )
@@ -15,8 +19,9 @@ setGeneric(
 
 setGeneric(
   "estimateDispersionBisection",
-  function(objCOTAN, cores = 1, step = 200) 
+  function(objCOTAN, cores = 1, step = 200) {
     standardGeneric("estimateDispersionBisection")
+  }
 )
 
 setGeneric(
@@ -67,6 +72,15 @@ setGeneric(
 )
 
 setGeneric(
-  "observedContingencyYY", 
+  "observedContingencyYY",
   function(objCOTAN, cells = FALSE) standardGeneric("observedContingencyYY")
 )
+
+setGeneric(
+  "chiSquaredTest",
+  function(objCOTAN) standardGeneric("chiSquaredTest")
+)
+
+setGeneric(
+  "Gtest", 
+  function(objCOTAN) standardGeneric("Gtest"))

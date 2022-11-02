@@ -66,6 +66,10 @@ objCOTAN <- coex(objCOTAN, cells = TRUE) # coex for cells
 endTime <- Sys.time()
 print(endTime - startTime)
 ```
+Save work
+```{r}
+saveRDS(objCOTAN, file = '/home/putty05/data/objCOTANcells.RDS')
+```
 
 Coex heatmap for clustered cells
 
