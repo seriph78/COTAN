@@ -30,63 +30,6 @@ setMethod("DEA_on_clusters","scCOTAN",
               }  
             }
             
-              #---------------------------------------------
-              fun_pzero_posi <- function(r,mu){ (1+r*mu)^(-1/r) }
-
-              fun_pzero_nega0 <- function(r,mu){ (exp(-(1-r)*mu))}
-
-              fun_dif_mu_zeros <- function(h,x,somma_zeri){
-                  if (h > 0) {
-                      sum(fun_pzero_posi(h,mu_estimator[x,])) - somma_zeri#/somma_zeri
-                  }else{
-                      sum(fun_pzero_nega0(h,mu_estimator[x,])) - somma_zeri#/somma_zeri
-                  }
-              }
-
-              fun_my_opt <- function(x){
-                  somma_zeri = sum(cells[x,] == 0)
-                  a1 <- 0
-                  u1 <- fun_dif_mu_zeros(a1,x,somma_zeri)
-                  a2 <- a1
-                  u2 <- u1
-                  if (u1 > 0) {
-                      a1 <- a1 - 1
-                      u1 <- fun_dif_mu_zeros(a1,x,somma_zeri)
-                      while (u1 > 0) {
-                          a2 <- a1
-                          u2 <- u1
-                          a1 <- 2 * a1
-                          u1 <- fun_dif_mu_zeros(a1,x,somma_zeri)
-                      }
-                  }else{
-                      a2 <- 1
-                      u2 <- fun_dif_mu_zeros(a2,x,somma_zeri)
-                      while (u2 < 0) {
-                          a1 <- a2
-                          u1 <-u2
-                          a2 <- 2 * a2
-                          u2 <- fun_dif_mu_zeros(a2,x,somma_zeri)
-                      }
-                  }
-                  a <- (a1+a2)/2
-                  u <- fun_dif_mu_zeros(a,x,somma_zeri)
-                  while (abs(u)>0.001) {
-                      if(u>0){
-                          a2 <- a
-                          u2 <- u
-                      }else{
-                          a1 <- a
-                          u1 <- u
-                      }
-                      a <- (a1 + a2)/2
-                      u <- fun_dif_mu_zeros(a,x,somma_zeri)
-                  }
-                  r <- data.frame(a,u)
-                  rownames(r) <- x
-                  return(r)
-              }
-
-
               cells<-obj@raw
               #cells[cells > 0] <- 1
               

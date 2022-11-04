@@ -319,25 +319,26 @@ setMethod("cotan_analysis","scCOTAN",
               mu_estimator <- as.matrix(mu_estimator)
               print("start a minimization")
               gc()
-              p <- 1
               tot <- list()
 
-
-              while(p <= length(rownames(mu_estimator))) {
-                  if((p+200) <= length(rownames(mu_estimator))){
-                      tot1 <- parallel::mclapply(rownames(mu_estimator)[p:(p+200)],
-                                       fun_my_opt, ce.mat= cells, mu_est= mu_estimator,
-                                       mc.cores = cores)
-
-                  }else{
+              p_begin <- 1
+              n_genes = length(rownames(mu_estimator))
+              while(p_begin <= n_genes) {
+                  p_end <- p_begin + 200
+                  if(p_end >= n_genes){
                       print("Final trance!")
-                      tot1 <- parallel::mclapply(rownames(mu_estimator)[p:length(rownames(mu_estimator))],
-                                      fun_my_opt, ce.mat=cells, mu_est= mu_estimator, mc.cores = cores)
+                      p_end = n_genes
                   }
+                  tot1 <- parallel::mclapply(
+                                  rownames(mu_estimator)[p_begin:p_end],
+                                  dispersionBisection, zeroOneMatrix = cells,
+                                  muEstimator = mu_estimator, mc.cores = cores)
                   tot <- append(tot, tot1)
-                  p <- p+200+1
-                  if((p %% 10)==0){
-                      print(paste("Next gene:",rownames(mu_estimator)[p],"number",p, sep = " "))
+                  p_begin <- p_end+1
+                  if((p_begin %% 10)==0){
+                      print(paste("Next gene:", rownames(mu_estimator)[p_begin],
+                                  "number", p_begin,
+                                  sep = " "))
                   }
               }
               gc()
@@ -345,14 +346,15 @@ setMethod("cotan_analysis","scCOTAN",
               tot2 <- tot[[1]]
               for (tt in 2:length(tot)) {
                   tot2<- rbind(tot2,tot[[tt]])
-
               }
 
-              object@a <- tot2$a
+              object@a <- tot2$dispersion
               names(object@a) <- rownames(tot2)
-              print(paste("a min:",min(tot2$a) ,"| a max",max(tot2$a) , "| negative a %:",
-                          sum(tot2$a <0)/nrow(tot2)*100 ,sep=" "))
-
+              print(paste("a min:",  min(tot2$dispersion),
+                          "| a max", max(tot2$dispersion),
+                          "| negative a %:", sum(tot2$dispersion <0)/nrow(tot2)*100,
+                          sep=" "))
+              
               gc()
 
               return(object)
