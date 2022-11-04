@@ -31,10 +31,6 @@ setMethod("DEA_on_clusters","scCOTAN",
             }
             
               #---------------------------------------------
-              fun_pzero <- function(a,mu){
-                  (a <= 0)*(exp(-(1+abs(a))*mu)) + (a > 0)*(1+abs(a)*mu)^(-1/abs(a))
-              }
-
               fun_pzero_posi <- function(r,mu){ (1+r*mu)^(-1/r) }
 
               fun_pzero_nega0 <- function(r,mu){ (exp(-(1-r)*mu))}
@@ -100,7 +96,7 @@ setMethod("DEA_on_clusters","scCOTAN",
               
               mu_estimator <- mu_estimator[!rownames(mu_estimator) %in% hk,]
               cells <- cells[!rownames(cells) %in% hk, ]
-              M <- fun_pzero(obj@a,mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
+              M <- funProbZero(obj@a,mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
               N <- 1-M
               
               cluster_data <- data.frame()

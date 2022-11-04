@@ -38,7 +38,7 @@ setMethod("get.clusters.delta.expression","scCOTAN",
     
     mu_estimator <- mu_estimator[!rownames(mu_estimator) %in% hk,]
     cells <- cells[!rownames(cells) %in% hk, ]
-    M = fun_pzero(obj@a,mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
+    M = funProbZero(obj@a,mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
     N = 1-M
     
   

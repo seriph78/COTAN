@@ -5,16 +5,16 @@ funProbZero <- function(disp, mu) {
 
 #' dispersionBisection
 #'
-#' private function invoked by 'estimatedispersionBisection' for the estimation
+#' private function invoked by 'estimateDispersionBisection' for the estimation
 #' of 'dispersion' field of a COTAN object with bisection
 #'
 #' the goal is to find dispersion value that produces a difference between
 #' the number of estimated and counted zeros close to 0
 #'
 #' @param genes name of the genes
-#' @param zeroOneMatrix
+#' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
 #' @param muEstimator estimator of vector mu
-#' @param threshold
+#' @param threshold minimal solution precision
 #' @return r, data.frame(a, u)
 dispersionBisection <- function(genes,
                                 zeroOneMatrix,

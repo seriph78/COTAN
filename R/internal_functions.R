@@ -14,15 +14,6 @@ setMethod(
   }
 )
 
-
-setGeneric("fun_pzero", function(a, mu) standardGeneric("fun_pzero"))
-setMethod(
-  "fun_pzero", "numeric",
-  function(a, mu) {
-    (a <= 0) * (exp(-(1 + abs(a)) * mu)) + (a > 0) * (1 + abs(a) * mu)^(-1 / abs(a))
-  }
-)
-
 setGeneric("fun_pzero_posi", function(r, mu) standardGeneric("fun_pzero_posi"))
 setMethod(
   "fun_pzero_posi", "numeric",
@@ -285,7 +276,7 @@ setMethod("expected_ct","scCOTAN",
     mu_estimator <- mu_estimator[!rownames(mu_estimator) %in% object@hk,]
     print("expected contingency tables creation")
 
-    M <- fun_pzero(object@a,mu_estimator[,colnames(cells)])
+    M <- funProbZero(object@a,mu_estimator[,colnames(cells)])
     N <- 1-M
     n_zero_esti <- rowSums(M)
     # estimated number of zeros for each genes

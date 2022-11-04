@@ -881,10 +881,6 @@ setGeneric("get.expected.ct", function(object, g1, g2) standardGeneric("get.expe
 setMethod(
   "get.expected.ct", "scCOTAN",
   function(object, g1, g2) {
-    fun_pzero <- function(a, mu) {
-      (a <= 0) * (exp(-(1 + abs(a)) * mu)) + (a > 0) * (1 + abs(a) * mu)^(-1 / abs(a))
-    }
-
     stopifnot("a gene is constitutive!" = !(g1 %in% object@hk | g2 %in% object@hk))
 
     mu_estimator <- object@lambda[c(g1, g2)] %*% t(object@nu)
@@ -895,7 +891,7 @@ setMethod(
     cells[cells > 0] <- 1
     cells[cells <= 0] <- 0
 
-    M <- fun_pzero(object@a[c(g1, g2)], mu_estimator)
+    M <- funProbZero(object@a[c(g1, g2)], mu_estimator)
     rownames(M) <- c(g1, g2)
     N <- 1 - M
 
