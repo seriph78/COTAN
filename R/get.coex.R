@@ -20,9 +20,9 @@ setMethod(
     print("coex dataframe creation")
     hk <- object@hk
 
-    object <- obs_yes_yes(object)
-    si_si <- object@yes_yes[!rownames(object@yes_yes) %in% hk, !colnames(object@yes_yes)
-    %in% hk]
+    yes_yes <- observedContingencyYY(object)
+    si_si <- yes_yes[!rownames(yes_yes) %in% hk,
+                     !colnames(yes_yes) %in% hk]
     est <- expected_ct(object)
     gc()
 

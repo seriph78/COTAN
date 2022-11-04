@@ -830,12 +830,13 @@ setGeneric("get.observed.ct", function(object, g1, g2) standardGeneric("get.obse
 setMethod(
   "get.observed.ct", "scCOTAN",
   function(object, g1, g2) {
-    si_si <- object@yes_yes[g1, g2]
+    yes_yes <- observedContingencyYY(object)
+    si_si <- yes_yes[g1, g2]
     n_cells <- object@n_cells
 
-    si_any <- max(object@yes_yes[g1, ])
+    si_any <- max(yes_yes[g1, ])
 
-    any_si <- max(object@yes_yes[g2, ])
+    any_si <- max(yes_yes[g2, ])
     si_no <- si_any - si_si
     no_si <- any_si - si_si
     no_no <- n_cells - (si_si + si_no + no_si)

@@ -154,37 +154,19 @@ setMethod("obs_ct","scCOTAN",
     si_any <- do.call("cbind", replicate(length(rownames(somma)), somma, simplify = FALSE))
 
     colnames(si_any) = rownames(si_any)
-    if (is.null(object@yes_yes)) {
-        object = obs_yes_yes(object)
-    }
 
-    si_si <- as.matrix(object@yes_yes)
+    si_si <- as.matrix(observedContingencyYY(object))
     si_no <- si_any - si_si
 
     si_any <- t(si_any)
     no_si <- si_any - si_si
 
     no_no <- length(colnames(cells)) - (si_si + no_si + si_no)
-    out <- list("no_yes"=no_si,"yes_no"=si_no,"no_no"=no_no,"object"=object)
+    out <- list("yes_yes"=si_si,"no_yes"=no_si,"yes_no"=si_no,"no_no"=no_no)
     return(out)
   }
 )
 
-setGeneric("obs_yes_yes", function(object) standardGeneric("obs_yes_yes"))
-setMethod("obs_yes_yes","scCOTAN",
-  function(object) {
-    print("creation of observed yes/yes contingency table")
-
-    cells <- object@raw
-    #---------------------------------------------------
-    # Cells matrix : formed by row data matrix changed to 0-1 matrix
-    cells[cells > 0] <- 1
-
-    si_si <- cells %*% Matrix::t(cells)
-    object@yes_yes <- si_si#as(si_si, "sparseMatrix")
-    return(object)
-    }
-)
 
 setGeneric("expected_ct", function(object) standardGeneric("expected_ct"))
 setMethod("expected_ct","scCOTAN",
@@ -219,8 +201,8 @@ setMethod("expected_ct","scCOTAN",
 
     print("Done")
 
-    out <- list("estimator_no_no"=estimator_no_no, "estimator_no_yes"=estimator_no_si,
-               "estimator_yes_no"=estimator_si_no,"estimator_yes_yes"=estimator_si_si)
+    out <- list("estimator_no_no"=estimator_no_no,  "estimator_no_yes"=estimator_no_si,
+                "estimator_yes_no"=estimator_si_no, "estimator_yes_yes"=estimator_si_si)
     return(out)
   }
 )
@@ -234,12 +216,10 @@ setMethod(
     hk <- object@hk
     ll <- obs_ct(object)
 
-    object <- ll$object
-
-    ll$no_yes <- ll$no_yes[!rownames(ll$no_yes) %in% hk, !colnames(ll$no_yes) %in% hk]
-    ll$no_no <- ll$no_no[!rownames(ll$no_no) %in% hk, !colnames(ll$no_no) %in% hk]
-    si_si <- object@yes_yes[!rownames(object@yes_yes) %in% hk, !colnames(object@yes_yes) %in% hk]
-    ll$yes_no <- ll$yes_no[!rownames(ll$yes_no) %in% hk, !colnames(ll$yes_no) %in% hk]
+    ll$no_yes  <- ll$no_yes [!rownames(ll$no_yes)  %in% hk, !colnames(ll$no_yes)  %in% hk]
+    ll$no_no   <- ll$no_no  [!rownames(ll$no_no)   %in% hk, !colnames(ll$no_no)   %in% hk]
+    ll$yes_yes <- ll@yes_yes[!rownames(ll@yes_yes) %in% hk, !colnames(ll@yes_yes) %in% hk]
+    ll$yes_no  <- ll$yes_no [!rownames(ll$yes_no)  %in% hk, !colnames(ll$yes_no)  %in% hk]
 
     est <- expected_ct(object)
     for (i in est) {
@@ -248,9 +228,9 @@ setMethod(
 
     print("G estimation")
 
-    t1 <- as.matrix(si_si) * log(as.matrix(si_si) /
+    t1 <- as.matrix(ll$yes_yes) * log(as.matrix(ll$yes_yes) /
       as.matrix(est$estimator_yes_yes))
-    t1[which(as.matrix(si_si) == 0)] <- 0
+    t1[which(as.matrix(ll$yes_yes) == 0)] <- 0
 
     t2 <- as.matrix(ll$no_no) * log(as.matrix(ll$no_no) /
       as.matrix(est$estimator_no_no))
@@ -259,9 +239,11 @@ setMethod(
     t3 <- as.matrix(ll$yes_no) * log(as.matrix(ll$yes_no) /
       as.matrix(est$estimator_yes_no))
     t3[which(as.matrix(ll$yes_no) == 0)] <- 0
+    
     t4 <- as.matrix(ll$no_yes) * log(as.matrix(ll$no_yes) /
       as.matrix(est$estimator_no_yes))
     t4[which(as.matrix(ll$no_yes) == 0)] <- 0
+    
     G <- 2 * (t1 + t2 + t3 + t4)
     return(G)
   }

@@ -50,7 +50,7 @@ COTAN <- function(raw = "ANY") {
 #' @slot hk vector.
 #' @slot n_cells numeric.
 #' @slot meta data.frame.
-#' @slot yes_yes ANY.
+#' @slot yes_yes ANY. Unused and deprecated
 #' @slot clusters vector.
 #' @slot cluster_data data.frame.
 #'
@@ -83,7 +83,6 @@ setClass("scCOTAN",
 ## Automatically convert an object from class "scCOTAN" into "COTAN"
 setIs("scCOTAN",
       "COTAN",
-      #test = function(obj) {is.null(obj@yes_yes)},
       coerce = function(obj) {
         new("COTAN",
             raw          = obj@raw,
