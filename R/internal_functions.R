@@ -168,46 +168,6 @@ setMethod("obs_ct","scCOTAN",
 )
 
 
-setGeneric("expected_ct", function(object) standardGeneric("expected_ct"))
-setMethod("expected_ct","scCOTAN",
-  function(object) {
-    cells <- as.matrix(object@raw)
-    #---------------------------------------------------
-    # Cells matrix : formed by row data matrix changed to 0-1 matrix
-    cells[cells > 0] <- 1
-
-    mu_estimator <- estimateMu(object)
-    mu_estimator <- mu_estimator[!rownames(mu_estimator) %in% object@hk,]
-    print("expected contingency tables creation")
-
-    M <- funProbZero(object@a,mu_estimator[,colnames(cells)])
-    N <- 1-M
-    n_zero_esti <- rowSums(M)
-    # estimated number of zeros for each genes
-    n_zero_obs <- rowSums(cells[!rownames(cells) %in% object@hk,] == 0)
-    # observed number of zeros for each genes
-    dist_zeros <- sqrt(sum((n_zero_esti - n_zero_obs)^2))
-
-    print(paste("The distance between estimated n of zeros and observed number of zero is",
-                dist_zeros,"over", length(rownames(M)), sep = " "))
-
-    stopifnot("Errore: some Na in matrix M " = !any(is.na(M)))
-
-    gc()
-    estimator_no_no <- M %*% t(M)
-    estimator_no_si <- M %*% t(N)
-    estimator_si_no <- t(estimator_no_si)
-    estimator_si_si <- N %*% t(N)
-
-    print("Done")
-
-    out <- list("estimator_no_no"=estimator_no_no,  "estimator_no_yes"=estimator_no_si,
-                "estimator_yes_no"=estimator_si_no, "estimator_yes_yes"=estimator_si_si)
-    return(out)
-  }
-)
-
-
 setGeneric("get.G", function(object) standardGeneric("get.G"))
 setMethod(
   "get.G", "scCOTAN",
@@ -221,7 +181,7 @@ setMethod(
     ll$yes_yes <- ll@yes_yes[!rownames(ll@yes_yes) %in% hk, !colnames(ll@yes_yes) %in% hk]
     ll$yes_no  <- ll$yes_no [!rownames(ll$yes_no)  %in% hk, !colnames(ll$yes_no)  %in% hk]
 
-    est <- expected_ct(object)
+    est <- expectedContingencyTables(object, FALSE)
     for (i in est) {
       stopifnot("Some expected values are 0!" = !any(i == 0))
     }
@@ -229,19 +189,19 @@ setMethod(
     print("G estimation")
 
     t1 <- as.matrix(ll$yes_yes) * log(as.matrix(ll$yes_yes) /
-      as.matrix(est$estimator_yes_yes))
+      as.matrix(est$expectedYY))
     t1[which(as.matrix(ll$yes_yes) == 0)] <- 0
 
     t2 <- as.matrix(ll$no_no) * log(as.matrix(ll$no_no) /
-      as.matrix(est$estimator_no_no))
+      as.matrix(est$expectedNN))
     t2[which(as.matrix(ll$no_no) == 0)] <- 0
 
     t3 <- as.matrix(ll$yes_no) * log(as.matrix(ll$yes_no) /
-      as.matrix(est$estimator_yes_no))
+      as.matrix(est$expectedYN))
     t3[which(as.matrix(ll$yes_no) == 0)] <- 0
     
     t4 <- as.matrix(ll$no_yes) * log(as.matrix(ll$no_yes) /
-      as.matrix(est$estimator_no_yes))
+      as.matrix(est$expectedNY))
     t4[which(as.matrix(ll$no_yes) == 0)] <- 0
     
     G <- 2 * (t1 + t2 + t3 + t4)

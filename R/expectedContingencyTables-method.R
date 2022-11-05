@@ -1,4 +1,4 @@
-# method for estimating the expected values of contingency tables
+#' method for estimating the expected values of contingency tables
 #' @param objCOTAN A COTAN object
 #' @param cells Boolean, if true, the function works for the cells, 
 #' otherwise for the genes 
