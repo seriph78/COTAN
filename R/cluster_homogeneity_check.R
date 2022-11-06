@@ -49,8 +49,6 @@ setMethod("cluster_homogeneity_check","scCOTAN",
               
             #---------- run this when B cells are to be removed
             
-            obj <- hk_genes(obj)
-            
             obj <- cotan_analysis(obj, cores = cores)
             # COEX evaluation and storing
             gc()

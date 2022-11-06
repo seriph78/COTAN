@@ -120,25 +120,6 @@ setMethod("get.S","scCOTAN",
 )
 
 
-setGeneric("hk_genes", function(object) standardGeneric("hk_genes"))
-setMethod("hk_genes","scCOTAN",
-  function(object) {
-      print("save effective constitutive genes")
-      #cells=as.matrix(object@raw)
-      cells=object@raw
-      #---------------------------------------------------
-      # Cells matrix : formed by row data matrix changed to 0-1 matrix
-      cells[cells > 0] <- 1
-      #cells[cells <= 0] <- 0
-
-      hk <- names(which(rowSums(cells) == length(colnames(cells))))
-      object@hk <- hk
-
-      return(object)
-  }
-)
-
-
 setGeneric("obs_ct", function(object) standardGeneric("obs_ct"))
 setMethod("obs_ct","scCOTAN",
   function(object) {

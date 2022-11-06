@@ -83,8 +83,6 @@ setMethod("cluster_homogeneity","scCOTAN",
                 
                 #dev.off()
 
-                obj = hk_genes(obj)
-
                 obj = cotan_analysis(obj, cores = cores)
                 # saving the structure
                 #saveRDS(obj,file = paste(out_dir,t,".cotan.RDS", sep = ""))

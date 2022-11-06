@@ -1,6 +1,5 @@
-# determines the housekeepingGenes vector of a COTAN object
+#' determines the housekeepingGenes vector of a COTAN object
 #' @export
-
 setMethod(
   "housekeepingGenes",
   "COTAN",
@@ -16,7 +15,7 @@ setMethod(
       stop("nCells not initialized or zero")
     }
     
-    objCOTAN@hKGenes <- names(which(rowSums(cells) == objCOTAN@nCells))
+    objCOTAN@hkGenes <- names(which(rowSums(cells) == objCOTAN@nCells))
 
     return(objCOTAN)
   }

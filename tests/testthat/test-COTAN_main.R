@@ -216,7 +216,6 @@ test_that("cell_homogeneous_clustering", {
     ttm <- clean(temp.obj)
     
     temp.obj <- ttm$object
-    temp.obj <- hk_genes(temp.obj)
     temp.obj <- cotan_analysis(temp.obj, cores = 12)
     gc()
     temp.obj <- get.coex(temp.obj)
@@ -288,7 +287,6 @@ test_that("merge_cell.clusters.test", {
     ttm <- clean(temp.obj)
     
     temp.obj <- ttm$object
-    temp.obj <- hk_genes(temp.obj)
     temp.obj <- cotan_analysis(temp.obj, cores = 12)
     gc()
     temp.obj <- get.coex(temp.obj)

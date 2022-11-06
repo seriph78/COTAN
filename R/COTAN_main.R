@@ -306,12 +306,12 @@ setMethod("cotan_analysis","scCOTAN",
               cells[cells > 0] <- 1
               #cells[cells <= 0] <- 0
 
-              # exlude the effective ubiqutarius genes and saved in a separate file
+              # exclude the effectively ubiquitous genes and saved in a separate file
               mu_estimator <- estimateMu(object)
 
-              object <- hk_genes(object)
-
-              hk <-object@hk
+              object <- as(housekeepingGenes(object), "scCOTAN")
+              
+              hk <- object@hk
 
               mu_estimator <- mu_estimator[!rownames(mu_estimator) %in% hk,]
               cells <- cells[!rownames(cells) %in% hk, ]
