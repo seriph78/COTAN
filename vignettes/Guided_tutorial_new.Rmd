@@ -87,7 +87,7 @@ Now we can start the cleaning. Analysis requires and starts from a matrix of raw
 If we do not want to consider the mitochondrial genes we can remove them before starting the analysis.
 
 ```{r}
-genes_to_rem = get.genes(obj)[grep('^MT', get.genes(obj))] 
+genes_to_rem = getGenes(obj)[grep('^MT', getGenes(obj))] 
 cells_to_rem = names(get.cell.size(obj)[which(get.cell.size(obj) == 0)])
 obj = drop.genes.cells(obj,genes_to_rem,cells_to_rem )
 ```
@@ -193,7 +193,7 @@ UDE (color) should not correlate with principal components! This is very importa
 The next part is used to remove the cells with efficiency too low.
 
 ```{r}
-nu_df = data.frame("nu"= sort(get.nu(obj)), "n"=c(1:length(get.nu(obj))))
+nu_df = data.frame("nu"= sort(getNu(obj)), "n"=c(1:length(getNu(obj))))
 
 ggplot(nu_df, aes(x = n, y=nu)) + 
     geom_point(colour = "#8491B4B2", size=1)

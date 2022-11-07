@@ -51,14 +51,30 @@ setGeneric(
 
 #-------------------------------------- get and set
 setGeneric(
+  "getNu",
+  function(objCOTAN) standardGeneric("getNu")
+)
+
+setGeneric(
   "getLambda",
   function(objCOTAN) standardGeneric("getLambda")
 )
 
 setGeneric(
-  "getNu",
-  function(objCOTAN) standardGeneric("getNu")
+  "getDispersion",
+  function(objCOTAN) standardGeneric("getDispersion")
 )
+
+setGeneric(
+  "getHousekeepingGenes",
+  function(objCOTAN) standardGeneric("getHousekeepingGenes")
+)
+
+setGeneric(
+  "getGenes",
+  function(objCOTAN) standardGeneric("getGenes")
+)
+
 
 #-------------------------------------- private
 setGeneric(

@@ -243,7 +243,7 @@ setMethod("clean","scCOTAN",
                 
               
                 # UDE/nu plot
-                nu_est = round(get.nu(object = object), digits = 7)
+                nu_est = round(getNu(object), digits = 7)
                 
                 plot.nu <-ggplot(pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
                 
@@ -822,8 +822,8 @@ setMethod(
 #' @rdname get.observed.ct
 #' @examples
 #' data("ERCC.cotan")
-#' g1 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
-#' g2 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+#' g1 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
+#' g2 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
 #' get.observed.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.observed.ct", function(object, g1, g2) standardGeneric("get.observed.ct"))
 #' @rdname get.observed.ct
@@ -869,14 +869,14 @@ setMethod(
 #' @rdname get.expected.ct
 #' @examples
 #' data("ERCC.cotan")
-#' g1 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
-#' g2 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
-#' while (g1 %in% get.constitutive.genes(ERCC.cotan)) {
-#'   g1 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+#' g1 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
+#' g2 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
+#' while (g1 %in% getHousekeepingGenes(ERCC.cotan)) {
+#'   g1 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
 #' }
 #'
-#' while (g2 %in% get.constitutive.genes(ERCC.cotan)) {
-#'   g2 <- get.genes(ERCC.cotan)[sample(length(get.genes(ERCC.cotan)), 1)]
+#' while (g2 %in% getHousekeepingGenes(ERCC.cotan)) {
+#'   g2 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
 #' }
 #' get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.expected.ct", function(object, g1, g2) standardGeneric("get.expected.ct"))
@@ -923,51 +923,6 @@ setMethod(
   }
 )
 
-
-#' get.constitutive.genes
-#' This function return the genes expressed in all cells in the dataset.
-#'
-#' @param object A COTAN object
-#'
-#' @return an array containing all genes expressed in all cells
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.constitutive.genes(ERCC.cotan)
-#'
-setGeneric("get.constitutive.genes", function(object) standardGeneric("get.constitutive.genes"))
-#' @rdname get.constitutive.genes
-setMethod(
-  "get.constitutive.genes", "scCOTAN",
-  function(object) {
-    gg <- object@hk
-
-    return(gg)
-  }
-)
-
-#' get.genes
-#'
-#' This function extract all genes in the dataset.
-#'
-#' @param object A COTAN object
-#'
-#' @return a gene array
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.genes(ERCC.cotan)[1:10]
-setGeneric("get.genes", function(object) standardGeneric("get.genes"))
-#' @rdname get.genes
-setMethod(
-  "get.genes", "scCOTAN",
-  function(object) {
-    gg <- rownames(object@raw)
-    return(gg)
-  }
-)
 
 
 #' get.metadata
@@ -1039,76 +994,6 @@ setMethod(
   }
 )
 
-
-#' get.nu
-#'
-#' This function extract the nu array.
-#'
-#' @param object A COTAN object
-#'
-#' @return the nu array.
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.nu(ERCC.cotan)[1:10]
-setGeneric("get.nu", function(object) standardGeneric("get.nu"))
-#' @rdname get.nu
-setMethod(
-  "get.nu", "scCOTAN",
-  function(object) {
-    meta <- object@nu
-    return(meta)
-  }
-)
-
-#' get.lambda
-#'
-#' This function extract the lambda array (mean expression for each gene).
-#'
-#' @param object A COTAN object
-#'
-#' @return the lambda array.
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.lambda(ERCC.cotan)[1:10]
-setGeneric("get.lambda", function(object) standardGeneric("get.lambda"))
-#' @rdname get.lambda
-setMethod(
-  "get.lambda", "scCOTAN",
-  function(object) {
-    meta <- object@lambda
-    return(meta)
-  }
-)
-
-
-
-#' get.a
-#'
-#' This function extract the a array.
-#'
-#' @param object A COTAN object
-#'
-#' @return the a array.
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.a(ERCC.cotan)[1:10]
-setGeneric("get.a", function(object) standardGeneric("get.a"))
-#' @rdname get.a
-setMethod(
-  "get.a", "scCOTAN",
-  function(object) {
-    meta <- object@a
-    return(meta)
-  }
-)
-
-
 #' get.cell.number
 #'
 #' This function extract number of analysed cells.
@@ -1135,7 +1020,7 @@ setMethod(
 
 #' get.cell.size
 #'
-#' This finction extract the cell raw libray size.
+#' This function extracts the cell raw libray size.
 #'
 #' @param object A COTAN object
 #'
@@ -1169,7 +1054,7 @@ setMethod(
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' genes.to.rem <- names(get.genes(ERCC.cotan)[1:10])
+#' genes.to.rem <- names(getGenes(ERCC.cotan)[1:10])
 #' cells.to.rem <- names(get.cell.size(ERCC.cotan)[1:10])
 #' ERCC.cotan <- drop.genes.cells(ERCC.cotan, genes.to.rem, cells.to.rem)
 setGeneric("drop.genes.cells", function(object, genes = c(), cells = c()) standardGeneric("drop.genes.cells"))
