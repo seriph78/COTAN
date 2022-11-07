@@ -51,6 +51,16 @@ setGeneric(
 
 #-------------------------------------- get and set
 setGeneric(
+  "getRawData",
+  function(objCOTAN) standardGeneric("getRawData")
+)
+
+setGeneric(
+  "getNormalizedData",
+  function(objCOTAN) standardGeneric("getNormalizedData")
+)
+
+setGeneric(
   "getNu",
   function(objCOTAN) standardGeneric("getNu")
 )
@@ -73,6 +83,11 @@ setGeneric(
 setGeneric(
   "getGenes",
   function(objCOTAN) standardGeneric("getGenes")
+)
+
+setGeneric(
+  "getMetadataDataset",
+  function(objCOTAN) standardGeneric("getMetadataDataset")
 )
 
 

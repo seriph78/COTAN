@@ -1,8 +1,51 @@
+
+#' getRawData
+#'
+#' This function extract the raw count table.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the raw count dataframe
+#' @export
+#' @rdname getRawData
+setMethod(
+  "getRawData",
+  "COTAN",
+  function(objCOTAN) {
+    if (is_empty(objCOTAN@raw)) {
+      warning("raw is empty")
+    }
+    
+    return(objCOTAN@raw)
+  }
+)
+
+#' getNormalizedData
+#'
+#' This function extract the normalized count table.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the normalized count dataframe (divided by nu).
+#' @export
+#' @rdname getNormalizedData
+setMethod(
+  "getNormalizedData",
+  "COTAN",
+  function(objCOTAN) {
+    if (is_empty(objCOTAN@rawNorm)) {
+      warning("rawNorm is empty")
+    }
+    
+    return(objCOTAN@rawNorm)
+  }
+)
+
 #' getNu
 #' 
 #' This function extract the nu array.
 #'
-#' @param object A COTAN object
+#' @param objCOTAN A COTAN object
 #'
 #' @return the nu array.
 #' @export
@@ -23,7 +66,7 @@ setMethod(
 #' 
 #' This function extract the lambda array (mean expression for each gene).
 #'
-#' @param object A COTAN object
+#' @param objCOTAN A COTAN object
 #'
 #' @return the lambda array.
 #' @export
@@ -44,7 +87,7 @@ setMethod(
 #' 
 #' This function extract the a array.
 #'
-#' @param object A COTAN object
+#' @param objCOTAN A COTAN object
 #'
 #' @return the a array.
 #' @export
@@ -65,7 +108,7 @@ setMethod(
 #' 
 #' This function return the genes expressed in all cells in the dataset.
 #'
-#' @param object A COTAN object
+#' @param objCOTAN A COTAN object
 #'
 #' @return an array containing all genes expressed in all cells
 #' @export
@@ -87,13 +130,14 @@ setMethod(
 #'
 #' This function extract all genes in the dataset.
 #'
-#' @param object A COTAN object
+#' @param objCOTAN A COTAN object
 #'
 #' @return a gene array
 #' @export
 #' @rdname getGenes
 setMethod(
-  "getGenes", "COTAN",
+  "getGenes",
+  "COTAN",
   function(objCOTAN) {
     if (is_empty(objCOTAN@raw)) {
       warning("raw is empty")
@@ -103,4 +147,26 @@ setMethod(
   }
 )
 
+
+#' getMetadataDataset
+#'
+#' This function extract the meta-data stored for the dataset.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the meta-data dataframe
+#' @export
+#' @rdname getMetadataDataset
+setMethod(
+  "getMetadataDataset",
+  "COTAN",
+  function(objCOTAN) {
+    if (is_empty(objCOTAN@raw)) {
+      warning("raw is empty")
+    }
+    
+    meta <- object@meta
+    return(meta)
+  }
+)
 

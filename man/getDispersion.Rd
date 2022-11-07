@@ -7,7 +7,7 @@
 \S4method{getDispersion}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{object}{A COTAN object}
+\item{objCOTAN}{A COTAN object}
 }
 \value{
 the a array.

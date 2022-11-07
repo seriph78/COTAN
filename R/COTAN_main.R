@@ -923,77 +923,6 @@ setMethod(
   }
 )
 
-
-
-#' get.metadata
-#'
-#' This function extract the meta date stored for the dataset.
-#'
-#' @param object A COTAN object
-#'
-#' @return the metatdata dataframe
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.metadata(ERCC.cotan)
-setGeneric("get.metadata", function(object) standardGeneric("get.metadata"))
-#' @rdname get.metadata
-setMethod(
-  "get.metadata", "scCOTAN",
-  function(object) {
-    meta <- object@meta
-    return(meta)
-  }
-)
-
-
-
-#' get.rawdata
-#'
-#' This function extract the raw count table.
-#'
-#' @param object A COTAN object
-#'
-#' @return the raw count dataframe
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.rawdata(ERCC.cotan)[1:10, 1:10]
-setGeneric("get.rawdata", function(object) standardGeneric("get.rawdata"))
-#' @rdname get.rawdata
-setMethod(
-  "get.rawdata", "scCOTAN",
-  function(object) {
-    meta <- object@raw
-    return(meta)
-  }
-)
-
-
-#' get.normdata
-#'
-#' This function extract the normalized count table.
-#'
-#' @param object A COTAN object
-#'
-#' @return the normalized count dataframe (divided by nu).
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.normdata(ERCC.cotan)[1:10, 1:10]
-setGeneric("get.normdata", function(object) standardGeneric("get.normdata"))
-#' @rdname get.normdata
-setMethod(
-  "get.normdata", "scCOTAN",
-  function(object) {
-    meta <- object@raw.norm
-    return(meta)
-  }
-)
-
 #' get.cell.number
 #'
 #' This function extract number of analysed cells.
@@ -1015,8 +944,6 @@ setMethod(
     return(num)
   }
 )
-
-
 
 #' get.cell.size
 #'
@@ -1082,7 +1009,7 @@ setMethod(
 #' data("ERCC.cotan")
 #' text <- c("Test", "This is a test")
 #' ERCC.cotan <- add.row.to.meta(ERCC.cotan, text)
-#' get.metadata(ERCC.cotan)
+#' getMetadataDataset(ERCC.cotan)
 setGeneric("add.row.to.meta", function(object, text.line) standardGeneric("add.row.to.meta"))
 #' @rdname add.row.to.meta
 setMethod(

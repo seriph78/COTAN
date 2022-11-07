@@ -24,5 +24,5 @@ This function is used to add a line of information to the information data frame
 data("ERCC.cotan")
 text <- c("Test", "This is a test")
 ERCC.cotan <- add.row.to.meta(ERCC.cotan, text)
-get.metadata(ERCC.cotan)
+getMetadataDataset(ERCC.cotan)
 }
