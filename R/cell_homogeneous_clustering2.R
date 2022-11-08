@@ -266,7 +266,7 @@ setMethod("cell_homogeneous_clustering","character",
     #break
   }
   
-  obj@meta <- rbind(obj@meta,c("n. cells left out by clustering:", (length(to_recluster_new)-1)))
+  obj@meta <- rbind(obj@meta,c("n. cells left out by clustering:", length(to_recluster_new)))
   
   if ( (obj@n_cells - length(to_recluster_new)) !=  dim(obj@raw)[2]) {
     print("Problems with the cell number! Check!")
@@ -313,13 +313,14 @@ setMethod("cell_homogeneous_clustering","character",
     print("Claening step done")
     obj <- ttm$object
     rm(ttm)
-    gc()
-    obj <- cotan_analysis(obj,cores = cores)
-    print("Analysis step done")
-    gc()
+    
     saveRDS(obj,paste(out_dir,"obj_",cond,".cotan.RDS",sep = ""))
     
   }
+  gc()
+  obj <- cotan_analysis(obj,cores = cores)
+  print("Analysis step done")
+  gc()
   saveRDS(obj,paste(out_dir,"obj_",cond,".cotan.RDS",sep = ""))
   gc()
   print("Coex estimation last step started")
