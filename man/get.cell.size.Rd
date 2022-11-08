@@ -16,7 +16,7 @@ get.cell.size(object)
 an array with the library sizes
 }
 \description{
-This finction extract the cell raw libray size.
+This function extracts the cell raw libray size.
 }
 \examples{
 data("ERCC.cotan")
