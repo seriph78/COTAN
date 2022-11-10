@@ -7,9 +7,8 @@ setMethod(
     # Cells matrix : formed by row data matrix changed to 0-1 matrix
     cells.0.1[cells.0.1 > 0] <- 1
     # We want to discard genes having less than 3 not 0 counts over 1000 cells
-    cells.0.1 <- cells.0.1[rowSums(cells.0.1) > round((length(colnames(object@raw)) / 1000 * 3),
-      digits = 0
-    ), ]
+    cells.0.1 <- cells.0.1[rowSums(cells.0.1) > round((getNumCells(object) / 1000 * 3),
+                                                      digits = 0), ]
     return(cells.0.1)
   }
 )
@@ -17,7 +16,7 @@ setMethod(
 
 #' spMat
 #'
-#' Internal function to convert the matrix in a sparce trinagolar matrix
+#' Internal function to convert the matrix in a sparce triangular matrix
 #' @param object A COTAN object
 #' @importFrom Matrix forceSymmetric
 #' @return the entire COTAN object

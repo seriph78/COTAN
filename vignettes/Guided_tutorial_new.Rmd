@@ -322,9 +322,9 @@ plot(dend)
 The next function can directly plot the GDI for the dataset with the 1.5 thresholds (in red) and the two higher quantiles (in blue). We can also define some gene sets (in this case three) that we want to specifically label in the GDI plot.
 
 ```{r}
-AA <- sample(rownames(obj@raw),size = 5)
-BB <- sample(rownames(obj@raw),size = 5)
-CC <- sample(rownames(obj@raw),size = 5)
+AA <- sample(getGenes(obj), size = 5)
+BB <- sample(getGenes(obj), size = 5)
+CC <- sample(getGenes(obj), size = 5)
 
 genes.list <- list("AA" = AA,"BB" = BB,"CC" = CC)
 

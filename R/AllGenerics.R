@@ -61,6 +61,16 @@ setGeneric(
 )
 
 setGeneric(
+  "getCells",
+  function(objCOTAN) standardGeneric("getCells")
+)
+
+setGeneric(
+  "getGenes",
+  function(objCOTAN) standardGeneric("getGenes")
+)
+
+setGeneric(
   "getNormalizedData",
   function(objCOTAN) standardGeneric("getNormalizedData")
 )
@@ -83,11 +93,6 @@ setGeneric(
 setGeneric(
   "getHousekeepingGenes",
   function(objCOTAN) standardGeneric("getHousekeepingGenes")
-)
-
-setGeneric(
-  "getGenes",
-  function(objCOTAN) standardGeneric("getGenes")
 )
 
 setGeneric(

@@ -60,10 +60,10 @@ setMethod("automatic.COTAN.object.creation","data.frame",
               obj <- methods::new("scCOTAN",raw = df)
               obj <- initRaw(obj,GEO = GEO ,sc.method = sc.method,cond = cond)
               #if (mt == FALSE) {
-              #    genes_to_rem <- rownames(obj@raw[grep(mt_prefix, rownames(obj@raw)),])
-              #    obj@raw <- obj@raw[!rownames(obj@raw) %in% genes_to_rem,]
+              #    genes_to_rem <- rownames(obj@raw[grep(mt_prefix, getGenes(obj)),])
+              #    obj@raw <- obj@raw[!getGenes(obj) %in% genes_to_rem,]
               #    cells_to_rem <- colnames(obj@raw[which(colSums(obj@raw) == 0)])
-              #    obj@raw <- obj@raw[,!colnames(obj@raw) %in% cells_to_rem]
+              #    obj@raw <- obj@raw[,!getCells(obj) %in% cells_to_rem]
               #}
               t <- cond
 

@@ -23,7 +23,7 @@
 #' data("ERCC.cotan")
 #' df <- get.gene.coexpression.space(ERCC.cotan,
 #'   n.genes.for.marker = 10,
-#'   primary.markers = getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 5)]
+#'   primary.markers = getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 5)]
 #' )
 setGeneric("get.gene.coexpression.space", function(object, n.genes.for.marker = 25, primary.markers) {
   standardGeneric("get.gene.coexpression.space")

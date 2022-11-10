@@ -43,7 +43,7 @@ setMethod("initRaw","scCOTAN",
                 object@meta[4,seq_len(2)] = c("Condition sample:",cond)
 
               object@clusters = rep(NA,ncol(object@raw))
-              names(object@clusters)=colnames(object@raw)
+              names(object@clusters)=getCells(object)
                 return(object)
           }
 )
@@ -817,8 +817,8 @@ setMethod(
 #' @rdname get.observed.ct
 #' @examples
 #' data("ERCC.cotan")
-#' g1 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
-#' g2 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
+#' g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
+#' g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
 #' get.observed.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.observed.ct", function(object, g1, g2) standardGeneric("get.observed.ct"))
 #' @rdname get.observed.ct
@@ -863,14 +863,14 @@ setMethod(
 #' @rdname get.expected.ct
 #' @examples
 #' data("ERCC.cotan")
-#' g1 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
-#' g2 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
+#' g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
+#' g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
 #' while (g1 %in% getHousekeepingGenes(ERCC.cotan)) {
-#'   g1 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
+#'   g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
 #' }
 #'
 #' while (g2 %in% getHousekeepingGenes(ERCC.cotan)) {
-#'   g2 <- getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 1)]
+#'   g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
 #' }
 #' get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.expected.ct", function(object, g1, g2) standardGeneric("get.expected.ct"))

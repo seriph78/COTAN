@@ -51,8 +51,8 @@ setMethod("cell_homogeneous_clustering","character",
   gc()
   
   # Step 2
-  df.cell.clustering <- as.data.frame(matrix(nrow = ncol(obj@raw),ncol = 1))
-  rownames(df.cell.clustering) <- colnames(obj@raw)
+  df.cell.clustering <- as.data.frame(matrix(nrow = getNumCells(obj),ncol = 1))
+  rownames(df.cell.clustering) <- getCells(obj)
   colnames(df.cell.clustering) <- "cl_1"
   
   to_recluster_new <- NA
@@ -105,7 +105,7 @@ setMethod("cell_homogeneous_clustering","character",
     print(paste("Length array cells to re-cluster:",length(to_recluster_new),"round:",round, sep = " "))
     
     #Clustering using Seurat
-    seurat.obj <- CreateSeuratObject(counts = (obj@raw[,colnames(obj@raw) %in% to_recluster_new]), 
+    seurat.obj <- CreateSeuratObject(counts = (obj@raw[,getCells(obj) %in% to_recluster_new]), 
                                    project = "reclustering", min.cells = 1, min.features = 2)
     seurat.obj <- NormalizeData(seurat.obj, normalization.method = "LogNormalize", 
                                 scale.factor = 10000)
@@ -234,16 +234,16 @@ setMethod("cell_homogeneous_clustering","character",
     
     if (length(to_recluster_new) <= 50 | cl.resolution >= 2.5) {
       print(paste0("NO new possible clusters! Cell left: ",(length(to_recluster_new)), " They will be removed!"))
-      obj@raw = obj@raw[,!colnames(obj@raw) %in% to_recluster_new]
+      obj@raw = obj@raw[,!getCells(obj) %in% to_recluster_new]
       #obj@clusters = obj@clusters[!names(obj@clusters) %in% to_recluster_new]
       df.cell.clustering$names <- rownames(df.cell.clustering)
       df.cell.clustering <- df.cell.clustering[!rownames(df.cell.clustering) %in% to_recluster_new,]
-      if ((!all(colnames(obj@raw) %in% rownames(df.cell.clustering)) & 
-           !all(rownames(df.cell.clustering) %in% colnames(obj@raw)))) {
+      if ((!all(getCells(obj) %in% rownames(df.cell.clustering)) & 
+           !all(rownames(df.cell.clustering) %in% getCells(obj)))) {
         print("Problem: different cells in raw and clusters!")
       }
       saveRDS(df.cell.clustering,paste(out_dir_round,"df.clusters_",cond,".cotan.RDS",sep = ""))
-      if (identical(colnames(obj@raw), rownames(df.cell.clustering))) {
+      if (identical(getCells(obj), rownames(df.cell.clustering))) {
         obj@clusters <- df.cell.clustering$cl_1
         names(obj@clusters) <- rownames(df.cell.clustering)
       }else{

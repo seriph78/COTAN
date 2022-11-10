@@ -26,7 +26,7 @@ creation of the COTAN object and initialization of the initial parameters
 objCOTAN <- COTAN(raw=yoc@raw)
 objCOTAN <- housekeepingGenes(objCOTAN)
 
-objCOTAN@raw <- objCOTAN@raw[!rownames(objCOTAN@raw) %in% objCOTAN@hkGenes, ]
+objCOTAN@raw <- objCOTAN@raw[!getGenes(objCOTAN) %in% objCOTAN@hkGenes, ]
 
 objCOTAN <- estimateLambdaLinear(objCOTAN)
 objCOTAN <- estimateNuLinear(objCOTAN) 

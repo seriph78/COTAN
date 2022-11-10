@@ -26,9 +26,9 @@ mitochondrial.percentage.plot <- function(obj, split.pattern = " ", n.col=2, gen
   sizes$n <- c(1:dim(sizes)[1])
   sizes$sample <- stringr::str_split(rownames(sizes),
                                      pattern = split.pattern,simplify = T)[,n.col]
-  mit.genes <- as.data.frame(obj@raw[rownames(obj@raw) %in% 
-                         rownames(obj@raw)[stringr::str_detect(rownames(obj@raw),pattern = "^MT-")],])
-  #colnames(mit.genes) <- rownames(obj@raw)[stringr::str_detect(rownames(obj@raw),pattern = "^MT-")]
+  mit.genes <- as.data.frame(getRawData(obj)[getGenes(obj) %in% 
+                              getGenes(obj)[stringr::str_detect(getGenes(obj), pattern = "^MT-")],])
+  #colnames(mit.genes) <- getGenes(obj)[stringr::str_detect(getGenes(obj), pattern = "^MT-")]
   if(!identical(colnames(mit.genes),rownames(sizes))){
     print("Problem cell oreder!")
   }

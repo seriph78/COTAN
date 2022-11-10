@@ -54,6 +54,51 @@ setMethod(
   }
 )
 
+
+#' getCells
+#'
+#' This function extract all cells in the dataset.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return a cell array
+#' @export
+#' @rdname getCells
+setMethod(
+  "getCells",
+  "COTAN",
+  function(objCOTAN) {
+    if (is_empty(objCOTAN@raw)) {
+      warning("raw is empty")
+    }
+    
+    return(colnames(objCOTAN@raw))
+  }
+)
+
+
+#' getGenes
+#'
+#' This function extract all genes in the dataset.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return a gene array
+#' @export
+#' @rdname getGenes
+setMethod(
+  "getGenes",
+  "COTAN",
+  function(objCOTAN) {
+    if (is_empty(objCOTAN@raw)) {
+      warning("raw is empty")
+    }
+    
+    return(rownames(objCOTAN@raw))
+  }
+)
+
+
 #' getNormalizedData
 #'
 #' This function extracts the normalized count table.
@@ -156,28 +201,6 @@ setMethod(
     }
     
     return(objCOTAN@hkGenes)
-  }
-)
-
-
-#' getGenes
-#'
-#' This function extract all genes in the dataset.
-#'
-#' @param objCOTAN A COTAN object
-#'
-#' @return a gene array
-#' @export
-#' @rdname getGenes
-setMethod(
-  "getGenes",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(objCOTAN@raw)) {
-      warning("raw is empty")
-    }
-    
-    return(rownames(objCOTAN@raw))
   }
 )
 
