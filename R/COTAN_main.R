@@ -918,33 +918,6 @@ setMethod(
 )
 
 
-#' drop.genes.cells
-#'
-#' This function remove an array of genes and/or cells from the original object raw matrix.
-#'
-#' @param object a COTAN object
-#' @param genes an array of gene names
-#' @param cells an array of cell names
-#'
-#' @return the original object but with the raw matrix without the indicated cells and/or genes.
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' genes.to.rem <- getGenes(ERCC.cotan)[grep('^MT', getGenes(ERCC.cotan))]
-#' cells.to.rem <- getCells(ERCC.cotan)[which(getCellsSize(ERCC.cotan) == 0)]
-#' ERCC.cotan <- drop.genes.cells(ERCC.cotan, genes.to.rem, cells.to.rem)
-setGeneric("drop.genes.cells", function(object, genes = c(), cells = c()) standardGeneric("drop.genes.cells"))
-#' @rdname drop.genes.cells
-setMethod(
-  "drop.genes.cells", "scCOTAN",
-  function(object, genes, cells) {
-    object@raw <- object@raw[!rownames(object@raw) %in% genes, ]
-    object@raw <- object@raw[, !colnames(object@raw) %in% cells]
-    return(object)
-  }
-)
-
 #' add.row.to.meta
 #'
 #' This function is used to add a line of information to the information data frame (metadata).

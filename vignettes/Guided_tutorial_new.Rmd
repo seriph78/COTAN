@@ -90,7 +90,7 @@ If we do not want to consider the mitochondrial genes we can remove them before 
 ```{r}
 genes_to_rem = getGenes(obj)[grep('^MT', getGenes(obj))] 
 cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
-obj = drop.genes.cells(obj,genes_to_rem,cells_to_rem )
+obj = as(dropGenesCells(obj, genes_to_rem, cells_to_rem), "scCOTAN")
 ```
 
 We want also to define a prefix to identify the sample.
@@ -146,7 +146,7 @@ if (length(ttm$cl1) < length(ttm$cl2)) {
   to_rem = ttm$cl2
 }
 n_it = n_it+1
-obj = drop.genes.cells(object = obj,genes = c(),cells = to_rem)
+obj = as(dropGenesCells(object = obj, genes = c(), cells = to_rem), "scCOTAN")
 
 gc()
 
@@ -228,7 +228,7 @@ obj = add.row.to.meta(obj,c("Threshold low UDE cells:",yset))
 
 to_rem = rownames(nu_df[which(nu_df$nu < yset),])
 
-obj = drop.genes.cells(object = obj, genes = c(),cells =  to_rem)
+obj = as(dropGenesCells(object = obj, genes = c(),cells =  to_rem), "scCOTAN")
 ```
 
 Repeat the estimation after the cells are removed

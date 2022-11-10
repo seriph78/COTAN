@@ -1,4 +1,9 @@
 setGeneric(
+  "dropGenesCells",
+  function(objCOTAN, genes = c(), cells = c()) standardGeneric("dropGenesCells")
+)
+
+setGeneric(
   "plotCellsHeatmap",
   function(objCOTAN, cellsName, clusters) standardGeneric("plotCellsHeatmap")
 )
