@@ -307,6 +307,8 @@ setMethod("cell_homogeneous_clustering","character",
   rm(srat)
   gc()
   #Re estimation of all parameters after cells removing
+  
+  
   if((length(to_recluster_new)) > 0){
     print("Estimate again parameters after cells dropping")
     ttm <- clean(obj)

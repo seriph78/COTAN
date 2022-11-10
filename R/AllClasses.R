@@ -154,10 +154,13 @@ setAs("COTAN",
                                 !is.null(from@clustersCoex),
                                 msg = "Unexpected scCOTAN null members")
         
-        if (!is_empty(from@metaCells[['clusters']]))
+        if (!is_empty(from@metaCells[['clusters']])) {
           clusters <- from@metaCells[['clusters']]
-        else
+          names(clusters) <- rownames(from@metaCells)
+        }
+        else {
           clusters <- c()
+        }
         
         if (!is_empty(from@clustersCoex[['cluster_data']]))
           cluster_data <- from@clustersCoex[['cluster_data']]
