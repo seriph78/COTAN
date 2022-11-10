@@ -22,11 +22,11 @@ setMethod(
 
 #' getNumCells
 #'
-#' This function extracts the number of cells in the sample (m)
+#' This function extracts the number of cells in the sample (𝑚)
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return the number of cells in the sample (m).
+#' @return the number of cells in the sample (𝑚).
 #' @export
 #' @rdname getNumCells
 setMethod(
@@ -39,11 +39,11 @@ setMethod(
 
 #' getNumGenes
 #'
-#' This function extracts the number of genes in the sample (n)
+#' This function extracts the number of genes in the sample (𝑛)
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return the number of genes in the sample (n).
+#' @return the number of genes in the sample (𝑛).
 #' @export
 #' @rdname getNumGenes
 setMethod(

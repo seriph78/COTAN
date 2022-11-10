@@ -24,13 +24,50 @@ setClass("COTAN",
            metaDataset  = "data.frame",
            metaCells    = "data.frame",
            clustersCoex = "list"
-         )
+         ),
+         prototype=list(
+           raw          = as(matrix(0, 0, 0), "dgCMatrix"),
+           rawNorm      = as(matrix(0, 0, 0), "dgCMatrix"),
+           coex         = as(matrix(0, 0, 0), "dgCMatrix"),
+           cellsCoex    = as(matrix(0, 0, 0), "dgCMatrix"),
+           nu           = vector(mode = "numeric"),
+           lambda       = vector(mode = "numeric"),
+           dispersion   = vector(mode = "numeric"),
+           hkGenes      = vector(mode = "character"),
+           metaDataset  = data.frame(),
+           metaCells    = data.frame(),
+           clustersCoex = vector(mode = "list")
+         ),
+         validity=function(object) {
+           if ((!is_empty(object@rawNorm)) && (!identical(dim(object@rawNorm), dim(object@raw)))) {
+             stop(paste("'rawNorm'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
+                        "] must have the same sizes as ",
+                        "'raw'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
+                        "] when not empty."))
+           }
+           if ((!is_empty(object@nu)) && (length(object@nu) != ncol(object@raw))) {
+             stop(paste("'nu'[", length(object@nu), "] must have size equal",
+                        " to the number of columns of 'raw'[", dim(object@raw), "] when not empty."))
+           }
+           if ((!is_empty(object@lambda)) && (length(object@lambda) != nrow(object@raw))) {
+             stop(paste("'lambda'[", length(object@lambda), "] must have size equal",
+                        " to the number of rows of 'raw'[", dim(object@raw), "] when not empty."))
+           }
+           if ((!is_empty(object@dispersion) &&
+                ((length(object@dispersion) + length(object@hkGenes)) != nrow(object@raw)))) {
+             stop(paste("'dispersion'[", length(object@dispersion), "] size plus",
+                        " 'hkGenes'[", length(object@hkGenes), "] size must be equal",
+                        " to the number of rows of 'raw'[", dim(object@raw), "] when not empty."))
+           }
+           # TODO: check remaining slots
+           return(TRUE)
+         }
 )
 
 # constructor of the COTAN CLASS
 #' @export 
 COTAN <- function(raw = "ANY") {
-  raw <- as(as.matrix(raw), "sparseMatrix")
+  raw <- as(as.matrix(raw), "dgCMatrix")
   new("COTAN", raw = raw)
 }
 
@@ -84,28 +121,47 @@ setIs("scCOTAN",
             warning("scCOTAN as COTAN: non-empty yes_yes member found: will be discarded",
                     call. = FALSE)
         }
-        
-        if (!is_empty(from@clusters))
-          metaCells <- data.frame(clusters = from@clusters,
-                           row.names = colnames(from@raw))
-        else
-          metaCells <- data.frame()
-        
-        if (!is_empty(from@cluster_data))
-          clustersCoex <- list(cluster_data = from@cluster_data)
-        else
-          clustersCoex <- list()
-        
-        if (!is_empty(from@raw.norm))
-          rawNorm = from@raw.norm
-        else
+
+        if (is_empty(from@raw)) {
+          raw = as(matrix(0, 0, 0), "dgCMatrix")
+        }
+        else if(is(from@raw, "dgCMatrix")) {
+          raw = from@raw
+        }
+        else {
+          raw = as(as.matrix(from@raw), "dgCMatrix")
+        }
+
+        if (is_empty(from@raw.norm)) {
           rawNorm = as(matrix(0, 0, 0), "dgCMatrix")
-            
+        }
+        else if(is(from@raw.norm, "dgCMatrix")) {
+          rawNorm = from@raw.norm
+        }
+        else {
+          rawNorm = as(as.matrix(from@raw.norm), "dgCMatrix")
+        }
+        
+        if (!is_empty(from@clusters)) {
+          metaCells <- data.frame(clusters = from@clusters,
+                                  row.names = colnames(from@raw))
+        }
+        else {
+          metaCells <- data.frame()
+        }
+        
+        if (!is_empty(from@cluster_data)) {
+          clustersCoex <- list(cluster_data = from@cluster_data)
+        }
+        else {
+          clustersCoex <- vector(mode = "list")
+        }
+
         new("COTAN",
-            raw          = from@raw,
+            raw          = raw,
             rawNorm      = rawNorm,
             coex         = from@coex,
-            cellsCoex    = matrix(0, 0, 0),
+            cellsCoex    = as(matrix(0, 0, 0), "dgCMatrix"),
             nu           = from@nu,
             lambda       = from@lambda,
             dispersion   = from@a,
@@ -120,27 +176,46 @@ setIs("scCOTAN",
           warning("scCOTAN<- as COTAN<-: non-empty yes_yes member found: will be discarded",
                   call. = FALSE)
         }
-        
-        if (!is_empty(value@clusters))
+
+        if (is_empty(value@raw)) {
+          raw = as(matrix(0, 0, 0), "dgCMatrix")
+        }
+        else if(is(value@raw, "dgCMatrix")) {
+          raw = value@raw
+        }
+        else {
+          raw = as(as.matrix(value@raw), "dgCMatrix")
+        }
+
+        if (is_empty(value@raw.norm)) {
+          rawNorm = as(matrix(0, 0, 0), "dgCMatrix")
+        }
+        else if(is(value@raw.norm, "dgCMatrix")) {
+          rawNorm = value@raw.norm
+        }
+        else {
+          rawNorm = as(as.matrix(value@raw.norm), "dgCMatrix")
+        }
+
+        if (!is_empty(value@clusters)) {
           metaCells <- data.frame(clusters = value@clusters,
                                   row.names = colnames(value@raw))
-        else
+        }
+        else {
           metaCells <- data.frame()
-        
-        if (!is_empty(value@cluster_data))
-          clustersCoex <- list(cluster_data = value@cluster_data)
-        else
-          clustersCoex <- list()
-        
-        if (!is_empty(value@raw.norm))
-          rawNorm = value@raw.norm
-        else
-          rawNorm = as(matrix(0, 0, 0), "dgCMatrix")
+        }
 
-        from@raw          <- value@raw
+        if (!is_empty(value@cluster_data)) {
+          clustersCoex <- list(cluster_data = value@cluster_data)
+        }
+        else {
+          clustersCoex <- vector(mode = "list")
+        }
+
+        from@raw          <- raw
         from@rawNorm      <- rawNorm
         from@coex         <- value@coex
-        from@cellCoex     <- matrix(0, 0, 0)
+        from@cellCoex     <- as(matrix(0, 0, 0), "dgCMatrix")
         from@nu           <- value@nu
         from@lambda       <- value@lambda
         from@dispersion   <- value@a
@@ -157,19 +232,21 @@ setAs("COTAN",
         assertthat::assert_that(!is.null(from@metaCells),
                                 !is.null(from@clustersCoex),
                                 msg = "Unexpected COTAN null members")
-        
+
         if (!is_empty(from@metaCells[['clusters']])) {
           clusters <- from@metaCells[['clusters']]
           names(clusters) <- rownames(from@metaCells)
         }
         else {
-          clusters <- c()
+          clusters <- vector()
         }
 
-        if (!is_empty(from@clustersCoex[['cluster_data']]))
+        if (!is_empty(from@clustersCoex[['cluster_data']])) {
           cluster_data <- from@clustersCoex[['cluster_data']]
-        else
+        }
+        else {
           cluster_data <- data.frame()
+        }
 
         new("scCOTAN",
             raw          = from@raw,
@@ -189,16 +266,20 @@ setAs("COTAN",
                                 !is.null(from@clustersCoex),
                                 msg = "Unexpected scCOTAN null members")
 
-        if (!is_empty(value@metaCells[['clusters']]))
+        if (!is_empty(value@metaCells[['clusters']])) {
           clusters <- value@metaCells[['clusters']]
-        else
-          clusters <- c()
-        
-        if (!is_empty(value@clustersCoex[['cluster_data']]))
+        }
+        else {
+          clusters <- vector()
+        }
+
+        if (!is_empty(value@clustersCoex[['cluster_data']])) {
           cluster_data <- value@clustersCoex[['cluster_data']]
-        else
+        }
+        else {
           cluster_data <- data.frame()
-        
+        }
+
         from@raw          <- value@raw
         from@raw.norm     <- value@rawNorm
         from@coex         <- value@coex
