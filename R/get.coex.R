@@ -55,7 +55,7 @@ setMethod(
     gc()
     
     coex_n <- coex_n * sqrt(sum.for.div_n)
-    coex_n <- coex_n / sqrt(object@n_cells)
+    coex_n <- coex_n / sqrt(getNumCells(object))
     coex_n <- list("genes" = yes_yes_n$genes, "values" = coex_n)
     object@coex <- coex_n
 

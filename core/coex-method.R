@@ -11,7 +11,6 @@ setMethod(
   "coex",
   "COTAN",
   function(objCOTAN, cells) {
-    objCOTAN <- nCells(objCOTAN)
     objCOTAN <- housekeepingGenes(objCOTAN)
     
     # observed yes/yes contingency table
@@ -57,7 +56,7 @@ setMethod(
     if (cells){
       coex <- coex / sqrt(nrow(objCOTAN@raw)) # divided by radq(n)
     } else {
-      coex <- coex / sqrt(objCOTAN@nCells) # divided by radq(m)
+      coex <- coex / sqrt(getNumCells(objCOTAN)) # divided by radq(m)
     }
     
     coex <- list("genes" = observedYY$genes, "values" = coex)

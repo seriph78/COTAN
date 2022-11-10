@@ -100,8 +100,7 @@ t = "test"
 
 print(paste("Condition ",t,sep = ""))
 #--------------------------------------
-n_cells = length(get.cell.size(object = obj))
-print(paste("n cells", n_cells, sep = " "))
+print(paste("n cells", getnumCells(obj), sep = " "))
 
 n_it = 1
 ```

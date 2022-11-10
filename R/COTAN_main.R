@@ -42,8 +42,6 @@ setMethod("initRaw","scCOTAN",
                 object@meta[3,2] = ncol(object@raw)
                 object@meta[4,seq_len(2)] = c("Condition sample:",cond)
 
-                object@n_cells = ncol(object@raw)
-
               object@clusters = rep(NA,ncol(object@raw))
               names(object@clusters)=colnames(object@raw)
                 return(object)
@@ -225,9 +223,6 @@ setMethod("clean","scCOTAN",
                                                             face ="italic" ),
                                    legend.position="bottom")
 
-                object@n_cells  <-  length(colnames(object@raw))
-                
-
                 #genes plot 
                 pl <- ggplot(D, aes(x=n,y=means)) + geom_point() +
                   geom_text_repel(data=subset(D, n > (max(D$n) - 15) ), aes(n,means,label=rownames(D[D$n > (max(D$n)- 15),])),
@@ -322,7 +317,7 @@ setMethod("cotan_analysis","scCOTAN",
               tot <- list()
 
               p_begin <- 1
-              n_genes = length(rownames(mu_estimator))
+              n_genes = nrow(mu_estimator)
               while(p_begin <= n_genes) {
                   p_end <- p_begin + 200
                   if(p_end >= n_genes){
@@ -434,9 +429,9 @@ setMethod(
       if (any(ge %in% obj@hk)) {
         genes.to.add <- ge[ge %in% obj@hk]
         temp.hk.rows <- as.data.frame(matrix(
-          ncol = ncol(p_val), nrow =
-            length(genes.to.add)
-        ))
+                          ncol = ncol(p_val),
+                          nrow = length(genes.to.add)
+                        ))
         rownames(temp.hk.rows) <- genes.to.add
         colnames(temp.hk.rows) <- colnames(p_val)
         temp.hk.rows <- 1
@@ -446,9 +441,9 @@ setMethod(
       if (any(gr %in% obj@hk)) {
         genes.to.add <- gr[gr %in% obj@hk]
         temp.hk.cols <- as.data.frame(matrix(
-          ncol = length(genes.to.add), nrow =
-            nrow(p_val)
-        ))
+                          ncol = length(genes.to.add),
+                          nrow = nrow(p_val)
+                        ))
         colnames(temp.hk.cols) <- genes.to.add
         rownames(temp.hk.cols) <- rownames(p_val)
         temp.hk.cols <- 1
@@ -832,14 +827,13 @@ setMethod(
   function(object, g1, g2) {
     yes_yes <- observedContingencyYY(object)
     si_si <- yes_yes[g1, g2]
-    n_cells <- object@n_cells
 
     si_any <- max(yes_yes[g1, ])
 
     any_si <- max(yes_yes[g2, ])
     si_no <- si_any - si_si
     no_si <- any_si - si_si
-    no_no <- n_cells - (si_si + si_no + no_si)
+    no_no <- getNumCells(object) - (si_si + si_no + no_si)
 
     ct <- as.data.frame(matrix(ncol = 2, nrow = 2))
     colnames(ct) <- c(paste(g1, "yes", sep = "."), paste(g1, "no", sep = "."))
@@ -920,28 +914,6 @@ setMethod(
     ct[2, 1] <- estimator_si_no[g1, g2]
 
     return(ct)
-  }
-)
-
-#' get.cell.number
-#'
-#' This function extract number of analysed cells.
-#'
-#' @param object A COTAN object
-#'
-#' @return the cell number value.
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.cell.number(ERCC.cotan)
-setGeneric("get.cell.number", function(object) standardGeneric("get.cell.number"))
-#' @rdname get.cell.number
-setMethod(
-  "get.cell.number", "scCOTAN",
-  function(object) {
-    num <- object@n_cells
-    return(num)
   }
 )
 

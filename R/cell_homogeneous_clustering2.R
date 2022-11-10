@@ -90,7 +90,6 @@ setMethod("cell_homogeneous_clustering","character",
   
   round <- 0
   singletons <- 0
-  #n_cells <- length(obj@clusters)
   to_recluster_old <- NA
   number.cls.old <- 0 #Just to start from a number higher than any possible real situation
   
@@ -267,14 +266,7 @@ setMethod("cell_homogeneous_clustering","character",
   }
   
   obj@meta <- rbind(obj@meta,c("n. cells left out by clustering:", length(to_recluster_new)))
-  
-  if ( (obj@n_cells - length(to_recluster_new)) !=  dim(obj@raw)[2]) {
-    print("Problems with the cell number! Check!")
-    #break
-  }
-  
-  obj@n_cells <- dim(obj@raw)[2]
-  
+
   #--------------------------
   cotan <- obj@clusters
   cotan <- as.data.frame(cotan)

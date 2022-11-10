@@ -50,7 +50,7 @@ setMethod("cluster_homogeneity","scCOTAN",
 
               print(paste("Condition ",t,sep = ""))
               #--------------------------------------
-              n_cells = length(get.cell.size(object = obj))
+              n_cells = getNumCells(obj)
               print(paste("n cells", n_cells, sep = " "))
               if (n_cells <= 10) {
                 print("Cell cluster too small!")

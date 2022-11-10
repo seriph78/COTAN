@@ -13,5 +13,5 @@
 the normalized count dataframe (divided by nu).
 }
 \description{
-This function extract the normalized count table.
+This function extracts the normalized count table.
 }

@@ -30,11 +30,6 @@ setGeneric(
 )
 
 setGeneric(
-  "nCells",
-  function(objCOTAN) standardGeneric("nCells")
-)
-
-setGeneric(
   "estimateLambdaLinear",
   function(objCOTAN) standardGeneric("estimateLambdaLinear")
 )
@@ -53,6 +48,16 @@ setGeneric(
 setGeneric(
   "getRawData",
   function(objCOTAN) standardGeneric("getRawData")
+)
+
+setGeneric(
+  "getNumCells",
+  function(objCOTAN) standardGeneric("getNumCells")
+)
+
+setGeneric(
+  "getNumGenes",
+  function(objCOTAN) standardGeneric("getNumGenes")
 )
 
 setGeneric(

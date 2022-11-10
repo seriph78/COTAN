@@ -172,7 +172,7 @@ setMethod("merge_cell.clusters","scCOTAN",
                         axis.title.y = element_text( size = si, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"),
                         legend.title = element_blank(),
                         legend.text = element_text(color = "#3C5488FF",face ="italic" ),
-                        legend.position = "none")  +ggtitle(paste(cond.merge,obj@n_cells,sep = " "))
+                        legend.position = "none") + ggtitle(paste(cond.merge,getNumCells(obj),sep = " "))
                 
                 
                 pdf(paste(dir,cond.merge, ".GDI_plots.pdf", sep = ""), onefile=TRUE)

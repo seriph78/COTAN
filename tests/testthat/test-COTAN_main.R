@@ -211,8 +211,6 @@ test_that("cell_homogeneous_clustering", {
     temp.obj <- new("scCOTAN",raw = temp.obj)
     temp.obj <- initRaw(temp.obj,GEO="" ,sc.method=" ",cond = "temp.clustered")
     
-    n_cells <- length(get.cell.size(object = temp.obj))
-    
     ttm <- clean(temp.obj)
     
     temp.obj <- ttm$object
@@ -281,8 +279,6 @@ test_that("merge_cell.clusters.test", {
     
     temp.obj <- new("scCOTAN",raw = temp.obj)
     temp.obj <- initRaw(temp.obj,GEO="" ,sc.method=" ",cond = "temp.clustered")
-    
-    n_cells <- length(get.cell.size(object = temp.obj))
     
     ttm <- clean(temp.obj)
     

@@ -69,8 +69,7 @@ setMethod("automatic.COTAN.object.creation","data.frame",
 
               print(paste("Condition ",t,sep = ""))
               #--------------------------------------
-              n_cells <- length(colnames(obj@raw))
-              print(paste("n cells", n_cells, sep = " "))
+              print(paste("n cells", getNumCells(obj), sep = " "))
 
               n_it <- 1
 
@@ -158,12 +157,14 @@ setMethod("automatic.COTAN.object.creation","data.frame",
 
               print(paste0("Only coex time ",coex_time))
 
-              utils::write.csv(data.frame("type" = c("tot_time","analysis_time","coex_time"),
-                                          "times"=
-                                              c(as.numeric(all.time),
-                                                as.numeric(analysis_time),
-                                                as.numeric(coex_time) ),
-                                          "n.cells"=n_cells,"n.genes"=dim(obj@raw)[1]),
+              utils::write.csv(data.frame("type" = c("tot_time",
+                                                     "analysis_time",
+                                                     "coex_time"),
+                                          "times"= c(as.numeric(all.time),
+                                                     as.numeric(analysis_time),
+                                                     as.numeric(coex_time) ),
+                                          "n.cells"=getNumCells(obj),
+                                          "n.genes"=getNumGenes(obj) ),
                                file = file.path(out_dir, paste(t,"_times.csv", sep = "")))
 
               

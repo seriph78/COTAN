@@ -19,14 +19,10 @@ setMethod(
       objCOTAN <- estimateNuLinear(objCOTAN)
     }
 
-    if (is_empty(objCOTAN@nCells)) {
-      objCOTAN <- nCells(objCOTAN)
-    }
-
     # vector of zeros
-    diffZero <- numeric(objCOTAN@nCells)
+    diffZero <- numeric(getNumCells(objCOTAN))
 
-    for (i in seq(1, objCOTAN@nCells)) {
+    for (i in seq(1, getNumCells(objCOTAN))) {
       # estimation
       numZeroEst <- sum(funProbZero(
         objCOTAN@dispersion,

@@ -113,7 +113,7 @@ setMethod("get.S","scCOTAN",
           print("COTAN object in the old format! Converting...")
           object <- get.coex(object)
       }
-      S <- (object@coex$values)^2 * object@n_cells
+      S <- (object@coex$values)^2 * getNumCells(object)
       S <- list("genes"=object@coex$genes,"values"=S)
       return(S)
   }

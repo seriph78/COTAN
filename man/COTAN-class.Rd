@@ -26,8 +26,6 @@ the negative binomial dispersion factors, size 𝑛.}
 \item{\code{hKGenes}}{house-keeping genes. It is a vector to store the name 
 of the genes with positive UMI count in every single cell of the sample}
 
-\item{\code{nCells}}{number of the cells in the sample (𝑚)}
-
 \item{\code{metaDataset}}{data.frame}
 
 \item{\code{metaCells}}{data.frame}

@@ -11,11 +11,12 @@ setMethod(
     #cells[cells <= 0] <- 0 as cells cannot be negative
 
     # name of the genes with positive UMI count in every single cell
-    if(is.na(objCOTAN@nCells) | objCOTAN@nCells == 0 ) {
-      stop("nCells not initialized or zero")
+    nCells <- getNumCells(objCOTAN)
+    if (nCells == 0) {
+      stop("zero cells given")
     }
     
-    objCOTAN@hkGenes <- names(which(rowSums(cells) == objCOTAN@nCells))
+    objCOTAN@hkGenes <- names(which(rowSums(cells) == nCells))
 
     return(objCOTAN)
   }

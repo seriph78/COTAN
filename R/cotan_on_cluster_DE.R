@@ -79,7 +79,7 @@ setMethod("DEA_on_clusters","scCOTAN",
 
 
                   exp_yes <- rowSums(cells>0)
-                  exp_no <-obj@n_cells - exp_yes
+                  exp_no <- getNumCells(obj) - exp_yes
                   if( sum(yes_in+yes_out-exp_yes) != 0 |  sum(no_in+no_out-exp_no) != 0 ){
                       print("Problems with observed counts!")
                   }
@@ -127,7 +127,7 @@ setMethod("DEA_on_clusters","scCOTAN",
 
                   coex <- coex / sqrt(1/new_estimator_yes_in + 1/new_estimator_no_in + 1/new_estimator_yes_out + 1/new_estimator_no_out)
 
-                  coex <- coex/sqrt(obj@n_cells)
+                  coex <- coex/sqrt(getNumCells(obj))
                   coex <- as.data.frame(coex)
 
                   colnames(coex) <- paste("cl.",condition,sep = "")

@@ -92,7 +92,7 @@ setMethod(
       colnames(to.plot_cl.genes) %in% all.genes.to.an
     ]
 
-    to.plot_cl.genes <- to.plot_cl.genes * sqrt(object@n_cells)
+    to.plot_cl.genes <- to.plot_cl.genes * sqrt(getNumCells(object))
 
     to.plot_cl.genes <- tanh(to.plot_cl.genes)
     print(paste0(

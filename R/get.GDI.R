@@ -47,7 +47,7 @@ setMethod(
     cells[cells > 0] <- 1
     cells[cells <= 0] <- 0
 
-    exp.cells <- (rowSums(cells) / object@n_cells) * 100
+    exp.cells <- (rowSums(cells) / getNumCells(object)) * 100
 
     GDI <- merge(GDI, as.data.frame(sum.raw.norm), by = "row.names", all.x = TRUE)
     rownames(GDI) <- GDI$Row.names

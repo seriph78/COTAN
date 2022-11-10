@@ -8,7 +8,6 @@
 #' the negative binomial dispersion factors, size 𝑛.
 #' @slot hKGenes house-keeping genes. It is a vector to store the name 
 #' of the genes with positive UMI count in every single cell of the sample
-#' @slot nCells number of the cells in the sample (𝑚)
 #' @slot metaDataset data.frame
 #' @slot metaCells data.frame
 #' @slot clustersCoex coex
@@ -22,7 +21,6 @@ setClass("COTAN",
            lambda       = "vector",
            dispersion   = "vector",
            hkGenes      = "vector",
-           nCells       = "numeric",
            metaDataset  = "data.frame",
            metaCells    = "data.frame",
            clustersCoex = "list"
@@ -32,7 +30,7 @@ setClass("COTAN",
 # constructor of the COTAN CLASS
 #' @export 
 COTAN <- function(raw = "ANY") {
-  raw <- methods::as(as.matrix(raw), "sparseMatrix")
+  raw <- as(as.matrix(raw), "sparseMatrix")
   new("COTAN", raw = raw)
 }
 
@@ -48,7 +46,6 @@ COTAN <- function(raw = "ANY") {
 #' @slot lambda vector.
 #' @slot a vector.
 #' @slot hk vector.
-#' @slot n_cells numeric.
 #' @slot meta data.frame.
 #' @slot yes_yes ANY. Unused and deprecated
 #' @slot clusters vector.
@@ -70,7 +67,6 @@ setClass("scCOTAN",
            lambda = "vector",
            a = "vector",
            hk = "vector",
-           n_cells = "numeric",
            meta = "data.frame",
            yes_yes = "ANY",
            clusters = "vector",
@@ -100,16 +96,20 @@ setIs("scCOTAN",
         else
           clustersCoex <- list()
         
+        if (!is_empty(from@raw.norm))
+          rawNorm = from@raw.norm
+        else
+          rawNorm = as(matrix(0, 0, 0), "dgCMatrix")
+            
         new("COTAN",
             raw          = from@raw,
-            rawNorm      = from@raw.norm,
+            rawNorm      = rawNorm,
             coex         = from@coex,
-            # cellsCoex,
+            cellsCoex    = matrix(0, 0, 0),
             nu           = from@nu,
             lambda       = from@lambda,
             dispersion   = from@a,
             hkGenes      = from@hk,
-            nCells       = from@n_cells,
             metaDataset  = from@meta,
             metaCells    = metaCells,
             clustersCoex = clustersCoex )
@@ -123,7 +123,7 @@ setIs("scCOTAN",
         
         if (!is_empty(value@clusters))
           metaCells <- data.frame(clusters = value@clusters,
-                             row.names = colnames(value@raw))
+                                  row.names = colnames(value@raw))
         else
           metaCells <- data.frame()
         
@@ -132,15 +132,19 @@ setIs("scCOTAN",
         else
           clustersCoex <- list()
         
+        if (!is_empty(value@raw.norm))
+          rawNorm = value@raw.norm
+        else
+          rawNorm = as(matrix(0, 0, 0), "dgCMatrix")
+
         from@raw          <- value@raw
-        from@rawNorm      <- value@raw.norm
+        from@rawNorm      <- rawNorm
         from@coex         <- value@coex
         from@cellCoex     <- matrix(0, 0, 0)
         from@nu           <- value@nu
         from@lambda       <- value@lambda
         from@dispersion   <- value@a
         from@hkGenes      <- value@hk
-        from@nCells       <- value@n_cells
         from@metaDataset  <- value@meta
         from@metaCells    <- metaCells
         from@clustersCoex <- clustersCoex
@@ -152,7 +156,7 @@ setAs("COTAN",
       function(from) {
         assertthat::assert_that(!is.null(from@metaCells),
                                 !is.null(from@clustersCoex),
-                                msg = "Unexpected scCOTAN null members")
+                                msg = "Unexpected COTAN null members")
         
         if (!is_empty(from@metaCells[['clusters']])) {
           clusters <- from@metaCells[['clusters']]
@@ -161,12 +165,12 @@ setAs("COTAN",
         else {
           clusters <- c()
         }
-        
+
         if (!is_empty(from@clustersCoex[['cluster_data']]))
           cluster_data <- from@clustersCoex[['cluster_data']]
         else
           cluster_data <- data.frame()
-        
+
         new("scCOTAN",
             raw          = from@raw,
             raw.norm     = from@rawNorm,
@@ -175,7 +179,6 @@ setAs("COTAN",
             lambda       = from@lambda,
             a            = from@dispersion,
             hk           = from@hkGenes,
-            n_cells      = from@nCells,
             meta         = from@metaDataset,
             clusters     = clusters,
             cluster_data = cluster_data )
@@ -203,7 +206,6 @@ setAs("COTAN",
         from@lambda       <- value@lambda
         from@a            <- value@dispersion
         from@hk           <- value@hkGenes
-        from@n_cells      <- value@nCells
         from@meta         <- value@metaDataset
         from@clusters     <- clusters
         from@cluster_data <- cluster_data

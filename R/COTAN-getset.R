@@ -20,9 +20,43 @@ setMethod(
   }
 )
 
+#' getNumCells
+#'
+#' This function extracts the number of cells in the sample (m)
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the number of cells in the sample (m).
+#' @export
+#' @rdname getNumCells
+setMethod(
+  "getNumCells",
+  "COTAN",
+  function(objCOTAN){
+    return(ncol(objCOTAN@raw))
+  }
+)
+
+#' getNumGenes
+#'
+#' This function extracts the number of genes in the sample (n)
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the number of genes in the sample (n).
+#' @export
+#' @rdname getNumGenes
+setMethod(
+  "getNumGenes",
+  "COTAN",
+  function(objCOTAN){
+    return(nrow(objCOTAN@raw))
+  }
+)
+
 #' getNormalizedData
 #'
-#' This function extract the normalized count table.
+#' This function extracts the normalized count table.
 #'
 #' @param objCOTAN A COTAN object
 #'

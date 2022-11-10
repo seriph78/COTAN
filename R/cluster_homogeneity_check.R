@@ -37,8 +37,7 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             obj <- drop.genes.cells(obj, cells = cells_to_rem )
             
             #--------------------------------------
-            n_cells <- length(get.cell.size(object = obj))
-            print(paste("n cells", n_cells, sep = " "))
+            print(paste("n cells", getNumCells(obj), sep = " "))
             
           
             ttm <- clean(obj)
