@@ -10,8 +10,8 @@
 \item{objCOTAN}{A COTAN object}
 }
 \value{
-the meta-data dataframe
+the meta-data data.frame
 }
 \description{
-This function extract the meta-data stored for the dataset.
+This function extract the meta-data stored for the data-set.
 }

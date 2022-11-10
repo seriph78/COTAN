@@ -24,7 +24,7 @@ This function remove an array of genes and/or cells from the original object raw
 }
 \examples{
 data("ERCC.cotan")
-genes.to.rem <- names(getGenes(ERCC.cotan)[1:10])
-cells.to.rem <- names(get.cell.size(ERCC.cotan)[1:10])
+genes.to.rem <- getGenes(ERCC.cotan)[grep('^MT', getGenes(ERCC.cotan))]
+cells.to.rem <- getCells(ERCC.cotan)[which(getCellsSize(ERCC.cotan) == 0)]
 ERCC.cotan <- drop.genes.cells(ERCC.cotan, genes.to.rem, cells.to.rem)
 }

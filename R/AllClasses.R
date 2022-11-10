@@ -11,60 +11,76 @@
 #' @slot metaDataset data.frame
 #' @slot metaCells data.frame
 #' @slot clustersCoex coex
-setClass("COTAN",
-         slots = c(
-           raw          = "dgCMatrix",
-           rawNorm      = "dgCMatrix",
-           coex         = "ANY",
-           cellsCoex    = "ANY",
-           nu           = "vector",
-           lambda       = "vector",
-           dispersion   = "vector",
-           hkGenes      = "vector",
-           metaDataset  = "data.frame",
-           metaCells    = "data.frame",
-           clustersCoex = "list"
-         ),
-         prototype=list(
-           raw          = as(matrix(0, 0, 0), "dgCMatrix"),
-           rawNorm      = as(matrix(0, 0, 0), "dgCMatrix"),
-           coex         = as(matrix(0, 0, 0), "dgCMatrix"),
-           cellsCoex    = as(matrix(0, 0, 0), "dgCMatrix"),
-           nu           = vector(mode = "numeric"),
-           lambda       = vector(mode = "numeric"),
-           dispersion   = vector(mode = "numeric"),
-           hkGenes      = vector(mode = "character"),
-           metaDataset  = data.frame(),
-           metaCells    = data.frame(),
-           clustersCoex = vector(mode = "list")
-         ),
-         validity=function(object) {
-           if ((!is_empty(object@rawNorm)) && (!identical(dim(object@rawNorm), dim(object@raw)))) {
-             stop(paste("'rawNorm'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
-                        "] must have the same sizes as ",
-                        "'raw'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
-                        "] when not empty."))
-           }
-           if ((!is_empty(object@nu)) && (length(object@nu) != ncol(object@raw))) {
-             stop(paste("'nu'[", length(object@nu), "] must have size equal",
-                        " to the number of columns of 'raw'[", dim(object@raw), "] when not empty."))
-           }
-           if ((!is_empty(object@lambda)) && (length(object@lambda) != nrow(object@raw))) {
-             stop(paste("'lambda'[", length(object@lambda), "] must have size equal",
-                        " to the number of rows of 'raw'[", dim(object@raw), "] when not empty."))
-           }
-           if ((!is_empty(object@dispersion) &&
-                ((length(object@dispersion) + length(object@hkGenes)) != nrow(object@raw)))) {
-             stop(paste("'dispersion'[", length(object@dispersion), "] size plus",
-                        " 'hkGenes'[", length(object@hkGenes), "] size must be equal",
-                        " to the number of rows of 'raw'[", dim(object@raw), "] when not empty."))
-           }
-           # TODO: check remaining slots
-           return(TRUE)
-         }
-)
+setClass(
+  "COTAN",
+  slots = c(
+    raw          = "dgCMatrix",
+    rawNorm      = "dgCMatrix",
+    coex         = "ANY",
+    cellsCoex    = "ANY",
+    nu           = "vector",
+    lambda       = "vector",
+    dispersion   = "vector",
+    hkGenes      = "vector",
+    metaDataset  = "data.frame",
+    metaCells    = "data.frame",
+    clustersCoex = "list"
+  ),
+  prototype = list(
+    raw          = as(matrix(0, 0, 0), "dgCMatrix"),
+    rawNorm      = as(matrix(0, 0, 0), "dgCMatrix"),
+    coex         = as(matrix(0, 0, 0), "dgCMatrix"),
+    cellsCoex    = as(matrix(0, 0, 0), "dgCMatrix"),
+    nu           = vector(mode = "numeric"),
+    lambda       = vector(mode = "numeric"),
+    dispersion   = vector(mode = "numeric"),
+    hkGenes      = vector(mode = "character"),
+    metaDataset  = data.frame(),
+    metaCells    = data.frame(),
+    clustersCoex = vector(mode = "list")
+  ),
+  validity = function(object) {
+    if (!is_empty(object@raw) && is_empty(object@rawNorm) &&
+        isFALSE(all.equal(object@raw, round(object@raw), tolerance = 0))) {
+      stop("Input raw data contains not integer numbers!")
+    }
+    if (!is_empty(object@rawNorm) &&
+        !identical(dim(object@rawNorm), dim(object@raw))) {
+      stop(paste("'rawNorm'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
+                 "] must have the same sizes as ",
+                 "'raw'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
+                 "] when not empty."))
+    }
+    if (!is_empty(object@nu) && length(object@nu) != ncol(object@raw)) {
+      stop(paste("'nu'[", length(object@nu), "] must have size equal",
+                 " to the number of columns [", ncol(object@raw),
+                 "] of 'raw' when not empty."))
+    }
+    if (!is_empty(object@lambda) && length(object@lambda) != nrow(object@raw)) {
+      stop(paste("'lambda'[", length(object@lambda), "] must have size equal",
+                 " to the number of rows [", nrow(object@raw),
+                 "]  of 'raw' when not empty."))
+    }
+    if (!is_empty(object@dispersion) &&
+        (length(object@dispersion) + length(object@hkGenes)) != nrow(object@raw)) {
+      stop(paste("'dispersion'[", length(object@dispersion), "] size plus",
+                 " 'hkGenes'[", length(object@hkGenes), "] size must be equal",
+                 " to the number of rows [", nrow(object@raw),
+                 "] of 'raw' when not empty."))
+    }
+    if (!is_empty(object@metaCells) &&
+        nrow(object@metaCells) != ncol(object@raw)) {
+      stop(paste("The number of rows [", nrow(object@metaCells),
+                 "] of 'metaCells' must be the same",
+                 " as the number of cols [", ncol(object@raw),
+                 "]  of 'raw' when not empty."))
+    }
+    # TODO: check remaining slots
+    return(TRUE)
+  }
+) #end class COTAN
 
-# constructor of the COTAN CLASS
+# constructor of the class COTAN 
 #' @export 
 COTAN <- function(raw = "ANY") {
   raw <- as(as.matrix(raw), "dgCMatrix")

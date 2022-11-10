@@ -45,7 +45,7 @@ setMethod("cluster_homogeneity","scCOTAN",
 
               #obj = readRDS(paste(out_dir,t,".cotan.RDS", sep = ""))
               
-              cells_to_rem = names(get.cell.size(obj)[which(get.cell.size(obj) == 0)])
+              cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
               obj = drop.genes.cells(obj, cells = cells_to_rem )
 
               print(paste("Condition ",t,sep = ""))

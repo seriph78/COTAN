@@ -10,8 +10,8 @@
 \item{objCOTAN}{A COTAN object}
 }
 \value{
-the number of genes in the sample (n).
+the number of genes in the sample (𝑛).
 }
 \description{
-This function extracts the number of genes in the sample (n)
+This function extracts the number of genes in the sample (𝑛)
 }

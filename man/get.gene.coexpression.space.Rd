@@ -32,6 +32,6 @@ In this case we denote it as local differentiation index (LDI) relative to V.
 data("ERCC.cotan")
 df <- get.gene.coexpression.space(ERCC.cotan,
   n.genes.for.marker = 10,
-  primary.markers = getGenes(ERCC.cotan)[sample(length(getGenes(ERCC.cotan)), 5)]
+  primary.markers = getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 5)]
 )
 }

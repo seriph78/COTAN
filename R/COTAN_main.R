@@ -917,28 +917,6 @@ setMethod(
   }
 )
 
-#' get.cell.size
-#'
-#' This function extracts the cell raw libray size.
-#'
-#' @param object A COTAN object
-#'
-#' @return an array with the library sizes
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' get.cell.size(ERCC.cotan)[1:10]
-setGeneric("get.cell.size", function(object) standardGeneric("get.cell.size"))
-#' @rdname get.cell.size
-setMethod(
-  "get.cell.size", "scCOTAN",
-  function(object) {
-    num <- colSums(object@raw)
-    return(num)
-  }
-)
-
 
 #' drop.genes.cells
 #'
@@ -953,8 +931,8 @@ setMethod(
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' genes.to.rem <- names(getGenes(ERCC.cotan)[1:10])
-#' cells.to.rem <- names(get.cell.size(ERCC.cotan)[1:10])
+#' genes.to.rem <- getGenes(ERCC.cotan)[grep('^MT', getGenes(ERCC.cotan))]
+#' cells.to.rem <- getCells(ERCC.cotan)[which(getCellsSize(ERCC.cotan) == 0)]
 #' ERCC.cotan <- drop.genes.cells(ERCC.cotan, genes.to.rem, cells.to.rem)
 setGeneric("drop.genes.cells", function(object, genes = c(), cells = c()) standardGeneric("drop.genes.cells"))
 #' @rdname drop.genes.cells

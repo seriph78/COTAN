@@ -207,23 +207,42 @@ setMethod(
 
 #' getMetadataDataset
 #'
-#' This function extract the meta-data stored for the dataset.
+#' This function extract the meta-data stored for the data-set.
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return the meta-data dataframe
+#' @return the meta-data data.frame
 #' @export
 #' @rdname getMetadataDataset
 setMethod(
   "getMetadataDataset",
   "COTAN",
   function(objCOTAN) {
+    if (is_empty(objCOTAN@metaDataset)) {
+      warning("metaDataset is empty")
+    }
+    
+    return(objCOTAN@metaDataset)
+  }
+)
+
+
+#' getCellsSize
+#'
+#' This function extracts the cell raw library size.
+#'
+#' @param object A COTAN object
+#'
+#' @return an array with the library sizes
+#' @export
+#' @rdname getCellsSize
+setMethod(
+  "getCellsSize", "COTAN",
+  function(objCOTAN) {
     if (is_empty(objCOTAN@raw)) {
       warning("raw is empty")
     }
     
-    meta <- object@meta
-    return(meta)
+    return(colSums(objCOTAN@raw))
   }
 )
-

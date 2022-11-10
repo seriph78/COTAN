@@ -32,8 +32,7 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             obj <- new("scCOTAN",raw = raw)
             obj <- initRaw(obj,GEO="" ,sc.method=" ",cond = "temp.clustered")
             
-           
-            cells_to_rem <- names(get.cell.size(obj)[which(get.cell.size(obj) == 0)])
+            cells_to_rem <- getCells(obj)[which(getCellsSize(obj) == 0)]
             obj <- drop.genes.cells(obj, cells = cells_to_rem )
             
             #--------------------------------------
