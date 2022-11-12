@@ -20,7 +20,7 @@ Definition of COTAN class
 
 \item{\code{lambda}}{vector to store the average for the gene expression, size 𝑛}
 
-\item{\code{dispetrion}}{vector to store all
+\item{\code{dispersion}}{vector to store all
 the negative binomial dispersion factors, size 𝑛.}
 
 \item{\code{hKGenes}}{house-keeping genes. It is a vector to store the name 

@@ -4,13 +4,14 @@
 #' @slot coex correlation of COTAN between genes, 𝑛×𝑛
 #' @slot nu vector that stores the estimated UDE, size 𝑚
 #' @slot lambda vector to store the average for the gene expression, size 𝑛
-#' @slot dispetrion vector to store all
+#' @slot dispersion vector to store all
 #' the negative binomial dispersion factors, size 𝑛.
 #' @slot hKGenes house-keeping genes. It is a vector to store the name 
 #' of the genes with positive UMI count in every single cell of the sample
 #' @slot metaDataset data.frame
 #' @slot metaCells data.frame
 #' @slot clustersCoex coex
+#' @importFrom rlang is_empty
 setClass(
   "COTAN",
   slots = c(
@@ -136,7 +137,7 @@ setClass(
 
 # Automatically convert an object from class "scCOTAN" into "COTAN"
 #' @importFrom methods setIs
-#' @export
+#' @importFrom rlang is_empty
 setIs("scCOTAN",
       "COTAN",
       coerce = function(from) {
@@ -253,7 +254,7 @@ setIs("scCOTAN",
 
 # Explicitly convert an object from class "COTAN" into "scCOTAN"
 #' @importFrom methods setAs
-#' @export
+#' @importFrom rlang is_empty
 setAs("COTAN",
       "scCOTAN",
       function(from) {

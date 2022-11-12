@@ -17,8 +17,8 @@ setMethod(
     # estimate Probabilities of 0 with internal function funProbZero
     probZero <- funProbZero(objCOTAN@dispersion, mu[, colnames(zeroOne)])
 
-    message <- "Error: some Na in matrix of probability of zero UMI counts. "
-    stopifnot(message = !any(is.na(probZero)))
+    errMgs <- "Error: some Na in matrix of probability of zero UMI counts. "
+    stopifnot(errMgs = !any(is.na(probZero)))
 
     if(cells) {
       # dimension m x m (m number of cells)

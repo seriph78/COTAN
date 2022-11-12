@@ -24,7 +24,7 @@ dataset.for.test.creation <- function(){
   a.test <- obj@a[genes.names.test]
   saveRDS(a.test, "tests/testthat/a.test.RDS")
   
-  raw.norm.test <- obj@raw.norm[genes.names.test,cell.names.test]
+  raw.norm.test <- getNormalizedData(obj)[genes.names.test,cell.names.test]
   saveRDS(raw.norm.test, "tests/testthat/raw.norm.test.RDS")
   
   coex.test <- extract.coex(object = obj,genes = genes.names.test)

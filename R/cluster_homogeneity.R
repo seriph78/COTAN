@@ -31,29 +31,29 @@ setMethod("cluster_homogeneity","scCOTAN",
                              axis.title.y = element_text( size = 14, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"))
 
             tot.clusters = max(as.numeric(as.vector(unique(data.seurat@meta.data$seurat_clusters[!data.seurat@meta.data$seurat_clusters == "singleton" ]))))
-            print(paste("Number of clusters:",tot.clusters,sep=" "))
+            print(paste("Number of clusters:", tot.clusters))
             to_rec = NA
             for (cl in c(0:tot.clusters)) { #0
 
-              print(paste("Working on cluster",cl,"out of",tot.clusters,sep=" " ))
+              print(paste("Working on cluster", cl, "out of", tot.clusters))
               raw = as.data.frame(data.raw[,rownames(data.seurat@meta.data[data.seurat@meta.data$seurat_clusters == cl,])])
-              t = paste(cond,"_cl.",cl,sep = "")
+              t = paste0(cond, "_cl.", cl)
 
               obj = COTAN(raw = raw)
               obj = initializeMetaDataset(
                       obj, GEO="", sequencingMethod = " ",
                       sampleCondition = paste("temp.", cond,
-                                              "clustered by Seurat", sep=" "))
+                                              "clustered by Seurat"))
 
-              #obj = readRDS(paste(out_dir,t,".cotan.RDS", sep = ""))
+              #obj = readRDS(paste0(out_dir, t, ".cotan.RDS"))
 
               cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
               obj = dropGenesCells(obj, cells = cells_to_rem)
 
-              print(paste("Condition ",t,sep = ""))
+              print(paste0("Condition ", t))
               #--------------------------------------
               n_cells = getNumCells(obj)
-              print(paste("n cells", n_cells, sep = " "))
+              print(paste("n cells", n_cells))
 
               obj <- as(obj, "scCOTAN")
 
@@ -74,7 +74,7 @@ setMethod("cluster_homogeneity","scCOTAN",
                 ttm$pca.cell.2
 
                 #---------- run this when B cells are to be removed
-                pdf(paste(out_dir,"/",t,"_",n_it,"_plots.pdf", sep = ""))
+                pdf(paste0(out_dir, "/", t, "_", n_it, "_plots.pdf"))
 
                 plot(ttm$pca.cell.2)
                 plot(ttm$genes.plot)
@@ -90,7 +90,7 @@ setMethod("cluster_homogeneity","scCOTAN",
 
                 obj = cotan_analysis(obj, cores = cores)
                 # saving the structure
-                #saveRDS(obj,file = paste(out_dir,t,".cotan.RDS", sep = ""))
+                #saveRDS(obj,file = paste0(out_dir, t, ".cotan.RDS"))
 
                 # COEX evaluation and storing
                 gc()
@@ -100,21 +100,23 @@ setMethod("cluster_homogeneity","scCOTAN",
                
                 GDI_data_wt1 = get.GDI(obj)
 
-                #obj = readRDS(paste(out_dir,cond,"_cl.", cl,".cotan.RDS",sep = ""))
+                #obj = readRDS(paste0(out_dir, cond, "_cl.", cl, ".cotan.RDS"))
                 #GDI_data_wt1 = get.GDI(obj)
 
                 #Test if the number of genes with GDI > 1.5 is more than 1%
                 if (dim(GDI_data_wt1[GDI_data_wt1$GDI >= 1.5,])[1]/dim(GDI_data_wt1)[1] > 0.01) {
-                  print(paste("Cluster",cl,"too high GDI!Recluster!",sep = " "))
+                  print(paste("Cluster", cl, "too high GDI! Recluster!"))
                   cells_to_cluster = colnames(obj@raw)
-                  write.csv(cells_to_cluster, file = paste(out_dir,"to_recluster_",cond,"_cl.",cl,".csv",sep = ""))
+                  write.csv(cells_to_cluster,
+                            file = paste0(out_dir, "to_recluster_",
+                                          cond, "_cl.", cl, ".csv"))
                   to_rec = c(to_rec,cells_to_cluster)
                 }
                 
                 
                 genes.to.label = rownames(GDI_data_wt1[order(GDI_data_wt1$GDI,decreasing = T),][1:20,])
 
-                #pdf(paste(out_dir,cond,"_cl.",cl, ".GDI_plots.pdf", sep = ""), onefile=TRUE)
+                #pdf(paste0(out_dir, cond, "_cl.", cl, ".GDI_plots.pdf"), onefile=TRUE)
                 #my.plots[[(cl+1)]] <-
                 plot(plot_GDI(obj, genes = list("top 20 GDI genes"=genes.to.label)))
                 

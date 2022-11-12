@@ -6,6 +6,7 @@
 #' @param objCOTAN A COTAN object
 #'
 #' @return the raw count dataframe
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getRawData
 setMethod(
@@ -27,6 +28,7 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the number of cells in the sample (𝑚).
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getNumCells
 setMethod(
@@ -62,6 +64,7 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return a cell array
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getCells
 setMethod(
@@ -84,6 +87,7 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return a gene array
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getGenes
 setMethod(
@@ -106,6 +110,7 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the normalized count dataframe (divided by nu).
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getNormalizedData
 setMethod(
@@ -127,6 +132,7 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the nu array.
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getNu
 setMethod(
@@ -148,6 +154,7 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the lambda array.
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getLambda
 setMethod(
@@ -169,6 +176,7 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the a array.
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getDispersion
 setMethod(
@@ -190,6 +198,7 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return an array containing all genes expressed in all cells
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getHousekeepingGenes
 setMethod(
@@ -212,6 +221,7 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the meta-data data.frame
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getMetadataDataset
 setMethod(
@@ -234,6 +244,7 @@ setMethod(
 #' @param object A COTAN object
 #'
 #' @return an array with the library sizes
+#' @importFrom rlang is_empty
 #' @export
 #' @rdname getCellsSize
 setMethod(
@@ -281,10 +292,8 @@ setMethod(
     objCOTAN@metaDataset[4,seq_len(2)] = c("Condition sample:", sampleCondition)
 
     #TODO: remove this!
-    clusters = rep(NA, numCells)
-    names(clusters) = getCells(objCOTAN)
-    objCOTAN@metaCells <- data.frame(clusters = clusters,
-                                     row.names = names(clusters))
+    objCOTAN@metaCells <- data.frame(clusters = rep(NA, numCells),
+                                     row.names = getCells(objCOTAN))
   
     return(objCOTAN)
   }

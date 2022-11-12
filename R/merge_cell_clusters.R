@@ -221,7 +221,8 @@ setMethod("merge_cell.clusters","scCOTAN",
               obj_list = DEA_on_clusters(obj,list.clusters)
               gc()
               
-              srat <- readRDS(paste(out_dir,"Seurat_obj_",cond,"_with_cotan_clusters_merged.RDS",sep = ""))
+              srat <- readRDS(paste0(out_dir, "Seurat_obj_", cond,
+                                     "_with_cotan_clusters_merged.RDS"))
               obj = obj_list[[1]]
               
               p_value = obj_list[[2]]
@@ -229,16 +230,19 @@ setMethod("merge_cell.clusters","scCOTAN",
               rm(obj_list)
               gc()
               
-              write.csv(p_value,file = paste(out_dir,cond,"/p_values_clusters_merged.csv", sep = ""))
-              write.csv(obj@cluster_data,file = paste(out_dir,cond,"/coex_clusters_merged.csv", sep = ""))
+              write.csv(p_value, file = paste0(out_dir, cond,
+                                               "/p_values_clusters_merged.csv"))
+              write.csv(obj@cluster_data,
+                        file = paste0(out_dir, cond, "/coex_clusters_merged.csv"))
               if (!is.null(markers)) {
-                write.csv(p_value[unlist(markers),],file = paste(out_dir,cond,"/p_values_clusters_merged_markers.csv", sep = ""))
-                write.csv(obj@cluster_data[unlist(markers),],file = paste(out_dir,cond,"/coex_clusters_merged_markers.csv", sep = ""))
-                
+                write.csv(p_value[unlist(markers),],
+                          file = paste0(out_dir, cond, "/p_values_clusters_merged_markers.csv"))
+                write.csv(obj@cluster_data[unlist(markers),],
+                          file = paste0(out_dir, cond, "/coex_clusters_merged_markers.csv"))
               }
               
             }
-            saveRDS(obj,file = paste(out_dir,cond,"_merged_cotan.RDS", sep = ""))
+            saveRDS(obj, file = paste0(out_dir, cond, "_merged_cotan.RDS"))
             
             return(obj)
             

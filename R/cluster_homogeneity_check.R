@@ -37,7 +37,7 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             obj <- dropGenesCells(obj, cells = cells_to_rem)
  
             #--------------------------------------
-            print(paste("n cells", getNumCells(obj), sep = " "))
+            print(paste("n cells", getNumCells(obj)))
 
             obj <- as(obj, "scCOTAN")
 
@@ -59,7 +59,7 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             
             # Plots
             genes.to.label = rownames(GDI_data_wt1[order(GDI_data_wt1$GDI,decreasing = T),][1:10,])
-            pdf(paste(out_dir,"/", code ,"_plots.pdf", sep = ""))
+            pdf(paste0(out_dir, "/", code, "_plots.pdf"))
             
             plot(ttm$pca.cell.2)
             plot(ttm$genes.plot)
@@ -76,11 +76,11 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             
             #Test if the number of genes with GDI > 1.5 is more than 1%
             if (dim(GDI_data_wt1[GDI_data_wt1$GDI >= 1.5,])[1]/dim(GDI_data_wt1)[1] > 0.01) {
-              print(paste("Cluster",code,"too high GDI!Recluster!",sep = " "))
-              write.csv(cells, file = paste(out_dir,"to_recluster_cl_",code,".csv",sep = ""))
+              print(paste("Cluster", code, "too high GDI! Recluster!"))
+              write.csv(cells, file = paste0(out_dir, "to_recluster_cl_", code, ".csv"))
               return(cells)
             }else{
-              print(paste("Cluster",code,"homogeneous.",sep = " "))
+              print(paste("Cluster", code, "homogeneous."))
             }
             
           }

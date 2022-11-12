@@ -48,11 +48,12 @@ library(MASS)
 Download the dataset for mouse cortex E17.5.
 
 ```{r eval=FALSE, include=FALSE}
-if (!file.exists(paste("inst/extdata/","E175_only_cortical_cells.txt.gz", sep = "/"))) {
-  download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/
-              samples/GSM2861nnn/GSM2861514/suppl/GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz",
-              paste(data_dir,"E175_only_cortical_cells.txt.gz", sep = "/"),method = "wget", quiet = FALSE)
-  
+if (!file.exists("inst/extdata/E175_only_cortical_cells.txt.gz")) {
+  download.file(paste0("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/",
+                       "GSM2861nnn/GSM2861514/suppl/"
+                       "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"),
+                paste0(data_dir, "/E175_only_cortical_cells.txt.gz"),
+                method = "wget", quiet = FALSE)
 }
 ```
 
@@ -103,9 +104,9 @@ We want also to define a prefix to identify the sample.
 #t = "E17.5_cortex"
 t = "test"
 
-print(paste("Condition ", t, sep = ""))
+print(paste0("Condition ", t))
 #--------------------------------------
-print(paste("n cells", getNumCells(obj), sep = " "))
+print(paste("n cells", getNumCells(obj)))
 
 n_it = 1
 ```
@@ -119,7 +120,7 @@ if(!file.exists(out_dir)){
   dir.create(file.path(out_dir))
 }
 
-if(!file.exists(paste(out_dir,"cleaning", sep = ""))){   
+if(!file.exists(paste0(out_dir, "cleaning"))){   
   dir.create(file.path(out_dir, "cleaning"))
 }
 ```
@@ -141,7 +142,8 @@ ttm$genes.plot
 Run this when B cells need to be removed.
 
 ```{r eval=TRUE, include=TRUE}
-pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = "")))
+pdf(file.path(out_dir, "cleaning",
+              paste0(t, "_", n_it, "_plots_before_cells_exlusion.pdf")))
 ttm$pca.cell.2
 ttm$genes.plot
 dev.off()
@@ -170,7 +172,8 @@ ttm$genes.plot
 Run this only in the last iteration, instead of the previous code, when B cells group has not been removed
 
 ```{r}
-pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_before_cells_exlusion.pdf", sep = "")))
+pdf(file.path(out_dir, "cleaning",
+              paste0(t, "_", n_it, "_plots_before_cells_exlusion.pdf")))
 ttm$pca.cell.2
 ttm$genes.plot
 
@@ -186,7 +189,8 @@ ttm$genes.plot
 To color the PCA based on nu_j (so the cells' efficiency)
 
 ```{r}
-pdf(file.path(out_dir,"cleaning",paste(t,"_plots_PCA_efficiency_colored.pdf", sep = "")))
+pdf(file.path(out_dir, "cleaning",
+              paste0(t, "_plots_PCA_efficiency_colored.pdf")))
 ttm$UDE.plot
 
 dev.off()
@@ -216,11 +220,11 @@ plot.ude <- ggplot(nu_df, aes(x = n, y=nu)) +
      ylim(0,1) + xlim(0,400) +
     geom_hline(yintercept=yset, linetype="dashed", color = "darkred") +
     annotate(geom="text", x=200, y=0.25, 
-             label=paste("to remove cells with nu < ",yset,sep = " "), 
+             label=paste("to remove cells with nu < ", yset), 
              color="darkred", size=4.5)
 
 
-pdf(file.path(out_dir,"cleaning",paste(t,"_plots_efficiency.pdf", sep = "")))
+pdf(file.path(out_dir, "cleaning", paste0(t, "_plots_efficiency.pdf")))
 plot.ude
 dev.off()
 
@@ -248,7 +252,7 @@ ttm$pca.cell.2
 In case we do not want to remove anything, we can run:
 
 ```{r}
-pdf(file.path(out_dir,"cleaning",paste(t,"_plots_efficiency.pdf", sep = "")))
+pdf(file.path(out_dir, "cleaning", paste(t, "_plots_efficiency.pdf")))
 
 ttm$UDE.plot
 
@@ -269,7 +273,7 @@ COEX evaluation and storing
 obj = get.coex(obj)
 
 # saving the structure 
-saveRDS(obj,file = paste(out_dir,t,".cotan.RDS", sep = ""))
+saveRDS(obj,file = paste(out_dir, t, ".cotan.RDS"))
 ```
 
 ## Automatic run
@@ -406,11 +410,11 @@ head(coex)
 The next few lines are just to clean.
 
 ```{r}
-if (file.exists(paste(out_dir,t,".cotan.RDS", sep = ""))) {
+if (file.exists(paste0(out_dir, t, ".cotan.RDS"))) {
   #Delete file if it exists
-  file.remove(paste(out_dir,t,".cotan.RDS", sep = ""))
+  file.remove(paste0(out_dir, t, ".cotan.RDS"))
 }
-unlink(paste(out_dir,"cleaning", sep = ""),recursive = TRUE)
+unlink(paste0(out_dir, "cleaning"), recursive = TRUE)
 
 print(sessionInfo())
 ```

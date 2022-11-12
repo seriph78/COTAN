@@ -85,11 +85,7 @@ setMethod("clean","scCOTAN",
                 gc()
 
 
-
-                raw_norm <- Matrix::t(Matrix::t(object@raw) *
-                                  (1/(as.vector(object@nu))))
-                object@raw.norm <- raw_norm
-                rm(raw_norm)
+                object <- as(rawNorm(object), "scCOTAN")
                 gc()
                 
                 print("starting hclust")
@@ -281,8 +277,7 @@ setMethod("cotan_analysis","scCOTAN",
                   p_begin <- p_end+1
                   if((p_begin %% 10)==0){
                       print(paste("Next gene:", rownames(mu_estimator)[p_begin],
-                                  "number", p_begin,
-                                  sep = " "))
+                                  "number", p_begin))
                   }
               }
               gc()
@@ -296,8 +291,7 @@ setMethod("cotan_analysis","scCOTAN",
               names(object@a) <- rownames(tot2)
               print(paste("a min:",  min(tot2$dispersion),
                           "| a max", max(tot2$dispersion),
-                          "| negative a %:", sum(tot2$dispersion <0)/nrow(tot2)*100,
-                          sep=" "))
+                          "| negative a %:", sum(tot2$dispersion <0)/nrow(tot2)*100))
               
               gc()
 

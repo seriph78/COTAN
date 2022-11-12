@@ -41,9 +41,9 @@ setMethod(
     GDI <- as.data.frame(GDI)
     colnames(GDI) <- "mean.pval"
 
-    sum.raw.norm <- log(rowSums(as.matrix(object@raw.norm)))
+    sum.raw.norm <- log(rowSums(getNormalizedData(object)))
 
-    cells <- as.matrix(object@raw)
+    cells <- getRawData(object)
     cells[cells > 0] <- 1
     cells[cells <= 0] <- 0
 

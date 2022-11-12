@@ -34,8 +34,9 @@ test_that("2.cleaning", {
     saveRDS(ttm$object, file = file.path(tm,"temp.RDS") )
     raw.norm <- readRDS(file.path(getwd(),"raw.norm.test.RDS"))
     nu <- readRDS(file.path(getwd(),"nu.test.RDS"))
-    expect_equal(as.matrix(ttm$object@raw.norm[genes.names.test,cell.names.test]),as.matrix(raw.norm))
-    expect_equal(ttm$object@nu[cell.names.test],nu)
+    expect_equal(as.matrix(getNormalizedData(ttm$object)[genes.names.test,cell.names.test]),
+                 as.matrix(raw.norm))
+    expect_equal(getNu(ttm$object)[cell.names.test],nu)
 
 })
 
@@ -44,7 +45,8 @@ test_that("mat_division", {
     nu <- readRDS(file.path(getwd(),"nu.test.RDS"))
     raw.norm <- readRDS(file.path(getwd(),"raw.norm.test.RDS"))
 
-    expect_equal( as.matrix(t(t(test.dataset.col[genes.names.test,cell.names.test]) * (1/nu))),as.matrix(raw.norm) )
+    expect_equal( as.matrix(t(t(test.dataset.col[genes.names.test,cell.names.test]) * (1/nu))),
+                  as.matrix(raw.norm) )
 })
 
 
