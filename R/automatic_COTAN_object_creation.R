@@ -45,9 +45,9 @@ setMethod("automatic.COTAN.object.creation","data.frame",
               means <- PC1 <- PC2 <- nu <- NULL
 
               mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
-              my_theme <- theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5,
-                                                           vjust = .5,
-                                                           face = "plain", colour ="#3C5488FF" ),
+              my_theme <- theme(axis.text.x = element_text( size = 14, angle = 0, hjust = .5,
+                                                            vjust = .5,
+                                                            face = "plain", colour ="#3C5488FF" ),
                                 axis.text.y = element_text( size = 14, angle = 0, hjust = 0,
                                                             vjust = .5,
                                                             face = "plain", colour ="#3C5488FF"),
@@ -57,19 +57,23 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                                 axis.title.y = element_text( size = 14, angle = 90, hjust = .5,
                                                              vjust = .5,
                                                              face = "plain", colour ="#3C5488FF"))
-              obj <- methods::new("scCOTAN",raw = df)
-              obj <- initRaw(obj,GEO = GEO ,sc.method = sc.method,cond = cond)
+              obj <- COTAN(raw = df)
+              obj <- initializeMetaDataset(obj, GEO = GEO, 
+                                           sequencingMethod = sc.method,
+                                           sampleCondition = cond)
+
               #if (mt == FALSE) {
               #    genes_to_rem <- rownames(obj@raw[grep(mt_prefix, getGenes(obj)),])
               #    obj@raw <- obj@raw[!getGenes(obj) %in% genes_to_rem,]
               #    cells_to_rem <- colnames(obj@raw[which(colSums(obj@raw) == 0)])
               #    obj@raw <- obj@raw[,!getCells(obj) %in% cells_to_rem]
               #}
+
               t <- cond
 
-              print(paste("Condition ",t,sep = ""))
+              print(paste0("Condition ",t))
               #--------------------------------------
-              print(paste("n cells", getNumCells(obj), sep = " "))
+              print(paste("n cells", getNumCells(obj)))
 
               n_it <- 1
 
@@ -77,16 +81,18 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                   dir.create(file.path(out_dir))
               }
 
-              if(!file.exists(paste(out_dir,"cleaning", sep = ""))){
+              if(!file.exists(paste0(out_dir, "cleaning"))){
                   dir.create(file.path(out_dir, "cleaning"))
               }
+
+              obj <- as(obj, "scCOTAN")
 
               ttm <- clean(obj)
 
               obj <- ttm$object
 
-              pdf(file.path(out_dir,"cleaning",paste(t,"_",n_it,"_plots_without_cleaning.pdf",
-                                                     sep = "")))
+              pdf(file.path(out_dir, "cleaning",
+                            paste0(t, "_", n_it, "_plots_without_cleaning.pdf")))
               plot(ttm$pca.cell.2)
               plot.fig = ggplot(ttm$D, aes(x=n,y= means)) + geom_point() +
                   geom_text_repel(data=subset(ttm$D, n > (max(ttm$D$n)- 15) ),
@@ -123,13 +129,15 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                                     legend.key.width = unit(2, "mm"),
                                     legend.position="right")
 
-              pdf(file.path(out_dir,"cleaning",paste(t,"_plots_PCA_efficiency_colored.pdf", sep = "")))
+              pdf(file.path(out_dir, "cleaning",
+                            paste0(t,"_plots_PCA_efficiency_colored.pdf")))
               plot(plot_nu)
               dev.off()
 
               nu_df <- data.frame("nu"= sort(obj@nu), "n"=seq_along(obj@nu))
 
-              pdf(file.path(out_dir,"cleaning",paste(t,"_plots_efficiency.pdf", sep = "")))
+              pdf(file.path(out_dir, "cleaning",
+                            paste0(t,"_plots_efficiency.pdf")))
               plot(ggplot(nu_df, aes(x = n, y=nu)) + geom_point(colour = "#8491B4B2", size=1) +my_theme +
                        annotate(geom="text", x=50, y=0.25, label="nothing to remove ", color="darkred")
               )
@@ -165,12 +173,13 @@ setMethod("automatic.COTAN.object.creation","data.frame",
                                                      as.numeric(coex_time) ),
                                           "n.cells"=getNumCells(obj),
                                           "n.genes"=getNumGenes(obj) ),
-                               file = file.path(out_dir, paste(t,"_times.csv", sep = "")))
+                               file = file.path(out_dir, paste0(t, "_times.csv")))
 
               
-              if(save.obj == "yes" | save.obj == "Yes" | save.obj == "YES"){
-              print(paste0("Saving elaborated data locally at ", out_dir,t,".cotan.RDS"))
-              saveRDS(obj,file = file.path(out_dir,paste(t,".cotan.RDS", sep = "")))
+              if (save.obj == "yes" | save.obj == "Yes" | save.obj == "YES") {
+                print(paste0("Saving elaborated data locally at ",
+                             out_dir, t, ".cotan.RDS"))
+                saveRDS(obj,file = file.path(out_dir,paste0(t, ".cotan.RDS")))
               }
               return(obj)
 

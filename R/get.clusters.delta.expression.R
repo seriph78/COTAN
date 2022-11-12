@@ -44,7 +44,7 @@ setMethod("get.clusters.delta.expression","scCOTAN",
   
     for (condition in names(list.clusters)) {
       gc()
-      print(paste("cluster",condition, sep=" "))
+      print(paste("cluster", condition))
       
       cells_set <-  unlist(list.clusters[condition])
       
@@ -62,7 +62,7 @@ setMethod("get.clusters.delta.expression","scCOTAN",
       
       increse.expression <- as.data.frame(increse.expression)
       
-      colnames(increse.expression) <- paste("cl.",condition,sep = "")
+      colnames(increse.expression) <- paste0("cl.", condition)
       
       if (dim(increased.expression.tot)[1] == 0) {
         increased.expression.tot <- as.data.frame(matrix(nrow = length(obj@coex$genes)))

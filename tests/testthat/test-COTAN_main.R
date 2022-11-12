@@ -7,21 +7,26 @@ genes.names.test <- readRDS(file.path(getwd(),"genes.names.test.RDS"))
 cell.names.test <- readRDS(file.path(getwd(),"cell.names.test.RDS"))
 
 test_that("1.initialization", {
-    
     utils::data("test.dataset.col", package = "COTAN")
     rownames(test.dataset.col) <- test.dataset.col$V1
     test.dataset.col <- test.dataset.col[,2:ncol(test.dataset.col)]
-    obj.temp <- new("scCOTAN",raw = test.dataset.col)
-    obj.temp <- initRaw(object = obj.temp,GEO="V" ,sc.method="10X",cond = "example")
-    expect_s4_class(obj.temp,"scCOTAN")
 
+    obj.temp <- COTAN(raw = test.dataset.col)
+    obj.temp <- initializeMetaDataset(obj.temp, GEO = "V",
+                                      sequencingMethod = "10X",
+                                      sampleCondition = "example")
+    expect_s4_class(obj.temp, "COTAN")
 })
 
 test_that("2.cleaning", {
     utils::data("test.dataset.col", package = "COTAN")
 
-    obj.temp <- new("scCOTAN",raw = test.dataset.col)
-    obj.temp <- initRaw(object = obj.temp,GEO=" " ,sc.method="10X",cond = "example")
+    obj.temp <- COTAN(raw = test.dataset.col)
+    obj.temp <- initializeMetaDataset(obj.temp, GEO = " ",
+                                      sequencingMethod = "10X",
+                                      sampleCondition = "example")
+    obj.temp <- as(obj.temp, "scCOTAN")
+
     #---------------------------------------------------
 
     ttm <- clean(obj.temp)
@@ -202,15 +207,18 @@ test_that("cell_homogeneous_clustering", {
   for (cl in sample(unique(temp@clusters),size = 5)) {
     cells.to_test <-  names(temp@clusters[temp@clusters == cl])
     #temp.obj <- cluster_homogeneity_check(obj = obj,cells = cells.to_test,
-     #                                     out_dir = paste0(tm,"/"),
+    #                                      out_dir = paste0(tm,"/"),
     #                                      cores = cores,
-     #                                     code = 12)
-    
+    #                                      code = 12)
+
     temp.obj <- temp@raw[,colnames(temp@raw) %in% cells.to_test]
-    
-    temp.obj <- new("scCOTAN",raw = temp.obj)
-    temp.obj <- initRaw(temp.obj,GEO="" ,sc.method=" ",cond = "temp.clustered")
-    
+  
+    temp.obj <- COTAN(raw = temp.obj)
+    temp.obj <- initializeMetaDataset(temp.obj, GEO = "",
+                                      sequencingMethod = " ",
+                                      sampleCondition = "temp.clustered")
+    temp.obj <- as(temp.obj, "scCOTAN")
+
     ttm <- clean(temp.obj)
     
     temp.obj <- ttm$object
@@ -256,10 +264,10 @@ test_that("merge_cell.clusters.test", {
                               cond = "test",
                               cores=12,
                               #out_dir_root = paste0(tm,"/"),
-                             srat = "Seurat_obj_test_with_cotan_clusters.RDS" ,
-                             out_dir = paste0(tm,"/") ,
-                             GEO = "test",
-                             sc.method = "10X")#,mt = FALSE, mt_prefix="^MT")
+                              srat = "Seurat_obj_test_with_cotan_clusters.RDS" ,
+                              out_dir = paste0(tm,"/") ,
+                              GEO = "test",
+                              sc.method = "10X")#,mt = FALSE, mt_prefix="^MT")
   
   final.cluster.number <- dim(temp@cluster_data)[2]
   expect_true(final.cluster.number < initial.cluster.number)
@@ -277,8 +285,12 @@ test_that("merge_cell.clusters.test", {
     
     temp.obj <- temp@raw[,colnames(temp@raw) %in% cells.to_test]
     
-    temp.obj <- new("scCOTAN",raw = temp.obj)
-    temp.obj <- initRaw(temp.obj,GEO="" ,sc.method=" ",cond = "temp.clustered")
+    temp.obj <- COTAN(raw = temp.obj)
+    temp.obj <- initializeMetaDataset(temp.obj,
+                                      GEO = "",
+                                      sequencingMethod = " ",
+                                      sampleCondition = "temp.clustered")
+    temp.obj <- as(temp.obj, "scCOTAN")
     
     ttm <- clean(temp.obj)
     

@@ -46,42 +46,52 @@ setClass(
     }
     if (!is_empty(object@rawNorm) &&
         !identical(dim(object@rawNorm), dim(object@raw))) {
-      stop(paste("'rawNorm'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
-                 "] must have the same sizes as ",
-                 "'raw'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
-                 "] when not empty."))
+      stop(paste0("'rawNorm'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
+                  "] must have the same sizes as ",
+                  "'raw'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
+                  "] when not empty."))
     }
     if (!is_empty(object@nu) && length(object@nu) != ncol(object@raw)) {
-      stop(paste("'nu'[", length(object@nu), "] must have size equal",
-                 " to the number of columns [", ncol(object@raw),
-                 "] of 'raw' when not empty."))
+      stop(paste0("'nu'[", length(object@nu), "] must have size equal",
+                  " to the number of columns [", ncol(object@raw),
+                  "] of 'raw' when not empty."))
     }
     if (!is_empty(object@lambda) && length(object@lambda) != nrow(object@raw)) {
-      stop(paste("'lambda'[", length(object@lambda), "] must have size equal",
-                 " to the number of rows [", nrow(object@raw),
-                 "]  of 'raw' when not empty."))
+      stop(paste0("'lambda'[", length(object@lambda), "] must have size equal",
+                  " to the number of rows [", nrow(object@raw),
+                  "]  of 'raw' when not empty."))
     }
     if (!is_empty(object@dispersion) &&
         (length(object@dispersion) + length(object@hkGenes)) != nrow(object@raw)) {
-      stop(paste("'dispersion'[", length(object@dispersion), "] size plus",
-                 " 'hkGenes'[", length(object@hkGenes), "] size must be equal",
-                 " to the number of rows [", nrow(object@raw),
-                 "] of 'raw' when not empty."))
+      stop(paste0("'dispersion'[", length(object@dispersion), "] size plus",
+                  " 'hkGenes'[", length(object@hkGenes), "] size must be equal",
+                  " to the number of rows [", nrow(object@raw),
+                  "] of 'raw' when not empty."))
     }
     if (!is_empty(object@metaCells) &&
         nrow(object@metaCells) != ncol(object@raw)) {
-      stop(paste("The number of rows [", nrow(object@metaCells),
-                 "] of 'metaCells' must be the same",
-                 " as the number of cols [", ncol(object@raw),
-                 "]  of 'raw' when not empty."))
+      stop(paste0("The number of rows [", nrow(object@metaCells),
+                  "] of 'metaCells' must be the same",
+                  " as the number of cols [", ncol(object@raw),
+                  "]  of 'raw' when not empty."))
     }
     # TODO: check remaining slots
     return(TRUE)
   }
 ) #end class COTAN
 
-# constructor of the class COTAN 
-#' @export 
+
+#' COTAN
+#' 
+#' constructor of the class COTAN 
+#' @importFrom methods new
+#' @export
+#' @examples
+#'
+#' data("raw.dataset")
+#' obj <- COTAN(raw = raw.dataset)
+#' 
+#' @rdname COTAN
 COTAN <- function(raw = "ANY") {
   raw <- as(as.matrix(raw), "dgCMatrix")
   new("COTAN", raw = raw)
@@ -100,41 +110,39 @@ COTAN <- function(raw = "ANY") {
 #' @slot a vector.
 #' @slot hk vector.
 #' @slot meta data.frame.
-#' @slot yes_yes ANY. Unused and deprecated
+#' @slot yes_yes ANY. Unused and deprecated. Kept for backward compatibility
+#' only
 #' @slot clusters vector.
 #' @slot cluster_data data.frame.
 #'
 #' @return the object class
 #' @export
-#' @examples
-#'
-#' data("ERCCraw")
-#' obj <- new("scCOTAN", raw = data)
-#'
-setClass("scCOTAN",
-         slots = c(
-           raw = "ANY",
-           raw.norm = "ANY",
-           coex = "ANY",
-           nu = "vector",
-           lambda = "vector",
-           a = "vector",
-           hk = "vector",
-           meta = "data.frame",
-           yes_yes = "ANY",
-           clusters = "vector",
-           cluster_data = "data.frame"
-         )
+setClass(
+  "scCOTAN",
+  slots = c(
+    raw = "ANY",
+    raw.norm = "ANY",
+    coex = "ANY",
+    nu = "vector",
+    lambda = "vector",
+    a = "vector",
+    hk = "vector",
+    meta = "data.frame",
+    yes_yes = "ANY", # Unused and deprecated: kept for backward compatibility only
+    clusters = "vector",
+    cluster_data = "data.frame"
+  )
 ) -> scCOTAN
 
-
-
-## Automatically convert an object from class "scCOTAN" into "COTAN"
+# Automatically convert an object from class "scCOTAN" into "COTAN"
+#' @importFrom methods setIs
+#' @export
 setIs("scCOTAN",
       "COTAN",
       coerce = function(from) {
         if (!is_empty(from@yes_yes)) {
-            warning("scCOTAN as COTAN: non-empty yes_yes member found: will be discarded",
+            warning(paste0("scCOTAN as COTAN: non-empty yes_yes member",
+                           " found: will be discarded"),
                     call. = FALSE)
         }
 
@@ -189,7 +197,8 @@ setIs("scCOTAN",
       # 'from' arg-name is convention: it is actually a destination!
       replace = function(from, value) {
         if(!is_empty(value@yes_yes)) {
-          warning("scCOTAN<- as COTAN<-: non-empty yes_yes member found: will be discarded",
+          warning(paste0("scCOTAN<- as COTAN<-: non-empty yes_yes member",
+                         " found: will be discarded"),
                   call. = FALSE)
         }
 
@@ -239,9 +248,12 @@ setIs("scCOTAN",
         from@metaDataset  <- value@meta
         from@metaCells    <- metaCells
         from@clustersCoex <- clustersCoex
-        from})
+        from}
+      ) # end setIs
 
-## Explicitly convert an object from class "COTAN" into "scCOTAN"
+# Explicitly convert an object from class "COTAN" into "scCOTAN"
+#' @importFrom methods setAs
+#' @export
 setAs("COTAN",
       "scCOTAN",
       function(from) {
@@ -306,4 +318,5 @@ setAs("COTAN",
         from@meta         <- value@metaDataset
         from@clusters     <- clusters
         from@cluster_data <- cluster_data
-        from})
+        from}
+      ) # end setAs

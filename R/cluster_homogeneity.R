@@ -39,19 +39,24 @@ setMethod("cluster_homogeneity","scCOTAN",
               raw = as.data.frame(data.raw[,rownames(data.seurat@meta.data[data.seurat@meta.data$seurat_clusters == cl,])])
               t = paste(cond,"_cl.",cl,sep = "")
 
-
-              obj = new("scCOTAN",raw = raw)
-              obj = initRaw(obj,GEO="" ,sc.method=" ",cond = paste("temp.",cond, "clustered by Seurat", sep=" "))
+              obj = COTAN(raw = raw)
+              obj = initializeMetaDataset(
+                      obj, GEO="", sequencingMethod = " ",
+                      sampleCondition = paste("temp.", cond,
+                                              "clustered by Seurat", sep=" "))
 
               #obj = readRDS(paste(out_dir,t,".cotan.RDS", sep = ""))
-              
+
               cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
-              obj = as(droGenesCells(obj, cells = cells_to_rem), "scCOTAN")
+              obj = dropGenesCells(obj, cells = cells_to_rem)
 
               print(paste("Condition ",t,sep = ""))
               #--------------------------------------
               n_cells = getNumCells(obj)
               print(paste("n cells", n_cells, sep = " "))
+
+              obj <- as(obj, "scCOTAN")
+
               if (n_cells <= 10) {
                 print("Cell cluster too small!")
                 to_rec = c(to_rec,colnames(raw))

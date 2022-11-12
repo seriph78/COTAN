@@ -246,3 +246,46 @@ setMethod(
     return(colSums(objCOTAN@raw))
   }
 )
+
+
+#' initializeMetaDataset
+#'
+#' initialize meta-data data-set
+#'
+#' @param objCOTAN the COTAN object
+#' @param GEO a code reporting the GEO identification
+#'            or other specific dataset code
+#' @param sequencingMethod a string reporting the method used for the sequencing
+#' @param sampleCondition a string reporting the specific sample condition or time point
+#'
+#' @return the given COTAN object with updated metaDataset
+#' @export
+#' @examples
+#'
+#' data("raw.dataset")
+#' obj <- COTAN(raw = raw.dataset)
+#' obj <- initRaw(obj, GEO = "code", sequencingMethod = "10X",
+#'                     sampleCondition = "mouse dataset")
+#'
+#' @rdname initializeMetaDataset
+setMethod(
+  "initializeMetaDataset",
+  "COTAN",
+  function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
+    print("Initializing COTAN meta-data")
+
+    numCells = getNumCells(objCOTAN)
+    objCOTAN@metaDataset[1,seq_len(2)] = c("GEO:", GEO)
+    objCOTAN@metaDataset[2,seq_len(2)] = c("scRNAseq method:", sequencingMethod)
+    objCOTAN@metaDataset[3,seq_len(2)] = c("starting n. of cells:", numCells)
+    objCOTAN@metaDataset[4,seq_len(2)] = c("Condition sample:", sampleCondition)
+
+    #TODO: remove this!
+    clusters = rep(NA, numCells)
+    names(clusters) = getCells(objCOTAN)
+    objCOTAN@metaCells <- data.frame(clusters = clusters,
+                                     row.names = names(clusters))
+  
+    return(objCOTAN)
+  }
+)

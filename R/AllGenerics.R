@@ -1,4 +1,11 @@
 setGeneric(
+  "initializeMetaDataset",
+  function(objCOTAN, GEO, sequencingMethod = "10X", sampleCondition) {
+    standardGeneric("initializeMetaDataset")
+  }
+)
+
+setGeneric(
   "dropGenesCells",
   function(objCOTAN, genes = c(), cells = c()) standardGeneric("dropGenesCells")
 )

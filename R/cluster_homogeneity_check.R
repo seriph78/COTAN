@@ -29,16 +29,18 @@ setMethod("cluster_homogeneity_check","scCOTAN",
               
             raw <- obj@raw[,colnames(obj@raw) %in% cells]
   
-            obj <- new("scCOTAN",raw = raw)
-            obj <- initRaw(obj,GEO="" ,sc.method=" ",cond = "temp.clustered")
-            
+            obj <- COTAN(raw = raw)
+            obj <- initializeMetaDataset(obj, GEO = "", sequencingMethod = " ",
+                                         sampleCondition = "temp.clustered")
+
             cells_to_rem <- getCells(obj)[which(getCellsSize(obj) == 0)]
-            obj <- as(dropGenesCells(obj, cells = cells_to_rem), "scCOTAN")
-            
+            obj <- dropGenesCells(obj, cells = cells_to_rem)
+ 
             #--------------------------------------
             print(paste("n cells", getNumCells(obj), sep = " "))
-            
-          
+
+            obj <- as(obj, "scCOTAN")
+
             ttm <- clean(obj)
               
             obj <- ttm$object

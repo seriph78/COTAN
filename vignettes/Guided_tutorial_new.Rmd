@@ -78,9 +78,13 @@ out_dir <- paste0(tempdir(),"/")
 Initialize the COTAN object with the row count table and the metadata for the experiment.
 
 ```{r}
-obj = new("scCOTAN",raw = test.dataset.col)
-#obj = initRaw(obj,GEO="GSM2861514" ,sc.method="Drop_seq",cond = "mouse cortex E17.5")
-obj = initRaw(obj,GEO="test" ,sc.method="10X",cond = "test_dataset")
+obj = COTAN(raw = test.dataset.col)
+#obj = initializeMetaDataset(obj, GEO = "GSM2861514",
+#                            sequencingMethod = "Drop_seq",
+#                            sampleCondition = "mouse cortex E17.5")
+obj = initializeMetaDataset(obj, GEO = "test",
+                            sequencingMethod = "10X",
+                            sampleCondition = "test_dataset")
 ```
 
 Now we can start the cleaning. Analysis requires and starts from a matrix of raw UMI counts after removing possible cell doublets or multiplets and low quality or dying cells (with too high mtRNA percentage, easily done with Seurat or other tools).
@@ -90,7 +94,7 @@ If we do not want to consider the mitochondrial genes we can remove them before 
 ```{r}
 genes_to_rem = getGenes(obj)[grep('^MT', getGenes(obj))] 
 cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
-obj = as(dropGenesCells(obj, genes_to_rem, cells_to_rem), "scCOTAN")
+obj = dropGenesCells(obj, genes_to_rem, cells_to_rem)
 ```
 
 We want also to define a prefix to identify the sample.
@@ -99,7 +103,7 @@ We want also to define a prefix to identify the sample.
 #t = "E17.5_cortex"
 t = "test"
 
-print(paste("Condition ",t,sep = ""))
+print(paste("Condition ", t, sep = ""))
 #--------------------------------------
 print(paste("n cells", getNumCells(obj), sep = " "))
 
@@ -121,6 +125,8 @@ if(!file.exists(paste(out_dir,"cleaning", sep = ""))){
 ```
 
 ```{r}
+obj <- as(obj, "scCOTAN")
+
 ttm = clean(obj)
 
 obj = ttm$object

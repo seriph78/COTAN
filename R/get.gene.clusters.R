@@ -53,7 +53,7 @@ setMethod("get.gene.clusters","scCOTAN",
     for (m in unlist(list.group.markers)) {
         tmp <- as.data.frame(tmp[order(tmp[,m]),])
         tmp$rank <- c(1:nrow(tmp))
-        colnames(tmp)[ncol(tmp)] <- paste("rank",m,sep = ".")
+        colnames(tmp)[ncol(tmp)] <- paste("rank", m, sep = ".")
     }
     rank.genes <- tmp[,(length(unlist(list.group.markers))+1):ncol(tmp)]
     #for (c in c(1:length(colnames(rank.genes)))) {

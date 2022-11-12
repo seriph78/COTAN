@@ -28,8 +28,8 @@ setMethod("plot_GDI","scCOTAN",
             if(is(class(object@coex)[1], "dtCMatrix")){
               print("COTAN object in the old format! Converting...")
               object <- get.coex(object)
-              print(paste("Saving as new file as ",dir,ET,"new.cotan.RDS", sep = ""))
-              saveRDS(object,paste(dir,ET,"new.cotan.RDS", sep = ""))
+              print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
+              saveRDS(object,paste0(dir, ET, "new.cotan.RDS"))
               
             }
             
@@ -78,7 +78,7 @@ setMethod("plot_GDI","scCOTAN",
                                direction ="both",
                                na.rm=TRUE,
                                seed = 1234) +
-              ggtitle(paste("GDI plot ",cond, sep = " "))+
+              ggtitle(paste("GDI plot ", cond))+
               theme(axis.text.x = element_text(size = text.size, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
                     axis.text.y = element_text( size = text.size, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
                     axis.title.x = element_text( size = text.size, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),

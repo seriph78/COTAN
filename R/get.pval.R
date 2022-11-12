@@ -41,7 +41,7 @@ setMethod(
         cond.col <- "on a set of genes on columns"
       }
     }
-    print(paste("Get p-values", cond.col, cond.row, sep = " "))
+    print(paste("Get p-values", cond.col, cond.row))
     if (type_stat == "S") {
       print("Using function S")
       S <- get.S(object)

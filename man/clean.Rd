@@ -23,11 +23,8 @@ estimated lambda and mu, "mu_estimator", "D"
 }
 \description{
 Main function that can be used to check and clean the dataset. It also
-produce
-(using the function fun_linear) and store
-the estimators for nu and lambda. It also fill the raw.norm (raw / nu) and
-n_cell
-(the initial number of cells in the dataset)
+produce (using the function fun_linear) and store
+the estimators for nu and lambda. It also fill the raw.norm (raw / nu)
 }
 \examples{
 data("ERCC.cotan")

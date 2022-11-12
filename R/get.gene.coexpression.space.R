@@ -37,10 +37,9 @@ setMethod(
 
     p.val.matrix <- get.pval(object, gene.set.col = primary.markers)
     if (!length(primary.markers) == ncol(p.val.matrix)) {
-      print(paste("Gene", primary.markers[!primary.markers %in% colnames(p.val.matrix)],
-        "not present!",
-        sep = " "
-      ))
+      print(paste("Gene",
+                  primary.markers[!primary.markers %in% colnames(p.val.matrix)],
+                  "not present!"))
       primary.markers <- primary.markers[primary.markers %in% colnames(p.val.matrix)]
     }
 

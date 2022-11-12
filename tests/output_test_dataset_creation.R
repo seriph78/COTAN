@@ -6,8 +6,10 @@ dataset.for.test.creation <- function(){
   tm = tempdir()
   utils::data("test.dataset.col", package = "COTAN")
   
-  obj <- new("scCOTAN",raw = test.dataset.col)
-  obj <- initRaw(object = obj,GEO=" " ,sc.method="10X",cond = "example")
+  obj <- COTAN(raw = test.dataset.col)
+  obj <- initializeMetaDataset(obj, GEO = " ", sequencingMethod = "10X",
+                               sampleCondition = "example")
+  obj <- as(obj, "scCOTAN")
   #---------------------------------------------------
   
   ttm <- clean(obj)

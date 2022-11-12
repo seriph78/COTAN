@@ -9,15 +9,16 @@ setMethod(
     zeroOne <- as.matrix(objCOTAN@raw)
     # zeroOne matrix: formed by row data matrix changed to 0-1 matrix
     zeroOne[zeroOne > 0] <- 1
+    zeroOne <- as.matrix(zeroOne)
     
-    if(cells){
+    if(isTRUE(cells)){
       # for cells 
-      YY <-  t(as.matrix(zeroOne)) %*% as.matrix(zeroOne)
+      YY <-  t(zeroOne) %*% zeroOne
     } else{
       # for genes
-      YY <- as.matrix(zeroOne) %*% t(as.matrix(zeroOne))
+      YY <- zeroOne %*% t(zeroOne)
     }
-    
+
     YY <- as(as.matrix(YY), "sparseMatrix")
     
     return(YY)

@@ -1,62 +1,11 @@
 ## Main functions
 
-
-#' initRaw
-#'
-#' It starts to fill some fields of cotan object.
-#' @param object the dataframe containing the raw data: it should be a data.frame, not a matrix.
-#' @param GEO a code reporting the GEO identification or other specific dataset
-#' code
-#' @param sc.method a string reporting the method used for the sequencing
-#' @param cond a string reporting the specific sample condition or time point
-#'
-#' @return A COTAN object to store all information
-#' @import methods
-#' @export
-#' @rdname initRaw
-#' @examples
-#'
-#' data("raw.dataset")
-#' obj <- new("scCOTAN", raw = raw.dataset)
-#' obj <- initRaw(obj, GEO = "code", sc.method = "10X", cond = "mouse dataset")
-#'
-setGeneric("initRaw", function(object, GEO, sc.method = "10X", cond) {
-  standardGeneric("initRaw")
-})
-#' @rdname initRaw
-setMethod("initRaw","scCOTAN",
-            function(object,GEO,sc.method,cond) {
-                print("Initializing S4 object")
-                if( (!attr(object@raw, "class")[1] == "dgCMatrix") |
-                   is.null(attr(object@raw, "class")) ){
-                    object@raw  <- methods::as(as.matrix(object@raw),
-                                             "sparseMatrix")
-                }
-                if(! all((object@raw - round(object@raw)) == 0)){
-                    print("WARNING! Input data contains not integer numbers!")
-
-                }
-                object@meta[1,seq_len(2)] = c("GEO:",GEO)
-                object@meta[2,seq_len(2)] = c("scRNAseq method:",sc.method)
-                object@meta[3,1] = "starting n. of cells:"
-                object@meta[3,2] = ncol(object@raw)
-                object@meta[4,seq_len(2)] = c("Condition sample:",cond)
-
-              object@clusters = rep(NA,ncol(object@raw))
-              names(object@clusters)=getCells(object)
-                return(object)
-          }
-)
-
-
 #' clean
 #'
 #' Main function that can be used to check and clean the dataset. It also
-#' produce
-#' (using the function fun_linear) and store
-#' the estimators for nu and lambda. It also fill the raw.norm (raw / nu) and
-#' n_cell
-#' (the initial number of cells in the dataset)
+#' produce (using the function fun_linear) and store
+#' the estimators for nu and lambda. It also fill the raw.norm (raw / nu)
+#' 
 #' @param object COTAN object
 #' @return a list of objects containing: "cl1" is the first cell cluster, "cl2"
 #' is the
@@ -410,16 +359,16 @@ setMethod(
     ge <- unique(array(sort(unlist(df_genes[sets]))))
     df.to.print <- data.frame()
     for (ET in conditions) {
-      print(paste("Loading condition", ET, sep = " "))
-      obj <- readRDS(paste(dir, ET, ".cotan.RDS", sep = ""))
+      print(paste0("Loading condition", ET))
+      obj <- readRDS(paste0(dir, ET, ".cotan.RDS"))
       if (is(class(obj@coex)[1], "dtCMatrix")) {
         print("COTAN object in the old format! Converting...")
         obj <- get.coex(obj)
-        print(paste("Saving as new file as ", dir, ET, "new.cotan.RDS", sep = ""))
-        saveRDS(obj, paste(dir, ET, "new.cotan.RDS", sep = ""))
+        print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
+        saveRDS(obj, paste0(dir, ET, "new.cotan.RDS"))
       }
       if (any(gr %in% obj@coex$genes) == FALSE) {
-        paste0("primary markers all absent in ", ET)
+        print(paste0("primary markers all absent in ", ET))
         stop()
       }
       p_val <- get.pval(obj, gene.set.col = gr, gene.set.row = ge)
@@ -500,7 +449,8 @@ setMethod(
       df.temp[df.temp$p_val > p_val.tr, ]$coex <- 0
       df.to.print <- rbind(df.to.print, df.temp)
     }
-    print(paste("min coex:", min(df.to.print$coex, na.rm = TRUE), "max coex", max(df.to.print$coex, na.rm = TRUE), sep = " "))
+    print(paste("min coex:", min(df.to.print$coex, na.rm = TRUE),
+                "max coex",  max(df.to.print$coex, na.rm = TRUE)))
     heatmap <- ggplot(data = subset(df.to.print, type %in% names(df_genes)[sets]), aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
       geom_tile(aes(fill = coex), colour = "black", show.legend = TRUE) +
       facet_grid(type ~ g1, scales = "free", space = "free") +
@@ -596,13 +546,13 @@ setMethod(
       markers.list <- as.list(markers.list)
     }
 
-    obj <- readRDS(paste(dir, condition, ".cotan.RDS", sep = ""))
+    obj <- readRDS(paste0(dir, condition, ".cotan.RDS"))
 
     if (is(class(obj@coex)[1], "dtCMatrix")) {
       print("COTAN object in the old format! Converting...")
       obj <- get.coex(obj)
-      print(paste("Saving as new file as ", dir, ET, "new.cotan.RDS", sep = ""))
-      saveRDS(obj, paste(dir, ET, "new.cotan.RDS", sep = ""))
+      print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
+      saveRDS(obj, paste0(dir, ET, "new.cotan.RDS"))
     }
 
     no_genes <- unique(c(unlist(markers.list), prim.markers))[!unique(c(
@@ -612,7 +562,7 @@ setMethod(
     %in% obj@coex$genes]
 
     if (!rlang::is_empty(no_genes)) {
-      print(paste(no_genes, "not present!", sep = " "))
+      print(paste0(no_genes, " not present!"))
     }
 
     pval <- get.pval(object = obj)
@@ -749,8 +699,8 @@ setMethod(
     if (is(class(object@coex)[1], "dtCMatrix")) {
       print("COTAN object in the old format! Converting...")
       object <- get.coex(object)
-      print(paste("Saving as new file as ", dir, ET, "new.cotan.RDS", sep = ""))
-      saveRDS(object, paste(dir, ET, "new.cotan.RDS", sep = ""))
+      print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
+      saveRDS(object, paste0(dir, ET, "new.cotan.RDS"))
     }
 
     print("GDI plot ")
@@ -775,7 +725,7 @@ setMethod(
       ) +
       xlab("log normalized reads sum") +
       ylab("global p val index (GDI)") +
-      ggtitle(paste("GDI ", cond, sep = " ")) +
+      ggtitle(paste("GDI ", cond)) +
       theme(
         axis.text.x = element_text(
           size = si, angle = 0, hjust = .5, vjust = .5,

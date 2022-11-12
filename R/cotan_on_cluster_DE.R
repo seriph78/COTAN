@@ -47,7 +47,7 @@ setMethod("DEA_on_clusters","scCOTAN",
               # cells_set  > set of cell code corresponding to cluster
               for (condition in names(cells_list)) {
                 gc()
-                  print(paste("cluster",condition, sep<-" "))
+                  print(paste("cluster", condition))
                   
                   cells_set <- unlist(cells_list[condition])
 
@@ -105,8 +105,9 @@ setMethod("DEA_on_clusters","scCOTAN",
                   rm(dif_yes_out,dif_no_in,dif_no_out,dif_yes_in)
                   gc()
 
-                  if(any(is.na(S))){
-                      print(paste("Errore: some Na in matrix S", which(is.na(S),arr.ind = T),sep = " "))
+                  if (any(is.na(S))) {
+                      print(paste("Error: some NA in matrix S",
+                                  which(is.na(S), arr.ind = T)))
                       break()
                   }
 
@@ -130,8 +131,8 @@ setMethod("DEA_on_clusters","scCOTAN",
                   coex <- coex/sqrt(getNumCells(obj))
                   coex <- as.data.frame(coex)
 
-                  colnames(coex) <- paste("cl.",condition,sep = "")
-                  colnames(p_value) <- paste("cl.",condition,sep = "")
+                  colnames(coex)    <- paste0("cl.", condition)
+                  colnames(p_value) <- paste0("cl.", condition)
                   #to insert gene names when the dataframe is empty
 
                   if (dim(cluster_data)[1] == 0) {

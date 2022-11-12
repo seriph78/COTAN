@@ -122,15 +122,18 @@ setMethod("merge_cell.clusters","scCOTAN",
                 
                 #Test if the number of genes with GDI > 1.5 is more than 1%
                 if (dim(GDI_data_wt1[GDI_data_wt1$GDI >= 1.5,])[1]/dim(GDI_data_wt1)[1] > 0.01) {
-                  print(paste("Clusters ",cl.1, " and ",cl.2," too high GDI!",sep = " "))
+                  print(paste("Clusters", cl.1, "and", cl.2, "too high GDI!"))
                   cl1_not_mergiable <- c(cl1_not_mergiable,cl.1)
                   cl2_not_mergiable <- c(cl2_not_mergiable,cl.2)
                   #cells_to_cluster = colnames(merged.obj@raw)
-                  #write.csv(cells_to_cluster, file = paste(out_dir,"to_recluster_",cond,"_cl.",cl,".csv",sep = ""))
+                  #write.csv(cells_to_cluster,
+                  #          file = paste0(out_dir, "to_recluster_",
+                  #                        cond, "_cl.", cl, ".csv"))
                   #to_rec = c(to_rec,cells_to_cluster)
                 }else{
-                  print(paste("Clusters ",cl.1, " and ",cl.2," can be merged.",sep = " "))
-                  write.csv(colnames(mat),paste0(dir,"merged_clusters_",cl.1,"_",cl.2,"cell_ids.csv"))
+                  print(paste("Clusters", cl.1, "and", cl.2, "can be merged."))
+                  write.csv(colnames(mat),paste0(dir, "merged_clusters_",
+                                                 cl.1, "_", cl.2, "cell_ids.csv"))
                   min.cl <- min(as.numeric(c(cl.1,cl.2)))
                   max.cl <- max(as.numeric(c(cl.1,cl.2)))
                   srat@meta.data[srat@meta.data$cotan == max.cl,]$cotan <- min.cl
@@ -172,10 +175,10 @@ setMethod("merge_cell.clusters","scCOTAN",
                         axis.title.y = element_text( size = si, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"),
                         legend.title = element_blank(),
                         legend.text = element_text(color = "#3C5488FF",face ="italic" ),
-                        legend.position = "none") + ggtitle(paste(cond.merge,getNumCells(obj),sep = " "))
+                        legend.position = "none") + ggtitle(paste(cond.merge, getNumCells(obj)))
                 
                 
-                pdf(paste(dir,cond.merge, ".GDI_plots.pdf", sep = ""), onefile=TRUE)
+                pdf(paste0(dir, cond.merge, ".GDI_plots.pdf"), onefile=TRUE)
                 plot(GDI_plot_wt1)
                 graphics.off()
                 
@@ -183,8 +186,10 @@ setMethod("merge_cell.clusters","scCOTAN",
                 gc()
               }
               
-              saveRDS(srat,paste(out_dir,"Seurat_obj_",cond,"_with_cotan_clusters_merged.RDS",sep = ""))
-              #srat <- readRDS(paste(out_dir_root,"Seurat_obj_",cond,"_with_cotan_clusters_merged.RDS",sep = ""))
+              saveRDS(srat,paste0(out_dir, "Seurat_obj_",
+                                  cond, "_with_cotan_clusters_merged.RDS"))
+              #srat <- readRDS(paste0(out_dir_root, "Seurat_obj_",
+              #                       cond, "_with_cotan_clusters_merged.RDS"))
               gc()
               
               

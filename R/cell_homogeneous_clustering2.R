@@ -68,7 +68,7 @@ setMethod("cell_homogeneous_clustering","character",
   }
     
   homog.clusters <- to_recluster_new[stringr::str_detect(to_recluster_new,pattern = "Cluster")]
-  print(paste(homog.clusters,collapse = " "))
+  print(paste(homog.clusters, collapse = " "))
   to_recluster_new <- to_recluster_new[stringr::str_detect(to_recluster_new,pattern = "Cluster",negate = T)]
   to_recluster_new <- to_recluster_new[2:length(to_recluster_new)]
   
@@ -83,8 +83,10 @@ setMethod("cell_homogeneous_clustering","character",
     print("Problems!")
   }
   
-  saveRDS(df.cell.clustering,paste(out_dir_cond,"cluster_df_",cond,".RDS",sep = ""))
-  write.csv(to_recluster_new,paste(out_dir_cond,"to_recluster_",cond,"tot.csv",sep = ""),row.names = F)
+  saveRDS(df.cell.clustering,paste0(out_dir_cond, "cluster_df_", cond, ".RDS"))
+  write.csv(to_recluster_new,
+            paste0(out_dir_cond, "to_recluster_", cond, "tot.csv"),
+            row.names = F)
   
   print("First part finished! Starting the iterative part.")
   
@@ -102,7 +104,8 @@ setMethod("cell_homogeneous_clustering","character",
     # Cells wih NA as cluster have to be clustered
     to_recluster_old <- rownames(df.cell.clustering)[is.na(df.cell.clustering$cl_1)]
     
-    print(paste("Length array cells to re-cluster:",length(to_recluster_new),"round:",round, sep = " "))
+    print(paste("Length array cells to re-cluster:", length(to_recluster_new),
+                "round:", round))
     
     #Clustering using Seurat
     seurat.obj <- CreateSeuratObject(counts = (obj@raw[,getCells(obj) %in% to_recluster_new]), 
@@ -145,11 +148,11 @@ setMethod("cell_homogeneous_clustering","character",
     seurat.obj <- RunUMAP(seurat.obj,umap.method = "uwot",metric = "cosine", 
                           dims = 1:min(c(25,(nrow(seurat.obj@meta.data)-1))))
     
-    out_dir_round <- paste(out_dir_cond,"round.",round,"/", sep = "")
+    out_dir_round <- paste0(out_dir_cond, "round.", round, "/")
     
     if(!file.exists(out_dir_round)){
       dir.create(file.path(out_dir_round))
-    #  dir.create(file.path(paste(out_dir_round,"cleaning",sep = "" )))
+    #  dir.create(file.path(paste0(out_dir_round, "cleaning")))
     }
     print(paste0("PDF UMAP! ", out_dir_round, "pdf_umap.pdf"))
     pdf(paste0(out_dir_round,"pdf_umap.pdf"))
@@ -242,7 +245,8 @@ setMethod("cell_homogeneous_clustering","character",
            !all(rownames(df.cell.clustering) %in% getCells(obj)))) {
         print("Problem: different cells in raw and clusters!")
       }
-      saveRDS(df.cell.clustering,paste(out_dir_round,"df.clusters_",cond,".cotan.RDS",sep = ""))
+      saveRDS(df.cell.clustering, 
+              paste0(out_dir_round, "df.clusters_", cond, ".cotan.RDS"))
       if (identical(getCells(obj), rownames(df.cell.clustering))) {
         obj@clusters <- df.cell.clustering$cl_1
         names(obj@clusters) <- rownames(df.cell.clustering)
@@ -250,13 +254,14 @@ setMethod("cell_homogeneous_clustering","character",
         errorCondition("Problems between obj@raw and clustered cells!")
         break
       }
-      #saveRDS(obj,paste(out_dir,"obj_",cond,".cotan.RDS",sep = ""))
+      #saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))
     }
     
     #print("Saving left cells.")  
-    #print(paste0("Left to recluster: ", (length(to_recluster_new)-1), " cells."))
-    saveRDS(df.cell.clustering,paste(out_dir_cond,"cluster_df_",cond,".RDS",sep = ""))
-    #saveRDS(obj,paste(out_dir_root,"obj_",cond,".cotan.RDS",sep = ""))
+    #print(paste0("Left to recluster: ", length(to_recluster_new)-1, " cells."))
+    saveRDS(df.cell.clustering,
+            paste0(out_dir_cond, "cluster_df_", cond, ".RDS"))
+    #saveRDS(obj, paste0(out_dir_root, "obj_", cond, ".cotan.RDS"))
     
   } # End while
   
@@ -295,7 +300,8 @@ setMethod("cell_homogeneous_clustering","character",
                         dims = 1:25)
   
   
-  saveRDS(srat,paste(out_dir,"Seurat_obj_",cond,"_with_cotan_clusters.RDS",sep = ""))
+  saveRDS(srat,
+          paste0(out_dir, "Seurat_obj_", cond, "_with_cotan_clusters.RDS"))
   rm(srat)
   gc()
   #Re estimation of all parameters after cells removing
@@ -308,21 +314,21 @@ setMethod("cell_homogeneous_clustering","character",
     obj <- ttm$object
     rm(ttm)
     
-    saveRDS(obj,paste(out_dir,"obj_",cond,".cotan.RDS",sep = ""))
+    saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))
     
   }
   gc()
   obj <- cotan_analysis(obj,cores = cores)
   print("Analysis step done")
   gc()
-  saveRDS(obj,paste(out_dir,"obj_",cond,".cotan.RDS",sep = ""))
+  saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))
   gc()
   print("Coex estimation last step started")
   obj <- get.coex(obj)
   print("Coex estimation last step done")
   gc()
   
-  saveRDS(obj,paste(out_dir,"obj_",cond,".cotan.RDS",sep = ""))
+  saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))
   return(obj)
   
  }

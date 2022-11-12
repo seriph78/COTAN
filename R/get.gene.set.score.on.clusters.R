@@ -37,8 +37,8 @@ setMethod("get.gene.set.score.on.clusters","scCOTAN",
                 df[m,ro] <- sum(ex,na.rm = T)/n.markers
               }
             }
-            write.csv(df,file = paste(out_dir,cond,"_gene_set_scores.csv", sep = ""))
+            write.csv(df, file = paste(out_dir, cond, "_gene_set_scores.csv"))
             
             return(df)
-                     }
+          }
 )
