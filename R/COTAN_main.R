@@ -34,40 +34,49 @@
 #'
 setGeneric("clean", function(object) standardGeneric("clean"))
 #' @rdname clean
-setMethod("clean","scCOTAN",
+setMethod(
+  "clean",
+  "scCOTAN",
+  function(object) {
 
-              function(object) {
+    mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
 
-                 mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
+    my_theme <- theme(axis.text.x = element_text(size = 14,
+                                                 angle = 0,
+                                                 hjust = .5,
+                                                 vjust = .5,
+                                                 face = "plain",
+                                                 colour ="#3C5488FF" ),
+                      axis.text.y = element_text(size = 14,
+                                                 angle = 0,
+                                                 hjust = 0,
+                                                 vjust = .5,
+                                                 face = "plain",
+                                                 colour ="#3C5488FF"),
+                      axis.title.x = element_text(size = 14,
+                                                  angle = 0,
+                                                  hjust = .5,
+                                                  vjust = 0,
+                                                  face = "plain",
+                                                  colour ="#3C5488FF"),
+                      axis.title.y = element_text(size = 14,
+                                                  angle = 90,
+                                                  hjust = .5,
+                                                  vjust = .5,
+                                                  face = "plain",
+                                                  colour ="#3C5488FF"))
+    print("Starting")
+    pc1 <- PC2 <- PC1 <- NULL
 
-                 my_theme  <- theme(axis.text.x = element_text(size = 14,
-                                                             angle = 0, hjust = .5,
-                                                             vjust = .5,
-                                                              face = "plain",
-                                                             colour ="#3C5488FF" ),
-                                   axis.text.y = element_text( size = 14, angle = 0, hjust = 0,
-                                                               vjust = .5,
-                                                               face = "plain",
-                                                               colour ="#3C5488FF"),
-                                   axis.title.x = element_text( size = 14,
-                                                                angle = 0, hjust = .5,
-                                                                vjust = 0,
-                                                                face = "plain",
-                                                                colour ="#3C5488FF"),
-                                   axis.title.y = element_text( size = 14, angle = 90, hjust = .5,
-                                                                vjust = .5,
-                                                                face = "plain",
-                                                                colour ="#3C5488FF"))
-                 print("Starting")
-                 pc1 <- PC2 <- PC1 <- NULL
+    # We want to discard genes having less than 3 non-zero counts per 1000 cells
+    threshold <- round((getNumCells(object) / 1000 * 3), digits = 0)
+    genesToDrop <- getGenes(object)[rowSums(getZeroOneProj(object)) <= threshold]
 
+    object <- as(dropGenesCells(object, genes = genesToDrop), "scCOTAN")
+    print(paste0("Genes selection done:",
+                 " dropped [", length(genesToDrop), "] genes"))
 
-                cells  <-  get.zero_one.cells(object)
-                
-                object@raw  <-  object@raw[rownames(cells), colnames(cells)]
-                print("Cells/genes selection done")
-                rm(cells)
-                gc()
+    gc()
 
                 list1  <- fun_linear(object)
                 print("Fun linear DONE")
@@ -231,26 +240,26 @@ setGeneric("cotan_analysis", function(object, cores = 1) {
   standardGeneric("cotan_analysis")
 })
 #' @rdname cotan_analysis
-setMethod("cotan_analysis","scCOTAN",
-          function(object, cores= 1) {
+setMethod(
+  "cotan_analysis",
+  "scCOTAN",
+  function(object, cores = 1) {
+    print("cotan analysis")
+    if (Sys.info()['sysname'] == "Windows") {
+      warning(paste0("On windows the numebr of cores used will be 1!",
+                     " Multicore is not supported."))
+      cores <- 1
+    }
 
-              print("cotan analysis")
-              if (Sys.info()['sysname'] == "Windows") {
-                  print("On windows the numebr of cores used will be 1! Multicore is not supported.")
-                  cores= 1
-              }
-
-              cells  <-  object@raw
-              #---------------------------------------------------
-              # Cells matrix : formed by row data matrix changed to 0-1 matrix
-              cells[cells > 0] <- 1
-              #cells[cells <= 0] <- 0
+    #---------------------------------------------------
+    # Cells matrix : formed by row data matrix changed to 0-1 matrix
+    cells <- getZeroOneProj(object)
 
               # exclude the effectively ubiquitous genes and saved in a separate file
               mu_estimator <- estimateMu(object)
 
               object <- as(housekeepingGenes(object), "scCOTAN")
-              
+
               hk <- object@hk
 
               mu_estimator <- mu_estimator[!rownames(mu_estimator) %in% hk,]
@@ -820,17 +829,15 @@ setMethod(
 setGeneric("get.expected.ct", function(object, g1, g2) standardGeneric("get.expected.ct"))
 #' @rdname get.expected.ct
 setMethod(
-  "get.expected.ct", "scCOTAN",
+  "get.expected.ct",
+  "scCOTAN",
   function(object, g1, g2) {
     stopifnot("a gene is constitutive!" = !(g1 %in% object@hk | g2 %in% object@hk))
 
     mu_estimator <- object@lambda[c(g1, g2)] %*% t(object@nu)
 
-    cells <- as.matrix(object@raw)[c(g1, g2), ]
     #---------------------------------------------------
-
-    cells[cells > 0] <- 1
-    cells[cells <= 0] <- 0
+    cells <- getZeroOneProj(object)[c(g1, g2), ]
 
     M <- funProbZero(object@a[c(g1, g2)], mu_estimator)
     rownames(M) <- c(g1, g2)

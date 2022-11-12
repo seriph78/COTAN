@@ -83,6 +83,11 @@ setGeneric(
 )
 
 setGeneric(
+  "getZeroOneProj",
+  function(objCOTAN) standardGeneric("getZeroOneProj")
+)
+
+setGeneric(
   "getNormalizedData",
   function(objCOTAN) standardGeneric("getNormalizedData")
 )

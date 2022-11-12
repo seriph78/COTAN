@@ -1,19 +1,4 @@
 
-setGeneric("get.zero_one.cells", function(object) standardGeneric("get.zero_one.cells"))
-setMethod(
-  "get.zero_one.cells", "scCOTAN",
-  function(object) {
-    cells.0.1 <- object@raw
-    # Cells matrix : formed by row data matrix changed to 0-1 matrix
-    cells.0.1[cells.0.1 > 0] <- 1
-    # We want to discard genes having less than 3 not 0 counts over 1000 cells
-    cells.0.1 <- cells.0.1[rowSums(cells.0.1) > round((getNumCells(object) / 1000 * 3),
-                                                      digits = 0), ]
-    return(cells.0.1)
-  }
-)
-
-
 #' spMat
 #'
 #' Internal function to convert the matrix in a sparce triangular matrix
@@ -122,20 +107,17 @@ setMethod("get.S","scCOTAN",
 setGeneric("obs_ct", function(object) standardGeneric("obs_ct"))
 setMethod("obs_ct","scCOTAN",
   function(object) {
-    cells <- object@raw
     #---------------------------------------------------
     # Cells matrix : formed by row data matrix changed to 0-1 matrix
-    cells[cells > 0] <- 1
-    #cells[cells <= 0] <- 0
-    cells <- cells
+    cells <- getZeroOneProj(object)
     print("Generating contingency tables for observed data")
-    somma <- rowSums(cells)
-    somma <- as.matrix(somma)
-    si_any <- do.call("cbind", replicate(length(rownames(somma)), somma, simplify = FALSE))
+    cellsRowSums <- as.matrix(rowSums(cells))
+    si_any <- do.call("cbind", replicate(length(rownames(cellsRowSums)),
+                                         cellsRowSums, simplify = FALSE))
 
     colnames(si_any) = rownames(si_any)
 
-    si_si <- as.matrix(observedContingencyYY(object))
+    si_si <- observedContingencyYY(object)
     si_no <- si_any - si_si
 
     si_any <- t(si_any)

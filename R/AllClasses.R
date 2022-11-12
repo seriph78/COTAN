@@ -12,6 +12,7 @@
 #' @slot metaCells data.frame
 #' @slot clustersCoex coex
 #' @importFrom rlang is_empty
+#' @importClassesFrom Matrix dgCMatrix
 setClass(
   "COTAN",
   slots = c(
@@ -41,9 +42,13 @@ setClass(
     clustersCoex = vector(mode = "list")
   ),
   validity = function(object) {
-    if (!is_empty(object@raw) && is_empty(object@rawNorm) &&
-        isFALSE(all.equal(object@raw, round(object@raw), tolerance = 0))) {
-      stop("Input raw data contains not integer numbers!")
+    if (!is_empty(object@raw) && is_empty(object@rawNorm)) {
+      if (isFALSE(all.equal(object@raw, round(object@raw), tolerance = 0))) {
+        stop("Input raw data contains not integer numbers!")
+      }
+      if (any(object@raw < 0)) {
+        stop("Input raw data must contain only non negative integers!")
+      }
     }
     if (!is_empty(object@rawNorm) &&
         !identical(dim(object@rawNorm), dim(object@raw))) {
@@ -86,6 +91,7 @@ setClass(
 #' 
 #' constructor of the class COTAN 
 #' @importFrom methods new
+#' @importClassesFrom Matrix dgCMatrix
 #' @export
 #' @examples
 #'
@@ -138,6 +144,7 @@ setClass(
 # Automatically convert an object from class "scCOTAN" into "COTAN"
 #' @importFrom methods setIs
 #' @importFrom rlang is_empty
+#' @importClassesFrom Matrix dgCMatrix
 setIs("scCOTAN",
       "COTAN",
       coerce = function(from) {
@@ -255,6 +262,7 @@ setIs("scCOTAN",
 # Explicitly convert an object from class "COTAN" into "scCOTAN"
 #' @importFrom methods setAs
 #' @importFrom rlang is_empty
+#' @importClassesFrom Matrix dgCMatrix
 setAs("COTAN",
       "scCOTAN",
       function(from) {

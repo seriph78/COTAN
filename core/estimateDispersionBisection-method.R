@@ -23,9 +23,7 @@ setMethod(
     }
 
     # taken the information if the values are greater than 0 or not
-    zeroOneMatrix <- objCOTAN@raw
-    zeroOneMatrix[zeroOneMatrix > 0] <- 1
-    zeroOneMatrix[zeroOneMatrix <= 0] <- 0
+    zeroOneMatrix <- getZeroOneProj(objCOTAN)
     zeroOneMatrix <-
       zeroOneMatrix[!rownames(zeroOneMatrix) %in% objCOTAN@hkGenes, ]
 

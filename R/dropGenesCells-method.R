@@ -9,8 +9,6 @@
 #'
 #' @return the original object but with genes/cells expunged as indicated.
 #' @importFrom rlang is_empty
-#' @importFrom rlang is_missing
-#' @importFrom rlang missing_arg
 #' @export
 #'
 #' @examples
@@ -29,48 +27,42 @@ setMethod(
       stop("No raw count data was given")
     }
 
-    genes.pos.to.keep <- which(!(getGenes(objCOTAN) %in% genes))
-    if (length(genes.pos.to.keep) == getNumGenes((objCOTAN))) {
-      # no genes to drop
-      # genes.pos.to.keep <- missing_arg()
-    }
+    genesPosToKeep <- which(!(getGenes(objCOTAN) %in% genes))
+    cellsPosToKeep <- which(!(getCells(objCOTAN) %in% cells))
 
-    cells.pos.to.keep <- which(!(getCells(objCOTAN) %in% cells))
-    if (length(cells.pos.to.keep) == getNumCells((objCOTAN))) {
-      # no cells to drop
-      # cells.pos.to.keep <- missing_arg()
-    }
+    anyGenesDropped <- length(genesPosToKeep) == getNumGenes((objCOTAN))
+    anyCellsDropped <- length(cellsPosToKeep) == getNumCells((objCOTAN))
 
-    if (is_missing(genes.pos.to.keep) && is_missing(cells.pos.to.keep)) {
+    if (!anyGenesDropped && !anyCellsDropped) {
       # nothing to do
       return(objCOTAN)
     }
 
-    objCOTAN@raw <- objCOTAN@raw[genes.pos.to.keep, cells.pos.to.keep]
+    objCOTAN@raw <- objCOTAN@raw[genesPosToKeep, cellsPosToKeep]
 
     if(!is_empty(objCOTAN@rawNorm)) {
-      objCOTAN@rawNorm <- objCOTAN@rawNorm[genes.pos.to.keep, cells.pos.to.keep]
+      objCOTAN@rawNorm <- objCOTAN@rawNorm[genesPosToKeep, cellsPosToKeep]
     }
 
     if (!is_empty(objCOTAN@coex) || !is_empty(objCOTAN@cellsCoex)) {
       stop("Cannot drop genes/cells once 'coex' matrices have been initialised")  
     }
     
-    if (!is_empty(objCOTAN@nu) && !is_missing(cells.pos.to.keep)) {
-      objCOTAN@nu <- objCOTAN@nu[cells.pos.to.keep]
+    if (!is_empty(objCOTAN@nu) && anyCellsDropped) {
+      objCOTAN@nu <- objCOTAN@nu[cellsPosToKeep]
     }
 
-    if (!is_empty(objCOTAN@lambda) && !is_missing(genes.pos.to.keep)) {
-      objCOTAN@lambda <- objCOTAN@lambda[genes.pos.to.keep]
+    if (!is_empty(objCOTAN@lambda) && anyGenesDropped) {
+      objCOTAN@lambda <- objCOTAN@lambda[genesPosToKeep]
     }
 
     if (!is_empty(objCOTAN@dispersion) || !is_empty(objCOTAN@hkGenes)) {
       stop("Cannot drop genes/cells once 'dispersion' or 'hkGenes' have been initialised")  
     }
 
-    if (!is_empty(objCOTAN@metaCells) && !is_missing(cells.pos.to.keep)) {
+    if (!is_empty(objCOTAN@metaCells) && anyCellsDropped) {
       colNames <- colnames(objCOTAN@metaCells)
-      objCOTAN@metaCells <- as.data.frame(objCOTAN@metaCells[cells.pos.to.keep,],
+      objCOTAN@metaCells <- as.data.frame(objCOTAN@metaCells[cellsPosToKeep,],
                                           row.names = getCells(objCOTAN))
       colnames(objCOTAN@metaCells) <- colNames
     }

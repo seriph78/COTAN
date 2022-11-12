@@ -43,9 +43,7 @@ setMethod(
 
     sum.raw.norm <- log(rowSums(getNormalizedData(object)))
 
-    cells <- getRawData(object)
-    cells[cells > 0] <- 1
-    cells[cells <= 0] <- 0
+    cells <- getZeroOneProj(object)
 
     exp.cells <- (rowSums(cells) / getNumCells(object)) * 100
 

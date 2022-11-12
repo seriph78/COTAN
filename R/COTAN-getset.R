@@ -103,6 +103,30 @@ setMethod(
 )
 
 
+#' getZeroOneProj
+#'
+#' This function extract the raw count table where any
+#' positive number has been replaced with 1
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the raw count projected to 0/1
+#' @importFrom rlang is_empty
+#' @export
+#' @rdname getZeroOneProj
+setMethod(
+  "getZeroOneProj",
+  "COTAN",
+  function(objCOTAN) {
+    if (is_empty(objCOTAN@raw)) {
+      warning("raw is empty")
+    }
+    
+    return(sign(objCOTAN@raw))
+  }
+)
+
+
 #' getNormalizedData
 #'
 #' This function extracts the normalized count table.
