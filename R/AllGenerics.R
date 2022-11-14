@@ -88,6 +88,11 @@ setGeneric(
 )
 
 setGeneric(
+  "getCellsSize",
+  function(objCOTAN) standardGeneric("getCellsSize")
+)
+
+setGeneric(
   "getNormalizedData",
   function(objCOTAN) standardGeneric("getNormalizedData")
 )
@@ -115,11 +120,6 @@ setGeneric(
 setGeneric(
   "getMetadataDataset",
   function(objCOTAN) standardGeneric("getMetadataDataset")
-)
-
-setGeneric(
-  "getCellsSize",
-  function(objCOTAN) standardGeneric("getCellsSize")
 )
 
 

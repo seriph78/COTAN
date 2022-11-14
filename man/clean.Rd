@@ -13,18 +13,20 @@ clean(object)
 \item{object}{COTAN object}
 }
 \value{
-a list of objects containing: "cl1" is the first cell cluster, "cl2"
-is the
-second cell cluster,
-"pca.cell.2" is a ggplot2 cell pca plot, "object" is the COTAN object with
-saved the
-estimated lambda and mu, "mu_estimator", "D"
+a list of objects containing:
+"object" is the COTAN object,
+"cl1" is the first cell cluster,
+"cl2" is the second cell cluster,
+"D" is the B cells' group genes,
 "pca_cells" pca numeric data.
+"pca.cell.2" is a ggplot2 cell pca plot,
+"genes.plot" is a ggplot2 B cells' group genes plot,
+"UDE.plot" is a ggplot2 cell UDE plot,
 }
 \description{
-Main function that can be used to check and clean the dataset. It also
-produce (using the function fun_linear) and store
-the estimators for nu and lambda. It also fill the raw.norm (raw / nu)
+Main function that can be used to check and clean the dataset.
+It also produces and stores the estimators for nu and lambda and fills
+the raw.norm (raw / nu)
 }
 \examples{
 data("ERCC.cotan")

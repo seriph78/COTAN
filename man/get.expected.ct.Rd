@@ -14,7 +14,7 @@ get.expected.ct(object, g1, g2)
 
 \item{g1}{A gene}
 
-\item{g2}{The other gene}
+\item{g2}{Another gene}
 }
 \value{
 A contingency table as dataframe
@@ -24,14 +24,13 @@ This function is used to get the expected contingency table for a given pair of 
 }
 \examples{
 data("ERCC.cotan")
-g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-while (g1 \%in\% getHousekeepingGenes(ERCC.cotan)) {
+repeat {
   g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
+  if (!(g1 \%in\% getHousekeepingGenes(ERCC.cotan))) break;
 }
-
-while (g2 \%in\% getHousekeepingGenes(ERCC.cotan)) {
+repeat {
   g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
+  if (!(g2 \%in\% getHousekeepingGenes(ERCC.cotan))) break;
 }
-get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
+get.expected.ct(ERCC.cotan, g1 = g1, g2 = g2)
 }

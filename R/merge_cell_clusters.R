@@ -16,13 +16,27 @@
 #' 
 #' @importFrom Matrix t
 #' @importFrom Matrix rowSums
+#' 
 #' @importFrom stats dist
 #' @importFrom stats hclust
 #' @importFrom stats as.dendrogram
+#' 
 #' @importFrom dendextend get_nodes_attr
+#' 
 #' @importFrom stringr str_remove
-#' @import ggplot2
-#'
+#' 
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 geom_tile
+#' @importFrom ggplot2 geom_hline
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 ggtitle
+#' @importFrom ggplot2 xlab
+#' @importFrom ggplot2 ylab
+#' @importFrom ggplot2 scale_color_manual
+#' @importFrom ggplot2 scale_fill_manual
+#' @importFrom ggrepel geom_text_repel
+#' 
 #' @return a COTAN object 
 #' @export
 #'
@@ -152,32 +166,26 @@ setMethod("merge_cell.clusters","scCOTAN",
                 # from here it is just a plot example
                 mycolours <- c("dif" = "#3C5488B2","normal"="#F39B7FE5","hk"="#7E6148B2","mk"="#E64B35B2")
                 
-                f1 = ggplot( subset(GDI_data_wt1,!rownames(GDI_data_wt1) %in% unique(rownames(genes.to.label))),  aes(x=sum.raw.norm, y=GDI)) +  geom_point(alpha = 0.4, color = "#8491B4B2", size=2)
-                
-                si=12
-                GDI_plot_wt1 = f1 + geom_point(data = subset(GDI_data_wt1,rownames(GDI_data_wt1) %in% c(rownames(genes.to.label),"Lhx1os","5330434G04Rik")),aes(x=sum.raw.norm, y=GDI, color=color),alpha = 1, size=2)+
-                  #geom_hline(yintercept=quantile(GDI$GDI)[4], linetype="dashed", color = "darkblue") +
-                  #geom_hline(yintercept=quantile(GDI$GDI)[3], linetype="dashed", color = "darkblue") +
-                  geom_hline(yintercept=1.5, linetype="dotted", color = "#3C5488B2", size= 0.5) +
-                  scale_color_manual("color", values = mycolours)  +
-                  scale_fill_manual("color", values = mycolours)  +
-                  xlab("log normalized counts")+ylab("GDI")+
-                  geom_label_repel(data =genes.to.label , aes(x=sum.raw.norm, y=GDI, label = rownames(genes.to.label),
-                                                              fill=color),
-                                   label.size = NA,
-                                   alpha = 0.5,
-                                   direction = "both",
-                                   na.rm=TRUE,
-                                   seed = 1234) +
-                  theme(axis.text.x = element_text(size = si, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
-                        axis.text.y = element_text( size = si, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
-                        axis.title.x = element_text( size = si, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),
-                        axis.title.y = element_text( size = si, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"),
-                        legend.title = element_blank(),
-                        legend.text = element_text(color = "#3C5488FF",face ="italic" ),
-                        legend.position = "none") + ggtitle(paste(cond.merge, getNumCells(obj)))
-                
-                
+                GDI_plot_wt1 <- ggplot(subset(GDI_data_wt1, !rownames(GDI_data_wt1) %in% unique(rownames(genes.to.label))),
+                                       aes(x = sum.raw.norm, y = GDI)) +
+                                geom_point(alpha = 0.4, color = "#8491B4B2", size = 2) +
+                                geom_point(data = subset(GDI_data_wt1, rownames(GDI_data_wt1) %in% c(rownames(genes.to.label), "Lhx1os", "5330434G04Rik")),
+                                                         aes(x = sum.raw.norm, y = GDI, color = color), alpha = 1, size = 2) +
+                                # geom_hline(yintercept = quantile(GDI$GDI)[4], linetype = "dashed", color = "darkblue") +
+                                # geom_hline(yintercept = quantile(GDI$GDI)[3], linetype = "dashed", color = "darkblue") +
+                                geom_hline(yintercept = 1.5, linetype="dotted", color = "#3C5488B2", size = 0.5) +
+                                scale_color_manual("color", values = mycolours)  +
+                                scale_fill_manual("color", values = mycolours)  +
+                                xlab("log normalized counts") +
+                                ylab("GDI") +
+                                geom_label_repel(data = genes.to.label,
+                                                 aes(x = sum.raw.norm, y = GDI,
+                                                     label = rownames(genes.to.label), fill = color),
+                                                 label.size = NA, alpha = 0.5,
+                                                 direction = "both", na.rm = TRUE, seed = 1234) +
+                                ggtitle(paste(cond.merge, getNumCells(obj))) +
+                                plotTheme("GDI", textSize = 12)
+
                 pdf(paste0(dir, cond.merge, ".GDI_plots.pdf"), onefile=TRUE)
                 plot(GDI_plot_wt1)
                 graphics.off()

@@ -84,7 +84,6 @@ geom_flat_violin <-function(mapping = NULL, data = NULL, stat = "ydensity",
 #' number with the sample name (default 2)
 #' 
 #'@importFrom Matrix colSums
-#'@importFrom ggthemes theme_tufte
 #'@import ggplot2
 #'@importFrom stringr str_split
 #' 
@@ -111,14 +110,10 @@ library.size.plot <- function(obj, split.pattern = " ", n.col=2){
          y = "Size (read number)",
          x = "") +
     scale_y_continuous(expand = c(0, 0)) +
-    ylim(0,max(sizes$sizes))+
-    ggthemes::theme_tufte()+
-    theme(legend.position = "none")#,
-  #axis.text.x=element_blank(),
-  #axis.ticks.x=element_blank())
+    ylim(0,max(sizes$sizes)) +
+    plotTheme("size-plot")
   
   return(plot)
-   
 }
 
 

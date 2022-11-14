@@ -12,10 +12,9 @@
 #' @param gene.prefix Prefix for the mitochondrial genes (default "^MT-" for 
 #' Human, mouse "^mt-")
 #' 
-#'@importFrom Matrix colSums
-#'@import ggplot2
-#'@importFrom stringr str_split
-#'@importFrom ggthemes theme_tufte
+#' @importFrom Matrix colSums
+#' @import ggplot2
+#' @importFrom stringr str_split
 #' @return the violin-boxplot plot
 #' @export
 #'
@@ -49,13 +48,9 @@ mitochondrial.percentage.plot <- function(obj, split.pattern = " ", n.col=2, gen
          x = "") +
     scale_y_continuous(expand = c(0, 0)) +
     #ylim(0,max(sizes$sizes))+
-    ggthemes::theme_tufte()+
-    theme(legend.position = "none")#,
-  #axis.text.x=element_blank(),
-  #axis.ticks.x=element_blank())
-  
-  return(list("plot" = plot,"sizes"= sizes))
-   
+    plotTheme("size-plot")
+
+  return(list("plot" = plot, "sizes" = sizes))
 }
 
 

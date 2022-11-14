@@ -12,7 +12,8 @@
 #' 
 #' @import Seurat
 #' @import ggrepel
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_point
 #' @return an array of cells that need to be re-clustered
 #' @export
 #'
@@ -23,13 +24,8 @@ setMethod("cluster_homogeneity","scCOTAN",
           function(data.seurat,data.raw,out_dir, cond, cores){
             
             options(ggrepel.max.overlaps = Inf)
-            # This detect the number of clusters
-            mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
-            my_theme = theme(axis.text.x = element_text(size = 14, angle = 0, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF" ),
-                             axis.text.y = element_text( size = 14, angle = 0, hjust = 0, vjust = .5, face = "plain", colour ="#3C5488FF"),
-                             axis.title.x = element_text( size = 14, angle = 0, hjust = .5, vjust = 0, face = "plain", colour ="#3C5488FF"),
-                             axis.title.y = element_text( size = 14, angle = 90, hjust = .5, vjust = .5, face = "plain", colour ="#3C5488FF"))
 
+            # This detect the number of clusters
             tot.clusters = max(as.numeric(as.vector(unique(data.seurat@meta.data$seurat_clusters[!data.seurat@meta.data$seurat_clusters == "singleton" ]))))
             print(paste("Number of clusters:", tot.clusters))
             to_rec = NA
@@ -84,7 +80,9 @@ setMethod("cluster_homogeneity","scCOTAN",
                 nu_df = data.frame("nu"= sort(obj@nu), "n"=c(1:length(obj@nu)))
 
             
-                plot(ggplot(nu_df, aes(x = n, y=nu)) + geom_point(colour = "#8491B4B2", size=1)+my_theme )
+                plot(ggplot(nu_df, aes(x = n, y = nu)) +
+                     geom_point(colour = "#8491B4B2", size = 1) +
+                     plotTheme() )
                 
                 #dev.off()
 

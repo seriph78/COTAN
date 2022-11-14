@@ -154,7 +154,7 @@ if (length(ttm$cl1) < length(ttm$cl2)) {
   to_rem = ttm$cl2
 }
 n_it = n_it+1
-obj = as(dropGenesCells(object = obj, genes = c(), cells = to_rem), "scCOTAN")
+obj = as(dropGenesCells(obj, genes = c(), cells = to_rem), "scCOTAN")
 
 gc()
 
@@ -238,7 +238,7 @@ obj = add.row.to.meta(obj,c("Threshold low UDE cells:",yset))
 
 to_rem = rownames(nu_df[which(nu_df$nu < yset),])
 
-obj = as(dropGenesCells(object = obj, genes = c(),cells =  to_rem), "scCOTAN")
+obj = as(dropGenesCells(obj, genes = c(), cells =  to_rem), "scCOTAN")
 ```
 
 Repeat the estimation after the cells are removed

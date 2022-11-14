@@ -16,7 +16,6 @@
 #'@importFrom scales math_format
 #'@importFrom scales trans_format
 #'@importFrom Matrix colSums
-#'@importFrom ggthemes theme_tufte
 #'@import ggplot2
 #'@importFrom stringr str_split
 #' @return
@@ -32,14 +31,14 @@ scatter.plot <- function(obj,split.pattern = " ", n.col=2, split.samples = F){
   to.plot$sample <- stringr::str_split(rownames(to.plot),pattern = split.pattern,simplify = T)[,n.col]
   
   plot <- ggplot(to.plot, aes(x=lib.size,y=gene.size, color = sample)) + geom_point(size = 0.5, alpha= 0.8)+
-    ggthemes::theme_tufte()+
    labs(title = "Scatter plot of library size VS gene detected for each cell", 
          y = "Gene number",
          x = "Library size (UMI)") + 
     scale_x_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
                   labels = scales::trans_format("log10", scales::math_format(10^.x))) +
     scale_y_log10(breaks = scales::trans_breaks("log10", function(x) 10^x),
-                  labels = scales::trans_format("log10", scales::math_format(10^.x)))
+                  labels = scales::trans_format("log10", scales::math_format(10^.x))) +
+    plotTheme("size-plot")
   
   if(split.samples == T){
     plot <- plot + facet_grid(cols = vars(sample))

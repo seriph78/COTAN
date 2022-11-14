@@ -10,7 +10,6 @@
 #' number with the sample name (default 2)
 #' 
 #'@importFrom Matrix colSums
-#'@importFrom ggthemes theme_tufte
 #'@import ggplot2
 #'@importFrom stringr str_split
 #' 
@@ -38,11 +37,8 @@ genes.size.plot <- function(obj, split.pattern = " ", n.col=2){
          x = "") +
     scale_y_continuous(expand = c(0, 0)) +
     ylim(0,max(sizes$sizes))+
-    ggthemes::theme_tufte()+
-    theme(legend.position = "none")#,
-  #axis.text.x=element_blank(),
-  #axis.ticks.x=element_blank())
-  
+    plotTheme("size-plot")
+
   return(plot)
   
 }

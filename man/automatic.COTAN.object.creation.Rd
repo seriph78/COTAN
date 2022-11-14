@@ -30,7 +30,8 @@ automatic.COTAN.object.creation(
 
 \item{out_dir}{directory for the output}
 
-\item{save.obj}{the created object is not automatically writen on disk (default NO). If "Yes" the object is written in out_dir}
+\item{save.obj}{the created object is not automatically writen on disk (default NO).
+If "Yes" the object is written in out_dir}
 
 \item{GEO}{GEO or other code that identify the dataset}
 

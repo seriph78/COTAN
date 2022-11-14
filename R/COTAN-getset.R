@@ -127,6 +127,28 @@ setMethod(
 )
 
 
+#' getCellsSize
+#'
+#' This function extracts the cell raw library size.
+#'
+#' @param object A COTAN object
+#'
+#' @return an array with the library sizes
+#' @importFrom rlang is_empty
+#' @export
+#' @rdname getCellsSize
+setMethod(
+  "getCellsSize", "COTAN",
+  function(objCOTAN) {
+    if (is_empty(objCOTAN@raw)) {
+      warning("raw is empty")
+    }
+    
+    return(colSums(objCOTAN@raw))
+  }
+)
+
+
 #' getNormalizedData
 #'
 #' This function extracts the normalized count table.
@@ -257,28 +279,6 @@ setMethod(
     }
     
     return(objCOTAN@metaDataset)
-  }
-)
-
-
-#' getCellsSize
-#'
-#' This function extracts the cell raw library size.
-#'
-#' @param object A COTAN object
-#'
-#' @return an array with the library sizes
-#' @importFrom rlang is_empty
-#' @export
-#' @rdname getCellsSize
-setMethod(
-  "getCellsSize", "COTAN",
-  function(objCOTAN) {
-    if (is_empty(objCOTAN@raw)) {
-      warning("raw is empty")
-    }
-    
-    return(colSums(objCOTAN@raw))
   }
 )
 

@@ -1,33 +1,50 @@
 ## Main functions
 
+
 #' clean
 #'
-#' Main function that can be used to check and clean the dataset. It also
-#' produce (using the function fun_linear) and store
-#' the estimators for nu and lambda. It also fill the raw.norm (raw / nu)
+#' Main function that can be used to check and clean the dataset.
+#' It also produces and stores the estimators for nu and lambda and fills
+#' the raw.norm (raw / nu)
 #' 
 #' @param object COTAN object
-#' @return a list of objects containing: "cl1" is the first cell cluster, "cl2"
-#' is the
-#' second cell cluster,
-#' "pca.cell.2" is a ggplot2 cell pca plot, "object" is the COTAN object with
-#' saved the
-#' estimated lambda and mu, "mu_estimator", "D"
+#' @return a list of objects containing:
+#' "object" is the COTAN object,
+#' "cl1" is the first cell cluster,
+#' "cl2" is the second cell cluster,
+#' "D" is the B cells' group genes,
 #' "pca_cells" pca numeric data.
+#' "pca.cell.2" is a ggplot2 cell pca plot,
+#' "genes.plot" is a ggplot2 B cells' group genes plot,
+#' "UDE.plot" is a ggplot2 cell UDE plot,
 #' @export
+#' 
+#' @import dplyr
 #'
-#' @import ggplot2
-#' dplyr
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 geom_tile
+#' @importFrom ggplot2 geom_hline
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 facet_grid
+#' @importFrom ggplot2 ggtitle
+#' @importFrom ggplot2 xlab
+#' @importFrom ggplot2 ylab
+#' @importFrom ggplot2 scale_color_gradient2
+#' @importFrom ggplot2 scale_color_manual
+#' @importFrom ggrepel geom_text_repel
 #'
 #' @importFrom tibble rownames_to_column
+#' 
 #' @importFrom stats hclust
 #' @importFrom stats cutree
 #'
-#' @importFrom Matrix rowMeans
-#' @importFrom Matrix t
 #' @importFrom utils head
+#' 
+#' @importFrom Matrix t
+#' @importFrom Matrix rowMeans
 #' @importFrom Matrix colMeans
-#' @rdname clean
+#' 
 #' @examples
 #' data("ERCC.cotan")
 #' ttm <- clean(ERCC.cotan)
@@ -39,34 +56,7 @@ setMethod(
   "scCOTAN",
   function(object) {
 
-    mycolours <- c("A" = "#8491B4B2","B"="#E64B35FF")
-
-    my_theme <- theme(axis.text.x = element_text(size = 14,
-                                                 angle = 0,
-                                                 hjust = .5,
-                                                 vjust = .5,
-                                                 face = "plain",
-                                                 colour ="#3C5488FF" ),
-                      axis.text.y = element_text(size = 14,
-                                                 angle = 0,
-                                                 hjust = 0,
-                                                 vjust = .5,
-                                                 face = "plain",
-                                                 colour ="#3C5488FF"),
-                      axis.title.x = element_text(size = 14,
-                                                  angle = 0,
-                                                  hjust = .5,
-                                                  vjust = 0,
-                                                  face = "plain",
-                                                  colour ="#3C5488FF"),
-                      axis.title.y = element_text(size = 14,
-                                                  angle = 90,
-                                                  hjust = .5,
-                                                  vjust = .5,
-                                                  face = "plain",
-                                                  colour ="#3C5488FF"))
     print("Starting")
-    pc1 <- PC2 <- PC1 <- NULL
 
     # We want to discard genes having less than 3 non-zero counts per 1000 cells
     threshold <- round((getNumCells(object) / 1000 * 3), digits = 0)
@@ -107,8 +97,8 @@ setMethod(
                 if(length(groups[groups == 1]) < length(groups[groups == 2])  ){
                   groups[groups == 1] <- "B"
                   groups[groups == 2] <- "A"
-
-                }else{
+                }
+                else{
                   groups[groups == 1] <- "A"
                   groups[groups == 2] <- "B"
                 }
@@ -127,8 +117,8 @@ setMethod(
 
                 if (identical(rownames(t_to_clust),names(groups))) {
                   t_to_clust <- cbind(t_to_clust,groups)
-                  
-                }else{
+                }
+                else {
                   stop("Error in the cell names")
                 }
                 
@@ -145,7 +135,8 @@ setMethod(
                 if (dim(B)[2]>2) {
                   B <- B[order(rowMeans(B[,2:length(colnames(B))]),
                               decreasing = TRUE), ]
-                }else{
+                }
+                else{
                   B <- B[order(B[,2],decreasing = TRUE), ]
                 }
 
@@ -155,69 +146,51 @@ setMethod(
                 rownames(C) <-  C$rowname
                 D <-  data.frame("means" = rowMeans(C[2:length(colnames(C))]),
                                "n" = NA )
-                D <-  D[D$means>0,]
-                D$n <-  seq_along(D$means)
+                D <- D[D$means>0,]
+                D$n <- seq_along(D$means)
 
                 #check if the pca plot is clean enought and from the printed genes,
                 #if the smalest group of cells are caratterised by particular genes
 
-                pca_cells  <-  cbind(pca_cells,"groups"=t_to_clust$groups)
+                pca_cells  <- cbind(pca_cells, "groups" = t_to_clust$groups)
 
-                pca.cell.1  <-  ggplot(subset(pca_cells,groups == "A" ),
-                                    aes(x=PC1, y=PC2,colour =groups)) +
-                  geom_point(alpha = 0.5, size=3)
+    PC2 <- PC1 <- NULL
 
-                pca.cell.2  <- pca.cell.1 + geom_point(data = subset(pca_cells,
-                            groups != "A" ),aes(x=PC1, y=PC2,colour =groups),
-                                                   alpha = 0.8, size=3)+
-                  scale_color_manual("groups", values = mycolours)  +
-                  my_theme + theme(legend.title = element_blank(),
-                                   legend.text = element_text( size = 12,
-                                                            color = "#3C5488FF",
-                                                            face ="italic" ),
-                                   legend.position="bottom")
+    pca.cell.1 <- ggplot(subset(pca_cells, groups == "A"),
+                         aes(x = PC1, y = PC2, colour = groups)) +
+                  geom_point(alpha = 0.5, size = 3)
 
-                #genes plot 
-                pl <- ggplot(D, aes(x=n,y=means)) + geom_point() +
-                  geom_text_repel(data=subset(D, n > (max(D$n) - 15) ), aes(n,means,label=rownames(D[D$n > (max(D$n)- 15),])),
-                                  nudge_y      = 0.05,
-                                  nudge_x      = 0.05,
-                                  direction    = "x",
-                                  angle        = 90,
-                                  vjust        = 0,
-                                  segment.size = 0.2)+
-                  ggtitle(label = "B cell group genes mean expression")+my_theme +
-                  theme(plot.title = element_text(color = "#3C5488FF", size = 20, face = "italic",vjust = - 1,hjust = 0.02 ),
-                        plot.subtitle = element_text(color = "darkred",vjust = - 15,hjust = 0.01 ))
-                
-              
-                # UDE/nu plot
-                nu_est = round(getNu(object), digits = 7)
-                
-                plot.nu <-ggplot(pca_cells,aes(x=PC1,y=PC2, colour = log(nu_est)))
-                
-                plot.nu = plot.nu + geom_point(size = 1,alpha= 0.8)+
-                  scale_color_gradient2(low = "#E64B35B2",mid =  "#4DBBD5B2", high =  "#3C5488B2" ,
-                                        midpoint = log(mean(nu_est)),name = "ln(nu)")+
-                  ggtitle("Cells PCA coloured by cells efficiency") +
-                  my_theme +  theme(plot.title = element_text(color = "#3C5488FF", size = 20),
-                                    legend.title=element_text(color = "#3C5488FF", size = 14,face = "italic"),
-                                    legend.text = element_text(color = "#3C5488FF", size = 11),
-                                    legend.key.width = unit(2, "mm"),
-                                    legend.position="right")
-                
+    pca.cell.2 <- pca.cell.1 +
+                  geom_point(data = subset(pca_cells, groups != "A" ),
+                             aes(x = PC1, y = PC2, colour = groups),
+                             alpha = 0.8, size = 3) +
+                  scale_color_manual("groups", values = c("A" = "#8491B4B2", "B"="#E64B35FF")) +
+                  plotTheme("pca")
 
-                output  <- list("cl1"=cl1,
-                                "cl2"=cl2,
-                                "pca.cell.2"=pca.cell.2,
-                                "object"=object,
-                                #"mu_estimator"=mu_estimator,
-                                "D"=D,
-                                "pca_cells"=pca_cells,
-                                "genes.plot"=pl,
-                                "UDE.plot"= plot.nu)
-                return(output)
-          }
+    # genes plot
+    pl <- ggplot(D, aes(x = n, y = means)) + geom_point() +
+          geom_text_repel(data = subset(D, n > (max(D$n) - 15)),
+                          aes(n, means, label = rownames(D[D$n > (max(D$n)- 15),])),
+                          nudge_y = 0.05, nudge_x = 0.05, direction = "x",
+                          angle = 90, vjust = 0, segment.size = 0.2) +
+          ggtitle(label = "B cell group genes mean expression") +
+          plotTheme("genes")
+    
+    # UDE/nu plot
+    nu_est = round(getNu(object), digits = 7)
+
+    plot.nu <- ggplot(pca_cells, aes(x = PC1,y = PC2, colour = log(nu_est))) +
+               geom_point(size = 1, alpha = 0.8) +
+               scale_color_gradient2(low = "#E64B35B2", mid = "#4DBBD5B2", high = "#3C5488B2",
+                                     midpoint = log(mean(nu_est)), name = "ln(nu)") +
+               ggtitle("Cells PCA coloured by cells efficiency") +
+               plotTheme("UDE")
+
+    output <- list("object" = object, 
+                   "cl1" = cl1, "cl2" = cl2, "D" = D, "pca_cells" = pca_cells,
+                   "pca.cell.2" = pca.cell.2, "genes.plot" = pl, "UDE.plot" = plot.nu)
+    return(output)
+  }
 )
 
 
@@ -454,32 +427,16 @@ setMethod(
     }
     print(paste("min coex:", min(df.to.print$coex, na.rm = TRUE),
                 "max coex",  max(df.to.print$coex, na.rm = TRUE)))
-    heatmap <- ggplot(data = subset(df.to.print, type %in% names(df_genes)[sets]), aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
-      geom_tile(aes(fill = coex), colour = "black", show.legend = TRUE) +
-      facet_grid(type ~ g1, scales = "free", space = "free") +
-      scale_fill_gradient2(
-        low = "#E64B35FF", mid = "gray93", high = "#3C5488FF",
-        midpoint = 0,
-        na.value = "grey80", space = "Lab", guide = "colourbar",
-        aesthetics = "fill", oob = scales::squish
-      ) +
-      theme(
-        axis.title.x = element_blank(),
-        panel.spacing = unit(0, "lines"),
-        strip.background = element_rect(fill = "#8491B44C"),
-        strip.text.y = element_text(size = 9, colour = "#3C5488FF"),
-        strip.text.x = element_text(size = 9, angle = 90, colour = "#3C5488FF"),
-        axis.title.y = element_blank(),
-        axis.text.y = element_text(
-          size = 9, angle = 0, hjust = 0, vjust = .5,
-          face = "plain", colour = "#3C5488FF"
-        ),
-        legend.text = element_text(color = "#3C5488FF", face = "italic"),
-        legend.position = "bottom",
-        legend.title = element_blank(),
-        legend.key.height = unit(2, "mm")
-      )
-    heatmap
+
+    heatmap <- ggplot(data = subset(df.to.print, type %in% names(df_genes)[sets]),
+                      aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
+               geom_tile(aes(fill = coex), colour = "black", show.legend = TRUE) +
+               facet_grid(type ~ g1, scales = "free", space = "free") +
+               scale_fill_gradient2(low = "#E64B35FF", mid = "gray93", high = "#3C5488FF",
+                                    midpoint = 0,na.value = "grey80", space = "Lab",
+                                    guide = "colourbar", aesthetics = "fill", oob = scales::squish) +
+               plotTheme("heatmap", textSize = 9)
+
     return(heatmap)
   }
 )
@@ -714,7 +671,6 @@ setMethod(
       GDI <- get.GDI(object, type = "G")
     }
 
-    si <- 12
     plot <- ggplot(GDI, aes(x = sum.raw.norm, y = GDI)) +
       geom_point(size = 2, alpha = 0.5, color = "#8491B4B2") +
       geom_hline(yintercept = 1.5, linetype = "dotted", color = "darkred", size = 1) +
@@ -729,29 +685,8 @@ setMethod(
       xlab("log normalized reads sum") +
       ylab("global p val index (GDI)") +
       ggtitle(paste("GDI ", cond)) +
-      theme(
-        axis.text.x = element_text(
-          size = si, angle = 0, hjust = .5, vjust = .5,
-          face = "plain", colour = "#3C5488FF"
-        ),
-        axis.text.y = element_text(
-          size = si, angle = 0, hjust = 0, vjust = .5,
-          face = "plain", colour = "#3C5488FF"
-        ),
-        axis.title.x = element_text(
-          size = si, angle = 0, hjust = .5, vjust = 0,
-          face = "plain", colour = "#3C5488FF"
-        ),
-        axis.title.y = element_text(
-          size = si, angle = 90, hjust = .5, vjust = .5,
-          face = "plain", colour = "#3C5488FF"
-        ),
-        legend.title = element_blank(),
-        plot.title = element_text(color = "#3C5488FF", size = 14, face = "bold.italic"),
-        legend.text = element_text(color = "#3C5488FF", face = "italic"),
-        legend.position = "bottom"
-      )
-
+      plotTheme("GDI", textSize = 12)
+      
     return(plot)
   }
 )
@@ -806,7 +741,7 @@ setMethod(
 #' This function is used to get the expected contingency table for a given pair of genes.
 #' @param object The cotan object
 #' @param g1 A gene
-#' @param g2 The other gene
+#' @param g2 Another gene
 #'
 #' @return A contingency table as dataframe
 #' @export
@@ -816,23 +751,23 @@ setMethod(
 #' @rdname get.expected.ct
 #' @examples
 #' data("ERCC.cotan")
-#' g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-#' g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-#' while (g1 %in% getHousekeepingGenes(ERCC.cotan)) {
+#' repeat {
 #'   g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
+#'   if (!(g1 %in% getHousekeepingGenes(ERCC.cotan))) break;
 #' }
-#'
-#' while (g2 %in% getHousekeepingGenes(ERCC.cotan)) {
+#' repeat {
 #'   g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
+#'   if (!(g2 %in% getHousekeepingGenes(ERCC.cotan))) break;
 #' }
-#' get.expected.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
+#' get.expected.ct(ERCC.cotan, g1 = g1, g2 = g2)
 setGeneric("get.expected.ct", function(object, g1, g2) standardGeneric("get.expected.ct"))
 #' @rdname get.expected.ct
 setMethod(
   "get.expected.ct",
   "scCOTAN",
   function(object, g1, g2) {
-    stopifnot("a gene is constitutive!" = !(g1 %in% object@hk | g2 %in% object@hk))
+    stopifnot("a gene is constitutive!" =
+              !(g1 %in% object@hk || g2 %in% object@hk))
 
     mu_estimator <- object@lambda[c(g1, g2)] %*% t(object@nu)
 
@@ -847,7 +782,7 @@ setMethod(
     n_zero_obs <- rowSums(cells[!rownames(cells) %in% object@hk, ] == 0)
 
     dist_zeros <- sqrt(sum((n_zero_esti - n_zero_obs)^2))
-    stopifnot("Errore: some Na in matrix M " = !any(is.na(M)))
+    stopifnot("Errore: some NA in matrix M " = !anyNA(M))
 
     gc()
     estimator_no_no <- M %*% t(M)
