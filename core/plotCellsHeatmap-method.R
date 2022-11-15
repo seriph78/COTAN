@@ -36,7 +36,7 @@ setMethod(
       Heatmap(coexMat,
         border = TRUE,
         column_split = factor(rep(clustersIdentifier, clustersSize), 
-                              levels = title
+                              levels = clustersIdentifier
         ),
         cluster_rows = FALSE,
         cluster_columns = FALSE
