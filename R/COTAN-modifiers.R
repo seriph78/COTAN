@@ -102,8 +102,8 @@ setMethod(
     genesPosToKeep <- which(!(getGenes(objCOTAN) %in% genes))
     cellsPosToKeep <- which(!(getCells(objCOTAN) %in% cells))
 
-    anyGenesDropped <- length(genesPosToKeep) == getNumGenes((objCOTAN))
-    anyCellsDropped <- length(cellsPosToKeep) == getNumCells((objCOTAN))
+    anyGenesDropped <- length(genesPosToKeep) != getNumGenes((objCOTAN))
+    anyCellsDropped <- length(cellsPosToKeep) != getNumCells((objCOTAN))
 
     if (!anyGenesDropped && !anyCellsDropped) {
       # nothing to do
@@ -112,7 +112,7 @@ setMethod(
 
     objCOTAN@raw <- objCOTAN@raw[genesPosToKeep, cellsPosToKeep]
 
-    if(!is_empty(objCOTAN@rawNorm)) {
+    if (!is_empty(objCOTAN@rawNorm)) {
       objCOTAN@rawNorm <- objCOTAN@rawNorm[genesPosToKeep, cellsPosToKeep]
     }
 
@@ -142,6 +142,8 @@ setMethod(
     if (!is_empty(objCOTAN@clustersCoex)) {
       stop("Cannot drop genes/cells once 'clustersCoex' has been initialised")
     }
+
+    validObject(objCOTAN)
 
     return(objCOTAN)
   }

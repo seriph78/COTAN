@@ -13,12 +13,12 @@
 #' @export
 #'
 #' @import grDevices
-#' 
+#'
 #' @importFrom Matrix rowSums
 #' @importFrom Matrix colSums
 #' @importFrom utils write.csv
 #' @importFrom methods new
-#' 
+#'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 annotate
@@ -26,7 +26,7 @@
 #' @importFrom ggplot2 ggtitle
 #' @importFrom ggplot2 scale_color_gradient2
 #' @importFrom ggrepel geom_text_repel
-#' 
+#'
 #' @rdname automatic.COTAN.object.creation
 #' @examples
 #'
@@ -42,8 +42,8 @@
 setGeneric(
   "automatic.COTAN.object.creation",
   function(df, out_dir,save.obj = "NO",
-           GEO, sc.method, cond, 
-           #mt = FALSE, mt_prefix="^mt", 
+           GEO, sc.method, cond,
+           #mt = FALSE, mt_prefix="^mt",
            cores = 1) {
     standardGeneric("automatic.COTAN.object.creation")
   }
@@ -53,13 +53,13 @@ setMethod(
   "automatic.COTAN.object.creation",
   "data.frame",
   function(df, out_dir, save.obj = "NO",
-           GEO, sc.method, cond, 
-           #mt = FALSE, mt_prefix="^mt", 
+           GEO, sc.method, cond,
+           #mt = FALSE, mt_prefix="^mt",
            cores = 1) {
     start_time_all <- Sys.time()
 
     obj <- COTAN(raw = df)
-    obj <- initializeMetaDataset(obj, GEO = GEO, 
+    obj <- initializeMetaDataset(obj, GEO = GEO,
                                  sequencingMethod = sc.method,
                                  sampleCondition = cond)
 
@@ -82,60 +82,42 @@ setMethod(
       dir.create(file.path(out_dir, "cleaning"))
     }
 
-              ttm <- clean(obj)
+    list[obj, , plots] <- clean(obj)
 
-              means <- PC1 <- PC2 <- nu <- NULL
-              
-              obj <- ttm$object
+    means <- PC1 <- PC2 <- nu <- NULL
 
-              n_it <- 1
+    {
+      numIter <- 1
+      pdf(file.path(out_dir, "cleaning",
+                    paste0(cond, "_", numIter, "_plots_without_cleaning.pdf")))
+      plot(plots[["pcaCells"]])
+      plot(plots[["genes"]])
+      dev.off()
+    }
 
-              pdf(file.path(out_dir, "cleaning",
-                            paste0(cond, "_", n_it, "_plots_without_cleaning.pdf")))
-              plot(ttm$pca.cell.2)
-              plot.fig = ggplot(ttm$D, aes(x = n, y = means)) +
-                         geom_point() +
-                         geom_text_repel(
-                           data = subset(ttm$D, n > (max(ttm$D$n)- 15)),
-                           aes(n, means, label = rownames(ttm$D[ttm$D$n > (max(ttm$D$n)- 15),])),
-                           nudge_y = 0.05, nudge_x = 0.05, direction = "x",
-                           angle = 90, vjust = 0, segment.size = 0.2) +
-                         ggtitle(label = "B cell group genes mean expression",
-                                 subtitle = " - B group NOT removed -") +
-                         plotTheme("genes")
-              plot(plot.fig)
+    {
+      pdf(file.path(out_dir, "cleaning",
+                    paste0(cond,"_plots_PCA_efficiency_colored.pdf")))
+      plot(plots[["UDE"]])
+      dev.off()
+    }
 
-              dev.off()
+    {
+      pdf(file.path(out_dir, "cleaning",
+                    paste0(cond,"_plots_efficiency.pdf")))
+      plot(plots[["nu"]] +
+           annotate(geom = "text", x = 50, y = 0.25,
+                    label = "nothing to remove ", color = "darkred"))
+      dev.off()
+    }
 
-              nu_est <- round(obj@nu, digits = 7)
-
-              plot_nu <- ggplot(ttm$pca_cells,
-                                aes(x = PC1,y = PC2, colour = log(nu_est))) +
-                         geom_point(size = 1, alpha=  0.8) +
-                         scale_color_gradient2(low = "#E64B35B2", mid = "#4DBBD5B2", high = "#3C5488B2",
-                                               midpoint = log(mean(nu_est)), name = "ln(nu)") +
-                         ggtitle("Cells PCA coloured by cells efficiency") +
-                         plotTheme("UDE")
-
-              pdf(file.path(out_dir, "cleaning",
-                            paste0(cond,"_plots_PCA_efficiency_colored.pdf")))
-              plot(plot_nu)
-              dev.off()
-
-              nu_df <- data.frame("nu"= sort(obj@nu), "n"=seq_along(obj@nu))
-
-              pdf(file.path(out_dir, "cleaning",
-                            paste0(cond,"_plots_efficiency.pdf")))
-              plot(ggplot(nu_df, aes(x = n, y = nu)) +
-                   geom_point(colour = "#8491B4B2", size = 1) +
-                   annotate(geom = "text", x = 50, y = 0.25,
-                            label = "nothing to remove ", color = "darkred") +
-                   plotTheme("common") )
-              dev.off()
-
-              analysis_time <- Sys.time()
+    rm(plots)
+    gc()
 
               print("Cotan analysis function started")
+              analysis_time <- Sys.time()
+
+              obj <- as(obj, "scCOTAN")
               obj <- cotan_analysis(obj,cores = cores)
 
               coex_time <- Sys.time()
@@ -165,7 +147,7 @@ setMethod(
                                           "n.genes"=getNumGenes(obj) ),
                                file = file.path(out_dir, paste0(cond, "_times.csv")))
 
-              
+
               if (save.obj == "yes" | save.obj == "Yes" | save.obj == "YES") {
                 print(paste0("Saving elaborated data locally at ",
                              out_dir, cond, ".cotan.RDS"))

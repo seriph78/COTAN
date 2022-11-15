@@ -25,10 +25,10 @@ or store the cell codes if the cluster need to be split)}
 an array of cells that need to be re-clustered or nothing
 }
 \description{
-# Function that takes a COTAN object and a set of cells to check if that 
+# Function that takes a COTAN object and a set of cells to check if that
 cluster is or not homogeneous.
-It runs COTAN check if the GDI is lower than 1.5 for the 99% of genes. 
+It runs COTAN check if the GDI is lower than 1.5 for the 99% of genes.
 If it is too high,
-the cluster is not uniform and so it return the cells in an array to cluster 
+the cluster is not uniform and so it return the cells in an array to cluster
 again.
 }

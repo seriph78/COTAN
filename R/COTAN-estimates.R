@@ -205,7 +205,7 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
 
-    print("Start estimation mu with linear method")
+    print("Linear estimations: START")
     print(paste0("Working on [", getNumGenes(objCOTAN), "] genes and [", getNumCells(objCOTAN), "] cells"))
 
     objCOTAN <- estimateLambdaLinear(objCOTAN)
@@ -217,26 +217,25 @@ setMethod(
     #           : round(getNumGenes(objCOTAN) * 3 / 4, digits = 0)
     # genesMax <- names(sort(genesMeans, decreasing = TRUE)[genesRng])
 
-    gc()
-
-    print("Start PCA")
-
-    pca_cells <- irlba::prcomp_irlba(t(getNormalizedData(objCOTAN)), n = 5)[["x"]]
-    rownames(pca_cells) <- getCells(objCOTAN)
+    print("Linear estimations: DONE")
 
     gc()
 
-    ppp <- pca_cells
-    ppp <- scale(ppp)
-    dist_cells <- stats::dist(ppp, method = "euclidean") # mhalanobis
+    print("PCA: START")
 
-    rm(ppp)
+    pcaCells <- irlba::prcomp_irlba(t(getNormalizedData(objCOTAN)), n = 5)[["x"]]
+    rownames(pcaCells) <- getCells(objCOTAN)
+
     gc()
 
-    pca_cells <- as.data.frame(pca_cells)
+    distCells <- stats::dist(scale(pcaCells), method = "euclidean") # mhalanobis
 
-    print("PCA DONE")
+    gc()
 
-    return( list(dist_cells, pca_cells, objCOTAN) )
+    pcaCells <- as.data.frame(pcaCells)
+
+    print("PCA: DONE")
+
+    return( list(distCells, pcaCells, objCOTAN) )
   }
 )

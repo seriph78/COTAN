@@ -10,15 +10,18 @@
 \item{objCOTAN}{COTAN object}
 }
 \value{
-a list of objects containing:
+lists of objects...
 "object" is the COTAN object,
-"cl1" is the first cell cluster,
-"cl2" is the second cell cluster,
-"D" is the B cells' group genes,
-"pca_cells" pca numeric data.
-"pca.cell.2" is a ggplot2 cell pca plot,
-"genes.plot" is a ggplot2 B cells' group genes plot,
-"UDE.plot" is a ggplot2 cell UDE plot,
+"data" a list with:
+       "cluster1" is the first  cell cluster,
+       "cluster2" is the second cell cluster,
+       "D" is the B cells' group genes,
+       "pcaCells" pca numeric data,
+"plots" a list with ggplot2 plots:
+        "pcaCells" is for pca cells,
+        "genes" is for B cells' group genes,
+        "UDE" is for cell UDE,
+        "nu" is for cell nu.
 }
 \description{
 Main function that can be used to check and clean the dataset.
@@ -27,6 +30,7 @@ the raw.norm (raw / nu)
 }
 \examples{
 data("ERCC.cotan")
-ttm <- clean(ERCC.cotan)
+list[objCOTAN, data, plots] <- clean(ERCC.cotan)
+plot(plots[["UDEPlot"]])
 
 }

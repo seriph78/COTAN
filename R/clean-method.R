@@ -5,18 +5,20 @@
 #' the raw.norm (raw / nu)
 #'
 #' @param objCOTAN COTAN object
-#' @return a list of objects containing:
+#' @return lists of objects...
 #' "object" is the COTAN object,
-#' "cl1" is the first cell cluster,
-#' "cl2" is the second cell cluster,
-#' "D" is the B cells' group genes,
-#' "pca_cells" pca numeric data.
-#' "pca.cell.2" is a ggplot2 cell pca plot,
-#' "genes.plot" is a ggplot2 B cells' group genes plot,
-#' "UDE.plot" is a ggplot2 cell UDE plot,
-#' @export
+#' "data" a list with:
+#'        "cluster1" is the first  cell cluster,
+#'        "cluster2" is the second cell cluster,
+#'        "D" is the B cells' group genes,
+#'        "pcaCells" pca numeric data,
+#' "plots" a list with ggplot2 plots:
+#'         "pcaCells" is for pca cells,
+#'         "genes" is for B cells' group genes,
+#'         "UDE" is for cell UDE,
+#'         "nu" is for cell nu.
 #'
-#' @import dplyr
+#' @export
 #'
 #' @import gsubfn
 #'
@@ -34,6 +36,7 @@
 #' @importFrom ggrepel geom_text_repel
 #'
 #' @importFrom tibble rownames_to_column
+#' @importFrom tibble column_to_rownames
 #'
 #' @importFrom stats hclust
 #' @importFrom stats cutree
@@ -46,15 +49,14 @@
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' ttm <- clean(ERCC.cotan)
+#' list[objCOTAN, data, plots] <- clean(ERCC.cotan)
+#' plot(plots[["UDEPlot"]])
 #'
 #' @rdname clean
 setMethod(
   "clean",
   "COTAN",
   function(objCOTAN) {
-
-    print("Starting")
 
     # We want to discard genes having less than 3 non-zero counts per 1000 cells
     threshold <- round(getNumCells(objCOTAN) * 3 / 1000, digits = 0)
@@ -66,115 +68,109 @@ setMethod(
 
     gc()
 
-    list[dist_cells, pca_cells, objCOTAN] = runEstimatesLinear(objCOTAN)
-    print("Linear estimations: DONE")
+    list[distCells, pcaCells, objCOTAN] = runEstimatesLinear(objCOTAN)
 
     gc()
 
-    # ** !! **
-    print("starting hclust")
+    print("Hierarchical clustering: START")
 
-    hc_cells <- hclust(dist_cells, method = "complete")
+    hcCells <- hclust(distCells, method = "complete")
+    rm(distCells)
     gc()
 
-    groups <- cutree(hc_cells, k=2)
+    groups <- cutree(hcCells, k = 2)
 
-    if(length(groups[groups == 1]) < length(groups[groups == 2])  ){
-      groups[groups == 1] <- "B"
-      groups[groups == 2] <- "A"
-    }
-    else{
-      groups[groups == 1] <- "A"
-      groups[groups == 2] <- "B"
-    }
+    pos1 <- which(groups == 1)
+    pos2 <- which(groups == 2)
 
-    cl2 <- names(which(cutree(hc_cells, k = 2) == 2))
-    cl1 <- names(which(cutree(hc_cells, k = 2) == 1))
-
-    if (length(cl2) > length(cl1) ) {
-      cl2  <-  names(which(cutree(hc_cells, k = 2) == 1))
-      cl1  <-  names(which(cutree(hc_cells, k = 2) == 2))
+    # ensure "A" group is the most numerous
+    if( length(pos1) < length(pos2) ) {
+      # swap pos1 <-> pos2
+      pos3 <- pos1
+      pos1 <- pos2
+      pos2 <- pos3
     }
 
-    to_clust <- getNormalizedData(objCOTAN)
-    t_to_clust <- Matrix::t(to_clust)
-    t_to_clust <- round(t_to_clust,digits = 4)
-    t_to_clust <- as.data.frame(as.matrix(t_to_clust))
+    cluster1 <- names(pos1)
+    cluster2 <- names(pos2)
 
-    if (identical(rownames(t_to_clust),names(groups))) {
-      t_to_clust <- cbind(t_to_clust,groups)
-    }
-    else {
+    groups[pos1] <- "A"
+    groups[pos2] <- "B"
+
+    print("Hierarchical clustering: DONE")
+
+    toClust <- as.matrix(round(getNormalizedData(objCOTAN), digits = 4))
+
+    if (!identical(colnames(toClust), names(groups))) {
       stop("Error in the cell names")
     }
 
     # ---- next: to check which genes are specific for the B group of cells
+    {
+      B <- as.data.frame(toClust[, pos2])
+      colnames(B) <- colnames(toClust)[pos2]
+      #print(utils::head(B, 15))
 
-    to_clust <- as.matrix(round(to_clust,digits = 4))
+      rm(toClust)
+      gc()
 
-    B <- as.data.frame(to_clust[,colnames(to_clust) %in% cl2])
-    rm(to_clust)
-    gc()
+      D <- data.frame("means" = rowMeans(B), "n" = NA)
+      rownames(D) <- rownames(B)
+      D <- rownames_to_column(D)
+      D <- D[order(D[["means"]], decreasing = TRUE), ]
+      rownames(D) <- c()
+      D <- column_to_rownames(D)
 
-    colnames(B)<-cl2
-    B <- rownames_to_column(B)
-    if (dim(B)[2]>2) {
-      B <- B[order(rowMeans(B[,2:length(colnames(B))]),
-                   decreasing = TRUE), ]
+       D <- D[D[["means"]] > 0,]
+       D[["n"]] <- seq_along(D[["means"]])
     }
-    else{
-      B <- B[order(B[,2],decreasing = TRUE), ]
-    }
-
-    #print(utils::head(B, 15))
-
-    C <-  arrange(B,rowMeans(B[2:length(colnames(B))]))
-    rownames(C) <-  C$rowname
-    D <-  data.frame("means" = rowMeans(C[2:length(colnames(C))]),
-                     "n" = NA )
-    D <- D[D$means>0,]
-    D$n <- seq_along(D$means)
 
     #check if the pca plot is clean enought and from the printed genes,
     #if the smalest group of cells are caratterised by particular genes
 
-    pca_cells  <- cbind(pca_cells, "groups" = t_to_clust$groups)
+    pcaCells <- cbind(pcaCells, groups)
 
     PC2 <- PC1 <- NULL
 
-    pca.cell.1 <- ggplot(subset(pca_cells, groups == "A"),
-                         aes(x = PC1, y = PC2, colour = groups)) +
-      geom_point(alpha = 0.5, size = 3)
-
-    pca.cell.2 <- pca.cell.1 +
-      geom_point(data = subset(pca_cells, groups != "A" ),
-                 aes(x = PC1, y = PC2, colour = groups),
-                 alpha = 0.8, size = 3) +
-      scale_color_manual("groups", values = c("A" = "#8491B4B2", "B"="#E64B35FF")) +
-      plotTheme("pca")
+    pcaCellsPlot <- ggplot(subset(pcaCells, groups == "A"),
+                           aes(x = PC1, y = PC2, colour = groups)) +
+                    geom_point(alpha = 0.5, size = 3) +
+                    geom_point(data = subset(pcaCells, groups != "A" ),
+                               aes(x = PC1, y = PC2, colour = groups),
+                               alpha = 0.8, size = 3) +
+                    scale_color_manual("groups", values = c("A" = "#8491B4B2", "B"="#E64B35FF")) +
+                    plotTheme("pca")
 
     # genes plot
-    pl <- ggplot(D, aes(x = n, y = means)) + geom_point() +
-      geom_text_repel(data = subset(D, n > (max(D$n) - 15)),
-                      aes(n, means, label = rownames(D[D$n > (max(D$n)- 15),])),
-                      nudge_y = 0.05, nudge_x = 0.05, direction = "x",
-                      angle = 90, vjust = 0, segment.size = 0.2) +
-      ggtitle(label = "B cell group genes mean expression") +
-      plotTheme("genes")
+    minN <- max(D[["n"]])- 15
+    genesPlot    <- ggplot(D, aes(x = n, y = means)) +
+                    ggtitle(label = "B cell group genes mean expression",
+                            subtitle = " - B group NOT removed -") +
+                    geom_text_repel(data = subset(D, n > minN),
+                          aes(n, means, label = rownames(D[D[["n"]] > minN,])),
+                          nudge_y = 0.05, nudge_x = 0.05, direction = "x",
+                          angle = 90, vjust = 0, segment.size = 0.2) +
+                    plotTheme("genes")
 
     # UDE/nu plot
-    nu_est = round(getNu(objCOTAN), digits = 7)
+    nuEst = round(getNu(objCOTAN), digits = 7)
 
-    plot.nu <- ggplot(pca_cells, aes(x = PC1,y = PC2, colour = log(nu_est))) +
-      geom_point(size = 1, alpha = 0.8) +
-      scale_color_gradient2(low = "#E64B35B2", mid = "#4DBBD5B2", high = "#3C5488B2",
-                            midpoint = log(mean(nu_est)), name = "ln(nu)") +
-      ggtitle("Cells PCA coloured by cells efficiency") +
-      plotTheme("UDE")
+    UDEPlot      <- ggplot(pcaCells, aes(x = PC1,y = PC2, colour = log(nuEst))) +
+                    geom_point(size = 1, alpha = 0.8) +
+                    scale_color_gradient2(low = "#E64B35B2", mid = "#4DBBD5B2", high = "#3C5488B2",
+                                          midpoint = log(mean(nuEst)), name = "ln(nu)") +
+                    ggtitle("Cells PCA coloured by cells efficiency") +
+                    plotTheme("UDE")
 
-    output <- list("object" = as(objCOTAN, "scCOTAN"),
-                   "cl1" = cl1, "cl2" = cl2, "D" = D, "pca_cells" = pca_cells,
-                   "pca.cell.2" = pca.cell.2, "genes.plot" = pl, "UDE.plot" = plot.nu)
-    return(output)
+    nuDf = data.frame("nu" = sort(getNu(objCOTAN)), "n" = c(1:getNumCells(objCOTAN)))
+    nuPlot       <- ggplot(nuDf, aes(x = n, y = nu)) +
+                    geom_point(colour = "#8491B4B2", size = 1) +
+                    plotTheme("common")
+
+    return( list("objCOTAN" = objCOTAN,
+                 "data"     = list("cluster1" = cluster1, "cluster2" = cluster2,
+                                   "D" = D, "pcaCells" = pcaCells),
+                 "plots"    = list("pcaCells" = pcaCellsPlot, "genes" = genesPlot,
+                                   "UDE" = UDEPlot, "nu" = nuPlot)) )
   }
 )

@@ -28,14 +28,14 @@ test_that("2.cleaning", {
 
     #---------------------------------------------------
 
-    ttm <- clean(obj.temp)
+    obj.temp <- as(clean(obj.temp)[["objCOTAN"]], "scCOTAN")
     stopifnot(file.exists(tm))
-    saveRDS(ttm$object, file = file.path(tm,"temp.RDS") )
+    saveRDS(obj.temp, file = file.path(tm,"temp.RDS") )
     raw.norm <- readRDS(file.path(getwd(),"raw.norm.test.RDS"))
     nu <- readRDS(file.path(getwd(),"nu.test.RDS"))
-    expect_equal(as.matrix(getNormalizedData(ttm$object)[genes.names.test,cell.names.test]),
+    expect_equal(as.matrix(getNormalizedData(obj.temp)[genes.names.test,cell.names.test]),
                  as.matrix(raw.norm))
-    expect_equal(getNu(ttm$object)[cell.names.test],nu)
+    expect_equal(getNu(obj.temp)[cell.names.test],nu)
 
 })
 
@@ -69,7 +69,7 @@ test_that("4.cotan_coex_test", {
     obj <- get.coex(obj)
 
     coex_test <- readRDS(file.path(getwd(),"coex.test.RDS"))
-    
+
     coex <- extract.coex(object = obj,genes = genes.names.test)
     #coex <- vec2mat_rfast(obj@coex,genes = coex_test$genes)
 
@@ -89,30 +89,30 @@ test_that("4.cotan_coex_test", {
 })
 
 test_that("PCA_test", {
-  
+
   utils::data("raw.dataset", package = "COTAN")
   pca <- irlba::prcomp_irlba(raw.dataset, n=5)
-  
+
   pca.raw <- pca$x
-  rm(pca) 
-  
+  rm(pca)
+
   rownames(pca.raw) <- rownames(raw.dataset)
   colnames(pca.raw) <- paste0("PC_", c(1:5))
   pca.tb = readRDS(file.path(getwd(),"pca.tb.RDS"))
-  
+
   correlation1.value <- cor(pca.raw[,1], pca.tb[,1])
   correlation2.value <- cor(pca.raw[,2], pca.tb[,2])
   pca.tb[,1] <- correlation1.value*pca.tb[,1]
   pca.tb[,2] <- correlation2.value*pca.tb[,2]
   x1 <- pca.raw[rownames(pca.tb),1] - pca.tb[,1]
   x2 <- pca.raw[rownames(pca.tb),2] - pca.tb[,2]
-  
+
   dist1 <- sqrt(sum(x1^2))
   dist2 <- sqrt(sum(x2^2))
-  
+
   expect_true(dist1 < 10^(-4))
   expect_true(dist2 < 10^(-4))
-  
+
 })
 
 
@@ -190,21 +190,21 @@ test_that("mat2vec_rfast_test", {
 
 test_that("cell_homogeneous_clustering", {
   #obj <- readRDS(file.path(tm,"temp.RDS"))
-  temp <- cell_homogeneous_clustering(cond = "test",out_dir = paste0(tm,"/"), in_dir = paste0(tm,"/"), 
-                                      cores = 12, 
-                                       dataset_name = "temp.RDS", 
+  temp <- cell_homogeneous_clustering(cond = "test",out_dir = paste0(tm,"/"), in_dir = paste0(tm,"/"),
+                                      cores = 12,
+                                       dataset_name = "temp.RDS",
                                       GEO = "test",sc.method ="10X"
                                       )
   saveRDS(temp, file = file.path(tm,"temp.RDS") )
   #clusters <- readRDS(file.path(getwd(),"clusters1.RDS"))
-  
+
   #expect_equal(temp@clusters, clusters)
   ####################################
-  
-  # Test the low GDI (homogeneity) for each defined clusters 
-  
+
+  # Test the low GDI (homogeneity) for each defined clusters
+
   ####################################
-  
+
   for (cl in sample(unique(temp@clusters),size = 5)) {
     cells.to_test <-  names(temp@clusters[temp@clusters == cl])
     #temp.obj <- cluster_homogeneity_check(obj = obj,cells = cells.to_test,
@@ -213,42 +213,41 @@ test_that("cell_homogeneous_clustering", {
     #                                      code = 12)
 
     temp.obj <- temp@raw[,colnames(temp@raw) %in% cells.to_test]
-  
+
     temp.obj <- COTAN(raw = temp.obj)
     temp.obj <- initializeMetaDataset(temp.obj, GEO = "",
                                       sequencingMethod = " ",
                                       sampleCondition = "temp.clustered")
 
-    ttm <- clean(temp.obj)
-    
-    temp.obj <- ttm$object
+    temp.obj <- as(clean(temp.obj)[["objCOTAN"]], "scCOTAN")
+
     temp.obj <- cotan_analysis(temp.obj, cores = 12)
     gc()
     temp.obj <- get.coex(temp.obj)
     gc()
     GDI_data <- get.GDI(temp.obj)
-    
+
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
-    
+
   }
-  
-  
+
+
 })
 
 #test_that("DEA_on_clusters_test", {
 #  obj <- readRDS(file.path(tm,"temp.RDS"))
 #  temp <- DEA_on_clusters(obj)
 #  saveRDS(temp[[1]], file = file.path(tm,"temp.RDS") )
-  
+
 #  pval.cl <- readRDS(file.path(getwd(),"pval.test.cluster1.RDS"))
-  
+
 #  error <- sum((temp[[2]][genes.names.test,] - pval.cl)**2, na.rm = T)
 #  if(error > 0.001 ){
 #    warning("Error difference grater than 0.001!")
 #  }
-  
+
 #  expect_true(error < 10^(-2))
-  
+
 #})
 
 
@@ -258,7 +257,7 @@ test_that("merge_cell.clusters.test", {
   temp <- readRDS(file.path(tm,"temp.RDS"))
   temp <- DEA_on_clusters(temp)
   temp <- temp[[1]]
-  
+
   initial.cluster.number <- dim(temp@cluster_data)[2]
   temp <- merge_cell.clusters(obj = temp,
                               cond = "test",
@@ -268,12 +267,12 @@ test_that("merge_cell.clusters.test", {
                               out_dir = paste0(tm,"/") ,
                               GEO = "test",
                               sc.method = "10X")#,mt = FALSE, mt_prefix="^MT")
-  
+
   final.cluster.number <- dim(temp@cluster_data)[2]
   expect_true(final.cluster.number < initial.cluster.number)
   #saveRDS(temp, file = file.path(tm,"temp.RDS") )
   #cluster_data <- readRDS(file.path(getwd(),"cluster_data_marged.RDS"))
-  
+
   #expect_equal(obj@cluster_data[genes.names.test,], cluster_data)
 
   for (cl in unique(temp@clusters)) {
@@ -282,30 +281,29 @@ test_that("merge_cell.clusters.test", {
     #                                     out_dir = paste0(tm,"/"),
     #                                      cores = cores,
     #                                     code = 12)
-    
+
     temp.obj <- temp@raw[,colnames(temp@raw) %in% cells.to_test]
-    
+
     temp.obj <- COTAN(raw = temp.obj)
     temp.obj <- initializeMetaDataset(temp.obj,
                                       GEO = "",
                                       sequencingMethod = " ",
                                       sampleCondition = "temp.clustered")
 
-    ttm <- clean(temp.obj)
-    
-    temp.obj <- ttm$object
+    temp.obj <- as(clean(temp.obj)[["objCOTAN"]], "scCOTAN")
+
     temp.obj <- cotan_analysis(temp.obj, cores = 12)
     gc()
     temp.obj <- get.coex(temp.obj)
     gc()
     GDI_data <- get.GDI(temp.obj)
-    
+
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
-    
+
   }
-  
-  
-    
+
+
+
 })
 
 

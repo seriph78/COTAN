@@ -42,6 +42,7 @@ library(plotly)
 library(tidyverse)
 library(htmlwidgets)
 library(MASS)
+library(gsubfn)
 #library(dendextend)
 ```
 
@@ -50,7 +51,7 @@ Download the dataset for mouse cortex E17.5.
 ```{r eval=FALSE, include=FALSE}
 if (!file.exists("inst/extdata/E175_only_cortical_cells.txt.gz")) {
   download.file(paste0("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/",
-                       "GSM2861nnn/GSM2861514/suppl/"
+                       "GSM2861nnn/GSM2861514/suppl/",
                        "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"),
                 paste0(data_dir, "/E175_only_cortical_cells.txt.gz"),
                 method = "wget", quiet = FALSE)
@@ -126,15 +127,15 @@ if(!file.exists(paste0(out_dir, "cleaning"))){
 ```
 
 ```{r}
-ttm = clean(obj)
+list[obj, data, plots] <- clean(obj)
+list[cluster1, cluster2, D, pcaCells] <- data
+list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- plots
 
-obj = ttm$object
-
-ttm$pca.cell.2
+pcaCellsPlot
 ```
 
 ```{r}
-ttm$genes.plot
+genesPlot
 ```
 
 Run this when B cells need to be removed.
@@ -142,29 +143,29 @@ Run this when B cells need to be removed.
 ```{r eval=TRUE, include=TRUE}
 pdf(file.path(out_dir, "cleaning",
               paste0(t, "_", n_it, "_plots_before_cells_exlusion.pdf")))
-ttm$pca.cell.2
-ttm$genes.plot
+pcaCellsPlot
+genesPlot
 dev.off()
 
-if (length(ttm$cl1) < length(ttm$cl2)) {
-  to_rem = ttm$cl1
+if (length(cluster1) < length(cluster2)) {
+  cellsToRemove = cluster1
 }else{
-  to_rem = ttm$cl2
+  cellsToRemove = cluster2
 }
 n_it = n_it+1
-obj = dropGenesCells(obj, genes = c(), cells = to_rem)
+obj = dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 
 gc()
 
-ttm = clean(obj)
-obj = ttm$object
+list[obj, data, plots] <- clean(obj)
+list[cluster1, cluster2, D, pcaCells] <- data
+list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- plots
 
-ttm$pca.cell.2
-
+pcaCellsPlot
 ```
 
 ```{r}
-ttm$genes.plot
+genesPlot
 ```
 
 Run this only in the last iteration, instead of the previous code, when B cells group has not been removed
@@ -172,16 +173,16 @@ Run this only in the last iteration, instead of the previous code, when B cells 
 ```{r}
 pdf(file.path(out_dir, "cleaning",
               paste0(t, "_", n_it, "_plots_before_cells_exlusion.pdf")))
-ttm$pca.cell.2
-ttm$genes.plot
+pcaCellsPlot
+genesPlot
 
 dev.off()
-ttm$pca.cell.2
+pcaCellsPlot
 
 ```
 
 ```{r}
-ttm$genes.plot
+genesPlot
 ```
 
 To color the PCA based on nu_j (so the cells' efficiency)
@@ -189,11 +190,11 @@ To color the PCA based on nu_j (so the cells' efficiency)
 ```{r}
 pdf(file.path(out_dir, "cleaning",
               paste0(t, "_plots_PCA_efficiency_colored.pdf")))
-ttm$UDE.plot
+UDEPlot
 
 dev.off()
 
-ttm$UDE.plot
+UDEPlot
 ```
 
 UDE (color) should not correlate with principal components! This is very important.
@@ -201,25 +202,22 @@ UDE (color) should not correlate with principal components! This is very importa
 The next part is used to remove the cells with efficiency too low.
 
 ```{r}
-nu_df = data.frame("nu"= sort(getNu(obj)), "n"=c(1:length(getNu(obj))))
-
-ggplot(nu_df, aes(x = n, y=nu)) + 
-    geom_point(colour = "#8491B4B2", size=1)
-    #my_theme #+ ylim(0,1) + xlim(0,70)
-
+plot(nuPlot)
 ```
 
 We can zoom on the smallest values and, if we detect a clear elbow, we can decide to remove the cells.
 
 ```{r}
+nuDf = data.frame("nu"= sort(getNu(obj)), "n"=c(1:length(getNu(obj))))
 yset = 0.35#threshold to remove low UDE cells
-plot.ude <- ggplot(nu_df, aes(x = n, y=nu)) + 
-    geom_point(colour = "#8491B4B2", size=1) + 
-     ylim(0,1) + xlim(0,400) +
-    geom_hline(yintercept=yset, linetype="dashed", color = "darkred") +
-    annotate(geom="text", x=200, y=0.25, 
-             label=paste("to remove cells with nu < ", yset), 
-             color="darkred", size=4.5)
+plot.ude <- ggplot(nuDf, aes(x = n, y = nu)) + 
+            geom_point(colour = "#8491B4B2", size = 1) + 
+            xlim(0, 400) +
+            ylim(0,   1) + 
+            geom_hline(yintercept = yset, linetype="dashed", color = "darkred") +
+            annotate(geom = "text", x = 200, y = 0.25, 
+                     label = paste("to remove cells with nu < ", yset), 
+                     color = "darkred", size = 4.5)
 
 
 pdf(file.path(out_dir, "cleaning", paste0(t, "_plots_efficiency.pdf")))
@@ -232,19 +230,21 @@ plot.ude
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
+obj <- as(obj, "scCOTAN")
 obj = add.row.to.meta(obj,c("Threshold low UDE cells:",yset)) 
 
-to_rem = rownames(nu_df[which(nu_df$nu < yset),])
-
-obj = dropGenesCells(obj, genes = c(), cells =  to_rem)
+cellsToRemove = rownames(nuDf[which(nuDf[["nu"]] < yset),])
+obj = dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 ```
 
 Repeat the estimation after the cells are removed
 
 ```{r}
-ttm = clean(obj)
-obj = ttm$object
-ttm$pca.cell.2
+list[obj, data, plots] <- clean(obj)
+list[cluster1, cluster2, D, pcaCells] <- data
+list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- plots
+
+pcaCellsPlot
 ```
 
 In case we do not want to remove anything, we can run:
@@ -252,7 +252,7 @@ In case we do not want to remove anything, we can run:
 ```{r}
 pdf(file.path(out_dir, "cleaning", paste(t, "_plots_efficiency.pdf")))
 
-ttm$UDE.plot
+UDEPlot
 
 dev.off()
 ```
@@ -262,6 +262,7 @@ dev.off()
 In this part, all the contingency tables are computed and used to get the statistics. To store efficiency, only the yes_yes matrix is stored. Note that if will be necessary re-computing the yes-yes table, the yes-yes table should be canceled before running cotan_analysis.
 
 ```{r}
+obj <- as(obj, "scCOTAN")
 obj = cotan_analysis(obj,cores = 10)
 ```
 
@@ -287,22 +288,19 @@ obj <- automatic.COTAN.object.creation(df = test.dataset.col,out_dir = out_dir,s
 The next step will find all homogeneous clusters using a GDI check on each cluster.
 
 ```{r}
-obj <- cell_homogeneous_clustering(dataset_name = "test.dataset.col.cotan.RDS",cond = "test", out_dir = out_dir,in_dir = out_dir,cores = 10, dataset_type = "COTAN",GEO =  "test")
+obj <- cell_homogeneous_clustering(dataset_name = "test.dataset.col.cotan.RDS",cond = "test", out_dir = out_dir,in_dir = out_dir,cores = 10, sc.method = "10X", GEO =  "test")
 ```
 
 Than we can perform a sort of differential expression to detect which genes are enriched or depleted in each cluster.
 
 ```{r}
-temp <- DEA_on_clusters(obj)
-obj <- temp[[1]]
-pval <- temp[[2]]
+list[obj, pval] <- DEA_on_clusters(obj)
 ```
 
 Using the cluster distance, based on the whole transcriptome, we can ththenheck if any of the closest clusters can form a still hohomogeneousigger cluster. We will keep this clusterization for the forther analysis.
 
 ```{r}
 obj <- merge_cell.clusters(obj = obj,cond = "test",cores=10, 
-                           out_dir_root = out_dir,
                            srat = "Seurat_obj_test_with_cotan_clusters.RDS",
                            out_dir = out_dir ,
                            GEO="GSE121380", sc.method="10X 5'"
