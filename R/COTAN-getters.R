@@ -1,3 +1,4 @@
+# COTAN objects (read-only) accessors
 
 #' getRawData
 #'
@@ -16,7 +17,7 @@ setMethod(
     if (is_empty(objCOTAN@raw)) {
       warning("raw is empty")
     }
-    
+
     return(objCOTAN@raw)
   }
 )
@@ -74,7 +75,7 @@ setMethod(
     if (is_empty(objCOTAN@raw)) {
       warning("raw is empty")
     }
-    
+
     return(colnames(objCOTAN@raw))
   }
 )
@@ -97,7 +98,7 @@ setMethod(
     if (is_empty(objCOTAN@raw)) {
       warning("raw is empty")
     }
-    
+
     return(rownames(objCOTAN@raw))
   }
 )
@@ -121,7 +122,7 @@ setMethod(
     if (is_empty(objCOTAN@raw)) {
       warning("raw is empty")
     }
-    
+
     return(sign(objCOTAN@raw))
   }
 )
@@ -143,7 +144,7 @@ setMethod(
     if (is_empty(objCOTAN@raw)) {
       warning("raw is empty")
     }
-    
+
     return(colSums(objCOTAN@raw))
   }
 )
@@ -166,13 +167,13 @@ setMethod(
     if (is_empty(objCOTAN@rawNorm)) {
       warning("rawNorm is empty")
     }
-    
+
     return(objCOTAN@rawNorm)
   }
 )
 
 #' getNu
-#' 
+#'
 #' This function extract the nu array.
 #'
 #' @param objCOTAN A COTAN object
@@ -194,7 +195,7 @@ setMethod(
 )
 
 #' getLambda
-#' 
+#'
 #' This function extract the lambda array (mean expression for each gene).
 #'
 #' @param objCOTAN A COTAN object
@@ -210,13 +211,13 @@ setMethod(
     if (is_empty(objCOTAN@lambda)) {
       warning("lambda is empty")
     }
-    
+
     return(objCOTAN@lambda)
   }
 )
 
 #' getDispersion
-#' 
+#'
 #' This function extract the a array.
 #'
 #' @param objCOTAN A COTAN object
@@ -232,13 +233,13 @@ setMethod(
     if (is_empty(objCOTAN@dispersion)) {
       warning("dispersion is empty")
     }
-    
+
     return(objCOTAN@dispersion)
   }
 )
 
 #' getHousekeepingGenes
-#' 
+#'
 #' This function return the genes expressed in all cells in the dataset.
 #'
 #' @param objCOTAN A COTAN object
@@ -251,10 +252,6 @@ setMethod(
   "getHousekeepingGenes",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(objCOTAN@hkGenes)) {
-      warning("hkGenes is empty")
-    }
-    
     return(objCOTAN@hkGenes)
   }
 )
@@ -277,48 +274,7 @@ setMethod(
     if (is_empty(objCOTAN@metaDataset)) {
       warning("metaDataset is empty")
     }
-    
+
     return(objCOTAN@metaDataset)
-  }
-)
-
-
-#' initializeMetaDataset
-#'
-#' initialize meta-data data-set
-#'
-#' @param objCOTAN the COTAN object
-#' @param GEO a code reporting the GEO identification
-#'            or other specific dataset code
-#' @param sequencingMethod a string reporting the method used for the sequencing
-#' @param sampleCondition a string reporting the specific sample condition or time point
-#'
-#' @return the given COTAN object with updated metaDataset
-#' @export
-#' @examples
-#'
-#' data("raw.dataset")
-#' obj <- COTAN(raw = raw.dataset)
-#' obj <- initRaw(obj, GEO = "code", sequencingMethod = "10X",
-#'                     sampleCondition = "mouse dataset")
-#'
-#' @rdname initializeMetaDataset
-setMethod(
-  "initializeMetaDataset",
-  "COTAN",
-  function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
-    print("Initializing COTAN meta-data")
-
-    numCells = getNumCells(objCOTAN)
-    objCOTAN@metaDataset[1,seq_len(2)] = c("GEO:", GEO)
-    objCOTAN@metaDataset[2,seq_len(2)] = c("scRNAseq method:", sequencingMethod)
-    objCOTAN@metaDataset[3,seq_len(2)] = c("starting n. of cells:", numCells)
-    objCOTAN@metaDataset[4,seq_len(2)] = c("Condition sample:", sampleCondition)
-
-    #TODO: remove this!
-    objCOTAN@metaCells <- data.frame(clusters = rep(NA, numCells),
-                                     row.names = getCells(objCOTAN))
-  
-    return(objCOTAN)
   }
 )

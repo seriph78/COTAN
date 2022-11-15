@@ -3,7 +3,7 @@
 #'This function takes in input a COTAN object with an already homogeneous clusters
 #'and, through the cosine distance and the hclust (with ward.D2 method), checks it merging
 #'two leaf clusters it is formed a still homogeneous cluster (this is done iteratively).
-#'All structures are saved on disk. 
+#'All structures are saved on disk.
 #'
 #' @param obj COTAN object
 #' @param cond sample condition name
@@ -13,18 +13,18 @@
 #' @param GEO GEO or other data set code
 #' @param sc.method scRNAseq method
 #' @param markers a list of marker genes. Default NULL
-#' 
+#'
 #' @importFrom Matrix t
 #' @importFrom Matrix rowSums
-#' 
+#'
 #' @importFrom stats dist
 #' @importFrom stats hclust
 #' @importFrom stats as.dendrogram
-#' 
+#'
 #' @importFrom dendextend get_nodes_attr
-#' 
+#'
 #' @importFrom stringr str_remove
-#' 
+#'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 geom_tile
@@ -36,30 +36,30 @@
 #' @importFrom ggplot2 scale_color_manual
 #' @importFrom ggplot2 scale_fill_manual
 #' @importFrom ggrepel geom_text_repel
-#' 
-#' @return a COTAN object 
+#'
+#' @return a COTAN object
 #' @export
 #'
 #' @examples
 setGeneric("merge_cell.clusters", function(obj,cond,cores=1,srat,out_dir ,GEO,
-                                           sc.method,#mt = FALSE, mt_prefix="^mt", 
+                                           sc.method,#mt = FALSE, mt_prefix="^mt",
                                            markers = NULL) standardGeneric("merge_cell.clusters"))
 #' @rdname merge_cell.clusters
 setMethod("merge_cell.clusters","scCOTAN",
          function(obj,cond,cores,srat,out_dir ,GEO,
-                   sc.method,#mt, #mt_prefix, 
+                   sc.method,#mt, #mt_prefix,
                   markers){
-            
+
            srat <- readRDS(paste0(out_dir,srat))
-           
+
            #Check if there are NA left clusters
-           
+
            if (any(is.na(obj@clusters))) {
              print("Problems! Some NA left!")
              break
            }
-           
-           
+
+
            ###############
             cl1_not_mergiable <- c()
             cl2_not_mergiable <- c()
@@ -69,10 +69,10 @@ setMethod("merge_cell.clusters","scCOTAN",
               round <- round + 1
               print(paste0("Start merging smallest clusters: round ", round))
               cl1_not_mergiable_old <- cl1_not_mergiable
-              
+
               #merge small cluster based on distances
               cluster_data <- obj@cluster_data
-              
+
               ######## This is the best: cosine dissimilarity
               Matrix <- as.matrix(Matrix::t(cluster_data))
               sim <- Matrix / sqrt(Matrix::rowSums(Matrix * Matrix))
@@ -81,12 +81,12 @@ setMethod("merge_cell.clusters","scCOTAN",
               tree <- stats::hclust(D_sim,method = "ward.D2")
               #plot(tree)
               dend <- stats::as.dendrogram(tree)
-              
-              
+
+
                 ############### This part check if any little two pair of leaf clusters could be merged
               # based on the tree
-              
-              
+
+
               id <- NA
               for (i in c(1:length(dendextend::get_nodes_attr(dend,"members")))) {
                 if(dendextend::get_nodes_attr(dend,"members")[i] == 2){
@@ -96,44 +96,44 @@ setMethod("merge_cell.clusters","scCOTAN",
               id <- id[2:length(id)]
               print(paste0("Created leafs id form marging: ",
                            paste(dendextend::get_nodes_attr(dend,"label",id = id ),collapse=" ")))
-              
+
               dir <- paste0(out_dir,"cond/","leafs_merge/")
               if(!file.exists(paste0(out_dir,"cond"))){
                 dir.create(paste0(out_dir,"cond"))
               }
-              
-              
+
+
               if(!file.exists(dir)){
                 dir.create(dir)
               }
-              
-              
+
+
               p = 1
               while (p < length(id)) {
                 p1 <- p
                 p2 <- p+1
                 p <- p2+1
-                
+
                 cl.1 <- stringr::str_remove(dendextend::get_nodes_attr(dend,"label",id = id[p1]),pattern = "cl.")
                 cl.2 <- stringr::str_remove(dendextend::get_nodes_attr(dend,"label",id = id[p2]),pattern = "cl.")
-                
-                
+
+
                 cond.merge <- paste0("merge_cl_",cl.1,"_",cl.2)
                 print(cond.merge)
                 if(cl.1 %in% cl1_not_mergiable){
                   print(paste0("Clusters ", cl.1," ", cl.2,"already analyzed and not mergiable: skip."))
                   next
                 }
-                
-                mat <- srat@assays$RNA@counts[,colnames(srat@assays$RNA@counts) %in% 
+
+                mat <- srat@assays$RNA@counts[,colnames(srat@assays$RNA@counts) %in%
                                                 rownames(srat@meta.data[srat@meta.data$cotan %in% c(cl.1,cl.2),])]
-                
+
                 merged.obj <- automatic.COTAN.object.creation(df = as.data.frame(mat),out_dir = out_dir ,GEO = GEO
                                                               ,sc.method=sc.method,cond = cond.merge,cores = cores,
-                                                              #mt = mt,mt_prefix = mt_prefix  
+                                                              #mt = mt,mt_prefix = mt_prefix
                 )
                 GDI_data_wt1 = get.GDI(merged.obj)
-                
+
                 #Test if the number of genes with GDI > 1.5 is more than 1%
                 if (dim(GDI_data_wt1[GDI_data_wt1$GDI >= 1.5,])[1]/dim(GDI_data_wt1)[1] > 0.01) {
                   print(paste("Clusters", cl.1, "and", cl.2, "too high GDI!"))
@@ -152,20 +152,20 @@ setMethod("merge_cell.clusters","scCOTAN",
                   max.cl <- max(as.numeric(c(cl.1,cl.2)))
                   srat@meta.data[srat@meta.data$cotan == max.cl,]$cotan <- min.cl
                 }
-                
-                
+
+
                 GDI_data_wt1$color = "normal"
                 genes.to.label = GDI_data_wt1[order(GDI_data_wt1$GDI,decreasing = T),][1:20,]
-                
+
                 #genes.to.label = rbind(genes.to.label,GDI_data_wt1[more_genes,])
                 genes.to.label$color = "dif"
                 #genes.to.label[more_genes,]$color = "mk"
                 GDI_data_wt1[rownames(genes.to.label),]$color = "dif"
                 #GDI_data_wt1[more_genes,]$color = "mk"
-                
+
                 # from here it is just a plot example
                 mycolours <- c("dif" = "#3C5488B2","normal"="#F39B7FE5","hk"="#7E6148B2","mk"="#E64B35B2")
-                
+
                 GDI_plot_wt1 <- ggplot(subset(GDI_data_wt1, !rownames(GDI_data_wt1) %in% unique(rownames(genes.to.label))),
                                        aes(x = sum.raw.norm, y = GDI)) +
                                 geom_point(alpha = 0.4, color = "#8491B4B2", size = 2) +
@@ -173,7 +173,7 @@ setMethod("merge_cell.clusters","scCOTAN",
                                                          aes(x = sum.raw.norm, y = GDI, color = color), alpha = 1, size = 2) +
                                 # geom_hline(yintercept = quantile(GDI$GDI)[4], linetype = "dashed", color = "darkblue") +
                                 # geom_hline(yintercept = quantile(GDI$GDI)[3], linetype = "dashed", color = "darkblue") +
-                                geom_hline(yintercept = 1.5, linetype="dotted", color = "#3C5488B2", size = 0.5) +
+                                geom_hline(yintercept = 1.5, linetype="dotted", color = "#3C5488B2", linewidth = 0.5) +
                                 scale_color_manual("color", values = mycolours)  +
                                 scale_fill_manual("color", values = mycolours)  +
                                 xlab("log normalized counts") +
@@ -189,18 +189,18 @@ setMethod("merge_cell.clusters","scCOTAN",
                 pdf(paste0(dir, cond.merge, ".GDI_plots.pdf"), onefile=TRUE)
                 plot(GDI_plot_wt1)
                 graphics.off()
-                
+
                 rm(merged.obj)
                 gc()
               }
-              
+
               saveRDS(srat,paste0(out_dir, "Seurat_obj_",
                                   cond, "_with_cotan_clusters_merged.RDS"))
               #srat <- readRDS(paste0(out_dir_root, "Seurat_obj_",
               #                       cond, "_with_cotan_clusters_merged.RDS"))
               gc()
-              
-              
+
+
               # Update the homogenus cluster array in cotan object
               obj.clusters.new <- srat@meta.data$cotan
               names(obj.clusters.new) <- rownames(srat@meta.data)
@@ -210,8 +210,8 @@ setMethod("merge_cell.clusters","scCOTAN",
                 print("Problem! not all(getCells(obj) %in% names(obj.clusters.new)")
                 break
               }
-              
-              
+
+
               # New DEA on clusters
               clusters.names = unique(obj@clusters)[!is.na(unique(obj@clusters))]
               list.clusters = list(names(obj@clusters[obj@clusters %in% clusters.names[1]]))
@@ -221,23 +221,23 @@ setMethod("merge_cell.clusters","scCOTAN",
                 names(tmp)= clusters.names[c]
                 list.clusters = c(list.clusters,tmp)
               }
-              
+
               rm(srat)
               gc()
-              
-              
+
+
               obj_list = DEA_on_clusters(obj,list.clusters)
               gc()
-              
+
               srat <- readRDS(paste0(out_dir, "Seurat_obj_", cond,
                                      "_with_cotan_clusters_merged.RDS"))
               obj = obj_list[[1]]
-              
+
               p_value = obj_list[[2]]
-              
+
               rm(obj_list)
               gc()
-              
+
               write.csv(p_value, file = paste0(out_dir, cond,
                                                "/p_values_clusters_merged.csv"))
               write.csv(obj@cluster_data,
@@ -248,11 +248,11 @@ setMethod("merge_cell.clusters","scCOTAN",
                 write.csv(obj@cluster_data[unlist(markers),],
                           file = paste0(out_dir, cond, "/coex_clusters_merged_markers.csv"))
               }
-              
+
             }
             saveRDS(obj, file = paste0(out_dir, cond, "_merged_cotan.RDS"))
-            
+
             return(obj)
-            
+
           }
 )

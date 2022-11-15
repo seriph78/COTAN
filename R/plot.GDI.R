@@ -10,7 +10,7 @@
 #' @param GDI.df when the GDI data frame was already calculated, it can be put here to speed up the process. Default is NULL.
 #' @return A ggplot2 object
 #' @export
-#' 
+#'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 geom_tile
@@ -22,11 +22,11 @@
 #' @importFrom ggplot2 scale_color_manual
 #' @importFrom ggplot2 scale_fill_manual
 #' @importFrom ggrepel geom_text_repel
-#' 
+#'
 #' @importFrom stats quantile
-#' 
+#'
 #' @importFrom Matrix forceSymmetric
-#' 
+#'
 #' @rdname plot_GDI
 #' @examples
 #' data("ERCC.cotan")
@@ -36,15 +36,15 @@ setGeneric("plot_GDI", function(object, cond = NULL,genes = NULL,type="S", GDI.d
 setMethod("plot_GDI","scCOTAN",
           function(object, cond, genes, type="S",GDI.df) {
             ET <- sum.raw.norm <- NULL
-            
+
             if(is(class(object@coex)[1], "dtCMatrix")){
               print("COTAN object in the old format! Converting...")
               object <- get.coex(object)
               print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
               saveRDS(object,paste0(dir, ET, "new.cotan.RDS"))
-              
+
             }
-            
+
             print("GDI plot ")
             if (is.null(GDI.df)) {
               if (type=="S") {
@@ -53,24 +53,24 @@ setMethod("plot_GDI","scCOTAN",
                 print("Using G")
                 GDI <- get.GDI(object,type="G")
               }
-              
+
             }else{
               GDI <- GDI.df
             }
-            
+
             GDI$colors <- "none"
             for (n in names(genes)) {
               GDI[rownames(GDI) %in% genes[[n]],]$colors <- n
             }
-            
+
             qual_col_pals = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 'qual',]
             col_vector = unlist(mapply(RColorBrewer::brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
-            
+
             mycolours <- col_vector[seq_along(names(genes))]
             names(mycolours) <- names(genes)
-            
+
             textdf <- GDI[!GDI$colors == "none",]
-            
+
             GDI_plot <- ggplot(subset(GDI, colors == "none"),
                                aes(x = sum.raw.norm, y = GDI)) +
                         geom_point(alpha = 0.3, color = "#8491B4B2", size = 2.5) +
@@ -79,7 +79,7 @@ setMethod("plot_GDI","scCOTAN",
                                    size = 2.5, alpha = 0.8) +
                         geom_hline(yintercept = quantile(GDI$GDI)[4], linetype = "dashed", color = "darkblue") +
                         geom_hline(yintercept = quantile(GDI$GDI)[3], linetype = "dashed", color = "darkblue") +
-                        geom_hline(yintercept = 1.5, linetype = "dotted", color = "red", size = 0.5) +
+                        geom_hline(yintercept = 1.5, linetype = "dotted", color = "red", linewidth = 0.5) +
                         scale_color_manual("Status", values = mycolours) +
                         scale_fill_manual( "Status", values = mycolours) +
                         xlab("log normalized counts") +
@@ -93,7 +93,7 @@ setMethod("plot_GDI","scCOTAN",
                         plotTheme("GDI", textSize = 10)
 
             return(GDI_plot)
-            
+
           }
 )
 

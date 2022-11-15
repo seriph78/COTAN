@@ -39,8 +39,6 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             #--------------------------------------
             print(paste("n cells", getNumCells(obj)))
 
-            obj <- as(obj, "scCOTAN")
-
             ttm <- clean(obj)
               
             obj <- ttm$object

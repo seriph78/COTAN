@@ -25,7 +25,6 @@ test_that("2.cleaning", {
     obj.temp <- initializeMetaDataset(obj.temp, GEO = " ",
                                       sequencingMethod = "10X",
                                       sampleCondition = "example")
-    obj.temp <- as(obj.temp, "scCOTAN")
 
     #---------------------------------------------------
 
@@ -219,7 +218,6 @@ test_that("cell_homogeneous_clustering", {
     temp.obj <- initializeMetaDataset(temp.obj, GEO = "",
                                       sequencingMethod = " ",
                                       sampleCondition = "temp.clustered")
-    temp.obj <- as(temp.obj, "scCOTAN")
 
     ttm <- clean(temp.obj)
     
@@ -292,8 +290,7 @@ test_that("merge_cell.clusters.test", {
                                       GEO = "",
                                       sequencingMethod = " ",
                                       sampleCondition = "temp.clustered")
-    temp.obj <- as(temp.obj, "scCOTAN")
-    
+
     ttm <- clean(temp.obj)
     
     temp.obj <- ttm$object

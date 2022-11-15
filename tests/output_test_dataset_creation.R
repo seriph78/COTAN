@@ -9,7 +9,6 @@ dataset.for.test.creation <- function(){
   obj <- COTAN(raw = test.dataset.col)
   obj <- initializeMetaDataset(obj, GEO = " ", sequencingMethod = "10X",
                                sampleCondition = "example")
-  obj <- as(obj, "scCOTAN")
   #---------------------------------------------------
   
   ttm <- clean(obj)

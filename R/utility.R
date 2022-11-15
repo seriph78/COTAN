@@ -90,7 +90,7 @@ plotTheme <- function(plotKind = "common", textSize = 14) {
 
 funProbZero <- function(disp, mu) {
   (disp <= 0) * (exp(-(1 + abs(disp)) * mu)) +
-    (disp > 0) * (1 + abs(disp) * mu)^(-1 / abs(disp))
+  (disp >  0) * (1 + abs(disp) * mu)^(-1 / abs(disp))
 }
 
 #' dispersionBisection

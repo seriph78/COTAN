@@ -24,7 +24,7 @@ BugReports: https://github.com/seriph78/COTAN/issues
 Depends: R (>= 4.1)
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.2
 Imports:
     stats,
     dplyr,

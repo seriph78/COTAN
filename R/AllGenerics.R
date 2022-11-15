@@ -6,8 +6,18 @@ setGeneric(
 )
 
 setGeneric(
+  "findHousekeepingGenes",
+  function(objCOTAN) standardGeneric("findHousekeepingGenes")
+)
+
+setGeneric(
   "dropGenesCells",
   function(objCOTAN, genes = c(), cells = c()) standardGeneric("dropGenesCells")
+)
+
+setGeneric(
+  "clean",
+  function(objCOTAN) standardGeneric("clean")
 )
 
 setGeneric(
@@ -27,36 +37,11 @@ setGeneric(
 
 setGeneric(
   "estimateDispersionBisection",
-  function(objCOTAN, cores = 1, step = 200) 
+  function(objCOTAN, cores = 1, step = 200)
     standardGeneric("estimateDispersionBisection")
 )
 
-setGeneric(
-  "rawNorm",
-  function(objCOTAN) standardGeneric("rawNorm")
-)
-
-setGeneric(
-  "housekeepingGenes",
-  function(objCOTAN) standardGeneric("housekeepingGenes")
-)
-
-setGeneric(
-  "estimateLambdaLinear",
-  function(objCOTAN) standardGeneric("estimateLambdaLinear")
-)
-
-setGeneric(
-  "estimateNuLinear",
-  function(objCOTAN) standardGeneric("estimateNuLinear")
-)
-
-setGeneric(
-  "estimateMu",
-  function(objCOTAN) standardGeneric("estimateMu")
-)
-
-#-------------------------------------- get and set
+#-------------------------------------- getters
 setGeneric(
   "getRawData",
   function(objCOTAN) standardGeneric("getRawData")
@@ -123,13 +108,38 @@ setGeneric(
 )
 
 
-#-------------------------------------- private
+#-------------------------------------- estimators
+setGeneric(
+  "estimateLambdaLinear",
+  function(objCOTAN) standardGeneric("estimateLambdaLinear")
+)
+
+setGeneric(
+  "estimateNuLinear",
+  function(objCOTAN) standardGeneric("estimateNuLinear")
+)
+
+setGeneric(
+  "estimateMu",
+  function(objCOTAN) standardGeneric("estimateMu")
+)
+
+setGeneric(
+  "estimateNormalisedData",
+  function(objCOTAN) standardGeneric("estimateNormalisedData")
+)
+
 setGeneric(
   "expectedContingencyTables",
   function(objCOTAN, cells = FALSE) standardGeneric("expectedContingencyTables")
 )
 
 setGeneric(
-  "observedContingencyYY", 
+  "observedContingencyYY",
   function(objCOTAN, cells = FALSE) standardGeneric("observedContingencyYY")
+)
+
+setGeneric(
+  "runEstimatesLinear",
+  function(objCOTAN) standardGeneric("runEstimatesLinear")
 )

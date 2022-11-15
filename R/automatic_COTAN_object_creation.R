@@ -82,8 +82,6 @@ setMethod(
       dir.create(file.path(out_dir, "cleaning"))
     }
 
-    obj <- as(obj, "scCOTAN")
-
               ttm <- clean(obj)
 
               means <- PC1 <- PC2 <- nu <- NULL
