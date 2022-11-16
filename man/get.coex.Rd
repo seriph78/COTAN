@@ -17,7 +17,7 @@ It returns a COTAN object
 }
 \description{
 This function estimates and stores the coex matrix in the coex field.
-It need to be run after \code{\link{cotan_analysis}}
+It need to be run after \code{\link{estimateDispersion}}
 }
 \examples{
 

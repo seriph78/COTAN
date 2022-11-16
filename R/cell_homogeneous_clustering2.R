@@ -317,7 +317,7 @@ setMethod("cell_homogeneous_clustering","character",
 
   gc()
 
-  obj <- cotan_analysis(obj,cores = cores)
+  obj <- as(estimateDispersion(obj, cores = cores), "scCOTAN")
   print("Analysis step done")
   gc()
   saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))

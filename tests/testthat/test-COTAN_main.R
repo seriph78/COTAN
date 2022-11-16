@@ -52,7 +52,7 @@ test_that("mat_division", {
 test_that("3.cotan_analysis_test", {
 
     obj <- readRDS(file.path(tm,"temp.RDS"))
-    obj <- cotan_analysis(obj,cores = 12)
+    obj <- as(estimateDispersion(obj, cores = 12), "scCOTAN")
 
     a <- readRDS(file.path(getwd(),"a.test.RDS"))
     nu <- readRDS(file.path(getwd(),"nu.test.RDS"))
@@ -219,12 +219,15 @@ test_that("cell_homogeneous_clustering", {
                                       sequencingMethod = " ",
                                       sampleCondition = "temp.clustered")
 
-    temp.obj <- as(clean(temp.obj)[["objCOTAN"]], "scCOTAN")
+    temp.obj <- clean(temp.obj)[["objCOTAN"]]
 
-    temp.obj <- cotan_analysis(temp.obj, cores = 12)
+    temp.obj <- estimateDispersion(temp.obj, cores = 12)
     gc()
+
+    temp.obj <- as(temp.obj, "scCOTAN")
     temp.obj <- get.coex(temp.obj)
     gc()
+
     GDI_data <- get.GDI(temp.obj)
 
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
@@ -290,10 +293,12 @@ test_that("merge_cell.clusters.test", {
                                       sequencingMethod = " ",
                                       sampleCondition = "temp.clustered")
 
-    temp.obj <- as(clean(temp.obj)[["objCOTAN"]], "scCOTAN")
+    temp.obj <- clean(temp.obj)[["objCOTAN"]]
 
-    temp.obj <- cotan_analysis(temp.obj, cores = 12)
+    temp.obj <- estimateDispersion(temp.obj, cores = 12)
     gc()
+
+    temp.obj <- as(temp.obj, "scCOTAN")
     temp.obj <- get.coex(temp.obj)
     gc()
     GDI_data <- get.GDI(temp.obj)

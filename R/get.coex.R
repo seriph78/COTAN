@@ -1,7 +1,7 @@
 #' get.coex
 #'
 #' This function estimates and stores the coex matrix in the coex field.
-#' It need to be run after \code{\link{cotan_analysis}}
+#' It need to be run after \code{\link{estimateDispersion}}
 #' @param object A COTAN object
 #'
 #' @return It returns a COTAN object
@@ -53,7 +53,7 @@ setMethod(
     rm(new_estimator_no_no_n)
     rm(new_estimator_no_yes_n)
     gc()
-    
+
     coex_n <- coex_n * sqrt(sum.for.div_n)
     coex_n <- coex_n / sqrt(getNumCells(object))
     coex_n <- list("genes" = yes_yes_n$genes, "values" = coex_n)
@@ -62,7 +62,7 @@ setMethod(
     rm(yes_yes_n)
     rm(coex_n)
     gc()
-    
+
     return(object)
   }
 )

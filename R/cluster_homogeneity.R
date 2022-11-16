@@ -76,13 +76,13 @@ setMethod("cluster_homogeneity","scCOTAN",
 
                 #dev.off()
 
-                obj <- as(obj, "scCOTAN")
-                obj = cotan_analysis(obj, cores = cores)
+                obj = estimateDispersion(obj, cores = cores)
                 # saving the structure
                 #saveRDS(obj,file = paste0(out_dir, t, ".cotan.RDS"))
+                gc()
 
                 # COEX evaluation and storing
-                gc()
+                obj <- as(obj, "scCOTAN")
                 obj = get.coex(obj)
 
                 gc()

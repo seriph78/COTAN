@@ -44,10 +44,11 @@ setMethod("cluster_homogeneity_check","scCOTAN",
 
             #---------- run this when B cells are to be removed
 
-            obj <- as(obj, "scCOTAN")
-            obj <- cotan_analysis(obj, cores = cores)
-            # COEX evaluation and storing
+            obj <- estimateDispersion(obj, cores = cores)
             gc()
+
+            # COEX evaluation and storing
+            obj <- as(obj, "scCOTAN")
             obj <- get.coex(obj)
             gc()
 

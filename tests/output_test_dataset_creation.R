@@ -11,8 +11,9 @@ dataset.for.test.creation <- function(){
                                sampleCondition = "example")
   #---------------------------------------------------
 
-  obj <- as(clean(obj)[["objCOTAN"]], "scCOTAN")
-  obj <- cotan_analysis(obj,cores = 10)
+  obj <- clean(obj)[["objCOTAN"]]
+  obj <- estimateDispersion(obj, cores = 10)
+  obj <- as(obj, "scCOTAN")
   obj <- get.coex(obj)
   saveRDS(obj, file = file.path(tm,"temp.RDS") )
 

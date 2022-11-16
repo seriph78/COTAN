@@ -26,13 +26,18 @@ setGeneric(
 )
 
 setGeneric(
+  "estimateDispersion",
+  function(objCOTAN, cores = 1) standardGeneric("estimateDispersion")
+)
+
+setGeneric(
   "plotCellsHeatmap",
   function(objCOTAN, cellsName, clusters) standardGeneric("plotCellsHeatmap")
 )
 
 setGeneric(
   "estimateNuBisection",
-  function(objCOTAN, threshold = 0.001, maxIterations = 1000) 
+  function(objCOTAN, threshold = 0.001, maxIterations = 1000)
     standardGeneric("estimateNuBisection")
 )
 

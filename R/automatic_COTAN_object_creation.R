@@ -13,6 +13,7 @@
 #' @export
 #'
 #' @import grDevices
+#' @import gsubfn
 #'
 #' @importFrom Matrix rowSums
 #' @importFrom Matrix colSums
@@ -118,8 +119,7 @@ setMethod(
               print("Cotan analysis function started")
               analysis_time <- Sys.time()
 
-              obj <- as(obj, "scCOTAN")
-              obj <- cotan_analysis(obj,cores = cores)
+              obj <- estimateDispersion(obj, cores = cores)
 
               coex_time <- Sys.time()
               analysis_time <- difftime(Sys.time(), analysis_time, units = "mins")
@@ -127,6 +127,7 @@ setMethod(
               print(paste0("Only analysis time ", analysis_time))
 
               print("Cotan coex estimation started")
+              obj <- as(obj, "scCOTAN")
               obj <- get.coex(obj)
 
               end_time <- Sys.time()

@@ -239,3 +239,103 @@ setMethod(
     return( list(distCells, pcaCells, objCOTAN) )
   }
 )
+
+
+#' estimateDispersion
+#'
+#' This is the main function that estimates the dispersion vector
+#' to store all the negative binomial dispersion factors.
+#' It needs to be run after \code{\link{clean}}
+#'
+#' @param objCOTAN A COTAN object
+#' @param cores number of cores to use. Default is 11.
+#' @return the updated COTAN object
+#'
+#' @importFrom parallel mclapply
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' ERCC.cotan <- clean(ERCC.cotan)
+#' ERCC.cotan <- estimateDispersion(ERCC.cotan)
+#'
+#' @rdname estimateDispersion
+#'
+setMethod(
+  "estimateDispersion",
+  "COTAN",
+  function(objCOTAN, cores = 1) {
+    print("Estimate dispersion: START")
+
+    if (Sys.info()['sysname'] == "Windows" && cores != 1) {
+      warning(paste0("On windows the numebr of cores used will be 1!",
+                     " Multicore is not supported."))
+      cores <- 1
+    }
+
+    # exclude the effectively ubiquitous genes and saved in a separate file
+    objCOTAN <- findHousekeepingGenes(objCOTAN)
+
+    genesPos <- which(!getGenes(objCOTAN) %in% getHousekeepingGenes(objCOTAN))
+
+    genes <- getGenes(objCOTAN)[genesPos]
+    zeroOneMatrix <- getZeroOneProj(objCOTAN)[genesPos, ]
+    muEst <- estimateMu(objCOTAN)[genesPos, ]
+
+    # muEst <- as.matrix(muEst)
+    # print("start a minimization")
+
+    dispList <- list()
+
+    numGenes <- length(genes)
+    pBegin <- 1
+    while (pBegin <= numGenes) {
+      pEnd <- pBegin + 200
+      if (pEnd >= numGenes) {
+        print("Final genes' trance!")
+        pEnd = numGenes
+      }
+
+      res <- parallel::mclapply(
+        genes[pBegin:pEnd],
+        dispersionBisection,
+        zeroOneMatrix = zeroOneMatrix,
+        muEstimator = muEst,
+        mc.cores = cores)
+
+      dispList <- append(dispList, res)
+      rm(res)
+
+      pBegin <- pEnd + 1
+      if ((pBegin %% 10) == 0) {
+        print(paste("Next gene:", genes[pBegin], "number", pBegin))
+      }
+    }
+
+    gc()
+    print("Estimate dispersion: DONE")
+
+    dispDf <- dispList[[1]]
+    for (i in 2:length(dispList)) {
+      dispDf<- rbind(dispDf, dispList[[i]])
+    }
+
+    rm(dispList)
+    gc()
+
+    objCOTAN@dispersion <- dispDf[["dispersion"]]
+    names(objCOTAN@dispersion) <- genes
+
+    rm(dispDf)
+    gc()
+
+    print(paste("dispersion",
+                "| min:", min(getDispersion(objCOTAN)),
+                "| max:", max(getDispersion(objCOTAN)),
+                "| % negative:", (sum(getDispersion(objCOTAN) <0) * 100 /
+                                  length(getDispersion(objCOTAN))) ))
+
+    return(objCOTAN)
+  }
+)
+

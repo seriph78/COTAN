@@ -262,13 +262,13 @@ dev.off()
 In this part, all the contingency tables are computed and used to get the statistics. To store efficiency, only the yes_yes matrix is stored. Note that if will be necessary re-computing the yes-yes table, the yes-yes table should be canceled before running cotan_analysis.
 
 ```{r}
-obj <- as(obj, "scCOTAN")
-obj = cotan_analysis(obj,cores = 10)
+obj = estimateDispersion(obj, cores = 10)
 ```
 
 COEX evaluation and storing
 
 ```{r}
+obj <- as(obj, "scCOTAN")
 obj = get.coex(obj)
 
 # saving the structure 
