@@ -27,7 +27,8 @@ setGeneric(
 
 setGeneric(
   "estimateNuBisection",
-  function(objCOTAN, threshold = 0.001) standardGeneric("estimateNuBisection")
+  function(objCOTAN, threshold = 0.001, maxIterations = 1000) 
+    standardGeneric("estimateNuBisection")
 )
 
 setGeneric(

@@ -6,14 +6,21 @@
 setMethod(
   "estimateNuBisection",
   "COTAN",
-  function(objCOTAN, threshold) {
+  function(objCOTAN, threshold, maxIterations) {
     zeroOne <- sign(objCOTAN@raw)
 
     # parameters estimation
     if (is_empty(objCOTAN@lambda)) {
       objCOTAN <- estimateLambdaLinear(objCOTAN)
     }
-
+  
+    if(is_empty(objCOTAN@hkGenes)){
+      objCOTAN <- housekeepingGenes(objCOTAN)
+    }
+    
+    # only genes not in housekeeping are used
+    lambda <- objCOTAN@lambda[!names(objCOTAN@lambda) %in% objCOTAN@hkGenes]
+    
     if (is_empty(objCOTAN@nu)) {
       warning("nu vector is empty, estimated linearly initially")
       objCOTAN <- estimateNuLinear(objCOTAN)
@@ -26,7 +33,7 @@ setMethod(
       # estimation
       numZeroEst <- sum(funProbZero(
         objCOTAN@dispersion,
-        objCOTAN@nu[i] * objCOTAN@lambda
+        objCOTAN@nu[i] * lambda
       ))
       numZeroObs <- sum(zeroOne[, i] == 0)
 
@@ -52,7 +59,7 @@ setMethod(
         # estimation
         leftDiffZero <- sum(funProbZero(
           objCOTAN@dispersion,
-          leftNu * objCOTAN@lambda
+          leftNu * lambda
         ))
         leftDiffZero <- leftDiffZero - numZeroObs
 
@@ -67,7 +74,7 @@ setMethod(
           # estimation
           leftDiffZero <- sum(funProbZero(
             objCOTAN@dispersion,
-            leftNu * objCOTAN@lambda
+            leftNu * lambda
           ))
           leftDiffZero <- leftDiffZero - numZeroObs
         }
@@ -80,7 +87,7 @@ setMethod(
         # estimation 
         rightDiffZero <- sum(funProbZero(
           objCOTAN@dispersion,
-          rightNu * objCOTAN@lambda
+          rightNu * lambda
         ))
         rightDiffZero <- leftDiffZero - numZeroObs
 
@@ -95,7 +102,7 @@ setMethod(
           # estimation
           rightDiffZero <- sum(funProbZero(
             objCOTAN@dispersion,
-            rightNu * objCOTAN@lambda
+            rightNu * lambda
           ))
           rightDiffZero <- rightDiffZero - numZeroObs
         }
@@ -107,11 +114,12 @@ setMethod(
       # estimation
       middleDiffZero <- sum(funProbZero(
         objCOTAN@dispersion,
-        middleNu * objCOTAN@lambda
+        middleNu * lambda
       ))
       middleDiffZero <- middleDiffZero - numZeroObs
 
-      while (abs(middleDiffZero) > threshold) {
+      iterCount <- 0
+      while (abs(middleDiffZero) > threshold & iterCount < maxIterations) {
         if (middleDiffZero > 0) {
           leftNu <- middleNu
           leftDiffZero <- middleDiffZero
@@ -125,9 +133,11 @@ setMethod(
         # estimation
         middleDiffZero <- sum(funProbZero(
           objCOTAN@dispersion,
-          middleNu * objCOTAN@lambda
+          middleNu * lambda
         ))
         middleDiffZero <- middleDiffZero - numZeroObs
+        
+        iterCount <- iterCount + 1
       }
 
       objCOTAN@nu[i] <- middleNu
