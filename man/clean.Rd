@@ -17,11 +17,6 @@ lists of objects...
        "cluster2" is the second cell cluster,
        "D" is the B cells' group genes,
        "pcaCells" pca numeric data,
-"plots" a list with ggplot2 plots:
-        "pcaCells" is for pca cells,
-        "genes" is for B cells' group genes,
-        "UDE" is for cell UDE,
-        "nu" is for cell nu.
 }
 \description{
 Main function that can be used to check and clean the dataset.
@@ -30,7 +25,6 @@ the raw.norm (raw / nu)
 }
 \examples{
 data("ERCC.cotan")
-list[objCOTAN, data, plots] <- clean(ERCC.cotan)
-plot(plots[["UDEPlot"]])
+list[objCOTAN, data] <- clean(ERCC.cotan)
 
 }

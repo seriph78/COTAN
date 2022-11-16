@@ -39,7 +39,8 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             #--------------------------------------
             print(paste("n cells", getNumCells(obj)))
 
-            list[obj, , plots] <- clean(obj)
+            list[obj, data] <- clean(obj)
+            plots <- cleanPlots(obj, data[["pcaCells"]], data[["D"]])
 
             #---------- run this when B cells are to be removed
 

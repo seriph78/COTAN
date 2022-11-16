@@ -21,6 +21,11 @@ setGeneric(
 )
 
 setGeneric(
+  "cleanPlots",
+  function(objCOTAN, pcaCells, D) standardGeneric("cleanPlots")
+)
+
+setGeneric(
   "plotCellsHeatmap",
   function(objCOTAN, cellsName, clusters) standardGeneric("plotCellsHeatmap")
 )

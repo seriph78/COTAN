@@ -82,7 +82,8 @@ setMethod(
       dir.create(file.path(out_dir, "cleaning"))
     }
 
-    list[obj, , plots] <- clean(obj)
+    list[obj, data] <- clean(obj)
+    plots <- cleanPlots(obj, data[["pcaCells"]], data[["D"]])
 
     means <- PC1 <- PC2 <- nu <- NULL
 
