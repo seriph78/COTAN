@@ -26,11 +26,6 @@ setGeneric(
 )
 
 setGeneric(
-  "estimateDispersion",
-  function(objCOTAN, cores = 1) standardGeneric("estimateDispersion")
-)
-
-setGeneric(
   "plotCellsHeatmap",
   function(objCOTAN, cellsName, clusters) standardGeneric("plotCellsHeatmap")
 )
@@ -44,12 +39,6 @@ setGeneric(
 setGeneric(
   "coex",
   function(objCOTAN, cells = FALSE) standardGeneric("coex")
-)
-
-setGeneric(
-  "estimateDispersionBisection",
-  function(objCOTAN, cores = 1, step = 200)
-    standardGeneric("estimateDispersionBisection")
 )
 
 #-------------------------------------- getters
@@ -153,4 +142,9 @@ setGeneric(
 setGeneric(
   "runEstimatesLinear",
   function(objCOTAN) standardGeneric("runEstimatesLinear")
+)
+
+setGeneric(
+  "estimateDispersion",
+  function(objCOTAN, cores = 1, step = 200) standardGeneric("estimateDispersion")
 )

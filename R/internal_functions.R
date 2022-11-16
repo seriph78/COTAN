@@ -1,4 +1,78 @@
 
+funProbZero <- function(disp, mu) {
+  ad <- abs(disp)
+  (disp <= 0) * (exp(-(1 + ad) * mu)) +
+  (disp >  0) * (1 + ad * mu)^(-1 / ad)
+}
+
+#' dispersionBisection
+#'
+#' private function invoked by 'estimateDispersion' for the estimation
+#' of 'dispersion' field of a COTAN object via a bisection solver
+#'
+#' the goal is to find dispersion value that produces a difference between
+#' the number of estimated and counted zeros close to 0
+#'
+#' @param gene name of the relevant gene
+#' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
+#' @param muEstimator a matrix estimator of vector mu
+#' @param threshold minimal solution precision
+#'
+#' @return r, data.frame(a, u)
+dispersionBisection <- function(gene,
+                                zeroOneMatrix,
+                                muEstimator,
+                                housekeepingGenes,
+                                threshold = 0.001) {
+  if(gene %in% housekeepingGenes) {
+    return(NA)
+  }
+
+  sumZeros <- sum(zeroOneMatrix[gene, ] == 0)
+  muEstimator <- muEstimator[gene, ]
+
+  # we look for two dispersion values where the first leads to a
+  # diffZeros negative and the second positive
+  disp1 <- 0
+  diff1 <- sum(funProbZero(disp1, muEstimator)) - sumZeros
+  if (abs(diff1) <= threshold) {
+    return(disp1)
+  }
+
+  disp2 <- -1 * sign(diff1) # we assume error is an increasing function of disp
+  repeat {
+    diff2 <- sum(funProbZero(disp2, muEstimator)) - sumZeros
+
+    if (diff2 * diff1 < 0) {
+      break
+    }
+
+    disp1 <- disp2 # disp is closer to producing 0
+    diff1 <- diff2
+
+    disp2 <- 2 * disp2 # we double at each step
+  }
+
+  # once we have found the two bounds to the dispersion value, we use bisection
+  repeat {
+    disp <- (disp1 + disp2) / 2
+    diff <- sum(funProbZero(disp, muEstimator)) - sumZeros
+
+    if (abs(diff) <= threshold) {
+      return(disp)
+    }
+
+    # drop same sign diff point
+    if (diff * diff2 > 0) {
+      disp2 <- disp
+      diff2 <- diff
+    } else {
+      disp1 <- disp
+      diff1 <- diff
+    }
+  }
+}
+
 
 setGeneric("get.S", function(object) standardGeneric("get.S"))
 setMethod("get.S","scCOTAN",
@@ -72,11 +146,11 @@ setMethod(
     t3 <- as.matrix(ll$yes_no) * log(as.matrix(ll$yes_no) /
       as.matrix(est$expectedYN))
     t3[which(as.matrix(ll$yes_no) == 0)] <- 0
-    
+
     t4 <- as.matrix(ll$no_yes) * log(as.matrix(ll$no_yes) /
       as.matrix(est$expectedNY))
     t4[which(as.matrix(ll$no_yes) == 0)] <- 0
-    
+
     G <- 2 * (t1 + t2 + t3 + t4)
     return(G)
   }

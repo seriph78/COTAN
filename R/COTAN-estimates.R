@@ -248,10 +248,13 @@ setMethod(
 #' It needs to be run after \code{\link{clean}}
 #'
 #' @param objCOTAN A COTAN object
-#' @param cores number of cores to use. Default is 11.
+#' @param cores number of cores to use. Default is 1.
+#' @param step number of genes to solve for at once. Default is 200.
+#'
 #' @return the updated COTAN object
 #'
 #' @importFrom parallel mclapply
+#'
 #' @export
 #'
 #' @examples
@@ -264,7 +267,7 @@ setMethod(
 setMethod(
   "estimateDispersion",
   "COTAN",
-  function(objCOTAN, cores = 1) {
+  function(objCOTAN, cores = 1, step = 200) {
     print("Estimate dispersion: START")
 
     if (Sys.info()['sysname'] == "Windows" && cores != 1) {
@@ -273,24 +276,21 @@ setMethod(
       cores <- 1
     }
 
+    genes <- getGenes(objCOTAN)
+    zeroOneMatrix <- getZeroOneProj(objCOTAN)
+    muEstimator <- estimateMu(objCOTAN)
+
     # exclude the effectively ubiquitous genes and saved in a separate file
     objCOTAN <- findHousekeepingGenes(objCOTAN)
 
-    genesPos <- which(!getGenes(objCOTAN) %in% getHousekeepingGenes(objCOTAN))
-
-    genes <- getGenes(objCOTAN)[genesPos]
-    zeroOneMatrix <- getZeroOneProj(objCOTAN)[genesPos, ]
-    muEst <- estimateMu(objCOTAN)[genesPos, ]
-
-    # muEst <- as.matrix(muEst)
-    # print("start a minimization")
+    housekeepingGenes <- getHousekeepingGenes(objCOTAN)
 
     dispList <- list()
 
     numGenes <- length(genes)
     pBegin <- 1
     while (pBegin <= numGenes) {
-      pEnd <- pBegin + 200
+      pEnd <- pBegin + step - 1 # pEnd is always a multiple of step
       if (pEnd >= numGenes) {
         print("Final genes' trance!")
         pEnd = numGenes
@@ -300,14 +300,15 @@ setMethod(
         genes[pBegin:pEnd],
         dispersionBisection,
         zeroOneMatrix = zeroOneMatrix,
-        muEstimator = muEst,
+        muEstimator = muEstimator,
+        housekeepingGenes = housekeepingGenes,
         mc.cores = cores)
 
       dispList <- append(dispList, res)
       rm(res)
 
       pBegin <- pEnd + 1
-      if ((pBegin %% 10) == 0) {
+      if (((pBegin - 1) %% (10 * step)) == 0) { # print a message each 10*step genes
         print(paste("Next gene:", genes[pBegin], "number", pBegin))
       }
     }
@@ -315,25 +316,18 @@ setMethod(
     gc()
     print("Estimate dispersion: DONE")
 
-    dispDf <- dispList[[1]]
-    for (i in 2:length(dispList)) {
-      dispDf<- rbind(dispDf, dispList[[i]])
-    }
-
-    rm(dispList)
-    gc()
-
-    objCOTAN@dispersion <- dispDf[["dispersion"]]
+    objCOTAN@dispersion <- unlist(dispList, recursive = FALSE, use.names = FALSE)
     names(objCOTAN@dispersion) <- genes
 
-    rm(dispDf)
-    gc()
-
     print(paste("dispersion",
-                "| min:", min(getDispersion(objCOTAN)),
-                "| max:", max(getDispersion(objCOTAN)),
-                "| % negative:", (sum(getDispersion(objCOTAN) <0) * 100 /
+                "| min:", min(getDispersion(objCOTAN), na.rm = TRUE),
+                "| max:", max(getDispersion(objCOTAN), na.rm = TRUE),
+                "| % negative:", (sum(getDispersion(objCOTAN) < 0, na.rm = TRUE) * 100 /
                                   length(getDispersion(objCOTAN))) ))
+
+    # drop housekeeping values [as they are all NA]
+    # TODO: keep all values and provide full and filterd accessors
+    objCOTAN@dispersion <- objCOTAN@dispersion[!genes %in% housekeepingGenes]
 
     return(objCOTAN)
   }
