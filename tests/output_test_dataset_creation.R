@@ -13,8 +13,8 @@ dataset.for.test.creation <- function(){
 
   obj <- clean(obj)[["objCOTAN"]]
   obj <- estimateDispersion(obj, cores = 10)
+  obj <- calculateCoex(obj)
   obj <- as(obj, "scCOTAN")
-  obj <- get.coex(obj)
   saveRDS(obj, file = file.path(tm,"temp.RDS") )
 
   cell.names.test <- colnames(obj@raw.norm[c(1:10,990:1000,1971:1981), c(1:10,2474:2484,4990:5000)])

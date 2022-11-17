@@ -116,39 +116,39 @@ setMethod(
     rm(plots)
     gc()
 
-              print("Cotan analysis function started")
-              analysis_time <- Sys.time()
+    print("Cotan analysis function started")
+    analysis_time <- Sys.time()
 
-              obj <- estimateDispersion(obj, cores = cores)
+    obj <- estimateDispersion(obj, cores = cores)
 
-              coex_time <- Sys.time()
-              analysis_time <- difftime(Sys.time(), analysis_time, units = "mins")
+    coex_time <- Sys.time()
+    analysis_time <- difftime(coex_time, analysis_time, units = "mins")
 
-              print(paste0("Only analysis time ", analysis_time))
+    print(paste0("Only analysis time ", analysis_time))
 
-              print("Cotan coex estimation started")
+    print("Cotan coex estimation started")
+    obj <- calculateCoex(obj)
+
+    end_time <- Sys.time()
+
+    all.time <- difftime(end_time, start_time_all, units = "mins")
+    print(paste0("Total time ", all.time))
+
+    coex_time <- difftime(end_time, coex_time, units = "mins")
+
+    print(paste0("Only coex time ", coex_time))
+
+    utils::write.csv(data.frame("type" = c("tot_time",
+                                           "analysis_time",
+                                           "coex_time"),
+                                "times"= c(as.numeric(all.time),
+                                           as.numeric(analysis_time),
+                                           as.numeric(coex_time) ),
+                                "n.cells"=getNumCells(obj),
+                                "n.genes"=getNumGenes(obj) ),
+                     file = file.path(out_dir, paste0(cond, "_times.csv")))
+
               obj <- as(obj, "scCOTAN")
-              obj <- get.coex(obj)
-
-              end_time <- Sys.time()
-
-              all.time <-  difftime(end_time, start_time_all, units = "mins")
-              print(paste0("Total time ", all.time))
-
-              coex_time <- difftime(end_time, coex_time, units = "mins")
-
-              print(paste0("Only coex time ",coex_time))
-
-              utils::write.csv(data.frame("type" = c("tot_time",
-                                                     "analysis_time",
-                                                     "coex_time"),
-                                          "times"= c(as.numeric(all.time),
-                                                     as.numeric(analysis_time),
-                                                     as.numeric(coex_time) ),
-                                          "n.cells"=getNumCells(obj),
-                                          "n.genes"=getNumGenes(obj) ),
-                               file = file.path(out_dir, paste0(cond, "_times.csv")))
-
 
               if (save.obj == "yes" | save.obj == "Yes" | save.obj == "YES") {
                 print(paste0("Saving elaborated data locally at ",
@@ -157,6 +157,5 @@ setMethod(
               }
               return(obj)
 
-          }
-
+  }
 )

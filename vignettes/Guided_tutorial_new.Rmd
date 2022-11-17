@@ -268,11 +268,10 @@ obj = estimateDispersion(obj, cores = 10)
 COEX evaluation and storing
 
 ```{r}
-obj <- as(obj, "scCOTAN")
-obj = get.coex(obj)
+obj = calculateCoex(obj)
 
-# saving the structure 
-saveRDS(obj,file = paste(out_dir, t, ".cotan.RDS"))
+# saving the structure
+saveRDS(obj, file = paste(out_dir, t, ".cotan.RDS"))
 ```
 
 ## Automatic run

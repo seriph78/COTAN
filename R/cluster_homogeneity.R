@@ -82,11 +82,11 @@ setMethod("cluster_homogeneity","scCOTAN",
                 gc()
 
                 # COEX evaluation and storing
-                obj <- as(obj, "scCOTAN")
-                obj = get.coex(obj)
+                obj = calculateCoex(obj)
 
                 gc()
 
+                obj <- as(obj, "scCOTAN")
                 GDI_data_wt1 = get.GDI(obj)
 
                 #obj = readRDS(paste0(out_dir, cond, "_cl.", cl, ".cotan.RDS"))

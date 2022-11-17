@@ -48,10 +48,10 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             gc()
 
             # COEX evaluation and storing
-            obj <- as(obj, "scCOTAN")
-            obj <- get.coex(obj)
+            obj <- calculateCoex(obj)
             gc()
 
+            obj <- as(obj, "scCOTAN")
             GDI_data_wt1 <- get.GDI(obj)
 
             # Plots

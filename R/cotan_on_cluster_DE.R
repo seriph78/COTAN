@@ -7,18 +7,18 @@
 #' be the condition o cell population or cluster number, the arraz will contain all the cell codes (as in the
 #' raw matrix column names).
 #'
-#' @return a list with two objects: the first is a scCOTAN with the new 
-#' object with also the correlation matrix for the genes in each cluster (obj@cluster_data), 
-#' the second is the p-values matrix. 
+#' @return a list with two objects: the first is a scCOTAN with the new
+#' object with also the correlation matrix for the genes in each cluster (obj@cluster_data),
+#' the second is the p-values matrix.
 #' @export
 #'
 #' @examples
-setGeneric("DEA_on_clusters", function(obj, cells_list = NULL) 
+setGeneric("DEA_on_clusters", function(obj, cells_list = NULL)
   standardGeneric("DEA_on_clusters"))
 #' @rdname DEA_on_clusters
 setMethod("DEA_on_clusters","scCOTAN",
           function(obj, cells_list = NULL) {
-            
+
             if (is.null(cells_list)) {
               clusters.names = unique(obj@clusters)[!is.na(unique(obj@clusters))]
               cells_list = list(names(obj@clusters[obj@clusters %in% clusters.names[1]]))
@@ -27,33 +27,33 @@ setMethod("DEA_on_clusters","scCOTAN",
                 tmp = list(names(obj@clusters[obj@clusters %in% clusters.names[c]]))
                 names(tmp)= clusters.names[c]
                 cells_list = c(cells_list,tmp)
-              }  
+              }
             }
 
               cells <- obj@raw
 
               mu_estimator <- estimateMu(obj)
 
-              hk <- obj@hk
-              
-              mu_estimator <- mu_estimator[!rownames(mu_estimator) %in% hk,]
-              cells <- cells[!rownames(cells) %in% hk, ]
-              M <- funProbZero(obj@a,mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
+              noHKFlags <- flagNotHousekeepingGenes(obj)
+
+              mu_estimator <- mu_estimator[noHKFlags,]
+              cells <- cells[noHKFlags, ]
+              M <- funProbZero(obj@a, mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
               N <- 1-M
-              
+
               cluster_data <- data.frame()
               cluster_pval <- data.frame()
               # cells_set  > set of cell code corresponding to cluster
               for (condition in names(cells_list)) {
                 gc()
                   print(paste("cluster", condition))
-                  
+
                   cells_set <- unlist(cells_list[condition])
 
                   stopifnot("ERROR. Some cells are not present!"<-  all(cells_set %in% colnames(cells)) )
 
                   # Cells matrix : formed by row data matrix changed to 0-1 matrix
-                  
+
 
                   yes_in <- rowSums(cells[,colnames(cells) %in% cells_set]>0)
                   yes_out <- rowSums(cells[,!colnames(cells) %in% cells_set]>0)
@@ -67,7 +67,7 @@ setMethod("DEA_on_clusters","scCOTAN",
                   estimator_no_in <- rowSums(M[,colnames(cells) %in% cells_set])
                   estimator_no_out <- rowSums(M[,!colnames(cells) %in% cells_set])
 
-                  
+
                   estimator_yes_in <- rowSums(N[,colnames(cells) %in% cells_set])
                   estimator_yes_out <- rowSums(N[,!colnames(cells) %in% cells_set])
 
@@ -100,7 +100,7 @@ setMethod("DEA_on_clusters","scCOTAN",
                   dif_yes_out <- (as.matrix(yes_out) - estimator_yes_out)**2/new_estimator_yes_out
 
                   S <- dif_no_in + dif_no_out + dif_yes_in + dif_yes_out
-                  
+
                   rm(dif_yes_out,dif_no_in,dif_no_out,dif_yes_in)
                   gc()
 
@@ -120,7 +120,7 @@ setMethod("DEA_on_clusters","scCOTAN",
                       ((as.matrix(no_out) - as.matrix(estimator_no_out))/as.matrix(new_estimator_no_out)) -
                       ((as.matrix(yes_out) - as.matrix(estimator_yes_out))/as.matrix(new_estimator_yes_out)) -
                       ((as.matrix(no_in) - as.matrix(estimator_no_in))/as.matrix(new_estimator_no_in))
-                  
+
                   rm(yes_in, yes_out,no_out,no_in)
                   rm(estimator_yes_out,estimator_yes_in, estimator_no_out, estimator_no_in)
                   gc()

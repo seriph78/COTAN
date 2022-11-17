@@ -78,13 +78,13 @@ setGeneric("get.S", function(object) standardGeneric("get.S"))
 setMethod("get.S","scCOTAN",
   function(object) {
       print("function to generate S ")
-      if(is(class(object@coex)[1], "dtCMatrix") | (as.vector(class(object@coex)) %in% "dtCMatrix")){
+      if (is(class(object@coex)[1], "dtCMatrix") ||
+          as.vector(class(object@coex)) %in% "dtCMatrix") {
           print("COTAN object in the old format! Converting...")
-          object <- get.coex(object)
+          object <- calculateCoex(object)
       }
       S <- (object@coex$values)^2 * getNumCells(object)
-      S <- list("genes"=object@coex$genes,"values"=S)
-      return(S)
+      return( list("genes" = object@coex$genes, "values" = S) )
   }
 )
 
@@ -120,13 +120,13 @@ setMethod(
   "get.G", "scCOTAN",
   function(object) {
     print("function to generate G ")
-    hk <- object@hk
+    noHKFlags <- flagNotHousekeepingGenes(object)
     ll <- obs_ct(object)
 
-    ll$no_yes  <- ll$no_yes [!rownames(ll$no_yes)  %in% hk, !colnames(ll$no_yes)  %in% hk]
-    ll$no_no   <- ll$no_no  [!rownames(ll$no_no)   %in% hk, !colnames(ll$no_no)   %in% hk]
-    ll$yes_yes <- ll@yes_yes[!rownames(ll@yes_yes) %in% hk, !colnames(ll@yes_yes) %in% hk]
-    ll$yes_no  <- ll$yes_no [!rownames(ll$yes_no)  %in% hk, !colnames(ll$yes_no)  %in% hk]
+    ll$no_yes  <- ll$no_yes [noHKFlags, noHKFlags]
+    ll$no_no   <- ll$no_no  [noHKFlags, noHKFlags]
+    ll$yes_yes <- ll@yes_yes[noHKFlags, noHKFlags]
+    ll$yes_no  <- ll$yes_no [noHKFlags, noHKFlags]
 
     est <- expectedContingencyTables(object, FALSE)
     for (i in est) {

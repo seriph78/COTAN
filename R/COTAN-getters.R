@@ -257,6 +257,28 @@ setMethod(
 )
 
 
+#' flagNotHousekeepingGenes
+#'
+#' This function returns a Boolean vector with TRUE for those genes that are
+#' not housekeeping.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return an array of Booleans with TRUE for genes that are not housekeeping
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#' @rdname flagNotHousekeepingGenes
+setMethod(
+  "flagNotHousekeepingGenes",
+  "COTAN",
+  function(objCOTAN) {
+    return( !(rownames(objCOTAN@raw) %in% objCOTAN@hkGenes ) )
+  }
+)
+
+
 #' getMetadataDataset
 #'
 #' This function extract the meta-data stored for the data-set.

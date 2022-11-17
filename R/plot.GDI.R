@@ -39,7 +39,8 @@ setMethod("plot_GDI","scCOTAN",
 
             if(is(class(object@coex)[1], "dtCMatrix")){
               print("COTAN object in the old format! Converting...")
-              object <- get.coex(object)
+              object <- calculateCoex(object)
+              object <- as(object, "scCOTAN")
               print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
               saveRDS(object,paste0(dir, ET, "new.cotan.RDS"))
 

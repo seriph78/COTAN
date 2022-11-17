@@ -19,8 +19,8 @@ be the condition o cell population or cluster number, the arraz will contain all
 raw matrix column names).}
 }
 \value{
-a list with two objects: the first is a scCOTAN with the new 
-object with also the correlation matrix for the genes in each cluster (obj@cluster_data), 
+a list with two objects: the first is a scCOTAN with the new
+object with also the correlation matrix for the genes in each cluster (obj@cluster_data),
 the second is the p-values matrix.
 }
 \description{

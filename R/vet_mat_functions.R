@@ -30,7 +30,7 @@ setMethod(
       m <- matrix(0, nrow = length(x$genes), ncol = length(genes))
       rownames(m) <- x$genes
       colnames(m) <- genes
-      
+
       for (pos.gene in match(genes, x$genes)) {
         temp.array <- x$values[pos.gene]
         p =1
@@ -41,10 +41,10 @@ setMethod(
           s <- s+l
           temp.array <- c(temp.array,x$values[s])
           p <- p +1
-          
+
         }
         if(pos.gene < length(x$genes)){
-          
+
           #linear part
           start.reading.position <- 1
           i <- 1
@@ -54,14 +54,14 @@ setMethod(
           }
           start.reading.position = start.reading.position+1
           start.reading.position
-          
-          
+
+
           end.reading.position <- 0
           for (i in c(0:(pos.gene-1))) {
             end.reading.position <- end.reading.position + (length(x$genes)-i)
           }
           end.reading.position
-          
+
           temp.array <- c(temp.array,x$values[(start.reading.position):end.reading.position])
         }
         m[,x$genes[pos.gene]] <- temp.array
@@ -92,7 +92,8 @@ setGeneric("mat2vec_rfast", function(mat) standardGeneric("mat2vec_rfast"))
 setMethod(
   "mat2vec_rfast", "matrix",
   function(mat) {
-    if (!dim(mat)[1] == dim(mat)[2]) stop("The matrix is not simmetric!")
+    if (!dim(mat)[1] == dim(mat)[2]) stop("The matrix is not square!")
+    #if (!isSymmetric(mat)) stop("The matrix is not simmetric!")
     v <- Rfast::lower_tri(mat, diag = TRUE)
     names.v <- rownames(mat)
     v <- list("genes" = rownames(mat), "values" = v)

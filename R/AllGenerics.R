@@ -36,9 +36,21 @@ setGeneric(
     standardGeneric("estimateNuBisection")
 )
 
+# -------------------------------------- calculate coex
+
 setGeneric(
-  "coex",
-  function(objCOTAN, cells = FALSE) standardGeneric("coex")
+  "expectedContingencyTables",
+  function(objCOTAN, actOnCells = FALSE) standardGeneric("expectedContingencyTables")
+)
+
+setGeneric(
+  "observedContingencyYY",
+  function(objCOTAN, actOnCells = FALSE) standardGeneric("observedContingencyYY")
+)
+
+setGeneric(
+  "calculateCoex",
+  function(objCOTAN, actOnCells = FALSE) standardGeneric("calculateCoex")
 )
 
 #-------------------------------------- getters
@@ -103,6 +115,11 @@ setGeneric(
 )
 
 setGeneric(
+  "flagNotHousekeepingGenes",
+  function(objCOTAN) standardGeneric("flagNotHousekeepingGenes")
+)
+
+setGeneric(
   "getMetadataDataset",
   function(objCOTAN) standardGeneric("getMetadataDataset")
 )
@@ -127,16 +144,6 @@ setGeneric(
 setGeneric(
   "estimateNormalisedData",
   function(objCOTAN) standardGeneric("estimateNormalisedData")
-)
-
-setGeneric(
-  "expectedContingencyTables",
-  function(objCOTAN, cells = FALSE) standardGeneric("expectedContingencyTables")
-)
-
-setGeneric(
-  "observedContingencyYY",
-  function(objCOTAN, cells = FALSE) standardGeneric("observedContingencyYY")
 )
 
 setGeneric(

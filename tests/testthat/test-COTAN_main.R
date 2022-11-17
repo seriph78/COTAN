@@ -66,10 +66,11 @@ test_that("3.cotan_analysis_test", {
 
 test_that("4.cotan_coex_test", {
     obj <- readRDS(file.path(tm,"temp.RDS"))
-    obj <- get.coex(obj)
+    obj <- calculateCoex(obj)
 
     coex_test <- readRDS(file.path(getwd(),"coex.test.RDS"))
 
+    obj <- as(obj, "scCOTAN")
     coex <- extract.coex(object = obj,genes = genes.names.test)
     #coex <- vec2mat_rfast(obj@coex,genes = coex_test$genes)
 
@@ -224,10 +225,10 @@ test_that("cell_homogeneous_clustering", {
     temp.obj <- estimateDispersion(temp.obj, cores = 12)
     gc()
 
-    temp.obj <- as(temp.obj, "scCOTAN")
-    temp.obj <- get.coex(temp.obj)
+    temp.obj <- calculateCoex(temp.obj)
     gc()
 
+    temp.obj <- as(temp.obj, "scCOTAN")
     GDI_data <- get.GDI(temp.obj)
 
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
@@ -298,9 +299,10 @@ test_that("merge_cell.clusters.test", {
     temp.obj <- estimateDispersion(temp.obj, cores = 12)
     gc()
 
-    temp.obj <- as(temp.obj, "scCOTAN")
-    temp.obj <- get.coex(temp.obj)
+    temp.obj <- calculateCoex(temp.obj)
     gc()
+
+    temp.obj <- as(temp.obj, "scCOTAN")
     GDI_data <- get.GDI(temp.obj)
 
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )

@@ -323,10 +323,11 @@ setMethod("cell_homogeneous_clustering","character",
   saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))
   gc()
   print("Coex estimation last step started")
-  obj <- get.coex(obj)
+  obj <- calculateCoex(obj)
   print("Coex estimation last step done")
   gc()
 
+  obj <- as(obj, "scCOTAN")
   saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))
   return(obj)
 

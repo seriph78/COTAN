@@ -18,13 +18,15 @@ setMethod(
     function.to.min <- function(par, object) {
       a <- par[seq_along(object@a)]
       nu <- exp(par[(length(object@a) + 1):(length(object@a) + length(object@nu))])
+
+      noHKFlags <- flagNotHousekeepingGenes(object)
       zero.cells <- colSums(as.data.frame(object@raw == 0))
-      zero.genes <- rowSums(as.data.frame(object@raw[!rownames(object@raw) %in% object@hk, ] == 0))
+      zero.genes <- rowSums(as.data.frame(object@raw[noHKFlags, ] == 0))
 
       a_1 <- 1 / a
       head(a_1)
 
-      l.nu <- outer(object@lambda[!names(object@lambda) %in% object@hk], nu)
+      l.nu <- outer(object@lambda[noHKFlags], nu)
 
       a_1.matrix <- matrix(a_1, nrow = length(a_1), ncol = ncol(l.nu))
 
