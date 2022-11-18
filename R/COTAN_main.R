@@ -52,9 +52,9 @@ setMethod(
     for (ET in conditions) {
       print(paste0("Loading condition", ET))
       obj <- readRDS(paste0(dir, ET, ".cotan.RDS"))
-      if (is(class(obj@coex)[1], "dtCMatrix")) {
-        print("COTAN object in the old format! Converting...")
-        obj <- calculateCoex(obj)
+
+      if (is(class(getCoex(obj, FALSE))[1], "dtCMatrix")) {
+        obi <- standardizeCoex(obj)
         obj <- as(obj, "scCOTAN")
         print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
         saveRDS(obj, paste0(dir, ET, "new.cotan.RDS"))
@@ -94,7 +94,7 @@ setMethod(
       p_val$g2 <- as.vector(rownames(p_val))
       df.temp.pval <- pivot_longer(p_val, cols = seq_along(colnames(p_val)) - 1, names_to = "g1", values_to = "p_val")
 
-      coex <- vec2mat_rfast(obj@coex, genes = gr)
+      coex <- getCoex(obj, asMatrix = TRUE, genes = gr)
       diag(coex) <- 0
       coex <- coex[rownames(coex) %in% ge, ]
       # this to add some eventually effective housekeeping genes
@@ -224,9 +224,8 @@ setMethod(
 
     obj <- readRDS(paste0(dir, condition, ".cotan.RDS"))
 
-    if (is(class(obj@coex)[1], "dtCMatrix")) {
-      print("COTAN object in the old format! Converting...")
-      obj <- calculateCoex(obj)
+    if (is(class(getCoex(obj, FALSE))[1], "dtCMatrix")) {
+      obi <- standardizeCoex(obj)
       obj <- as(obj, "scCOTAN")
       print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
       saveRDS(obj, paste0(dir, ET, "new.cotan.RDS"))
@@ -252,7 +251,7 @@ setMethod(
     genes.row <- unique(c(unique(c(unlist(markers.list), prim.markers)), genes.row))
     pval <- as.data.frame(pval)
 
-    coex <- vec2mat_rfast(obj@coex)
+    coex <- getCoex(obj)
     diag(coex) <- 0
     if (symmetric == TRUE) {
       coex <- coex[rownames(coex) %in% genes.row, colnames(coex) %in% genes.row]
@@ -373,10 +372,9 @@ setMethod(
   function(object, cond, type = "S") {
     ET <- sum.raw.norm <- NULL
 
-    if (is(class(object@coex)[1], "dtCMatrix")) {
-      print("COTAN object in the old format! Converting...")
-      object <- calculateCoex(object)
-      object <- as(object, "scCOTAN")
+    if (is(class(getCoex(object, FALSE))[1], "dtCMatrix")) {
+      obi <- standardizeCoex(object)
+      obj <- as(object, "scCOTAN")
       print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
       saveRDS(object, paste0(dir, ET, "new.cotan.RDS"))
     }

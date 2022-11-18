@@ -148,3 +148,39 @@ setMethod(
     return(objCOTAN)
   }
 )
+
+
+#' standardizeCoex
+#'
+#' @param object a COTAN object
+#'
+#' @return the original object but with coex and cellsCoex slots
+#' in standard format.
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @rdname standardizeCoex
+#'
+setMethod(
+  "standardizeCoex",
+  "COTAN",
+  function(objCOTAN) {
+
+    if (!is_empty(objCOTAN@coex) &&
+        (is(class(objCOTAN@coex)[1], "dtCMatrix") ||
+         as.vector(class(objCOTAN@coex)) %in% "dtCMatrix") ) {
+      print("Coex slot in the old format! Converting...")
+      objCOTAN@coex <- mat2vec_rfast(objCOTAN@coex)
+    }
+
+    if (!is_empty(objCOTAN@cellsCoex) &&
+        (is(class(objCOTAN@cellsCoex)[1], "dtCMatrix") ||
+         as.vector(class(objCOTAN@cellsCoex)) %in% "dtCMatrix") ) {
+      print("CellsCoex in the old format! Converting...")
+      objCOTAN@cellsCoex <- mat2vec_rfast(objCOTAN@cellsCoex)
+    }
+
+    return(objCOTAN)
+  }
+)

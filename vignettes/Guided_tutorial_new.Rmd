@@ -392,13 +392,15 @@ Another useful function is extract.coex. This can be used to extract the whole o
 
 ```{r}
 # For the whole matrix
-coex <- extract.coex(object = obj)
+coex <- getCoex(obj, asMatrix = TRUE)
 coex[1:5,1:5]
 ```
 
 ```{r}
 # For a partial matrix
-coex <- extract.coex(object = obj,genes = c("CEP104", "TNFRSF25", "ZBTB48", "STIM1","TRIM5",      "APBB1" , "DNHD1"))
+coex <- getCoex(obj, asMatrix = TRUE,
+                genes = c("CEP104", "TNFRSF25", "ZBTB48", "STIM1",
+                          "TRIM5", "APBB1", "DNHD1"))
 head(coex)
 ```
 

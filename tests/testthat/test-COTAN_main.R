@@ -71,8 +71,8 @@ test_that("4.cotan_coex_test", {
     coex_test <- readRDS(file.path(getwd(),"coex.test.RDS"))
 
     obj <- as(obj, "scCOTAN")
-    coex <- extract.coex(object = obj,genes = genes.names.test)
-    #coex <- vec2mat_rfast(obj@coex,genes = coex_test$genes)
+    coex <- getCoex(obj, asMatrix = TRUE, genes = genes.names.test)
+    #coex <- getCoex(obj, asMatrix = TRUE, genes = coex_test$genes)
 
     #coex <- mat2vec_rfast(coex[coex_test$genes,coex_test$genes])
 

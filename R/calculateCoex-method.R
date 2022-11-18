@@ -31,6 +31,50 @@ setMethod(
 )
 
 
+#' observedContingency
+#'
+#' calculate observed yes/yes field of contingency table
+#' @param objCOTAN A COTAN object
+#' @param cells Boolean, if true, the function works for the cells,
+#' otherwise for the genes
+#' @return the YesYes observed contengency table
+#'
+#' @importFrom Matrix t
+#' @importClassesFrom Matrix symmetricMatrix
+#' @export
+#'
+#' @rdname observedContingency
+setMethod(
+  "observedContingency",
+  "COTAN",
+  function(objCOTAN, actOnCells = FALSE) {
+    # TODO: add actOnCells support
+    stopifnot("cells case not supported" = !actOnCells)
+
+    zeroOne <- getZeroOneProj(object)
+
+    # Yes/Any matrix = Yes/Yes + Yes/No
+    observedYA <- do.call("cbind", replicate(getNumGenes(objCOTAN),
+                                             as.matrix(rowSums(zeroOne)),
+                                             simplify = FALSE))
+    colnames(observedYA) = rownames(observedYA)
+
+    observedYY <- observedContingencyYY(object, actOnCells)
+    observedYN <- observedYA - YY
+
+    observedYA <- t(observedYA) # now effectively Any/Yes = Yes/Yes + No/Yes
+    observedNY <- observedYA - observedYY
+
+    observedNN <- getNumCells(objCOTAN) - (observedYA + observedYN)
+
+    return( list("observedNN" = as.matrix(observedNN),
+                 "observedNY" = as.matrix(observedNY),
+                 "observedYN" = as.matrix(observedYN),
+                 "observedYY" = as.matrix(observedYY)) )
+  }
+)
+
+
 #' expectedContingencyTables
 #'
 #' method for estimating the expected values of contingency tables
@@ -164,6 +208,7 @@ setMethod(
     coex <- (observedYY$values - expectedYY$values)
     coex <- coex * sqrt(sumForDiv) * normFact
 
+    # TODO: the "genes" name is misleading in case of actOnCells
     coex <- list("genes" = observedYY$genes, "values" = coex)
 
     if(actOnCells) {
@@ -179,5 +224,97 @@ setMethod(
 
     print(paste("Calculate", kind, "coex: DONE"))
     return(objCOTAN)
+  }
+)
+
+
+#' calculateS
+#'
+#' calculate the statistics S for genes contingency tables
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the S matrix
+#'
+#' @export
+#'
+#' @rdname calculateS
+#'
+setMethod(
+  "calculateS",
+  "COTAN",
+  function(objCOTAN) {
+    print("Calculating S: START")
+
+    objCOTAN <- standardizeCoex(objCOTAN)
+    coex <- getCoex(objCOTAN, asMatrix = FALSE)
+
+    stopifnot("Coex is missing" = !is_empty(coex))
+
+    S <- (coex$values)^2 * getNumCells(objCOTAN)
+
+    print("Calculating S: DONE")
+    return( vec2mat_rfast( list("genes" = coex$genes, "values" = S) ) )
+  }
+)
+
+
+#' calculateG
+#'
+#' calculate the statistics G-test for genes contingency tables
+#' It is proportional to the genes' precence mutual information.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the G matrix
+#'
+#' @export
+#'
+#' @rdname calculateG
+#'
+setMethod(
+  "calculateG",
+  "COTAN",
+  function(objCOTAN) {
+    print("Calculating G: START")
+
+    list[observedNN, observedNY, observedYN, observedYY] <-
+      observedContingency(objCOTAN, actOnCells = FALSE)
+
+    noHKFlags <- flagNotHousekeepingGenes(objCOTAN)
+    observedNN <- observedNN[noHKFlags, noHKFlags]
+    observedNY <- observedNY[noHKFlags, noHKFlags]
+    observedYN <- observedYN[noHKFlags, noHKFlags]
+    observedYY <- observedYY[noHKFlags, noHKFlags]
+
+    list[expectedNN, expectedNY, expectedYN, expectedYY] <-
+      expectedContingencyTables(objCOTAN, actOnCells = FALSE)
+
+    for (i in c(expectedNN, expectedNY, expectedYN, expectedYY)) {
+      stopifnot("Some expected values are 0!" = !any(i == 0))
+    }
+
+    print("Estimating G")
+
+    tNN <- observedNN * log(observedNN / expectedNN)
+    tNN[which(observedNN == 0)] <- 0
+    rm(observedNN); rm(expectedNN)
+
+    tNY <- observedNY * log(observedNY / expectedNY)
+    tNY[which(observedNY == 0)] <- 0
+    rm(observedNY); rm(expectedNY)
+
+    tYN <- observedYN * log(observedYN / expectedYN)
+    tYN[which(observedYN == 0)] <- 0
+    rm(observedYN); rm(expectedYN)
+
+    tYY <- observedYY * log(observedYY / expectedYY)
+    tYY[which(observedYY == 0)] <- 0
+    rm(observedYY); rm(expectedYY)
+
+    G <- 2 * (tNN + tNY + tYN + tYY)
+
+    print("Calculating G: DONE")
+    return( as.matrix(G) )
   }
 )

@@ -65,7 +65,7 @@ setMethod(
       )[[1]][2]
     }
 
-    S <- get.S(object)
+    S <- calcualteS(object)
     S <- vec2mat_rfast(S)
     S <- S[, colnames(S) %in% all.genes.to.an]
     S <- as.matrix(S)
@@ -85,7 +85,7 @@ setMethod(
       stats::quantile(quant.p.val2$loc.GDI, probs = 0.1), ]
     genes.raw <- quant.p.val2$names
 
-    to.plot_cl.genes <- vec2mat_rfast(object@coex)
+    to.plot_cl.genes <- getCoex(obj)
     to.plot_cl.genes <- to.plot_cl.genes[
       rownames(to.plot_cl.genes) %in% genes.raw,
       colnames(to.plot_cl.genes) %in% all.genes.to.an

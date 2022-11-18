@@ -24,13 +24,12 @@ setMethod(
     print("function to generate GDI dataframe")
     if (type == "S") {
       print("Using S")
-      S <- get.S(object)
+      S <- calculateS(object)
     } else if (type == "G") {
       print("Using G")
-      S <- get.G(object)
+      S <- calculateG(object)
     }
 
-    S <- vec2mat_rfast(S)
     diag(S) <- 0
     CD.sorted <- apply(S, 2, sort, decreasing = TRUE)
     rg <- round(nrow(CD.sorted) / 20, digits = 0)

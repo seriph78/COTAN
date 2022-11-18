@@ -26,7 +26,7 @@ dataset.for.test.creation <- function(){
   raw.norm.test <- getNormalizedData(obj)[genes.names.test,cell.names.test]
   saveRDS(raw.norm.test, "tests/testthat/raw.norm.test.RDS")
 
-  coex.test <- extract.coex(object = obj,genes = genes.names.test)
+  coex.test <- getCoex(obj, asMatrix = TRUE, genes = genes.names.test)
   saveRDS(coex.test, "tests/testthat/coex.test.RDS")
 
   lambda.test <- obj@lambda[genes.names.test]

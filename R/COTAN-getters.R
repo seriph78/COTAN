@@ -300,3 +300,74 @@ setMethod(
     return(objCOTAN@metaDataset)
   }
 )
+
+
+#' getCoex
+#'
+#' This function extract a complete or a partial coex matrix
+#' from the COTAN object.
+#'
+#' @param object A COTAN object
+#' @param asMatrix A Boolean to query whether return the coex as a matrix
+#' or leave it in which-ever form it already is
+#' @param genes A vector of gene names. It will exclude any gene not on the list.
+#' By defaults the function will keep all genes.
+#'
+#' @return the coex values
+#'
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' coex <- getCoex(ERCC.cotan, asMatrix = TRUE)
+#'
+#' @rdname getCoex
+setMethod(
+  "getCoex",
+  "COTAN",
+  function(objCOTAN, asMatrix = TRUE, genes = "all") {
+    if (!asMatrix) {
+      stopifnot("Get coex as list. Genes subset not supported yet." = genes == "all")
+      return(objCOTAN@coex)
+    }
+    else {
+      return( vec2mat_rfast(objCOTAN@coex, genes = genes) )
+    }
+  }
+)
+
+
+#' getCellsCoex
+#'
+#' This function extract a complete or a partial cellsCoex matrix
+#' from the COTAN object.
+#'
+#' @param object A COTAN object
+#' @param asMatrix A Boolean to query whether return the cellsCoex as a matrix
+#' or leave it in which-ever form it already is
+#' @param cells A vector of cell names. It will exclude any cell not on the list.
+#' By defaults the function will keep all cells.
+#'
+#' @return the cellsCoex values
+#'
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' coex <- getCellsCoex(ERCC.cotan, asMatrix = TRUE)
+#'
+#' @rdname getCellsCoex
+setMethod(
+  "getCellsCoex",
+  "COTAN",
+  function(objCOTAN, asMatrix = TRUE, cells = "all") {
+    if (!asMatrix) {
+      stopifnot("Get coex as list. Cells subset not supported yet." = cells == "all")
+      return(objCOTAN@coex)
+    }
+    else {
+      return( vec2mat_rfast(objCOTAN@cellsCoex, genes = cells) )
+    }
+  }
+)
+

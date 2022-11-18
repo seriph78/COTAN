@@ -121,7 +121,7 @@ setMethod("merge_cell.clusters","scCOTAN",
                 cond.merge <- paste0("merge_cl_",cl.1,"_",cl.2)
                 print(cond.merge)
                 if(cl.1 %in% cl1_not_mergiable){
-                  print(paste0("Clusters ", cl.1," ", cl.2,"already analyzed and not mergiable: skip."))
+                  print(paste0("Clusters ", cl.1, " ", cl.2, " already analyzed and not mergeable: skip."))
                   next
                 }
 

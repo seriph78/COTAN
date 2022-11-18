@@ -41,24 +41,24 @@ setMethod(
         cond.col <- "on a set of genes on columns"
       }
     }
+
     print(paste("Get p-values", cond.col, cond.row))
     if (type_stat == "S") {
       print("Using function S")
-      S <- get.S(object)
+      S <- calculateS(object)
     } else if (type_stat == "G") {
       print("Using function G")
-      S <- get.G(object)
+      S <- calculateG(object)
     }
 
-
     if (cond.col == "on a set of genes on columns") {
-      S <- vec2mat_rfast(S, genes = S$genes[S$genes %in% gene.set.col])
+      genesToKeep = colnames(S) %in% gene.set.col
+      S <- S[genesToKeep, genesToKeep]
       if (cond.row == "on a set of genes on rows") {
         S <- S[rownames(S) %in% gene.set.row, ]
       }
-    } else {
-      S <- vec2mat_rfast(S)
     }
+
     p_value <- pchisq(as.matrix(S), df = 1, lower.tail = FALSE)
     return(p_value)
   }

@@ -1,19 +1,3 @@
-setGeneric(
-  "initializeMetaDataset",
-  function(objCOTAN, GEO, sequencingMethod = "10X", sampleCondition) {
-    standardGeneric("initializeMetaDataset")
-  }
-)
-
-setGeneric(
-  "findHousekeepingGenes",
-  function(objCOTAN) standardGeneric("findHousekeepingGenes")
-)
-
-setGeneric(
-  "dropGenesCells",
-  function(objCOTAN, genes = c(), cells = c()) standardGeneric("dropGenesCells")
-)
 
 setGeneric(
   "clean",
@@ -39,13 +23,17 @@ setGeneric(
 # -------------------------------------- calculate coex
 
 setGeneric(
-  "expectedContingencyTables",
-  function(objCOTAN, actOnCells = FALSE) standardGeneric("expectedContingencyTables")
+  "observedContingencyYY",
+  function(objCOTAN, actOnCells = FALSE) standardGeneric("observedContingencyYY")
+)
+setGeneric(
+  "observedContingency",
+  function(objCOTAN, actOnCells = FALSE) standardGeneric("observedContingency")
 )
 
 setGeneric(
-  "observedContingencyYY",
-  function(objCOTAN, actOnCells = FALSE) standardGeneric("observedContingencyYY")
+  "expectedContingencyTables",
+  function(objCOTAN, actOnCells = FALSE) standardGeneric("expectedContingencyTables")
 )
 
 setGeneric(
@@ -53,7 +41,18 @@ setGeneric(
   function(objCOTAN, actOnCells = FALSE) standardGeneric("calculateCoex")
 )
 
+setGeneric(
+  "calculateS",
+  function(objCOTAN) standardGeneric("calculateS")
+)
+
+setGeneric(
+  "calculateG",
+  function(objCOTAN) standardGeneric("calculateG")
+)
+
 #-------------------------------------- getters
+
 setGeneric(
   "getRawData",
   function(objCOTAN) standardGeneric("getRawData")
@@ -124,6 +123,39 @@ setGeneric(
   function(objCOTAN) standardGeneric("getMetadataDataset")
 )
 
+setGeneric(
+  "getCoex",
+  function(objCOTAN, asMatrix = TRUE, genes = "all") standardGeneric("getCoex")
+)
+
+setGeneric(
+  "getCellsCoex",
+  function(objCOTAN, asMatrix = TRUE, cells = "all") standardGeneric("getCellsCoex")
+)
+
+#-------------------------------------- modifiers
+
+setGeneric(
+  "initializeMetaDataset",
+  function(objCOTAN, GEO, sequencingMethod = "10X", sampleCondition) {
+    standardGeneric("initializeMetaDataset")
+  }
+)
+
+setGeneric(
+  "findHousekeepingGenes",
+  function(objCOTAN) standardGeneric("findHousekeepingGenes")
+)
+
+setGeneric(
+  "dropGenesCells",
+  function(objCOTAN, genes = c(), cells = c()) standardGeneric("dropGenesCells")
+)
+
+setGeneric(
+  "standardizeCoex",
+  function(objCOTAN) standardGeneric("standardizeCoex")
+)
 
 #-------------------------------------- estimators
 setGeneric(
