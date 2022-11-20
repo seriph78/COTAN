@@ -7,15 +7,17 @@
 \format{
 A structure with:
 \describe{
-  \item{raw}{the raw dataset: 88 fake genes for 1015 fake cells}
-  \item{raw.norm}{raw divided for nu}
+  \item{raw}{the raw dataset}
+  \item{rawNorm}{raw divided for nu}
   \item{coex}{}
+  \item{cellsCoex}{}
   \item{nu}{UDE}
   \item{lambda}{ average gene expression}
-  \item{a}{}
-  \item{hk}{genes expressed in all cells}
-  \item{n_cells}{final number of cells}
-  \item{meta}{meta data}
+  \item{dispersion}{}
+  \item{hkGenes}{genes expressed in all cells}
+  \item{metaDataset}{meta data for the dataset}
+  \item{metaCells}{meta data for the cells}
+  \item{clustersCoex}{}
 }
 }
 \source{

@@ -340,7 +340,7 @@ plot_GDI(obj, cond = "test", genes = genes.list)
 If a more complex plot is needed, or if we want to analyze more in detail the GDI data, we can get directly the GDI data frame.
 
 ```{r}
-quant.p = get.GDI(obj)
+quant.p = calculateGDI(obj)
 
 head(quant.p)
 ```

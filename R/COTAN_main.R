@@ -381,10 +381,10 @@ setMethod(
 
     print("GDI plot ")
     if (type == "S") {
-      GDI <- get.GDI(object, type = "S")
+      GDI <- calculateGDI(object, type = "S")
     } else if (type == "G") {
       print("Using G")
-      GDI <- get.GDI(object, type = "G")
+      GDI <- calculateGDI(object, type = "G")
     }
 
     plot <- ggplot(GDI, aes(x = sum.raw.norm, y = GDI)) +

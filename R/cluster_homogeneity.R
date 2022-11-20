@@ -86,16 +86,15 @@ setMethod("cluster_homogeneity","scCOTAN",
 
                 gc()
 
-                obj <- as(obj, "scCOTAN")
-                GDI_data_wt1 = get.GDI(obj)
+                GDI_data_wt1 = calculateGDI(obj)
 
                 #obj = readRDS(paste0(out_dir, cond, "_cl.", cl, ".cotan.RDS"))
-                #GDI_data_wt1 = get.GDI(obj)
+                #GDI_data_wt1 = calculateGDI(obj)
 
                 #Test if the number of genes with GDI > 1.5 is more than 1%
                 if (dim(GDI_data_wt1[GDI_data_wt1$GDI >= 1.5,])[1]/dim(GDI_data_wt1)[1] > 0.01) {
                   print(paste("Cluster", cl, "too high GDI! Recluster!"))
-                  cells_to_cluster = colnames(obj@raw)
+                  cells_to_cluster = getCells(obj)
                   write.csv(cells_to_cluster,
                             file = paste0(out_dir, "to_recluster_",
                                           cond, "_cl.", cl, ".csv"))
@@ -107,6 +106,7 @@ setMethod("cluster_homogeneity","scCOTAN",
 
                 #pdf(paste0(out_dir, cond, "_cl.", cl, ".GDI_plots.pdf"), onefile=TRUE)
                 #my.plots[[(cl+1)]] <-
+                obj <- as(obj, "scCOTAN")
                 plot(plot_GDI(obj, genes = list("top 20 GDI genes"=genes.to.label)))
 
                 dev.off()

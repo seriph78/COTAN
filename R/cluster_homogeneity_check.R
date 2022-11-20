@@ -51,8 +51,7 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             obj <- calculateCoex(obj)
             gc()
 
-            obj <- as(obj, "scCOTAN")
-            GDI_data_wt1 <- get.GDI(obj)
+            GDI_data_wt1 <- calculateGDI(obj)
 
             # Plots
             genes.to.label = rownames(GDI_data_wt1[order(GDI_data_wt1$GDI,decreasing = T),][1:10,])
@@ -62,6 +61,7 @@ setMethod("cluster_homogeneity_check","scCOTAN",
             plot(plots[["genes"]])
             plot(plots[["UDE"]])
             plot(plots[["nu"]])
+            obj <- as(obj, "scCOTAN")
             plot(plot_GDI(obj,GDI.df = GDI_data_wt1, genes = list("top 20 GDI genes"=genes.to.label)))
 
             dev.off()

@@ -47,10 +47,10 @@ setMethod("plot_GDI","scCOTAN",
             print("GDI plot ")
             if (is.null(GDI.df)) {
               if (type=="S") {
-                GDI <- get.GDI(object,type="S")
+                GDI <- calculateGDI(object,type="S")
               }else if(type=="G"){
                 print("Using G")
-                GDI <- get.GDI(object,type="G")
+                GDI <- calculateGDI(object,type="G")
               }
 
             }else{

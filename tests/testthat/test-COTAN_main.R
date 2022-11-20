@@ -139,7 +139,7 @@ test_that("5.get_pval_test", {
 test_that("get_GDI_test", {
   object <- readRDS(file.path(tm,"temp.RDS"))
     #utils::data("ERCC.cotan", package = "COTAN")
-    GDI <- get.GDI(object)[genes.names.test,]
+    GDI <- calculateGDI(object)[genes.names.test,]
     expect_equal(GDI, readRDS(file.path(getwd(),"GDI.test.RDS")))
 
 })
@@ -228,13 +228,10 @@ test_that("cell_homogeneous_clustering", {
     temp.obj <- calculateCoex(temp.obj)
     gc()
 
-    temp.obj <- as(temp.obj, "scCOTAN")
-    GDI_data <- get.GDI(temp.obj)
+    GDI_data <- calculateGDI(temp.obj)
 
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
-
   }
-
 
 })
 
@@ -302,8 +299,7 @@ test_that("merge_cell.clusters.test", {
     temp.obj <- calculateCoex(temp.obj)
     gc()
 
-    temp.obj <- as(temp.obj, "scCOTAN")
-    GDI_data <- get.GDI(temp.obj)
+    GDI_data <- calculateGDI(temp.obj)
 
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
 

@@ -368,3 +368,71 @@ setMethod(
     return( as.matrix(G) )
   }
 )
+
+
+#' calculateGDI
+#'
+#' This function produce a dataframe with the GDI for each genes.
+#'
+#' @param object A COTAN object
+#' @param type Type of statistic to be used. Default is "S":
+#' Pearson's chi-squared test statistics. "G" is G-test statistics
+#'
+#' @return A dataframe
+#'
+#' @export
+#'
+#' @importFrom stats pchisq
+#' @importFrom Matrix rowSums
+#' @importFrom Matrix colMeans
+#' @importFrom Matrix forceSymmetric
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' quant.p <- calculateGDI(ERCC.cotan)
+#'
+#' @rdname calculateGDI
+setMethod(
+  "calculateGDI",
+  "COTAN",
+  function(objCOTAN, type = "S") {
+    print("Calculate GDI dataframe: START")
+
+    if (type == "S") {
+      print("Using S")
+      S <- calculateS(objCOTAN)
+    } else if (type == "G") {
+      print("Using G")
+      S <- calculateG(objCOTAN)
+    }
+
+    diag(S) <- 0
+    CDSorted <- apply(S, 2, sort, decreasing = TRUE)
+    rg <- round(nrow(CDSorted) / 20, digits = 0)
+    CDSorted <- CDSorted[seq_len(rg), ]
+    CDSorted <- pchisq(as.matrix(CDSorted), df = 1, lower.tail = FALSE)
+
+    GDI <- log(-log(colMeans(CDSorted)))
+    GDI <- as.data.frame(GDI)
+    colnames(GDI) <- "GDI"
+    rm(CDSorted)
+    gc()
+
+    sum.raw.norm <- log(rowSums(getNormalizedData(objCOTAN)))
+    GDI <- merge(GDI, as.data.frame(sum.raw.norm), by = "row.names", all.x = TRUE)
+    GDI <- column_to_rownames(GDI, var = "Row.names")
+    rm(sum.raw.norm)
+    gc()
+
+    exp.cells <- (rowSums(getZeroOneProj(objCOTAN)) / getNumCells(objCOTAN)) * 100
+    GDI <- merge(GDI, as.data.frame(exp.cells), by = "row.names", all.x = TRUE)
+    GDI <- column_to_rownames(GDI, var = "Row.names")
+    rm(exp.cells)
+    gc()
+
+    GDI <- GDI[, c("sum.raw.norm", "GDI", "exp.cells")]
+
+    print("Calculate GDI dataframe: DONE")
+    return(GDI)
+  }
+)

@@ -51,6 +51,11 @@ setGeneric(
   function(objCOTAN) standardGeneric("calculateG")
 )
 
+setGeneric(
+  "calculateGDI",
+  function(objCOTAN, type = "S") standardGeneric("calculateGDI")
+)
+
 #-------------------------------------- getters
 
 setGeneric(

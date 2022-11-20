@@ -61,14 +61,14 @@ setMethod("merge_cell.clusters","scCOTAN",
 
 
            ###############
-            cl1_not_mergiable <- c()
-            cl2_not_mergiable <- c()
-            cl1_not_mergiable_old <- 1
+            cl1_not_mergeable <- c()
+            cl2_not_mergeable <- c()
+            cl1_not_mergeable_old <- 1
             round <- 0
-            while (!identical(cl1_not_mergiable,cl1_not_mergiable_old)) {
+            while (!identical(cl1_not_mergeable,cl1_not_mergeable_old)) {
               round <- round + 1
               print(paste0("Start merging smallest clusters: round ", round))
-              cl1_not_mergiable_old <- cl1_not_mergiable
+              cl1_not_mergeable_old <- cl1_not_mergeable
 
               #merge small cluster based on distances
               cluster_data <- obj@cluster_data
@@ -120,7 +120,7 @@ setMethod("merge_cell.clusters","scCOTAN",
 
                 cond.merge <- paste0("merge_cl_",cl.1,"_",cl.2)
                 print(cond.merge)
-                if(cl.1 %in% cl1_not_mergiable){
+                if(cl.1 %in% cl1_not_mergeable){
                   print(paste0("Clusters ", cl.1, " ", cl.2, " already analyzed and not mergeable: skip."))
                   next
                 }
@@ -132,13 +132,13 @@ setMethod("merge_cell.clusters","scCOTAN",
                                                               ,sc.method=sc.method,cond = cond.merge,cores = cores,
                                                               #mt = mt,mt_prefix = mt_prefix
                 )
-                GDI_data_wt1 = get.GDI(merged.obj)
+                GDI_data_wt1 = calculateGDI(merged.obj)
 
                 #Test if the number of genes with GDI > 1.5 is more than 1%
                 if (dim(GDI_data_wt1[GDI_data_wt1$GDI >= 1.5,])[1]/dim(GDI_data_wt1)[1] > 0.01) {
                   print(paste("Clusters", cl.1, "and", cl.2, "too high GDI!"))
-                  cl1_not_mergiable <- c(cl1_not_mergiable,cl.1)
-                  cl2_not_mergiable <- c(cl2_not_mergiable,cl.2)
+                  cl1_not_mergeable <- c(cl1_not_mergeable,cl.1)
+                  cl2_not_mergeable <- c(cl2_not_mergeable,cl.2)
                   #cells_to_cluster = colnames(merged.obj@raw)
                   #write.csv(cells_to_cluster,
                   #          file = paste0(out_dir, "to_recluster_",

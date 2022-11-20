@@ -32,7 +32,7 @@ dataset.for.test.creation <- function(){
   lambda.test <- obj@lambda[genes.names.test]
   saveRDS(lambda.test, "tests/testthat/lambda.test.RDS")
 
-  GDI.test <- get.GDI(obj)
+  GDI.test <- calculateGDI(obj)
   GDI.test <- GDI.test[genes.names.test,]
   saveRDS(GDI.test, "tests/testthat/GDI.test.RDS")
 
