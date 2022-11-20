@@ -10,7 +10,7 @@
 \item{objCOTAN}{A COTAN object}
 }
 \value{
-a matrix
+the G matrix
 }
 \description{
 calculate the statistics G-test for genes contingency tables

@@ -10,7 +10,7 @@
 \item{objCOTAN}{A COTAN object}
 }
 \value{
-a vectorised matrix
+the S matrix
 }
 \description{
 calculate the statistics S for genes contingency tables

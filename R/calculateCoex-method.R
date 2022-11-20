@@ -16,17 +16,23 @@ setMethod(
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
     zeroOne <- getZeroOneProj(objCOTAN)
+    zeroOne <- as.matrix(zeroOne)
 
-    if(isTRUE(actOnCells)){
+    cat("calculating YY..")
+    if (isTRUE(actOnCells)) {
       # for cells
       YY <- t(zeroOne) %*% zeroOne
-    } else{
+    }
+    else{
       # for genes
       YY <- zeroOne %*% t(zeroOne)
     }
+    rm(zeroOne)
+    gc()
+    cat(" done\n")
 
     #return(as(YY, "symmetricMatrix"))
-    return(YY)
+    return(as.matrix(YY))
   }
 )
 
@@ -48,24 +54,49 @@ setMethod(
   "observedContingency",
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
-    # TODO: add actOnCells support
-    stopifnot("cells case not supported" = !actOnCells)
 
     zeroOne <- getZeroOneProj(object)
+    probZero <- as.matrix(probZero)
 
-    # Yes/Any matrix = Yes/Yes + Yes/No
-    observedYA <- do.call("cbind", replicate(getNumGenes(objCOTAN),
-                                             as.matrix(rowSums(zeroOne)),
-                                             simplify = FALSE))
-    colnames(observedYA) = rownames(observedYA)
+    numGenes <- getNumGenes(objCOTAN)
+    numCells <- getNumCells(objCOTAN)
 
-    observedYY <- observedContingencyYY(object, actOnCells)
-    observedYN <- observedYA - YY
+    cat("calculating YY..")
+    if (isTRUE(actOnCells)) {
+      # dimension m x m (m number of cells)
+      observedYY <- t(zeroOne) %*% zeroOne
 
-    observedYA <- t(observedYA) # now effectively Any/Yes = Yes/Yes + No/Yes
-    observedNY <- observedYA - observedYY
+      cat("NY..")
+      # Any/Yes vector [cycled] = Yes/Yes + No/Yes
+      observedAY <- colSums(probZero)
 
-    observedNN <- getNumCells(objCOTAN) - (observedYA + observedYN)
+      observedNY <- observedAY - observedYY
+
+      cat("YN..")
+      observedYN <- t(observedNY)
+
+      cat("NN..")
+      observedNN <- numGenes - observedAY - observedYN
+    }
+    else {
+      # dimension n x n (n number of genes)
+      observedYY <- zeroOne %*% t(zeroOne)
+
+      cat("YN..")
+      # Yes/Any vector [cycled] = Yes/Yes + Yes/No
+      observedYA <- rowSums(zeroOne)
+
+      observedYN <- observedYA - observedYY
+
+      cat("NY..")
+      observedNY <- t(observedYN)
+
+      cat("NN..")
+      observedNN <- numCells - observedYA - observedNY
+    }
+    rm(probZero)
+    gc()
+    cat(" done\n")
 
     return( list("observedNN" = as.matrix(observedNN),
                  "observedNY" = as.matrix(observedNY),
@@ -94,34 +125,53 @@ setMethod(
   "expectedContingencyTables",
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
-    mu <- estimateMu(objCOTAN)[flagNotHousekeepingGenes(objCOTAN), ]
+    mu <- as.matrix(estimateMu(objCOTAN)[flagNotHousekeepingGenes(objCOTAN), ])
 
     # estimate Probabilities of 0 with internal function funProbZero
     probZero <- funProbZero(getDispersion(objCOTAN), mu)
+    probZero <- as.matrix(probZero)
 
     errMgs <- "Error: some NA in matrix of probability of zero UMI counts. "
     stopifnot(errMgs = !anyNA(probZero))
 
+    numGenes <- getNumGenes(objCOTAN)
+    numCells <- getNumCells(objCOTAN)
+
     cat("calculating NN..")
-    if(actOnCells) {
+    if (isTRUE(actOnCells)) {
       # dimension m x m (m number of cells)
       expectedNN <- t(probZero) %*% probZero
-      cat("NY..")
-      expectedNY <- t(1 - probZero) %*% probZero
+
       cat("YN..")
-      expectedYN <- t(expectedNY)
+      # Any/No vector [cycled] = No/No + Yes/No
+      expectedAN <- colSums(probZero)
+
+      expectedYN <- expectedNA - expectedNN
+
+      cat("NY..")
+      expectedNY <- t(expectedYN)
+
       cat("YY..")
-      expectedYY <- t(1 - probZero) %*% (1 - probZero)
-    } else {
+      expectedYY <- numGenes - expectedNA - expectedNY
+    }
+    else {
       # dimension n x n (n number of genes)
       expectedNN <- probZero %*% t(probZero)
+
       cat("NY..")
-      expectedNY <- probZero %*% t(1 - probZero)
+      # No/Any vector [cycled] = No/No + No/Yes
+      expectedNA <- rowSums(probZero)
+
+      expectedNY <- expectedNA - expectedNN
+
       cat("YN..")
       expectedYN <- t(expectedNY)
+
       cat("YY..")
-      expectedYY <- (1 - probZero) %*% t(1 - probZero)
+      expectedYY <- numCells - expectedNA - expectedYN
     }
+    rm(probZero)
+    gc()
     cat(" done\n")
 
     out <- list( "expectedNN" = as.matrix(expectedNN),
@@ -163,7 +213,7 @@ setMethod(
 
     observedYY <- observedContingencyYY(objCOTAN, actOnCells)
 
-    if(!actOnCells){
+    if (isFALSE(actOnCells)) {
       # remove the housekeeping genes
       noHKFlags <- flagNotHousekeepingGenes(objCOTAN)
       observedYY <- observedYY[noHKFlags, noHKFlags]
@@ -194,7 +244,7 @@ setMethod(
                    1 / pmax(1, expectedNY$values) +
                    1 / pmax(1, expectedNN$values) )
 
-    if (actOnCells) {
+    if (isTRUE(actOnCells)) {
       normFact <- 1 / sqrt(getNumGenes(objCOTAN)) # divided by sqrt(n)
     }
     else {
