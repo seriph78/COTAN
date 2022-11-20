@@ -16,7 +16,6 @@ setMethod(
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
     zeroOne <- getZeroOneProj(objCOTAN)
-    zeroOne <- as.matrix(zeroOne)
 
     cat("calculating YY..")
     if (isTRUE(actOnCells)) {
@@ -54,9 +53,7 @@ setMethod(
   "observedContingency",
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
-
     zeroOne <- getZeroOneProj(object)
-    probZero <- as.matrix(probZero)
 
     numGenes <- getNumGenes(objCOTAN)
     numCells <- getNumCells(objCOTAN)
@@ -115,6 +112,10 @@ setMethod(
 #'
 #' @return a list with the expected contengency tables
 #'
+#' @importFrom Rfast mat.mult
+#' @importFrom Rfast rowsums
+#' @importFrom Rfast colsums
+#'
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix symmetricMatrix
 #'
@@ -125,11 +126,10 @@ setMethod(
   "expectedContingencyTables",
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
-    mu <- as.matrix(estimateMu(objCOTAN)[flagNotHousekeepingGenes(objCOTAN), ])
+    mu <- estimateMu(objCOTAN)[flagNotHousekeepingGenes(objCOTAN), ]
 
     # estimate Probabilities of 0 with internal function funProbZero
     probZero <- funProbZero(getDispersion(objCOTAN), mu)
-    probZero <- as.matrix(probZero)
 
     errMgs <- "Error: some NA in matrix of probability of zero UMI counts. "
     stopifnot(errMgs = !anyNA(probZero))
@@ -140,11 +140,11 @@ setMethod(
     cat("calculating NN..")
     if (isTRUE(actOnCells)) {
       # dimension m x m (m number of cells)
-      expectedNN <- t(probZero) %*% probZero
+      expectedNN <- mat.mult(t(probZero) %*% probZero)
 
       cat("YN..")
       # Any/No vector [cycled] = No/No + Yes/No
-      expectedAN <- colSums(probZero)
+      expectedAN <- colsums(probZero)
 
       expectedYN <- expectedNA - expectedNN
 
@@ -156,11 +156,11 @@ setMethod(
     }
     else {
       # dimension n x n (n number of genes)
-      expectedNN <- probZero %*% t(probZero)
+      expectedNN <- mat.mult(probZero, t(probZero))
 
       cat("NY..")
       # No/Any vector [cycled] = No/No + No/Yes
-      expectedNA <- rowSums(probZero)
+      expectedNA <- rowsums(probZero)
 
       expectedNY <- expectedNA - expectedNN
 
@@ -219,7 +219,7 @@ setMethod(
       observedYY <- observedYY[noHKFlags, noHKFlags]
     }
 
-    observedYY <- mat2vec_rfast(as.matrix(observedYY))
+    observedYY <- mat2vec_rfast(observedYY)
 
     gc()
 

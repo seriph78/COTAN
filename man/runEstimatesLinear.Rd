@@ -7,10 +7,10 @@
 \S4method{runEstimatesLinear}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{COTAN object}
+\item{objCOTAN}{a COTAN object}
 }
 \value{
-a list of object (dist_cells, pca_cells, objCOTAN)
+the updated COTAN object
 }
 \description{
 Internal function to estimate the cell efficiency

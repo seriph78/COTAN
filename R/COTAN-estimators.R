@@ -102,8 +102,8 @@ setMethod(
 #' runEstimatesLinear
 #'
 #' Internal function to estimate the cell efficiency
-#' @param objCOTAN COTAN object
-#' @return a list of object (dist_cells, pca_cells, objCOTAN)
+#' @param objCOTAN a COTAN object
+#' @return the updated COTAN object
 #'
 #' @importFrom Matrix t
 #' @importFrom Matrix mean
@@ -134,24 +134,7 @@ setMethod(
 
     print("Linear estimations: DONE")
 
-    gc()
-
-    print("PCA: START")
-
-    pcaCells <- irlba::prcomp_irlba(t(getNormalizedData(objCOTAN)), n = 5)[["x"]]
-    rownames(pcaCells) <- getCells(objCOTAN)
-
-    gc()
-
-    distCells <- stats::dist(scale(pcaCells), method = "euclidean") # mhalanobis
-
-    gc()
-
-    pcaCells <- as.data.frame(pcaCells)
-
-    print("PCA: DONE")
-
-    return( list(distCells, pcaCells, objCOTAN) )
+    return(objCOTAN)
   }
 )
 

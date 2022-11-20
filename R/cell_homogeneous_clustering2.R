@@ -309,7 +309,7 @@ setMethod("cell_homogeneous_clustering","character",
 
   if ((length(to_recluster_new)) > 0) {
     print("Estimate again parameters after cells dropping")
-    obj <- as(clean(obj)[["objCOTAN"]], "scCOTAN")
+    obj <- as(clean(obj, calcExtraData = FALSE)[["objCOTAN"]], "scCOTAN")
     print("Cleaning step done")
 
     saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))

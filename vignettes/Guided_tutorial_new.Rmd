@@ -157,7 +157,7 @@ obj = dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 
 gc()
 
-list[obj, data, plots] <- clean(obj)
+list[obj, data] <- clean(obj)
 list[cluster1, cluster2, D, pcaCells] <- data
 list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj, pcaCells, D)
 
@@ -240,7 +240,7 @@ obj = dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 Repeat the estimation after the cells are removed
 
 ```{r}
-list[obj, data, plots] <- clean(obj)
+list[obj, data] <- clean(obj)
 list[cluster1, cluster2, D, pcaCells] <- data
 list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj, pcaCells, D)
 

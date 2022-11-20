@@ -28,7 +28,7 @@ test_that("2.cleaning", {
 
     #---------------------------------------------------
 
-    obj.temp <- as(clean(obj.temp)[["objCOTAN"]], "scCOTAN")
+    obj.temp <- as(clean(obj.temp, calcExtraData = FALSE)[["objCOTAN"]], "scCOTAN")
     stopifnot(file.exists(tm))
     saveRDS(obj.temp, file = file.path(tm,"temp.RDS") )
     raw.norm <- readRDS(file.path(getwd(),"raw.norm.test.RDS"))
@@ -220,7 +220,7 @@ test_that("cell_homogeneous_clustering", {
                                       sequencingMethod = " ",
                                       sampleCondition = "temp.clustered")
 
-    temp.obj <- clean(temp.obj)[["objCOTAN"]]
+    temp.obj <- clean(temp.obj, calcExtraData = FALSE)[["objCOTAN"]]
 
     temp.obj <- estimateDispersion(temp.obj, cores = 12)
     gc()
@@ -294,7 +294,7 @@ test_that("merge_cell.clusters.test", {
                                       sequencingMethod = " ",
                                       sampleCondition = "temp.clustered")
 
-    temp.obj <- clean(temp.obj)[["objCOTAN"]]
+    temp.obj <- clean(temp.obj, calcExtraData = FALSE)[["objCOTAN"]]
 
     temp.obj <- estimateDispersion(temp.obj, cores = 12)
     gc()
