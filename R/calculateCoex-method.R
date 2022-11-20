@@ -146,13 +146,13 @@ setMethod(
       # Any/No vector [cycled] = No/No + Yes/No
       expectedAN <- colsums(probZero)
 
-      expectedYN <- expectedNA - expectedNN
+      expectedYN <- expectedAN - expectedNN
 
       cat("NY..")
       expectedNY <- t(expectedYN)
 
       cat("YY..")
-      expectedYY <- numGenes - expectedNA - expectedNY
+      expectedYY <- numGenes - expectedAN - expectedNY
     }
     else {
       # dimension n x n (n number of genes)
