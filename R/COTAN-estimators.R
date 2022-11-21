@@ -152,6 +152,7 @@ setMethod(
 #' @return the updated COTAN object
 #'
 #' @importFrom parallel mclapply
+#' @importFrom parallel splitIndices
 #'
 #' @export
 #'
@@ -165,7 +166,8 @@ setMethod(
 setMethod(
   "estimateDispersion",
   "COTAN",
-  function(objCOTAN, cores = 1, step = 200) {
+  function(objCOTAN, step = 256, threshold = 0.001,
+           maxIterations = 1000, cores = 1) {
     print("Estimate dispersion: START")
 
     if (Sys.info()['sysname'] == "Windows" && cores != 1) {
@@ -185,36 +187,40 @@ setMethod(
 
     dispList <- list()
 
-    numGenes <- length(genes)
+    spIdx <- parallel::splitIndices(length(genes), ceiling(length(genes) / step))
+
+    spGenes = lapply(spIdx, function(x) genes[x])
+
+    numSplits <- length(spGenes)
+    splitStep <- max(16, cores * 2)
+
     pBegin <- 1
-    while (pBegin <= numGenes) {
-      pEnd <- pBegin + step - 1 # pEnd is always a multiple of step
-      if (pEnd >= numGenes) {
-        print("Final genes' trance!")
-        pEnd = numGenes
-      }
+    while (pBegin <= numSplits) {
+      pEnd <- min(pBegin + splitStep - 1, numSplits)
+
+      print(paste0("Executing genes batches from",
+                   " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"))
 
       res <- parallel::mclapply(
-        genes[pBegin:pEnd],
-        dispersionBisection,
-        zeroOneMatrix = zeroOneMatrix,
-        muEstimator = muEstimator,
-        housekeepingGenes = housekeepingGenes,
-        mc.cores = cores)
+              spGenes[pBegin:pEnd],
+              parallelDispersionBisection,
+              zeroOneMatrix = zeroOneMatrix,
+              muEstimator = muEstimator,
+              housekeepingGenes = housekeepingGenes,
+              threshold = threshold,
+              maxIterations = maxIterations,
+              mc.cores = cores)
 
       dispList <- append(dispList, res)
       rm(res)
 
       pBegin <- pEnd + 1
-      if (((pBegin - 1) %% (10 * step)) == 0) { # print a message each 10*step genes
-        print(paste("Next gene:", genes[pBegin], "number", pBegin))
-      }
     }
 
     gc()
     print("Estimate dispersion: DONE")
 
-    objCOTAN@dispersion <- unlist(dispList, recursive = FALSE, use.names = FALSE)
+    objCOTAN@dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
     names(objCOTAN@dispersion) <- genes
 
     print(paste("dispersion",

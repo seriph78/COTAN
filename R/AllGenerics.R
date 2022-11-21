@@ -190,5 +190,6 @@ setGeneric(
 
 setGeneric(
   "estimateDispersion",
-  function(objCOTAN, cores = 1, step = 200) standardGeneric("estimateDispersion")
+  function(objCOTAN, step = 256, threshold = 0.001,
+           maxIterations = 1000, cores = 1) standardGeneric("estimateDispersion")
 )

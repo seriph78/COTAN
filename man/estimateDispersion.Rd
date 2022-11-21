@@ -4,14 +4,20 @@
 \alias{estimateDispersion,COTAN-method}
 \title{estimateDispersion}
 \usage{
-\S4method{estimateDispersion}{COTAN}(objCOTAN, cores = 1, step = 200)
+\S4method{estimateDispersion}{COTAN}(
+  objCOTAN,
+  step = 256,
+  threshold = 0.001,
+  maxIterations = 1000,
+  cores = 1
+)
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
-\item{cores}{number of cores to use. Default is 1.}
-
 \item{step}{number of genes to solve for at once. Default is 200.}
+
+\item{cores}{number of cores to use. Default is 1.}
 }
 \value{
 the updated COTAN object

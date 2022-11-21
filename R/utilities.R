@@ -4,6 +4,7 @@ funProbZero <- function(disp, mu) {
     (disp >  0) * (1 + ad * mu)^(-1 / ad)
 }
 
+
 #' dispersionBisection
 #'
 #' private function invoked by 'estimateDispersion' for the estimation
@@ -17,19 +18,21 @@ funProbZero <- function(disp, mu) {
 #' @param muEstimator a matrix estimator of vector mu
 #' @param threshold minimal solution precision
 #'
-#' @return r, data.frame(a, u)
+#' @return the dispersion value
 #'
 #' @rdname dispersionBisection
-dispersionBisection <- function(gene,
-                                zeroOneMatrix,
-                                muEstimator,
-                                housekeepingGenes,
-                                threshold = 0.001) {
-  if(gene %in% housekeepingGenes) {
+dispersionBisection <-
+  function(gene,
+           zeroOneMatrix,
+           muEstimator,
+           housekeepingGenes,
+           threshold = 0.001,
+           maxIterations = 1000) {
+  if (gene %in% housekeepingGenes) {
     return(NA)
   }
 
-  sumZeros <- sum(zeroOneMatrix[gene, ] == 0)
+  sumZeros <- ncol(zeroOneMatrix) - sum(zeroOneMatrix[gene, ])
   muEstimator <- muEstimator[gene, ]
 
   # we look for two dispersion values where the first leads to a
@@ -41,6 +44,7 @@ dispersionBisection <- function(gene,
   }
 
   disp2 <- -1 * sign(diff1) # we assume error is an increasing function of disp
+  iter <- 1
   repeat {
     diff2 <- sum(funProbZero(disp2, muEstimator)) - sumZeros
 
@@ -48,30 +52,143 @@ dispersionBisection <- function(gene,
       break
     }
 
-    disp1 <- disp2 # disp is closer to producing 0
-    diff1 <- diff2
+    if (iter >= maxIterations) {
+      stop("Max number of iterations reached while finding the solution straddling intervals")
+    }
+    iter <- iter + 1
+
+    disp1 <- disp2 # disp2 is closer to producing 0
 
     disp2 <- 2 * disp2 # we double at each step
   }
 
   # once we have found the two bounds to the dispersion value, we use bisection
+  iter <- 1
   repeat {
     disp <- (disp1 + disp2) / 2
+
     diff <- sum(funProbZero(disp, muEstimator)) - sumZeros
 
     if (abs(diff) <= threshold) {
       return(disp)
     }
 
+    if (iter >= maxIterations) {
+      stop("Max number of iterations reached while finding the solution straddling intervals")
+    }
+    iter <- iter + 1
+
     # drop same sign diff point
     if (diff * diff2 > 0) {
       disp2 <- disp
-      diff2 <- diff
     } else {
       disp1 <- disp
-      diff1 <- diff
     }
   }
+}
+
+
+#' parallelDispersionBisection
+#'
+#' private function invoked by 'estimateBisection' for the estimation
+#' of 'dispersion' field of a COTAN object via a parallel bisection solver
+#'
+#' the goal is to find dispersion value that produces a difference between
+#' the number of estimated and counted zeros close to 0
+#'
+#' @param genes names of the relevant genes
+#' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
+#' @param muEstimator a matrix estimator of vector mu
+#' @param threshold minimal solution precision
+#'
+#' @return the dispersion values
+#'
+#' @rdname parallelDispersionBisection
+parallelDispersionBisection <-
+  function(genes,
+           zeroOneMatrix,
+           muEstimator,
+           housekeepingGenes,
+           threshold = 0.001,
+           maxIterations = 1000) {
+  output <- rep(NA, length(genes))
+
+  goodPos <- !(genes %in% housekeepingGenes)
+
+  if (sum(goodPos) == 0) {
+    return(output)
+  }
+
+  sumZeros <- ncol(zeroOneMatrix) - rowSums(zeroOneMatrix[genes[goodPos], , drop = FALSE])
+  muEstimator <- muEstimator[genes[goodPos], , drop = FALSE]
+
+  # we look for two dispersion values where the first leads to a
+  # diffZeros negative and the second positive
+  disps1 <- rep(0, length(sumZeros))
+  diffs1 <- rowSums(funProbZero(disps1, muEstimator)) - sumZeros
+  if (all(abs(diffs1) <= threshold)) {
+    return(disps1)
+  }
+
+  disps2 <- -1 * sign(diffs1) # we assume error is an increasing function of the dispersion
+  diffs2 <- diffs1
+  runPos <- rep(TRUE, length(diffs1))
+  iter <- 1
+  repeat {
+    diffs2[runPos] <- (rowSums(funProbZero(disps2[runPos],
+                                          muEstimator[runPos, , drop = FALSE])) -
+                       sumZeros[runPos])
+
+    runPos <- (diffs2 * diffs1 >= 0)
+
+    if (!any(runPos)) {
+      break
+    }
+
+    if (iter >= maxIterations) {
+      stop("Max number of iterations reached while finding the solution straddling intervals")
+    }
+    iter <- iter + 1
+
+    disps1[runPos] <- disps2[runPos] # disps2 are closer to producing 0
+
+    disps2[runPos] <- 2 * disps2[runPos] # we double at each step
+  }
+
+  # once we have found the two bounds to the dispersion value, we use bisection
+  runNum <- length(diffs1)
+  runPos <- rep(TRUE, runNum)
+  disps <- disps1
+  diffs <- diffs1
+  iter <- 1
+  repeat {
+    disps[runPos] <- (disps1[runPos] + disps2[runPos]) / 2
+
+    diffs[runPos] <- (rowSums(funProbZero(disps[runPos],
+                                         muEstimator[runPos, , drop = FALSE])) -
+                      sumZeros[runPos])
+
+    runPos <- abs(diffs) > threshold
+    if (!any(runPos)) {
+      break
+    }
+
+    if (iter >= maxIterations) {
+      stop("Max number of iterations reached while finding the solutions")
+    }
+    iter <- iter + 1
+
+    # drop same sign diff point
+    pPos <- runPos & (diffs * diffs2 > 0)
+    disps2[pPos] <- disps[pPos]
+
+    nPos <- runPos & !pPos
+    disps1[nPos] <- disps[nPos]
+  }
+
+  output[goodPos] <- disps
+
+  return(output)
 }
 
 

@@ -28,7 +28,8 @@ test_that("2.cleaning", {
 
     #---------------------------------------------------
 
-    obj.temp <- as(clean(obj.temp, calcExtraData = FALSE)[["objCOTAN"]], "scCOTAN")
+    obj.temp <- clean(obj.temp, calcExtraData = FALSE)[["objCOTAN"]]
+    obj.temp <- as(obj.temp, "scCOTAN")
     stopifnot(file.exists(tm))
     saveRDS(obj.temp, file = file.path(tm,"temp.RDS") )
     raw.norm <- readRDS(file.path(getwd(),"raw.norm.test.RDS"))
