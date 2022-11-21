@@ -193,3 +193,9 @@ setGeneric(
   function(objCOTAN, step = 256, threshold = 0.001,
            maxIterations = 1000, cores = 1) standardGeneric("estimateNuBisection")
 )
+
+setGeneric(
+  "estimateDispersionNuBisection",
+  function(objCOTAN, step = 256, threshold = 0.001,
+           maxIterations = 1000, cores = 1) standardGeneric("estimateDispersionNuBisection")
+)

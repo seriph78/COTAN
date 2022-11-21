@@ -15,6 +15,10 @@ setMethod(
   "estimateLambdaLinear",
   "COTAN",
   function(objCOTAN) {
+    if (is_empty(getRawData(objCOTAN))) {
+      stop("empty raw")
+    }
+
     objCOTAN@lambda <- rowMeans(getRawData(objCOTAN), dims = 1, na.rm = TRUE)
 
     return(objCOTAN)
@@ -36,6 +40,10 @@ setMethod(
   "estimateNuLinear",
   "COTAN",
   function(objCOTAN) {
+    if (is_empty(getRawData(objCOTAN))) {
+      stop("empty raw")
+    }
+
     # raw column averages divided by global_mean
     objCOTAN@nu <- colMeans(getRawData(objCOTAN), dims = 1, na.rm = TRUE)
     objCOTAN@nu <- objCOTAN@nu / mean(objCOTAN@nu)
@@ -59,6 +67,14 @@ setMethod(
   "estimateMu",
   "COTAN",
   function(objCOTAN) {
+    if (is_empty(getLambda(objCOTAN))) {
+      stop("lambda must not be empty, estimate it")
+    }
+
+    if (is_empty(getNu(objCOTAN))) {
+      stop("nu must not be empty, estimate it")
+    }
+
     muEstimator <- getLambda(objCOTAN) %*% t(getNu(objCOTAN))
 
     rownames(muEstimator) <- getGenes(objCOTAN)
@@ -186,8 +202,9 @@ setMethod(
     muEstimator <- estimateMu(objCOTAN)
 
     # exclude the effectively ubiquitous genes and saved in a separate file
-    objCOTAN <- findHousekeepingGenes(objCOTAN)
-
+    if (is_empty(getHousekeepingGenes(objCOTAN))) {
+      objCOTAN <- findHousekeepingGenes(objCOTAN)
+    }
     housekeepingGenes <- getHousekeepingGenes(objCOTAN)
 
     dispList <- list()
@@ -278,26 +295,13 @@ setMethod(
       cores <- 1
     }
 
-
     # parameters estimation
-    if (is_empty(getLambda(objCOTAN))) {
-      objCOTAN <- estimateLambdaLinear(objCOTAN)
-    }
-
-    if (is_empty(getHousekeepingGenes(objCOTAN))) {
-      objCOTAN <- findHousekeepingGenes(objCOTAN)
-    }
-
     if (is_empty(getNu(objCOTAN))) {
-      # nu vector is empty: estimate it linearly as initial guesses
-      objCOTAN <- estimateNuLinear(objCOTAN)
+      stop("nu must not be empty, estimate it")
     }
 
     if (is_empty(getDispersion(objCOTAN))) {
-      objCOTAN <- estimateDispersion(objCOTAN, step = step,
-                                     threshold = threshold,
-                                     maxIterations = maxIterations,
-                                     cores = cores)
+      stop("dispersion must not be empty, estimate it")
     }
 
     # only genes not in housekeeping are used (to align to dispersion vector)
@@ -346,12 +350,76 @@ setMethod(
     objCOTAN@nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
     names(objCOTAN@nu) <- cells
 
+    print(paste("Nu mean:", mean(getNu(objCOTAN))))
+
     # TODO: remove once code has been tested
     nuChange <- abs(nu - getNu(objCOTAN))
     print(paste("nu change",
                 "| max:",     max(nuChange),
                 "| median: ", median(nuChange),
                 "| mean: ",   mean(nuChange) ))
+
+    return(objCOTAN)
+  }
+)
+
+
+#'estimateDispersionNuBisection
+#'
+#' Estimates the 'dispersion' and 'nu' field of a COTAN object by running
+#' sequentially a bisection for each parameter. This allows to enforce
+#' \code{mean('nu') == 1} assumption
+#' Assumes \code{\link{estimateNuLinear}} being run already
+#'
+#' @param objCOTAN a COTAN object
+#' @param step number of genes to solve in batch in a single core. Default is 256.
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#' @param cores number of cores to use. Default is 1.
+#'
+#' @return the updated COTAN object
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @rdname estimateDispersionNuBisection
+#'
+setMethod(
+  "estimateDispersionNuBisection",
+  "COTAN",
+  function(objCOTAN, step = 256, threshold = 0.001,
+           maxIterations = 1000, cores = 1) {
+
+    if (is_empty(getNu(objCOTAN))) {
+      stop("Nu vector needs to be initialised as initial guess")
+    }
+
+    iter <- 1
+    repeat {
+      objCOTAN <- estimateDispersion(objCOTAN, step = step,
+                                     threshold = threshold,
+                                     maxIterations = maxIterations,
+                                     cores = cores)
+
+      objCOTAN <- estimateNuBisection(objCOTAN, step = step,
+                                      threshold = threshold,
+                                      maxIterations = maxIterations,
+                                      cores = cores)
+
+      meanNu <- mean(getNu(objCOTAN))
+      print(paste("Nu mean:", meanNu))
+
+      if (abs(meanNu-1) < threshold / 100) {
+        break
+      }
+
+      if (iter >= maxIterations / 100) {
+        stop("Max number of outer iterations reached while finding the solution")
+      }
+
+      objCOTAN@nu <- objCOTAN@nu / meanNu
+    }
 
     return(objCOTAN)
   }
