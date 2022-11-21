@@ -1,9 +1,9 @@
 #' merge_cell.clusters
 #'
-#'This function takes in input a COTAN object with an already homogeneous clusters
-#'and, through the cosine distance and the hclust (with ward.D2 method), checks it merging
-#'two leaf clusters it is formed a still homogeneous cluster (this is done iteratively).
-#'All structures are saved on disk.
+#' This function takes in input a COTAN object with an already homogeneous clusters
+#' and, through the cosine distance and the hclust (with ward.D2 method), checks if merging
+#' two leaf clusters will form a still homogeneous cluster (this is done iteratively).
+#' All structures are saved on disk.
 #'
 #' @param obj COTAN object
 #' @param cond sample condition name
@@ -13,6 +13,8 @@
 #' @param GEO GEO or other data set code
 #' @param sc.method scRNAseq method
 #' @param markers a list of marker genes. Default NULL
+#'
+#' @return a COTAN object
 #'
 #' @importFrom Matrix t
 #' @importFrom Matrix rowSums
@@ -37,10 +39,11 @@
 #' @importFrom ggplot2 scale_fill_manual
 #' @importFrom ggrepel geom_text_repel
 #'
-#' @return a COTAN object
 #' @export
 #'
 #' @examples
+#'
+#' @rdname merge_cell.clusters
 setGeneric("merge_cell.clusters", function(obj,cond,cores=1,srat,out_dir ,GEO,
                                            sc.method,#mt = FALSE, mt_prefix="^mt",
                                            markers = NULL) standardGeneric("merge_cell.clusters"))

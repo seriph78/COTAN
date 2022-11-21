@@ -1,7 +1,7 @@
 funProbZero <- function(disp, mu) {
   ad <- abs(disp)
   (disp <= 0) * (exp(-(1 + ad) * mu)) +
-    (disp >  0) * (1 + ad * mu)^(-1 / ad)
+  (disp >  0) * (1 + ad * mu)^(-1 / ad)
 }
 
 
@@ -308,7 +308,7 @@ parallelNuBisection <-
            maxIterations = 1000) {
   sumZeros <- nrow(zeroOneMatrix) - colSums(zeroOneMatrix[, cells, drop = FALSE])
 
-  stopifnot("initialGuess must hold only positive values" = all(nu > 0))
+  stopifnot("initialGuess must hold only positive values" = all(initialGuess > 0))
 
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
