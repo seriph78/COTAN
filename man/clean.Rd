@@ -23,8 +23,7 @@ lists of objects...
 }
 \description{
 Main function that can be used to check and clean the dataset.
-It also produces and stores the estimators for nu and lambda and fills
-the rawNorm (raw / nu)
+It also produces and stores the estimators for nu and lambda
 }
 \examples{
 data("ERCC.cotan")

@@ -1,12 +1,11 @@
 #' Definition of COTAN class
 #' @slot raw raw UMI count matrix 𝑛×𝑚 (gene number × cell number)
-#' @slot rawNorm raw UMI count matrix divided by UDE, 𝑛×𝑚
 #' @slot coex correlation of COTAN between genes, 𝑛×𝑛
 #' @slot nu vector that stores the estimated UDE, size 𝑚
 #' @slot lambda vector to store the average for the gene expression, size 𝑛
 #' @slot dispersion vector to store all
 #' the negative binomial dispersion factors, size 𝑛.
-#' @slot hKGenes house-keeping genes. It is a vector to store the name 
+#' @slot hKGenes house-keeping genes. It is a vector to store the name
 #' of the genes with positive UMI count in every single cell of the sample
 #' @slot metaDataset data.frame
 #' @slot metaCells data.frame
@@ -17,7 +16,6 @@ setClass(
   "COTAN",
   slots = c(
     raw          = "dgCMatrix",
-    rawNorm      = "dgCMatrix",
     coex         = "ANY",
     cellsCoex    = "ANY",
     nu           = "vector",
@@ -30,7 +28,6 @@ setClass(
   ),
   prototype = list(
     raw          = as(matrix(0, 0, 0), "dgCMatrix"),
-    rawNorm      = as(matrix(0, 0, 0), "dgCMatrix"),
     coex         = as(matrix(0, 0, 0), "dgCMatrix"),
     cellsCoex    = as(matrix(0, 0, 0), "dgCMatrix"),
     nu           = vector(mode = "numeric"),
@@ -42,20 +39,13 @@ setClass(
     clustersCoex = vector(mode = "list")
   ),
   validity = function(object) {
-    if (!is_empty(object@raw) && is_empty(object@rawNorm)) {
+    if (!is_empty(object@raw) && is_empty(object@lambda)) {
       if (isFALSE(all.equal(object@raw, round(object@raw), tolerance = 0))) {
         stop("Input raw data contains not integer numbers!")
       }
       if (any(object@raw < 0)) {
         stop("Input raw data must contain only non negative integers!")
       }
-    }
-    if (!is_empty(object@rawNorm) &&
-        !identical(dim(object@rawNorm), dim(object@raw))) {
-      stop(paste0("'rawNorm'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
-                  "] must have the same sizes as ",
-                  "'raw'[", nrow(object@rawNorm), "," , ncol(object@rawNorm),
-                  "] when not empty."))
     }
     if (!is_empty(object@nu) && length(object@nu) != ncol(object@raw)) {
       stop(paste0("'nu'[", length(object@nu), "] must have size equal",
@@ -88,8 +78,8 @@ setClass(
 
 
 #' COTAN
-#' 
-#' constructor of the class COTAN 
+#'
+#' constructor of the class COTAN
 #' @importFrom methods new
 #' @importClassesFrom Matrix dgCMatrix
 #' @export
@@ -97,7 +87,7 @@ setClass(
 #'
 #' data("raw.dataset")
 #' obj <- COTAN(raw = raw.dataset)
-#' 
+#'
 #' @rdname COTAN
 COTAN <- function(raw = "ANY") {
   raw <- as(as.matrix(raw), "dgCMatrix")
@@ -164,16 +154,6 @@ setIs("scCOTAN",
           raw = as(as.matrix(from@raw), "dgCMatrix")
         }
 
-        if (is_empty(from@raw.norm)) {
-          rawNorm = as(matrix(0, 0, 0), "dgCMatrix")
-        }
-        else if(is(from@raw.norm, "dgCMatrix")) {
-          rawNorm = from@raw.norm
-        }
-        else {
-          rawNorm = as(as.matrix(from@raw.norm), "dgCMatrix")
-        }
-        
         if (!is_empty(from@clusters)) {
           metaCells <- data.frame(clusters = from@clusters,
                                   row.names = colnames(from@raw))
@@ -181,7 +161,7 @@ setIs("scCOTAN",
         else {
           metaCells <- data.frame()
         }
-        
+
         if (!is_empty(from@cluster_data)) {
           clustersCoex <- list(cluster_data = from@cluster_data)
         }
@@ -191,7 +171,6 @@ setIs("scCOTAN",
 
         new("COTAN",
             raw          = raw,
-            rawNorm      = rawNorm,
             coex         = from@coex,
             cellsCoex    = as(matrix(0, 0, 0), "dgCMatrix"),
             nu           = from@nu,
@@ -220,16 +199,6 @@ setIs("scCOTAN",
           raw = as(as.matrix(value@raw), "dgCMatrix")
         }
 
-        if (is_empty(value@raw.norm)) {
-          rawNorm = as(matrix(0, 0, 0), "dgCMatrix")
-        }
-        else if(is(value@raw.norm, "dgCMatrix")) {
-          rawNorm = value@raw.norm
-        }
-        else {
-          rawNorm = as(as.matrix(value@raw.norm), "dgCMatrix")
-        }
-
         if (!is_empty(value@clusters)) {
           metaCells <- data.frame(clusters = value@clusters,
                                   row.names = colnames(value@raw))
@@ -246,7 +215,6 @@ setIs("scCOTAN",
         }
 
         from@raw          <- raw
-        from@rawNorm      <- rawNorm
         from@coex         <- value@coex
         from@cellCoex     <- as(matrix(0, 0, 0), "dgCMatrix")
         from@nu           <- value@nu
@@ -287,7 +255,7 @@ setAs("COTAN",
 
         new("scCOTAN",
             raw          = from@raw,
-            raw.norm     = from@rawNorm,
+            raw.norm     = getNormalizedData(from),
             coex         = from@coex,
             nu           = from@nu,
             lambda       = from@lambda,
@@ -318,7 +286,7 @@ setAs("COTAN",
         }
 
         from@raw          <- value@raw
-        from@raw.norm     <- value@rawNorm
+        from@raw.norm     <- getNormalizedData(value)
         from@coex         <- value@coex
         from@nu           <- value@nu
         from@lambda       <- value@lambda

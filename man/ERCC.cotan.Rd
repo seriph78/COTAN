@@ -8,7 +8,6 @@
 A structure with:
 \describe{
   \item{raw}{the raw dataset}
-  \item{rawNorm}{raw divided for nu}
   \item{coex}{}
   \item{cellsCoex}{}
   \item{nu}{UDE}

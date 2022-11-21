@@ -1,8 +1,7 @@
 #' clean
 #'
 #' Main function that can be used to check and clean the dataset.
-#' It also produces and stores the estimators for nu and lambda and fills
-#' the rawNorm (raw / nu)
+#' It also produces and stores the estimators for nu and lambda
 #'
 #' @param objCOTAN COTAN object
 #' @param calcExtraData Boolean flag. When FALSE all PCA/cluster related
@@ -50,14 +49,25 @@ setMethod(
     print(paste0("Genes selection done:",
                  " dropped [", length(genesToDrop), "] genes"))
 
-    objCOTAN <- runEstimatesLinear(objCOTAN)
+    print(paste0("Working on [", getNumGenes(objCOTAN), "]",
+                 " genes and [", getNumCells(objCOTAN), "] cells"))
+
+    objCOTAN <- estimateLambdaLinear(objCOTAN)
+    objCOTAN <- estimateNuLinear(objCOTAN)
+
+    # genesMeans <- getNu(objCOTAN)
+    # genesRng <- round(getNumGenes(objCOTAN)     / 2, digits = 0)
+    #           : round(getNumGenes(objCOTAN) * 3 / 4, digits = 0)
+    # genesMax <- names(sort(genesMeans, decreasing = TRUE)[genesRng])
 
     gc()
 
     if (isTRUE(calcExtraData)) {
       print("PCA: START")
 
-      pcaCells <- irlba::prcomp_irlba(t(getNormalizedData(objCOTAN)), n = 5)[["x"]]
+      rawNorm <- getNormalizedData(objCOTAN)
+
+      pcaCells <- irlba::prcomp_irlba(t(rawNorm), n = 5)[["x"]]
       rownames(pcaCells) <- getCells(objCOTAN)
 
       distCells <- stats::dist(scale(pcaCells), method = "euclidean") # mhalanobis
@@ -95,7 +105,7 @@ setMethod(
 
       print("Hierarchical clustering: DONE")
 
-      toClust <- as.matrix(round(getNormalizedData(objCOTAN), digits = 4))
+      toClust <- as.matrix(round(rawNorm, digits = 4))
 
       if (!identical(colnames(toClust), names(groups))) {
         stop("Error in the cell names")

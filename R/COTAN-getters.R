@@ -164,11 +164,15 @@ setMethod(
   "getNormalizedData",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(objCOTAN@rawNorm)) {
-      warning("rawNorm is empty")
+    if (is_empty(getRawData(objCOTAN))) {
+      stop("empty raw")
     }
 
-    return(objCOTAN@rawNorm)
+    if (is_empty(getNu(objCOTAN))) {
+      stop("nu must not be empty, estimate it")
+    }
+
+    return( t(t(getRawData(objCOTAN)) * (1/getNu(objCOTAN))) )
   }
 )
 

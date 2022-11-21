@@ -12,8 +12,6 @@ Definition of COTAN class
 \describe{
 \item{\code{raw}}{raw UMI count matrix 𝑛×𝑚 (gene number × cell number)}
 
-\item{\code{rawNorm}}{raw UMI count matrix divided by UDE, 𝑛×𝑚}
-
 \item{\code{coex}}{correlation of COTAN between genes, 𝑛×𝑛}
 
 \item{\code{nu}}{vector that stores the estimated UDE, size 𝑚}
@@ -23,7 +21,7 @@ Definition of COTAN class
 \item{\code{dispersion}}{vector to store all
 the negative binomial dispersion factors, size 𝑛.}
 
-\item{\code{hKGenes}}{house-keeping genes. It is a vector to store the name 
+\item{\code{hKGenes}}{house-keeping genes. It is a vector to store the name
 of the genes with positive UMI count in every single cell of the sample}
 
 \item{\code{metaDataset}}{data.frame}

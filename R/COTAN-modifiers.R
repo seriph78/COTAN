@@ -112,10 +112,6 @@ setMethod(
 
     objCOTAN@raw <- objCOTAN@raw[genesPosToKeep, cellsPosToKeep]
 
-    if (!is_empty(objCOTAN@rawNorm)) {
-      objCOTAN@rawNorm <- objCOTAN@rawNorm[genesPosToKeep, cellsPosToKeep]
-    }
-
     if (!is_empty(objCOTAN@coex) || !is_empty(objCOTAN@cellsCoex)) {
       stop("Cannot drop genes/cells once 'coex' matrices have been initialised")
     }

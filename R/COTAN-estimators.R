@@ -84,80 +84,6 @@ setMethod(
 )
 
 
-#' estimateNormalisedData
-#'
-#' This function estimates and initializes the normalized count table.
-#'
-#' @param objCOTAN A COTAN object
-#' @return the updated COTAN object
-#'
-#' @importFrom rlang is_empty
-#' @importFrom Matrix t
-#'
-#' @export
-#'
-#' @rdname estimateNormalisedData
-#'
-setMethod(
-  "estimateNormalisedData",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(getRawData(objCOTAN))) {
-      stop("empty raw")
-    }
-
-    if (is_empty(getNu(objCOTAN))) {
-      stop("nu must not be empty, estimate it")
-    }
-
-    objCOTAN@rawNorm <- t(t(getRawData(objCOTAN)) * (1/(getNu(objCOTAN))))
-
-    return(objCOTAN)
-  }
-)
-
-
-#' runEstimatesLinear
-#'
-#' Internal function to estimate the cell efficiency
-#' @param objCOTAN a COTAN object
-#' @return the updated COTAN object
-#'
-#' @importFrom Matrix t
-#' @importFrom Matrix mean
-#' @importFrom Matrix rowMeans
-#' @importFrom Matrix colMeans
-#'
-#' @importFrom irlba prcomp_irlba
-#'
-#' @importFrom stats dist
-#'
-#' @rdname runEstimatesLinear
-#'
-setMethod(
-  "runEstimatesLinear",
-  "COTAN",
-  function(objCOTAN) {
-
-    print("Linear estimations: START")
-    print(paste0("Working on [", getNumGenes(objCOTAN), "] genes and [", getNumCells(objCOTAN), "] cells"))
-
-    objCOTAN <- estimateLambdaLinear(objCOTAN)
-    objCOTAN <- estimateNuLinear(objCOTAN)
-    objCOTAN <- estimateNormalisedData(objCOTAN)
-
-    # genesMeans <- getNu(objCOTAN)
-    # genesRng <- round(getNumGenes(objCOTAN)     / 2, digits = 0)
-    #           : round(getNumGenes(objCOTAN) * 3 / 4, digits = 0)
-    # genesMax <- names(sort(genesMeans, decreasing = TRUE)[genesRng])
-
-    print("Linear estimations: DONE")
-
-    return(objCOTAN)
-  }
-)
-
-
 #' estimateDispersion
 #'
 #' This is the main function that estimates the dispersion vector
@@ -350,8 +276,6 @@ setMethod(
     objCOTAN@nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
     names(objCOTAN@nu) <- cells
 
-    print(paste("Nu mean:", mean(getNu(objCOTAN))))
-
     # TODO: remove once code has been tested
     nuChange <- abs(nu - getNu(objCOTAN))
     print(paste("nu change",
@@ -390,6 +314,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, step = 256, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
+    print("Estimate dispersion/nu: START")
 
     if (is_empty(getNu(objCOTAN))) {
       stop("Nu vector needs to be initialised as initial guess")
@@ -408,7 +333,10 @@ setMethod(
                                       cores = cores)
 
       meanNu <- mean(getNu(objCOTAN))
+
       print(paste("Nu mean:", meanNu))
+
+      objCOTAN@nu <- objCOTAN@nu / meanNu
 
       if (abs(meanNu-1) < threshold / 100) {
         break
@@ -417,9 +345,9 @@ setMethod(
       if (iter >= maxIterations / 100) {
         stop("Max number of outer iterations reached while finding the solution")
       }
-
-      objCOTAN@nu <- objCOTAN@nu / meanNu
     }
+
+    print("Estimate dispersion/nu: DONE")
 
     return(objCOTAN)
   }

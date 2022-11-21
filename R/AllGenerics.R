@@ -173,16 +173,6 @@ setGeneric(
 )
 
 setGeneric(
-  "estimateNormalisedData",
-  function(objCOTAN) standardGeneric("estimateNormalisedData")
-)
-
-setGeneric(
-  "runEstimatesLinear",
-  function(objCOTAN) standardGeneric("runEstimatesLinear")
-)
-
-setGeneric(
   "estimateDispersion",
   function(objCOTAN, step = 256, threshold = 0.001,
            maxIterations = 1000, cores = 1) standardGeneric("estimateDispersion")
