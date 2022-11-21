@@ -14,12 +14,6 @@ setGeneric(
   function(objCOTAN, cellsName, clusters) standardGeneric("plotCellsHeatmap")
 )
 
-setGeneric(
-  "estimateNuBisection",
-  function(objCOTAN, threshold = 0.001, maxIterations = 1000)
-    standardGeneric("estimateNuBisection")
-)
-
 # -------------------------------------- calculate coex
 
 setGeneric(
@@ -192,4 +186,10 @@ setGeneric(
   "estimateDispersion",
   function(objCOTAN, step = 256, threshold = 0.001,
            maxIterations = 1000, cores = 1) standardGeneric("estimateDispersion")
+)
+
+setGeneric(
+  "estimateNuBisection",
+  function(objCOTAN, step = 256, threshold = 0.001,
+           maxIterations = 1000, cores = 1) standardGeneric("estimateNuBisection")
 )

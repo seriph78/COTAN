@@ -8,7 +8,7 @@ funProbZero <- function(disp, mu) {
 #' dispersionBisection
 #'
 #' private function invoked by 'estimateDispersion' for the estimation
-#' of 'dispersion' field of a COTAN object via a bisection solver
+#' of 'dispersion' slot of a COTAN object via a bisection solver
 #'
 #' the goal is to find dispersion value that produces a difference between
 #' the number of estimated and counted zeros close to 0
@@ -16,7 +16,9 @@ funProbZero <- function(disp, mu) {
 #' @param gene name of the relevant gene
 #' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
 #' @param muEstimator a matrix estimator of vector mu
+#' @param housekeepingGenes the list of genes to be ignored
 #' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
 #'
 #' @return the dispersion value
 #'
@@ -91,7 +93,7 @@ dispersionBisection <-
 #' parallelDispersionBisection
 #'
 #' private function invoked by 'estimateBisection' for the estimation
-#' of 'dispersion' field of a COTAN object via a parallel bisection solver
+#' of 'dispersion' slot of a COTAN object via a parallel bisection solver
 #'
 #' the goal is to find dispersion value that produces a difference between
 #' the number of estimated and counted zeros close to 0
@@ -99,7 +101,9 @@ dispersionBisection <-
 #' @param genes names of the relevant genes
 #' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
 #' @param muEstimator a matrix estimator of vector mu
+#' @param housekeepingGenes the list of genes to be ignored
 #' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
 #'
 #' @return the dispersion values
 #'
@@ -189,6 +193,89 @@ parallelDispersionBisection <-
   output[goodPos] <- disps
 
   return(output)
+}
+
+
+#' nuBisection
+#'
+#' private function invoked by 'estimateNuBisection' for the estimation
+#' of 'nu' slot of a COTAN object via a bisection solver
+#'
+#' the goal is to find dispersion value that produces a difference between
+#' the number of estimated and counted zeros close to 0
+#'
+#' @param cell name of the relevant cell
+#' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
+#' @param lambda the lambda vector
+#' @param dispersion the dispersion vector
+#' @param initialGuess the initial guess for nu
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#'
+#' @return the nu value
+#'
+#' @rdname nuBisection
+nuBisection <-
+  function(cell,
+           zeroOneMatrix,
+           lambda,
+           dispersion,
+           initialGuess,
+           threshold = 0.001,
+           maxIterations = 1000) {
+  sumZeros <- nrow(zeroOneMatrix) - sum(zeroOneMatrix[, cell])
+
+  # we look for two dispersion values where the first leads to a
+  # diffZeros negative and the second positive
+  nu1 <- initialGuess
+  diff1 <- sum(funProbZero(dispersion, nu1 * lambda)) - sumZeros
+  if (abs(diff1) <= threshold) {
+    return(nu1)
+  }
+
+  factor <- 2 ^ sign(diff1)
+  nu2 <- nu1 * factor # we assume error is an decreasing function of nu
+  iter <- 1
+  repeat {
+    diff2 <- sum(funProbZero(dispersion, nu2 * lambda)) - sumZeros
+
+    if (diff2 * diff1 < 0) {
+      break
+    }
+
+    if (iter >= maxIterations) {
+      stop("Max number of iterations reached while finding the solution straddling intervals")
+    }
+    iter <- iter + 1
+
+    nu1 <- nu2 # nu2 is closer to producing 0
+
+    nu2 <- nu2 * factor # we double/half at each step
+  }
+
+  # once we have found the two bounds to the dispersion value, we use bisection
+  iter <- 1
+  repeat {
+    nu <- (nu1 + nu2) / 2
+
+    diff <- sum(funProbZero(dispersion, nu * lambda)) - sumZeros
+
+    if (abs(diff) <= threshold) {
+      return(nu)
+    }
+
+    if (iter >= maxIterations) {
+      stop("Max number of iterations reached while finding the solution straddling intervals")
+    }
+    iter <- iter + 1
+
+    # drop same sign diff point
+    if (diff * diff2 > 0) {
+      nu2 <- nu
+    } else {
+      nu1 <- nu
+    }
+  }
 }
 
 

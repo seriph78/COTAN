@@ -20,14 +20,18 @@ parallelDispersionBisection(
 
 \item{muEstimator}{a matrix estimator of vector mu}
 
+\item{housekeepingGenes}{the list of genes to be ignored}
+
 \item{threshold}{minimal solution precision}
+
+\item{maxIterations}{max number of iterations (avoids infinite loops)}
 }
 \value{
 the dispersion values
 }
 \description{
 private function invoked by 'estimateBisection' for the estimation
-of 'dispersion' field of a COTAN object via a parallel bisection solver
+of 'dispersion' slot of a COTAN object via a parallel bisection solver
 }
 \details{
 the goal is to find dispersion value that produces a difference between

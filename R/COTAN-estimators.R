@@ -77,9 +77,11 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #' @importFrom Matrix t
+#'
 #' @export
 #'
 #' @rdname estimateNormalisedData
+#'
 setMethod(
   "estimateNormalisedData",
   "COTAN",
@@ -115,6 +117,7 @@ setMethod(
 #' @importFrom stats dist
 #'
 #' @rdname runEstimatesLinear
+#'
 setMethod(
   "runEstimatesLinear",
   "COTAN",
@@ -146,8 +149,10 @@ setMethod(
 #' It needs to be run after \code{\link{clean}}
 #'
 #' @param objCOTAN A COTAN object
+#' @param step number of genes to solve in batch in a single core. Default is 256.
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param cores number of cores to use. Default is 1.
-#' @param step number of genes to solve for at once. Default is 200.
 #'
 #' @return the updated COTAN object
 #'
@@ -198,7 +203,7 @@ setMethod(
     while (pBegin <= numSplits) {
       pEnd <- min(pBegin + splitStep - 1, numSplits)
 
-      print(paste0("Executing genes batches from",
+      print(paste0("Executing ", (pEnd - pBegin + 1), " genes batches from",
                    " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"))
 
       res <- parallel::mclapply(
@@ -237,3 +242,75 @@ setMethod(
   }
 )
 
+
+#'estimateNuBisection
+#'
+#' Estimates the 'nu' field of a COTAN object by bisection.
+#' Assumes dispersion being already calculated
+#'
+#' @param objCOTAN a COTAN object
+#' @param step number of genes to solve in batch in a single core. Default is 256.
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#' @param cores number of cores to use. Default is 1.
+#'
+#' @return the updated COTAN object
+#'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom parallel mclapply
+#' @importFrom parallel splitIndices
+#'
+#' @export
+#'
+#' @rdname estimateNuBisection
+#'
+setMethod(
+  "estimateNuBisection",
+  "COTAN",
+  function(objCOTAN, step = 256, threshold = 0.001,
+           maxIterations = 1000, cores = 1) {
+    zeroOne <- getZeroOneProj(objCOTAN)
+
+    # parameters estimation
+    if (is_empty(getLambda(objCOTAN))) {
+      objCOTAN <- estimateLambdaLinear(objCOTAN)
+    }
+
+    if (is_empty(getHousekeepingGenes(objCOTAN))) {
+      objCOTAN <- housekeepingGenes(objCOTAN)
+    }
+
+    if (is_empty(getNu(objCOTAN))) {
+      # nu vector is empty: estimate it linearly as initial guesses
+      objCOTAN <- estimateNuLinear(objCOTAN)
+    }
+
+    if (is_empty(getDispersion(objCOTAN))) {
+      objCOTAN <- estimateDispersion(objCOTAN, step = step,
+                                     threshold = threshold,
+                                     maxIterations = maxIterations,
+                                     cores = cores)
+    }
+
+    # only genes not in housekeeping are used (to align to dispersion vector)
+    lambda <- getLambda(objCOTAN)[flagNotHousekeepingGenes(objCOTAN)]
+    dispersion <- getDispersion(objCOTAN)
+    nu <- getNu(objCOTAN)
+
+    for (cell in getCells(objCOTAN)) {
+      # estimation
+      res <- nuBisection(cell,
+                         zeroOneMatrix,
+                         lambda,
+                         dispersion,
+                         nu[cell],
+                         threshold = threshold,
+                         maxIterations = maxIterations)
+
+      objCOTAN@nu[cell] <- res
+    }
+
+    return(objCOTAN)
+  }
+)
