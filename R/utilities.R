@@ -10,7 +10,7 @@ funProbZero <- function(disp, mu) {
 #' private function invoked by 'estimateDispersion' for the estimation
 #' of 'dispersion' slot of a COTAN object via a bisection solver
 #'
-#' the goal is to find dispersion value that produces a difference between
+#' the goal is to find a dispersion value that produces a difference between
 #' the number of estimated and counted zeros close to 0
 #'
 #' @param gene name of the relevant gene
@@ -92,10 +92,10 @@ dispersionBisection <-
 
 #' parallelDispersionBisection
 #'
-#' private function invoked by 'estimateBisection' for the estimation
+#' private function invoked by 'estimateDispersion' for the estimation
 #' of 'dispersion' slot of a COTAN object via a parallel bisection solver
 #'
-#' the goal is to find dispersion value that produces a difference between
+#' the goal is to find a dispersion array that produces a difference between
 #' the number of estimated and counted zeros close to 0
 #'
 #' @param genes names of the relevant genes
@@ -201,7 +201,7 @@ parallelDispersionBisection <-
 #' private function invoked by 'estimateNuBisection' for the estimation
 #' of 'nu' slot of a COTAN object via a bisection solver
 #'
-#' the goal is to find dispersion value that produces a difference between
+#' the goal is to find a nu value that produces a difference between
 #' the number of estimated and counted zeros close to 0
 #'
 #' @param cell name of the relevant cell
@@ -276,6 +276,104 @@ nuBisection <-
       nu1 <- nu
     }
   }
+}
+
+
+#' parallelNuBisection
+#'
+#' private function invoked by 'estimateNuBisection' for the estimation
+#' of 'nu' slot of a COTAN object via a parallel bisection solver
+#'
+#' the goal is to find a nu array that produces a difference between
+#' the number of estimated and counted zeros close to 0
+#'
+#' @param cells names of the relevant cells
+#' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
+#' @param lambda the lambda vector
+#' @param dispersion the dispersion vector
+#' @param initialGuess the initial guess for nu
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#'
+#' @return the dispersion values
+#'
+#' @rdname parallelNuBisection
+parallelNuBisection <-
+  function(cells,
+           zeroOneMatrix,
+           lambda,
+           dispersion,
+           initialGuess,
+           threshold = 0.001,
+           maxIterations = 1000) {
+  sumZeros <- nrow(zeroOneMatrix) - colSums(zeroOneMatrix[, cells, drop = FALSE])
+
+  stopifnot("initialGuess must hold only positive values" = all(nu > 0))
+
+  # we look for two dispersion values where the first leads to a
+  # diffZeros negative and the second positive
+  nus1 <- initialGuess[cells]
+  diffs1 <- colSums(funProbZero(dispersion, lambda %*% t(nus1))) - sumZeros
+  if (all(abs(diffs1) <= threshold)) {
+    return(nus1)
+  }
+
+  factors <- 2 ^ sign(diffs1)
+  nus2 <- nus1 * factors # we assume error is an increasing function of the dispersion
+  diffs2 <- diffs1
+  runPos <- rep(TRUE, length(diffs1))
+  iter <- 1
+  repeat {
+    diffs2[runPos] <- (colSums(funProbZero(dispersion, lambda %*% t(nus2[runPos]))) -
+                       sumZeros[runPos])
+
+    runPos <- (diffs2 * diffs1 >= 0)
+
+    if (!any(runPos)) {
+      break
+    }
+
+    if (iter >= maxIterations) {
+      stop("Max number of iterations reached while finding the solution straddling intervals")
+    }
+    iter <- iter + 1
+
+    nus1[runPos] <- nus2[runPos] # nus2 are closer to producing 0
+
+    nus2[runPos] <- nus2[runPos] * factors[runPos] # we double/half at each step
+  }
+
+  # once we have found the two bounds to the dispersion value, we use bisection
+  runNum <- length(diffs1)
+  runPos <- rep(TRUE, runNum)
+  nus <- nus1
+  diffs <- diffs1
+  iter <- 1
+  repeat {
+    nus[runPos] <- (nus1[runPos] + nus2[runPos]) / 2
+
+    diffs[runPos] <- (colSums(funProbZero(dispersion, lambda %*% t(nus[runPos]))) -
+                      sumZeros[runPos])
+
+    runPos <- (abs(diffs) > threshold)
+    if (!any(runPos)) {
+      break
+    }
+
+    if (iter >= maxIterations) {
+      stop("Max number of iterations reached while finding the solutions")
+    }
+    iter <- iter + 1
+
+    # drop same sign diff point
+    pPos <- runPos & (diffs * diffs2 > 0)
+    nus2[pPos] <- nus[pPos]
+
+    nPos <- runPos & !pPos
+    nus1[nPos] <- nus[nPos]
+  }
+
+  return(nus)
 }
 
 

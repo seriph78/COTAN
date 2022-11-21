@@ -30,10 +30,10 @@ parallelDispersionBisection(
 the dispersion values
 }
 \description{
-private function invoked by 'estimateBisection' for the estimation
+private function invoked by 'estimateDispersion' for the estimation
 of 'dispersion' slot of a COTAN object via a parallel bisection solver
 }
 \details{
-the goal is to find dispersion value that produces a difference between
+the goal is to find a dispersion array that produces a difference between
 the number of estimated and counted zeros close to 0
 }

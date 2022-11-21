@@ -34,6 +34,6 @@ private function invoked by 'estimateDispersion' for the estimation
 of 'dispersion' slot of a COTAN object via a bisection solver
 }
 \details{
-the goal is to find dispersion value that produces a difference between
+the goal is to find a dispersion value that produces a difference between
 the number of estimated and counted zeros close to 0
 }

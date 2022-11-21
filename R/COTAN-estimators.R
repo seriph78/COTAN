@@ -270,7 +270,14 @@ setMethod(
   "COTAN",
   function(objCOTAN, step = 256, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
-    zeroOne <- getZeroOneProj(objCOTAN)
+    print("Estimate nu: START")
+
+    if (Sys.info()['sysname'] == "Windows" && cores != 1) {
+      warning(paste0("On windows the numebr of cores used will be 1!",
+                     " Multicore is not supported."))
+      cores <- 1
+    }
+
 
     # parameters estimation
     if (is_empty(getLambda(objCOTAN))) {
@@ -278,7 +285,7 @@ setMethod(
     }
 
     if (is_empty(getHousekeepingGenes(objCOTAN))) {
-      objCOTAN <- housekeepingGenes(objCOTAN)
+      objCOTAN <- findHousekeepingGenes(objCOTAN)
     }
 
     if (is_empty(getNu(objCOTAN))) {
@@ -294,22 +301,57 @@ setMethod(
     }
 
     # only genes not in housekeeping are used (to align to dispersion vector)
+    cells <- getCells(objCOTAN)
+    zeroOneMatrix <- getZeroOneProj(objCOTAN)
     lambda <- getLambda(objCOTAN)[flagNotHousekeepingGenes(objCOTAN)]
     dispersion <- getDispersion(objCOTAN)
     nu <- getNu(objCOTAN)
 
-    for (cell in getCells(objCOTAN)) {
-      # estimation
-      res <- nuBisection(cell,
-                         zeroOneMatrix,
-                         lambda,
-                         dispersion,
-                         nu[cell],
-                         threshold = threshold,
-                         maxIterations = maxIterations)
+    nuList <- list()
 
-      objCOTAN@nu[cell] <- res
+    spIdx <- parallel::splitIndices(length(cells), ceiling(length(cells) / step))
+
+    spCells = lapply(spIdx, function(x) cells[x])
+
+    numSplits <- length(spCells)
+    splitStep <- max(16, cores * 2)
+
+    pBegin <- 1
+    while (pBegin <= numSplits) {
+      pEnd <- min(pBegin + splitStep - 1, numSplits)
+
+      print(paste0("Executing ", (pEnd - pBegin + 1), " cells batches from",
+                   " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"))
+
+      res <- parallel::mclapply(
+        spCells[pBegin:pEnd],
+        parallelNuBisection,
+        zeroOneMatrix = zeroOneMatrix,
+        lambda = lambda,
+        dispersion = dispersion,
+        initialGuess = nu,
+        threshold = threshold,
+        maxIterations = maxIterations,
+        mc.cores = cores)
+
+      nuList <- append(nuList, res)
+      rm(res)
+
+      pBegin <- pEnd + 1
     }
+
+    gc()
+    print("Estimate nu: DONE")
+
+    objCOTAN@nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
+    names(objCOTAN@nu) <- cells
+
+    # TODO: remove once code has been tested
+    nuChange <- abs(nu - getNu(objCOTAN))
+    print(paste("nu change",
+                "| max:",     max(nuChange),
+                "| median: ", median(nuChange),
+                "| mean: ",   mean(nuChange) ))
 
     return(objCOTAN)
   }
