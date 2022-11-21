@@ -140,7 +140,7 @@ setMethod(
     cat("calculating NN..")
     if (isTRUE(actOnCells)) {
       # dimension m x m (m number of cells)
-      expectedNN <- mat.mult(t(probZero) %*% probZero)
+      expectedNN <- mat.mult(t(probZero), probZero)
 
       cat("YN..")
       # Any/No vector [cycled] = No/No + Yes/No

@@ -278,7 +278,7 @@ setMethod(
     }
 
     if (is_empty(getHousekeepingGenes(objCOTAN))) {
-      objCOTAN <- housekeepingGenes(objCOTAN)
+      objCOTAN <- findHousekeepingGenes(objCOTAN)
     }
 
     if (is_empty(getNu(objCOTAN))) {
@@ -297,6 +297,7 @@ setMethod(
     lambda <- getLambda(objCOTAN)[flagNotHousekeepingGenes(objCOTAN)]
     dispersion <- getDispersion(objCOTAN)
     nu <- getNu(objCOTAN)
+    zeroOneMatrix <- getZeroOneProj(objCOTAN)
 
     for (cell in getCells(objCOTAN)) {
       # estimation
