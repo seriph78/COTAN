@@ -3,11 +3,12 @@ stopifnot(file.exists(tm))
 
 #root = "tests/testthat/"
 root = ""
-genes.names.test <- readRDS(file.path(getwd(),"genes.names.test.RDS"))
-cell.names.test <- readRDS(file.path(getwd(),"cell.names.test.RDS"))
+genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
+cell.names.test <- readRDS(file.path(getwd(), "cell.names.test.RDS"))
 
 test_that("1.initialization", {
     utils::data("test.dataset.col", package = "COTAN")
+
     rownames(test.dataset.col) <- test.dataset.col$V1
     test.dataset.col <- test.dataset.col[,2:ncol(test.dataset.col)]
 
@@ -15,6 +16,7 @@ test_that("1.initialization", {
     obj.temp <- initializeMetaDataset(obj.temp, GEO = "V",
                                       sequencingMethod = "10X",
                                       sampleCondition = "example")
+
     expect_s4_class(obj.temp, "COTAN")
 })
 
@@ -29,21 +31,23 @@ test_that("2.cleaning", {
     #---------------------------------------------------
 
     obj.temp <- clean(obj.temp, calcExtraData = FALSE)[["objCOTAN"]]
-    obj.temp <- as(obj.temp, "scCOTAN")
-    stopifnot(file.exists(tm))
-    saveRDS(obj.temp, file = file.path(tm,"temp.RDS") )
-    raw.norm <- readRDS(file.path(getwd(),"raw.norm.test.RDS"))
-    nu <- readRDS(file.path(getwd(),"nu.test.RDS"))
-    expect_equal(as.matrix(getNormalizedData(obj.temp)[genes.names.test,cell.names.test]),
-                 as.matrix(raw.norm))
-    expect_equal(getNu(obj.temp)[cell.names.test],nu)
 
+    stopifnot(file.exists(tm))
+    saveRDS(obj.temp, file = file.path(tm,"temp.RDS"))
+
+    raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
+    nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
+
+    expect_equal(getNormalizedData(obj.temp)[genes.names.test,cell.names.test],
+                 raw.norm)
+    expect_equal(getNu(obj.temp)[cell.names.test], nu)
 })
 
 test_that("mat_division", {
     utils::data("test.dataset.col", package = "COTAN")
-    nu <- readRDS(file.path(getwd(),"nu.test.RDS"))
-    raw.norm <- readRDS(file.path(getwd(),"raw.norm.test.RDS"))
+
+    nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
+    raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
 
     expect_equal( as.matrix(t(t(test.dataset.col[genes.names.test,cell.names.test]) * (1/nu))),
                   as.matrix(raw.norm) )
@@ -51,43 +55,34 @@ test_that("mat_division", {
 
 
 test_that("3.cotan_analysis_test", {
+    obj <- readRDS(file.path(tm, "temp.RDS"))
 
-    obj <- readRDS(file.path(tm,"temp.RDS"))
-    obj <- as(estimateDispersion(obj, cores = 12), "scCOTAN")
+    obj <- estimateDispersion(obj, cores = 12)
 
-    a <- readRDS(file.path(getwd(),"a.test.RDS"))
-    nu <- readRDS(file.path(getwd(),"nu.test.RDS"))
-    lambda <- readRDS(file.path(getwd(),"lambda.test.RDS"))
-    saveRDS(obj, file = file.path(tm,"temp.RDS") )
-    expect_equal(obj@a[genes.names.test], a)
-    expect_equal(obj@nu[cell.names.test] , nu)
-    expect_equal(obj@lambda[genes.names.test], lambda)
+    saveRDS(obj, file = file.path(tm, "temp.RDS"))
+
+    dispersion <- readRDS(file.path(getwd(), "a.test.RDS"))
+    nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
+    lambda <- readRDS(file.path(getwd(), "lambda.test.RDS"))
+
+    expect_equal(getDispersion(obj)[genes.names.test], dispersion)
+    expect_equal(getNu(obj)[cell.names.test] , nu)
+    expect_equal(getLambda(obj)[genes.names.test], lambda)
 })
 
 
 test_that("4.cotan_coex_test", {
-    obj <- readRDS(file.path(tm,"temp.RDS"))
+    obj <- readRDS(file.path(tm, "temp.RDS"))
+
     obj <- calculateCoex(obj)
 
-    coex_test <- readRDS(file.path(getwd(),"coex.test.RDS"))
-
-    obj <- as(obj, "scCOTAN")
     coex <- getCoex(obj, asMatrix = TRUE, genes = genes.names.test)
-    #coex <- getCoex(obj, asMatrix = TRUE, genes = coex_test$genes)
 
-    #coex <- mat2vec_rfast(coex[coex_test$genes,coex_test$genes])
+    saveRDS(obj, file = file.path(tm, "temp.RDS"))
 
-    saveRDS(obj, file = file.path(tm,"temp.RDS") )
-
-    #error <- sqrt(mean((coex$values - coex_test$values)^2))
-
-    #if(error < 0.001 & error > 10^(-4) ){
-     #   warning("Error difference grater than 0.0001!")
-    #}
+    coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
     expect_equal(coex, coex_test)
-
-    #expect_true(error < 10^(-3))
 })
 
 test_that("PCA_test", {
@@ -120,7 +115,7 @@ test_that("PCA_test", {
 
 
 test_that("5.get_pval_test", {
-    object <- readRDS(file.path(tm,"temp.RDS"))
+    object <- as(readRDS(file.path(tm,"temp.RDS")), "scCOTAN")
     pval <- get.pval(object, gene.set.col = genes.names.test,gene.set.row = genes.names.test)
     pval.exp  <- readRDS(file.path(getwd(),"pval.test.RDS"))
 
@@ -138,11 +133,11 @@ test_that("5.get_pval_test", {
 
 
 test_that("get_GDI_test", {
+  #utils::data("ERCC.cotan", package = "COTAN")
   object <- readRDS(file.path(tm,"temp.RDS"))
-    #utils::data("ERCC.cotan", package = "COTAN")
-    GDI <- calculateGDI(object)[genes.names.test,]
-    expect_equal(GDI, readRDS(file.path(getwd(),"GDI.test.RDS")))
 
+  GDI <- calculateGDI(object)[genes.names.test,]
+  expect_equal(GDI, readRDS(file.path(getwd(),"GDI.test.RDS")))
 })
 
 
@@ -194,10 +189,10 @@ test_that("cell_homogeneous_clustering", {
   #obj <- readRDS(file.path(tm,"temp.RDS"))
   temp <- cell_homogeneous_clustering(cond = "test",out_dir = paste0(tm,"/"), in_dir = paste0(tm,"/"),
                                       cores = 12,
-                                       dataset_name = "temp.RDS",
-                                      GEO = "test",sc.method ="10X"
+                                      dataset_name = "temp.RDS",
+                                      GEO = "test", sc.method ="10X"
                                       )
-  saveRDS(temp, file = file.path(tm,"temp.RDS") )
+  saveRDS(temp, file = file.path(tm, "temp.RDS"))
   #clusters <- readRDS(file.path(getwd(),"clusters1.RDS"))
 
   #expect_equal(temp@clusters, clusters)

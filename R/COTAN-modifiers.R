@@ -30,10 +30,6 @@ setMethod(
     objCOTAN@metaDataset[3,seq_len(2)] = c("starting n. of cells:", numCells)
     objCOTAN@metaDataset[4,seq_len(2)] = c("Condition sample:", sampleCondition)
 
-    #TODO: remove this!
-    objCOTAN@metaCells <- data.frame(clusters = rep(NA, numCells),
-                                     row.names = getCells(objCOTAN))
-
     return(objCOTAN)
   }
 )
@@ -163,16 +159,12 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
 
-    if (!is_empty(objCOTAN@coex) &&
-        (is(class(objCOTAN@coex)[1], "dtCMatrix") ||
-         as.vector(class(objCOTAN@coex)) %in% "dtCMatrix") ) {
+    if (!is_empty(objCOTAN@coex) && isa(objCOTAN@coex, "dtCMatrix")) {
       print("Coex slot in the old format! Converting...")
       objCOTAN@coex <- mat2vec_rfast(objCOTAN@coex)
     }
 
-    if (!is_empty(objCOTAN@cellsCoex) &&
-        (is(class(objCOTAN@cellsCoex)[1], "dtCMatrix") ||
-         as.vector(class(objCOTAN@cellsCoex)) %in% "dtCMatrix") ) {
+    if (!is_empty(objCOTAN@cellsCoex) && isa(objCOTAN@cellsCoex, "dtCMatrix")) {
       print("CellsCoex in the old format! Converting...")
       objCOTAN@cellsCoex <- mat2vec_rfast(objCOTAN@cellsCoex)
     }
