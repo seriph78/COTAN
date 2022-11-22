@@ -49,7 +49,7 @@ a COTAN object
 }
 \description{
 This function takes in input a COTAN object with an already homogeneous clusters
-and, through the cosine distance and the hclust (with ward.D2 method), checks it merging
-two leaf clusters it is formed a still homogeneous cluster (this is done iteratively).
+and, through the cosine distance and the hclust (with ward.D2 method), checks if merging
+two leaf clusters will form a still homogeneous cluster (this is done iteratively).
 All structures are saved on disk.
 }

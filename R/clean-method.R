@@ -46,8 +46,16 @@ setMethod(
     genesToDrop <- getGenes(objCOTAN)[rowSums(getZeroOneProj(objCOTAN)) <= threshold]
 
     objCOTAN <- dropGenesCells(objCOTAN, genes = genesToDrop)
-    print(paste0("Genes selection done:",
-                 " dropped [", length(genesToDrop), "] genes"))
+
+    # We want to discard cells having less than 2 non-zero counts per 1000 genes
+    threshold <- round(getNumGenes(objCOTAN) * 2 / 1000, digits = 0)
+    cellsToDrop <- getCells(objCOTAN)[colSums(getZeroOneProj(objCOTAN)) <= threshold]
+
+    objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
+
+    print(paste0("Genes/cells selection done:",
+                 " dropped [", length(genesToDrop), "] genes",
+                 " and [", length(cellsToDrop), "] cells"))
 
     print(paste0("Working on [", getNumGenes(objCOTAN), "]",
                  " genes and [", getNumCells(objCOTAN), "] cells"))
@@ -76,13 +84,10 @@ setMethod(
 
       print("PCA: DONE")
 
-      gc()
-
       print("Hierarchical clustering: START")
 
       hcCells <- hclust(distCells, method = "complete")
       rm(distCells)
-      gc()
 
       groups <- cutree(hcCells, k = 2)
 
@@ -104,6 +109,7 @@ setMethod(
       groups[pos2] <- "B"
 
       print("Hierarchical clustering: DONE")
+      gc()
 
       toClust <- as.matrix(round(rawNorm, digits = 4))
 
@@ -118,21 +124,20 @@ setMethod(
         #print(utils::head(B, 15))
 
         rm(toClust)
-        gc()
 
         D <- data.frame("means" = rowMeans(B), "n" = NA)
         rownames(D) <- rownames(B)
         D <- rownames_to_column(D)
+        rm(B)
+
         D <- D[order(D[["means"]], decreasing = TRUE), ]
         rownames(D) <- c()
         D <- column_to_rownames(D)
 
         D <- D[D[["means"]] > 0,]
         D[["n"]] <- seq_along(D[["means"]])
-
-        rm(B)
-        gc()
       }
+      gc()
 
       pcaCells <- cbind(pcaCells, groups)
 
