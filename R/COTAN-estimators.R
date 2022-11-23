@@ -113,7 +113,7 @@ setMethod(
 setMethod(
   "estimateDispersion",
   "COTAN",
-  function(objCOTAN, step = 256, threshold = 0.001,
+  function(objCOTAN, step = 512, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
     print("Estimate dispersion: START")
 
@@ -126,12 +126,6 @@ setMethod(
     genes <- getGenes(objCOTAN)
     zeroOneMatrix <- getZeroOneProj(objCOTAN)
     muEstimator <- estimateMu(objCOTAN)
-
-    # exclude the effectively ubiquitous genes and saved in a separate file
-    if (is_empty(getHousekeepingGenes(objCOTAN))) {
-      objCOTAN <- findHousekeepingGenes(objCOTAN)
-    }
-    housekeepingGenes <- getHousekeepingGenes(objCOTAN)
 
     dispList <- list()
 
@@ -149,37 +143,44 @@ setMethod(
       print(paste0("Executing ", (pEnd - pBegin + 1), " genes batches from",
                    " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"))
 
-      res <- parallel::mclapply(
-              spGenes[pBegin:pEnd],
-              parallelDispersionBisection,
-              zeroOneMatrix = zeroOneMatrix,
-              muEstimator = muEstimator,
-              housekeepingGenes = housekeepingGenes,
-              threshold = threshold,
-              maxIterations = maxIterations,
-              mc.cores = cores)
+      if (cores != 1) {
+        res  <- parallel::mclapply(
+                  spGenes[pBegin:pEnd],
+                  parallelDispersionBisection,
+                  zeroOneMatrix = zeroOneMatrix,
+                  muEstimator = muEstimator,
+                  threshold = threshold,
+                  maxIterations = maxIterations,
+                  mc.cores = cores)
+      }
+      else {
+        res  <- lapply(
+                  spGenes[pBegin:pEnd],
+                  parallelDispersionBisection,
+                  zeroOneMatrix = zeroOneMatrix,
+                  muEstimator = muEstimator,
+                  threshold = threshold,
+                  maxIterations = maxIterations)
+      }
 
       dispList <- append(dispList, res)
       rm(res)
 
       pBegin <- pEnd + 1
     }
+    print("Estimate dispersion: DONE")
 
     gc()
-    print("Estimate dispersion: DONE")
 
     objCOTAN@dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
     names(objCOTAN@dispersion) <- genes
 
+    goodPos <- is.finite(getDispersion(objCOTAN))
     print(paste("dispersion",
-                "| min:", min(getDispersion(objCOTAN), na.rm = TRUE),
-                "| max:", max(getDispersion(objCOTAN), na.rm = TRUE),
-                "| % negative:", (sum(getDispersion(objCOTAN) < 0, na.rm = TRUE) * 100 /
-                                  length(getDispersion(objCOTAN))) ))
-
-    # drop housekeeping values [as they are all NA]
-    # TODO: keep all values and provide full and filterd accessors
-    objCOTAN@dispersion <- objCOTAN@dispersion[!genes %in% housekeepingGenes]
+                "| min:", min(getDispersion(objCOTAN)[goodPos]),
+                "| max:", max(getDispersion(objCOTAN)[goodPos]),
+                "| % negative:", (sum(getDispersion(objCOTAN) < 0) * 100 /
+                                  getNumGenes(objCOTAN)) ))
 
     return(objCOTAN)
   }
@@ -211,7 +212,7 @@ setMethod(
 setMethod(
   "estimateNuBisection",
   "COTAN",
-  function(objCOTAN, step = 256, threshold = 0.001,
+  function(objCOTAN, step = 512, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
     print("Estimate nu: START")
 
@@ -233,7 +234,7 @@ setMethod(
     # only genes not in housekeeping are used (to align to dispersion vector)
     cells <- getCells(objCOTAN)
     zeroOneMatrix <- getZeroOneProj(objCOTAN)
-    lambda <- getLambda(objCOTAN)[flagNotHousekeepingGenes(objCOTAN)]
+    lambda <- getLambda(objCOTAN)
     dispersion <- getDispersion(objCOTAN)
     nu <- getNu(objCOTAN)
 
@@ -253,16 +254,29 @@ setMethod(
       print(paste0("Executing ", (pEnd - pBegin + 1), " cells batches from",
                    " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"))
 
-      res <- parallel::mclapply(
-        spCells[pBegin:pEnd],
-        parallelNuBisection,
-        zeroOneMatrix = zeroOneMatrix,
-        lambda = lambda,
-        dispersion = dispersion,
-        initialGuess = nu,
-        threshold = threshold,
-        maxIterations = maxIterations,
-        mc.cores = cores)
+      if (cores != 1) {
+        res  <- parallel::mclapply(
+                  spCells[pBegin:pEnd],
+                  parallelNuBisection,
+                  zeroOneMatrix = zeroOneMatrix,
+                  lambda = lambda,
+                  dispersion = dispersion,
+                  initialGuess = nu,
+                  threshold = threshold,
+                  maxIterations = maxIterations,
+                  mc.cores = cores)
+      }
+      else {
+        res  <- lapply(
+                  spCells[pBegin:pEnd],
+                  parallelNuBisection,
+                  zeroOneMatrix = zeroOneMatrix,
+                  lambda = lambda,
+                  dispersion = dispersion,
+                  initialGuess = nu,
+                  threshold = threshold,
+                  maxIterations = maxIterations)
+      }
 
       nuList <- append(nuList, res)
       rm(res)
@@ -312,7 +326,7 @@ setMethod(
 setMethod(
   "estimateDispersionNuBisection",
   "COTAN",
-  function(objCOTAN, step = 256, threshold = 0.001,
+  function(objCOTAN, step = 512, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
     print("Estimate dispersion/nu: START")
 

@@ -62,6 +62,7 @@ setMethod(
 
     objCOTAN <- estimateLambdaLinear(objCOTAN)
     objCOTAN <- estimateNuLinear(objCOTAN)
+    objCOTAN <- findHousekeepingGenes(objCOTAN)
 
     # genesMeans <- getNu(objCOTAN)
     # genesRng <- round(getNumGenes(objCOTAN)     / 2, digits = 0)

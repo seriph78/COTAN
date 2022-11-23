@@ -24,10 +24,9 @@ setMethod(
   function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
     print("Initializing COTAN meta-data")
 
-    numCells = getNumCells(objCOTAN)
     objCOTAN@metaDataset[1,seq_len(2)] = c("GEO:", GEO)
     objCOTAN@metaDataset[2,seq_len(2)] = c("scRNAseq method:", sequencingMethod)
-    objCOTAN@metaDataset[3,seq_len(2)] = c("starting n. of cells:", numCells)
+    objCOTAN@metaDataset[3,seq_len(2)] = c("starting n. of cells:", getNumCells(objCOTAN))
     objCOTAN@metaDataset[4,seq_len(2)] = c("Condition sample:", sampleCondition)
 
     return(objCOTAN)
@@ -75,7 +74,9 @@ setMethod(
 #' @param genes an array of gene names
 #' @param cells an array of cell names
 #'
-#' @return the original object but with genes/cells expunged as indicated.
+#' @return a new object with the raw data where the with genes/cells were
+#' expunged as indicated. The meta-data for the dataset are kept, while the
+#' rest is dropped as no more relevant with the restricted matrix
 #' @importFrom rlang is_empty
 #' @export
 #'
@@ -102,42 +103,17 @@ setMethod(
     anyCellsDropped <- length(cellsPosToKeep) != getNumCells((objCOTAN))
 
     if (!anyGenesDropped && !anyCellsDropped) {
-      # nothing to do
+      # nothing dropped
       return(objCOTAN)
     }
+    else {
+      # as all estimates would be wrong, a completely new object is created
+      # with the same meta data for the data-set as the original
+      output <- COTAN(objCOTAN@raw[genesPosToKeep, cellsPosToKeep])
+      output@metaDataset <- getMetadataDataset(objCOTAN)
 
-    objCOTAN@raw <- objCOTAN@raw[genesPosToKeep, cellsPosToKeep]
-
-    if (!is_empty(objCOTAN@coex) || !is_empty(objCOTAN@cellsCoex)) {
-      stop("Cannot drop genes/cells once 'coex' matrices have been initialised")
+      return(output)
     }
-
-    if (!is_empty(objCOTAN@nu) && anyCellsDropped) {
-      objCOTAN@nu <- objCOTAN@nu[cellsPosToKeep]
-    }
-
-    if (!is_empty(objCOTAN@lambda) && anyGenesDropped) {
-      objCOTAN@lambda <- objCOTAN@lambda[genesPosToKeep]
-    }
-
-    if (!is_empty(objCOTAN@dispersion) || !is_empty(objCOTAN@hkGenes)) {
-      stop("Cannot drop genes/cells once 'dispersion' or 'hkGenes' have been initialised")
-    }
-
-    if (!is_empty(objCOTAN@metaCells) && anyCellsDropped) {
-      colNames <- colnames(objCOTAN@metaCells)
-      objCOTAN@metaCells <- as.data.frame(objCOTAN@metaCells[cellsPosToKeep,],
-                                          row.names = getCells(objCOTAN))
-      colnames(objCOTAN@metaCells) <- colNames
-    }
-
-    if (!is_empty(objCOTAN@clustersCoex)) {
-      stop("Cannot drop genes/cells once 'clustersCoex' has been initialised")
-    }
-
-    validObject(objCOTAN)
-
-    return(objCOTAN)
   }
 )
 

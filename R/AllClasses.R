@@ -62,16 +62,11 @@ setClass(
                   " to the number of rows [", nrow(object@raw),
                   "]  of 'raw' when not empty."))
     }
-    # if (!is_empty(object@dispersion) && length(object@dispersion) != nrow(object@raw)) {
-    #   stop(paste0("'dispersion'[", length(object@dispersion), "] must have size equal",
-    #               " to the number of rows [", nrow(object@raw),
-    #               "] of 'raw' when not empty."))
-    # }
-    # if (!is_empty(object@hkGenes) && length(object@hkGenes) != nrow(object@raw)) {
-    #   stop(paste0("'hkGenes'[", length(object@hkGenes), "] must have size equal",
-    #               " to the number of rows [", nrow(object@raw),
-    #               "]  of 'raw' when not empty."))
-    # }
+    if (!is_empty(object@dispersion) && length(object@dispersion) != nrow(object@raw)) {
+      stop(paste0("'dispersion'[", length(object@dispersion), "] must have size equal",
+                  " to the number of rows [", nrow(object@raw),
+                  "] of 'raw' when not empty."))
+    }
     # metaDataset has no required fields as of now
     if (!is_empty(object@metaCells) && nrow(object@metaCells) != ncol(object@raw)) {
       stop(paste0("The number of rows [", nrow(object@metaCells),

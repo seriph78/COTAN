@@ -6,7 +6,7 @@
 \usage{
 \S4method{estimateDispersion}{COTAN}(
   objCOTAN,
-  step = 256,
+  step = 512,
   threshold = 0.001,
   maxIterations = 1000,
   cores = 1

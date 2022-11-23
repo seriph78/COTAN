@@ -8,7 +8,6 @@ parallelDispersionBisection(
   genes,
   zeroOneMatrix,
   muEstimator,
-  housekeepingGenes,
   threshold = 0.001,
   maxIterations = 1000
 )
@@ -19,8 +18,6 @@ parallelDispersionBisection(
 \item{zeroOneMatrix}{raw data matrix changed to 0-1 matrix}
 
 \item{muEstimator}{a matrix estimator of vector mu}
-
-\item{housekeepingGenes}{the list of genes to be ignored}
 
 \item{threshold}{minimal solution precision}
 

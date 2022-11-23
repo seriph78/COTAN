@@ -14,7 +14,9 @@
 \item{object}{a COTAN object}
 }
 \value{
-the original object but with genes/cells expunged as indicated.
+a new object with the raw data where the with genes/cells were
+expunged as indicated. The meta-data for the dataset are kept, while the
+rest is dropped as no more relevant with the restricted matrix
 }
 \description{
 This function remove an array of genes and/or cells from the current COTAN

@@ -126,10 +126,8 @@ setMethod(
   "expectedContingencyTables",
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
-    mu <- estimateMu(objCOTAN)[flagNotHousekeepingGenes(objCOTAN), ]
-
     # estimate Probabilities of 0 with internal function funProbZero
-    probZero <- funProbZero(getDispersion(objCOTAN), mu)
+    probZero <- funProbZero(getDispersion(objCOTAN), estimateMu(objCOTAN))
 
     errMgs <- "Error: some NA in matrix of probability of zero UMI counts. "
     stopifnot(errMgs = !anyNA(probZero))
@@ -205,19 +203,9 @@ setMethod(
     if(actOnCells) { kind <- "cells" } else { kind <- "genes" }
     print(paste("Calculate", kind, "coex: START"))
 
-    if (is_empty(getHousekeepingGenes(objCOTAN))) {
-      objCOTAN <- findHousekeepingGenes(objCOTAN)
-    }
-
     print("Retrieving observed yes/yes contingency table")
 
     observedYY <- observedContingencyYY(objCOTAN, actOnCells)
-
-    if (isFALSE(actOnCells)) {
-      # remove the housekeeping genes
-      noHKFlags <- flagNotHousekeepingGenes(objCOTAN)
-      observedYY <- observedYY[noHKFlags, noHKFlags]
-    }
 
     observedYY <- mat2vec_rfast(observedYY)
 
@@ -259,7 +247,7 @@ setMethod(
     coex <- coex * sqrt(sumForDiv) * normFact
 
     # TODO: the "genes" name is misleading in case of actOnCells
-    coex <- list("genes" = observedYY$genes, "values" = coex)
+    coex <- list("genes" = getGenes(objCOTAN), "values" = coex)
 
     if(actOnCells) {
       objCOTAN@cellsCoex <- coex
@@ -330,12 +318,6 @@ setMethod(
 
     list[observedNN, observedNY, observedYN, observedYY] <-
       observedContingency(objCOTAN, actOnCells = FALSE)
-
-    noHKFlags <- flagNotHousekeepingGenes(objCOTAN)
-    observedNN <- observedNN[noHKFlags, noHKFlags]
-    observedNY <- observedNY[noHKFlags, noHKFlags]
-    observedYN <- observedYN[noHKFlags, noHKFlags]
-    observedYY <- observedYY[noHKFlags, noHKFlags]
 
     list[expectedNN, expectedNY, expectedYN, expectedYY] <-
       expectedContingencyTables(objCOTAN, actOnCells = FALSE)

@@ -1,7 +1,8 @@
 funProbZero <- function(disp, mu) {
+  neg <- disp <= 0
   ad <- abs(disp)
-  (disp <= 0) * (exp(-(1 + ad) * mu)) +
-  (disp >  0) * (1 + ad * mu)^(-1 / ad)
+  return( ( neg) * (exp(-(1 + ad) * mu)) +
+          (!neg) * (1 + ad * mu)^(-1 / ad) )
 }
 
 
@@ -16,7 +17,6 @@ funProbZero <- function(disp, mu) {
 #' @param gene name of the relevant gene
 #' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
 #' @param muEstimator a matrix estimator of vector mu
-#' @param housekeepingGenes the list of genes to be ignored
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
@@ -27,14 +27,13 @@ dispersionBisection <-
   function(gene,
            zeroOneMatrix,
            muEstimator,
-           housekeepingGenes,
            threshold = 0.001,
            maxIterations = 1000) {
-  if (gene %in% housekeepingGenes) {
-    return(NA)
-  }
-
   sumZeros <- ncol(zeroOneMatrix) - sum(zeroOneMatrix[gene, ])
+  if (sumZeros == 0){
+    # cannot match exactly zero prob of zeros with finite values
+    return(-Inf)
+  }
   muEstimator <- muEstimator[gene, ]
 
   # we look for two dispersion values where the first leads to a
@@ -101,7 +100,6 @@ dispersionBisection <-
 #' @param genes names of the relevant genes
 #' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
 #' @param muEstimator a matrix estimator of vector mu
-#' @param housekeepingGenes the list of genes to be ignored
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
@@ -112,26 +110,31 @@ parallelDispersionBisection <-
   function(genes,
            zeroOneMatrix,
            muEstimator,
-           housekeepingGenes,
            threshold = 0.001,
            maxIterations = 1000) {
-  output <- rep(NA, length(genes))
+  sumZeros <- ncol(zeroOneMatrix) - rowSums(zeroOneMatrix[genes, , drop = FALSE])
+  muEstimator <- muEstimator[genes, , drop = FALSE]
 
-  goodPos <- !(genes %in% housekeepingGenes)
+  goodPos <- sumZeros != 0
+
+  # cannot match exactly zero prob of zeros with finite values
+  # so we ignore the rows with no zeros from the solver and return -Inf
+  output <- rep(-Inf, length(sumZeros))
 
   if (sum(goodPos) == 0) {
     return(output)
   }
 
-  sumZeros <- ncol(zeroOneMatrix) - rowSums(zeroOneMatrix[genes[goodPos], , drop = FALSE])
-  muEstimator <- muEstimator[genes[goodPos], , drop = FALSE]
+  sumZeros <- sumZeros[goodPos]
+  muEstimator <- muEstimator[goodPos, , drop = FALSE]
 
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
   disps1 <- rep(0, length(sumZeros))
   diffs1 <- rowSums(funProbZero(disps1, muEstimator)) - sumZeros
   if (all(abs(diffs1) <= threshold)) {
-    return(disps1)
+    output[goodPos] <- disp1
+    return(output)
   }
 
   disps2 <- -1 * sign(diffs1) # we assume error is an increasing function of the dispersion
@@ -191,9 +194,8 @@ parallelDispersionBisection <-
   }
 
   output[goodPos] <- disps
-
   return(output)
-}
+  }
 
 
 #' nuBisection
@@ -224,6 +226,11 @@ nuBisection <-
            threshold = 0.001,
            maxIterations = 1000) {
   sumZeros <- nrow(zeroOneMatrix) - sum(zeroOneMatrix[, cell])
+
+  if (sumZeros == 0) {
+    # cannot match exactly zero prob of zeros with finite values
+    return(initialGuess)
+  }
 
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
@@ -307,15 +314,29 @@ parallelNuBisection <-
            threshold = 0.001,
            maxIterations = 1000) {
   sumZeros <- nrow(zeroOneMatrix) - colSums(zeroOneMatrix[, cells, drop = FALSE])
+  initialGuess <- initialGuess[cells]
 
   stopifnot("initialGuess must hold only positive values" = all(initialGuess > 0))
 
+  goodPos <- sumZeros != 0
+
+  # cannot match exactly zero prob of zeros with finite values
+  output <- rep(initialGuess, length(sumZeros))
+
+  if (sum(goodPos) == 0) {
+    return(output)
+  }
+
+  sumZeros <- sumZeros[goodPos]
+
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
-  nus1 <- initialGuess[cells]
+  nus1 <- initialGuess[goodPos]
+
   diffs1 <- colSums(funProbZero(dispersion, lambda %*% t(nus1))) - sumZeros
   if (all(abs(diffs1) <= threshold)) {
-    return(nus1)
+    output[goodPos] <- nus1
+    return(output)
   }
 
   factors <- 2 ^ sign(diffs1)
@@ -373,7 +394,8 @@ parallelNuBisection <-
     nus1[nPos] <- nus[nPos]
   }
 
-  return(nus)
+  output[goodPos] <- nus
+  return(output)
 }
 
 
