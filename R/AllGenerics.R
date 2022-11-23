@@ -109,8 +109,18 @@ setGeneric(
 )
 
 setGeneric(
-  "getHousekeepingGenes",
-  function(objCOTAN) standardGeneric("getHousekeepingGenes")
+  "getMetadataDataset",
+  function(objCOTAN) standardGeneric("getMetadataDataset")
+)
+
+setGeneric(
+  "getMetadataGenes",
+  function(objCOTAN) standardGeneric("getMetadataGenes")
+)
+
+setGeneric(
+  "getMetadataCells",
+  function(objCOTAN) standardGeneric("getMetadataCells")
 )
 
 setGeneric(
@@ -119,8 +129,8 @@ setGeneric(
 )
 
 setGeneric(
-  "getMetadataDataset",
-  function(objCOTAN) standardGeneric("getMetadataDataset")
+  "getHousekeepingGenes",
+  function(objCOTAN) standardGeneric("getHousekeepingGenes")
 )
 
 setGeneric(
@@ -140,6 +150,11 @@ setGeneric(
   function(objCOTAN, GEO, sequencingMethod = "10X", sampleCondition) {
     standardGeneric("initializeMetaDataset")
   }
+)
+
+setGeneric(
+  "addElementToMetaDataset",
+  function(objCOTAN, colName, value) standardGeneric("addElementToMetaDataset")
 )
 
 setGeneric(

@@ -15,10 +15,6 @@ setMethod(
   "estimateLambdaLinear",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(getRawData(objCOTAN))) {
-      stop("empty raw")
-    }
-
     objCOTAN@lambda <- rowMeans(getRawData(objCOTAN), dims = 1, na.rm = TRUE)
 
     return(objCOTAN)
@@ -40,10 +36,6 @@ setMethod(
   "estimateNuLinear",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(getRawData(objCOTAN))) {
-      stop("empty raw")
-    }
-
     # raw column averages divided by global_mean
     objCOTAN@nu <- colMeans(getRawData(objCOTAN), dims = 1, na.rm = TRUE)
     objCOTAN@nu <- objCOTAN@nu / mean(objCOTAN@nu)

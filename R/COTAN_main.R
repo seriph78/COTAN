@@ -519,28 +519,3 @@ setMethod(
   }
 )
 
-
-#' add.row.to.meta
-#'
-#' This function is used to add a line of information to the information data frame (metadata).
-#'
-#' @param object a COTAN object
-#' @param text.line an array containing the information
-#'
-#' @return the updated COTAN object
-#' @export
-#'
-#' @examples
-#' data("ERCC.cotan")
-#' text <- c("Test", "This is a test")
-#' ERCC.cotan <- add.row.to.meta(ERCC.cotan, text)
-#' getMetadataDataset(ERCC.cotan)
-setGeneric("add.row.to.meta", function(object, text.line) standardGeneric("add.row.to.meta"))
-#' @rdname add.row.to.meta
-setMethod(
-  "add.row.to.meta", "scCOTAN",
-  function(object, text.line) {
-    object@meta[(nrow(object@meta) + 1), seq_len(length(text.line))] <- text.line
-    return(object)
-  }
-)

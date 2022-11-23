@@ -33,6 +33,37 @@ setMethod(
   }
 )
 
+
+#' addElementToMetaDataset
+#'
+#' This function is used to add a line of information to the information data frame (metadata).
+#'
+#' @param object a COTAN object
+#' @param tag the new information tag
+#' @param value a value (or an array) containing the information
+#'
+#' @return the updated COTAN object
+#'
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' ERCC.cotan <- addElementToMetaDataset(ERCC.cotan, "Test", c("These are ", "some values"))
+#' getMetadataDataset(ERCC.cotan)
+#' @rdname addElementToMetaDataset
+setMethod(
+  "addElementToMetaDataset",
+  "COTAN",
+  function(objCOTAN, colName, value) {
+    newLine <- c(colName, value)
+
+    objCOTAN@metaDataset[(nrow(objCOTAN@metaDataset) + 1), seq_along(newLine)] <- newLine
+
+    return(objCOTAN)
+  }
+)
+
+
 #' findHousekeepingGenes
 #'
 #' determines the housekeeping genes vector of a COTAN object
@@ -48,17 +79,12 @@ setMethod(
   "findHousekeepingGenes",
   "COTAN",
   function(objCOTAN) {
-    nCells <- getNumCells(objCOTAN)
-
-    if (nCells == 0) {
-      stop("zero cells given")
-    }
-
     # determine positive UMI
     cells <- getZeroOneProj(objCOTAN)
 
-    # name of the genes with positive UMI count in every single cell
-    objCOTAN@hkGenes <- names(which(rowSums(cells) == nCells))
+    # flag the genes with positive UMI count in every single cell
+    addColumnToDF(objCOTAN@metaGenes, rowSums(cells) == getNumCells(objCOTAN),
+                  "hkGenes", getGenes(objCOTAN))
 
     return(objCOTAN)
   }
@@ -91,10 +117,6 @@ setMethod(
   "COTAN",
   function(objCOTAN, genes, cells) {
     stopifnot(validObject(objCOTAN))
-
-    if (is_empty(objCOTAN@raw)) {
-      stop("No raw count data was given")
-    }
 
     genesPosToKeep <- which(!(getGenes(objCOTAN) %in% genes))
     cellsPosToKeep <- which(!(getCells(objCOTAN) %in% cells))

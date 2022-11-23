@@ -8,15 +8,15 @@
 A structure with:
 \describe{
   \item{raw}{the raw dataset}
-  \item{coex}{}
-  \item{cellsCoex}{}
+  \item{genesCoex}{a symmetric matrix expressing the gene/gene co-expression}
+  \item{cellsCoex}{a symmetric matrix expressing the cell/cell co-expression}
   \item{nu}{UDE}
-  \item{lambda}{ average gene expression}
-  \item{dispersion}{}
-  \item{hkGenes}{genes expressed in all cells}
+  \item{lambda}{average gene expression}
+  \item{dispersion}{negative binomial dispersion}
   \item{metaDataset}{meta data for the dataset}
+  \item{metaGenes}{meta data for the genes}
   \item{metaCells}{meta data for the cells}
-  \item{clustersCoex}{}
+  \item{clustersCoex}{list of co-expression matrices. One per each clusterization in metaCells columns}
 }
 }
 \source{

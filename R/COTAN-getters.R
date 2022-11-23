@@ -14,10 +14,6 @@ setMethod(
   "getRawData",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(objCOTAN@raw)) {
-      warning("raw is empty")
-    }
-
     return(objCOTAN@raw)
   }
 )
@@ -72,10 +68,6 @@ setMethod(
   "getCells",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(objCOTAN@raw)) {
-      warning("raw is empty")
-    }
-
     return(colnames(objCOTAN@raw))
   }
 )
@@ -95,10 +87,6 @@ setMethod(
   "getGenes",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(objCOTAN@raw)) {
-      warning("raw is empty")
-    }
-
     return(rownames(objCOTAN@raw))
   }
 )
@@ -119,10 +107,6 @@ setMethod(
   "getZeroOneProj",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(objCOTAN@raw)) {
-      warning("raw is empty")
-    }
-
     return(sign(objCOTAN@raw))
   }
 )
@@ -141,10 +125,6 @@ setMethod(
 setMethod(
   "getCellsSize", "COTAN",
   function(objCOTAN) {
-    if (is_empty(objCOTAN@raw)) {
-      warning("raw is empty")
-    }
-
     return(colSums(objCOTAN@raw))
   }
 )
@@ -164,10 +144,6 @@ setMethod(
   "getNormalizedData",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(getRawData(objCOTAN))) {
-      stop("empty raw")
-    }
-
     if (is_empty(getNu(objCOTAN))) {
       stop("nu must not be empty, estimate it")
     }
@@ -242,21 +218,60 @@ setMethod(
   }
 )
 
-#' getHousekeepingGenes
+
+#' getMetadataDataset
 #'
-#' This function return the genes expressed in all cells in the dataset.
+#' This function extract the meta-data stored for the data-set.
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return an array containing all genes expressed in all cells
+#' @return the meta-data data.frame
 #' @importFrom rlang is_empty
 #' @export
-#' @rdname getHousekeepingGenes
+#' @rdname getMetadataDataset
 setMethod(
-  "getHousekeepingGenes",
+  "getMetadataDataset",
   "COTAN",
   function(objCOTAN) {
-    return(objCOTAN@hkGenes)
+    return(objCOTAN@metaDataset)
+  }
+)
+
+
+#' getMetadataGenes
+#'
+#' This function extract the meta-data stored for the genes.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the meta-data data.frame
+#' @importFrom rlang is_empty
+#' @export
+#' @rdname getMetadataGenes
+setMethod(
+  "getMetadataGenes",
+  "COTAN",
+  function(objCOTAN) {
+    return(objCOTAN@metaGenes)
+  }
+)
+
+
+#' getMetadataCells
+#'
+#' This function extract the meta-data stored for the cells.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the meta-data data.frame
+#' @importFrom rlang is_empty
+#' @export
+#' @rdname getMetadataCells
+setMethod(
+  "getMetadataCells",
+  "COTAN",
+  function(objCOTAN) {
+    return(objCOTAN@metaCells)
   }
 )
 
@@ -278,30 +293,31 @@ setMethod(
   "flagNotHousekeepingGenes",
   "COTAN",
   function(objCOTAN) {
-    return( !(rownames(objCOTAN@raw) %in% objCOTAN@hkGenes ) )
+    if (is_empty(getMetadataGenes(objCOTAN)[["hkGenes"]])) {
+      return(rep(TRUE, getNumGenes(objCOTAN)))
+    }
+    else {
+      return(getMetadataGenes(objCOTAN)[["hkGenes"]] == 0)
+    }
   }
 )
 
 
-#' getMetadataDataset
+#' getHousekeepingGenes
 #'
-#' This function extract the meta-data stored for the data-set.
+#' This function return the genes expressed in all cells in the dataset.
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return the meta-data data.frame
+#' @return an array containing all genes expressed in all cells
 #' @importFrom rlang is_empty
 #' @export
-#' @rdname getMetadataDataset
+#' @rdname getHousekeepingGenes
 setMethod(
-  "getMetadataDataset",
+  "getHousekeepingGenes",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(objCOTAN@metaDataset)) {
-      warning("metaDataset is empty")
-    }
-
-    return(objCOTAN@metaDataset)
+    return(getGenes(objCOTAN)[!flagNotHousekeepingGenes(objCOTAN)])
   }
 )
 
@@ -330,7 +346,7 @@ setMethod(
   "getGenesCoex",
   "COTAN",
   function(objCOTAN, asMatrix = TRUE, genes = "all") {
-    if (!asMatrix) {
+    if (isFALSE(asMatrix)) {
       stopifnot("Get coex as list. Genes subsetting is not supported yet." = genes == "all")
       return(objCOTAN@genesCoex)
     }
@@ -365,7 +381,7 @@ setMethod(
   "getCellsCoex",
   "COTAN",
   function(objCOTAN, asMatrix = TRUE, cells = "all") {
-    if (!asMatrix) {
+    if (isFALSE(asMatrix)) {
       stopifnot("Get coex as list. Cells subsetting is not supported yet." = cells == "all")
       return(objCOTAN@coex)
     }

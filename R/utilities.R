@@ -1,3 +1,48 @@
+#' addColumnToDF
+#'
+#' private function that append a new column to a data.frame,
+#' whether it is empty or not.
+#'
+#' @param df the data.frame
+#' @param colToAdd the the column to add
+#' @param colName the data.frame
+#' @param rowNames when not empty the new row names of the result
+#'
+#' @return the updated/created data.frame
+#'
+#' @rdname addColumnToDF
+#'
+addColumnToDF <- function(df, colToAdd, colName, rowNames) {
+  if(is_empty(df)) {
+    out <- data.frame(colToAdd)
+    colnames(out) <- colName
+  }
+  else {
+    df <- cbind(df, colToAdd)
+    colnames(df)[ncol(df)] <- colName
+  }
+
+  if (!is_empty(rowNames)) {
+    rownames(out) <- rowNames
+  }
+
+  return(out)
+}
+
+
+#' funProbZero
+#'
+#' private function that gives the probability of a sample gene count
+#' being zero given the given the dispersion and mu
+#'
+#' @param disp the estimated dispersion
+#' @param mu the lambda times nu value
+#'
+#' @return the probability that a count is identically zero
+#'
+#'
+#' @rdname funProbZero
+#'
 funProbZero <- function(disp, mu) {
   neg <- disp <= 0
   ad <- abs(disp)

@@ -25,8 +25,8 @@ setClass(
     nu           = "vector",
     lambda       = "vector",
     dispersion   = "vector",
-    hkGenes      = "vector",
     metaDataset  = "data.frame",
+    metaGenes    = "data.frame",
     metaCells    = "data.frame",
     clustersCoex = "list"
   ),
@@ -37,13 +37,16 @@ setClass(
     nu           = vector(mode = "numeric"),
     lambda       = vector(mode = "numeric"),
     dispersion   = vector(mode = "numeric"),
-    hkGenes      = vector(mode = "character"),
     metaDataset  = data.frame(),
+    metaGenes    = data.frame(),
     metaCells    = data.frame(),
     clustersCoex = vector(mode = "list")
   ),
   validity = function(object) {
-    if (!is_empty(object@raw) && is_empty(object@lambda)) {
+    if (is_empty(object@raw)) {
+      stop("'raw' is empty")
+    }
+    else if (is_empty(object@lambda)) { #run the test only at the beginning
       if (anyNA(object@raw)) {
         stop("Input 'raw' data contains NA!")
       }
@@ -120,6 +123,12 @@ setClass(
                   "] of 'raw' when not empty."))
     }
     # metaDataset has no required fields as of now
+    if (!is_empty(object@metaGenes) && nrow(object@metaGenes) != numGenes) {
+      stop(paste0("The number of rows [", nrow(object@metaGenes),
+                  "] of 'metaGenes' must be the same",
+                  " as the number of rows [", numGenes,
+                  "]  of 'raw' when not empty."))
+    }
     if (!is_empty(object@metaCells) && nrow(object@metaCells) != numCells) {
       stop(paste0("The number of rows [", nrow(object@metaCells),
                   "] of 'metaCells' must be the same",
@@ -223,6 +232,12 @@ setIs("scCOTAN",
           raw = as(as.matrix(from@raw), "dgCMatrix")
         }
 
+        metaGenes <- data.frame()
+        if (!is_empty(from@hk)) {
+          metaGenes <- addColumnToDF(metaGenes, rownames(from@raw) %in% from@hk,
+                                     "hkGenes", rownames(from@raw))
+        }
+
         if (!is_empty(from@clusters)) {
           metaCells <- data.frame(clusters = from@clusters,
                                   row.names = colnames(from@raw))
@@ -250,8 +265,8 @@ setIs("scCOTAN",
             nu           = from@nu,
             lambda       = from@lambda,
             dispersion   = from@a,
-            hkGenes      = from@hk,
             metaDataset  = from@meta,
+            metaGenes    = metaGenes,
             metaCells    = metaCells,
             clustersCoex = clustersCoex )
       },
@@ -271,6 +286,12 @@ setIs("scCOTAN",
         }
         else {
           raw = as(as.matrix(value@raw), "dgCMatrix")
+        }
+
+        metaGenes <- data.frame()
+        if (!is_empty(value@hk)) {
+          metaGenes <- addColumnToDF(metaGenes, rownames(from@raw) %in% value@hk,
+                                     "hkGenes", rownames(from@raw))
         }
 
         if (!is_empty(value@clusters)) {
@@ -299,8 +320,8 @@ setIs("scCOTAN",
         from@nu           <- value@nu
         from@lambda       <- value@lambda
         from@dispersion   <- value@a
-        from@hkGenes      <- value@hk
         from@metaDataset  <- value@meta
+        from@metaGenes    <- metaGenes
         from@metaCells    <- metaCells
         from@clustersCoex <- clustersCoex
         from}
@@ -313,6 +334,11 @@ setIs("scCOTAN",
 setAs("COTAN",
       "scCOTAN",
       function(from) {
+        hk <- vector(mode = "character")
+        if (!is_empty(from@metaGenes[["hkGenes"]])) {
+          hk <- rownames(from@raw)[from@metaGenes[["hkGenes"]] != 0]
+        }
+
         if (!is_empty(from@clustersCoex)) {
           # pick last element as the most relevant!
           clustersName <- names(from@clustersCoex)[length(from@clustersCoex)]
@@ -344,13 +370,18 @@ setAs("COTAN",
             nu           = from@nu,
             lambda       = from@lambda,
             a            = from@dispersion,
-            hk           = from@hkGenes,
+            hk           = hk,
             meta         = from@metaDataset,
             clusters     = clusters,
             cluster_data = cluster_data )
       },
       # 'from' arg-name is convention: it is actually a destination!
       replace = function(from, value) {
+        hk <- vector(mode = "character")
+        if (!is_empty(value@metaGenes[["hkGenes"]])) {
+          hk <- rownames(value@raw)[value@metaGenes[["hkGenes"]] != 0]
+        }
+
         if (!is_empty(value@clustersCoex)) {
           # pick last element as the most relevant!
           clustersName <- names(value@clustersCoex)[length(value@clustersCoex)]
@@ -371,6 +402,8 @@ setAs("COTAN",
           names(clusters) <- colnames(value@raw)
         }
 
+        hk <- vector(mode = "character")
+
         if (!is_empty(value@cellsCoex)) {
           warning("'cellsCoex' is not empty: will be lost in conversion to 'scCOTAN'")
         }
@@ -381,7 +414,7 @@ setAs("COTAN",
         from@nu           <- value@nu
         from@lambda       <- value@lambda
         from@a            <- value@dispersion
-        from@hk           <- value@hkGenes
+        from@hk           <- hk
         from@meta         <- value@metaDataset
         from@clusters     <- clusters
         from@cluster_data <- cluster_data

@@ -231,9 +231,9 @@ We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
 obj <- as(obj, "scCOTAN")
-obj = add.row.to.meta(obj,c("Threshold low UDE cells:",yset)) 
+obj = addElementToMetaDataset(obj, "Threshold low UDE cells:", yset) 
 
-cellsToRemove = rownames(nuDf[which(nuDf[["nu"]] < yset),])
+cellsToRemove = rownames(nuDf)[nuDf[["nu"]] < yset]
 obj = dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 ```
 
