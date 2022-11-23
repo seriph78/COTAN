@@ -1,7 +1,7 @@
 #' vec2mat_rfast
 #'
 #' @param x a list formed by two arrays: "genes" with the gene names and "values" with all unique values.
-#' @param genes a vector with all wanted genes or "all". By default is equal to  "all" in this way it recreate the entire coex dataframe.
+#' @param genes a vector with all wanted genes or "all". By default is equal to  "all" in this way it recreates the entire coex dMatrix.
 #'
 #' @return a dataframe
 #' @export

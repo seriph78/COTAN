@@ -12,7 +12,7 @@ vec2mat_rfast(x, genes = "all")
 \arguments{
 \item{x}{a list formed by two arrays: "genes" with the gene names and "values" with all unique values.}
 
-\item{genes}{a vector with all wanted genes or "all". By default is equal to  "all" in this way it recreate the entire coex dataframe.}
+\item{genes}{a vector with all wanted genes or "all". By default is equal to  "all" in this way it recreates the entire coex dMatrix.}
 }
 \value{
 a dataframe

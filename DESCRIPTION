@@ -8,6 +8,7 @@ Authors@R: c(
   person("Pietrosanto","Marco", role = "aut",comment = c(ORCID = "0000-0001-5129-6065")),
   person("Cremisi","Federico", role = "aut",comment = c(ORCID = "0000-0003-4925-2703")),
   person("Helmer-Citterich","Manuela", role = "aut",comment = c(ORCID = "0000-0001-9530-7504")))
+  person("Fantozzi", "Marco", role = "aut")
 Description: Statistical and computational method to analyze the co-expression of 
     gene pairs at single cell level. It provides the foundation for single-cell gene 
     interactome analysis. The basic idea is studying the zero UMI counts' distribution 
@@ -27,6 +28,7 @@ Encoding: UTF-8
 RoxygenNote: 7.2.2
 Imports:
     stats,
+    gsubfn,
     dplyr,
     methods,
     grDevices,

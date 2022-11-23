@@ -184,8 +184,8 @@ setMethod(
 
 #' calculateCoex
 #'
-#' This function estimates and stores the coex matrix in the 'cellCoex' or
-#' coex field depending on given actOnCells flag
+#' This function estimates and stores the coex matrix in the 'genesCoex' or
+#' 'cellCoex' field depending on given 'actOnCells' flag
 #'
 #' @param objCOTAN A COTAN object
 #' @param actOnCells Boolean, if TRUE, the function works for the cells,
@@ -200,7 +200,7 @@ setMethod(
   "calculateCoex",
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
-    if(actOnCells) { kind <- "cells" } else { kind <- "genes" }
+    if(actOnCells) { kind <- "cells'" } else { kind <- "genes'" }
     print(paste("Calculate", kind, "coex: START"))
 
     print("Retrieving observed yes/yes contingency table")
@@ -224,7 +224,7 @@ setMethod(
 
     gc()
 
-    print("Estimating coex")
+    print(paste("Estimating", kind, "coex"))
 
     # sum for division
     sumForDiv <- ( 1 / pmax(1, expectedYY$values) +
@@ -253,7 +253,7 @@ setMethod(
       objCOTAN@cellsCoex <- coex
     }
     else {
-      objCOTAN@coex <- coex
+      objCOTAN@genesCoex <- coex
     }
 
     rm(expectedYY)
@@ -285,7 +285,7 @@ setMethod(
     print("Calculating S: START")
 
     objCOTAN <- standardizeCoex(objCOTAN)
-    coex <- getCoex(objCOTAN, asMatrix = FALSE)
+    coex <- getGenesCoex(objCOTAN, asMatrix = FALSE)
 
     stopifnot("Coex is missing" = !is_empty(coex))
 

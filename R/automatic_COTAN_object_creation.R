@@ -28,7 +28,6 @@
 #' @importFrom ggplot2 scale_color_gradient2
 #' @importFrom ggrepel geom_text_repel
 #'
-#' @rdname automatic.COTAN.object.creation
 #' @examples
 #'
 #' data("raw.dataset")
@@ -40,19 +39,9 @@
 #'   cond = "test"
 #' )
 #'
-setGeneric(
-  "automatic.COTAN.object.creation",
-  function(df, out_dir,save.obj = "NO",
-           GEO, sc.method, cond,
-           #mt = FALSE, mt_prefix="^mt",
-           cores = 1) {
-    standardGeneric("automatic.COTAN.object.creation")
-  }
-)
 #' @rdname automatic.COTAN.object.creation
-setMethod(
-  "automatic.COTAN.object.creation",
-  "data.frame",
+
+automatic.COTAN.object.creation <-
   function(df, out_dir, save.obj = "NO",
            GEO, sc.method, cond,
            #mt = FALSE, mt_prefix="^mt",
@@ -121,12 +110,12 @@ setMethod(
 
     obj <- estimateDispersion(obj, cores = cores)
 
-    coex_time <- Sys.time()
-    analysis_time <- difftime(coex_time, analysis_time, units = "mins")
+    genes_coex_time <- Sys.time()
+    analysis_time <- difftime(genes_coex_time, analysis_time, units = "mins")
 
     print(paste0("Only analysis time ", analysis_time))
 
-    print("Cotan coex estimation started")
+    print("Cotan genes' coex estimation started")
     obj <- calculateCoex(obj)
 
     end_time <- Sys.time()
@@ -134,16 +123,16 @@ setMethod(
     all.time <- difftime(end_time, start_time_all, units = "mins")
     print(paste0("Total time ", all.time))
 
-    coex_time <- difftime(end_time, coex_time, units = "mins")
+    genes_coex_time <- difftime(end_time, genes_coex_time, units = "mins")
 
-    print(paste0("Only coex time ", coex_time))
+    print(paste0("Only genes' coex time ", genes_coex_time))
 
     utils::write.csv(data.frame("type" = c("tot_time",
                                            "analysis_time",
-                                           "coex_time"),
+                                           "genes_coex_time"),
                                 "times"= c(as.numeric(all.time),
                                            as.numeric(analysis_time),
-                                           as.numeric(coex_time) ),
+                                           as.numeric(genes_coex_time) ),
                                 "n.cells"=getNumCells(obj),
                                 "n.genes"=getNumGenes(obj) ),
                      file = file.path(out_dir, paste0(cond, "_times.csv")))
@@ -158,4 +147,4 @@ setMethod(
               return(obj)
 
   }
-)
+

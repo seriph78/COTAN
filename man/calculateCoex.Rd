@@ -16,6 +16,6 @@ otherwise for the genes}
 the updated COTAN object
 }
 \description{
-This function estimates and stores the coex matrix in the 'cellCoex' or
-coex field depending on given actOnCells flag
+This function estimates and stores the coex matrix in the 'genesCoex' or
+'cellCoex' field depending on given 'actOnCells' flag
 }

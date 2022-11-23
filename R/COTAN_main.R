@@ -94,7 +94,7 @@ setMethod(
       p_val$g2 <- as.vector(rownames(p_val))
       df.temp.pval <- pivot_longer(p_val, cols = seq_along(colnames(p_val)) - 1, names_to = "g1", values_to = "p_val")
 
-      coex <- getCoex(obj, asMatrix = TRUE, genes = gr)
+      coex <- getGenesCoex(obj, asMatrix = TRUE, genes = gr)
       diag(coex) <- 0
       coex <- coex[rownames(coex) %in% ge, ]
       # this to add some eventually effective housekeeping genes
@@ -251,7 +251,7 @@ setMethod(
     genes.row <- unique(c(unique(c(unlist(markers.list), prim.markers)), genes.row))
     pval <- as.data.frame(pval)
 
-    coex <- getCoex(obj)
+    coex <- getGenesCoex(obj)
     diag(coex) <- 0
     if (symmetric == TRUE) {
       coex <- coex[rownames(coex) %in% genes.row, colnames(coex) %in% genes.row]
@@ -372,7 +372,7 @@ setMethod(
   function(object, cond, type = "S") {
     ET <- sum.raw.norm <- NULL
 
-    if (is(class(getCoex(object, FALSE))[1], "dtCMatrix")) {
+    if (isa(getGenesCoex(object, asMatrix = FALSE), "dtCMatrix")) {
       obi <- standardizeCoex(object)
       obj <- as(object, "scCOTAN")
       print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))

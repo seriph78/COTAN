@@ -306,10 +306,10 @@ setMethod(
 )
 
 
-#' getCoex
+#' getGenesCoex
 #'
-#' This function extract a complete or a partial coex matrix
-#' from the COTAN object.
+#' This function extract a complete (or a partial after genes dropping)
+#' genes' coex matrix from the COTAN object.
 #'
 #' @param object A COTAN object
 #' @param asMatrix A Boolean to query whether return the coex as a matrix
@@ -317,25 +317,25 @@ setMethod(
 #' @param genes A vector of gene names. It will exclude any gene not on the list.
 #' By defaults the function will keep all genes.
 #'
-#' @return the coex values
+#' @return the genes' coex values
 #'
 #' @export
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' coex <- getCoex(ERCC.cotan, asMatrix = TRUE)
+#' coex <- getGenesCoex(ERCC.cotan, asMatrix = TRUE)
 #'
-#' @rdname getCoex
+#' @rdname getGenesCoex
 setMethod(
-  "getCoex",
+  "getGenesCoex",
   "COTAN",
   function(objCOTAN, asMatrix = TRUE, genes = "all") {
     if (!asMatrix) {
-      stopifnot("Get coex as list. Genes subset not supported yet." = genes == "all")
-      return(objCOTAN@coex)
+      stopifnot("Get coex as list. Genes subsetting is not supported yet." = genes == "all")
+      return(objCOTAN@genesCoex)
     }
     else {
-      return( vec2mat_rfast(objCOTAN@coex, genes = genes) )
+      return( vec2mat_rfast(objCOTAN@genesCoex, genes = genes) )
     }
   }
 )
@@ -343,8 +343,8 @@ setMethod(
 
 #' getCellsCoex
 #'
-#' This function extract a complete or a partial cellsCoex matrix
-#' from the COTAN object.
+#' This function extract a complete (or a partial after cells dropping)
+#' cells' coex matrix from the COTAN object.
 #'
 #' @param object A COTAN object
 #' @param asMatrix A Boolean to query whether return the cellsCoex as a matrix
@@ -352,7 +352,7 @@ setMethod(
 #' @param cells A vector of cell names. It will exclude any cell not on the list.
 #' By defaults the function will keep all cells.
 #'
-#' @return the cellsCoex values
+#' @return the cells' coex values
 #'
 #' @export
 #'
@@ -366,7 +366,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, asMatrix = TRUE, cells = "all") {
     if (!asMatrix) {
-      stopifnot("Get coex as list. Cells subset not supported yet." = cells == "all")
+      stopifnot("Get coex as list. Cells subsetting is not supported yet." = cells == "all")
       return(objCOTAN@coex)
     }
     else {

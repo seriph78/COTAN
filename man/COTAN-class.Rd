@@ -12,14 +12,15 @@ Definition of COTAN class
 \describe{
 \item{\code{raw}}{raw UMI count matrix 𝑛×𝑚 (gene number × cell number)}
 
-\item{\code{coex}}{correlation of COTAN between genes, 𝑛×𝑛}
+\item{\code{genesCoex}}{correlation of COTAN between genes, 𝑛×𝑛}
+
+\item{\code{cellsCoex}}{correlation of COTAN between cells, 𝑚×𝑚}
 
 \item{\code{nu}}{vector that stores the estimated UDE, size 𝑚}
 
 \item{\code{lambda}}{vector to store the average for the gene expression, size 𝑛}
 
-\item{\code{dispersion}}{vector to store all
-the negative binomial dispersion factors, size 𝑛.}
+\item{\code{dispersion}}{vector to store all the negative binomial dispersion factors, size 𝑛.}
 
 \item{\code{hKGenes}}{house-keeping genes. It is a vector to store the name
 of the genes with positive UMI count in every single cell of the sample}
@@ -28,6 +29,6 @@ of the genes with positive UMI count in every single cell of the sample}
 
 \item{\code{metaCells}}{data.frame}
 
-\item{\code{clustersCoex}}{coex}
+\item{\code{clustersCoex}}{a list of coex data.frames for each clustering in the metaCells}
 }}
 

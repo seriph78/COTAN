@@ -10,7 +10,7 @@
 \item{object}{a COTAN object}
 }
 \value{
-the original object but with coex and cellsCoex slots
+the original object but with 'genesCoex' and 'cellsCoex' slots
 in standard format.
 }
 \description{

@@ -2,20 +2,9 @@
 % Please edit documentation in R/automatic_COTAN_object_creation.R
 \name{automatic.COTAN.object.creation}
 \alias{automatic.COTAN.object.creation}
-\alias{automatic.COTAN.object.creation,data.frame-method}
 \title{automatic.COTAN.object.creation}
 \usage{
 automatic.COTAN.object.creation(
-  df,
-  out_dir,
-  save.obj = "NO",
-  GEO,
-  sc.method,
-  cond,
-  cores = 1
-)
-
-\S4method{automatic.COTAN.object.creation}{data.frame}(
   df,
   out_dir,
   save.obj = "NO",

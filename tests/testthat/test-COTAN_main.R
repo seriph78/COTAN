@@ -76,7 +76,7 @@ test_that("4.cotan_coex_test", {
 
     obj <- calculateCoex(obj)
 
-    coex <- getCoex(obj, asMatrix = TRUE, genes = genes.names.test)
+    coex <- getGenesCoex(obj, asMatrix = TRUE, genes = genes.names.test)
 
     saveRDS(obj, file = file.path(tm, "temp.RDS"))
 

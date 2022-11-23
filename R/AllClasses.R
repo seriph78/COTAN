@@ -1,24 +1,26 @@
 #' Definition of COTAN class
 #' @slot raw raw UMI count matrix 𝑛×𝑚 (gene number × cell number)
-#' @slot coex correlation of COTAN between genes, 𝑛×𝑛
+#' @slot genesCoex correlation of COTAN between genes, 𝑛×𝑛
+#' @slot cellsCoex correlation of COTAN between cells, 𝑚×𝑚
 #' @slot nu vector that stores the estimated UDE, size 𝑚
 #' @slot lambda vector to store the average for the gene expression, size 𝑛
-#' @slot dispersion vector to store all
-#' the negative binomial dispersion factors, size 𝑛.
+#' @slot dispersion vector to store all the negative binomial dispersion factors, size 𝑛.
 #' @slot hKGenes house-keeping genes. It is a vector to store the name
 #' of the genes with positive UMI count in every single cell of the sample
 #' @slot metaDataset data.frame
 #' @slot metaCells data.frame
-#' @slot clustersCoex coex
+#' @slot clustersCoex a list of coex data.frames for each clustering in the metaCells
 #'
 #' @importFrom rlang is_empty
+#'
 #' @importClassesFrom Matrix dgCMatrix
+#' @importClassesFrom Matrix dMatrix
 #'
 setClass(
   "COTAN",
   slots = c(
     raw          = "dgCMatrix",
-    coex         = "ANY",
+    genesCoex    = "ANY",
     cellsCoex    = "ANY",
     nu           = "vector",
     lambda       = "vector",
@@ -30,7 +32,7 @@ setClass(
   ),
   prototype = list(
     raw          = as(matrix(0, 0, 0), "dgCMatrix"),
-    coex         = vector(mode = "list"),
+    genesCoex    = vector(mode = "list"),
     cellsCoex    = vector(mode = "list"),
     nu           = vector(mode = "numeric"),
     lambda       = vector(mode = "numeric"),
@@ -43,51 +45,100 @@ setClass(
   validity = function(object) {
     if (!is_empty(object@raw) && is_empty(object@lambda)) {
       if (anyNA(object@raw)) {
-        stop("Input raw data contains NA!")
+        stop("Input 'raw' data contains NA!")
       }
       if (isFALSE(all.equal(object@raw, round(object@raw), tolerance = 0))) {
-        stop("Input raw data contains not integer numbers!")
+        stop("Input 'raw' data contains non integer numbers.")
       }
       if (any(object@raw < 0)) {
-        stop("Input raw data must contain only non negative integers!")
+        stop("Input 'raw' data must contain only non negative integers.")
       }
     }
-    if (!is_empty(object@nu) && length(object@nu) != ncol(object@raw)) {
+    numGenes <- nrow(object@raw)
+    numCells <- ncol(object@raw)
+    if (!is_empty(object@genesCoex)) {
+      if (isa(object@genesCoex, "list")) {
+        if (length(names(object@genesCoex)) != 2 ||
+            !all(names(object@genesCoex) %in% c("values", "genes"))) {
+          stop("'genesCoex' must only have names 'values' and 'genes'.")
+        }
+        if (length(object@genesCoex[["genes"]]) != numGenes) {
+          stop(paste0("'genesCoex' names length [", length(object@genesCoex[["genes"]]),
+                      "] does not match with the number of rows [",
+                      numGenes, "]  of 'raw'."))
+        }
+        if (2 * length(object@genesCoex[["values"]]) != numGenes * (numGenes + 1)) {
+          stop(paste0("'genesCoex' values length [", length(object@genesCoex[["values"]]),
+                      "] is not commensurate with the number of rows [",
+                      numGenes, "]  of 'raw'."))
+        }
+      }
+      else if (isa(object@genesCoex, "dMatrix")) {
+        if (nrow(object@genesCoex) != ncol(object@genesCoex) ||
+            nrow(object@genesCoex) != numGenes) {
+          stop("'genesCoex' sizes should match the number of genes.")
+        }
+      }
+    }
+    if (!is_empty(object@cellsCoex)) {
+      if (isa(object@cellsCoex, "list")) {
+        if (length(names(object@cellsCoex)) != 2 ||
+            !all(names(object@cellsCoex) %in% c("values", "genes"))) {
+          stop("'cellsCoex' must only have names 'values' and 'genes'.")
+        }
+        if (length(object@cellsCoex[["genes"]]) != numCells) {
+          stop(paste0("'cellsCoex' names length [", length(object@cellsCoex[["genes"]]),
+                      "] does not match with the number of cols [",
+                      numCells, "]  of 'raw'."))
+        }
+        if (2 * length(object@cellsCoex[["values"]]) != numCells * (numCells + 1)) {
+          stop(paste0("'cellsCoex' values length [", length(object@cellsCoex[["values"]]),
+                      "] is not commensurate with the number of cols [", numCells,
+                      "]  of 'raw'."))
+        }
+      }
+      else if (isa(object@cellsCoex, "dMatrix")) {
+        if (nrow(object@cellsCoex) != ncol(object@cellsCoex) ||
+            nrow(object@cellsCoex) != numCells) {
+          stop("'cellsCoex' sizes should match the number of cells.")
+        }
+      }
+    }
+    if (!is_empty(object@nu) && length(object@nu) != numCells) {
       stop(paste0("'nu'[", length(object@nu), "] must have size equal",
-                  " to the number of columns [", ncol(object@raw),
+                  " to the number of columns [", numCells,
                   "] of 'raw' when not empty."))
     }
-    if (!is_empty(object@lambda) && length(object@lambda) != nrow(object@raw)) {
+    if (!is_empty(object@lambda) && length(object@lambda) != numGenes) {
       stop(paste0("'lambda'[", length(object@lambda), "] must have size equal",
-                  " to the number of rows [", nrow(object@raw),
+                  " to the number of rows [", numGenes,
                   "]  of 'raw' when not empty."))
     }
-    if (!is_empty(object@dispersion) && length(object@dispersion) != nrow(object@raw)) {
+    if (!is_empty(object@dispersion) && length(object@dispersion) != numGenes) {
       stop(paste0("'dispersion'[", length(object@dispersion), "] must have size equal",
-                  " to the number of rows [", nrow(object@raw),
+                  " to the number of rows [", numGenes,
                   "] of 'raw' when not empty."))
     }
     # metaDataset has no required fields as of now
-    if (!is_empty(object@metaCells) && nrow(object@metaCells) != ncol(object@raw)) {
+    if (!is_empty(object@metaCells) && nrow(object@metaCells) != numCells) {
       stop(paste0("The number of rows [", nrow(object@metaCells),
                   "] of 'metaCells' must be the same",
-                  " as the number of cols [", ncol(object@raw),
+                  " as the number of cols [", numCells,
                   "]  of 'raw' when not empty."))
     }
     for (clusterName in names(object@clustersCoex)) {
       if (!clusterName %in% colnames(object@metaCells)) {
         stop(paste0("The cluster name '", clusterName, "' found in 'clustersCoex'",
-                    " must be one of the column names of 'metaCells'"))
+                    " must be one of the column names of 'metaCells'."))
       }
       if (!isa((object@clustersCoex)[[clusterName]], "data.frame")) {
         stop(paste0("'clusterCoex' is supposedly compose of data.frames.",
-                    " A '", class((object@clustersCoex)[[clusterName]]), "' was given instead" ))
+                    " A '", class((object@clustersCoex)[[clusterName]]), "' was given instead." ))
       }
-      if (nrow((object@clustersCoex)[[clusterName]]) != nrow(object@raw)) {
+      if (nrow((object@clustersCoex)[[clusterName]]) != numGenes) {
         stop(paste0("The number of rows [", nrow((object@clustersCoex)[[clusterName]]),
                     "] of the data.frames in 'clustersCoex' must be the same",
-                    " as the number of rows [", nrow(object@raw),
-                    "]  of 'raw'."))
+                    " as the number of rows [", numGenes, "]  of 'raw'."))
       }
     }
     return(TRUE)
@@ -194,7 +245,7 @@ setIs("scCOTAN",
 
         new("COTAN",
             raw          = raw,
-            coex         = from@coex,
+            genesCoex    = from@coex,
             cellsCoex    = list(),
             nu           = from@nu,
             lambda       = from@lambda,
@@ -243,8 +294,8 @@ setIs("scCOTAN",
         }
 
         from@raw          <- raw
-        from@coex         <- value@coex
-        from@cellCoex     <- list()
+        from@genesCoex    <- value@coex
+        from@cellsCoex    <- list()
         from@nu           <- value@nu
         from@lambda       <- value@lambda
         from@dispersion   <- value@a
@@ -282,10 +333,14 @@ setAs("COTAN",
           names(clusters) <- colnames(from@raw)
         }
 
+        if (!is_empty(from@cellsCoex)) {
+          warning("'cellsCoex' is not empty: will be lost in conversion to 'scCOTAN'")
+        }
+
         new("scCOTAN",
             raw          = from@raw,
             raw.norm     = getNormalizedData(from),
-            coex         = from@coex,
+            coex         = from@genesCoex,
             nu           = from@nu,
             lambda       = from@lambda,
             a            = from@dispersion,
@@ -316,9 +371,13 @@ setAs("COTAN",
           names(clusters) <- colnames(value@raw)
         }
 
+        if (!is_empty(value@cellsCoex)) {
+          warning("'cellsCoex' is not empty: will be lost in conversion to 'scCOTAN'")
+        }
+
         from@raw          <- value@raw
         from@raw.norm     <- getNormalizedData(value)
-        from@coex         <- value@coex
+        from@coex         <- value@genesCoex
         from@nu           <- value@nu
         from@lambda       <- value@lambda
         from@a            <- value@dispersion

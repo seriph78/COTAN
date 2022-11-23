@@ -58,7 +58,7 @@ obtain the coex matrix for the cells
 ```{r}
 startTime <- Sys.time()
 
-objCOTAN <- coex(objCOTAN, cells = TRUE) # coex for cells
+objCOTAN <- calculateCoex(objCOTAN, cells = TRUE)
 
 endTime <- Sys.time()
 print(endTime - startTime)

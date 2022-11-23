@@ -20,6 +20,7 @@ setGeneric(
   "observedContingencyYY",
   function(objCOTAN, actOnCells = FALSE) standardGeneric("observedContingencyYY")
 )
+
 setGeneric(
   "observedContingency",
   function(objCOTAN, actOnCells = FALSE) standardGeneric("observedContingency")
@@ -123,8 +124,8 @@ setGeneric(
 )
 
 setGeneric(
-  "getCoex",
-  function(objCOTAN, asMatrix = TRUE, genes = "all") standardGeneric("getCoex")
+  "getGenesCoex",
+  function(objCOTAN, asMatrix = TRUE, genes = "all") standardGeneric("getGenesCoex")
 )
 
 setGeneric(

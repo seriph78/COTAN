@@ -16,11 +16,11 @@ By defaults the function will keep all cells.}
 \item{object}{A COTAN object}
 }
 \value{
-the cellsCoex values
+the cells' coex values
 }
 \description{
-This function extract a complete or a partial cellsCoex matrix
-from the COTAN object.
+This function extract a complete (or a partial after cells dropping)
+cells' coex matrix from the COTAN object.
 }
 \examples{
 data("ERCC.cotan")

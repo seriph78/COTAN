@@ -37,7 +37,7 @@ setMethod("plot_GDI","scCOTAN",
           function(object, cond, genes, type="S",GDI.df) {
             ET <- sum.raw.norm <- NULL
 
-            if (is(class(getCoex(object, FALSE))[1], "dtCMatrix")) {
+            if (isa(getGenesCoex(object, asMatrix = FALSE), "dtCMatrix")) {
               obi <- standardizeCoex(object)
               obj <- as(object, "scCOTAN")
               print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))

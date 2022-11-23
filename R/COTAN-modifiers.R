@@ -122,7 +122,7 @@ setMethod(
 #'
 #' @param object a COTAN object
 #'
-#' @return the original object but with coex and cellsCoex slots
+#' @return the original object but with 'genesCoex' and 'cellsCoex' slots
 #' in standard format.
 #' @importFrom rlang is_empty
 #'
@@ -135,13 +135,13 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
 
-    if (!is_empty(objCOTAN@coex) && isa(objCOTAN@coex, "dtCMatrix")) {
-      print("Coex slot in the old format! Converting...")
-      objCOTAN@coex <- mat2vec_rfast(objCOTAN@coex)
+    if (!is_empty(objCOTAN@genesCoex) && isa(objCOTAN@genesCoex, "dtCMatrix")) {
+      print("'genesCoex' slot in the old format! Converting...")
+      objCOTAN@genesCoex <- mat2vec_rfast(objCOTAN@genesCoex)
     }
 
     if (!is_empty(objCOTAN@cellsCoex) && isa(objCOTAN@cellsCoex, "dtCMatrix")) {
-      print("CellsCoex in the old format! Converting...")
+      print("'cellsCoex' in the old format! Converting...")
       objCOTAN@cellsCoex <- mat2vec_rfast(objCOTAN@cellsCoex)
     }
 
