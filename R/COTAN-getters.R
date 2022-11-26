@@ -152,72 +152,6 @@ setMethod(
   }
 )
 
-#' getNu
-#'
-#' This function extract the nu array.
-#'
-#' @param objCOTAN A COTAN object
-#'
-#' @return the nu array.
-#' @importFrom rlang is_empty
-#' @export
-#' @rdname getNu
-setMethod(
-  "getNu",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(objCOTAN@nu)) {
-      warning("nu is empty")
-    }
-
-    return(objCOTAN@nu)
-  }
-)
-
-#' getLambda
-#'
-#' This function extract the lambda array (mean expression for each gene).
-#'
-#' @param objCOTAN A COTAN object
-#'
-#' @return the lambda array.
-#' @importFrom rlang is_empty
-#' @export
-#' @rdname getLambda
-setMethod(
-  "getLambda",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(objCOTAN@lambda)) {
-      warning("lambda is empty")
-    }
-
-    return(objCOTAN@lambda)
-  }
-)
-
-#' getDispersion
-#'
-#' This function extract the a array.
-#'
-#' @param objCOTAN A COTAN object
-#'
-#' @return the a array.
-#' @importFrom rlang is_empty
-#' @export
-#' @rdname getDispersion
-setMethod(
-  "getDispersion",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(objCOTAN@dispersion)) {
-      warning("dispersion is empty")
-    }
-
-    return(objCOTAN@dispersion)
-  }
-)
-
 
 #' getMetadataDataset
 #'
@@ -272,6 +206,87 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     return(objCOTAN@metaCells)
+  }
+)
+
+
+#' getNu
+#'
+#' This function extract the nu array.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the nu array.
+#' @importFrom rlang is_empty
+#' @export
+#' @rdname getNu
+setMethod(
+  "getNu",
+  "COTAN",
+  function(objCOTAN) {
+    nu <- getMetadataCells(objCOTAN)[["nu"]]
+
+    if (is_empty(nu)) {
+      warning("nu is empty")
+    }
+
+    names(nu) <- getCells(objCOTAN)
+
+    return(nu)
+  }
+)
+
+
+#' getLambda
+#'
+#' This function extract the lambda array (mean expression for each gene).
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the lambda array.
+#' @importFrom rlang is_empty
+#' @export
+#' @rdname getLambda
+setMethod(
+  "getLambda",
+  "COTAN",
+  function(objCOTAN) {
+    lambda <- getMetadataGenes(objCOTAN)[["lambda"]]
+
+    if (is_empty(lambda)) {
+      warning("lambda is empty")
+    }
+
+    names(lambda) <- getGenes(objCOTAN)
+
+    return(lambda)
+  }
+)
+
+
+#' getDispersion
+#'
+#' This function extract the a array.
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the a array.
+#' @importFrom rlang is_empty
+#' @export
+#' @rdname getDispersion
+setMethod(
+  "getDispersion",
+  "COTAN",
+  function(objCOTAN) {
+    dispersion <- getMetadataGenes(objCOTAN)[["dispersion"]]
+
+    if (is_empty(dispersion)) {
+      warning("dispersion is empty")
+    }
+
+    names(dispersion) <- getGenes(objCOTAN)
+
+    return(dispersion)
   }
 )
 

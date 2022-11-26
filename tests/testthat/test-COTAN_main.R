@@ -12,35 +12,35 @@ test_that("1.initialization", {
     rownames(test.dataset.col) <- test.dataset.col$V1
     test.dataset.col <- test.dataset.col[,2:ncol(test.dataset.col)]
 
-    obj.temp <- COTAN(raw = test.dataset.col)
-    obj.temp <- initializeMetaDataset(obj.temp, GEO = "V",
-                                      sequencingMethod = "10X",
-                                      sampleCondition = "example")
+    obj <- COTAN(raw = test.dataset.col)
+    obj <- initializeMetaDataset(obj, GEO = "V",
+                                 sequencingMethod = "10X",
+                                 sampleCondition = "example")
 
-    expect_s4_class(obj.temp, "COTAN")
+    expect_s4_class(obj, "COTAN")
 })
 
 test_that("2.cleaning", {
     utils::data("test.dataset.col", package = "COTAN")
 
-    obj.temp <- COTAN(raw = test.dataset.col)
-    obj.temp <- initializeMetaDataset(obj.temp, GEO = " ",
-                                      sequencingMethod = "10X",
-                                      sampleCondition = "example")
+    obj <- COTAN(raw = test.dataset.col)
+    obj <- initializeMetaDataset(obj, GEO = " ",
+                                 sequencingMethod = "10X",
+                                 sampleCondition = "example")
 
     #---------------------------------------------------
 
-    obj.temp <- clean(obj.temp, calcExtraData = FALSE)[["objCOTAN"]]
+    obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
 
     stopifnot(file.exists(tm))
-    saveRDS(obj.temp, file = file.path(tm,"temp.RDS"))
+    saveRDS(obj, file = file.path(tm,"temp.RDS"))
 
     raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
     nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
 
-    expect_equal(getNormalizedData(obj.temp)[genes.names.test,cell.names.test],
+    expect_equal(getNormalizedData(obj)[genes.names.test,cell.names.test],
                  raw.norm)
-    expect_equal(getNu(obj.temp)[cell.names.test], nu)
+    expect_equal(getNu(obj)[cell.names.test], nu)
 })
 
 test_that("mat_division", {
@@ -252,7 +252,7 @@ test_that("cell_homogeneous_clustering", {
 
 test_that("merge_cell.clusters.test", {
   temp <- readRDS(file.path(tm,"temp.RDS"))
-  temp <- DEA_on_clusters(temp)
+  temp <- DEA_on_clusters(as(temp,"scCOTAN"))
   temp <- temp[[1]]
 
   initial.cluster.number <- dim(temp@cluster_data)[2]

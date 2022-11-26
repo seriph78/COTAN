@@ -154,7 +154,7 @@ setGeneric(
 
 setGeneric(
   "addElementToMetaDataset",
-  function(objCOTAN, colName, value) standardGeneric("addElementToMetaDataset")
+  function(objCOTAN, tag, value) standardGeneric("addElementToMetaDataset")
 )
 
 setGeneric(

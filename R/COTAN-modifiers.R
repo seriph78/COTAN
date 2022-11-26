@@ -54,8 +54,8 @@ setMethod(
 setMethod(
   "addElementToMetaDataset",
   "COTAN",
-  function(objCOTAN, colName, value) {
-    newLine <- c(colName, value)
+  function(objCOTAN, tag, value) {
+    newLine <- c(tag, value)
 
     objCOTAN@metaDataset[(nrow(objCOTAN@metaDataset) + 1), seq_along(newLine)] <- newLine
 
@@ -83,8 +83,9 @@ setMethod(
     cells <- getZeroOneProj(objCOTAN)
 
     # flag the genes with positive UMI count in every single cell
-    addColumnToDF(objCOTAN@metaGenes, rowSums(cells) == getNumCells(objCOTAN),
-                  "hkGenes", getGenes(objCOTAN))
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes,
+                                        rowSums(cells) == getNumCells(objCOTAN),
+                                        "hkGenes", getGenes(objCOTAN))
 
     return(objCOTAN)
   }

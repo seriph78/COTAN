@@ -1,28 +1,34 @@
-#' addColumnToDF
+#' setColumnInDF
 #'
-#' private function that append a new column to a data.frame,
-#' whether it is empty or not.
+#' private function that append if missing or resets if present a column
+#' into a data.frame, whether the data.frame is empty or not.
 #'
 #' @param df the data.frame
-#' @param colToAdd the the column to add
+#' @param colToSet the the column to add
 #' @param colName the data.frame
 #' @param rowNames when not empty the new row names of the result
 #'
 #' @return the updated/created data.frame
 #'
-#' @rdname addColumnToDF
+#' @rdname setColumnInDF
 #'
-addColumnToDF <- function(df, colToAdd, colName, rowNames) {
-  if(is_empty(df)) {
-    out <- data.frame(colToAdd)
+setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
+  out <- df
+  if(is_empty(out)) {
+    out <- data.frame(colToSet)
     colnames(out) <- colName
   }
   else {
-    df <- cbind(df, colToAdd)
-    colnames(df)[ncol(df)] <- colName
+    if (colName %in% colnames(out)) {
+      out[[colName]] <- colToSet
+    }
+    else {
+      out <- cbind(out, colToSet)
+      colnames(out)[ncol(out)] <- colName
+    }
   }
 
-  if (!is_empty(rowNames)) {
+  if (!is_empty(rowNames) && is_empty(rownames(out))) {
     rownames(out) <- rowNames
   }
 

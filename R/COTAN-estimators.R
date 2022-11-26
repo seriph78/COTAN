@@ -15,7 +15,10 @@ setMethod(
   "estimateLambdaLinear",
   "COTAN",
   function(objCOTAN) {
-    objCOTAN@lambda <- rowMeans(getRawData(objCOTAN), dims = 1, na.rm = TRUE)
+    lambda <- rowMeans(getRawData(objCOTAN), dims = 1)
+
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, lambda,
+                                        "lambda", getGenes(objCOTAN))
 
     return(objCOTAN)
   }
@@ -37,8 +40,11 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     # raw column averages divided by global_mean
-    objCOTAN@nu <- colMeans(getRawData(objCOTAN), dims = 1, na.rm = TRUE)
-    objCOTAN@nu <- objCOTAN@nu / mean(objCOTAN@nu)
+    nu <- colMeans(getRawData(objCOTAN), dims = 1)
+    nu <- nu / mean(nu)
+
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
+                                        "nu", getCells(objCOTAN))
 
     return(objCOTAN)
   }
@@ -164,8 +170,9 @@ setMethod(
 
     gc()
 
-    objCOTAN@dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
-    names(objCOTAN@dispersion) <- genes
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes,
+                                        unlist(dispList, recursive = TRUE, use.names = FALSE),
+                                        "dispersion", genes)
 
     goodPos <- is.finite(getDispersion(objCOTAN))
     print(paste("dispersion",
@@ -279,8 +286,9 @@ setMethod(
     gc()
     print("Estimate nu: DONE")
 
-    objCOTAN@nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
-    names(objCOTAN@nu) <- cells
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
+                                        unlist(nuList, recursive = TRUE, use.names = FALSE),
+                                        "nu", cells)
 
     # TODO: remove once code has been tested
     nuChange <- abs(nu - getNu(objCOTAN))
@@ -342,7 +350,9 @@ setMethod(
 
       print(paste("Nu mean:", meanNu))
 
-      objCOTAN@nu <- objCOTAN@nu / meanNu
+      objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
+                                          getNu(objCOTAN) / meanNu,
+                                          "nu")
 
       if (abs(meanNu-1) < threshold / 100) {
         break
