@@ -13,13 +13,15 @@
 #' @param dir The directory in which are all COTAN files (corresponding to the previous prefixes)
 #'
 #' @return a ggplot object
+#'
 #' @importFrom Matrix forceSymmetric
-#' @export
+#' @importFrom tidyr pivot_longer
 #'
 #' @import ggplot2
-#' @import tidyr
 #' @import scales
-#' @rdname plot_heatmap
+#'
+#' @export
+#'
 #' @examples
 #' data("ERCC.cotan")
 #' data_dir <- tempdir()
@@ -37,10 +39,10 @@
 #'   sets = c(2, 3), conditions = c("ERCC"), dir = paste0(data_dir, "/")
 #' )
 #'
+#' @rdname plot_heatmap
 setGeneric("plot_heatmap", function(p_val.tr = 0.05, df_genes, sets, conditions, dir) {
   standardGeneric("plot_heatmap")
 })
-#' @rdname plot_heatmap
 setMethod(
   "plot_heatmap", "ANY",
   function(p_val.tr = 0.05, df_genes, sets, conditions, dir) {
@@ -52,14 +54,9 @@ setMethod(
     for (ET in conditions) {
       print(paste0("Loading condition", ET))
       obj <- readRDS(paste0(dir, ET, ".cotan.RDS"))
+      obj <- as(obj, "scCOTAN")
 
-      if (is(class(getCoex(obj, FALSE))[1], "dtCMatrix")) {
-        obi <- standardizeCoex(obj)
-        obj <- as(obj, "scCOTAN")
-        print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
-        saveRDS(obj, paste0(dir, ET, "new.cotan.RDS"))
-      }
-      if (any(gr %in% obj@coex$genes) == FALSE) {
+      if (any(gr %in% rownames(obj@coex)) == FALSE) {
         print(paste0("primary markers all absent in ", ET))
         stop()
       }
@@ -94,7 +91,7 @@ setMethod(
       p_val$g2 <- as.vector(rownames(p_val))
       df.temp.pval <- pivot_longer(p_val, cols = seq_along(colnames(p_val)) - 1, names_to = "g1", values_to = "p_val")
 
-      coex <- getGenesCoex(obj, asMatrix = TRUE, genes = gr)
+      coex <- getGenesCoex(obj, genes = gr)
       diag(coex) <- 0
       coex <- coex[rownames(coex) %in% ge, ]
       # this to add some eventually effective housekeeping genes
@@ -235,7 +232,7 @@ setMethod(
       unlist(markers.list),
       prim.markers
     ))
-    %in% obj@coex$genes]
+    %in% rownames(obj@coex)]
 
     if (!rlang::is_empty(no_genes)) {
       print(paste0(no_genes, " not present!"))
@@ -371,13 +368,6 @@ setMethod(
   "plot_GDI", "scCOTAN",
   function(object, cond, type = "S") {
     ET <- sum.raw.norm <- NULL
-
-    if (isa(getGenesCoex(object, asMatrix = FALSE), "dtCMatrix")) {
-      obi <- standardizeCoex(object)
-      obj <- as(object, "scCOTAN")
-      print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
-      saveRDS(object, paste0(dir, ET, "new.cotan.RDS"))
-    }
 
     print("GDI plot ")
     if (type == "S") {

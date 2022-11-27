@@ -6,6 +6,8 @@
 #' @return the Mu matrix
 #'
 #' @importFrom Matrix t
+#' @importClassesFrom Matrix dgeMatrix
+#'
 #' @export
 #'
 #' @rdname calculateMu
@@ -25,7 +27,7 @@ setMethod(
 
     rownames(muEstimator) <- getGenes(objCOTAN)
 
-    return(muEstimator)
+    return(as.matrix(muEstimator))
   }
 )
 
@@ -39,7 +41,9 @@ setMethod(
 #' @return the YesYes observed contengency table
 #'
 #' @importFrom Matrix t
-#' @importClassesFrom Matrix symmetricMatrix
+#' @importClassesFrom Matrix dgeMatrix
+#' @importClassesFrom Matrix dsyMatrix
+#'
 #' @export
 #'
 #' @rdname observedContingencyYY
@@ -59,11 +63,12 @@ setMethod(
       YY <- zeroOne %*% t(zeroOne)
     }
     rm(zeroOne)
-    gc()
+
+    YY <- forceSymmetric(as(YY, "generalMatrix"))
+
     cat(" done\n")
 
-    #return(as(YY, "symmetricMatrix"))
-    return(as.matrix(YY))
+    return(YY)
   }
 )
 
@@ -124,13 +129,12 @@ setMethod(
       observedNN <- numCells - observedYA - observedNY
     }
     rm(probZero)
-    gc()
     cat(" done\n")
 
-    return( list("observedNN" = as.matrix(observedNN),
-                 "observedNY" = as.matrix(observedNY),
-                 "observedYN" = as.matrix(observedYN),
-                 "observedYY" = as.matrix(observedYY)) )
+    return( list("observedNN" = as(observedNN, "generalMatrix"),
+                 "observedNY" = as(observedNY, "generalMatrix"),
+                 "observedYN" = as(observedYN, "generalMatrix"),
+                 "observedYY" = as(observedYY, "generalMatrix")) )
   }
 )
 
@@ -204,10 +208,10 @@ setMethod(
     gc()
     cat(" done\n")
 
-    out <- list( "expectedNN" = as.matrix(expectedNN),
-                 "expectedNY" = as.matrix(expectedNY),
-                 "expectedYN" = as.matrix(expectedYN),
-                 "expectedYY" = as.matrix(expectedYY) )
+    out <- list( "expectedNN" = as(expectedNN, "generalMatrix"),
+                 "expectedNY" = as(expectedNY, "generalMatrix"),
+                 "expectedYN" = as(expectedYN, "generalMatrix"),
+                 "expectedYY" = as(expectedYY, "generalMatrix") )
 
     return(out)
   }
@@ -239,30 +243,19 @@ setMethod(
 
     observedYY <- observedContingencyYY(objCOTAN, actOnCells)
 
-    observedYY <- mat2vec_rfast(observedYY)
-
-    gc()
-
     print("Retrieving expected contingency table")
 
     # four estimators: expectedNN, expectedNY, expectedYN, expectedYY
     list[expectedNN, expectedNY, expectedYN, expectedYY] <-
       expectedContingencyTables(objCOTAN, actOnCells)
 
-    expectedNN <- mat2vec_rfast(expectedNN)
-    expectedNY <- mat2vec_rfast(expectedNY)
-    expectedYN <- mat2vec_rfast(expectedYN)
-    expectedYY <- mat2vec_rfast(expectedYY)
-
-    gc()
-
     print(paste("Estimating", kind, "coex"))
 
     # sum for division
-    sumForDiv <- ( 1 / pmax(1, expectedYY$values) +
-                   1 / pmax(1, expectedYN$values) +
-                   1 / pmax(1, expectedNY$values) +
-                   1 / pmax(1, expectedNN$values) )
+    sumForDiv <- ( 1 / pmax(1, expectedYY) +
+                   1 / pmax(1, expectedYN) +
+                   1 / pmax(1, expectedNY) +
+                   1 / pmax(1, expectedNN) )
 
     if (isTRUE(actOnCells)) {
       normFact <- 1 / sqrt(getNumGenes(objCOTAN)) # divided by sqrt(n)
@@ -272,14 +265,12 @@ setMethod(
     }
 
     rm(expectedYN); rm(expectedNY); rm(expectedNN);
-    gc()
 
     # coex estimation
-    coex <- (observedYY$values - expectedYY$values)
+    coex <- (observedYY - expectedYY)
     coex <- coex * sqrt(sumForDiv) * normFact
 
-    # TODO: the "genes" name is misleading in case of actOnCells
-    coex <- list("genes" = getGenes(objCOTAN), "values" = coex)
+    coex <- pack(forceSymmetric(coex))
 
     if(actOnCells) {
       objCOTAN@cellsCoex <- coex
@@ -290,9 +281,9 @@ setMethod(
 
     rm(expectedYY)
     rm(coex)
-    gc()
 
     print(paste("Calculate", kind, "coex: DONE"))
+
     return(objCOTAN)
   }
 )
@@ -317,14 +308,15 @@ setMethod(
     print("Calculating S: START")
 
     objCOTAN <- standardizeCoex(objCOTAN)
-    coex <- getGenesCoex(objCOTAN, asMatrix = FALSE)
+    coex <- getGenesCoex(objCOTAN)
 
     stopifnot("Coex is missing" = !is_empty(coex))
 
-    S <- (coex$values)^2 * getNumCells(objCOTAN)
+    S <- (coex)^2 * getNumCells(objCOTAN)
 
     print("Calculating S: DONE")
-    return( vec2mat_rfast( list("genes" = coex$genes, "values" = S) ) )
+
+    return(S)
   }
 )
 
@@ -379,7 +371,7 @@ setMethod(
     G <- 2 * (tNN + tNY + tYN + tYY)
 
     print("Calculating G: DONE")
-    return( as.matrix(G) )
+    return(G)
   }
 )
 

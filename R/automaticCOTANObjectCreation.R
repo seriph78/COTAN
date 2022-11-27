@@ -1,15 +1,17 @@
-#' automatic.COTAN.object.creation
+#' automaticCOTANObjectCreation
 #'
-#' @param df dataframe with the row counts
-#' @param out_dir directory for the output
-#' @param save.obj the created object is not automatically writen on disk (default NO).
-#' If "Yes" the object is written in out_dir
-#' @param GEO GEO or other code that identify the dataset
-#' @param sc.method Type of single cell RNA-seq method used
-#' @param cond A string that will identify the sample or condition. It will be part of the
-#' final file name.
+#' @param raw a matrix or dataframe with the raw counts
+#' @param outDir directory for the output
+#' @param saveObj the created object is not automatically writen on disk (default NO).
+#' If "Yes" the object is written in outDir
+#' @param GEO a code reporting the GEO identification or other specific dataset code
+#' @param sequencingMethod a string reporting the method used for the sequencing
+#' @param sampleCondition a string reporting the specific sample condition or time point.
+#' It will be part of the final file name.
 #' @param cores number of cores to be used
+#'
 #' @return It return the COTAN object. It will also store it directly in the output directory
+#'
 #' @export
 #'
 #' @import grDevices
@@ -31,27 +33,25 @@
 #' @examples
 #'
 #' data("raw.dataset")
-#' obj <- automatic.COTAN.object.creation(
-#'   df = raw.dataset,
-#'   out_dir = tempdir(),
+#' obj <- automaticCOTANObjectCreation(
+#'   raw = raw.dataset,
+#'   outDir = tempdir(),
 #'   GEO = "test_GEO",
-#'   sc.method = "test_method",
-#'   cond = "test"
-#' )
+#'   sequencingMethod = "test_method",
+#'   sampleCondition = "test")
 #'
-#' @rdname automatic.COTAN.object.creation
+#' @rdname automaticCOTANObjectCreation
 
-automatic.COTAN.object.creation <-
-  function(df, out_dir, save.obj = "NO",
-           GEO, sc.method, cond,
-           #mt = FALSE, mt_prefix="^mt",
+automaticCOTANObjectCreation <-
+  function(raw, outDir, saveObj = "NO",
+           GEO, sequencingMethod, sampleCondition,
            cores = 1) {
     start_time_all <- Sys.time()
 
-    obj <- COTAN(raw = df)
+    obj <- COTAN(raw = raw)
     obj <- initializeMetaDataset(obj, GEO = GEO,
-                                 sequencingMethod = sc.method,
-                                 sampleCondition = cond)
+                                 sequencingMethod = sequencingMethod,
+                                 sampleCondition = sampleCondition)
 
     #if (isFALSE(mt)) {
     #  genes_to_rem <- getGenes(obj)[grep(mt_prefix, getGenes(obj)),])
@@ -59,17 +59,17 @@ automatic.COTAN.object.creation <-
     #  dropGenesCells(obj, genes_to_rem, cells_to_rem)
     #}
 
-    print(paste0("Condition ", cond))
+    print(paste0("Condition ", sampleCondition))
     print(paste("n cells", getNumCells(obj)))
 
 
     #--------------------------------------
-    if (!file.exists(out_dir)) {
-      dir.create(file.path(out_dir))
+    if (!file.exists(outDir)) {
+      dir.create(file.path(outDir))
     }
 
-    if (!file.exists(paste0(out_dir, "cleaning"))) {
-      dir.create(file.path(out_dir, "cleaning"))
+    if (!file.exists(paste0(outDir, "cleaning"))) {
+      dir.create(file.path(outDir, "cleaning"))
     }
 
     list[obj, data] <- clean(obj)
@@ -79,23 +79,23 @@ automatic.COTAN.object.creation <-
 
     {
       numIter <- 1
-      pdf(file.path(out_dir, "cleaning",
-                    paste0(cond, "_", numIter, "_plots_without_cleaning.pdf")))
+      pdf(file.path(outDir, "cleaning",
+                    paste0(sampleCondition, "_", numIter, "_plots_without_cleaning.pdf")))
       plot(plots[["pcaCells"]])
       plot(plots[["genes"]])
       dev.off()
     }
 
     {
-      pdf(file.path(out_dir, "cleaning",
-                    paste0(cond,"_plots_PCA_efficiency_colored.pdf")))
+      pdf(file.path(outDir, "cleaning",
+                    paste0(sampleCondition, "_plots_PCA_efficiency_colored.pdf")))
       plot(plots[["UDE"]])
       dev.off()
     }
 
     {
-      pdf(file.path(out_dir, "cleaning",
-                    paste0(cond,"_plots_efficiency.pdf")))
+      pdf(file.path(outDir, "cleaning",
+                    paste0(sampleCondition,"_plots_efficiency.pdf")))
       plot(plots[["nu"]] +
            annotate(geom = "text", x = 50, y = 0.25,
                     label = "nothing to remove ", color = "darkred"))
@@ -135,16 +135,14 @@ automatic.COTAN.object.creation <-
                                            as.numeric(genes_coex_time) ),
                                 "n.cells"=getNumCells(obj),
                                 "n.genes"=getNumGenes(obj) ),
-                     file = file.path(out_dir, paste0(cond, "_times.csv")))
+                     file = file.path(outDir, paste0(sampleCondition, "_times.csv")))
 
-              obj <- as(obj, "scCOTAN")
+    if (toupper(saveObj) == "YES") {
+      print(paste0("Saving elaborated data locally at ",
+                   outDir, sampleCondition, ".cotan.RDS"))
+      saveRDS(obj,file = file.path(outDir, paste0(sampleCondition, ".cotan.RDS")))
+    }
 
-              if (save.obj == "yes" | save.obj == "Yes" | save.obj == "YES") {
-                print(paste0("Saving elaborated data locally at ",
-                             out_dir, cond, ".cotan.RDS"))
-                saveRDS(obj,file = file.path(out_dir,paste0(cond, ".cotan.RDS")))
-              }
-              return(obj)
-
+    return(obj)
   }
 

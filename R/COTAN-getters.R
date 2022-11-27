@@ -367,8 +367,6 @@ setMethod(
 #' genes' coex matrix from the COTAN object.
 #'
 #' @param objCOTAN A COTAN object
-#' @param asMatrix A Boolean to query whether return the coex as a matrix
-#' or leave it in which-ever form it already is
 #' @param genes A vector of gene names. It will exclude any gene not on the list.
 #' By defaults the function will keep all genes.
 #'
@@ -378,19 +376,18 @@ setMethod(
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' coex <- getGenesCoex(ERCC.cotan, asMatrix = TRUE)
+#' genesCoex <- getGenesCoex(ERCC.cotan)
 #'
 #' @rdname getGenesCoex
 setMethod(
   "getGenesCoex",
   "COTAN",
-  function(objCOTAN, asMatrix = TRUE, genes = "all") {
-    if (isFALSE(asMatrix)) {
-      stopifnot("Get coex as list. Genes subsetting is not supported yet." = genes == "all")
+  function(objCOTAN, genes = c()) {
+    if (is_empty(genes)) {
       return(objCOTAN@genesCoex)
     }
     else {
-      return( vec2mat_rfast(objCOTAN@genesCoex, genes = genes) )
+      return(objCOTAN@genesCoex[, genes])
     }
   }
 )
@@ -402,8 +399,6 @@ setMethod(
 #' cells' coex matrix from the COTAN object.
 #'
 #' @param objCOTAN A COTAN object
-#' @param asMatrix A Boolean to query whether return the cellsCoex as a matrix
-#' or leave it in which-ever form it already is
 #' @param cells A vector of cell names. It will exclude any cell not on the list.
 #' By defaults the function will keep all cells.
 #'
@@ -413,19 +408,18 @@ setMethod(
 #'
 #' @examples
 #' data("ERCC.cotan")
-#' coex <- getCellsCoex(ERCC.cotan, asMatrix = TRUE)
+#' cellsCoex <- getCellsCoex(ERCC.cotan)
 #'
 #' @rdname getCellsCoex
 setMethod(
   "getCellsCoex",
   "COTAN",
-  function(objCOTAN, asMatrix = TRUE, cells = "all") {
-    if (isFALSE(asMatrix)) {
-      stopifnot("Get coex as list. Cells subsetting is not supported yet." = cells == "all")
-      return(objCOTAN@coex)
+  function(objCOTAN, cells = c()) {
+    if (is_empty(cells)) {
+      return(objCOTAN@cellsCoex)
     }
     else {
-      return( vec2mat_rfast(objCOTAN@cellsCoex, genes = cells) )
+      return(objCOTAN@cellsCoex[, cells])
     }
   }
 )

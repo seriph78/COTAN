@@ -15,6 +15,8 @@ setGeneric("get.clusters.delta.expression", function(obj)
 #' @rdname get.clusters.delta.expression
 setMethod("get.clusters.delta.expression","scCOTAN",
  function(obj){
+   obj <- as(obj, "scCOTAN")
+
    if(any(is.na(obj@clusters))){
      print("Problem. There are Nas in clusters!")
      break
@@ -65,8 +67,8 @@ setMethod("get.clusters.delta.expression","scCOTAN",
       colnames(increse.expression) <- paste0("cl.", condition)
 
       if (dim(increased.expression.tot)[1] == 0) {
-        increased.expression.tot <- as.data.frame(matrix(nrow = length(obj@coex$genes)))
-        rownames(increased.expression.tot) <- obj@coex$genes
+        increased.expression.tot <- as.data.frame(matrix(nrow = nrow(obj@coex)))
+        rownames(increased.expression.tot) <- rownames(obj@coex)
       }
 
       increased.expression.tot  <- cbind(increased.expression.tot ,increse.expression )

@@ -74,14 +74,15 @@ test_that("4_cotan_coex_test", {
 
     obj <- calculateCoex(obj)
 
-    coex <- getGenesCoex(obj, asMatrix = TRUE, genes = genes.names.test)
+    coex <- getGenesCoex(obj, genes = genes.names.test)
 
     saveRDS(obj, file = file.path(tm, "temp.RDS"))
-
+    print("Reached here")
     coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
-    expect_equal(coex, coex_test)
+    expect_equal(as.matrix(coex), coex_test)
 })
+
 
 test_that("PCA_test", {
 
@@ -116,7 +117,6 @@ test_that("PCA_test", {
 })
 
 
-
 test_that("5_calculatePValue_test", {
     obj <- readRDS(file.path(tm,"temp.RDS"))
     pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)
@@ -145,7 +145,7 @@ test_that("6_calculateGDI_test", {
 
 
 test_that("vec2mat_rfast_test1", {
-    mat <- matrix(0,nrow = 5, ncol = 5)
+    mat <- matrix(0, nrow = 5, ncol = 5)
     mat <- Rfast::lower_tri.assign(mat,c(1:15),diag = T)
     mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
 
@@ -154,37 +154,34 @@ test_that("vec2mat_rfast_test1", {
 
     v <- mat2vec_rfast(mat)
 
-    expect_equal(mat, vec2mat_rfast(v,genes = "all"))
-
+    expect_equal(mat, vec2mat_rfast(v))
 })
 
 test_that("vec2mat_rfast_test2", {
     mat <- matrix(0,nrow = 10, ncol = 10)
-    mat <- Rfast::lower_tri.assign(mat,c(1:55),diag = T)
-    mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
+    mat <- Rfast::lower_tri.assign(mat, c(1:55), diag = T)
+    mat <- Rfast::upper_tri.assign(mat, v = Rfast::upper_tri(Rfast::transpose(mat)))
 
-    colnames(mat) <- paste0("row.",c(1:10))
-    rownames(mat) <- paste0("row.",c(1:10))
+    colnames(mat) <- paste0("row.", c(1:10))
+    rownames(mat) <- paste0("row.", c(1:10))
 
     v <- mat2vec_rfast(mat)
 
-    genes <- c("row.1","row.2","row.9","row.10")
+    genes <- c("row.1", "row.2", "row.9", "row.10")
 
-    expect_equal(mat[,genes], vec2mat_rfast(v,genes = genes))
-
+    expect_equal(mat[, genes], vec2mat_rfast(v, genes = genes))
 })
 
 test_that("mat2vec_rfast_test", {
     vec <- c(1:15)
-    names.v <- paste0("raw",c(1:5))
+    names.v <- paste0("raw", c(1:5))
 
     names.v
-    vec <- list("genes"=names.v, "values"=vec)
+    vec <- list("genes" = names.v, "values" = vec)
 
     m <- vec2mat_rfast(vec)
 
     expect_equal(vec, mat2vec_rfast(m))
-
 })
 
 

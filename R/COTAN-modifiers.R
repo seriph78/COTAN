@@ -3,8 +3,7 @@
 #' initialize meta-data data-set
 #'
 #' @param objCOTAN the COTAN object
-#' @param GEO a code reporting the GEO identification
-#'            or other specific dataset code
+#' @param GEO a code reporting the GEO identification or other specific dataset code
 #' @param sequencingMethod a string reporting the method used for the sequencing
 #' @param sampleCondition a string reporting the specific sample condition or time point
 #'

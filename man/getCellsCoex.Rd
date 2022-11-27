@@ -4,13 +4,10 @@
 \alias{getCellsCoex,COTAN-method}
 \title{getCellsCoex}
 \usage{
-\S4method{getCellsCoex}{COTAN}(objCOTAN, asMatrix = TRUE, cells = "all")
+\S4method{getCellsCoex}{COTAN}(objCOTAN, cells = c())
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}
-
-\item{asMatrix}{A Boolean to query whether return the cellsCoex as a matrix
-or leave it in which-ever form it already is}
 
 \item{cells}{A vector of cell names. It will exclude any cell not on the list.
 By defaults the function will keep all cells.}
@@ -24,6 +21,6 @@ cells' coex matrix from the COTAN object.
 }
 \examples{
 data("ERCC.cotan")
-coex <- getCellsCoex(ERCC.cotan, asMatrix = TRUE)
+cellsCoex <- getCellsCoex(ERCC.cotan)
 
 }

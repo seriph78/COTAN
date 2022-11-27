@@ -1,6 +1,7 @@
 #' DEA_on_clusters
-#' Next method is used to do the differential expression analysis using COTAN contingency tables
-#' on the cluster checked with the previous method
+#'
+#' Next method is used to do the differential expression analysis using
+#' COTAN contingency tables on the cluster checked with the previous method
 #'
 #' @param obj A COTAN object
 #' @param cells_list a list with all the cells divided for each group. Name of each element in the list will
@@ -10,6 +11,7 @@
 #' @return a list with two objects: the first is a scCOTAN with the new
 #' object with also the correlation matrix for the genes in each cluster (obj@cluster_data),
 #' the second is the p-values matrix.
+#'
 #' @export
 #'
 #' @examples
@@ -133,10 +135,10 @@ setMethod("DEA_on_clusters","scCOTAN",
                   #to insert gene names when the dataframe is empty
 
                   if (dim(cluster_data)[1] == 0) {
-                      cluster_data <- as.data.frame(matrix(nrow = length(obj@coex$genes)))
-                      rownames(cluster_data) <- obj@coex$genes
-                      cluster_pval <- as.data.frame(matrix(nrow = length(obj@coex$genes)))
-                      rownames(cluster_pval) <- obj@coex$genes
+                      cluster_data <- as.data.frame(matrix(nrow = nrow(obj@coex)))
+                      rownames(cluster_data) <- rownames(obj@coex)
+                      cluster_pval <- as.data.frame(matrix(nrow = nrow(obj@coex)))
+                      rownames(cluster_pval) <- rownames(obj@coex)
                   }
 
                   cluster_data <- cbind(cluster_data,coex)

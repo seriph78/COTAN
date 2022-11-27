@@ -9,8 +9,7 @@
 \arguments{
 \item{objCOTAN}{the COTAN object}
 
-\item{GEO}{a code reporting the GEO identification
-or other specific dataset code}
+\item{GEO}{a code reporting the GEO identification or other specific dataset code}
 
 \item{sequencingMethod}{a string reporting the method used for the sequencing}
 

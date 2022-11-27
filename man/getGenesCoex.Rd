@@ -4,13 +4,10 @@
 \alias{getGenesCoex,COTAN-method}
 \title{getGenesCoex}
 \usage{
-\S4method{getGenesCoex}{COTAN}(objCOTAN, asMatrix = TRUE, genes = "all")
+\S4method{getGenesCoex}{COTAN}(objCOTAN, genes = c())
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}
-
-\item{asMatrix}{A Boolean to query whether return the coex as a matrix
-or leave it in which-ever form it already is}
 
 \item{genes}{A vector of gene names. It will exclude any gene not on the list.
 By defaults the function will keep all genes.}
@@ -24,6 +21,6 @@ genes' coex matrix from the COTAN object.
 }
 \examples{
 data("ERCC.cotan")
-coex <- getGenesCoex(ERCC.cotan, asMatrix = TRUE)
+genesCoex <- getGenesCoex(ERCC.cotan)
 
 }

@@ -3,9 +3,7 @@
 \name{DEA_on_clusters}
 \alias{DEA_on_clusters}
 \alias{DEA_on_clusters,scCOTAN-method}
-\title{DEA_on_clusters
-Next method is used to do the differential expression analysis using COTAN contingency tables
-on the cluster checked with the previous method}
+\title{DEA_on_clusters}
 \usage{
 DEA_on_clusters(obj, cells_list = NULL)
 
@@ -24,7 +22,6 @@ object with also the correlation matrix for the genes in each cluster (obj@clust
 the second is the p-values matrix.
 }
 \description{
-DEA_on_clusters
-Next method is used to do the differential expression analysis using COTAN contingency tables
-on the cluster checked with the previous method
+Next method is used to do the differential expression analysis using
+COTAN contingency tables on the cluster checked with the previous method
 }

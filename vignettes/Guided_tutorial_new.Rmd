@@ -279,7 +279,9 @@ saveRDS(obj, file = paste(out_dir, t, ".cotan.RDS"))
 It is also possible to run a ddirectlya single function if we don't want to clean anything.
 
 ```{r}
-obj <- automatic.COTAN.object.creation(df = test.dataset.col,out_dir = out_dir,save.obj = "YES",GEO = "test",sc.method = "10X", cond = "test.dataset.col")
+obj <- automaticCOTANObjectCreation(
+  raw = test.dataset.col, outDir = out_dir, saveObj = "YES",
+  GEO = "test", sequencingMethod = "10X", sampleCondition = "test.dataset.col")
 ```
 
 # Cell cluster
@@ -392,15 +394,14 @@ Another useful function is extract.coex. This can be used to extract the whole o
 
 ```{r}
 # For the whole matrix
-coex <- getGenesCoex(obj, asMatrix = TRUE)
+coex <- getGenesCoex(obj)
 coex[1:5,1:5]
 ```
 
 ```{r}
 # For a partial matrix
-coex <- getGenesCoex(obj, asMatrix = TRUE,
-                     genes = c("CEP104", "TNFRSF25", "ZBTB48", "STIM1",
-                               "TRIM5", "APBB1", "DNHD1"))
+coex <- getGenesCoex(obj, genes = c("CEP104", "TNFRSF25", "ZBTB48", "STIM1",
+                                    "TRIM5", "APBB1", "DNHD1"))
 head(coex)
 ```
 

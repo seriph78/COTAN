@@ -28,7 +28,8 @@ setMethod("cell_homogeneous_clustering","character",
     dir.create(file.path(out_dir_cond))
   }
   #Step 1
-  obj <- as(readRDS(paste0(in_dir,dataset_name)), "scCOTAN")
+  obj <- readRDS(paste0(in_dir,dataset_name))
+  obj <- as(obj, "scCOTAN")
   srat <- CreateSeuratObject(counts = as.data.frame(obj@raw), project = cond,
                              min.cells = 3, min.features = 4)
   srat <- NormalizeData(srat)

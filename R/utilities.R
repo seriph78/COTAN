@@ -10,6 +10,8 @@
 #'
 #' @return the updated/created data.frame
 #'
+#' @importFrom rlang is_empty
+#'
 #' @rdname setColumnInDF
 #'
 setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {

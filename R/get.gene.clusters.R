@@ -73,7 +73,7 @@ setMethod("get.gene.clusters","scCOTAN",
         df.secondary.markers[list.group.markers[[name]],name] <- 1
     }
 
-    temp.coex = getGenesCoex(obj, asMatrix = TRUE, genes = unlist(list.group.markers))
+    temp.coex = getGenesCoex(obj, genes = unlist(list.group.markers))
     temp.coex = temp.coex[rownames(temp.coex) %in% rownames(df.secondary.markers),]
 
     for (name in names(list.group.markers)) {

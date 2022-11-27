@@ -131,10 +131,13 @@ setMethod("merge_cell.clusters","scCOTAN",
                 mat <- srat@assays$RNA@counts[,colnames(srat@assays$RNA@counts) %in%
                                                 rownames(srat@meta.data[srat@meta.data$cotan %in% c(cl.1,cl.2),])]
 
-                merged.obj <- automatic.COTAN.object.creation(df = as.data.frame(mat),out_dir = out_dir ,GEO = GEO
-                                                              ,sc.method=sc.method,cond = cond.merge,cores = cores,
-                                                              #mt = mt,mt_prefix = mt_prefix
-                )
+                merged.obj <- automaticCOTANObjectCreation(raw = mat,
+                                                           outDir = out_dir,
+                                                           GEO = GEO,
+                                                           sequencingMethod = sc.method,
+                                                           sampleCondition = cond.merge,
+                                                           cores = cores)
+
                 GDI_data_wt1 = calculateGDI(merged.obj)
 
                 #Test if the number of genes with GDI > 1.5 is more than 1%

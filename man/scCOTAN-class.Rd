@@ -19,7 +19,7 @@ Define my COTAN structure
 \item{\code{raw.norm}}{ANY. To store the raw data matrix divided for the cell
 efficiency estimated (nu)}
 
-\item{\code{coex}}{ANY. The coex matrix (sparce)}
+\item{\code{coex}}{ANY. The coex matrix}
 
 \item{\code{nu}}{vector.}
 

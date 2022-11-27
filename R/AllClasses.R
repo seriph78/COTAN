@@ -1,4 +1,18 @@
+#' @importClassesFrom Matrix dgCMatrix
+#'
+emptySparseMatrix <- function() {
+  return( as(as(as(matrix(0, 0, 0), "dMatrix"), "generalMatrix"), "CsparseMatrix") )
+}
+
+#' @importClassesFrom Matrix dspMatrix
+#'
+emptySymmetricMatrix <- function() {
+  return( as(as(as(matrix(0, 0, 0), "dMatrix"), "symmetricMatrix"), "packedMatrix") )
+}
+
+
 #' Definition of COTAN class
+#'
 #' @slot raw raw UMI count matrix 𝑛×𝑚 (gene number × cell number)
 #' @slot genesCoex correlation of COTAN between genes, 𝑛×𝑛
 #' @slot cellsCoex correlation of COTAN between cells, 𝑚×𝑚
@@ -9,23 +23,23 @@
 #' @importFrom rlang is_empty
 #'
 #' @importClassesFrom Matrix dgCMatrix
-#' @importClassesFrom Matrix dMatrix
+#' @importClassesFrom Matrix dspMatrix
 #'
 setClass(
   "COTAN",
   slots = c(
     raw          = "dgCMatrix",
-    genesCoex    = "ANY",
-    cellsCoex    = "ANY",
+    genesCoex    = "dspMatrix",
+    cellsCoex    = "dspMatrix",
     metaDataset  = "data.frame",
     metaGenes    = "data.frame",
     metaCells    = "data.frame",
     clustersCoex = "list"
   ),
   prototype = list(
-    raw          = as(matrix(0, 0, 0), "dgCMatrix"),
-    genesCoex    = vector(mode = "list"),
-    cellsCoex    = vector(mode = "list"),
+    raw          = emptySparseMatrix(),
+    genesCoex    = emptySymmetricMatrix(),
+    cellsCoex    = emptySymmetricMatrix(),
     metaDataset  = data.frame(),
     metaGenes    = data.frame(),
     metaCells    = data.frame(),
@@ -49,51 +63,19 @@ setClass(
     numGenes <- nrow(object@raw)
     numCells <- ncol(object@raw)
     if (!is_empty(object@genesCoex)) {
-      if (isa(object@genesCoex, "list")) {
-        if (length(names(object@genesCoex)) != 2 ||
-            !all(names(object@genesCoex) %in% c("values", "genes"))) {
-          stop("'genesCoex' must only have names 'values' and 'genes'.")
-        }
-        if (length(object@genesCoex[["genes"]]) != numGenes) {
-          stop(paste0("'genesCoex' names length [", length(object@genesCoex[["genes"]]),
-                      "] does not match with the number of rows [",
-                      numGenes, "]  of 'raw'."))
-        }
-        if (2 * length(object@genesCoex[["values"]]) != numGenes * (numGenes + 1)) {
-          stop(paste0("'genesCoex' values length [", length(object@genesCoex[["values"]]),
-                      "] is not commensurate with the number of rows [",
-                      numGenes, "]  of 'raw'."))
-        }
+      if (!isa(object@genesCoex, "dspMatrix")) {
+        stop("'genesCoex' must be of type 'dspMatrix.")
       }
-      else if (isa(object@genesCoex, "dMatrix")) {
-        if (nrow(object@genesCoex) != ncol(object@genesCoex) ||
-            nrow(object@genesCoex) != numGenes) {
-          stop("'genesCoex' sizes should match the number of genes.")
-        }
+      if (nrow(object@genesCoex) != numGenes) {
+        stop("'genesCoex' sizes should match the number of genes.")
       }
     }
     if (!is_empty(object@cellsCoex)) {
-      if (isa(object@cellsCoex, "list")) {
-        if (length(names(object@cellsCoex)) != 2 ||
-            !all(names(object@cellsCoex) %in% c("values", "genes"))) {
-          stop("'cellsCoex' must only have names 'values' and 'genes'.")
-        }
-        if (length(object@cellsCoex[["genes"]]) != numCells) {
-          stop(paste0("'cellsCoex' names length [", length(object@cellsCoex[["genes"]]),
-                      "] does not match with the number of cols [",
-                      numCells, "]  of 'raw'."))
-        }
-        if (2 * length(object@cellsCoex[["values"]]) != numCells * (numCells + 1)) {
-          stop(paste0("'cellsCoex' values length [", length(object@cellsCoex[["values"]]),
-                      "] is not commensurate with the number of cols [", numCells,
-                      "]  of 'raw'."))
-        }
+      if (!isa(object@genesCoex, "dspMatrix")) {
+        stop("'genesCoex' must be of type 'dspMatrix.")
       }
-      else if (isa(object@cellsCoex, "dMatrix")) {
-        if (nrow(object@cellsCoex) != ncol(object@cellsCoex) ||
-            nrow(object@cellsCoex) != numCells) {
-          stop("'cellsCoex' sizes should match the number of cells.")
-        }
+      if (nrow(object@genesCoex) != numGenes) {
+        stop("'genesCoex' sizes should match the number of genes.")
       }
     }
     # metaDataset has no required fields as of now
@@ -156,7 +138,7 @@ setClass(
 #'
 #' @rdname COTAN
 COTAN <- function(raw = "ANY") {
-  raw <- as(as.matrix(raw), "dgCMatrix")
+  raw <- as(as(as(as.matrix(raw), "dMatrix"), "generalMatrix"), "CsparseMatrix")
   new("COTAN", raw = raw)
 }
 
@@ -167,7 +149,7 @@ COTAN <- function(raw = "ANY") {
 #' @slot raw ANY. To store the raw data matrix
 #' @slot raw.norm ANY. To store the raw data matrix divided for the cell
 #' efficiency estimated (nu)
-#' @slot coex ANY. The coex matrix (sparce)
+#' @slot coex ANY. The coex matrix
 #' @slot nu vector.
 #' @slot lambda vector.
 #' @slot a vector.
@@ -197,10 +179,16 @@ setClass(
   )
 ) -> scCOTAN
 
+
 # Automatically convert an object from class "scCOTAN" into "COTAN"
+
 #' @importFrom methods setIs
 #' @importFrom rlang is_empty
 #' @importClassesFrom Matrix dgCMatrix
+#' @importClassesFrom Matrix dspMatrix
+#' @importFrom Matrix forceSymmetric
+#' @importFrom Matrix pack
+#'
 setIs("scCOTAN",
       "COTAN",
       coerce = function(from) {
@@ -211,14 +199,34 @@ setIs("scCOTAN",
         }
 
         if (is_empty(from@raw)) {
-          raw = as(matrix(0, 0, 0), "dgCMatrix")
+          raw = emptySparseMatrix()
         }
         else if(isa(from@raw, "dgCMatrix")) {
           raw = from@raw
         }
         else {
-          raw = as(as.matrix(from@raw), "dgCMatrix")
+          raw = as(as(as(as.matrix(from@raw), "dMatrix"), "generalMatrix"), "CsparseMatrix")
         }
+
+        genesCoex <- emptySymmetricMatrix()
+        if (!is_empty(from@coex)) {
+          if (isa(from@coex, "list")) {
+            genesCoex <- vec2mat_rfast(from@coex[["values"]])
+          }
+          else if(isa(from@coex, "dMatrix")) {
+            genesCoex <- as.matrix(from@coex)
+          }
+          else if(isa(from@coex, "matrix")) {
+            genesCoex <- from@coex
+          }
+          else {
+            stop(paste0("Unsupported coex type: ", class(from@coex)))
+          }
+          # now 'coex' is of type 'matrix'
+          genesCoex <- pack(forceSymmetric(genesCoex))
+        }
+
+        cellsCoex <- emptySymmetricMatrix()
 
         metaGenes <- data.frame()
         if (!is_empty(from@hk)) {
@@ -260,8 +268,8 @@ setIs("scCOTAN",
 
         new("COTAN",
             raw          = raw,
-            genesCoex    = from@coex,
-            cellsCoex    = list(),
+            genesCoex    = genesCoex,
+            cellsCoex    = cellsCoex,
             metaDataset  = from@meta,
             metaGenes    = metaGenes,
             metaCells    = metaCells,
@@ -276,14 +284,34 @@ setIs("scCOTAN",
         }
 
         if (is_empty(value@raw)) {
-          raw = as(matrix(0, 0, 0), "dgCMatrix")
+          raw = emptySparseMatrix()
         }
-        else if(is(value@raw, "dgCMatrix")) {
+        else if(isa(value@raw, "dgCMatrix")) {
           raw = value@raw
         }
         else {
-          raw = as(as.matrix(value@raw), "dgCMatrix")
+          raw = as(as(as(as.matrix(value@raw), "dMatrix"), "generalMatrix"), "CsparseMatrix")
         }
+
+        genesCoex <- emptySymmetricMatrix()
+        if (!is_empty(value@coex)) {
+          if (isa(value@coex, "list")) {
+            genesCoex <- vec2mat_rfast(value@coex[["values"]])
+          }
+          else if(isa(value@coex, "dMatrix")) {
+            genesCoex <- as.matrix(value@coex)
+          }
+          else if(isa(value@coex, "matrix")) {
+            genesCoex <- value@coex
+          }
+          else {
+            stop(paste0("Unsupported coex type: ", class(value@coex)))
+          }
+          # now 'genesCoex' is of type 'matrix'
+          genesCoex <- pack(forceSymmetric(genesCoex))
+        }
+
+        cellsCoex <- emptySymmetricMatrix()
 
         metaGenes <- data.frame()
         if (!is_empty(value@hk)) {
@@ -324,8 +352,8 @@ setIs("scCOTAN",
         }
 
         from@raw          <- raw
-        from@genesCoex    <- value@coex
-        from@cellsCoex    <- list()
+        from@genesCoex    <- genesCoex
+        from@cellsCoex    <- cellsCoex
         from@metaDataset  <- value@meta
         from@metaGenes    <- metaGenes
         from@metaCells    <- metaCells
@@ -333,14 +361,16 @@ setIs("scCOTAN",
         from}
       ) # end setIs
 
+
 # Explicitly convert an object from class "COTAN" into "scCOTAN"
+
 #' @importFrom methods setAs
 #' @importFrom rlang is_empty
-#' @importClassesFrom Matrix dgCMatrix
+#'
 setAs("COTAN",
       "scCOTAN",
       function(from) {
-        lamda <- vector(mode = "numeric")
+        lambda <- vector(mode = "numeric")
         if (!is_empty(from@metaGenes[["lambda"]])) {
           lambda <- from@metaGenes[["lambda"]]
         }
@@ -360,7 +390,7 @@ setAs("COTAN",
           hk <- rownames(from@raw)[from@metaGenes[["hkGenes"]] != 0]
         }
 
-        raw.norm <- as(matrix(0, 0, 0), "dgCMatrix")
+        raw.norm <- emptySparseMatrix()
         if (!is_empty(nu)) {
           raw.norm <- t(t(from@raw) * (1/nu))
         }
@@ -369,8 +399,7 @@ setAs("COTAN",
           # pick last element as the most relevant!
           clusterizationName <- names(from@clustersCoex)[length(from@clustersCoex)]
           cluster_data <- from@clustersCoex[[clusterizationName]]
-        }
-        else {
+        } else {
           clusterizationName <- "CL_clusters"
           cluster_data <- data.frame()
         }
@@ -378,8 +407,7 @@ setAs("COTAN",
         if (!is_empty(from@metaCells[[clusterizationName]])) {
           clusters <- from@metaCells[[clusterizationName]]
           names(clusters) <- rownames(from@metaCells)
-        }
-        else {
+        } else {
           # ensure non-empty vector
           clusters <- rep(NA, ncol(from@raw))
           names(clusters) <- colnames(from@raw)
@@ -399,7 +427,7 @@ setAs("COTAN",
             hk           = hk,
             meta         = from@metaDataset,
             clusters     = clusters,
-            cluster_data = cluster_data )
+            cluster_data = cluster_data)
       },
       # 'from' arg-name is convention: it is actually a destination!
       replace = function(from, value) {
@@ -423,7 +451,7 @@ setAs("COTAN",
           hk <- rownames(value@raw)[value@metaGenes[["hkGenes"]] != 0]
         }
 
-        raw.norm <- as(matrix(0, 0, 0), "dgCMatrix")
+        raw.norm <- emptySparseMatrix()
         if (!is_empty(nu)) {
           raw.norm <- t(t(value@raw) * (1/nu))
         }

@@ -66,7 +66,6 @@ setMethod(
     }
 
     S <- calcualteS(object)
-    S <- vec2mat_rfast(S)
     S <- S[, colnames(S) %in% all.genes.to.an]
     S <- as.matrix(S)
 

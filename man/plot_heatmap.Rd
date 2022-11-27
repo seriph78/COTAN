@@ -2,12 +2,9 @@
 % Please edit documentation in R/COTAN_main.R
 \name{plot_heatmap}
 \alias{plot_heatmap}
-\alias{plot_heatmap,ANY-method}
 \title{plot_heatmap}
 \usage{
 plot_heatmap(p_val.tr = 0.05, df_genes, sets, conditions, dir)
-
-\S4method{plot_heatmap}{ANY}(p_val.tr = 0.05, df_genes, sets, conditions, dir)
 }
 \arguments{
 \item{p_val.tr}{p-value threshold. Default is 0.05}
