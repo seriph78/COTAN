@@ -7,13 +7,13 @@
 \S4method{getCellsCoex}{COTAN}(objCOTAN, asMatrix = TRUE, cells = "all")
 }
 \arguments{
+\item{objCOTAN}{A COTAN object}
+
 \item{asMatrix}{A Boolean to query whether return the cellsCoex as a matrix
 or leave it in which-ever form it already is}
 
 \item{cells}{A vector of cell names. It will exclude any cell not on the list.
 By defaults the function will keep all cells.}
-
-\item{object}{A COTAN object}
 }
 \value{
 the cells' coex values

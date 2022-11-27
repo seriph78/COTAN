@@ -1,3 +1,35 @@
+#' calculateMu
+#'
+#' estimate vector mu
+#' @param objCOTAN a COTAN object
+#'
+#' @return the Mu matrix
+#'
+#' @importFrom Matrix t
+#' @export
+#'
+#' @rdname calculateMu
+setMethod(
+  "calculateMu",
+  "COTAN",
+  function(objCOTAN) {
+    if (is_empty(getLambda(objCOTAN))) {
+      stop("lambda must not be empty, estimate it")
+    }
+
+    if (is_empty(getNu(objCOTAN))) {
+      stop("nu must not be empty, estimate it")
+    }
+
+    muEstimator <- getLambda(objCOTAN) %*% t(getNu(objCOTAN))
+
+    rownames(muEstimator) <- getGenes(objCOTAN)
+
+    return(muEstimator)
+  }
+)
+
+
 #' observedContingencyYY
 #'
 #' calculate observed yes/yes field of contingency table
@@ -127,7 +159,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
     # estimate Probabilities of 0 with internal function funProbZero
-    probZero <- funProbZero(getDispersion(objCOTAN), estimateMu(objCOTAN))
+    probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
 
     errMgs <- "Error: some NA in matrix of probability of zero UMI counts. "
     stopifnot(errMgs = !anyNA(probZero))
@@ -416,5 +448,83 @@ setMethod(
 
     print("Calculate GDI dataframe: DONE")
     return(GDI)
+  }
+)
+
+
+#' calculatePValue
+#'
+#' This function computes the p-values for genes in the COTAN object.
+#' It can be used genome-wide or by setting some specific genes of interest.
+#' By default it computes the p-values using the S statistics (\eqn{\chi^{2}})
+#'
+#' @param objCOTAN a COTAN object
+#' @param statType Whic statistics to use to compute the p-values.
+#' By default it will use the S (\eqn{\chi^{2}})
+#' @param geneSubsetCol an array of genes. It will be put in columns.
+#' If left empty the function will do it genome-wide.
+#' @param geneSubsetRow an array of genes. It will be put in rows.
+#' If left empty the function will do it genome-wide.
+#'
+#' @return a p-value matrix
+#'
+#' @export
+#'
+#' @importFrom Matrix forceSymmetric
+#'
+#' @examples
+#'
+#' data("ERCC.cotan")
+#' ERCC.cotan <- calculatePValue(ERCC.cotan, statType = "S")
+#'
+#' @rdname calculatePValue
+setMethod(
+  "calculatePValue",
+  "COTAN",
+  function(objCOTAN, statType = "S", geneSubsetCol = c(), geneSubsetRow = c()) {
+    if(is_empty(geneSubsetCol) && !is_empty(geneSubsetRow)) {
+      stop(paste0("can't have genome wide on columns and not rows!",
+                  " Use a subset on geneSubsetCol, not on rows."))
+    }
+
+    if (statType == "S") {
+      print("Using function S")
+      S <- calculateS(objCOTAN)
+    }
+    else if (statType == "G") {
+      print("Using function G")
+      S <- calculateG(objCOTAN)
+    }
+    else {
+      stop("Unrecognised stat type: must be either 'S' or 'G'")
+    }
+
+    print("calculating PValues: START")
+
+    genes <- getGenes(objCOTAN)
+    if (is_empty(geneSubsetCol)) {
+      geneSubsetCol <- genes
+    }
+    else {
+      geneSubsetCol = genes[genes %in% geneSubsetCol]
+    }
+
+    if (is_empty(geneSubsetRow)) {
+      geneSubsetRow <- geneSubsetCol
+    }
+    else {
+      geneSubsetRow <- geneSubsetCol[geneSubsetCol %in% geneSubsetRow]
+    }
+
+    strCol <- (if (all(genes %in% geneSubsetCol)) "genome wide" else "on a set of genes")
+    strRow <- (if (all(genes %in% geneSubsetRow)) "genome wide" else "on a set of genes")
+    print(paste("Get p-values", strCol, "on columns and", strRow, "on rows"))
+
+    S <- S[geneSubsetCol, geneSubsetRow, drop = FALSE]
+
+    p_value <- pchisq(as.matrix(S), df = 1, lower.tail = FALSE)
+    print("calculating PValues: DONE")
+
+    return(p_value)
   }
 )

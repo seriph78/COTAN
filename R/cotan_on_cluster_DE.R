@@ -32,12 +32,12 @@ setMethod("DEA_on_clusters","scCOTAN",
 
               cells <- obj@raw
 
-              mu_estimator <- estimateMu(obj)
+              mu_estimator <- calculateMu(obj)
 
               noHKFlags <- flagNotHousekeepingGenes(obj)
 
               mu_estimator <- mu_estimator[noHKFlags,]
-              cells <- cells[noHKFlags, ]
+              cells <- sign(cells[noHKFlags, ]) # now a zero-one matrix
               M <- funProbZero(obj@a, mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
               N <- 1-M
 
@@ -50,26 +50,23 @@ setMethod("DEA_on_clusters","scCOTAN",
 
                   cells_set <- unlist(cells_list[condition])
 
+                  cells_in <- colnames(cells) %in% cells_set
+
                   stopifnot("ERROR. Some cells are not present!"<-  all(cells_set %in% colnames(cells)) )
 
                   # Cells matrix : formed by row data matrix changed to 0-1 matrix
 
 
-                  yes_in <- rowSums(cells[,colnames(cells) %in% cells_set]>0)
-                  yes_out <- rowSums(cells[,!colnames(cells) %in% cells_set]>0)
-                  #no_in <- rowSums(1 - cells[,colnames(cells) %in% cells_set] )
-                  #no_out <- rowSums(1 - cells[,!colnames(cells) %in% cells_set])
-                  no_in <- rowSums(cells[,colnames(cells) %in% cells_set] == 0)
-                  no_out <- rowSums(cells[,!colnames(cells) %in% cells_set] == 0)
+                  yes_in  <- rowSums(cells[, cells_in])
+                  yes_out <- rowSums(cells[,!cells_in])
+                  no_in   <- sum( cells_in) - yes_in
+                  no_out  <- sum(!cells_in) - yes_out
 
+                  estimator_no_in   <- rowSums(M[, cells_in])
+                  estimator_no_out  <- rowSums(M[,!cells_in])
 
-
-                  estimator_no_in <- rowSums(M[,colnames(cells) %in% cells_set])
-                  estimator_no_out <- rowSums(M[,!colnames(cells) %in% cells_set])
-
-
-                  estimator_yes_in <- rowSums(N[,colnames(cells) %in% cells_set])
-                  estimator_yes_out <- rowSums(N[,!colnames(cells) %in% cells_set])
+                  estimator_yes_in  <- rowSums(N[, cells_in])
+                  estimator_yes_out <- rowSums(N[,!cells_in])
 
                   if( (sum(((yes_in+no_in)-(estimator_no_in+estimator_yes_in))**2)+
                        sum(((yes_out+no_out)-(estimator_yes_out+estimator_no_out))**2)) > 0.0001){
@@ -77,8 +74,8 @@ setMethod("DEA_on_clusters","scCOTAN",
                   }
 
 
-                  exp_yes <- rowSums(cells>0)
-                  exp_no <- getNumCells(obj) - exp_yes
+                  exp_yes <- rowSums(cells)
+                  exp_no <- ncol(cells) - exp_yes
                   if( sum(yes_in+yes_out-exp_yes) != 0 |  sum(no_in+no_out-exp_no) != 0 ){
                       print("Problems with observed counts!")
                   }
@@ -132,6 +129,7 @@ setMethod("DEA_on_clusters","scCOTAN",
 
                   colnames(coex)    <- paste0("cl.", condition)
                   colnames(p_value) <- paste0("cl.", condition)
+
                   #to insert gene names when the dataframe is empty
 
                   if (dim(cluster_data)[1] == 0) {

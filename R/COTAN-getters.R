@@ -116,7 +116,7 @@ setMethod(
 #'
 #' This function extracts the cell raw library size.
 #'
-#' @param object A COTAN object
+#' @param objCOTAN A COTAN object
 #'
 #' @return an array with the library sizes
 #' @importFrom rlang is_empty
@@ -206,6 +206,30 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     return(objCOTAN@metaCells)
+  }
+)
+
+
+#' getClustersCoex
+#'
+#' This function extract the complete clusterCoex list
+#'
+#' @param objCOTAN A COTAN object
+#'
+#' @return the clusterCoex list
+#'
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' clusterCoex <- getClustersCoex(ERCC.cotan, asMatrix = TRUE)
+#'
+#' @rdname getClustersCoex
+setMethod(
+  "getClustersCoex",
+  "COTAN",
+  function(objCOTAN) {
+    return(objCOTAN@clustersCoex)
   }
 )
 
@@ -342,7 +366,7 @@ setMethod(
 #' This function extract a complete (or a partial after genes dropping)
 #' genes' coex matrix from the COTAN object.
 #'
-#' @param object A COTAN object
+#' @param objCOTAN A COTAN object
 #' @param asMatrix A Boolean to query whether return the coex as a matrix
 #' or leave it in which-ever form it already is
 #' @param genes A vector of gene names. It will exclude any gene not on the list.
@@ -377,7 +401,7 @@ setMethod(
 #' This function extract a complete (or a partial after cells dropping)
 #' cells' coex matrix from the COTAN object.
 #'
-#' @param object A COTAN object
+#' @param objCOTAN A COTAN object
 #' @param asMatrix A Boolean to query whether return the cellsCoex as a matrix
 #' or leave it in which-ever form it already is
 #' @param cells A vector of cell names. It will exclude any cell not on the list.
@@ -406,3 +430,76 @@ setMethod(
   }
 )
 
+
+#' getClusterizations
+#'
+#' This function extract the list of clusterizations defined in the COTAN object.
+#'
+#' @param objCOTAN A COTAN object
+#' @param dropNoCoex When TRUE drops the names from the clusterizations with
+#' empty associated coex data.frame
+#'
+#' @return a vactor of clusterizations names without the 'CL_' prefix
+#'
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' clusterizations <- getClusterizations(ERCC.cotan)
+#'
+#' @rdname getClusterizations
+setMethod(
+  "getClusterizations",
+  "COTAN",
+  function(objCOTAN, dropNoCoex = FALSE) {
+    stopifnot(validObject(objCOTAN))
+
+    clsCoex <- getClustersCoex(objCOTAN)
+
+    if (isTRUE(dropNoCoex)) {
+      names(clsCoex[!sapply(clsCoex, is_empty)])
+    }
+    else {
+      return( names(clsCoex) )
+    }
+  }
+)
+
+#' getClusterizationData
+#'
+#' This function extract the asked clusterization column and its coex
+#' data.frame from the COTAN object.
+#'
+#' @param objCOTAN A COTAN object
+#' @param clName The name of the clusterization. If not give the last
+#' available clusterization will be returned, as probably the most significant!
+#'
+#' @return a list with 'clusters' and 'coex'
+#'
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' list[cls, clsCoex] <- getClusterizationData(ERCC.cotan, clName = "Merged")
+#'
+#' @rdname getClusterizationData
+setMethod(
+  "getClusterizationData",
+  "COTAN",
+  function(objCOTAN, clName = NULL) {
+    if (is_empty(clName)) {
+      clName <- getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
+    }
+    if (substring(clName, 1, 3) != "CL_") {
+      #complete the name
+      clName <- paste0("CL_", clName)
+    }
+    if (!clName %in% getClusterizations(objCOTAN)) {
+      return( list("clusters" = c(), "coex" = data.frame()) )
+    }
+    else {
+      return( list("clusters" = getMetadataCells(objCOTAN)[[clName]],
+                   "coex" = getClustersCoex(objCOTAN)[[clName]]) )
+    }
+  }
+)

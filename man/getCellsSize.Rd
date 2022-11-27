@@ -7,7 +7,7 @@
 \S4method{getCellsSize}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{object}{A COTAN object}
+\item{objCOTAN}{A COTAN object}
 }
 \value{
 an array with the library sizes

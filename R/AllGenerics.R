@@ -17,6 +17,11 @@ setGeneric(
 # -------------------------------------- calculate coex
 
 setGeneric(
+  "calculateMu",
+  function(objCOTAN) standardGeneric("calculateMu")
+)
+
+setGeneric(
   "observedContingencyYY",
   function(objCOTAN, actOnCells = FALSE) standardGeneric("observedContingencyYY")
 )
@@ -49,6 +54,12 @@ setGeneric(
 setGeneric(
   "calculateGDI",
   function(objCOTAN, type = "S") standardGeneric("calculateGDI")
+)
+
+setGeneric(
+  "calculatePValue",
+  function(objCOTAN, statType = "S", geneSubsetCol = c(), geneSubsetRow = c() )
+    standardGeneric("calculatePValue")
 )
 
 #-------------------------------------- getters
@@ -124,6 +135,11 @@ setGeneric(
 )
 
 setGeneric(
+  "getClustersCoex",
+  function(objCOTAN) standardGeneric("getClustersCoex")
+)
+
+setGeneric(
   "flagNotHousekeepingGenes",
   function(objCOTAN) standardGeneric("flagNotHousekeepingGenes")
 )
@@ -141,6 +157,16 @@ setGeneric(
 setGeneric(
   "getCellsCoex",
   function(objCOTAN, asMatrix = TRUE, cells = "all") standardGeneric("getCellsCoex")
+)
+
+setGeneric(
+  "getClusterizations",
+  function(objCOTAN, dropNoCoex = FALSE) standardGeneric("getClusterizations")
+)
+
+setGeneric(
+  "getClusterizationData",
+  function(objCOTAN, clName = NULL) standardGeneric("getClusterizationData")
 )
 
 #-------------------------------------- modifiers
@@ -181,11 +207,6 @@ setGeneric(
 setGeneric(
   "estimateNuLinear",
   function(objCOTAN) standardGeneric("estimateNuLinear")
-)
-
-setGeneric(
-  "estimateMu",
-  function(objCOTAN) standardGeneric("estimateMu")
 )
 
 setGeneric(

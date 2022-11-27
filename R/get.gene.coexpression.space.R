@@ -35,7 +35,7 @@ setMethod(
   function(object, n.genes.for.marker = 25, primary.markers) {
     print("calculating gene coexpression space: output tanh of reduced coex matrix")
 
-    p.val.matrix <- get.pval(object, gene.set.col = primary.markers)
+    p.val.matrix <- calculatePValue(object, geneSubsetCol = primary.markers)
     if (!length(primary.markers) == ncol(p.val.matrix)) {
       print(paste("Gene",
                   primary.markers[!primary.markers %in% colnames(p.val.matrix)],

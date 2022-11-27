@@ -28,7 +28,7 @@ objCOTAN <- COTAN(raw=yoc@raw)
 objCOTAN <- estimateLambdaLinear(objCOTAN)
 objCOTAN <- estimateNuLinear(objCOTAN) 
 objCOTAN <- estimateRawNorm(objCOTAN)
-muEst    <- estimateMu(objCOTAN)
+muEst    <- calculateMu(objCOTAN)
 ```
 
 [PART A] Estimation by bisection of the 'dispersion' parameter

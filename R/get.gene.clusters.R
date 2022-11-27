@@ -48,7 +48,9 @@ setMethod("get.gene.clusters","scCOTAN",
 
     cut <- stats::cutree(hc.norm, k = k.cuts)
 
-    tmp <- get.pval(object = obj,gene.set.col =unlist(list.group.markers),gene.set.row = colnames(g.space))
+    tmp <- calculatePValue(object = obj,
+                           geneSubsetCol = unlist(list.group.markers),
+                           geneSubsetRow = colnames(g.space))
 
     for (m in unlist(list.group.markers)) {
         tmp <- as.data.frame(tmp[order(tmp[,m]),])

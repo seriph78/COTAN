@@ -63,7 +63,7 @@ setMethod(
         print(paste0("primary markers all absent in ", ET))
         stop()
       }
-      p_val <- get.pval(obj, gene.set.col = gr, gene.set.row = ge)
+      p_val <- calculatePValue(obj, geneSubsetCol = gr, geneSubsetRow = ge)
       p_val <- as.data.frame(p_val)
 
       # this to add some eventually effective housekeeping genes
@@ -241,7 +241,7 @@ setMethod(
       print(paste0(no_genes, " not present!"))
     }
 
-    pval <- get.pval(object = obj)
+    pval <- calculatePValue(object = obj)
     diag(pval) <- 1
     pval <- pval[, unique(c(unlist(markers.list), prim.markers))]
 

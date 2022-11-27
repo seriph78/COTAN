@@ -51,37 +51,6 @@ setMethod(
 )
 
 
-#' estimateMu
-#'
-#' estimate vector mu
-#' @param objCOTAN a COTAN object
-#' @return the estimated Mu matrix
-#'
-#' @importFrom Matrix t
-#' @export
-#'
-#' @rdname estimateMu
-setMethod(
-  "estimateMu",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(getLambda(objCOTAN))) {
-      stop("lambda must not be empty, estimate it")
-    }
-
-    if (is_empty(getNu(objCOTAN))) {
-      stop("nu must not be empty, estimate it")
-    }
-
-    muEstimator <- getLambda(objCOTAN) %*% t(getNu(objCOTAN))
-
-    rownames(muEstimator) <- getGenes(objCOTAN)
-
-    return(muEstimator)
-  }
-)
-
-
 #' estimateDispersion
 #'
 #' This is the main function that estimates the dispersion vector
@@ -123,7 +92,7 @@ setMethod(
 
     genes <- getGenes(objCOTAN)
     zeroOneMatrix <- getZeroOneProj(objCOTAN)
-    muEstimator <- estimateMu(objCOTAN)
+    muEstimator <- calculateMu(objCOTAN)
 
     dispList <- list()
 

@@ -32,7 +32,7 @@ setMethod("get.clusters.delta.expression","scCOTAN",
     increased.expression.tot <- data.frame()
 
     cells <- obj@raw
-    mu_estimator <- estimateMu(obj)
+    mu_estimator <- calculateMu(obj)
 
     noHKFlags <- flagNotHousekeepingGenes(object)
 

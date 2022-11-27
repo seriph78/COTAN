@@ -38,7 +38,7 @@ setMethod(
 #'
 #' This function is used to add a line of information to the information data frame (metadata).
 #'
-#' @param object a COTAN object
+#' @param objCOTAN a COTAN object
 #' @param tag the new information tag
 #' @param value a value (or an array) containing the information
 #'
@@ -97,7 +97,7 @@ setMethod(
 #' This function remove an array of genes and/or cells from the current COTAN
 #' object.
 #'
-#' @param object a COTAN object
+#' @param objCOTAN a COTAN object
 #' @param genes an array of gene names
 #' @param cells an array of cell names
 #'
@@ -143,7 +143,7 @@ setMethod(
 
 #' standardizeCoex
 #'
-#' @param object a COTAN object
+#' @param objCOTAN a COTAN object
 #'
 #' @return the original object but with 'genesCoex' and 'cellsCoex' slots
 #' in standard format.

@@ -7,13 +7,13 @@
 \S4method{getGenesCoex}{COTAN}(objCOTAN, asMatrix = TRUE, genes = "all")
 }
 \arguments{
+\item{objCOTAN}{A COTAN object}
+
 \item{asMatrix}{A Boolean to query whether return the coex as a matrix
 or leave it in which-ever form it already is}
 
 \item{genes}{A vector of gene names. It will exclude any gene not on the list.
 By defaults the function will keep all genes.}
-
-\item{object}{A COTAN object}
 }
 \value{
 the genes' coex values

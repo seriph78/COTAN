@@ -4,14 +4,14 @@
 \alias{addElementToMetaDataset,COTAN-method}
 \title{addElementToMetaDataset}
 \usage{
-\S4method{addElementToMetaDataset}{COTAN}(objCOTAN, colName, value)
+\S4method{addElementToMetaDataset}{COTAN}(objCOTAN, tag, value)
 }
 \arguments{
-\item{value}{a value (or an array) containing the information}
-
-\item{object}{a COTAN object}
+\item{objCOTAN}{a COTAN object}
 
 \item{tag}{the new information tag}
+
+\item{value}{a value (or an array) containing the information}
 }
 \value{
 the updated COTAN object

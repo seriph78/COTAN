@@ -7,11 +7,11 @@
 \S4method{dropGenesCells}{COTAN}(objCOTAN, genes = c(), cells = c())
 }
 \arguments{
+\item{objCOTAN}{a COTAN object}
+
 \item{genes}{an array of gene names}
 
 \item{cells}{an array of cell names}
-
-\item{object}{a COTAN object}
 }
 \value{
 a new object with the raw data where the with genes/cells were

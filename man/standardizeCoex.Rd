@@ -7,7 +7,7 @@
 \S4method{standardizeCoex}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{object}{a COTAN object}
+\item{objCOTAN}{a COTAN object}
 }
 \value{
 the original object but with 'genesCoex' and 'cellsCoex' slots
