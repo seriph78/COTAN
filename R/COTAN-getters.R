@@ -451,11 +451,16 @@ setMethod(
     clsCoex <- getClustersCoex(objCOTAN)
 
     if (isTRUE(dropNoCoex)) {
-      names(clsCoex[!sapply(clsCoex, is_empty)])
+      out <- names(clsCoex[!sapply(clsCoex, is_empty)])
     }
     else {
-      return( names(clsCoex) )
+      out <- names(clsCoex)
     }
+
+    # drop the internal 'CL_' prefix
+    out <- substring(out, 4)
+
+    return(out)
   }
 )
 
@@ -486,16 +491,16 @@ setMethod(
     if (is_empty(clusterizationName)) {
       clusterizationName <- getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
     }
-    if (substring(clusterizationName, 1, 3) != "CL_") {
-      #complete the name
-      clusterizationName <- paste0("CL_", clusterizationName)
+    clName <- clusterizationName
+    if (!startsWith(clName, "CL_")) {
+      clName <- paste0("CL_", clName)
     }
-    if (!clusterizationName %in% getClusterizations(objCOTAN)) {
+    if (!clName %in% getClusterizations(objCOTAN)) {
       return( list("clusters" = c(), "coex" = data.frame()) )
     }
     else {
-      return( list("clusters" = getMetadataCells(objCOTAN)[[clusterizationName]],
-                   "coex" = getClustersCoex(objCOTAN)[[clusterizationName]]) )
+      return( list("clusters" = getMetadataCells(objCOTAN)[[clName]],
+                   "coex" = getClustersCoex(objCOTAN)[[clName]]) )
     }
   }
 )

@@ -168,7 +168,12 @@ setMethod(
   "addClusterization",
   "COTAN",
   function(objCOTAN, clusterizationName, clusters, coexDF = data.frame()) {
-    if (clusterizationName %in% colnames(getMetadataCells(objCOTAN))) {
+    clName <- clusterizationName
+    if (!startsWith(clName, "CL_")) {
+      clName <- paste0("CL_", clName)
+    }
+
+    if (clName %in% colnames(getMetadataCells(objCOTAN))) {
       stop(paste0("A clusterization with name '", clusterizationName, "' already exists."))
     }
     if (length(clusters) != getNumCells(objCOTAN)) {
@@ -183,10 +188,10 @@ setMethod(
     }
 
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, clusters,
-                                        clusterizationName, getCells(objCOTAN))
+                                        clName, getCells(objCOTAN))
 
     objCOTAN@clustersCoex <- append(objCOTAN@clustersCoex, coexDF)
-    names(objCOTAN@clustersCoex)[length(objCOTAN@clustersCoex)] <- clusterizationName
+    names(objCOTAN@clustersCoex)[length(objCOTAN@clustersCoex)] <- clName
 
     validObject(objCOTAN)
 
@@ -226,10 +231,15 @@ setMethod(
                   clusterizationName, "'."))
     }
 
-    if (!clusterizationName %in% names(getClustersCoex(objCOTAN))) {
+    clName <- clusterizationName
+    if (!startsWith(clName, "CL_")) {
+      clName <- paste0("CL_", clName)
+    }
+
+    if (!clName %in% names(getClustersCoex(objCOTAN))) {
       stop(paste0("A clusterization with name '", clusterizationName, "' does not exists."))
     }
-    objCOTAN@clustersCoex[[clusterizationName]] <- coexDF
+    objCOTAN@clustersCoex[[clName]] <- coexDF
 
     return(objCOTAN)
   }
@@ -260,14 +270,19 @@ setMethod(
   "dropClusterization",
   "COTAN",
   function(objCOTAN, clusterizationName) {
-    if (!clusterizationName %in% names(getClustersCoex(objCOTAN))) {
+    clName <- clusterizationName
+    if (!startsWith(clName, "CL_")) {
+      clName <- paste0("CL_", clName)
+    }
+
+    if (!clName %in% names(getClustersCoex(objCOTAN))) {
       stop(paste0("A clusterization with name '", clusterizationName, "' does not exists."))
     }
 
-    keptCols <- !colnames(objCOTAN@metaCells) %in% clusterizationName
+    keptCols <- !colnames(objCOTAN@metaCells) %in% clName
     objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols]
 
-    keptCols <- !colnames(objCOTAN@clustersCoex) %in% clusterizationName
+    keptCols <- !colnames(objCOTAN@clustersCoex) %in% clName
     objCOTAN@clustersCoex <- objCOTAN@clustersCoex[keptCols]
 
     return(objCOTAN)
