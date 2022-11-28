@@ -221,13 +221,6 @@ setMethod(
 
     obj <- readRDS(paste0(dir, condition, ".cotan.RDS"))
 
-    if (is(class(getCoex(obj, FALSE))[1], "dtCMatrix")) {
-      obi <- standardizeCoex(obj)
-      obj <- as(obj, "scCOTAN")
-      print(paste0("Saving as new file as ", dir, ET, "new.cotan.RDS"))
-      saveRDS(obj, paste0(dir, ET, "new.cotan.RDS"))
-    }
-
     no_genes <- unique(c(unlist(markers.list), prim.markers))[!unique(c(
       unlist(markers.list),
       prim.markers

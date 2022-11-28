@@ -129,23 +129,12 @@ setMethod("DEA_on_clusters","scCOTAN",
                   coex <- coex/sqrt(getNumCells(obj))
                   coex <- as.data.frame(coex)
 
-                  colnames(coex)    <- paste0("cl.", condition)
-                  colnames(p_value) <- paste0("cl.", condition)
-
-                  #to insert gene names when the dataframe is empty
-
-                  if (dim(cluster_data)[1] == 0) {
-                      cluster_data <- as.data.frame(matrix(nrow = nrow(obj@coex)))
-                      rownames(cluster_data) <- rownames(obj@coex)
-                      cluster_pval <- as.data.frame(matrix(nrow = nrow(obj@coex)))
-                      rownames(cluster_pval) <- rownames(obj@coex)
-                  }
-
-                  cluster_data <- cbind(cluster_data,coex)
-                  cluster_pval <- cbind(cluster_pval,p_value)
-
+                  cluster_data <- setColumnInDF(cluster_data, colToSet = coex,
+                                                colName = condition, rowNames = rownames(obj@coex))
+                  cluster_pval <- setColumnInDF(cluster_pval, colToSet = p_value,
+                                                colName = condition, rowNames = rownames(obj@coex))
               }
-              obj@cluster_data <- cluster_data[,2:ncol(cluster_data)]
+              obj@cluster_data <- cluster_data
 
               return(list(obj,cluster_pval))
           }

@@ -4,13 +4,14 @@
 \alias{getClusterizationData,COTAN-method}
 \title{getClusterizationData}
 \usage{
-\S4method{getClusterizationData}{COTAN}(objCOTAN, clName = NULL)
+\S4method{getClusterizationData}{COTAN}(objCOTAN, clusterizationName = NULL)
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
-\item{clName}{The name of the clusterization. If not give the last
-available clusterization will be returned, as probably the most significant!}
+\item{clusterizationName}{The name of the clusterization.
+If not given the last available clusterization will be returned,
+as it is probably the most significant!}
 }
 \value{
 a list with 'clusters' and 'coex'
@@ -20,7 +21,8 @@ This function extract the asked clusterization column and its coex
 data.frame from the COTAN object.
 }
 \examples{
+
 data("ERCC.cotan")
-list[cls, clsCoex] <- getClusterizationData(ERCC.cotan, clName = "Merged")
+list[cls, clsCoex] <- getClusterizationData(ERCC.cotan, clusterizationName = "merged")
 
 }

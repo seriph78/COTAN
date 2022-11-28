@@ -116,7 +116,7 @@ setMethod(
   "dropGenesCells",
   "COTAN",
   function(objCOTAN, genes, cells) {
-    stopifnot(validObject(objCOTAN))
+    validObject(objCOTAN)
 
     genesPosToKeep <- which(!(getGenes(objCOTAN) %in% genes))
     cellsPosToKeep <- which(!(getCells(objCOTAN) %in% cells))
@@ -140,32 +140,135 @@ setMethod(
 )
 
 
-#' standardizeCoex
+#' addClusterization
+#'
+#' This function adds a clusterization to the current COTAN object, by adding a
+#' new column in the \code{metaCells} data.frame and adding a new element
+#' in the \code{clustersCoex} list using the passed in coex data.frame.
 #'
 #' @param objCOTAN a COTAN object
+#' @param clusterizationName the name of a new clusterization.
+#' It cannot match an existing name; in case use \link{\code{dropClusterization}} first.
+#' @param clusters a factors array of cluster names
+#' @param coexDF a data.frame where each column indicates the coex
+#' for each (or some) of the clusters of the clusterization
 #'
-#' @return the original object but with 'genesCoex' and 'cellsCoex' slots
-#' in standard format.
+#' @return the updated COTAN object
+#'
 #' @importFrom rlang is_empty
 #'
 #' @export
 #'
-#' @rdname standardizeCoex
+#' @examples
+#' data("ERCC.cotan")
+#' ERCC.cotan <- addClusterization(ERCC.cotan, "merged", clusters)
 #'
+#' @rdname addClusterization
 setMethod(
-  "standardizeCoex",
+  "addClusterization",
   "COTAN",
-  function(objCOTAN) {
-
-    if (!is_empty(objCOTAN@genesCoex) && isa(objCOTAN@genesCoex, "dtCMatrix")) {
-      print("'genesCoex' slot in the old format! Converting...")
-      objCOTAN@genesCoex <- mat2vec_rfast(objCOTAN@genesCoex)
+  function(objCOTAN, clusterizationName, clusters, coexDF = data.frame()) {
+    if (clusterizationName %in% colnames(getMetadataCells(objCOTAN))) {
+      stop(paste0("A clusterization with name '", clusterizationName, "' already exists."))
+    }
+    if (length(clusters) != getNumCells(objCOTAN)) {
+      stop(paste0("The passed clusterization has the wrong number of elements [",
+                  length(clusters), "] instead of the expected number of cells [",
+                  getNumCells(objCOTAN), "]."))
+    }
+    if (!isa(coexDF, "data.frame")) {
+      stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
+                  " A '", class(coexDF), "' was given instead for clusterization '",
+                  clusterizationName, "'."))
     }
 
-    if (!is_empty(objCOTAN@cellsCoex) && isa(objCOTAN@cellsCoex, "dtCMatrix")) {
-      print("'cellsCoex' in the old format! Converting...")
-      objCOTAN@cellsCoex <- mat2vec_rfast(objCOTAN@cellsCoex)
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, clusters,
+                                        clusterizationName, getCells(objCOTAN))
+
+    objCOTAN@clustersCoex <- append(objCOTAN@clustersCoex, coexDF)
+    names(objCOTAN@clustersCoex)[length(objCOTAN@clustersCoex)] <- clusterizationName
+
+    validObject(objCOTAN)
+
+    return(objCOTAN)
+  }
+)
+
+#' addClusterizationCoex
+#'
+#' This function adds a clusterization coex data.frame to the current COTAN object.
+#' It requires the clusterization to be already present, see \link{\code{addClusterization}}
+#'
+#' @param objCOTAN a COTAN object
+#' @param clusterizationName the name of an existing clusterization
+#' @param coexDF a data.frame where each column indicates the coex
+#' for each (or some) of the clusters of the clusterization
+#'
+#' @return the updated COTAN object
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#'
+#' data("ERCC.cotan")
+#' ERCC.cotan <- addClusterizationCoex(ERCC.cotan, "merge", coex)
+#'
+#' @rdname addClusterizationCoex
+setMethod(
+  "addClusterizationCoex",
+  "COTAN",
+  function(objCOTAN, clusterizationName, coexDF) {
+    if (!isa(coexDF, "data.frame")) {
+      stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
+                  " A '", class(coexDF), "' was given instead for clusterization '",
+                  clusterizationName, "'."))
     }
+
+    if (!clusterizationName %in% names(getClustersCoex(objCOTAN))) {
+      stop(paste0("A clusterization with name '", clusterizationName, "' does not exists."))
+    }
+    objCOTAN@clustersCoex[[clusterizationName]] <- coexDF
+
+    return(objCOTAN)
+  }
+)
+
+
+#' dropClusterization
+#'
+#' This function drops a clusterization from the current COTAN object, by removing
+#' the corresponding column in the \code{metaCells} data.frame and in case dropping
+#' the corresponding coex data.frame from the \code{clustersCoex} list.
+#'
+#' @param objCOTAN a COTAN object
+#' @param clusterizationName the name of an existing clusterization.
+#'
+#' @return the updated COTAN object
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' data("ERCC.cotan")
+#' ERCC.cotan <- dropClusterization(ERCC.cotan, "merged")
+#'
+#' @rdname dropClusterization
+setMethod(
+  "dropClusterization",
+  "COTAN",
+  function(objCOTAN, clusterizationName) {
+    if (!clusterizationName %in% names(getClustersCoex(objCOTAN))) {
+      stop(paste0("A clusterization with name '", clusterizationName, "' does not exists."))
+    }
+
+    keptCols <- !colnames(objCOTAN@metaCells) %in% clusterizationName
+    objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols]
+
+    keptCols <- !colnames(objCOTAN@clustersCoex) %in% clusterizationName
+    objCOTAN@clustersCoex <- objCOTAN@clustersCoex[keptCols]
 
     return(objCOTAN)
   }

@@ -446,7 +446,7 @@ setMethod(
   "getClusterizations",
   "COTAN",
   function(objCOTAN, dropNoCoex = FALSE) {
-    stopifnot(validObject(objCOTAN))
+    validObject(objCOTAN)
 
     clsCoex <- getClustersCoex(objCOTAN)
 
@@ -465,35 +465,37 @@ setMethod(
 #' data.frame from the COTAN object.
 #'
 #' @param objCOTAN A COTAN object
-#' @param clName The name of the clusterization. If not give the last
-#' available clusterization will be returned, as probably the most significant!
+#' @param clusterizationName The name of the clusterization.
+#' If not given the last available clusterization will be returned,
+#' as it is probably the most significant!
 #'
 #' @return a list with 'clusters' and 'coex'
 #'
 #' @export
 #'
 #' @examples
+#'
 #' data("ERCC.cotan")
-#' list[cls, clsCoex] <- getClusterizationData(ERCC.cotan, clName = "Merged")
+#' list[cls, clsCoex] <- getClusterizationData(ERCC.cotan, clusterizationName = "merged")
 #'
 #' @rdname getClusterizationData
 setMethod(
   "getClusterizationData",
   "COTAN",
-  function(objCOTAN, clName = NULL) {
-    if (is_empty(clName)) {
-      clName <- getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
+  function(objCOTAN, clusterizationName = NULL) {
+    if (is_empty(clusterizationName)) {
+      clusterizationName <- getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
     }
-    if (substring(clName, 1, 3) != "CL_") {
+    if (substring(clusterizationName, 1, 3) != "CL_") {
       #complete the name
-      clName <- paste0("CL_", clName)
+      clusterizationName <- paste0("CL_", clusterizationName)
     }
-    if (!clName %in% getClusterizations(objCOTAN)) {
+    if (!clusterizationName %in% getClusterizations(objCOTAN)) {
       return( list("clusters" = c(), "coex" = data.frame()) )
     }
     else {
-      return( list("clusters" = getMetadataCells(objCOTAN)[[clName]],
-                   "coex" = getClustersCoex(objCOTAN)[[clName]]) )
+      return( list("clusters" = getMetadataCells(objCOTAN)[[clusterizationName]],
+                   "coex" = getClustersCoex(objCOTAN)[[clusterizationName]]) )
     }
   }
 )

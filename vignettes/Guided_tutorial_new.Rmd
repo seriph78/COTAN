@@ -276,7 +276,7 @@ saveRDS(obj, file = paste(out_dir, t, ".cotan.RDS"))
 
 ## Automatic run
 
-It is also possible to run a ddirectlya single function if we don't want to clean anything.
+It is also possible to run a directly a single function if we don't want to clean anything.
 
 ```{r}
 obj <- automaticCOTANObjectCreation(

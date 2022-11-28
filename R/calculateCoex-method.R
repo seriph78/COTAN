@@ -129,6 +129,7 @@ setMethod(
       observedNN <- numCells - observedYA - observedNY
     }
     rm(probZero)
+    gc()
     cat(" done\n")
 
     return( list("observedNN" = as(observedNN, "generalMatrix"),
@@ -270,6 +271,11 @@ setMethod(
     coex <- (observedYY - expectedYY)
     coex <- coex * sqrt(sumForDiv) * normFact
 
+    rm(sumForDiv)
+    rm(observedYY)
+    rm(expectedYY)
+    gc()
+
     coex <- pack(forceSymmetric(coex))
 
     if(actOnCells) {
@@ -279,8 +285,8 @@ setMethod(
       objCOTAN@genesCoex <- coex
     }
 
-    rm(expectedYY)
     rm(coex)
+    gc()
 
     print(paste("Calculate", kind, "coex: DONE"))
 
@@ -307,7 +313,6 @@ setMethod(
   function(objCOTAN) {
     print("Calculating S: START")
 
-    objCOTAN <- standardizeCoex(objCOTAN)
     coex <- getGenesCoex(objCOTAN)
 
     stopifnot("Coex is missing" = !is_empty(coex))
@@ -367,8 +372,12 @@ setMethod(
     tYY <- observedYY * log(observedYY / expectedYY)
     tYY[which(observedYY == 0)] <- 0
     rm(observedYY); rm(expectedYY)
+    gc()
 
     G <- 2 * (tNN + tNY + tYN + tYY)
+
+    rm(tNN); rm(tNY); rm(tYN); rm(tYY)
+    gc()
 
     print("Calculating G: DONE")
     return(G)

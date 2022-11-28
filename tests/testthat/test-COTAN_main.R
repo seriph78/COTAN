@@ -252,8 +252,7 @@ test_that("7_cell_homogeneous_clustering", {
 
 test_that("8_merge_cell.clusters.test", {
   temp <- readRDS(file.path(tm,"temp.RDS"))
-  temp <- DEA_on_clusters(as(temp,"scCOTAN"))
-  temp <- temp[[1]]
+  temp <- DEA_on_clusters(as(temp,"scCOTAN"))[[1]]
 
   initial.cluster.number <- dim(temp@cluster_data)[2]
   temp <- merge_cell.clusters(obj = temp,

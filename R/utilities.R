@@ -1,3 +1,4 @@
+
 #' setColumnInDF
 #'
 #' private function that append if missing or resets if present a column

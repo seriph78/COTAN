@@ -1,3 +1,4 @@
+
 #' @importClassesFrom Matrix dgCMatrix
 #'
 emptySparseMatrix <- function() {
@@ -34,7 +35,7 @@ setClass(
     metaDataset  = "data.frame",
     metaGenes    = "data.frame",
     metaCells    = "data.frame",
-    clustersCoex = "list"
+    clustersCoex = "list" # of data.frames
   ),
   prototype = list(
     raw          = emptySparseMatrix(),
@@ -100,15 +101,27 @@ setClass(
         stop(paste0("The clusterization name '", name, "', found in 'clustersCoex',",
                     " must be one of the column names of 'metaCells'."))
       }
-      if (!isa(object@clustersCoex[[name]], "data.frame")) {
+      coexDF <- object@clustersCoex[[name]]
+      if (!isa(coexDF, "data.frame")) {
         stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
-                    " A '", class(object@clustersCoex[[name]]), "' was given instead." ))
+                    " A '", class(coexDF), "' was given instead." ))
       }
-      if (!is_empty(object@clustersCoex[[name]]) &&
-          nrow(object@clustersCoex[[name]]) != numGenes) {
-        stop(paste0("The number of rows [", nrow(object@clustersCoex[[name]]),
-                    "] of the non-empty data.frames in 'clustersCoex' must be the same",
-                    " as the number of rows [", numGenes, "]  of 'raw'."))
+      if (!is_empty(coexDF)) {
+        if (nrow(coexDF) != numGenes) {
+          stop(paste0("The number of rows [", nrow(object@clustersCoex[[name]]),
+                      "] of the non-empty data.frames in 'clustersCoex' must be the same",
+                      " as the number of rows [", numGenes, "]  of 'raw'."))
+        }
+        # TODO: fix merge_cell.clusters that causes the following to fail
+        # if (!all(colnames(coexDF) %in% object@metaCells[[name]])) {
+        #   badClustersNames <- colnames(coexDF)[!colnames(coexDF) %in% object@metaCells[[name]]]
+        #   stop(paste0("The column names of the data.frames in 'clustersCoex' must",
+        #               " be a subset of the names in the clusterization.",
+        #               " The data.frame for clusterization '", name, "' does not",
+        #               " satisfy this condition with the names [",
+        #               paste(badClustersNames, collapse = ","), "] vs cluester names [",
+        #               paste(unique(object@metaCells[[name]]), collapse = ","), "]."))
+        # }
       }
     }
     for (name in colnames(object@metaCells)) {

@@ -166,7 +166,7 @@ setGeneric(
 
 setGeneric(
   "getClusterizationData",
-  function(objCOTAN, clName = NULL) standardGeneric("getClusterizationData")
+  function(objCOTAN, clusterizationName = NULL) standardGeneric("getClusterizationData")
 )
 
 #-------------------------------------- modifiers
@@ -194,8 +194,18 @@ setGeneric(
 )
 
 setGeneric(
-  "standardizeCoex",
-  function(objCOTAN) standardGeneric("standardizeCoex")
+  "addClusterization",
+  function(objCOTAN, clusterizationName, clusters, coexDF = NULL) standardGeneric("addClusterization")
+)
+
+setGeneric(
+  "addClusterizationCoex",
+  function(objCOTAN, clusterizationName, coexDF) standardGeneric("addClusterizationCoex")
+)
+
+setGeneric(
+  "dropClusterization",
+  function(objCOTAN, clusterizationName) standardGeneric("dropClusterization")
 )
 
 #-------------------------------------- estimators
