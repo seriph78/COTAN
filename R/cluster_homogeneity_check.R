@@ -21,7 +21,7 @@
 #' @examples
 setGeneric("cluster_homogeneity_check", function(obj,cells,out_dir, cores=1,code) standardGeneric("cluster_homogeneity_check"))
 #' @rdname cluster_homogeneity_check
-setMethod("cluster_homogeneity_check","scCOTAN",
+setMethod("cluster_homogeneity_check","COTAN",
           function(obj,cells,out_dir, cores,code){
 
             options(ggrepel.max.overlaps = Inf)
