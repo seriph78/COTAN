@@ -283,7 +283,7 @@ nuBisection <-
 
   if (sumZeros == 0) {
     # cannot match exactly zero prob of zeros with finite values
-    return(initialGuess)
+    return(Inf)
   }
 
   # we look for two dispersion values where the first leads to a
@@ -375,7 +375,7 @@ parallelNuBisection <-
   goodPos <- sumZeros != 0
 
   # cannot match exactly zero prob of zeros with finite values
-  output <- rep(initialGuess, length(sumZeros))
+  output <- rep(Inf, length(initialGuess))
 
   if (sum(goodPos) == 0) {
     return(output)

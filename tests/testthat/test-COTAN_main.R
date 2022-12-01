@@ -77,7 +77,7 @@ test_that("4_cotan_coex_test", {
     coex <- getGenesCoex(obj, genes = genes.names.test)
 
     saveRDS(obj, file = file.path(tm, "temp.RDS"))
-    print("Reached here")
+
     coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
     expect_equal(as.matrix(coex), coex_test)

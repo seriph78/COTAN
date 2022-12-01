@@ -2,12 +2,12 @@
 % Please edit documentation in R/cluster_homogeneity_check.R
 \name{cluster_homogeneity_check}
 \alias{cluster_homogeneity_check}
-\alias{cluster_homogeneity_check,scCOTAN-method}
+\alias{cluster_homogeneity_check,COTAN-method}
 \title{cluster_homogeneity_check}
 \usage{
 cluster_homogeneity_check(obj, cells, out_dir, cores = 1, code)
 
-\S4method{cluster_homogeneity_check}{scCOTAN}(obj, cells, out_dir, cores = 1, code)
+\S4method{cluster_homogeneity_check}{COTAN}(obj, cells, out_dir, cores = 1, code)
 }
 \arguments{
 \item{obj}{a COTAN object}
