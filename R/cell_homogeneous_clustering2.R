@@ -5,22 +5,18 @@
 #'(calling the cluster_homogeneity function).
 #' @param cond a string specifying the experiment condition
 #' @param out_dir an existing directory for the analysis output. In this directory is saved also the final Seurat object.
-#' @param in_dir directory in which there is the Seurat object
 #' @param cores number of cores (NB for windows system no more that 1 can be used)
-#' @param dataset_name COTAN object file name
-#' @param GEO GEO or other dataset official code
-#' @param sc.method single cell method used fot the experiment
 #' @import Seurat
 #' @importFrom stringr str_detect
 #' @return the scCOTAN object and it saves, in the out_dir, the Seurat elaborated data file
 #' @export
 #'
 #' @examples
-setGeneric("cell_homogeneous_clustering", function(obj,cond,out_dir,cores=1,
-                                                   GEO, sc.method )
+setGeneric("cell_homogeneous_clustering", function(obj,cond,out_dir,cores=1)
   standardGeneric("cell_homogeneous_clustering"))
 #' @rdname cell_homogeneous_clustering
-setMethod("cell_homogeneous_clustering","character",
+setMethod("cell_homogeneous_clustering",
+          "COTAN",
  function(obj,cond,out_dir,cores){
 
   out_dir_cond <- paste0(out_dir,"/",cond,"/")
@@ -28,8 +24,9 @@ setMethod("cell_homogeneous_clustering","character",
     dir.create(file.path(out_dir_cond))
   }
   #Step 1
-  #obj <- readRDS(paste0(in_dir,dataset_name))
-  #obj <- as(obj, "scCOTAN")
+  cell.cluster.vector <- rep(NA, length = getNumCells(obj))
+  names(cell.cluster.vector) <- getCells(obj)
+  
   srat <- CreateSeuratObject(counts = as.data.frame(obj@raw), project = cond,
                              min.cells = 3, min.features = 4)
   srat <- NormalizeData(srat)
@@ -37,7 +34,6 @@ setMethod("cell_homogeneous_clustering","character",
   all.genes <- rownames(srat)
   srat <- ScaleData(srat, features = all.genes)
   srat <- RunPCA(srat, features = VariableFeatures(object = srat))
-
 
   srat <- FindNeighbors(srat, dims = 1:25)
   srat <- FindClusters(srat, resolution = 0.5,algorithm = 2)
@@ -81,42 +77,33 @@ setMethod("cell_homogeneous_clustering","character",
   tmp_meta <- srat@meta.data[!rownames(srat@meta.data) %in% to_recluster_new,]
 
   # To save the already defined clusters
-  #df.cell.clustering[rownames(tmp_meta),"cl_1"] <- as.vector(tmp_meta$seurat_clusters)
-  tmp_meta <- tmp_meta[rownames(getMetadataCells(obj)),]
-  #obj@metaCells <- cbind(obj@metaCells, as.vector(tmp_meta$seurat_clusters))
-  #colnames(obj@metaCells)[dim(obj@metaCells)[2]] <- clustering.name
-  obj <- addClusterization(obj,clusters = tmp_meta$seurat_clusters, clusterizationName = clustering.name)
-  if (!sum(is.na(getMetadataCells(obj)[,dim(getMetadataCells(obj))[2]])) == length(to_recluster_new)) {
+  cell.cluster.vector[rownames(tmp_meta)] <- tmp_meta$seurat_clusters
+  
+  if (!sum(is.na(cell.cluster.vector)) == length(to_recluster_new)) {
     print("Problems!")
   }
 
-  #saveRDS(df.cell.clustering,paste0(out_dir_cond, "cluster_df_", cond, ".RDS"))
-  #write.csv(to_recluster_new,
-   #         paste0(out_dir_cond, "to_recluster_", cond, "tot.csv"),
-  #          row.names = F)
-
   print("First part finished! Starting the iterative part.")
-
   round <- 0
   singletons <- 0
-  to_recluster_old <- NA
+  to_recluster_old <- names(cell.cluster.vector[is.na(cell.cluster.vector)])
   number.cls.old <- 0 #Just to start from a number higher than any possible real situation
 
-  while (sum(is.na(getMetadataCells(obj)[,clustering.name])) > 50 ) { #& round < 25
+  while (sum(is.na(cell.cluster.vector)) > 50 ) { #& round < 25
     #data.raw = Read10X(get(paste0("raw.",cond)))
     gc()
     round = round+1
 
+    #to_recluster_new <- names(cell.cluster.vector[is.na(cell.cluster.vector)])
 
-    # Cells wih NA as cluster have to be clustered
-    to_recluster_old <- rownames(getMetadataCells(obj))[is.na(getMetadataCells(obj)[clustering.name])]
-
-    print(paste("Length array cells to re-cluster:", length(to_recluster_new),
+    print(paste("Length array cells to re-cluster:", length(to_recluster_old),
                 "round:", round))
 
     #Clustering using Seurat
-    seurat.obj <- CreateSeuratObject(counts = (obj@raw[,getCells(obj) %in% to_recluster_new]),
-                                   project = "reclustering", min.cells = 1, min.features = 2)
+#    seurat.obj <- CreateSeuratObject(counts = (obj@raw[,getCells(obj) %in% to_recluster_new]),
+#                                   project = "reclustering", min.cells = 1, min.features = 2)
+    seurat.obj <- CreateSeuratObject(counts = (obj@raw[,getCells(obj) %in% to_recluster_old]),
+                                     project = "reclustering", min.cells = 1, min.features = 2)
     seurat.obj <- NormalizeData(seurat.obj, normalization.method = "LogNormalize",
                                 scale.factor = 10000)
     seurat.obj <- FindVariableFeatures(seurat.obj, selection.method = "vst",
@@ -159,7 +146,6 @@ setMethod("cell_homogeneous_clustering","character",
     #in homog.clusters are saved the homogeneous clusters while in
     #to_reclusters_new are kept the other cells.
 
-    #to_recluster = cluster_homogeneity(seurat.obj,data.raw,out_dir_round,cond = cond,cores = cores)
     to_recluster_new <- NA
     for (cl in unique(seurat.obj@meta.data$seurat_clusters)[!unique(seurat.obj@meta.data$seurat_clusters) == "singleton"]) {
       cells <- rownames(seurat.obj@meta.data[seurat.obj@meta.data$seurat_clusters == cl,])
@@ -174,7 +160,7 @@ setMethod("cell_homogeneous_clustering","character",
       }
     }
     homog.clusters <- to_recluster_new[stringr::str_detect(to_recluster_new,pattern = "Cluster")]
-    number.cls.old <- length(unique(seurat.obj$seurat_clusters))- (length(homog.clusters)-1)
+    number.cls.old <- length(unique(seurat.obj$seurat_clusters)) - (length(homog.clusters)-1)
     to_recluster_new <- to_recluster_new[stringr::str_detect(to_recluster_new,pattern = "Cluster",negate = T)]
     to_recluster_new <- to_recluster_new[!is.na(to_recluster_new)]
 
@@ -190,40 +176,37 @@ setMethod("cell_homogeneous_clustering","character",
     cl_number_to_store = unique(seurat.obj@meta.data[!rownames(seurat.obj@meta.data) %in% to_recluster_new,]$seurat_clusters)
 
     #cluster number not already used
-    cl_number_to_store_ready = cl_number_to_store[!cl_number_to_store %in% df.cell.clustering$cl_1]
+    cl_number_to_store_ready = cl_number_to_store[!cl_number_to_store %in% cell.cluster.vector]
     cl_number_to_store_ready = as.vector(cl_number_to_store_ready)
 
-    # singletons are saved as not clustered so need to be added to the dim(seurat.obj@meta.data)[1] in the next round
-    cl_cells_ready =  seurat.obj@meta.data[seurat.obj@meta.data$seurat_clusters %in% cl_number_to_store_ready,]
-
+    cl_cells_ready =  seurat.obj@meta.data[seurat.obj@meta.data$seurat_clusters %in% 
+                                             cl_number_to_store_ready,]
+    
+    # singletons are saved as not clustered so need to be added to the 
     singletons = singletons+dim(cl_cells_ready[cl_cells_ready$seurat_clusters == "singleton",])[1]
 
     #obj@clusters[rownames(cl_cells_ready)] = as.numeric(as.vector(cl_cells_ready$seurat_clusters))
-    obj@metaCells[rownames(cl_cells_ready),clustering.name] <- as.numeric(as.vector(cl_cells_ready$seurat_clusters))
-
+    cell.cluster.vector[rownames(cl_cells_ready)] <- as.numeric(as.vector(cl_cells_ready$seurat_clusters))
 
     #cluster to change value because already present
     cl_to_change = as.vector(cl_number_to_store[!cl_number_to_store %in% cl_number_to_store_ready])
     cl_cells_to_change = seurat.obj@meta.data[seurat.obj@meta.data$seurat_clusters %in% cl_to_change,]
     #cl_not_used = c(min(unique(obj@clusters),na.rm = T):max(unique(obj@clusters),na.rm = T))[!c(min(unique(obj@clusters),na.rm = T):max(unique(obj@clusters),na.rm = T)) %in% unique(obj@clusters)]
-    cl_not_used = c(min(unique(df.cell.clustering$cl_1),na.rm = T):
-                      max(unique(df.cell.clustering$cl_1),na.rm = T))[!c(min(df.cell.clustering$cl_1,na.rm = T):
-                                                                           max(unique(df.cell.clustering$cl_1),na.rm = T)) %in% unique(df.cell.clustering$cl_1)]
+    cl_not_used = which(!c(1:max(cell.cluster.vector, na.rm = T)) %in% cell.cluster.vector)
+    
     k=1
-    while (!is.na(cl_to_change[k])) {
-      cells_cluster = rownames(seurat.obj@meta.data[seurat.obj@meta.data$seurat_clusters == cl_to_change[k],])
-      if ( !is.na(cl_not_used[k])) {
-        #obj@clusters[cells_cluster] = cl_not_used[k]
-        obj@metaCells[cells_cluster,clustering.name] <- cl_not_used[k]
+    for (cl.used in cl_to_change) {
+      cells_cluster = rownames(seurat.obj@meta.data[seurat.obj@meta.data$seurat_clusters == cl.used,])
+      if (k <= length(cl_not_used)) {
+        cell.cluster.vector[cells_cluster] <- cl_not_used[k]
+        k <- k+1
       }else{
-        #obj@clusters[cells_cluster] = (max(unique(as.numeric(as.vector(obj@clusters))),na.rm = T)+1)
-        obj@metaCells[cells_cluster,clustering.name] <- (max(unique(as.numeric(as.vector(df.cell.clustering$cl_1))),na.rm = T)+1)
-
+        cell.cluster.vector[cells_cluster] <- max(cell.cluster.vector,na.rm = T)+1
       }
-      k=k+1
     }
-
-    if (!sum(is.na(obj@metaCells[,clustering.name])) == length(to_recluster_new)) {
+    
+    
+    if (!sum(is.na(cell.cluster.vector)) == length(to_recluster_new)) {
       print("Some problems in cells reclustering")
       break
     }
@@ -251,25 +234,22 @@ setMethod("cell_homogeneous_clustering","character",
       #saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))
     }
 
-    #print("Saving left cells.")
-    #print(paste0("Left to recluster: ", length(to_recluster_new)-1, " cells."))
-    #saveRDS(df.cell.clustering,
-     #       paste0(out_dir_cond, "cluster_df_", cond, ".RDS"))
-    #saveRDS(obj, paste0(out_dir_root, "obj_", cond, ".cotan.RDS"))
-
   } # End while
 
-  if (!sum(is.na(obj@metaCells[,clustering.name])) == length(to_recluster_new)) {
+  if (!sum(is.na(cell.cluster.vector)) == length(to_recluster_new)) {
     print("Problems! Some NA left!")
     #break
   }
 
-  obj@metaDataset <- rbind(obj@metaDataset,c("n. cells left out by clustering:", length(to_recluster_new)))
+  obj <- addElementToMetaDataset(obj,tag = "n. cells left out by clustering:",length(to_recluster_new))
 
   #--------------------------
-  cotan <- obj@metaCells[,clustering.name, drop = FALSE]
+# Da mettere in una funzione esterna!
   #cotan <- as.data.frame(cotan)
-  meta.data <- merge(srat@meta.data,cotan,by = "row.names",all.x = T)
+  meta.data <- merge(srat@meta.data,
+                     as.matrix(cell.cluster.vector),
+                     by = "row.names",all.x = T)
+  colnames(meta.data)[dim(meta.data)[2]] <- paste0("cotan_",clustering.name)
   rownames(meta.data) <- meta.data$Row.names
   meta.data <- meta.data[rownames(srat@meta.data),]
   if(!identical(rownames(meta.data),rownames(srat@meta.data))){
@@ -318,12 +298,14 @@ setMethod("cell_homogeneous_clustering","character",
   #gc()
   #print("Coex estimation last step started")
   #obj <- calculateCoex(obj)
-  print("Coex estimation last step done")
-  gc()
+  #print("Coex estimation last step done")
+  #gc()
 
   #obj <- as(obj, "scCOTAN")
-  saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))
-  return(obj)
+  #obj <- addClusterization(obj,clusters = cell.cluster.vector, clusterizationName = clustering.name)
+  
+  #saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))
+  return(cell.cluster.vector)
 
  }
 )

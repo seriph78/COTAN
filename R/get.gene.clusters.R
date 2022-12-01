@@ -1,4 +1,7 @@
 #' get.gene.clusters
+#' 
+#' This function perfor the gene clustering based on a pool of gene marker, using the gene
+#' coexpression space
 #'
 #' @param obj a COTAN object
 #' @param list.group.markers a named list with a name for each group a one or more marker gene for each group.
@@ -15,7 +18,11 @@
 #' @importFrom stats cutree
 #' @importFrom RColorBrewer brewer.pal
 #'
-#' @return a list
+#' @return a list of 
+#' 1. the gene coexpression space dataframe, 
+#' 2. the eigenvalues plot (using eigenvalue from factoextra package)
+#' 3. the pca component dataframe
+#' 4. the tree plot for the coexpression space genes
 #' @export
 #'
 #' @examples
@@ -30,9 +37,12 @@ setMethod("get.gene.clusters","scCOTAN",
                                           primary.markers = unlist(list.group.markers))
     g.space <- as.data.frame(g.space)
 
-    coex.pca.genes <- prcomp(t(g.space),
+    coex.pca.genes <- prcomp(g.space,
                              center = TRUE,
                              scale. = F)
+    #coex.pca.genes <- prcomp(t(g.space),
+     #                        center = TRUE,
+      #                       scale. = F)
 
     plot.eig <- fviz_eig(coex.pca.genes, addlabels=TRUE,ncp = 10)
 
@@ -43,7 +53,8 @@ setMethod("get.gene.clusters","scCOTAN",
     }
     dend <- as.dendrogram(hc.norm)
 
-    pca_1 <- as.data.frame(coex.pca.genes$rotation[,1:10])
+    #pca_1 <- as.data.frame(coex.pca.genes$rotation[,1:10])
+    pca_1 <- as.data.frame(coex.pca.genes$x[,1:10])
     pca_1 <- pca_1[order.dendrogram(dend),]
 
     cut <- stats::cutree(hc.norm, k = k.cuts)
@@ -137,6 +148,6 @@ setMethod("get.gene.clusters","scCOTAN",
     dend <- dendextend::color_labels(dend,labels = rownames(pca_1),col=pca_1$colors)
 
     return(list("g.space"=g.space, "plot.eig"=plot.eig,
-                "pca_clusters"=pca_1,"tree_plot"=dend,"g.space"=g.space))
+                "pca_clusters"=pca_1,"tree_plot"=dend))
  }
 )
