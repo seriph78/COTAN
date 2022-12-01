@@ -599,10 +599,10 @@ setMethod(
   "calculatePValue",
   "COTAN",
   function(objCOTAN, statType = "S", geneSubsetCol = c(), geneSubsetRow = c()) {
-    if(is_empty(geneSubsetCol) && !is_empty(geneSubsetRow)) {
-      stop(paste0("can't have genome wide on columns and not rows!",
-                  " Use a subset on geneSubsetCol, not on rows."))
-    }
+    #if(is_empty(geneSubsetCol) && !is_empty(geneSubsetRow)) {
+    #  stop(paste0("can't have genome wide on columns and not rows!",
+    #              " Use a subset on geneSubsetCol, not on rows."))
+    #}
 
     if (statType == "S") {
       print("Using function S")
@@ -627,17 +627,17 @@ setMethod(
     }
 
     if (is_empty(geneSubsetRow)) {
-      geneSubsetRow <- geneSubsetCol
+      geneSubsetRow <- genes
     }
     else {
-      geneSubsetRow <- geneSubsetCol[geneSubsetCol %in% geneSubsetRow]
+      geneSubsetRow <- genes[genes %in% geneSubsetRow]
     }
 
     strCol <- (if (all(genes %in% geneSubsetCol)) "genome wide" else "on a set of genes")
     strRow <- (if (all(genes %in% geneSubsetRow)) "genome wide" else "on a set of genes")
     print(paste("Get p-values", strCol, "on columns and", strRow, "on rows"))
 
-    S <- S[geneSubsetCol, geneSubsetRow, drop = FALSE]
+    S <- S[geneSubsetRow, geneSubsetCol, drop = FALSE]
 
     p_value <- pchisq(as.matrix(S), df = 1, lower.tail = FALSE)
     print("calculating PValues: DONE")
