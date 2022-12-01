@@ -4,13 +4,16 @@
 \alias{expectedContingencyTables,COTAN-method}
 \title{expectedContingencyTables}
 \usage{
-\S4method{expectedContingencyTables}{COTAN}(objCOTAN, actOnCells = FALSE)
+\S4method{expectedContingencyTables}{COTAN}(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
 \item{actOnCells}{Boolean, if TRUE, the function works for the cells,
 otherwise for the genes}
+
+\item{asDspMatrices}{Boolean, if TRUE the function will return only packed
+dense symmetric matrices}
 }
 \value{
 a list with the expected contengency tables

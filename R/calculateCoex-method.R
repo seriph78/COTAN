@@ -32,12 +32,15 @@ setMethod(
 )
 
 
-#' observedContingencyYY
+#' observedContingencyTablesYY
 #'
 #' calculate observed yes/yes field of contingency table
 #' @param objCOTAN A COTAN object
 #' @param cells Boolean, if true, the function works for the cells,
 #' otherwise for the genes
+#' @param asDspMatrices Boolean, if TRUE the function will return only packed
+#' dense symmetric matrices
+#'
 #' @return the YesYes observed contengency table
 #'
 #' @importFrom Matrix t
@@ -46,11 +49,11 @@ setMethod(
 #'
 #' @export
 #'
-#' @rdname observedContingencyYY
+#' @rdname observedContingencyTablesYY
 setMethod(
-  "observedContingencyYY",
+  "observedContingencyTablesYY",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE) {
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE) {
     zeroOne <- getZeroOneProj(objCOTAN)
 
     cat("calculating YY..")
@@ -64,7 +67,11 @@ setMethod(
     }
     rm(zeroOne)
 
-    YY <- forceSymmetric(as(YY, "generalMatrix"))
+    YY <- forceSymmetric(as(YY, "denseMatrix"))
+
+    if (isTRUE(asDspMatrices)) {
+      YY <- pack(YY)
+    }
 
     cat(" done\n")
 
@@ -73,23 +80,26 @@ setMethod(
 )
 
 
-#' observedContingency
+#' observedContingencyTables
 #'
 #' calculate observed yes/yes field of contingency table
 #' @param objCOTAN A COTAN object
 #' @param cells Boolean, if true, the function works for the cells,
 #' otherwise for the genes
+#' #' @param asDspMatrices Boolean, if TRUE the function will return only packed
+#' dense symmetric matrices
+#'
 #' @return the YesYes observed contengency table
 #'
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix symmetricMatrix
 #' @export
 #'
-#' @rdname observedContingency
+#' @rdname observedContingencyTables
 setMethod(
-  "observedContingency",
+  "observedContingencyTables",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE) {
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE) {
     zeroOne <- getZeroOneProj(object)
 
     numGenes <- getNumGenes(objCOTAN)
@@ -132,10 +142,23 @@ setMethod(
     gc()
     cat(" done\n")
 
-    return( list("observedNN" = as(observedNN, "generalMatrix"),
-                 "observedNY" = as(observedNY, "generalMatrix"),
-                 "observedYN" = as(observedYN, "generalMatrix"),
-                 "observedYY" = as(observedYY, "generalMatrix")) )
+    observedNN = forceSymmetric(as(observedNN, "denseMatrix"))
+    observedNY =                as(observedNY, "denseMatrix")
+    observedYN =                as(observedYN, "denseMatrix")
+    observedYY = forceSymmetric(as(observedYY, "denseMatrix"))
+
+
+    if (isTRUE(asDspMatrices)) {
+      observedNN = pack(observedNN)
+      observedNY = pack(forceSymmetric(observedNY)) # these operation drops the lower triangle values
+      observedYN = pack(forceSymmetric(observedYN)) # but the other matrix contains them anyway
+      observedYY = pack(observedYY)
+    }
+
+    return( list("observedNN" = observedNN,
+                 "observedNY" = observedNY,
+                 "observedYN" = observedYN,
+                 "observedYY" = observedYY) )
   }
 )
 
@@ -146,6 +169,8 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #' @param actOnCells Boolean, if TRUE, the function works for the cells,
 #' otherwise for the genes
+#' @param asDspMatrices Boolean, if TRUE the function will return only packed
+#' dense symmetric matrices
 #'
 #' @return a list with the expected contengency tables
 #'
@@ -162,7 +187,7 @@ setMethod(
 setMethod(
   "expectedContingencyTables",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE) {
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE) {
     # estimate Probabilities of 0 with internal function funProbZero
     probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
 
@@ -209,12 +234,23 @@ setMethod(
     gc()
     cat(" done\n")
 
-    out <- list( "expectedNN" = as(expectedNN, "generalMatrix"),
-                 "expectedNY" = as(expectedNY, "generalMatrix"),
-                 "expectedYN" = as(expectedYN, "generalMatrix"),
-                 "expectedYY" = as(expectedYY, "generalMatrix") )
+    expectedNN = forceSymmetric(as(expectedNN, "denseMatrix"))
+    expectedNY =                as(expectedNY, "denseMatrix")
+    expectedYN =                as(expectedYN, "denseMatrix")
+    expectedYY = forceSymmetric(as(expectedYY, "denseMatrix"))
 
-    return(out)
+
+    if (isTRUE(asDspMatrices)) {
+      expectedNN = pack(expectedNN)
+      expectedNY = pack(forceSymmetric(expectedNY)) # these operation drops the lower triangle values
+      expectedYN = pack(forceSymmetric(expectedYN)) # but the other matrix contains them anyway
+      expectedYY = pack(expectedYY)
+    }
+
+    return( list("expectedNN" = expectedNN,
+                 "expectedNY" = expectedNY,
+                 "expectedYN" = expectedYN,
+                 "expectedYY" = expectedYY) )
   }
 )
 
@@ -237,46 +273,57 @@ setMethod(
   "calculateCoex",
   "COTAN",
   function(objCOTAN, actOnCells = FALSE) {
-    if(actOnCells) { kind <- "cells'" } else { kind <- "genes'" }
+    if (isTRUE(actOnCells)) {
+      kind <- "cells'"
+      allNames <- getCells(objCOTAN)
+      normFact <- 1 / sqrt(getNumGenes(objCOTAN)) # divided by sqrt(n)
+    } else {
+      kind <- "genes'"
+      allNames <- getGenes(objCOTAN)
+      normFact <- 1 / sqrt(getNumCells(objCOTAN)) # divided by sqrt(m)
+    }
+
     print(paste("Calculate", kind, "coex: START"))
-
-    print("Retrieving observed yes/yes contingency table")
-
-    observedYY <- observedContingencyYY(objCOTAN, actOnCells)
 
     print("Retrieving expected contingency table")
 
     # four estimators: expectedNN, expectedNY, expectedYN, expectedYY
     list[expectedNN, expectedNY, expectedYN, expectedYY] <-
-      expectedContingencyTables(objCOTAN, actOnCells)
+      expectedContingencyTables(objCOTAN, actOnCells, asDspMatrices = TRUE)
 
-    print(paste("Estimating", kind, "coex"))
+    gc()
+
+    print(paste("Calculating", kind, "coex normalization factor"))
 
     # sum for division
-    sumForDiv <- ( 1 / pmax(1, expectedYY) +
-                   1 / pmax(1, expectedYN) +
-                   1 / pmax(1, expectedNY) +
-                   1 / pmax(1, expectedNN) )
 
-    if (isTRUE(actOnCells)) {
-      normFact <- 1 / sqrt(getNumGenes(objCOTAN)) # divided by sqrt(n)
-    }
-    else {
-      normFact <- 1 / sqrt(getNumCells(objCOTAN)) # divided by sqrt(m)
-    }
+    coex <- normFact * sqrt(1 / pmax(1, expectedYY@x) +
+                            1 / pmax(1, expectedYN@x) +
+                            1 / pmax(1, expectedNY@x) +
+                            1 / pmax(1, expectedNN@x) )
 
     rm(expectedYN); rm(expectedNY); rm(expectedNN);
+    gc()
+
+    print("Retrieving observed yes/yes contingency table")
+
+    observedYY <- observedContingencyTablesYY(objCOTAN, actOnCells, asDspMatrices = TRUE)
+
+    gc()
 
     # coex estimation
-    coex <- (observedYY - expectedYY)
-    coex <- coex * sqrt(sumForDiv) * normFact
+    print(paste("Estimating", kind, "coex"))
 
-    rm(sumForDiv)
+    coex <- coex * (observedYY@x - expectedYY@x)
+
+    stopifnot("Matrix@x has the wrong size" = length(coex) == (length(allNames)*(length(allNames)+1)/2))
+
+    coex <- new("dspMatrix", Dim = dim(expectedYY), x = coex)
+    rownames(coex) <- colnames(coex) <- allNames
+
     rm(observedYY)
     rm(expectedYY)
     gc()
-
-    coex <- pack(forceSymmetric(coex))
 
     if(actOnCells) {
       objCOTAN@cellsCoex <- coex
@@ -346,7 +393,7 @@ setMethod(
     print("Calculating G: START")
 
     list[observedNN, observedNY, observedYN, observedYY] <-
-      observedContingency(objCOTAN, actOnCells = FALSE)
+      observedContingencyTables(objCOTAN, actOnCells = FALSE)
 
     list[expectedNN, expectedNY, expectedYN, expectedYY] <-
       expectedContingencyTables(objCOTAN, actOnCells = FALSE)

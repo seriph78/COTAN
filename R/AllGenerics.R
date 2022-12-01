@@ -22,18 +22,21 @@ setGeneric(
 )
 
 setGeneric(
-  "observedContingencyYY",
-  function(objCOTAN, actOnCells = FALSE) standardGeneric("observedContingencyYY")
+  "observedContingencyTablesYY",
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
+    standardGeneric("observedContingencyTablesYY")
 )
 
 setGeneric(
-  "observedContingency",
-  function(objCOTAN, actOnCells = FALSE) standardGeneric("observedContingency")
+  "observedContingencyTables",
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
+    standardGeneric("observedContingencyTables")
 )
 
 setGeneric(
   "expectedContingencyTables",
-  function(objCOTAN, actOnCells = FALSE) standardGeneric("expectedContingencyTables")
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
+    standardGeneric("expectedContingencyTables")
 )
 
 setGeneric(

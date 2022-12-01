@@ -184,7 +184,7 @@ test_that("mat2vec_rfast_test", {
     expect_equal(vec, mat2vec_rfast(m))
 })
 
-
+if(FALSE){
 test_that("7_cell_homogeneous_clustering", {
   obj <- readRDS(file.path(tm,"temp.RDS"))
   clusters <- cell_homogeneous_clustering(obj, cond = "test", cores = 12,
@@ -299,7 +299,7 @@ test_that("8_merge_cell.clusters.test", {
 
 })
 
-
+}
 
 
 
