@@ -19,10 +19,10 @@ setMethod("get.clusters.delta.expression","scCOTAN",
 
    if(any(is.na(obj@clusters))){
      print("Problem. There are Nas in clusters!")
-     break
+     
    }
 
-    clusters.names = unique(obj@clusters)
+    clusters.names = unique(obj@clusters[!is.na(obj@clusters)])
     list.clusters = list(names(obj@clusters[obj@clusters %in% clusters.names[1]]))
     names(list.clusters)=clusters.names[1]
     for (c in c(2:length(clusters.names))) {
@@ -36,7 +36,7 @@ setMethod("get.clusters.delta.expression","scCOTAN",
     cells <- obj@raw
     mu_estimator <- calculateMu(obj)
 
-    noHKFlags <- flagNotHousekeepingGenes(object)
+    noHKFlags <- flagNotHousekeepingGenes(obj)
 
     mu_estimator <- mu_estimator[noHKFlags,]
     cells <- cells[noHKFlags, ]
