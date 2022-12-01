@@ -2,35 +2,19 @@
 % Please edit documentation in R/cell_homogeneous_clustering2.R
 \name{cell_homogeneous_clustering}
 \alias{cell_homogeneous_clustering}
-\alias{cell_homogeneous_clustering,character-method}
+\alias{cell_homogeneous_clustering,COTAN-method}
 \title{cell_homogeneous_clustering}
 \usage{
-cell_homogeneous_clustering(
-  cond,
-  out_dir,
-  in_dir,
-  cores = 1,
-  dataset_name,
-  GEO,
-  sc.method
-)
+cell_homogeneous_clustering(obj, cond, out_dir, cores = 1)
 
-\S4method{cell_homogeneous_clustering}{character}(cond, out_dir, in_dir, cores, dataset_name)
+\S4method{cell_homogeneous_clustering}{COTAN}(obj, cond, out_dir, cores = 1)
 }
 \arguments{
 \item{cond}{a string specifying the experiment condition}
 
 \item{out_dir}{an existing directory for the analysis output. In this directory is saved also the final Seurat object.}
 
-\item{in_dir}{directory in which there is the Seurat object}
-
 \item{cores}{number of cores (NB for windows system no more that 1 can be used)}
-
-\item{dataset_name}{COTAN object file name}
-
-\item{GEO}{GEO or other dataset official code}
-
-\item{sc.method}{single cell method used fot the experiment}
 }
 \value{
 the scCOTAN object and it saves, in the out_dir, the Seurat elaborated data file
