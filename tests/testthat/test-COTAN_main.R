@@ -123,10 +123,12 @@ test_that("5_calculatePValue_test", {
     pval.exp  <- readRDS(file.path(getwd(), "pval.test.RDS"))
 
     #expect_equal(pval, pval.exp)
+    pval <- pval[genes.names.test, ]
+
     error <- sqrt(mean((log(pval+10^(-10)) - log(pval.exp+10^(-10)))^2))
     error_max <- max(abs(log(pval+10^(-10)) - log(pval.exp+10^(-10))))
 
-    if(error > 0.001 ){
+    if (error > 0.001) {
         warning("Error difference grater than 0.001!")
     }
 

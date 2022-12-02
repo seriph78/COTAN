@@ -19,3 +19,10 @@ the updated COTAN object
 This function estimates and stores the coex matrix in the 'genesCoex' or
 'cellCoex' field depending on given 'actOnCells' flag
 }
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+
+}

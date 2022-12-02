@@ -24,7 +24,7 @@ If left empty the function will do it genome-wide.}
 If left empty the function will do it genome-wide.}
 }
 \value{
-a p-value matrix
+a p-value matrix as dspMatrix
 }
 \description{
 This function computes the p-values for genes in the COTAN object.
@@ -33,7 +33,10 @@ By default it computes the p-values using the S statistics (\eqn{\chi^{2}})
 }
 \examples{
 
-data("ERCC.cotan")
-ERCC.cotan <- calculatePValue(ERCC.cotan, statType = "S")
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+pValue <- calculatePValue(objCOTAN)
 
 }

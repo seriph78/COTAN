@@ -26,3 +26,7 @@ and the 'No' expected vector
 \description{
 calculate the expected No/No filed of contingency tables
 }
+\examples{
+expNN <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+
+}

@@ -4,10 +4,16 @@
 \alias{calculateG,COTAN-method}
 \title{calculateG}
 \usage{
-\S4method{calculateG}{COTAN}(objCOTAN)
+\S4method{calculateG}{COTAN}(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}
+
+\item{geneSubsetCol}{an array of genes. It will be put in columns.
+If left empty the function will do it genome-wide.}
+
+\item{geneSubsetRow}{an array of genes. It will be put in rows.
+If left empty the function will do it genome-wide.}
 }
 \value{
 the G matrix
@@ -15,4 +21,8 @@ the G matrix
 \description{
 calculate the statistics G-test for genes contingency tables
 It is proportional to the genes' precence mutual information.
+}
+\examples{
+G <- calculateG(objCOTAN)
+
 }

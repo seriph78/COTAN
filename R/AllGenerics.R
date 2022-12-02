@@ -52,12 +52,14 @@ setGeneric(
 
 setGeneric(
   "calculateS",
-  function(objCOTAN) standardGeneric("calculateS")
+  function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
+    standardGeneric("calculateS")
 )
 
 setGeneric(
   "calculateG",
-  function(objCOTAN) standardGeneric("calculateG")
+  function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
+    standardGeneric("calculateG")
 )
 
 setGeneric(

@@ -15,3 +15,7 @@ the Mu matrix
 \description{
 calculate vector mu = lambda × nu^t
 }
+\examples{
+mu <- calculateMu(objCOTAN)
+
+}

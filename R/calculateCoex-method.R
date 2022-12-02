@@ -11,6 +11,9 @@
 #'
 #' @export
 #'
+#' @examples
+#' mu <- calculateMu(objCOTAN)
+#'
 #' @rdname calculateMu
 setMethod(
   "calculateMu",
@@ -52,6 +55,9 @@ setMethod(
 #'
 #' @export
 #'
+#' @examples
+#' obsYY <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+#'
 #' @rdname observedContingencyTablesYY
 setMethod(
   "observedContingencyTablesYY",
@@ -65,8 +71,7 @@ setMethod(
       observedYY <- t(zeroOne) %*% zeroOne
 
       observedY <- colSums(probZero)
-    }
-    else{
+    } else {
       # for genes
       observedYY <- zeroOne %*% t(zeroOne)
 
@@ -103,6 +108,9 @@ setMethod(
 #' @importClassesFrom Matrix symmetricMatrix
 #' @export
 #'
+#' @examples
+#' obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
+#'
 #' @rdname observedContingencyTables
 setMethod(
   "observedContingencyTables",
@@ -129,8 +137,7 @@ setMethod(
 
       cat("NN..")
       observedNN <- numGenes - observedY - observedYN
-    }
-    else {
+    } else {
       # dimension n x n (n number of genes)
       observedYY <- zeroOne %*% t(zeroOne)
 
@@ -190,6 +197,9 @@ setMethod(
 #'
 #' @export
 #'
+#' @examples
+#' expNN <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+#'
 #' @rdname expectedContingencyTablesNN
 setMethod(
   "expectedContingencyTablesNN",
@@ -211,8 +221,7 @@ setMethod(
       expectedNN <- mat.mult(t(probZero), probZero)
 
       expectedN <- colsums(probZero)
-    }
-    else{
+    } else {
       # dimension n x n (n number of genes)
       expectedNN <- mat.mult(probZero, t(probZero))
 
@@ -254,6 +263,9 @@ setMethod(
 #'
 #' @export
 #'
+#' @examples
+#' exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
+#'
 #' @rdname expectedContingencyTables
 setMethod(
   "expectedContingencyTables",
@@ -284,8 +296,7 @@ setMethod(
 
       cat("YY..")
       expectedYY <- numGenes - expectedN - expectedNY
-    }
-    else {
+    } else {
       # dimension n x n (n number of genes)
       expectedNN <- mat.mult(probZero, t(probZero))
 
@@ -338,6 +349,12 @@ setMethod(
 #' @return the updated COTAN object
 #'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #'
 #' @rdname calculateCoex
 setMethod(
@@ -396,8 +413,7 @@ setMethod(
 
     if(actOnCells) {
       objCOTAN@cellsCoex <- coex
-    }
-    else {
+    } else {
       objCOTAN@genesCoex <- coex
     }
 
@@ -410,26 +426,45 @@ setMethod(
   }
 )
 
+handleGenesSubsets <- function(genes, genesSubset = c()) {
+  if (is_empty(genesSubset)) {
+    genesSubset <- genes
+  } else {
+    stopifnot("Passed genes are not a subset of the full list" = all(genesSubset %in% genes))
+    genesSubset = genes[genes %in% genesSubset]
+  }
+  return(genesSubset)
+}
 
 #' calculateS
 #'
 #' calculate the statistics S for genes contingency tables
 #'
 #' @param objCOTAN A COTAN object
+#' @param geneSubsetCol an array of genes. It will be put in columns.
+#' If left empty the function will do it genome-wide.
+#' @param geneSubsetRow an array of genes. It will be put in rows.
+#' If left empty the function will do it genome-wide.
 #'
 #' @return the S matrix
 #'
 #' @export
+#'
+#' @examples
+#' S <- calculateS(objCOTAN)
 #'
 #' @rdname calculateS
 #'
 setMethod(
   "calculateS",
   "COTAN",
-  function(objCOTAN) {
+  function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
+    geneSubsetCol <- handleGenesSubsets(getGenes(objCOTAN), geneSubsetCol)
+    geneSubsetRow <- handleGenesSubsets(getGenes(objCOTAN), geneSubsetRow)
+
     print("Calculating S: START")
 
-    coex <- getGenesCoex(objCOTAN)
+    coex <- getGenesCoex(objCOTAN)[geneSubsetRow, geneSubsetCol, drop = FALSE]
 
     stopifnot("Coex is missing" = !is_empty(coex))
 
@@ -448,17 +483,27 @@ setMethod(
 #' It is proportional to the genes' precence mutual information.
 #'
 #' @param objCOTAN A COTAN object
+#' @param geneSubsetCol an array of genes. It will be put in columns.
+#' If left empty the function will do it genome-wide.
+#' @param geneSubsetRow an array of genes. It will be put in rows.
+#' If left empty the function will do it genome-wide.
 #'
 #' @return the G matrix
 #'
 #' @export
+#'
+#' @examples
+#' G <- calculateG(objCOTAN)
 #'
 #' @rdname calculateG
 #'
 setMethod(
   "calculateG",
   "COTAN",
-  function(objCOTAN) {
+  function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
+    geneSubsetCol <- handleGenesSubsets(getGenes(objCOTAN), geneSubsetCol)
+    geneSubsetRow <- handleGenesSubsets(getGenes(objCOTAN), geneSubsetRow)
+
     print("Calculating G: START")
 
     list[observedNN, observedNY, observedYN, observedYY] <-
@@ -474,18 +519,22 @@ setMethod(
     print("Estimating G")
 
     tNN <- observedNN * log(observedNN / expectedNN)
+    tNN <- tNN[geneSubsetRow, geneSubsetCol, drop = FALSE]
     tNN[which(observedNN == 0)] <- 0
     rm(observedNN); rm(expectedNN)
 
     tNY <- observedNY * log(observedNY / expectedNY)
+    tNY <- tNY[geneSubsetRow, geneSubsetCol, drop = FALSE]
     tNY[which(observedNY == 0)] <- 0
     rm(observedNY); rm(expectedNY)
 
     tYN <- observedYN * log(observedYN / expectedYN)
+    tYN <- tYN[geneSubsetRow, geneSubsetCol, drop = FALSE]
     tYN[which(observedYN == 0)] <- 0
     rm(observedYN); rm(expectedYN)
 
     tYY <- observedYY * log(observedYY / expectedYY)
+    tYY <- tYY[geneSubsetRow, geneSubsetCol, drop = FALSE]
     tYY[which(observedYY == 0)] <- 0
     rm(observedYY); rm(expectedYY)
     gc()
@@ -519,8 +568,12 @@ setMethod(
 #' @importFrom Matrix forceSymmetric
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' quant.p <- calculateGDI(ERCC.cotan)
+#'
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+#' GDI <- calculateGDI(objCOTAN)
 #'
 #' @rdname calculateGDI
 setMethod(
@@ -583,65 +636,52 @@ setMethod(
 #' @param geneSubsetRow an array of genes. It will be put in rows.
 #' If left empty the function will do it genome-wide.
 #'
-#' @return a p-value matrix
+#' @return a p-value matrix as dspMatrix
 #'
 #' @export
 #'
 #' @importFrom Matrix forceSymmetric
+#' @importFrom Matrix pack
+#'
+#' @importClassesFrom Matrix dspMatrix
 #'
 #' @examples
 #'
-#' data("ERCC.cotan")
-#' ERCC.cotan <- calculatePValue(ERCC.cotan, statType = "S")
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+#' pValue <- calculatePValue(objCOTAN)
 #'
 #' @rdname calculatePValue
 setMethod(
   "calculatePValue",
   "COTAN",
   function(objCOTAN, statType = "S", geneSubsetCol = c(), geneSubsetRow = c()) {
-    #if(is_empty(geneSubsetCol) && !is_empty(geneSubsetRow)) {
-    #  stop(paste0("can't have genome wide on columns and not rows!",
-    #              " Use a subset on geneSubsetCol, not on rows."))
-    #}
-
     if (statType == "S") {
       print("Using function S")
-      S <- calculateS(objCOTAN)
-    }
-    else if (statType == "G") {
+      S <- calculateS(objCOTAN,
+                      geneSubsetCol = geneSubsetCol,
+                      geneSubsetRow = geneSubsetRow)
+    } else if (statType == "G") {
       print("Using function G")
-      S <- calculateG(objCOTAN)
-    }
-    else {
+      S <- calculateG(objCOTAN,
+                      geneSubsetCol = geneSubsetCol,
+                      geneSubsetRow = geneSubsetRow)
+    } else {
       stop("Unrecognised stat type: must be either 'S' or 'G'")
     }
 
     print("calculating PValues: START")
 
-    genes <- getGenes(objCOTAN)
-    if (is_empty(geneSubsetCol)) {
-      geneSubsetCol <- genes
-    }
-    else {
-      geneSubsetCol = genes[genes %in% geneSubsetCol]
-    }
-
-    if (is_empty(geneSubsetRow)) {
-      geneSubsetRow <- genes
-    }
-    else {
-      geneSubsetRow <- genes[genes %in% geneSubsetRow]
-    }
-
-    strCol <- (if (all(genes %in% geneSubsetCol)) "genome wide" else "on a set of genes")
-    strRow <- (if (all(genes %in% geneSubsetRow)) "genome wide" else "on a set of genes")
+    strCol <- (if (all(getGenes(objCOTAN) %in% geneSubsetCol)) "genome wide" else "on a set of genes")
+    strRow <- (if (all(getGenes(objCOTAN) %in% geneSubsetRow)) "genome wide" else "on a set of genes")
     print(paste("Get p-values", strCol, "on columns and", strRow, "on rows"))
 
-    S <- S[geneSubsetRow, geneSubsetCol, drop = FALSE]
+    pValues <- pchisq(as.matrix(S), df = 1, lower.tail = FALSE)
 
-    p_value <- pchisq(as.matrix(S), df = 1, lower.tail = FALSE)
     print("calculating PValues: DONE")
 
-    return(p_value)
+    return(pValues)
   }
 )

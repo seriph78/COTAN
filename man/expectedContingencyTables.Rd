@@ -21,3 +21,7 @@ a list with the expected contingency tables
 \description{
 calcualte the expected values of contingency tables
 }
+\examples{
+exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
+
+}

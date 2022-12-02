@@ -20,3 +20,7 @@ the observed contingency tables
 \description{
 calculate observed yes/yes field of contingency table
 }
+\examples{
+obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
+
+}

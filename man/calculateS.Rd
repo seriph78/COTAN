@@ -4,14 +4,24 @@
 \alias{calculateS,COTAN-method}
 \title{calculateS}
 \usage{
-\S4method{calculateS}{COTAN}(objCOTAN)
+\S4method{calculateS}{COTAN}(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}
+
+\item{geneSubsetCol}{an array of genes. It will be put in columns.
+If left empty the function will do it genome-wide.}
+
+\item{geneSubsetRow}{an array of genes. It will be put in rows.
+If left empty the function will do it genome-wide.}
 }
 \value{
 the S matrix
 }
 \description{
 calculate the statistics S for genes contingency tables
+}
+\examples{
+S <- calculateS(objCOTAN)
+
 }

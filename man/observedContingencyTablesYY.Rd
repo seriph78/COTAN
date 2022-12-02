@@ -26,3 +26,7 @@ and the 'Yes' observed vector
 \description{
 calculate observed Yes/Yes field of contingency table
 }
+\examples{
+obsYY <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+
+}
