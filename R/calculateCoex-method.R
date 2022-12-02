@@ -1,6 +1,7 @@
 #' calculateMu
 #'
-#' estimate vector mu
+#' calculate vector mu = lambda × nu^t
+#'
 #' @param objCOTAN a COTAN object
 #'
 #' @return the Mu matrix
@@ -34,14 +35,16 @@ setMethod(
 
 #' observedContingencyTablesYY
 #'
-#' calculate observed yes/yes field of contingency table
+#' calculate observed Yes/Yes field of contingency table
+#'
 #' @param objCOTAN A COTAN object
 #' @param cells Boolean, if true, the function works for the cells,
 #' otherwise for the genes
 #' @param asDspMatrices Boolean, if TRUE the function will return only packed
 #' dense symmetric matrices
 #'
-#' @return the YesYes observed contengency table
+#' @return a list with the 'Yes/Yes' observed contingency table
+#' and the 'Yes' observed vector
 #'
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix dgeMatrix
@@ -59,23 +62,27 @@ setMethod(
     cat("calculating YY..")
     if (isTRUE(actOnCells)) {
       # for cells
-      YY <- t(zeroOne) %*% zeroOne
+      observedYY <- t(zeroOne) %*% zeroOne
+
+      observedY <- colSums(probZero)
     }
     else{
       # for genes
-      YY <- zeroOne %*% t(zeroOne)
+      observedYY <- zeroOne %*% t(zeroOne)
+
+      observedY <- rowSums(zeroOne)
     }
     rm(zeroOne)
 
-    YY <- forceSymmetric(as(YY, "denseMatrix"))
+    observedYY <- forceSymmetric(as(observedYY, "denseMatrix"))
 
     if (isTRUE(asDspMatrices)) {
-      YY <- pack(YY)
+      observedYY <- pack(observedYY)
     }
 
     cat(" done\n")
 
-    return(YY)
+    return(list("observedYY" = observedYY, "observedY" = observedY))
   }
 )
 
@@ -83,13 +90,14 @@ setMethod(
 #' observedContingencyTables
 #'
 #' calculate observed yes/yes field of contingency table
+#'
 #' @param objCOTAN A COTAN object
 #' @param cells Boolean, if true, the function works for the cells,
 #' otherwise for the genes
 #' #' @param asDspMatrices Boolean, if TRUE the function will return only packed
 #' dense symmetric matrices
 #'
-#' @return the YesYes observed contengency table
+#' @return the observed contingency tables
 #'
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix symmetricMatrix
@@ -112,15 +120,15 @@ setMethod(
 
       cat("NY..")
       # Any/Yes vector [cycled] = Yes/Yes + No/Yes
-      observedAY <- colSums(probZero)
+      observedY <- colSums(probZero)
 
-      observedNY <- observedAY - observedYY
+      observedNY <- observedY - observedYY
 
       cat("YN..")
       observedYN <- t(observedNY)
 
       cat("NN..")
-      observedNN <- numGenes - observedAY - observedYN
+      observedNN <- numGenes - observedY - observedYN
     }
     else {
       # dimension n x n (n number of genes)
@@ -128,15 +136,15 @@ setMethod(
 
       cat("YN..")
       # Yes/Any vector [cycled] = Yes/Yes + Yes/No
-      observedYA <- rowSums(zeroOne)
+      observedY <- rowSums(zeroOne)
 
-      observedYN <- observedYA - observedYY
+      observedYN <- observedY - observedYY
 
       cat("NY..")
       observedNY <- t(observedYN)
 
       cat("NN..")
-      observedNN <- numCells - observedYA - observedNY
+      observedNN <- numCells - observedY - observedNY
     }
     rm(probZero)
     gc()
@@ -163,16 +171,79 @@ setMethod(
 )
 
 
+#' expectedContingencyTablesNN
+#'
+#' calculate the expected No/No filed of contingency tables
+#'
+#' @param objCOTAN A COTAN object
+#' @param cells Boolean, if true, the function works for the cells,
+#' otherwise for the genes
+#' @param asDspMatrices Boolean, if TRUE the function will return only packed
+#' dense symmetric matrices
+#'
+#' @return a list with the 'No/No' observed contingency table
+#' and the 'No' expected vector
+#'
+#' @importFrom Matrix t
+#' @importClassesFrom Matrix dgeMatrix
+#' @importClassesFrom Matrix dsyMatrix
+#'
+#' @export
+#'
+#' @rdname expectedContingencyTablesNN
+setMethod(
+  "expectedContingencyTablesNN",
+  "COTAN",
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE) {
+    # estimate Probabilities of 0 with internal function funProbZero
+    probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
+
+    errMgs <- "Error: some NA in matrix of probability of zero UMI counts. "
+    stopifnot(errMgs = !anyNA(probZero))
+
+    numGenes <- getNumGenes(objCOTAN)
+    numCells <- getNumCells(objCOTAN)
+
+    cat("calculating NN..")
+
+    if (isTRUE(actOnCells)) {
+      # dimension m x m (m number of cells)
+      expectedNN <- mat.mult(t(probZero), probZero)
+
+      expectedN <- colsums(probZero)
+    }
+    else{
+      # dimension n x n (n number of genes)
+      expectedNN <- mat.mult(probZero, t(probZero))
+
+      expectedN <- rowsums(probZero)
+    }
+    rm(probZero)
+
+    expectedNN <- forceSymmetric(as(expectedNN, "denseMatrix"))
+
+    if (isTRUE(asDspMatrices)) {
+      expectedNN <- pack(expectedNN)
+    }
+
+    cat(" done\n")
+
+    return( list("expectedNN" = expectedNN, "expectedN" = expectedN) )
+  }
+)
+
+
 #' expectedContingencyTables
 #'
-#' method for estimating the expected values of contingency tables
+#' calcualte the expected values of contingency tables
+#'
 #' @param objCOTAN A COTAN object
 #' @param actOnCells Boolean, if TRUE, the function works for the cells,
 #' otherwise for the genes
 #' @param asDspMatrices Boolean, if TRUE the function will return only packed
 #' dense symmetric matrices
 #'
-#' @return a list with the expected contengency tables
+#' @return a list with the expected contingency tables
 #'
 #' @importFrom Rfast mat.mult
 #' @importFrom Rfast rowsums
@@ -204,15 +275,15 @@ setMethod(
 
       cat("YN..")
       # Any/No vector [cycled] = No/No + Yes/No
-      expectedAN <- colsums(probZero)
+      expectedN <- colsums(probZero)
 
-      expectedYN <- expectedAN - expectedNN
+      expectedYN <- expectedN - expectedNN
 
       cat("NY..")
       expectedNY <- t(expectedYN)
 
       cat("YY..")
-      expectedYY <- numGenes - expectedAN - expectedNY
+      expectedYY <- numGenes - expectedN - expectedNY
     }
     else {
       # dimension n x n (n number of genes)
@@ -220,15 +291,15 @@ setMethod(
 
       cat("NY..")
       # No/Any vector [cycled] = No/No + No/Yes
-      expectedNA <- rowsums(probZero)
+      expectedN <- rowsums(probZero)
 
-      expectedNY <- expectedNA - expectedNN
+      expectedNY <- expectedN - expectedNN
 
       cat("YN..")
       expectedYN <- t(expectedNY)
 
       cat("YY..")
-      expectedYY <- numCells - expectedNA - expectedYN
+      expectedYY <- numCells - expectedN - expectedYN
     }
     rm(probZero)
     gc()
@@ -295,8 +366,6 @@ setMethod(
 
     print(paste("Calculating", kind, "coex normalization factor"))
 
-    # sum for division
-
     coex <- normFact * sqrt(1 / pmax(1, expectedYY@x) +
                             1 / pmax(1, expectedYN@x) +
                             1 / pmax(1, expectedNY@x) +
@@ -307,7 +376,7 @@ setMethod(
 
     print("Retrieving observed yes/yes contingency table")
 
-    observedYY <- observedContingencyTablesYY(objCOTAN, actOnCells, asDspMatrices = TRUE)
+    list[observedYY, ] <- observedContingencyTablesYY(objCOTAN, actOnCells, asDspMatrices = TRUE)
 
     gc()
 

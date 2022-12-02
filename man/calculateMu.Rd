@@ -13,5 +13,5 @@
 the Mu matrix
 }
 \description{
-estimate vector mu
+calculate vector mu = lambda × nu^t
 }

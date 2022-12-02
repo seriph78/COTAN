@@ -16,8 +16,8 @@ otherwise for the genes}
 dense symmetric matrices}
 }
 \value{
-a list with the expected contengency tables
+a list with the expected contingency tables
 }
 \description{
-method for estimating the expected values of contingency tables
+calcualte the expected values of contingency tables
 }

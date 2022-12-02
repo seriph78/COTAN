@@ -34,6 +34,12 @@ setGeneric(
 )
 
 setGeneric(
+  "expectedContingencyTablesNN",
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
+    standardGeneric("expectedContingencyTablesNN")
+)
+
+setGeneric(
   "expectedContingencyTables",
   function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
     standardGeneric("expectedContingencyTables")

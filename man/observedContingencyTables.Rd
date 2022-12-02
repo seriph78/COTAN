@@ -15,7 +15,7 @@ otherwise for the genes
 dense symmetric matrices}
 }
 \value{
-the YesYes observed contengency table
+the observed contingency tables
 }
 \description{
 calculate observed yes/yes field of contingency table
