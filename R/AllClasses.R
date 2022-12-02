@@ -386,16 +386,19 @@ setAs("COTAN",
         lambda <- vector(mode = "numeric")
         if (!is_empty(from@metaGenes[["lambda"]])) {
           lambda <- from@metaGenes[["lambda"]]
+          names(lambda) <- rownames(from@metaGenes)
         }
 
         a <- vector(mode = "numeric")
         if (!is_empty(from@metaGenes[["dispersion"]])) {
           a <- from@metaGenes[["dispersion"]]
+          names(a) <- rownames(from@metaGenes)
         }
 
         nu <- vector(mode = "numeric")
         if (!is_empty(from@metaCells[["nu"]])) {
           nu <- from@metaCells[["nu"]]
+          names(nu) <- rownames(from@metaCells)
         }
 
         hk <- vector(mode = "character")
@@ -409,7 +412,10 @@ setAs("COTAN",
         }
 
         if (!is_empty(from@clustersCoex)) {
-          # pick last element as the most relevant!
+          if (length(from@clustersCoex) > 1) {
+            warning(paste0("The 'COTAN' object contains more than one clusterization:",
+                           "picking up the last one as likely to be the most relevant"))
+          }
           clusterizationName <- names(from@clustersCoex)[length(from@clustersCoex)]
           cluster_data <- from@clustersCoex[[clusterizationName]]
         } else {
@@ -447,16 +453,19 @@ setAs("COTAN",
         lamda <- vector(mode = "numeric")
         if (!is_empty(value@metaGenes[["lambda"]])) {
           lambda <- value@metaGenes[["lambda"]]
+          names(lambda) <- rownames(value@metaGenes)
         }
 
         a <- vector(mode = "numeric")
         if (!is_empty(value@metaGenes[["dispersion"]])) {
           a <- value@metaGenes[["dispersion"]]
+          names(a) <- rownames(value@metaGenes)
         }
 
         nu <- vector(mode = "numeric")
         if (!is_empty(value@metaCells[["nu"]])) {
           nu <- value@metaCells[["nu"]]
+          names(nu) <- rownames(value@metaCells)
         }
 
         hk <- vector(mode = "character")
@@ -470,7 +479,10 @@ setAs("COTAN",
         }
 
         if (!is_empty(value@clustersCoex)) {
-          # pick last element as the most relevant!
+          if (length(value@clustersCoex) > 1) {
+            warning(paste0("The 'COTAN' object contains more than one clusterization:",
+                           "picking up the last one as likely to be the most relevant"))
+          }
           clusterizationName <- names(value@clustersCoex)[length(value@clustersCoex)]
           cluster_data <- value@clustersCoex[[clusterizationName]]
         }
