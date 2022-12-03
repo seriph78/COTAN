@@ -11,6 +11,8 @@ author:
   affiliation: "Scuola Normale Superiore di Pisa"
 - name: "Manuela Helmer-Citterich"
   affiliation: "Department of Biology, University of Rome Tor Vergata"
+- name: "Marco Fantozzi"
+  affiliation: "None [freelance]"
 package: COTAN
 output: 
     BiocStyle::html_document
@@ -289,7 +291,7 @@ obj <- automaticCOTANObjectCreation(
 The next step will find all homogeneous clusters using a GDI check on each cluster.
 
 ```{r}
-obj <- cell_homogeneous_clustering(dataset_name = "test.dataset.col.cotan.RDS",cond = "test", out_dir = out_dir,in_dir = out_dir,cores = 10, sc.method = "10X", GEO =  "test")
+obj <- cell_homogeneous_clustering(obj, cond = "test", out_dir = out_dir, cores = 10)
 ```
 
 Than we can perform a sort of differential expression to detect which genes are enriched or depleted in each cluster.

@@ -307,12 +307,10 @@ setMethod(
     numGenes <- getNumGenes(objCOTAN)
     numCells <- getNumCells(objCOTAN)
 
-    print(paste0("ECT: dims[", numGenes, ", ", numCells, "]"))
-
     list[expectedNN, expectedN] <-
       expectedContingencyTablesNN(objCOTAN,
                                   actOnCells = actOnCells,
-                                  asDspMatrices = FALSE,
+                                  asDspMatrices = isFALSE(optimizeForSpeed),
                                   optimizeForSpeed = optimizeForSpeed)
     gc()
 
