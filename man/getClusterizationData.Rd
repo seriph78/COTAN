@@ -22,7 +22,6 @@ data.frame from the COTAN object.
 }
 \examples{
 
-data("ERCC.cotan")
-list[cls, clsCoex] <- getClusterizationData(ERCC.cotan, clusterizationName = "merged")
+list[cls, clsCoex] <- getClusterizationData(objCOTAN, clusterizationName = "merged")
 
 }

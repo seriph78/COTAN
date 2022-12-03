@@ -16,3 +16,8 @@ the raw count projected to 0/1
 This function extract the raw count table where any
 positive number has been replaced with 1
 }
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+zeroOne <- getZeroOneProj(objCOTAN)
+
+}

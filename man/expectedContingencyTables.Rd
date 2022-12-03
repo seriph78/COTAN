@@ -4,7 +4,12 @@
 \alias{expectedContingencyTables,COTAN-method}
 \title{expectedContingencyTables}
 \usage{
-\S4method{expectedContingencyTables}{COTAN}(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
+\S4method{expectedContingencyTables}{COTAN}(
+  objCOTAN,
+  actOnCells = FALSE,
+  asDspMatrices = FALSE,
+  optimizeForSpeed = TRUE
+)
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}
@@ -14,6 +19,9 @@ otherwise for the genes}
 
 \item{asDspMatrices}{Boolean, if TRUE the function will return only packed
 dense symmetric matrices}
+
+\item{optimizeForSpeed}{Boolean, if TRUE, the function will use Rfast
+parallel algorithms that on the flip side use more memory}
 }
 \value{
 a list with the expected contingency tables

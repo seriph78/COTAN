@@ -50,6 +50,9 @@ setMethod(
 #' and the 'Yes' observed vector
 #'
 #' @importFrom Matrix t
+#' @importFrom Matrix crossprod
+#' @importFrom Matrix tcrossprod
+#'
 #' @importClassesFrom Matrix dgeMatrix
 #' @importClassesFrom Matrix dsyMatrix
 #'
@@ -68,14 +71,12 @@ setMethod(
     cat("calculating YY..")
     if (isTRUE(actOnCells)) {
       # for cells
-      observedYY <- t(zeroOne) %*% zeroOne
-
-      observedY <- colSums(probZero)
+      observedYY <- crossprod(zeroOne)
+      observedY  <- colSums(zeroOne)
     } else {
       # for genes
-      observedYY <- zeroOne %*% t(zeroOne)
-
-      observedY <- rowSums(zeroOne)
+      observedYY <- tcrossprod(zeroOne)
+      observedY  <- rowSums(zeroOne)
     }
     rm(zeroOne)
 
@@ -121,53 +122,59 @@ setMethod(
     numGenes <- getNumGenes(objCOTAN)
     numCells <- getNumCells(objCOTAN)
 
-    cat("calculating YY..")
+    list[observedYY, observedY] <-
+      observedContingencyTablesYY(objCOTAN,
+                                  actOnCells = actOnCells,
+                                  asDspMatrices = FALSE)
+    gc()
+
     if (isTRUE(actOnCells)) {
       # dimension m x m (m number of cells)
-      observedYY <- t(zeroOne) %*% zeroOne
+      cat("calculating NY..")
 
-      cat("NY..")
       # Any/Yes vector [cycled] = Yes/Yes + No/Yes
-      observedY <- colSums(probZero)
-
-      observedNY <- observedY - observedYY
+      #observedNY <- observedY - observedYY
 
       cat("YN..")
-      observedYN <- t(observedNY)
+      observedYN <- t(observedY - observedYY)
 
       cat("NN..")
       observedNN <- numGenes - observedY - observedYN
+
+      observedYN <- as(observedYN, "denseMatrix")
     } else {
       # dimension n x n (n number of genes)
-      observedYY <- zeroOne %*% t(zeroOne)
+      cat("calculating YN..")
 
-      cat("YN..")
       # Yes/Any vector [cycled] = Yes/Yes + Yes/No
-      observedY <- rowSums(zeroOne)
-
-      observedYN <- observedY - observedYY
+      #observedYN <- observedY - observedYY
 
       cat("NY..")
-      observedNY <- t(observedYN)
+      observedNY <- t(observedY - observedYY)
 
       cat("NN..")
       observedNN <- numCells - observedY - observedNY
+
+      observedNY <- as(observedNY, "denseMatrix")
     }
     rm(probZero)
     gc()
     cat(" done\n")
 
-    observedNN = forceSymmetric(as(observedNN, "denseMatrix"))
-    observedNY =                as(observedNY, "denseMatrix")
-    observedYN =                as(observedYN, "denseMatrix")
-    observedYY = forceSymmetric(as(observedYY, "denseMatrix"))
-
+    observedNN <- forceSymmetric(as(observedNN, "denseMatrix"))
 
     if (isTRUE(asDspMatrices)) {
-      observedNN = pack(observedNN)
-      observedNY = pack(forceSymmetric(observedNY)) # these operation drops the lower triangle values
-      observedYN = pack(forceSymmetric(observedYN)) # but the other matrix contains them anyway
-      observedYY = pack(observedYY)
+      observedNN <- pack(observedNN)
+      observedYY <- pack(observedYY)
+      # these operation drops the lower triangle values
+      # but the other matrix contains them anyway
+      if( isTRUE(actOnCells) ) {
+        observedNY <- pack(forceSymmetric(t(observedYN)))
+        observedYN <- pack(forceSymmetric(  observedYN) )
+      } else {
+        observedYN <- pack(forceSymmetric(t(observedNY)))
+        observedNY <- pack(forceSymmetric(  observedNY) )
+      }
     }
 
     return( list("observedNN" = observedNN,
@@ -187,13 +194,21 @@ setMethod(
 #' otherwise for the genes
 #' @param asDspMatrices Boolean, if TRUE the function will return only packed
 #' dense symmetric matrices
+#' @param optimizeForSpeed Boolean, if TRUE, the function will use Rfast
+#' parallel algorithms that on the flip side use more memory
 #'
 #' @return a list with the 'No/No' observed contingency table
 #' and the 'No' expected vector
 #'
 #' @importFrom Matrix t
+#'
 #' @importClassesFrom Matrix dgeMatrix
 #' @importClassesFrom Matrix dsyMatrix
+#'
+#' @importFrom Rfast Crossprod
+#' @importFrom Rfast Tcrossprod
+#' @importFrom Rfast rowsums
+#' @importFrom Rfast colsums
 #'
 #' @export
 #'
@@ -204,12 +219,12 @@ setMethod(
 setMethod(
   "expectedContingencyTablesNN",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE) {
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE, optimizeForSpeed = TRUE) {
     # estimate Probabilities of 0 with internal function funProbZero
     probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
+    gc()
 
-    errMgs <- "Error: some NA in matrix of probability of zero UMI counts. "
-    stopifnot(errMgs = !anyNA(probZero))
+    stopifnot("Error: some NA in matrix of probability of zero UMI counts" = !anyNA(probZero))
 
     numGenes <- getNumGenes(objCOTAN)
     numCells <- getNumCells(objCOTAN)
@@ -218,14 +233,24 @@ setMethod(
 
     if (isTRUE(actOnCells)) {
       # dimension m x m (m number of cells)
-      expectedNN <- mat.mult(t(probZero), probZero)
-
-      expectedN <- colsums(probZero)
+      if (isTRUE(optimizeForSpeed)) {
+        # use Rfast functions
+        expectedNN <- Crossprod(probZero, probZero)
+        expectedN  <- colsums(probZero, parallel = TRUE)
+      } else {
+        expectedNN <- crossprod(probZero)
+        expectedN  <- colSums(probZero)
+      }
     } else {
       # dimension n x n (n number of genes)
-      expectedNN <- mat.mult(probZero, t(probZero))
-
-      expectedN <- rowsums(probZero)
+      if (isTRUE(optimizeForSpeed)) {
+        # use Rfast functions
+        expectedNN <- Tcrossprod(probZero, probZero)
+        expectedN  <- rowsums(probZero, parallel = TRUE)
+      } else {
+        expectedNN <- tcrossprod(probZero)
+        expectedN  <- rowSums(probZero)
+      }
     }
     rm(probZero)
 
@@ -251,10 +276,13 @@ setMethod(
 #' otherwise for the genes
 #' @param asDspMatrices Boolean, if TRUE the function will return only packed
 #' dense symmetric matrices
+#' @param optimizeForSpeed Boolean, if TRUE, the function will use Rfast
+#' parallel algorithms that on the flip side use more memory
 #'
 #' @return a list with the expected contingency tables
 #'
-#' @importFrom Rfast mat.mult
+#' @importFrom Rfast Crossprod
+#' @importFrom Rfast Tcrossprod
 #' @importFrom Rfast rowsums
 #' @importFrom Rfast colsums
 #'
@@ -270,63 +298,71 @@ setMethod(
 setMethod(
   "expectedContingencyTables",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE) {
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE, optimizeForSpeed = TRUE) {
     # estimate Probabilities of 0 with internal function funProbZero
     probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
 
-    errMgs <- "Error: some NA in matrix of probability of zero UMI counts. "
-    stopifnot(errMgs = !anyNA(probZero))
+    stopifnot("Error: some NA in matrix of probability of zero UMI counts" = !anyNA(probZero))
 
     numGenes <- getNumGenes(objCOTAN)
     numCells <- getNumCells(objCOTAN)
 
-    cat("calculating NN..")
+    print(paste0("ECT: dims[", numGenes, ", ", numCells, "]"))
+
+    list[expectedNN, expectedN] <-
+      expectedContingencyTablesNN(objCOTAN,
+                                  actOnCells = actOnCells,
+                                  asDspMatrices = FALSE,
+                                  optimizeForSpeed = optimizeForSpeed)
+    gc()
+
     if (isTRUE(actOnCells)) {
       # dimension m x m (m number of cells)
-      expectedNN <- mat.mult(t(probZero), probZero)
+      cat("calculating YN..")
 
-      cat("YN..")
       # Any/No vector [cycled] = No/No + Yes/No
-      expectedN <- colsums(probZero)
-
-      expectedYN <- expectedN - expectedNN
+      #expectedYN <- expectedN - expectedNN
 
       cat("NY..")
-      expectedNY <- t(expectedYN)
+      expectedNY <- t(expectedN - expectedNN)
 
       cat("YY..")
       expectedYY <- numGenes - expectedN - expectedNY
+
+      expectedNY <- as(expectedNY, "denseMatrix")
     } else {
       # dimension n x n (n number of genes)
-      expectedNN <- mat.mult(probZero, t(probZero))
+      cat("calculating NY..")
 
-      cat("NY..")
       # No/Any vector [cycled] = No/No + No/Yes
-      expectedN <- rowsums(probZero)
-
-      expectedNY <- expectedN - expectedNN
+      #expectedNY <- expectedN - expectedNN
 
       cat("YN..")
-      expectedYN <- t(expectedNY)
+      expectedYN <- t(expectedN - expectedNN)
 
       cat("YY..")
       expectedYY <- numCells - expectedN - expectedYN
+
+      expectedYN <- as(expectedYN, "denseMatrix")
     }
     rm(probZero)
     gc()
     cat(" done\n")
 
-    expectedNN = forceSymmetric(as(expectedNN, "denseMatrix"))
-    expectedNY =                as(expectedNY, "denseMatrix")
-    expectedYN =                as(expectedYN, "denseMatrix")
-    expectedYY = forceSymmetric(as(expectedYY, "denseMatrix"))
-
+    expectedYY <- forceSymmetric(as(expectedYY, "denseMatrix"))
 
     if (isTRUE(asDspMatrices)) {
-      expectedNN = pack(expectedNN)
-      expectedNY = pack(forceSymmetric(expectedNY)) # these operation drops the lower triangle values
-      expectedYN = pack(forceSymmetric(expectedYN)) # but the other matrix contains them anyway
-      expectedYY = pack(expectedYY)
+      expectedNN <- pack(expectedNN)
+      expectedYY <- pack(expectedYY)
+      # these operation drops the lower triangle values
+      # but the other matrix contains them anyway
+      if( isTRUE(actOnCells) ) {
+        expectedYN <- pack(forceSymmetric(t(expectedNY)))
+        expectedNY <- pack(forceSymmetric(  expectedNY) )
+      } else {
+        expectedNY <- pack(forceSymmetric(t(expectedYN)))
+        expectedYN <- pack(forceSymmetric(  expectedYN) )
+      }
     }
 
     return( list("expectedNN" = expectedNN,
@@ -345,6 +381,8 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #' @param actOnCells Boolean, if TRUE, the function works for the cells,
 #' otherwise for the genes
+#' @param optimizeForSpeed Boolean, if TRUE, the function will use Rfast
+#' parallel algorithms that on the flip side use more memory
 #'
 #' @return the updated COTAN object
 #'
@@ -360,7 +398,7 @@ setMethod(
 setMethod(
   "calculateCoex",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE) {
+  function(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE) {
     if (isTRUE(actOnCells)) {
       kind <- "cells'"
       allNames <- getCells(objCOTAN)
@@ -377,7 +415,10 @@ setMethod(
 
     # four estimators: expectedNN, expectedNY, expectedYN, expectedYY
     list[expectedNN, expectedNY, expectedYN, expectedYY] <-
-      expectedContingencyTables(objCOTAN, actOnCells, asDspMatrices = TRUE)
+      expectedContingencyTables(objCOTAN,
+                                actOnCells = actOnCells,
+                                asDspMatrices = TRUE,
+                                optimizeForSpeed = optimizeForSpeed)
 
     gc()
 
@@ -393,7 +434,10 @@ setMethod(
 
     print("Retrieving observed yes/yes contingency table")
 
-    list[observedYY, ] <- observedContingencyTablesYY(objCOTAN, actOnCells, asDspMatrices = TRUE)
+    list[observedYY, ] <-
+      observedContingencyTablesYY(objCOTAN,
+                                  actOnCells = actOnCells,
+                                  asDspMatrices = TRUE)
 
     gc()
 
@@ -426,6 +470,8 @@ setMethod(
   }
 )
 
+
+# Internal function to handle genes subset...
 handleGenesSubsets <- function(genes, genesSubset = c()) {
   if (is_empty(genesSubset)) {
     genesSubset <- genes

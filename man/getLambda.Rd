@@ -10,8 +10,14 @@
 \item{objCOTAN}{A COTAN object}
 }
 \value{
-the lambda array.
+the lambda array
 }
 \description{
 This function extract the lambda array (mean expression for each gene).
+}
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+objCOTAN <- estimateLambda(objCOTAN)
+lambda <- getLambda(objCOTAN)
+
 }

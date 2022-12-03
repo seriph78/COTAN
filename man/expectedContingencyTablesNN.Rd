@@ -7,7 +7,8 @@
 \S4method{expectedContingencyTablesNN}{COTAN}(
   objCOTAN,
   actOnCells = FALSE,
-  asDspMatrices = FALSE
+  asDspMatrices = FALSE,
+  optimizeForSpeed = TRUE
 )
 }
 \arguments{
@@ -15,6 +16,9 @@
 
 \item{asDspMatrices}{Boolean, if TRUE the function will return only packed
 dense symmetric matrices}
+
+\item{optimizeForSpeed}{Boolean, if TRUE, the function will use Rfast
+parallel algorithms that on the flip side use more memory}
 
 \item{cells}{Boolean, if true, the function works for the cells,
 otherwise for the genes}

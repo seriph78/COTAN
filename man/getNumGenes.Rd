@@ -15,3 +15,8 @@ the number of genes in the sample (𝑛).
 \description{
 This function extracts the number of genes in the sample (𝑛)
 }
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+numGenes <- getNumGenes(objCOTAN)
+
+}

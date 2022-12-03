@@ -19,7 +19,6 @@ a vactor of clusterizations names without the 'CL_' prefix
 This function extract the list of clusterizations defined in the COTAN object.
 }
 \examples{
-data("ERCC.cotan")
-clusterizations <- getClusterizations(ERCC.cotan)
+clusterizations <- getClusterizations(objCOTAN)
 
 }

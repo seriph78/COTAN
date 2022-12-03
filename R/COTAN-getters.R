@@ -7,8 +7,15 @@
 #' @param objCOTAN A COTAN object
 #'
 #' @return the raw count dataframe
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' rawData <- getRawData(objCOTAN)
+#'
 #' @rdname getRawData
 setMethod(
   "getRawData",
@@ -25,8 +32,15 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the number of cells in the sample (𝑚).
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' numCells <- getNumCells(objCOTAN)
+#'
 #' @rdname getNumCells
 setMethod(
   "getNumCells",
@@ -43,7 +57,13 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the number of genes in the sample (𝑛).
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' numGenes <- getNumGenes(objCOTAN)
+#'
 #' @rdname getNumGenes
 setMethod(
   "getNumGenes",
@@ -60,9 +80,16 @@ setMethod(
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return a cell array
+#' @return a cell character array
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' cellsNames <- getCells(objCOTAN)
+#'
 #' @rdname getCells
 setMethod(
   "getCells",
@@ -80,8 +107,15 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return a gene array
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' genesNames <- getGenes(objCOTAN)
+#'
 #' @rdname getGenes
 setMethod(
   "getGenes",
@@ -100,8 +134,15 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the raw count projected to 0/1
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' zeroOne <- getZeroOneProj(objCOTAN)
+#'
 #' @rdname getZeroOneProj
 setMethod(
   "getZeroOneProj",
@@ -119,8 +160,15 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return an array with the library sizes
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' cellsSize <- getCellsSize(objCOTAN)
+#'
 #' @rdname getCellsSize
 setMethod(
   "getCellsSize", "COTAN",
@@ -137,8 +185,15 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the normalized count dataframe (divided by nu).
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' rawNorm <- getNormalizedData(objCOTAN)
+#'
 #' @rdname getNormalizedData
 setMethod(
   "getNormalizedData",
@@ -160,8 +215,15 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the meta-data data.frame
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' dataSetInfo <- getMetadataDataset(objCOTAN)
+#'
 #' @rdname getMetadataDataset
 setMethod(
   "getMetadataDataset",
@@ -179,8 +241,15 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the meta-data data.frame
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' metaGenes <- getMetadataGenes(objCOTAN)
+#'
 #' @rdname getMetadataGenes
 setMethod(
   "getMetadataGenes",
@@ -198,8 +267,15 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the meta-data data.frame
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' metaCells <- getMetadataCells(objCOTAN)
+#'
 #' @rdname getMetadataCells
 setMethod(
   "getMetadataCells",
@@ -216,13 +292,13 @@ setMethod(
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return the clusterCoex list
+#' @return the list with a coex data.frame for each clusterization
+#' When not empty, each data.frame contains a coex column for each cluster.
 #'
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' clusterCoex <- getClustersCoex(ERCC.cotan, asMatrix = TRUE)
+#' allClustersCoexDF <- getClustersCoex(objCOTAN)
 #'
 #' @rdname getClustersCoex
 setMethod(
@@ -241,8 +317,16 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return the nu array.
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- estimateNuLinear(objCOTAN)
+#' nu <- getNu(objCOTAN)
+#'
 #' @rdname getNu
 setMethod(
   "getNu",
@@ -267,9 +351,17 @@ setMethod(
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return the lambda array.
+#' @return the lambda array
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- estimateLambda(objCOTAN)
+#' lambda <- getLambda(objCOTAN)
+#'
 #' @rdname getLambda
 setMethod(
   "getLambda",
@@ -294,9 +386,18 @@ setMethod(
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return the a array.
+#' @return the dispersion array
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
+#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' dispersion <- getDispersion(objCOTAN)
+#'
 #' @rdname getDispersion
 setMethod(
   "getDispersion",
@@ -327,6 +428,12 @@ setMethod(
 #' @importFrom rlang is_empty
 #'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- findHousekeepingGenes(objCOTAN)
+#' goodPos <- flagNotHousekeepingGenes(objCOTAN)
+#'
 #' @rdname flagNotHousekeepingGenes
 setMethod(
   "flagNotHousekeepingGenes",
@@ -349,8 +456,16 @@ setMethod(
 #' @param objCOTAN A COTAN object
 #'
 #' @return an array containing all genes expressed in all cells
+#'
 #' @importFrom rlang is_empty
+#'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- findHousekeepingGenes(objCOTAN)
+#' hkGenes <- getHousekeepingGenes(objCOTAN)
+#'
 #' @rdname getHousekeepingGenes
 setMethod(
   "getHousekeepingGenes",
@@ -372,11 +487,16 @@ setMethod(
 #'
 #' @return the genes' coex values
 #'
+#' @importFrom rlang is_empty
+#'
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' genesCoex <- getGenesCoex(ERCC.cotan)
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+#' genesCoex <- getGenesCoex(objCOTAN)
 #'
 #' @rdname getGenesCoex
 setMethod(
@@ -404,11 +524,17 @@ setMethod(
 #'
 #' @return the cells' coex values
 #'
+#' @importFrom rlang is_empty
+#'
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' cellsCoex <- getCellsCoex(ERCC.cotan)
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
+#' cellsCoex <- getCellsCoex(objCOTAN)
 #'
 #' @rdname getCellsCoex
 setMethod(
@@ -438,8 +564,7 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' clusterizations <- getClusterizations(ERCC.cotan)
+#' clusterizations <- getClusterizations(objCOTAN)
 #'
 #' @rdname getClusterizations
 setMethod(
@@ -480,8 +605,7 @@ setMethod(
 #'
 #' @examples
 #'
-#' data("ERCC.cotan")
-#' list[cls, clsCoex] <- getClusterizationData(ERCC.cotan, clusterizationName = "merged")
+#' list[cls, clsCoex] <- getClusterizationData(objCOTAN, clusterizationName = "merged")
 #'
 #' @rdname getClusterizationData
 setMethod(

@@ -20,7 +20,11 @@ This function extract a complete (or a partial after cells dropping)
 cells' coex matrix from the COTAN object.
 }
 \examples{
-data("ERCC.cotan")
-cellsCoex <- getCellsCoex(ERCC.cotan)
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
+objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
+cellsCoex <- getCellsCoex(objCOTAN)
 
 }

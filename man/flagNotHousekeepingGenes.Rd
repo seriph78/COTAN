@@ -16,3 +16,9 @@ an array of Booleans with TRUE for genes that are not housekeeping
 This function returns a Boolean vector with TRUE for those genes that are
 not housekeeping.
 }
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+objCOTAN <- findHousekeepingGenes(objCOTAN)
+goodPos <- flagNotHousekeepingGenes(objCOTAN)
+
+}

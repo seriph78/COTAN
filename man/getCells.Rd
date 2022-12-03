@@ -10,8 +10,13 @@
 \item{objCOTAN}{A COTAN object}
 }
 \value{
-a cell array
+a cell character array
 }
 \description{
 This function extract all cells in the dataset.
+}
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+cellsNames <- getCells(objCOTAN)
+
 }

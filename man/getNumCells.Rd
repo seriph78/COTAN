@@ -15,3 +15,8 @@ the number of cells in the sample (𝑚).
 \description{
 This function extracts the number of cells in the sample (𝑚)
 }
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+numCells <- getNumCells(objCOTAN)
+
+}

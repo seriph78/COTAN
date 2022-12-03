@@ -10,13 +10,13 @@
 \item{objCOTAN}{A COTAN object}
 }
 \value{
-the clusterCoex list
+the list with a coex data.frame for each clusterization
+When not empty, each data.frame contains a coex column for each cluster.
 }
 \description{
 This function extract the complete clusterCoex list
 }
 \examples{
-data("ERCC.cotan")
-clusterCoex <- getClustersCoex(ERCC.cotan, asMatrix = TRUE)
+allClustersCoexDF <- getClustersCoex(objCOTAN)
 
 }

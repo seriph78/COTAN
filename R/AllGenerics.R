@@ -35,19 +35,20 @@ setGeneric(
 
 setGeneric(
   "expectedContingencyTablesNN",
-  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE, optimizeForSpeed = TRUE)
     standardGeneric("expectedContingencyTablesNN")
 )
 
 setGeneric(
   "expectedContingencyTables",
-  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
+  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE, optimizeForSpeed = TRUE)
     standardGeneric("expectedContingencyTables")
 )
 
 setGeneric(
   "calculateCoex",
-  function(objCOTAN, actOnCells = FALSE) standardGeneric("calculateCoex")
+  function(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
+    standardGeneric("calculateCoex")
 )
 
 setGeneric(

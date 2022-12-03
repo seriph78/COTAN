@@ -4,13 +4,16 @@
 \alias{calculateCoex,COTAN-method}
 \title{calculateCoex}
 \usage{
-\S4method{calculateCoex}{COTAN}(objCOTAN, actOnCells = FALSE)
+\S4method{calculateCoex}{COTAN}(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
 \item{actOnCells}{Boolean, if TRUE, the function works for the cells,
 otherwise for the genes}
+
+\item{optimizeForSpeed}{Boolean, if TRUE, the function will use Rfast
+parallel algorithms that on the flip side use more memory}
 }
 \value{
 the updated COTAN object

@@ -15,3 +15,8 @@ the raw count dataframe
 \description{
 This function extract the raw count table.
 }
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+rawData <- getRawData(objCOTAN)
+
+}

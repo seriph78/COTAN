@@ -15,3 +15,8 @@ the meta-data data.frame
 \description{
 This function extract the meta-data stored for the genes.
 }
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+metaGenes <- getMetadataGenes(objCOTAN)
+
+}

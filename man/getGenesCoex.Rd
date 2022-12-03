@@ -20,7 +20,10 @@ This function extract a complete (or a partial after genes dropping)
 genes' coex matrix from the COTAN object.
 }
 \examples{
-data("ERCC.cotan")
-genesCoex <- getGenesCoex(ERCC.cotan)
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+genesCoex <- getGenesCoex(objCOTAN)
 
 }

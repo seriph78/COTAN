@@ -15,3 +15,8 @@ the meta-data data.frame
 \description{
 This function extract the meta-data stored for the data-set.
 }
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+dataSetInfo <- getMetadataDataset(objCOTAN)
+
+}

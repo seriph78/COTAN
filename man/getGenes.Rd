@@ -15,3 +15,8 @@ a gene array
 \description{
 This function extract all genes in the dataset.
 }
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+genesNames <- getGenes(objCOTAN)
+
+}
