@@ -59,11 +59,13 @@ automaticCOTANObjectCreation <-
     #  dropGenesCells(obj, genes_to_rem, cells_to_rem)
     #}
 
-    print(paste0("Condition ", sampleCondition))
-    print(paste("n cells", getNumCells(obj)))
+    logThis(paste0("Condition ", sampleCondition), logLevel = 2)
+    logThis(paste("n cells", getNumCells(obj)), logLevel = 2)
 
 
     #--------------------------------------
+    logThis("Cotan analysis functions started", logLevel = 1)
+
     if (!file.exists(outDir)) {
       dir.create(file.path(outDir))
     }
@@ -105,7 +107,6 @@ automaticCOTANObjectCreation <-
     rm(plots)
     gc()
 
-    print("Cotan analysis function started")
     analysis_time <- Sys.time()
 
     obj <- estimateDispersion(obj, cores = cores)
@@ -113,19 +114,19 @@ automaticCOTANObjectCreation <-
     genes_coex_time <- Sys.time()
     analysis_time <- difftime(genes_coex_time, analysis_time, units = "mins")
 
-    print(paste0("Only analysis time ", analysis_time))
+    logThis(paste0("Only analysis time ", analysis_time), logLevel = 3)
 
-    print("Cotan genes' coex estimation started")
+    logThis("Cotan genes' coex estimation started", logLevel = 1)
     obj <- calculateCoex(obj)
 
     end_time <- Sys.time()
 
     all.time <- difftime(end_time, start_time_all, units = "mins")
-    print(paste0("Total time ", all.time))
+    logThis(paste0("Total time ", all.time), logLevel = 3)
 
     genes_coex_time <- difftime(end_time, genes_coex_time, units = "mins")
 
-    print(paste0("Only genes' coex time ", genes_coex_time))
+    logThis(paste0("Only genes' coex time ", genes_coex_time), logLevel = 3)
 
     utils::write.csv(data.frame("type" = c("tot_time",
                                            "analysis_time",
@@ -138,8 +139,9 @@ automaticCOTANObjectCreation <-
                      file = file.path(outDir, paste0(sampleCondition, "_times.csv")))
 
     if (toupper(saveObj) == "YES") {
-      print(paste0("Saving elaborated data locally at ",
-                   outDir, sampleCondition, ".cotan.RDS"))
+      logThis(paste0("Saving elaborated data locally at ",
+                     outDir, sampleCondition, ".cotan.RDS"),
+              logLevel = 1)
       saveRDS(obj,file = file.path(outDir, paste0(sampleCondition, ".cotan.RDS")))
     }
 

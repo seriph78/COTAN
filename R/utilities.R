@@ -1,3 +1,61 @@
+#' setLoggingLevel
+#'
+#' Set the COTAN logging level:
+#' 0 -> Always on log messages
+#' 1 -> Major log messages
+#' 2 -> Minor log messages
+#' 3 -> All log messages [for Debugging only]
+#'
+#' @param newLevel the new default logging level. It defaults to 1
+#'
+#' @export
+#'
+#' @examples
+#' setLoggingLevel(3) # for debugging purposes only
+#'
+#' @rdname setLoggingLevel
+#'
+setLoggingLevel <- function(newLevel = 1) {
+  message(paste0("Setting new log level to ", newLevel))
+  options(COTAN.LogLevel = newLevel)
+}
+
+#' logThis
+#'
+#' Print the given message string if the current log level is
+#' greater or equal to the given log level. It uses \link{\code{message()}}
+#' to actually print the messages on the \code{strerr()} connection, so
+#' it is subject to \code{suppressMessages()}
+#' See \link{\code{setLoggingLevel}} for details on the levels
+#'
+#' @param msg the message to print
+#' @param logLevel the logging level of the current message. It defaults to 2
+#' @param appendLF whther to add a new-line character at the end of
+#' the message
+#'
+#' @return whether the message has been printed
+#'
+#' @export
+#'
+#' @examples
+#' logThis("LogLevel 0 messages will always show, ", logLevel = 0, appendLF = FALSE)
+#' suppressMessages(logThis("unless all messages are suppressed", logLevel = 0))
+#'
+#' @rdname logThis
+#'
+logThis <- function(msg, logLevel = 2, appendLF = TRUE) {
+  # set the logging level global variable
+  if (is.null(getOption("COTAN.LogLevel"))) {
+    setLoggingLevel() # to default
+  }
+  currentLevel <- getOption("COTAN.LogLevel")
+  if (currentLevel >= logLevel) {
+    message(msg, appendLF= appendLF)
+    return(TRUE)
+  }
+  return(FALSE)
+}
+
 
 #' setColumnInDF
 #'

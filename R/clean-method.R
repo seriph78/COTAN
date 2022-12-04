@@ -53,12 +53,14 @@ setMethod(
 
     objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-    print(paste0("Genes/cells selection done:",
-                 " dropped [", length(genesToDrop), "] genes",
-                 " and [", length(cellsToDrop), "] cells"))
+    logThis(paste0("Genes/cells selection done:",
+                   " dropped [", length(genesToDrop), "] genes",
+                   " and [", length(cellsToDrop), "] cells"),
+            logLevel = 1)
 
-    print(paste0("Working on [", getNumGenes(objCOTAN), "]",
-                 " genes and [", getNumCells(objCOTAN), "] cells"))
+    logThis(paste0("Working on [", getNumGenes(objCOTAN), "]",
+                   " genes and [", getNumCells(objCOTAN), "] cells"),
+            logLevel = 2)
 
     objCOTAN <- estimateLambdaLinear(objCOTAN)
     objCOTAN <- estimateNuLinear(objCOTAN)
@@ -72,7 +74,7 @@ setMethod(
     gc()
 
     if (isTRUE(calcExtraData)) {
-      print("PCA: START")
+      logThis("PCA: START", logLevel = 2)
 
       rawNorm <- getNormalizedData(objCOTAN)
 
@@ -83,9 +85,9 @@ setMethod(
 
       pcaCells <- as.data.frame(pcaCells)
 
-      print("PCA: DONE")
+      logThis("PCA: DONE", logLevel = 2)
 
-      print("Hierarchical clustering: START")
+      logThis("Hierarchical clustering: START", logLevel = 2)
 
       hcCells <- hclust(distCells, method = "complete")
       rm(distCells)
@@ -109,7 +111,7 @@ setMethod(
       groups[pos1] <- "A"
       groups[pos2] <- "B"
 
-      print("Hierarchical clustering: DONE")
+      logThis("Hierarchical clustering: DONE", logLevel = 2)
       gc()
 
       toClust <- as.matrix(round(rawNorm, digits = 4))

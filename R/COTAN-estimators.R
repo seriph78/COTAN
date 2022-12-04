@@ -82,7 +82,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, step = 512, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
-    print("Estimate dispersion: START")
+    logThis("Estimate dispersion: START", logLevel = 2)
 
     if (Sys.info()['sysname'] == "Windows" && cores != 1) {
       warning(paste0("On windows the numebr of cores used will be 1!",
@@ -107,8 +107,9 @@ setMethod(
     while (pBegin <= numSplits) {
       pEnd <- min(pBegin + splitStep - 1, numSplits)
 
-      print(paste0("Executing ", (pEnd - pBegin + 1), " genes batches from",
-                   " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"))
+      logThis(paste0("Executing ", (pEnd - pBegin + 1), " genes batches from",
+                     " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
+              logLevel = 3)
 
       if (cores != 1) {
         res  <- parallel::mclapply(
@@ -135,7 +136,7 @@ setMethod(
 
       pBegin <- pEnd + 1
     }
-    print("Estimate dispersion: DONE")
+    logThis("Estimate dispersion: DONE", logLevel = 2)
 
     gc()
 
@@ -144,11 +145,12 @@ setMethod(
                                         "dispersion", genes)
 
     goodPos <- is.finite(getDispersion(objCOTAN))
-    print(paste("dispersion",
-                "| min:", min(getDispersion(objCOTAN)[goodPos]),
-                "| max:", max(getDispersion(objCOTAN)[goodPos]),
-                "| % negative:", (sum(getDispersion(objCOTAN) < 0) * 100 /
-                                  getNumGenes(objCOTAN)) ))
+    logThis(paste("dispersion",
+                  "| min:", min(getDispersion(objCOTAN)[goodPos]),
+                  "| max:", max(getDispersion(objCOTAN)[goodPos]),
+                  "| % negative:", (sum(getDispersion(objCOTAN) < 0) * 100 /
+                                    getNumGenes(objCOTAN)) ),
+            logLevel = 1)
 
     return(objCOTAN)
   }
@@ -182,7 +184,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, step = 512, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
-    print("Estimate nu: START")
+    logThis("Estimate nu: START", logLevel = 2)
 
     if (Sys.info()['sysname'] == "Windows" && cores != 1) {
       warning(paste0("On windows the numebr of cores used will be 1!",
@@ -219,8 +221,9 @@ setMethod(
     while (pBegin <= numSplits) {
       pEnd <- min(pBegin + splitStep - 1, numSplits)
 
-      print(paste0("Executing ", (pEnd - pBegin + 1), " cells batches from",
-                   " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"))
+      logThis(paste0("Executing ", (pEnd - pBegin + 1), " cells batches from",
+                     " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
+              logLevel = 3)
 
       if (cores != 1) {
         res  <- parallel::mclapply(
@@ -253,18 +256,20 @@ setMethod(
     }
 
     gc()
-    print("Estimate nu: DONE")
+    logThis("Estimate nu: DONE", logLevel = 2)
 
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
                                         unlist(nuList, recursive = TRUE, use.names = FALSE),
                                         "nu", cells)
 
-    # TODO: remove once code has been tested
-    nuChange <- abs(nu - getNu(objCOTAN))
-    print(paste("nu change",
-                "| max:",     max(nuChange),
-                "| median: ", median(nuChange),
-                "| mean: ",   mean(nuChange) ))
+    {
+      nuChange <- abs(nu - getNu(objCOTAN))
+      logThis(paste("nu change",
+                    "| max:",     max(nuChange),
+                    "| median: ", median(nuChange),
+                    "| mean: ",   mean(nuChange) ),
+              logLevel = 1)
+    }
 
     return(objCOTAN)
   }
@@ -297,7 +302,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, step = 512, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
-    print("Estimate dispersion/nu: START")
+    logThis("Estimate dispersion/nu: START", logLevel = 2)
 
     if (is_empty(getNu(objCOTAN))) {
       stop("Nu vector needs to be initialised as initial guess")
@@ -317,7 +322,7 @@ setMethod(
 
       meanNu <- mean(getNu(objCOTAN))
 
-      print(paste("Nu mean:", meanNu))
+      logThis(paste("Nu mean:", meanNu), logLevel = 3)
 
       objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
                                           getNu(objCOTAN) / meanNu,
@@ -332,7 +337,7 @@ setMethod(
       }
     }
 
-    print("Estimate dispersion/nu: DONE")
+    logThis("Estimate dispersion/nu: DONE", loglevel = 2)
 
     return(objCOTAN)
   }

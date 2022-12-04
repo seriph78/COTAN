@@ -46,6 +46,10 @@ library(htmlwidgets)
 library(MASS)
 library(gsubfn)
 #library(dendextend)
+
+# Log-level 2 was chosen to showcase better how the package works
+# In normal usage a level of 0 or 1 is more appropriate 
+setLoggingLevel(2)
 ```
 
 Download the dataset for mouse cortex E17.5.
@@ -107,9 +111,9 @@ We want also to define a prefix to identify the sample.
 #t = "E17.5_cortex"
 t = "test"
 
-print(paste0("Condition ", t))
+logThis(paste0("Condition ", t), logLevel = 1)
 #--------------------------------------
-print(paste("n cells", getNumCells(obj)))
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1)
 
 n_it = 1
 ```
@@ -291,7 +295,8 @@ obj <- automaticCOTANObjectCreation(
 The next step will find all homogeneous clusters using a GDI check on each cluster.
 
 ```{r}
-obj <- cell_homogeneous_clustering(obj, cond = "test", out_dir = out_dir, cores = 10)
+clusters <- cell_homogeneous_clustering(obj, cond = "test", out_dir = out_dir, cores = 10)
+obj <- addClusterization(obj, clusterizationName = "test", clusters = clusters)
 ```
 
 Than we can perform a sort of differential expression to detect which genes are enriched or depleted in each cluster.

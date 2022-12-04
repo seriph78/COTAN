@@ -21,7 +21,7 @@ setMethod(
   "initializeMetaDataset",
   "COTAN",
   function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
-    print("Initializing COTAN meta-data")
+    logThis("Initializing COTAN meta-data", logLevel = 2)
 
     objCOTAN@metaDataset[1,seq_len(2)] = c("GEO:", GEO)
     objCOTAN@metaDataset[2,seq_len(2)] = c("scRNAseq method:", sequencingMethod)
