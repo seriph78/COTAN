@@ -181,7 +181,7 @@ setMethod(
                   length(clusters), "] instead of the expected number of cells [",
                   getNumCells(objCOTAN), "]."))
     }
-    if (!isa(coexDF, "data.frame")) {
+    if (!is_empty(coexDF) && !isa(coexDF, "data.frame")) {
       stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
                   " A '", class(coexDF), "' was given instead for clusterization '",
                   clusterizationName, "'."))
@@ -190,8 +190,11 @@ setMethod(
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, clusters,
                                         clName, getCells(objCOTAN))
 
-    objCOTAN@clustersCoex <- append(objCOTAN@clustersCoex, coexDF)
-    names(objCOTAN@clustersCoex)[length(objCOTAN@clustersCoex)] <- clName
+    # adding an empty data.frame is equivalent to remove the element in the list
+    objCOTAN@clustersCoex[[clName]] <- list(NULL)
+    if (!is_empty(coexDF)) {
+      objCOTAN@clustersCoex[[clName]] <- coexDF
+    }
 
     validObject(objCOTAN)
 
@@ -280,7 +283,7 @@ setMethod(
     }
 
     keptCols <- !colnames(objCOTAN@metaCells) %in% clName
-    objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols]
+    objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols, drop = FALSE]
 
     keptCols <- !colnames(objCOTAN@clustersCoex) %in% clName
     objCOTAN@clustersCoex <- objCOTAN@clustersCoex[keptCols]

@@ -173,12 +173,14 @@ setGeneric(
 
 setGeneric(
   "getClusterizations",
-  function(objCOTAN, dropNoCoex = FALSE) standardGeneric("getClusterizations")
+  function(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE)
+    standardGeneric("getClusterizations")
 )
 
 setGeneric(
   "getClusterizationData",
-  function(objCOTAN, clusterizationName = NULL) standardGeneric("getClusterizationData")
+  function(objCOTAN, clusterizationName = NULL)
+    standardGeneric("getClusterizationData")
 )
 
 #-------------------------------------- modifiers

@@ -10,10 +10,10 @@
 \item{objCOTAN}{A COTAN object}
 }
 \value{
-the raw count dataframe
+the raw count sparse matrix
 }
 \description{
-This function extract the raw count table.
+This function extracts the raw count table.
 }
 \examples{
 objCOTAN <- COTAN(raw = data("ERCC.cotan"))

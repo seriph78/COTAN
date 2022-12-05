@@ -2,11 +2,11 @@
 
 #' getRawData
 #'
-#' This function extract the raw count table.
+#' @description This function extracts the raw count table.
 #'
 #' @param objCOTAN A COTAN object
 #'
-#' @return the raw count dataframe
+#' @returns the raw count sparse matrix
 #'
 #' @importFrom rlang is_empty
 #'
@@ -24,6 +24,7 @@ setMethod(
     return(objCOTAN@raw)
   }
 )
+
 
 #' getNumCells
 #'
@@ -570,7 +571,7 @@ setMethod(
 setMethod(
   "getClusterizations",
   "COTAN",
-  function(objCOTAN, dropNoCoex = FALSE) {
+  function(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE) {
     validObject(objCOTAN)
 
     clsCoex <- getClustersCoex(objCOTAN)
@@ -583,7 +584,9 @@ setMethod(
     }
 
     # drop the internal 'CL_' prefix
-    out <- substring(out, 4)
+    if (isFALSE(keepPrefix)) {
+      out <- substring(out, 4)
+    }
 
     return(out)
   }
@@ -625,7 +628,7 @@ setMethod(
       clName <- paste0("CL_", clName)
     }
 
-    if (!clName %in% getClusterizations(objCOTAN)) {
+    if (!clName %in% getClusterizations(objCOTAN, keepPrefix = TRUE)) {
       logThis(paste("Asked clusterization", clusterizationName,
                     "not present in the 'COTAN' object"), logLevel = 3)
 

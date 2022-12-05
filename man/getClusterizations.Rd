@@ -4,7 +4,7 @@
 \alias{getClusterizations,COTAN-method}
 \title{getClusterizations}
 \usage{
-\S4method{getClusterizations}{COTAN}(objCOTAN, dropNoCoex = FALSE)
+\S4method{getClusterizations}{COTAN}(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE)
 }
 \arguments{
 \item{objCOTAN}{A COTAN object}

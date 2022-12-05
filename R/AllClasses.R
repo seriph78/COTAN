@@ -131,11 +131,13 @@ setClass(
                     " must be one of the column names of 'metaCells'."))
       }
       coexDF <- object@clustersCoex[[name]]
-      if (!isa(coexDF, "data.frame")) {
-        stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
-                    " A '", class(coexDF), "' was given instead." ))
-      }
-      if (!is_empty(coexDF)) {
+      isNullDF <- ( is_empty(coexDF)
+                  || (isa(coexDF, "list") && length(coexDF) == 1 && is.null(coexDF[[1]])) )
+      if (!isNullDF) {
+        if (!isa(coexDF, "data.frame")) {
+          stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
+                      " A '", class(coexDF), "' was given instead." ))
+        }
         if (nrow(coexDF) != numGenes) {
           stop(paste0("The number of rows [", nrow(object@clustersCoex[[name]]),
                       "] of the non-empty data.frames in 'clustersCoex' must be the same",
