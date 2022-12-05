@@ -192,92 +192,110 @@ setClass(
   )
 ) -> scCOTAN
 
-
-# Automatically convert an object from class "scCOTAN" into "COTAN"
-
-#' @importFrom methods setIs
+#
+# helper function to be shared by coerce() and replace()
+#
 #' @importFrom rlang is_empty
 #' @importClassesFrom Matrix dgCMatrix
 #' @importClassesFrom Matrix dspMatrix
 #' @importFrom Matrix forceSymmetric
 #' @importFrom Matrix pack
 #'
+getCOTANSlots <- function(from) {
+  if (!is_empty(from@yes_yes)) {
+    warning(paste0("scCOTAN as COTAN: non-empty yes_yes member",
+                   " found: will be discarded"),
+            call. = FALSE)
+  }
+
+  if (is_empty(from@raw)) {
+    raw = emptySparseMatrix()
+  } else if(isa(from@raw, "dgCMatrix")) {
+    raw = from@raw
+  } else {
+    raw = as(as(as(as.matrix(from@raw), "dMatrix"), "generalMatrix"), "CsparseMatrix")
+  }
+
+  genesCoex <- emptySymmetricMatrix()
+  if (!is_empty(from@coex)) {
+    if (isa(from@coex, "list")) {
+      genesCoex <- vec2mat_rfast(from@coex[["values"]])
+    }
+    else if(isa(from@coex, "dMatrix")) {
+      genesCoex <- as.matrix(from@coex)
+    }
+    else if(isa(from@coex, "matrix")) {
+      genesCoex <- from@coex
+    }
+    else {
+      stop(paste0("Unsupported coex type: ", class(from@coex)))
+    }
+    # now 'coex' is of type 'matrix'
+    genesCoex <- pack(forceSymmetric(genesCoex))
+  }
+
+  cellsCoex <- emptySymmetricMatrix()
+
+  metaGenes <- data.frame()
+
+  if (!is_empty(from@hk)) {
+    metaGenes <- setColumnInDF(metaGenes, rownames(from@raw) %in% from@hk,
+                               "hkGenes", rownames(from@raw))
+  }
+
+  if (!is_empty(from@lambda)) {
+    metaGenes <- setColumnInDF(metaGenes, from@lambda,
+                               "lambda", rownames(from@raw))
+  }
+
+  if (!is_empty(from@a)) {
+    metaGenes <- setColumnInDF(metaGenes, from@a,
+                               "dispersion", rownames(from@raw))
+  }
+
+  metaCells <- data.frame()
+
+  if (!is_empty(from@nu)) {
+    metaCells <- setColumnInDF(metaCells, from@nu,
+                               "nu", colnames(from@raw))
+  }
+
+  clustersCoex <- vector(mode = "list")
+  {
+    hasClusters <- !is_empty(from@clusters) && !all(is.na(from@clusters))
+
+    if (!hasClusters && !is_empty(from@cluster_data)) {
+      stop("Cannot convert to 'COTAN' when 'cluster_data' is not empty and 'clusters' is empty")
+    }
+
+    if (hasClusters) {
+      metaCells <- setColumnInDF(metaCells, from@clusters,
+                                 "CL_clusters", colnames(from@raw))
+    }
+
+    if (!is_empty(from@cluster_data)) {
+      clustersCoex <- list(CL_clusters = from@cluster_data)
+    }
+    else if (hasClusters) {
+      # keep aligned
+      clustersCoex <- list("CL_clusters" = data.frame())
+    }
+  }
+
+  return(list(raw, genesCoex, cellsCoex, metaGenes, metaCells, clustersCoex))
+}
+
+# Automatically convert an object from class "scCOTAN" into "COTAN"
+
+#' @import gsubfn
+#'
+#' @importFrom methods setIs
+#'
 setIs("scCOTAN",
       "COTAN",
       coerce = function(from) {
-        if (!is_empty(from@yes_yes)) {
-            warning(paste0("scCOTAN as COTAN: non-empty yes_yes member",
-                           " found: will be discarded"),
-                    call. = FALSE)
-        }
-
-        if (is_empty(from@raw)) {
-          raw = emptySparseMatrix()
-        }
-        else if(isa(from@raw, "dgCMatrix")) {
-          raw = from@raw
-        }
-        else {
-          raw = as(as(as(as.matrix(from@raw), "dMatrix"), "generalMatrix"), "CsparseMatrix")
-        }
-
-        genesCoex <- emptySymmetricMatrix()
-        if (!is_empty(from@coex)) {
-          if (isa(from@coex, "list")) {
-            genesCoex <- vec2mat_rfast(from@coex[["values"]])
-          }
-          else if(isa(from@coex, "dMatrix")) {
-            genesCoex <- as.matrix(from@coex)
-          }
-          else if(isa(from@coex, "matrix")) {
-            genesCoex <- from@coex
-          }
-          else {
-            stop(paste0("Unsupported coex type: ", class(from@coex)))
-          }
-          # now 'coex' is of type 'matrix'
-          genesCoex <- pack(forceSymmetric(genesCoex))
-        }
-
-        cellsCoex <- emptySymmetricMatrix()
-
-        metaGenes <- data.frame()
-        if (!is_empty(from@hk)) {
-          metaGenes <- setColumnInDF(metaGenes, rownames(from@raw) %in% from@hk,
-                                     "hkGenes", rownames(from@raw))
-        }
-        if (!is_empty(from@lambda)) {
-          metaGenes <- setColumnInDF(metaGenes, from@lambda,
-                                     "lambda", rownames(from@raw))
-        }
-        if (!is_empty(from@a)) {
-          metaGenes <- setColumnInDF(metaGenes, from@a,
-                                     "dispersion", rownames(from@raw))
-        }
-
-        if (is_empty(from@clusters) && !is_empty(from@cluster_data)) {
-          stop("Cannot convert to 'COTAN' when 'cluster_data' is not empty and 'clusters' is empty")
-        }
-
-        metaCells <- data.frame()
-        if (!is_empty(from@clusters)) {
-          metaCells <- setColumnInDF(metaCells, from@clusters,
-                                     "CL_clusters", colnames(from@raw))
-        }
-        if (!is_empty(from@nu)) {
-          metaCells <- setColumnInDF(metaCells, from@nu,
-                                     "nu", colnames(from@raw))
-        }
-
-        if (!is_empty(from@cluster_data)) {
-          clustersCoex <- list(CL_clusters = from@cluster_data)
-        }
-        else if (!is_empty(from@clusters)) {
-          clustersCoex <- list("CL_clusters" = data.frame())
-        }
-        else {
-          clustersCoex <- vector(mode = "list")
-        }
+        list[raw, genesCoex, cellsCoex,
+             metaGenes, metaCells, clustersCoex] <- getCOTANSlots(from)
 
         new("COTAN",
             raw          = raw,
@@ -290,79 +308,8 @@ setIs("scCOTAN",
       },
       # 'from' arg-name is convention: it is actually a destination!
       replace = function(from, value) {
-        if(!is_empty(value@yes_yes)) {
-          warning(paste0("scCOTAN<- as COTAN<-: non-empty yes_yes member",
-                         " found: will be discarded"),
-                  call. = FALSE)
-        }
-
-        if (is_empty(value@raw)) {
-          raw = emptySparseMatrix()
-        }
-        else if(isa(value@raw, "dgCMatrix")) {
-          raw = value@raw
-        }
-        else {
-          raw = as(as(as(as.matrix(value@raw), "dMatrix"), "generalMatrix"), "CsparseMatrix")
-        }
-
-        genesCoex <- emptySymmetricMatrix()
-        if (!is_empty(value@coex)) {
-          if (isa(value@coex, "list")) {
-            genesCoex <- vec2mat_rfast(value@coex[["values"]])
-          }
-          else if(isa(value@coex, "dMatrix")) {
-            genesCoex <- as.matrix(value@coex)
-          }
-          else if(isa(value@coex, "matrix")) {
-            genesCoex <- value@coex
-          }
-          else {
-            stop(paste0("Unsupported coex type: ", class(value@coex)))
-          }
-          # now 'genesCoex' is of type 'matrix'
-          genesCoex <- pack(forceSymmetric(genesCoex))
-        }
-
-        cellsCoex <- emptySymmetricMatrix()
-
-        metaGenes <- data.frame()
-        if (!is_empty(value@hk)) {
-          metaGenes <- setColumnInDF(metaGenes, rownames(value@raw) %in% value@hk,
-                                     "hkGenes", rownames(value@raw))
-        }
-        if (!is_empty(value@lambda)) {
-          metaGenes <- setColumnInDF(metaGenes, value@lambda,
-                                     "lambda", rownames(value@raw))
-        }
-        if (!is_empty(value@dispersion)) {
-          metaGenes <- setColumnInDF(metaGenes, value@dipsersion,
-                                     "dispersion", rownames(value@raw))
-        }
-
-        if (is_empty(value@clusters) && !is_empty(value@cluster_data)) {
-          stop("Cannot convert to 'COTAN' when 'cluster_data' is not empty and 'clusters' is empty")
-        }
-
-        metaCells <- data.frame()
-        if (!is_empty(value@clusters)) {
-          metaCells <- setColumnInDF(metaCells, value@clusters,
-                                     "CL_clusters", colnames(value@raw))
-        }
-        if (!is_empty(value@nu)) {
-          metaCells <- setColumnInDF(metaCells, value@nu,
-                                     "nu", colnames(value@raw))
-        }
-
-        if (!is_empty(value@cluster_data)) {
-          clustersCoex <- list(CL_clusters = value@cluster_data)
-        }
-        else if (!is_empty(value@clusters)) {
-          clustersCoex <- list("CL_clusters" = data.frame())
-        }
-        else {
-          clustersCoex <- vector(mode = "list")
-        }
+        list[raw, genesCoex, cellsCoex,
+             metaGenes, metaCells, clustersCoex] <- getCOTANSlots(value)
 
         from@raw          <- raw
         from@genesCoex    <- genesCoex
@@ -375,6 +322,72 @@ setIs("scCOTAN",
       ) # end setIs
 
 
+#
+# helper function to be shared by coerce() and replace()
+#
+#' @importFrom rlang is_empty
+#' @importClassesFrom Matrix dgCMatrix
+#' @importClassesFrom Matrix dspMatrix
+#' @importFrom Matrix forceSymmetric
+#' @importFrom Matrix pack
+#'
+getScCOTANSlots <- function(from) {
+  lambda <- vector(mode = "numeric")
+  if (!is_empty(from@metaGenes[["lambda"]])) {
+    lambda <- from@metaGenes[["lambda"]]
+    names(lambda) <- rownames(from@metaGenes)
+  }
+
+  a <- vector(mode = "numeric")
+  if (!is_empty(from@metaGenes[["dispersion"]])) {
+    a <- from@metaGenes[["dispersion"]]
+    names(a) <- rownames(from@metaGenes)
+  }
+
+  nu <- vector(mode = "numeric")
+  if (!is_empty(from@metaCells[["nu"]])) {
+    nu <- from@metaCells[["nu"]]
+    names(nu) <- rownames(from@metaCells)
+  }
+
+  hk <- vector(mode = "character")
+  if (!is_empty(from@metaGenes[["hkGenes"]])) {
+    hk <- rownames(from@raw)[from@metaGenes[["hkGenes"]]]
+  }
+
+  raw.norm <- emptySparseMatrix()
+  if (!is_empty(nu)) {
+    raw.norm <- t(t(from@raw) * (1/nu))
+  }
+
+  if (!is_empty(from@clustersCoex)) {
+    if (length(from@clustersCoex) > 1) {
+      warning(paste0("The 'COTAN' object contains more than one clusterization:",
+                     "picking up the last one as likely to be the most relevant"))
+    }
+    clusterizationName <- names(from@clustersCoex)[length(from@clustersCoex)]
+    cluster_data <- from@clustersCoex[[clusterizationName]]
+  } else {
+    clusterizationName <- "CL_clusters"
+    cluster_data <- data.frame()
+  }
+
+  if (!is_empty(from@metaCells[[clusterizationName]])) {
+    clusters <- from@metaCells[[clusterizationName]]
+    names(clusters) <- rownames(from@metaCells)
+  } else {
+    # ensure non-empty vector
+    clusters <- rep(NA, ncol(from@raw))
+    names(clusters) <- colnames(from@raw)
+  }
+
+  if (!is_empty(from@cellsCoex)) {
+    warning("'cellsCoex' is not empty: will be lost in conversion to 'scCOTAN'")
+  }
+
+  return(list(raw.norm, nu, lambda, a, hk, clusters, cluster_data))
+}
+
 # Explicitly convert an object from class "COTAN" into "scCOTAN"
 
 #' @importFrom methods setAs
@@ -383,58 +396,8 @@ setIs("scCOTAN",
 setAs("COTAN",
       "scCOTAN",
       function(from) {
-        lambda <- vector(mode = "numeric")
-        if (!is_empty(from@metaGenes[["lambda"]])) {
-          lambda <- from@metaGenes[["lambda"]]
-          names(lambda) <- rownames(from@metaGenes)
-        }
-
-        a <- vector(mode = "numeric")
-        if (!is_empty(from@metaGenes[["dispersion"]])) {
-          a <- from@metaGenes[["dispersion"]]
-          names(a) <- rownames(from@metaGenes)
-        }
-
-        nu <- vector(mode = "numeric")
-        if (!is_empty(from@metaCells[["nu"]])) {
-          nu <- from@metaCells[["nu"]]
-          names(nu) <- rownames(from@metaCells)
-        }
-
-        hk <- vector(mode = "character")
-        if (!is_empty(from@metaGenes[["hkGenes"]])) {
-          hk <- rownames(from@raw)[from@metaGenes[["hkGenes"]] != 0]
-        }
-
-        raw.norm <- emptySparseMatrix()
-        if (!is_empty(nu)) {
-          raw.norm <- t(t(from@raw) * (1/nu))
-        }
-
-        if (!is_empty(from@clustersCoex)) {
-          if (length(from@clustersCoex) > 1) {
-            warning(paste0("The 'COTAN' object contains more than one clusterization:",
-                           "picking up the last one as likely to be the most relevant"))
-          }
-          clusterizationName <- names(from@clustersCoex)[length(from@clustersCoex)]
-          cluster_data <- from@clustersCoex[[clusterizationName]]
-        } else {
-          clusterizationName <- "CL_clusters"
-          cluster_data <- data.frame()
-        }
-
-        if (!is_empty(from@metaCells[[clusterizationName]])) {
-          clusters <- from@metaCells[[clusterizationName]]
-          names(clusters) <- rownames(from@metaCells)
-        } else {
-          # ensure non-empty vector
-          clusters <- rep(NA, ncol(from@raw))
-          names(clusters) <- colnames(from@raw)
-        }
-
-        if (!is_empty(from@cellsCoex)) {
-          warning("'cellsCoex' is not empty: will be lost in conversion to 'scCOTAN'")
-        }
+        list[raw.norm, nu, lambda, a,
+             hk, clusters, cluster_data] <- getScCOTANSlots(from)
 
         new("scCOTAN",
             raw          = from@raw,
@@ -450,60 +413,8 @@ setAs("COTAN",
       },
       # 'from' arg-name is convention: it is actually a destination!
       replace = function(from, value) {
-        lamda <- vector(mode = "numeric")
-        if (!is_empty(value@metaGenes[["lambda"]])) {
-          lambda <- value@metaGenes[["lambda"]]
-          names(lambda) <- rownames(value@metaGenes)
-        }
-
-        a <- vector(mode = "numeric")
-        if (!is_empty(value@metaGenes[["dispersion"]])) {
-          a <- value@metaGenes[["dispersion"]]
-          names(a) <- rownames(value@metaGenes)
-        }
-
-        nu <- vector(mode = "numeric")
-        if (!is_empty(value@metaCells[["nu"]])) {
-          nu <- value@metaCells[["nu"]]
-          names(nu) <- rownames(value@metaCells)
-        }
-
-        hk <- vector(mode = "character")
-        if (!is_empty(value@metaGenes[["hkGenes"]])) {
-          hk <- rownames(value@raw)[value@metaGenes[["hkGenes"]] != 0]
-        }
-
-        raw.norm <- emptySparseMatrix()
-        if (!is_empty(nu)) {
-          raw.norm <- t(t(value@raw) * (1/nu))
-        }
-
-        if (!is_empty(value@clustersCoex)) {
-          if (length(value@clustersCoex) > 1) {
-            warning(paste0("The 'COTAN' object contains more than one clusterization:",
-                           "picking up the last one as likely to be the most relevant"))
-          }
-          clusterizationName <- names(value@clustersCoex)[length(value@clustersCoex)]
-          cluster_data <- value@clustersCoex[[clusterizationName]]
-        }
-        else {
-          clusterizationName <- "CL_clusters"
-          cluster_data <- data.frame()
-        }
-
-        if (!is_empty(value@metaCells[[clusterizationName]])) {
-          clusters <- value@metaCells[[clusterizationName]]
-          names(clusters) <- rownames(value@metaCells)
-        }
-        else {
-          # ensure non-empty vector
-          clusters <- rep(NA, ncol(value@raw))
-          names(clusters) <- colnames(value@raw)
-        }
-
-        if (!is_empty(value@cellsCoex)) {
-          warning("'cellsCoex' is not empty: will be lost in conversion to 'scCOTAN'")
-        }
+        list[raw.norm, nu, lambda, a,
+             hk, clusters, cluster_data] <- getScCOTANSlots(value)
 
         from@raw          <- value@raw
         from@raw.norm     <- raw.norm

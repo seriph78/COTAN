@@ -615,16 +615,24 @@ setMethod(
     if (is_empty(clusterizationName)) {
       clusterizationName <- getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
     }
+    if (is_empty(clusterizationName)) {
+      logThis("No clusterizations are present in the 'COTAN' object", logLevel = 3)
+      return( list("clusters" = c(), "coex" = data.frame()) )
+    }
+    # clName can still be empty if no clusterization was store in the objCOTAN
     clName <- clusterizationName
     if (!startsWith(clName, "CL_")) {
       clName <- paste0("CL_", clName)
     }
+
     if (!clName %in% getClusterizations(objCOTAN)) {
+      logThis(paste("Asked clusterization", clusterizationName,
+                    "not present in the 'COTAN' object"), logLevel = 3)
+
       return( list("clusters" = c(), "coex" = data.frame()) )
     }
-    else {
-      return( list("clusters" = getMetadataCells(objCOTAN)[[clName]],
-                   "coex" = getClustersCoex(objCOTAN)[[clName]]) )
-    }
+
+    return( list("clusters" = getMetadataCells(objCOTAN)[[clName]],
+                 "coex" = getClustersCoex(objCOTAN)[[clName]]) )
   }
 )

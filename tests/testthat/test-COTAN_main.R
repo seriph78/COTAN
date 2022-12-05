@@ -8,20 +8,6 @@ root = ""
 genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
 cell.names.test <- readRDS(file.path(getwd(), "cell.names.test.RDS"))
 
-test_that("1_initialization", {
-    utils::data("test.dataset.col", package = "COTAN")
-
-    rownames(test.dataset.col) <- test.dataset.col$V1
-    test.dataset.col <- test.dataset.col[,2:ncol(test.dataset.col)]
-
-    obj <- COTAN(raw = test.dataset.col)
-    obj <- initializeMetaDataset(obj, GEO = "V",
-                                 sequencingMethod = "10X",
-                                 sampleCondition = "example")
-
-    expect_s4_class(obj, "COTAN")
-})
-
 test_that("2_cleaning", {
     utils::data("test.dataset.col", package = "COTAN")
 
