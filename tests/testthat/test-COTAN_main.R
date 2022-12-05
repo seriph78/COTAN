@@ -29,16 +29,6 @@ test_that("2_cleaning", {
     expect_equal(getNu(obj)[cell.names.test], nu)
 })
 
-test_that("mat_division", {
-    utils::data("test.dataset.col", package = "COTAN")
-
-    nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
-    raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
-
-    expect_equal( as.matrix(t(t(test.dataset.col[genes.names.test,cell.names.test]) * (1/nu))),
-                  as.matrix(raw.norm) )
-})
-
 
 test_that("3_cotan_analysis_test", {
     obj <- readRDS(file.path(tm, "temp.RDS"))
@@ -72,39 +62,6 @@ test_that("4_cotan_coex_test", {
 })
 
 
-test_that("PCA_test", {
-
-  utils::data("raw.dataset", package = "COTAN")
-  pca.tb = readRDS(file.path(getwd(),"pca.tb.RDS"))
-
-  if (nrow(raw.dataset) != nrow(pca.tb) &&
-      rownames(raw.dataset)[[1]] == "HK") {
-    raw.dataset <- raw.dataset[2:nrow(raw.dataset),]
-  }
-
-  pca <- irlba::prcomp_irlba(raw.dataset, n=5)
-
-  pca.raw <- pca$x
-  rm(pca)
-
-  rownames(pca.raw) <- rownames(raw.dataset)
-  colnames(pca.raw) <- paste0("PC_", c(1:5))
-
-  correlation1.value <- cor(pca.raw[,1], pca.tb[,1])
-  correlation2.value <- cor(pca.raw[,2], pca.tb[,2])
-  pca.tb[,1] <- correlation1.value*pca.tb[,1]
-  pca.tb[,2] <- correlation2.value*pca.tb[,2]
-  x1 <- pca.raw[rownames(pca.tb),1] - pca.tb[,1]
-  x2 <- pca.raw[rownames(pca.tb),2] - pca.tb[,2]
-
-  dist1 <- sqrt(sum(x1^2))
-  dist2 <- sqrt(sum(x2^2))
-
-  expect_true(dist1 < 10^(-4))
-  expect_true(dist2 < 10^(-4))
-})
-
-
 test_that("5_calculatePValue_test", {
     obj <- readRDS(file.path(tm,"temp.RDS"))
     pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)
@@ -133,46 +90,6 @@ test_that("6_calculateGDI_test", {
   expect_equal(GDI, readRDS(file.path(getwd(),"GDI.test.RDS")))
 })
 
-
-test_that("vec2mat_rfast_test1", {
-    mat <- matrix(0, nrow = 5, ncol = 5)
-    mat <- Rfast::lower_tri.assign(mat,c(1:15),diag = T)
-    mat <- Rfast::upper_tri.assign(mat,v = Rfast::upper_tri(Rfast::transpose(mat)))
-
-    colnames(mat) <- paste0("row.",c(1:5))
-    rownames(mat) <- paste0("row.",c(1:5))
-
-    v <- mat2vec_rfast(mat)
-
-    expect_equal(mat, vec2mat_rfast(v))
-})
-
-test_that("vec2mat_rfast_test2", {
-    mat <- matrix(0,nrow = 10, ncol = 10)
-    mat <- Rfast::lower_tri.assign(mat, c(1:55), diag = T)
-    mat <- Rfast::upper_tri.assign(mat, v = Rfast::upper_tri(Rfast::transpose(mat)))
-
-    colnames(mat) <- paste0("row.", c(1:10))
-    rownames(mat) <- paste0("row.", c(1:10))
-
-    v <- mat2vec_rfast(mat)
-
-    genes <- c("row.1", "row.2", "row.9", "row.10")
-
-    expect_equal(mat[, genes], vec2mat_rfast(v, genes = genes))
-})
-
-test_that("mat2vec_rfast_test", {
-    vec <- c(1:15)
-    names.v <- paste0("raw", c(1:5))
-
-    names.v
-    vec <- list("genes" = names.v, "values" = vec)
-
-    m <- vec2mat_rfast(vec)
-
-    expect_equal(vec, mat2vec_rfast(m))
-})
 
 test_that("7_cell_homogeneous_clustering", {
   #TODO: fix this issue:

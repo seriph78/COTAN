@@ -248,3 +248,16 @@ setGeneric(
   function(objCOTAN, step = 256, threshold = 0.001,
            maxIterations = 1000, cores = 1) standardGeneric("estimateDispersionNuBisection")
 )
+
+#-------------------------------------- legacy
+setGeneric(
+  "vec2mat_rfast",
+  function(x, genes = "all") standardGeneric("vec2mat_rfast")
+)
+
+setGeneric(
+  "mat2vec_rfast",
+  function(mat) standardGeneric("mat2vec_rfast")
+)
+
+
