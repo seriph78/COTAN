@@ -16,10 +16,10 @@ evaluation will be skipped and the returned "data" list will be empty}
 lists of objects...
 "object" is the COTAN object,
 "data" a empty list when cleanExtraData is FALSE otherwise a list with:
-       "cluster1" is the first  cell cluster,
-       "cluster2" is the second cell cluster,
-       "D" is the B cells' group genes,
-       "pcaCells" pca numeric data,
+"cluster1" is the first  cell cluster,
+"cluster2" is the second cell cluster,
+"D" is the B cells' group genes,
+"pcaCells" pca numeric data,
 }
 \description{
 Main function that can be used to check and clean the dataset.

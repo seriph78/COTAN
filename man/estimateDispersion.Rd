@@ -29,7 +29,7 @@ the updated COTAN object
 \description{
 This is the main function that estimates the dispersion vector
 to store all the negative binomial dispersion factors.
-It needs to be run after \code{\link{clean}}
+It needs to be run after \code{\link[=clean]{clean()}}
 }
 \examples{
 data("ERCC.cotan")

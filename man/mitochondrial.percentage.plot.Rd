@@ -14,19 +14,19 @@ mitochondrial.percentage.plot(
 \arguments{
 \item{obj}{COTAN object}
 
-\item{split.pattern}{pattern used to extract, from the column names, the 
+\item{split.pattern}{pattern used to extract, from the column names, the
 sample field (default " ")}
 
-\item{n.col}{ones the column names are splitted by split.pattern, the column 
+\item{n.col}{ones the column names are splitted by split.pattern, the column
 number with the sample name (default 2)}
 
-\item{gene.prefix}{Prefix for the mitochondrial genes (default "^MT-" for 
+\item{gene.prefix}{Prefix for the mitochondrial genes (default "^MT-" for
 Human, mouse "^mt-")}
 }
 \value{
 the violin-boxplot plot
 }
 \description{
-Function that plots the row library size for each cell and sample (if there 
+Function that plots the row library size for each cell and sample (if there
 are more samples).
 }

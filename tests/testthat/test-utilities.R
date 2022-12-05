@@ -1,6 +1,6 @@
 library(Matrix)
 
-test_that("Logging levels work", {
+test_that("Logging levels", {
   currentLevel <- getOption("COTAN.LogLevel", default = 1)
 
   suppressMessages(setLoggingLevel(0))
@@ -24,7 +24,7 @@ test_that("Logging levels work", {
 })
 
 
-test_that("Adding columns to data.frames is OK",{
+test_that("Adding columns to data.frames", {
   df <- data.frame()
 
   df <- setColumnInDF(df, colName = "constant", colToSet = rep(1, 10))
@@ -41,12 +41,12 @@ test_that("Adding columns to data.frames is OK",{
 })
 
 
-test_that("funProbZero gives the correct values", {
+test_that("funProbZero", {
 
 })
 
 
-test_that("Normalization of raw data behaves", {
+test_that("Raw data normalization", {
   utils::data("test.dataset.col", package = "COTAN")
   genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
   cell.names.test <- readRDS(file.path(getwd(), "cell.names.test.RDS"))
@@ -59,7 +59,7 @@ test_that("Normalization of raw data behaves", {
   expect_equal(t(t(raw) * (1/nu)), raw.norm)
 })
 
-test_that("prcomp_irlba performs as expected", {
+test_that("prcomp_irlba usage", {
   utils::data("raw.dataset", package = "COTAN")
   pca.tb = readRDS(file.path(getwd(),"pca.tb.RDS"))
 
@@ -92,7 +92,7 @@ test_that("prcomp_irlba performs as expected", {
 })
 
 # legacy
-test_that("vec2mat_rfast and mat2vec_rfast are one inverse of the other", {
+test_that("vec2mat_rfast", {
   mat <- matrix(0,nrow = 10, ncol = 10)
   mat <- Rfast::lower_tri.assign(mat, c(1:55), diag = T)
   mat <- Rfast::upper_tri.assign(mat, v = Rfast::upper_tri(Rfast::transpose(mat)))
@@ -106,10 +106,10 @@ test_that("vec2mat_rfast and mat2vec_rfast are one inverse of the other", {
   expect_equal(mat[, genes], vec2mat_rfast(mat2vec_rfast(mat), genes = genes))
 })
 
-test_that("mat2vec_rfast_test", {
-  names.v <- paste0("raw", c(1:5))
+test_that("mat2vec_rfast", {
+  names.v <- paste0("raw", c(1:15))
 
-  vec <- list("genes" = names.v, "values" =  c(1:15))
+  vec <- list("genes" = names.v, "values" =  c(1:120))
 
   expect_equal(vec, mat2vec_rfast(vec2mat_rfast(vec)))
 })

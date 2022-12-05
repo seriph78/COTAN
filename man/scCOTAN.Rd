@@ -6,10 +6,10 @@
 \alias{scCOTAN}
 \title{scCOTAN-class (for legacy usage)}
 \value{
-the object class
+a 'scCOTAN' object
 }
 \description{
-Define my COTAN structure
+Define scCOTAN structure
 }
 \section{Slots}{
 

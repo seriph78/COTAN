@@ -12,10 +12,10 @@
 )
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{clusterizationName}{the name of a new clusterization.
-It cannot match an existing name; in case use \link{\code{dropClusterization}} first.}
+It cannot match an existing name; in case use \code{\link[=dropClusterization]{dropClusterization()}} first.}
 
 \item{clusters}{a factors array of cluster names}
 
@@ -26,9 +26,9 @@ for each (or some) of the clusters of the clusterization}
 the updated COTAN object
 }
 \description{
-This function adds a clusterization to the current COTAN object, by adding a
-new column in the \code{metaCells} data.frame and adding a new element
-in the \code{clustersCoex} list using the passed in coex data.frame.
+This function adds a clusterization to the current \code{COTAN} object, by adding a
+new column in the \verb{metaCells data.frame} and adding a new element
+in the \verb{clustersCoex list} using the passed in \verb{coex data.frame}.
 }
 \examples{
 data("ERCC.cotan")

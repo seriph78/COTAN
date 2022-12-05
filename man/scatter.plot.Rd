@@ -9,16 +9,16 @@ scatter.plot(obj, split.pattern = " ", n.col = 2, split.samples = F)
 \arguments{
 \item{obj}{COTAN object}
 
-\item{split.pattern}{pattern used to extract, from the column names, the 
+\item{split.pattern}{pattern used to extract, from the column names, the
 sample field (default " ")}
 
-\item{n.col}{ones the column names are splitted by split.pattern, the column 
+\item{n.col}{ones the column names are splitted by split.pattern, the column
 number with the sample name (default 2)}
 
 \item{split.samples}{T/F if we want to plot each sample in a different
 panel (default F)}
 }
 \description{
-Plot that check the realtion between the library size and the number gene 
+Plot that check the realtion between the library size and the number gene
 detected.
 }

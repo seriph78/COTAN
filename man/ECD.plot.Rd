@@ -12,7 +12,7 @@ ECD.plot(obj, y_cut)
 \item{y_cut}{y threshold of library size to drop}
 }
 \description{
-This function plots the empirical distribution function of library sizes  
-(UMI number). It helps to define where to drop "cells" that are simple 
+This function plots the empirical distribution function of library sizes
+(UMI number). It helps to define where to drop "cells" that are simple
 background signal.
 }

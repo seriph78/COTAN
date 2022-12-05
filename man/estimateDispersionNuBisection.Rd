@@ -30,5 +30,5 @@ the updated COTAN object
 Estimates the 'dispersion' and 'nu' field of a COTAN object by running
 sequentially a bisection for each parameter. This allows to enforce
 \code{mean('nu') == 1} assumption
-Assumes \code{\link{estimateNuLinear}} being run already
+Assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being run already
 }

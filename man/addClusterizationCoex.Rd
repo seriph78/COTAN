@@ -19,7 +19,7 @@ the updated COTAN object
 }
 \description{
 This function adds a clusterization coex data.frame to the current COTAN object.
-It requires the clusterization to be already present, see \link{\code{addClusterization}}
+It requires the clusterization to be already present, see \code{\link[=addClusterization]{addClusterization()}}
 }
 \examples{
 

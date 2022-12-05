@@ -11,21 +11,24 @@ logThis(msg, logLevel = 2, appendLF = TRUE)
 
 \item{logLevel}{the logging level of the current message. It defaults to 2}
 
-\item{appendLF}{whther to add a new-line character at the end of
-the message}
+\item{appendLF}{whther to add a new-line character at the end of the message}
 }
 \value{
 whether the message has been printed
 }
 \description{
 Print the given message string if the current log level is
-greater or equal to the given log level. It uses \link{\code{message()}}
-to actually print the messages on the \code{strerr()} connection, so
-it is subject to \code{suppressMessages()}
-See \link{\code{setLoggingLevel}} for details on the levels
+greater or equal to the given log level.
+}
+\details{
+It uses \code{\link[=message]{message()}} to actually print the messages on the \code{\link[=strerr]{strerr()}}
+connection, so it is subject to \code{\link[=suppressMessages]{suppressMessages()}}
 }
 \examples{
 logThis("LogLevel 0 messages will always show, ", logLevel = 0, appendLF = FALSE)
 suppressMessages(logThis("unless all messages are suppressed", logLevel = 0))
 
+}
+\seealso{
+\code{\link[=setLoggingLevel]{setLoggingLevel()}} for details on the levels
 }

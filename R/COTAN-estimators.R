@@ -55,7 +55,7 @@ setMethod(
 #'
 #' This is the main function that estimates the dispersion vector
 #' to store all the negative binomial dispersion factors.
-#' It needs to be run after \code{\link{clean}}
+#' It needs to be run after [clean()]
 #'
 #' @param objCOTAN A COTAN object
 #' @param step number of genes to solve in batch in a single core. Default is 256.
@@ -280,8 +280,8 @@ setMethod(
 #'
 #' Estimates the 'dispersion' and 'nu' field of a COTAN object by running
 #' sequentially a bisection for each parameter. This allows to enforce
-#' \code{mean('nu') == 1} assumption
-#' Assumes \code{\link{estimateNuLinear}} being run already
+#' `mean('nu') == 1` assumption
+#' Assumes [estimateNuLinear()] being run already
 #'
 #' @param objCOTAN a COTAN object
 #' @param step number of genes to solve in batch in a single core. Default is 256.

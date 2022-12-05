@@ -10,13 +10,20 @@ setLoggingLevel(newLevel = 1)
 \item{newLevel}{the new default logging level. It defaults to 1}
 }
 \description{
-Set the COTAN logging level:
-0 -> Always on log messages
-1 -> Major log messages
-2 -> Minor log messages
-3 -> All log messages [for Debugging only]
+Set the \code{COTAN} logging level
+}
+\details{
+\itemize{
+\item 0 - Always on log messages.
+\item 1 - Major log messages.
+\item 2 - Minor log messages.
+\item 3 - All log messages.
+}
 }
 \examples{
 setLoggingLevel(3) # for debugging purposes only
 
+}
+\seealso{
+\code{\link[=logThis]{logThis()}}
 }

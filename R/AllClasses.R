@@ -1,11 +1,26 @@
-
+#' emptySparseMatrix
+#'
+#' @description Useful to default initialize COTAN slots
+#'
+#' @returns an empty matrix of type dgCMatrix
+#'
 #' @importClassesFrom Matrix dgCMatrix
+#'
+#' @noRd
 #'
 emptySparseMatrix <- function() {
   return( as(as(as(matrix(0, 0, 0), "dMatrix"), "generalMatrix"), "CsparseMatrix") )
 }
 
+#' emptySymmetricMatrix
+#'
+#' @description Useful to default initialize COTAN slots
+#'
+#' @returns an empty matrix of type dspMatrix
+#'
 #' @importClassesFrom Matrix dspMatrix
+#'
+#' @noRd
 #'
 emptySymmetricMatrix <- function() {
   return( as(as(as(matrix(0, 0, 0), "dMatrix"), "symmetricMatrix"), "packedMatrix") )
@@ -61,8 +76,17 @@ setClass(
         stop("Input 'raw' data must contain only non negative integers.")
       }
     }
+
     numGenes <- nrow(object@raw)
     numCells <- ncol(object@raw)
+
+    if (length(rownames(object@raw)) != numGenes) {
+      stop("Input 'raw' data must have row names")
+    }
+    if (length(colnames(object@raw)) != numCells) {
+      stop("Input 'raw' data must have column names")
+    }
+
     if (!is_empty(object@genesCoex)) {
       if (!isa(object@genesCoex, "dspMatrix")) {
         stop("'genesCoex' must be of type 'dspMatrix.")
@@ -71,6 +95,7 @@ setClass(
         stop("'genesCoex' sizes should match the number of genes.")
       }
     }
+
     if (!is_empty(object@cellsCoex)) {
       if (!isa(object@genesCoex, "dspMatrix")) {
         stop("'genesCoex' must be of type 'dspMatrix.")
@@ -79,19 +104,23 @@ setClass(
         stop("'genesCoex' sizes should match the number of genes.")
       }
     }
+
     # metaDataset has no required fields as of now
+
     if (!is_empty(object@metaGenes) && nrow(object@metaGenes) != numGenes) {
       stop(paste0("The number of rows [", nrow(object@metaGenes),
                   "] of 'metaGenes' must be the same",
                   " as the number of rows [", numGenes,
                   "]  of 'raw' when not empty."))
     }
+
     if (!is_empty(object@metaCells) && nrow(object@metaCells) != numCells) {
       stop(paste0("The number of rows [", nrow(object@metaCells),
                   "] of 'metaCells' must be the same",
                   " as the number of cols [", numCells,
                   "]  of 'raw' when not empty."))
     }
+
     for (name in names(object@clustersCoex)) {
       if (substring(name, 1, 3) != "CL_") {
         stop(paste0("The clusterization name '", name, "' does not start",
@@ -112,18 +141,18 @@ setClass(
                       "] of the non-empty data.frames in 'clustersCoex' must be the same",
                       " as the number of rows [", numGenes, "]  of 'raw'."))
         }
-        # TODO: fix merge_cell.clusters that causes the following to fail
-        # if (!all(colnames(coexDF) %in% object@metaCells[[name]])) {
-        #   badClustersNames <- colnames(coexDF)[!colnames(coexDF) %in% object@metaCells[[name]]]
-        #   stop(paste0("The column names of the data.frames in 'clustersCoex' must",
-        #               " be a subset of the names in the clusterization.",
-        #               " The data.frame for clusterization '", name, "' does not",
-        #               " satisfy this condition with the names [",
-        #               paste(badClustersNames, collapse = ","), "] vs cluester names [",
-        #               paste(unique(object@metaCells[[name]]), collapse = ","), "]."))
-        # }
+        if (!all(colnames(coexDF) %in% object@metaCells[[name]])) {
+          badClustersNames <- colnames(coexDF)[!colnames(coexDF) %in% object@metaCells[[name]]]
+          stop(paste0("The column names of the data.frames in 'clustersCoex' must",
+                      " be a subset of the names in the clusterization.",
+                      " The data.frame for clusterization '", name, "' does not",
+                      " satisfy this condition with the names [",
+                      paste(badClustersNames, collapse = ","), "] vs cluester names [",
+                      paste(unique(object@metaCells[[name]]), collapse = ","), "]."))
+        }
       }
     }
+
     for (name in colnames(object@metaCells)) {
       if (substring(name, 1, 3) != "CL_") {
         next # not a clusterization name
@@ -133,6 +162,7 @@ setClass(
                     " an element in the 'clusterCoex' list"))
       }
     }
+
     return(TRUE)
   }
 ) #end class COTAN
@@ -140,28 +170,40 @@ setClass(
 
 #' COTAN
 #'
-#' constructor of the class COTAN
-#' @importFrom methods new
-#' @importClassesFrom Matrix dgCMatrix
-#' @export
-#' @examples
+#' @description Constructor of the class COTAN
 #'
-#' data("raw.dataset")
-#' obj <- COTAN(raw = raw.dataset)
+#' @param raw any object that can be converted to a matrix, but with row [genes]
+#'   and column [cells] names
+#'
+#' @returns a 'COTAN' object
+#'
+#' @importFrom methods new
+#'
+#' @importClassesFrom Matrix dgCMatrix
+#'
+#' @export
+#'
+#' @examples
+#' obj <- COTAN(raw = data("raw.dataset"))
 #'
 #' @rdname COTAN
 COTAN <- function(raw = "ANY") {
   raw <- as(as(as(as.matrix(raw), "dMatrix"), "generalMatrix"), "CsparseMatrix")
+
+  stopifnot("Inputs must have both row and column names!"
+            <- (!is_empty(rownames(raw)) && !is_empty(colnames(raw))))
+
   new("COTAN", raw = raw)
 }
 
 
 #' scCOTAN-class (for legacy usage)
 #'
-#' Define my COTAN structure
+#' Define scCOTAN structure
+#'
 #' @slot raw ANY. To store the raw data matrix
 #' @slot raw.norm ANY. To store the raw data matrix divided for the cell
-#' efficiency estimated (nu)
+#'   efficiency estimated (nu)
 #' @slot coex ANY. The coex matrix
 #' @slot nu vector.
 #' @slot lambda vector.
@@ -169,12 +211,16 @@ COTAN <- function(raw = "ANY") {
 #' @slot hk vector.
 #' @slot meta data.frame.
 #' @slot yes_yes ANY. Unused and deprecated. Kept for backward compatibility
-#' only
+#'   only
 #' @slot clusters vector.
 #' @slot cluster_data data.frame.
 #'
-#' @return the object class
+#' @returns a 'scCOTAN' object
+#'
 #' @export
+#'
+#' @rdname scCOTAN
+#'
 setClass(
   "scCOTAN",
   slots = c(
@@ -192,14 +238,24 @@ setClass(
   )
 ) -> scCOTAN
 
-#
-# helper function to be shared by coerce() and replace()
-#
+#' getCOTANSlots
+#'
+#' @description Helper function to be shared by coerce() and replace()
+#'
+#' @param a 'scCOTAN' object
+#'
+#' @returns a list with all non trivially converted slots of the equivalent
+#'   'COTAN' class
+#'
 #' @importFrom rlang is_empty
+#'
 #' @importClassesFrom Matrix dgCMatrix
 #' @importClassesFrom Matrix dspMatrix
+#'
 #' @importFrom Matrix forceSymmetric
 #' @importFrom Matrix pack
+#'
+#' @noRd
 #'
 getCOTANSlots <- function(from) {
   if (!is_empty(from@yes_yes)) {
@@ -285,11 +341,18 @@ getCOTANSlots <- function(from) {
   return(list(raw, genesCoex, cellsCoex, metaGenes, metaCells, clustersCoex))
 }
 
-# Automatically convert an object from class "scCOTAN" into "COTAN"
-
+#' setIs(): 'scCOTAN' -> 'COTAN'
+#'
+#' @description Automatically converts an object from class 'scCOTAN' into
+#'   'COTAN'
+#'
 #' @import gsubfn
 #'
 #' @importFrom methods setIs
+#'
+#' @export
+#'
+#' @noRd
 #'
 setIs("scCOTAN",
       "COTAN",
@@ -322,14 +385,24 @@ setIs("scCOTAN",
       ) # end setIs
 
 
-#
-# helper function to be shared by coerce() and replace()
-#
+#' getScCOTANSlots
+#'
+#' @description Helper function to be shared by coerce() and replace()
+#'
+#' @param a 'COTAN' object
+#'
+#' @returns a list with all non trivially converted slots of the equivalent
+#'   'scCOTAN' class
+#'
 #' @importFrom rlang is_empty
+#'
 #' @importClassesFrom Matrix dgCMatrix
 #' @importClassesFrom Matrix dspMatrix
+#'
 #' @importFrom Matrix forceSymmetric
 #' @importFrom Matrix pack
+#'
+#' @noRd
 #'
 getScCOTANSlots <- function(from) {
   lambda <- vector(mode = "numeric")
@@ -388,10 +461,17 @@ getScCOTANSlots <- function(from) {
   return(list(raw.norm, nu, lambda, a, hk, clusters, cluster_data))
 }
 
-# Explicitly convert an object from class "COTAN" into "scCOTAN"
-
+#' setAs(): 'COTAN' -> 'scCOTAN'
+#'
+#' @description Explicitly converts an object from class 'COTAN' into 'scCOTAN'
+#'
+#' @import gsubfn
+#'
 #' @importFrom methods setAs
-#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @noRd
 #'
 setAs("COTAN",
       "scCOTAN",

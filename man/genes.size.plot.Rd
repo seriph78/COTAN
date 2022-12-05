@@ -9,16 +9,16 @@ genes.size.plot(obj, split.pattern = " ", n.col = 2)
 \arguments{
 \item{obj}{COTAN object}
 
-\item{split.pattern}{pattern used to extract, from the column names, the 
+\item{split.pattern}{pattern used to extract, from the column names, the
 sample field (default " ")}
 
-\item{n.col}{ones the column names are splitted by split.pattern, the column 
+\item{n.col}{ones the column names are splitted by split.pattern, the column
 number with the sample name (default 2)}
 }
 \value{
 the violin-boxplot plot
 }
 \description{
-Function that plots the row gene number (reads greather then 0) for each cell and sample (if there 
+Function that plots the row gene number (reads greather then 0) for each cell and sample (if there
 are more samples).
 }

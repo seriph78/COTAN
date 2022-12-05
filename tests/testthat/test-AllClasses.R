@@ -3,7 +3,7 @@ library(Matrix)
 tm = tempdir()
 stopifnot(file.exists(tm))
 
-test_that("Empty matrices are OK", {
+test_that("Empty matrice", {
   expect_equal(dim(emptySparseMatrix()), c(0,0))
   expect_s4_class(emptySparseMatrix(), "dgCMatrix")
 
@@ -11,7 +11,7 @@ test_that("Empty matrices are OK", {
   expect_s4_class(emptySymmetricMatrix(), "dspMatrix")
 })
 
-test_that("'COTAN' constructor works", {
+test_that("'COTAN' constructor", {
   utils::data("test.dataset.col", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset.col)
@@ -21,7 +21,7 @@ test_that("'COTAN' constructor works", {
   expect_equal(obj@raw, as(as.matrix(test.dataset.col), "sparseMatrix"))
 })
 
-test_that("'scCOTAN' converters perform as expected",{
+test_that("'scCOTAN' converters",{
   filePath <- file.path(tm, "Completely_analysed_COTAN_obj.RDS")
   #filePath <- file.path(tm, "temp.RDS")
 

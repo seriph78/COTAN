@@ -7,14 +7,34 @@
 plotTheme(plotKind = "common", textSize = 14)
 }
 \arguments{
-\item{plotKind}{a string indicating the plot kind; supported kinds are:
-"common", "pca", "genes", "UDE", "heatmap", "GDI", "size-plot"}
+\item{plotKind}{a string indicating the plot kind}
 
 \item{textSize}{axes and strip text size (default=14)}
 }
 \value{
-a ggplot2 theme object
+a \code{ggplot2} theme object
 }
 \description{
-This function returns the appropriate theme for the selected plot kind
+This function returns the appropriate theme for the selected
+plot kind
+}
+\details{
+Supported kinds are:
+\itemize{
+\item \code{common}
+\item \code{pca}
+\item \code{genes}
+\item \code{UDE}
+\item \code{heatmap}
+\item \code{GDI}
+\item \code{size-plot}
+}
+}
+\examples{
+theme <- plotTheme("pca")
+theme
+
+}
+\seealso{
+\code{\link[ggplot2:theme]{ggplot2::theme()}} and \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}
 }

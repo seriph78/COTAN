@@ -26,6 +26,7 @@ Depends: R (>= 4.1)
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.2.2
+Roxygen: list(markdown = TRUE)
 Imports:
     stats,
     proto,

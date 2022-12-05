@@ -24,8 +24,11 @@ cluster_homogeneity(data.seurat, data.raw, out_dir, cond, cores = 1)
 an array of cells that need to be re-clustered
 }
 \description{
-# Function that takes a seurat object and the whole raw data (after cleaning).
-It runs cotan on each cluster and check if the GDI is lower than 1.5 for the 99% of genes.
+cluster_homogeneity
+}
+\section{Function that takes a seurat object and the whole raw data (after cleaning).}{
+It runs cotan on each cluster and check if the GDI is lower than 1.5 for the 99\% of genes.
 If it is too high,
 the cluster is not uniform and so it save the cells in an array to cluster again.
 }
+

@@ -1,10 +1,14 @@
 #' setLoggingLevel
 #'
-#' Set the COTAN logging level:
-#' 0 -> Always on log messages
-#' 1 -> Major log messages
-#' 2 -> Minor log messages
-#' 3 -> All log messages [for Debugging only]
+#' @description Set the `COTAN` logging level
+#'
+#' @details
+#' * 0 - Always on log messages.
+#' * 1 - Major log messages.
+#' * 2 - Minor log messages.
+#' * 3 - All log messages.
+#'
+#' @seealso [logThis()]
 #'
 #' @param newLevel the new default logging level. It defaults to 1
 #'
@@ -22,18 +26,19 @@ setLoggingLevel <- function(newLevel = 1) {
 
 #' logThis
 #'
-#' Print the given message string if the current log level is
-#' greater or equal to the given log level. It uses \link{\code{message()}}
-#' to actually print the messages on the \code{strerr()} connection, so
-#' it is subject to \code{suppressMessages()}
-#' See \link{\code{setLoggingLevel}} for details on the levels
+#' @description Print the given message string if the current log level is
+#'   greater or equal to the given log level.
+#'
+#' @details It uses [message()] to actually print the messages on the [strerr()]
+#'   connection, so it is subject to [suppressMessages()]
+#'
+#' @seealso [setLoggingLevel()] for details on the levels
 #'
 #' @param msg the message to print
 #' @param logLevel the logging level of the current message. It defaults to 2
-#' @param appendLF whther to add a new-line character at the end of
-#' the message
+#' @param appendLF whther to add a new-line character at the end of the message
 #'
-#' @return whether the message has been printed
+#' @returns whether the message has been printed
 #'
 #' @export
 #'
@@ -59,19 +64,20 @@ logThis <- function(msg, logLevel = 2, appendLF = TRUE) {
 
 #' setColumnInDF
 #'
-#' private function that append if missing or resets if present a column
-#' into a data.frame, whether the data.frame is empty or not.
+#' @description Private function that append, if missing, or resets, if present,
+#'   a column into a `data.frame`, whether the `data.frame` is empty or not.
 #'
-#' @param df the data.frame
+#' @param df the `data.frame`
 #' @param colToSet the the column to add
-#' @param colName the data.frame
-#' @param rowNames when not empty the new row names of the result
+#' @param colName the name of the new or existing column in the `data.frame`
+#' @param rowNames when not empty, if the input `data.frame` has no real row
+#'   names, the new row names of the resulting `data.frame`
 #'
-#' @return the updated/created data.frame
+#' @returns the updated/created `data.frame`
 #'
 #' @importFrom rlang is_empty
 #'
-#' @rdname setColumnInDF
+#' @noRd
 #'
 setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
   out <- df
@@ -100,16 +106,15 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 
 #' funProbZero
 #'
-#' private function that gives the probability of a sample gene count
-#' being zero given the given the dispersion and mu
+#' @description Private function that gives the probability of a sample gene
+#'   count being zero given the given the dispersion and mu
 #'
-#' @param disp the estimated dispersion
-#' @param mu the lambda times nu value
+#' @param disp the estimated dispersion (can be a 𝑛-sized vector)
+#' @param mu the lambda times nu value  (can be a 𝑛×𝑚 matrix)
 #'
-#' @return the probability that a count is identically zero
+#' @returns the probability (matrix) that a count is identically zero
 #'
-#'
-#' @rdname funProbZero
+#' @noRd
 #'
 funProbZero <- function(disp, mu) {
   neg <- disp <= 0
@@ -121,11 +126,11 @@ funProbZero <- function(disp, mu) {
 
 #' dispersionBisection
 #'
-#' private function invoked by 'estimateDispersion' for the estimation
-#' of 'dispersion' slot of a COTAN object via a bisection solver
+#' @description Private function invoked by [estimateDispersion()] for the
+#'   estimation of 'dispersion' slot of a `COTAN` object via a bisection solver
 #'
-#' the goal is to find a dispersion value that produces a difference between
-#' the number of estimated and counted zeros close to 0
+#' @details The goal is to find a dispersion value that reduces to zero the
+#'   difference between the number of estimated and counted zeros
 #'
 #' @param gene name of the relevant gene
 #' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
@@ -133,9 +138,10 @@ funProbZero <- function(disp, mu) {
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
-#' @return the dispersion value
+#' @returns the dispersion value
 #'
-#' @rdname dispersionBisection
+#' @noRd
+#'
 dispersionBisection <-
   function(gene,
            zeroOneMatrix,
@@ -167,7 +173,8 @@ dispersionBisection <-
     }
 
     if (iter >= maxIterations) {
-      stop("Max number of iterations reached while finding the solution straddling intervals")
+      stop(paste("Max number of iterations reached",
+                 "while finding the solution straddling intervals"))
     }
     iter <- iter + 1
 
@@ -188,7 +195,8 @@ dispersionBisection <-
     }
 
     if (iter >= maxIterations) {
-      stop("Max number of iterations reached while finding the solution straddling intervals")
+      stop(paste("Max number of iterations reached",
+                 "while finding the solution straddling intervals"))
     }
     iter <- iter + 1
 
@@ -204,11 +212,12 @@ dispersionBisection <-
 
 #' parallelDispersionBisection
 #'
-#' private function invoked by 'estimateDispersion' for the estimation
-#' of 'dispersion' slot of a COTAN object via a parallel bisection solver
+#' @description Private function invoked by [estimateDispersion()] for the
+#'   estimation of the `dispersion` slot of a `COTAN` object via a parallel
+#'   bisection solver
 #'
-#' the goal is to find a dispersion array that produces a difference between
-#' the number of estimated and counted zeros close to 0
+#' @details The goal is to find a dispersion array that reduces to zero the
+#'   difference between the number of estimated and counted zeros
 #'
 #' @param genes names of the relevant genes
 #' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
@@ -216,9 +225,10 @@ dispersionBisection <-
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
-#' @return the dispersion values
+#' @returns the dispersion values
 #'
-#' @rdname parallelDispersionBisection
+#' @noRd
+#'
 parallelDispersionBisection <-
   function(genes,
            zeroOneMatrix,
@@ -313,11 +323,11 @@ parallelDispersionBisection <-
 
 #' nuBisection
 #'
-#' private function invoked by 'estimateNuBisection' for the estimation
-#' of 'nu' slot of a COTAN object via a bisection solver
+#' @description Private function invoked by [estimateNuBisection()] for the
+#'   estimation of `nu` slot of a `COTAN` object via a bisection solver
 #'
-#' the goal is to find a nu value that produces a difference between
-#' the number of estimated and counted zeros close to 0
+#' @details The goal is to find a nu value that reduces to zero the difference
+#'   between the number of estimated and counted zeros
 #'
 #' @param cell name of the relevant cell
 #' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
@@ -327,9 +337,10 @@ parallelDispersionBisection <-
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
-#' @return the nu value
+#' @returns the nu value
 #'
-#' @rdname nuBisection
+#' @noRd
+#'
 nuBisection <-
   function(cell,
            zeroOneMatrix,
@@ -401,11 +412,11 @@ nuBisection <-
 
 #' parallelNuBisection
 #'
-#' private function invoked by 'estimateNuBisection' for the estimation
-#' of 'nu' slot of a COTAN object via a parallel bisection solver
+#' @description Private function invoked by [estimateNuBisection()] for the
+#'   estimation of `nu` slot of a `COTAN` object via a parallel bisection solver
 #'
-#' the goal is to find a nu array that produces a difference between
-#' the number of estimated and counted zeros close to 0
+#' @details The goal is to find a nu array that reduces to zero the difference
+#'   between the number of estimated and counted zeros
 #'
 #' @param cells names of the relevant cells
 #' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
@@ -415,9 +426,10 @@ nuBisection <-
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
-#' @return the dispersion values
+#' @returns the dispersion values
 #'
-#' @rdname parallelNuBisection
+#' @noRd
+#'
 parallelNuBisection <-
   function(cells,
            zeroOneMatrix,
@@ -514,12 +526,24 @@ parallelNuBisection <-
 
 #' plotTheme
 #'
-#' This function returns the appropriate theme for the selected plot kind
+#' @description This function returns the appropriate theme for the selected
+#'   plot kind
 #'
-#' @param plotKind a string indicating the plot kind; supported kinds are:
-#' "common", "pca", "genes", "UDE", "heatmap", "GDI", "size-plot"
+#' @details Supported kinds are:
+#' * `common`
+#' * `pca`
+#' * `genes`
+#' * `UDE`
+#' * `heatmap`
+#' * `GDI`
+#' * `size-plot`
+#'
+#' @seealso [ggplot2::theme()] and [ggplot2::ggplot()]
+#'
+#' @param plotKind a string indicating the plot kind
 #' @param textSize axes and strip text size (default=14)
-#' @return a ggplot2 theme object
+#'
+#' @returns a `ggplot2` theme object
 #
 #' @importFrom ggplot2 theme
 #' @importFrom ggplot2 element_text
@@ -529,7 +553,13 @@ parallelNuBisection <-
 #' @importFrom ggthemes theme_tufte
 #'
 #' @export
+#'
+#' @examples
+#' theme <- plotTheme("pca")
+#' theme
+#'
 #' @rdname plotTheme
+#'
 plotTheme <- function(plotKind = "common", textSize = 14) {
   myDarkBlue <- "#3C5488FF"
   ts <- textSize
@@ -602,17 +632,25 @@ plotTheme <- function(plotKind = "common", textSize = 14) {
 }
 
 
-# legacy
+#----------------- legacy functions
 
 
 #' vec2mat_rfast
 #'
-#' @param x a list formed by two arrays: "genes" with the unique gene names
-#' and "values" with all the values.
-#' @param genes a vector with all wanted genes or the string "all".
-#' When is equal to "all", the default, it recreates the entire matrix.
+#' @description Converts a compacted symmetric matrix back into a proper matrix
 #'
-#' @return a matrix
+#' @details This is a lagacy function related to old `scCOTAN` objects. Use the
+#'   more appropriate `Matrix::dspMatrix` type for similar functionality
+#'
+#' @seealso [calculateCoex()] or [expectedContingencyTables()] for actual
+#'   examples
+#'
+#' @param x a list formed by two arrays: `genes` with the unique gene names and
+#'   `values` with all the values.
+#' @param genes a vector with all wanted genes or the string `"all"`. When equal
+#'   to `"all"` (the default), it recreates the entire matrix.
+#'
+#' @returns a matrix
 #'
 #' @importFrom Rfast lower_tri.assign
 #' @importFrom Rfast upper_tri.assign
@@ -683,10 +721,19 @@ setMethod(
 
 #' mat2vec_rfast
 #'
+#' @description Converts a square matrix into a compact form, by forcibly make
+#'   it symmetric
+#'
+#' @details This is a lagacy function related to old `scCOTAN` objects. Use the
+#'   more appropriate `Matrix::dspMatrix` type for similar functionality
+#'
+#' @seealso [calculateCoex()] or [expectedContingencyTables()] for actual
+#'   examples
+#'
 #' @param mat a possibly symmetric matrix with all genes as row and column names
 #'
-#' @return a list formed by two arrays: "genes" with the unique gene names
-#' and "values" with all the values.
+#' @returns a `list` formed by two arrays: `genes` with the unique gene names
+#'   and `values` with all the values.
 #'
 #' @importFrom Rfast lower_tri.assign
 #' @importFrom Rfast upper_tri.assign

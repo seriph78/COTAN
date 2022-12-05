@@ -37,11 +37,13 @@ get.gene.clusters(
 \item{hclust.method}{default is "ward.D2" but can be any method defined by hclust function}
 }
 \value{
-a list of 
-1. the gene coexpression space dataframe, 
-2. the eigenvalues plot (using eigenvalue from factoextra package)
-3. the pca component dataframe
-4. the tree plot for the coexpression space genes
+a list of
+\enumerate{
+\item the gene coexpression space dataframe,
+\item the eigenvalues plot (using eigenvalue from factoextra package)
+\item the pca component dataframe
+\item the tree plot for the coexpression space genes
+}
 }
 \description{
 This function perfor the gene clustering based on a pool of gene marker, using the gene

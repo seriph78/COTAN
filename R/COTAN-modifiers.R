@@ -142,13 +142,13 @@ setMethod(
 
 #' addClusterization
 #'
-#' This function adds a clusterization to the current COTAN object, by adding a
-#' new column in the \code{metaCells} data.frame and adding a new element
-#' in the \code{clustersCoex} list using the passed in coex data.frame.
+#' This function adds a clusterization to the current `COTAN` object, by adding a
+#' new column in the `metaCells data.frame` and adding a new element
+#' in the `clustersCoex list` using the passed in `coex data.frame`.
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param clusterizationName the name of a new clusterization.
-#' It cannot match an existing name; in case use \link{\code{dropClusterization}} first.
+#' It cannot match an existing name; in case use [dropClusterization()] first.
 #' @param clusters a factors array of cluster names
 #' @param coexDF a data.frame where each column indicates the coex
 #' for each (or some) of the clusters of the clusterization
@@ -202,7 +202,7 @@ setMethod(
 #' addClusterizationCoex
 #'
 #' This function adds a clusterization coex data.frame to the current COTAN object.
-#' It requires the clusterization to be already present, see \link{\code{addClusterization}}
+#' It requires the clusterization to be already present, see [addClusterization()]
 #'
 #' @param objCOTAN a COTAN object
 #' @param clusterizationName the name of an existing clusterization
@@ -248,11 +248,11 @@ setMethod(
 
 #' dropClusterization
 #'
-#' This function drops a clusterization from the current COTAN object, by removing
-#' the corresponding column in the \code{metaCells} data.frame and in case dropping
-#' the corresponding coex data.frame from the \code{clustersCoex} list.
+#' This function drops a clusterization from the current `COTAN` object, by removing
+#' the corresponding column in the `metaCells data.frame` and in case dropping
+#' the corresponding `coex data.frame` from the `clustersCoex list`.
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param clusterizationName the name of an existing clusterization.
 #'
 #' @return the updated COTAN object
