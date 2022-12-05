@@ -190,11 +190,7 @@ setMethod(
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, clusters,
                                         clName, getCells(objCOTAN))
 
-    # adding an empty data.frame is equivalent to remove the element in the list
-    objCOTAN@clustersCoex[[clName]] <- list(NULL)
-    if (!is_empty(coexDF)) {
-      objCOTAN@clustersCoex[[clName]] <- coexDF
-    }
+    objCOTAN@clustersCoex[[clName]] <- coexDF
 
     validObject(objCOTAN)
 
@@ -285,8 +281,7 @@ setMethod(
     keptCols <- !colnames(objCOTAN@metaCells) %in% clName
     objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols, drop = FALSE]
 
-    keptCols <- !colnames(objCOTAN@clustersCoex) %in% clName
-    objCOTAN@clustersCoex <- objCOTAN@clustersCoex[keptCols]
+    objCOTAN@clustersCoex[[clName]] <- NULL
 
     return(objCOTAN)
   }

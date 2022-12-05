@@ -635,7 +635,10 @@ setMethod(
       return( list("clusters" = c(), "coex" = data.frame()) )
     }
 
-    return( list("clusters" = getMetadataCells(objCOTAN)[[clName]],
+    clusters <- getMetadataCells(objCOTAN)[[clName]]
+    names(clusters) <- getCells(objCOTAN)
+
+    return( list("clusters" = clusters,
                  "coex" = getClustersCoex(objCOTAN)[[clName]]) )
   }
 )

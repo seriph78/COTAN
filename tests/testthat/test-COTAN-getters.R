@@ -1,4 +1,3 @@
-library("COTAN")
 
 test_that("COTAN getters", {
   raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
@@ -35,7 +34,7 @@ test_that("COTAN getters", {
   expect_equal(rownames(getMetadataCells(obj)), getCells(obj))
   expect_equal(length(getClustersCoex(obj)), 2)
   expect_equal(names(getClustersCoex(obj)), paste0("CL_", getClusterizations(obj)))
-  expect_equal(getClustersCoex(obj)[["CL_Test"]], list(NULL))
+  expect_equal(getClustersCoex(obj)[["CL_Test"]], data.frame())
   expect_equal(getNu(obj), getMetadataCells(obj)[["nu"]], ignore_attr = TRUE)
   expect_equal(getLambda(obj), getMetadataGenes(obj)[["lambda"]], ignore_attr = TRUE)
   expect_equal(getDispersion(obj), getMetadataGenes(obj)[["dispersion"]], ignore_attr = TRUE)
@@ -46,5 +45,5 @@ test_that("COTAN getters", {
   expect_equal(getClusterizations(obj), c("Test", "Test2"))
   expect_setequal(names(getClusterizationData(obj)), c("coex","clusters"))
   expect_equal(getClusterizationData(obj)[["clusters"]], getMetadataCells(obj)[["CL_Test2"]], ignore_attr = TRUE)
-  expect_equal(getClusterizationData(obj)[["coex"]], list(NULL))
+  expect_equal(getClusterizationData(obj)[["coex"]], data.frame())
 })

@@ -131,9 +131,7 @@ setClass(
                     " must be one of the column names of 'metaCells'."))
       }
       coexDF <- object@clustersCoex[[name]]
-      isNullDF <- ( is_empty(coexDF)
-                  || (isa(coexDF, "list") && length(coexDF) == 1 && is.null(coexDF[[1]])) )
-      if (!isNullDF) {
+      if (!is_empty(coexDF)) {
         if (!isa(coexDF, "data.frame")) {
           stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
                       " A '", class(coexDF), "' was given instead." ))
@@ -261,8 +259,8 @@ setClass(
 #'
 getCOTANSlots <- function(from) {
   if (!is_empty(from@yes_yes)) {
-    warning(paste0("scCOTAN as COTAN: non-empty yes_yes member",
-                   " found: will be discarded"),
+    warning(paste0("scCOTAN as COTAN: non-empty yes_yes member found:",
+                   " will be discarded"),
             call. = FALSE)
   }
 
@@ -296,14 +294,14 @@ getCOTANSlots <- function(from) {
 
   metaGenes <- data.frame()
 
-  if (!is_empty(from@hk)) {
-    metaGenes <- setColumnInDF(metaGenes, rownames(from@raw) %in% from@hk,
-                               "hkGenes", rownames(from@raw))
-  }
-
   if (!is_empty(from@lambda)) {
     metaGenes <- setColumnInDF(metaGenes, from@lambda,
                                "lambda", rownames(from@raw))
+  }
+
+  if (!is_empty(from@hk)) {
+    metaGenes <- setColumnInDF(metaGenes, rownames(from@raw) %in% from@hk,
+                               "hkGenes", rownames(from@raw))
   }
 
   if (!is_empty(from@a)) {

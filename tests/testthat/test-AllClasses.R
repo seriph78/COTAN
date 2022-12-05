@@ -1,9 +1,11 @@
 library(Matrix)
 
+setLoggingLevel(3)
+
 tm = tempdir()
 stopifnot(file.exists(tm))
 
-test_that("Empty matrice", {
+test_that("Empty matrices", {
   expect_equal(dim(emptySparseMatrix()), c(0,0))
   expect_s4_class(emptySparseMatrix(), "dgCMatrix")
 
@@ -22,12 +24,24 @@ test_that("'COTAN' constructor", {
 })
 
 test_that("'scCOTAN' converters",{
-  filePath <- file.path(tm, "Completely_analysed_COTAN_obj.RDS")
-  #filePath <- file.path(tm, "temp.RDS")
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  rownames(raw) = LETTERS[1:10]
+  colnames(raw) = letters[1:20]
 
-  skip_if_not(file.exists(filePath), message = "TODO: produce missing data-file")
+  tags <- c("GEO:", "scRNAseq method:", "starting n. of cells:", "Condition sample:")
 
-  obj <- readRDS(filePath)
+  obj <- COTAN(raw = raw)
+  obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
+  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- estimateDispersion(obj)
+  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
+
+  coexDF <- as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.5)/pi*2)
+  colnames(coexDF) <- c(1, 2)
+
+  obj <- addClusterization(obj, clusterizationName = "clusters",
+                           clusters = rep(colnames(coexDF), 10),
+                           coexDF = coexDF)
 
   # coerce 'COTAN' -> 'scCOTAN'
   obj_sc <- as(obj, "scCOTAN")
