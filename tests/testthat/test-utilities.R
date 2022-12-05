@@ -42,7 +42,73 @@ test_that("Adding columns to data.frames", {
 
 
 test_that("funProbZero", {
+  # Cases with mu = 0 are not actually in use
+  expect_equal(funProbZero(-Inf,   0), NaN)
+  expect_equal(funProbZero(  -1,   0),   1)
+  expect_equal(funProbZero(   0,   0),   1)
+  expect_equal(funProbZero(   1,   0),   1)
+  expect_equal(funProbZero(  10,   0),   1)
+  expect_equal(funProbZero( Inf,   0), NaN)
 
+  # Cases with infinite disp can happen
+  expect_equal(funProbZero(-Inf,   1),          0)
+  expect_equal(funProbZero(  -1,   1),    exp(-2))
+  expect_equal(funProbZero(   0,   1),    exp(-1))
+  expect_equal(funProbZero(   1,   1),        1/2)
+  expect_equal(funProbZero(  10,   1), 11^(-1/10))
+  expect_equal(funProbZero( Inf,   1),          1)
+
+  # Cases with mu = Inf are not actually in use
+  expect_equal(funProbZero(-Inf, Inf),   0)
+  expect_equal(funProbZero(  -1, Inf),   0)
+  expect_equal(funProbZero(   0, Inf), NaN)
+  expect_equal(funProbZero(   1, Inf),   0)
+  expect_equal(funProbZero(  10, Inf),   0)
+  expect_equal(funProbZero( Inf, Inf),   1)
+})
+
+
+test_that("funProbZero with matrices", {
+  mu <- matrix(c(1:25)/7, nrow = 10, ncol = 10)
+  disp <- c(-1:8)/3
+
+  p <- funProbZero(disp, mu)
+
+  expect_equal(dim(p),dim(mu))
+
+  expect_equal(p[ 1, 1], funProbZero(disp[ 1], mu[ 1, 1]))
+  expect_equal(p[ 1,10], funProbZero(disp[ 1], mu[ 1,10]))
+
+  expect_equal(p[ 3, 7], funProbZero(disp[ 3], mu[ 3, 7]))
+  expect_equal(p[ 6, 4], funProbZero(disp[ 6], mu[ 6, 4]))
+
+  expect_equal(p[10, 1], funProbZero(disp[10], mu[10, 1]))
+  expect_equal(p[10,10], funProbZero(disp[10], mu[10,10]))
+})
+
+
+test_that("dispersionBisection", {
+  mu      <- matrix(c(7, 5, 4, 3, 7, 5, 4, 3, 7, 5, 4, 3, 7, 5, 4, 3, 7, 5, 4, 3), nrow = 2)
+  zeroOne <- matrix(c(1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1), nrow = 2)
+
+  expect_equal(dispersionBisection(1, zeroOne, mu), -Inf)
+  expect_equal(dispersionBisection(2, zeroOne, mu), 4.0546875)
+})
+
+
+test_that("nuBisection", {
+  lambda     <- c(5.5,  4,2,    1,   5.5, 1.5, 3,   3.5, 1,   4.5)
+  dispersion <- c(-Inf, 4, 2.5, 0.9, 5,   1.9, 3.5, 4,   0.9, 4.5)
+  zeroOne <- matrix(c(1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0), ncol = 2)
+  initialGuess <- c(1.5, 0.5)
+
+  expect_equal(nuBisection(1, zeroOne, lambda, dispersion, initialGuess), 3.15234375)
+  expect_equal(nuBisection(2, zeroOne, lambda, dispersion, initialGuess), 0.34960938)
+})
+
+
+test_that("plotTheme", {
+  expect_warning(plotTheme(plotKind = "Wrong", textSize = 12))
 })
 
 
@@ -58,6 +124,7 @@ test_that("Raw data normalization", {
 
   expect_equal(t(t(raw) * (1/nu)), raw.norm)
 })
+
 
 test_that("prcomp_irlba usage", {
   utils::data("raw.dataset", package = "COTAN")
@@ -91,6 +158,7 @@ test_that("prcomp_irlba usage", {
   expect_true(dist2 < 10^(-4))
 })
 
+
 # legacy
 test_that("vec2mat_rfast", {
   mat <- matrix(0,nrow = 10, ncol = 10)
@@ -105,6 +173,7 @@ test_that("vec2mat_rfast", {
   expect_equal(mat, vec2mat_rfast(mat2vec_rfast(mat)))
   expect_equal(mat[, genes], vec2mat_rfast(mat2vec_rfast(mat), genes = genes))
 })
+
 
 test_that("mat2vec_rfast", {
   names.v <- paste0("raw", c(1:15))

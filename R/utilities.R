@@ -109,12 +109,22 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #' @description Private function that gives the probability of a sample gene
 #'   count being zero given the given the dispersion and mu
 #'
+#' @details Using \eqn{d}{`disp`} for `disp` and \eqn{\mu}{`mu`} for `mu`,
+#'   it returns:
+#'   \eqn{(1 + d \mu)^{-\frac{1}{d}}}{(1 + `disp` * `mu`)^(-1 / `disp`)}
+#'   when \eqn{d > 0}{`disp > 0`} and
+#'   \eqn{\exp{((d - 1) \mu)}}{exp((`disp` - 1) * `mu`)} otherwise.
+#'   The function is continuous in \eqn{d = 0}{`disp = 0`}, increasing in \eqn{d}{`disp`}
+#'   and decreasing in \eqn{\mu}{`mu`}. It returns 0 when
+#'   \eqn{d = -\infty}{`disp = -Inf`} or \eqn{\mu = \infty}{`mu = Inf`}.
+#'   It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
+#'
 #' @param disp the estimated dispersion (can be a 𝑛-sized vector)
 #' @param mu the lambda times nu value  (can be a 𝑛×𝑚 matrix)
 #'
 #' @returns the probability (matrix) that a count is identically zero
 #'
-#' @noRd
+#' @rdname funProbZero
 #'
 funProbZero <- function(disp, mu) {
   neg <- disp <= 0
@@ -358,7 +368,7 @@ nuBisection <-
 
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
-  nu1 <- initialGuess
+  nu1 <- initialGuess[cell]
   diff1 <- sum(funProbZero(dispersion, nu1 * lambda)) - sumZeros
   if (abs(diff1) <= threshold) {
     return(nu1)
