@@ -89,7 +89,8 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
     }
   }
 
-  if (!is_empty(rowNames) && is_empty(rownames(out))) {
+  # default assigned rownames are numbers...
+  if (!is_empty(rowNames) && is.integer(attr(out, "row.names"))) {
     rownames(out) <- rowNames
   }
 

@@ -3,7 +3,7 @@ library(Matrix)
 tm = tempdir()
 stopifnot(file.exists(tm))
 
-test_that("Empty matrices", {
+test_that("Empty matrices are OK", {
   expect_equal(dim(emptySparseMatrix()), c(0,0))
   expect_s4_class(emptySparseMatrix(), "dgCMatrix")
 
@@ -11,7 +11,7 @@ test_that("Empty matrices", {
   expect_s4_class(emptySymmetricMatrix(), "dspMatrix")
 })
 
-test_that("'COTAN' constructor", {
+test_that("'COTAN' constructor works", {
   utils::data("test.dataset.col", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset.col)
@@ -21,11 +21,13 @@ test_that("'COTAN' constructor", {
   expect_equal(obj@raw, as(as.matrix(test.dataset.col), "sparseMatrix"))
 })
 
-#TODO: re-enable once the following file has been produced!
-if (FALSE) {
-test_that("'scCOTAN' converters",{
-  obj <- readRDS(file.path(tm, "Completely_analysed_COTAN_obj.RDS"))
-  #obj <- readRDS(file.path(tm, "temp.RDS"))
+test_that("'scCOTAN' converters perform as expected",{
+  filePath <- file.path(tm, "Completely_analysed_COTAN_obj.RDS")
+  #filePath <- file.path(tm, "temp.RDS")
+
+  skip_if_not(file.exists(filePath), message = "TODO: produce missing data-file")
+
+  obj <- readRDS(filePath)
 
   # coerce 'COTAN' -> 'scCOTAN'
   obj_sc <- as(obj, "scCOTAN")
@@ -57,8 +59,6 @@ test_that("'scCOTAN' converters",{
   }
 
   expect_equal(obj2, obj)
-
 })
-}
 
 gc()

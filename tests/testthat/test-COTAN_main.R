@@ -174,8 +174,10 @@ test_that("mat2vec_rfast_test", {
     expect_equal(vec, mat2vec_rfast(m))
 })
 
-if(FALSE){
 test_that("7_cell_homogeneous_clustering", {
+  #TODO: fix this issue:
+  skip("cell_homogeneous_clustering does not terminate!")
+
   obj <- readRDS(file.path(tm,"temp.RDS"))
   clusters <- cell_homogeneous_clustering(obj, cond = "test", cores = 12,
                                           out_dir = paste0(tm,"/"))
@@ -237,6 +239,9 @@ test_that("7_cell_homogeneous_clustering", {
 
 
 test_that("8_merge_cell.clusters.test", {
+  #TODO: make clusterization into a data-file!
+  skip("no clusterization available to run test!")
+
   temp <- readRDS(file.path(tm,"temp.RDS"))
   temp <- DEA_on_clusters(as(temp,"scCOTAN"))[[1]]
 
@@ -284,12 +289,7 @@ test_that("8_merge_cell.clusters.test", {
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
 
   }
-
-
-
 })
-
-}
 
 
 
