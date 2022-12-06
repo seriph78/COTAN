@@ -91,7 +91,7 @@ test_that("6_calculateGDI_test", {
 
 test_that("7_cell_homogeneous_clustering", {
   #TODO: fix this issue:
-  skip("cell_homogeneous_clustering does not terminate!")
+  #skip("cell_homogeneous_clustering does not terminate!")
 
   obj <- readRDS(file.path(tm,"temp.RDS"))
   clusters <- cell_homogeneous_clustering(obj, cond = "test", cores = 12,

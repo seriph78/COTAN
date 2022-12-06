@@ -86,7 +86,7 @@ setMethod("cell_homogeneous_clustering",
   print("First part finished! Starting the iterative part.")
   round <- 0
   singletons <- 0
-  to_recluster_old <- names(cell.cluster.vector[is.na(cell.cluster.vector)])
+  #to_recluster_old <- names(cell.cluster.vector[is.na(cell.cluster.vector)])
   number.cls.old <- 0 #Just to start from a number higher than any possible real situation
 
   while (sum(is.na(cell.cluster.vector)) > 50 ) { #& round < 25
@@ -96,13 +96,13 @@ setMethod("cell_homogeneous_clustering",
 
     #to_recluster_new <- names(cell.cluster.vector[is.na(cell.cluster.vector)])
 
-    print(paste("Length array cells to re-cluster:", length(to_recluster_old),
+    print(paste("Length array cells to re-cluster:", sum(is.na(cell.cluster.vector)),
                 "round:", round))
 
     #Clustering using Seurat
 #    seurat.obj <- CreateSeuratObject(counts = (obj@raw[,getCells(obj) %in% to_recluster_new]),
 #                                   project = "reclustering", min.cells = 1, min.features = 2)
-    seurat.obj <- CreateSeuratObject(counts = (obj@raw[,getCells(obj) %in% to_recluster_old]),
+    seurat.obj <- CreateSeuratObject(counts = (obj@raw[,getCells(obj) %in% getCells(obj)[is.na(cell.cluster.vector)]]),
                                      project = "reclustering", min.cells = 1, min.features = 2)
     seurat.obj <- NormalizeData(seurat.obj, normalization.method = "LogNormalize",
                                 scale.factor = 10000)
@@ -138,7 +138,7 @@ setMethod("cell_homogeneous_clustering",
     pdf(paste0(out_dir_round,"pdf_umap.pdf"))
       plot(DimPlot(seurat.obj, reduction = "umap",label = TRUE)+
              annotate(geom="text", x=0, y=30,
-                      label=paste0("Cell number: ",length(to_recluster_old),"\nCl. resolution: ",
+                      label=paste0("Cell number: ",sum(is.na(cell.cluster.vector)),"\nCl. resolution: ",
                                    cl.resolution),color="black"))
     dev.off()
 
@@ -166,8 +166,9 @@ setMethod("cell_homogeneous_clustering",
 
     #clusters.to.recluster <- unique(seurat.obj@meta.data[rownames(seurat.obj@meta.data) %in% to_recluster_new,]$seurat_clusters)
 
-    if (length(to_recluster_new) == length(to_recluster_old) & cl.resolution < 2.5) {
-        next
+    if (length(to_recluster_new) == sum(is.na(cell.cluster.vector)) ) {
+      warning("Problems: no other uniform clusters found")
+      break
     }
 
 
