@@ -23,7 +23,7 @@ It cannot match an existing name; in case use \code{\link[=dropClusterization]{d
 for each (or some) of the clusters of the clusterization}
 }
 \value{
-the updated COTAN object
+the updated \code{COTAN} object
 }
 \description{
 This function adds a clusterization to the current \code{COTAN} object, by adding a

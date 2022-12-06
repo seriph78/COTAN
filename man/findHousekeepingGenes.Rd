@@ -7,11 +7,11 @@
 \S4method{findHousekeepingGenes}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{the COTAN object}
+\item{objCOTAN}{the \code{COTAN} object}
 }
 \value{
-the given COTAN object with updated housekeepingGenes
+the given \code{COTAN} object with updated housekeepingGenes
 }
 \description{
-determines the housekeeping genes vector of a COTAN object
+determines the housekeeping genes vector of a \code{COTAN} object
 }

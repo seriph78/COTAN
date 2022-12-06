@@ -7,10 +7,10 @@
 \S4method{getGenes}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 }
 \value{
-a gene array
+a character array with the genes' names
 }
 \description{
 This function extract all genes in the dataset.

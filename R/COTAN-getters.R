@@ -4,7 +4,7 @@
 #'
 #' @description This function extracts the raw count table.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
 #' @returns the raw count sparse matrix
 #'
@@ -28,11 +28,11 @@ setMethod(
 
 #' getNumCells
 #'
-#' This function extracts the number of cells in the sample (𝑚)
+#' @description This function extracts the number of cells in the sample (𝑚)
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the number of cells in the sample (𝑚).
+#' @returns the number of cells in the sample (𝑚).
 #'
 #' @importFrom rlang is_empty
 #'
@@ -43,6 +43,7 @@ setMethod(
 #' numCells <- getNumCells(objCOTAN)
 #'
 #' @rdname getNumCells
+#'
 setMethod(
   "getNumCells",
   "COTAN",
@@ -53,11 +54,11 @@ setMethod(
 
 #' getNumGenes
 #'
-#' This function extracts the number of genes in the sample (𝑛)
+#' @description This function extracts the number of genes in the sample (𝑛)
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the number of genes in the sample (𝑛).
+#' @returns the number of genes in the sample (𝑛).
 #'
 #' @export
 #'
@@ -66,6 +67,7 @@ setMethod(
 #' numGenes <- getNumGenes(objCOTAN)
 #'
 #' @rdname getNumGenes
+#'
 setMethod(
   "getNumGenes",
   "COTAN",
@@ -77,11 +79,11 @@ setMethod(
 
 #' getCells
 #'
-#' This function extract all cells in the dataset.
+#' @description This function extract all cells in the dataset.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return a cell character array
+#' @returns a character array with the cells' names
 #'
 #' @importFrom rlang is_empty
 #'
@@ -92,6 +94,7 @@ setMethod(
 #' cellsNames <- getCells(objCOTAN)
 #'
 #' @rdname getCells
+#'
 setMethod(
   "getCells",
   "COTAN",
@@ -103,11 +106,11 @@ setMethod(
 
 #' getGenes
 #'
-#' This function extract all genes in the dataset.
+#' @description This function extract all genes in the dataset.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return a gene array
+#' @returns a character array with the genes' names
 #'
 #' @importFrom rlang is_empty
 #'
@@ -118,6 +121,7 @@ setMethod(
 #' genesNames <- getGenes(objCOTAN)
 #'
 #' @rdname getGenes
+#'
 setMethod(
   "getGenes",
   "COTAN",
@@ -129,12 +133,12 @@ setMethod(
 
 #' getZeroOneProj
 #'
-#' This function extract the raw count table where any
-#' positive number has been replaced with 1
+#' @description This function extract the raw count table where any positive
+#'   number has been replaced with 1
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the raw count projected to 0/1
+#' @returns the raw count matrix projected to 0/1
 #'
 #' @importFrom rlang is_empty
 #'
@@ -145,6 +149,7 @@ setMethod(
 #' zeroOne <- getZeroOneProj(objCOTAN)
 #'
 #' @rdname getZeroOneProj
+#'
 setMethod(
   "getZeroOneProj",
   "COTAN",
@@ -158,7 +163,7 @@ setMethod(
 #'
 #' This function extracts the cell raw library size.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
 #' @return an array with the library sizes
 #'
@@ -181,11 +186,11 @@ setMethod(
 
 #' getNormalizedData
 #'
-#' This function extracts the normalized count table.
+#' @description This function extracts the normalized count table.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the normalized count dataframe (divided by nu).
+#' @returns the normalized count dataframe (i.e. divided by nu).
 #'
 #' @importFrom rlang is_empty
 #'
@@ -196,6 +201,7 @@ setMethod(
 #' rawNorm <- getNormalizedData(objCOTAN)
 #'
 #' @rdname getNormalizedData
+#'
 setMethod(
   "getNormalizedData",
   "COTAN",
@@ -211,11 +217,11 @@ setMethod(
 
 #' getMetadataDataset
 #'
-#' This function extract the meta-data stored for the data-set.
+#' @description This function extract the meta-data stored for the data-set.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the meta-data data.frame
+#' @returns the meta-data data.frame
 #'
 #' @importFrom rlang is_empty
 #'
@@ -226,6 +232,7 @@ setMethod(
 #' dataSetInfo <- getMetadataDataset(objCOTAN)
 #'
 #' @rdname getMetadataDataset
+#'
 setMethod(
   "getMetadataDataset",
   "COTAN",
@@ -237,11 +244,11 @@ setMethod(
 
 #' getMetadataGenes
 #'
-#' This function extract the meta-data stored for the genes.
+#' @description This function extract the meta-data stored for the genes.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the meta-data data.frame
+#' @returns the meta-data data.frame
 #'
 #' @importFrom rlang is_empty
 #'
@@ -252,6 +259,7 @@ setMethod(
 #' metaGenes <- getMetadataGenes(objCOTAN)
 #'
 #' @rdname getMetadataGenes
+#'
 setMethod(
   "getMetadataGenes",
   "COTAN",
@@ -263,11 +271,11 @@ setMethod(
 
 #' getMetadataCells
 #'
-#' This function extract the meta-data stored for the cells.
+#' @description This function extract the meta-data stored for the cells.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the meta-data data.frame
+#' @returns the meta-data data.frame
 #'
 #' @importFrom rlang is_empty
 #'
@@ -278,6 +286,7 @@ setMethod(
 #' metaCells <- getMetadataCells(objCOTAN)
 #'
 #' @rdname getMetadataCells
+#'
 setMethod(
   "getMetadataCells",
   "COTAN",
@@ -289,12 +298,12 @@ setMethod(
 
 #' getClustersCoex
 #'
-#' This function extract the complete clusterCoex list
+#' @description This function extract the complete clusterCoex list
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the list with a coex data.frame for each clusterization
-#' When not empty, each data.frame contains a coex column for each cluster.
+#' @returns the list with a coex data.frame for each clusterization When not
+#'   empty, each data.frame contains a coex column for each cluster.
 #'
 #' @export
 #'
@@ -302,6 +311,7 @@ setMethod(
 #' allClustersCoexDF <- getClustersCoex(objCOTAN)
 #'
 #' @rdname getClustersCoex
+#'
 setMethod(
   "getClustersCoex",
   "COTAN",
@@ -313,11 +323,11 @@ setMethod(
 
 #' getNu
 #'
-#' This function extract the nu array.
+#' @description This function extract the nu array.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the nu array.
+#' @returns the nu array.
 #'
 #' @importFrom rlang is_empty
 #'
@@ -329,6 +339,7 @@ setMethod(
 #' nu <- getNu(objCOTAN)
 #'
 #' @rdname getNu
+#'
 setMethod(
   "getNu",
   "COTAN",
@@ -350,9 +361,9 @@ setMethod(
 #'
 #' This function extract the lambda array (mean expression for each gene).
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the lambda array
+#' @returns the lambda array
 #'
 #' @importFrom rlang is_empty
 #'
@@ -383,11 +394,11 @@ setMethod(
 
 #' getDispersion
 #'
-#' This function extract the a array.
+#' @description This function extract the a array.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return the dispersion array
+#' @returns the dispersion array
 #'
 #' @importFrom rlang is_empty
 #'
@@ -400,6 +411,7 @@ setMethod(
 #' dispersion <- getDispersion(objCOTAN)
 #'
 #' @rdname getDispersion
+#'
 setMethod(
   "getDispersion",
   "COTAN",
@@ -419,12 +431,12 @@ setMethod(
 
 #' flagNotHousekeepingGenes
 #'
-#' This function returns a Boolean vector with TRUE for those genes that are
-#' not housekeeping.
+#' @description This function returns a Boolean vector with TRUE for those genes
+#'   that are not housekeeping.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return an array of Booleans with TRUE for genes that are not housekeeping
+#' @returns an array of Booleans with TRUE for genes that are not housekeeping
 #'
 #' @importFrom rlang is_empty
 #'
@@ -436,6 +448,7 @@ setMethod(
 #' goodPos <- flagNotHousekeepingGenes(objCOTAN)
 #'
 #' @rdname flagNotHousekeepingGenes
+#'
 setMethod(
   "flagNotHousekeepingGenes",
   "COTAN",
@@ -452,11 +465,11 @@ setMethod(
 
 #' getHousekeepingGenes
 #'
-#' This function return the genes expressed in all cells in the dataset.
+#' @description This function return the genes expressed in all cells in the dataset.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #'
-#' @return an array containing all genes expressed in all cells
+#' @returns an array containing all genes expressed in all cells
 #'
 #' @importFrom rlang is_empty
 #'
@@ -468,6 +481,7 @@ setMethod(
 #' hkGenes <- getHousekeepingGenes(objCOTAN)
 #'
 #' @rdname getHousekeepingGenes
+#'
 setMethod(
   "getHousekeepingGenes",
   "COTAN",
@@ -479,12 +493,12 @@ setMethod(
 
 #' getGenesCoex
 #'
-#' This function extract a complete (or a partial after genes dropping)
-#' genes' coex matrix from the COTAN object.
+#' @description This function extract a complete (or a partial after genes
+#'   dropping) genes' coex matrix from the `COTAN` object.
 #'
-#' @param objCOTAN A COTAN object
-#' @param genes A vector of gene names. It will exclude any gene not on the list.
-#' By defaults the function will keep all genes.
+#' @param objCOTAN A `COTAN` object
+#' @param genes A vector of gene names. It will exclude any gene not on the
+#'   list. By defaults the function will keep all genes.
 #'
 #' @return the genes' coex values
 #'
@@ -500,6 +514,7 @@ setMethod(
 #' genesCoex <- getGenesCoex(objCOTAN)
 #'
 #' @rdname getGenesCoex
+#'
 setMethod(
   "getGenesCoex",
   "COTAN",
@@ -516,14 +531,14 @@ setMethod(
 
 #' getCellsCoex
 #'
-#' This function extract a complete (or a partial after cells dropping)
-#' cells' coex matrix from the COTAN object.
+#' @description This function extract a complete (or a partial after cells
+#'   dropping) cells' coex matrix from the `COTAN` object.
 #'
-#' @param objCOTAN A COTAN object
-#' @param cells A vector of cell names. It will exclude any cell not on the list.
-#' By defaults the function will keep all cells.
+#' @param objCOTAN A `COTAN` object
+#' @param cells A vector of cell names. It will exclude any cell not on the
+#'   list. By defaults the function will keep all cells.
 #'
-#' @return the cells' coex values
+#' @returns the cells' coex values
 #'
 #' @importFrom rlang is_empty
 #'
@@ -538,6 +553,7 @@ setMethod(
 #' cellsCoex <- getCellsCoex(objCOTAN)
 #'
 #' @rdname getCellsCoex
+#'
 setMethod(
   "getCellsCoex",
   "COTAN",
@@ -554,13 +570,14 @@ setMethod(
 
 #' getClusterizations
 #'
-#' This function extract the list of clusterizations defined in the COTAN object.
+#' @description This function extract the list of clusterizations defined in the
+#'   `COTAN` object.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN A `COTAN` object
 #' @param dropNoCoex When TRUE drops the names from the clusterizations with
-#' empty associated coex data.frame
+#'   empty associated coex data.frame
 #'
-#' @return a vactor of clusterizations names without the 'CL_' prefix
+#' @returns a vector of clusterizations names without the 'CL_' prefix
 #'
 #' @export
 #'
@@ -568,6 +585,7 @@ setMethod(
 #' clusterizations <- getClusterizations(objCOTAN)
 #'
 #' @rdname getClusterizations
+#'
 setMethod(
   "getClusterizations",
   "COTAN",
@@ -594,15 +612,15 @@ setMethod(
 
 #' getClusterizationData
 #'
-#' This function extract the asked clusterization column and its coex
-#' data.frame from the COTAN object.
+#' @description This function extract the asked clusterization column and its
+#'   coex data.frame from the `COTAN` object.
 #'
-#' @param objCOTAN A COTAN object
-#' @param clusterizationName The name of the clusterization.
-#' If not given the last available clusterization will be returned,
-#' as it is probably the most significant!
+#' @param objCOTAN A `COTAN` object
+#' @param clusterizationName The name of the clusterization. If not given the
+#'   last available clusterization will be returned, as it is probably the most
+#'   significant!
 #'
-#' @return a list with 'clusters' and 'coex'
+#' @returns a list with 'clusters' and 'coex'
 #'
 #' @export
 #'
@@ -611,6 +629,7 @@ setMethod(
 #' list[cls, clsCoex] <- getClusterizationData(objCOTAN, clusterizationName = "merged")
 #'
 #' @rdname getClusterizationData
+#'
 setMethod(
   "getClusterizationData",
   "COTAN",

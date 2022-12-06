@@ -7,10 +7,10 @@
 \S4method{getCells}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 }
 \value{
-a cell character array
+a character array with the cells' names
 }
 \description{
 This function extract all cells in the dataset.

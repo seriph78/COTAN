@@ -7,7 +7,7 @@
 \S4method{getLambda}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 }
 \value{
 the lambda array

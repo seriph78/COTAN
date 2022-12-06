@@ -7,14 +7,14 @@
 \S4method{getZeroOneProj}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 }
 \value{
-the raw count projected to 0/1
+the raw count matrix projected to 0/1
 }
 \description{
-This function extract the raw count table where any
-positive number has been replaced with 1
+This function extract the raw count table where any positive
+number has been replaced with 1
 }
 \examples{
 objCOTAN <- COTAN(raw = data("ERCC.cotan"))

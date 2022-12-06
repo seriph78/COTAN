@@ -7,17 +7,17 @@
 \S4method{getCellsCoex}{COTAN}(objCOTAN, cells = c())
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 
-\item{cells}{A vector of cell names. It will exclude any cell not on the list.
-By defaults the function will keep all cells.}
+\item{cells}{A vector of cell names. It will exclude any cell not on the
+list. By defaults the function will keep all cells.}
 }
 \value{
 the cells' coex values
 }
 \description{
-This function extract a complete (or a partial after cells dropping)
-cells' coex matrix from the COTAN object.
+This function extract a complete (or a partial after cells
+dropping) cells' coex matrix from the \code{COTAN} object.
 }
 \examples{
 objCOTAN <- COTAN(raw = data("ERCC.cotan"))

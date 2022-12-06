@@ -12,7 +12,7 @@
 \item{clusterizationName}{the name of an existing clusterization.}
 }
 \value{
-the updated COTAN object
+the updated \code{COTAN} object
 }
 \description{
 This function drops a clusterization from the current \code{COTAN} object, by removing

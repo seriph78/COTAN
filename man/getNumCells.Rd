@@ -7,7 +7,7 @@
 \S4method{getNumCells}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 }
 \value{
 the number of cells in the sample (𝑚).

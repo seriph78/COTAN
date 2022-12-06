@@ -7,16 +7,17 @@
 \S4method{getClusterizations}{COTAN}(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 
 \item{dropNoCoex}{When TRUE drops the names from the clusterizations with
 empty associated coex data.frame}
 }
 \value{
-a vactor of clusterizations names without the 'CL_' prefix
+a vector of clusterizations names without the 'CL_' prefix
 }
 \description{
-This function extract the list of clusterizations defined in the COTAN object.
+This function extract the list of clusterizations defined in the
+\code{COTAN} object.
 }
 \examples{
 clusterizations <- getClusterizations(objCOTAN)

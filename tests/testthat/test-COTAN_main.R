@@ -1,8 +1,6 @@
 tm = tempdir()
 stopifnot(file.exists(tm))
 
-setLoggingLevel(3)
-
 #root = "tests/testthat/"
 root = ""
 genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))

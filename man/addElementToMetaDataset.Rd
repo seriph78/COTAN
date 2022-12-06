@@ -7,20 +7,22 @@
 \S4method{addElementToMetaDataset}{COTAN}(objCOTAN, tag, value)
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{tag}{the new information tag}
 
 \item{value}{a value (or an array) containing the information}
 }
 \value{
-the updated COTAN object
+the updated \code{COTAN} object
 }
 \description{
-This function is used to add a line of information to the information data frame (metadata).
+This function is used to add a line of information to the
+information data frame (metadata).
 }
 \examples{
 data("ERCC.cotan")
 ERCC.cotan <- addElementToMetaDataset(ERCC.cotan, "Test", c("These are ", "some values"))
 getMetadataDataset(ERCC.cotan)
+
 }

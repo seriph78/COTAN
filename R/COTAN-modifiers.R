@@ -1,27 +1,31 @@
 #' initializeMetaDataset
 #'
-#' initialize meta-data data-set
+#' @description Initialize meta-data data-set
 #'
-#' @param objCOTAN the COTAN object
-#' @param GEO a code reporting the GEO identification or other specific dataset code
+#' @param objCOTAN the `COTAN` object
+#' @param GEO a code reporting the GEO identification or other specific data-set
+#'   code
 #' @param sequencingMethod a string reporting the method used for the sequencing
-#' @param sampleCondition a string reporting the specific sample condition or time point
+#' @param sampleCondition a string reporting the specific sample condition or
+#'   time point
 #'
-#' @return the given COTAN object with updated metaDataset
+#' @returns the given `COTAN` object with updated metaDataset
+#'
 #' @export
-#' @examples
 #'
+#' @examples
 #' data("raw.dataset")
 #' obj <- COTAN(raw = raw.dataset)
-#' obj <- initRaw(obj, GEO = "code", sequencingMethod = "10X",
-#'                     sampleCondition = "mouse dataset")
+#' obj <- initializeMetaDataset(obj, GEO = "code", sequencingMethod = "10X",
+#'                              sampleCondition = "mouse dataset")
 #'
 #' @rdname initializeMetaDataset
+#'
 setMethod(
   "initializeMetaDataset",
   "COTAN",
   function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
-    logThis("Initializing COTAN meta-data", logLevel = 2)
+    logThis("Initializing `COTAN` meta-data", logLevel = 2)
 
     objCOTAN@metaDataset[1,seq_len(2)] = c("GEO:", GEO)
     objCOTAN@metaDataset[2,seq_len(2)] = c("scRNAseq method:", sequencingMethod)
@@ -35,13 +39,14 @@ setMethod(
 
 #' addElementToMetaDataset
 #'
-#' This function is used to add a line of information to the information data frame (metadata).
+#' @description This function is used to add a line of information to the
+#'   information data frame (metadata).
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param tag the new information tag
 #' @param value a value (or an array) containing the information
 #'
-#' @return the updated COTAN object
+#' @returns the updated `COTAN` object
 #'
 #' @export
 #'
@@ -49,7 +54,9 @@ setMethod(
 #' data("ERCC.cotan")
 #' ERCC.cotan <- addElementToMetaDataset(ERCC.cotan, "Test", c("These are ", "some values"))
 #' getMetadataDataset(ERCC.cotan)
+#'
 #' @rdname addElementToMetaDataset
+#'
 setMethod(
   "addElementToMetaDataset",
   "COTAN",
@@ -65,10 +72,10 @@ setMethod(
 
 #' findHousekeepingGenes
 #'
-#' determines the housekeeping genes vector of a COTAN object
+#' determines the housekeeping genes vector of a `COTAN` object
 #'
-#' @param objCOTAN the COTAN object
-#' @return the given COTAN object with updated housekeepingGenes
+#' @param objCOTAN the `COTAN` object
+#' @return the given `COTAN` object with updated housekeepingGenes
 #'
 #' @importFrom Matrix rowSums
 #' @export
@@ -96,7 +103,7 @@ setMethod(
 #' This function remove an array of genes and/or cells from the current COTAN
 #' object.
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param genes an array of gene names
 #' @param cells an array of cell names
 #'
@@ -153,7 +160,7 @@ setMethod(
 #' @param coexDF a data.frame where each column indicates the coex
 #' for each (or some) of the clusters of the clusterization
 #'
-#' @return the updated COTAN object
+#' @return the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
@@ -200,15 +207,15 @@ setMethod(
 
 #' addClusterizationCoex
 #'
-#' This function adds a clusterization coex data.frame to the current COTAN object.
+#' This function adds a clusterization coex data.frame to the current `COTAN` object.
 #' It requires the clusterization to be already present, see [addClusterization()]
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param clusterizationName the name of an existing clusterization
 #' @param coexDF a data.frame where each column indicates the coex
 #' for each (or some) of the clusters of the clusterization
 #'
-#' @return the updated COTAN object
+#' @return the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
@@ -254,7 +261,7 @@ setMethod(
 #' @param objCOTAN a `COTAN` object
 #' @param clusterizationName the name of an existing clusterization.
 #'
-#' @return the updated COTAN object
+#' @return the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'

@@ -7,7 +7,7 @@
 \S4method{getHousekeepingGenes}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 }
 \value{
 an array containing all genes expressed in all cells

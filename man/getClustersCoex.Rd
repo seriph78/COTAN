@@ -7,11 +7,11 @@
 \S4method{getClustersCoex}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 }
 \value{
-the list with a coex data.frame for each clusterization
-When not empty, each data.frame contains a coex column for each cluster.
+the list with a coex data.frame for each clusterization When not
+empty, each data.frame contains a coex column for each cluster.
 }
 \description{
 This function extract the complete clusterCoex list

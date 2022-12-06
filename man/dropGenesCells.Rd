@@ -7,7 +7,7 @@
 \S4method{dropGenesCells}{COTAN}(objCOTAN, genes = c(), cells = c())
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{genes}{an array of gene names}
 

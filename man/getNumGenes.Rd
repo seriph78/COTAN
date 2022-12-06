@@ -7,7 +7,7 @@
 \S4method{getNumGenes}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 }
 \value{
 the number of genes in the sample (𝑛).

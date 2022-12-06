@@ -7,14 +7,14 @@
 \S4method{flagNotHousekeepingGenes}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 }
 \value{
 an array of Booleans with TRUE for genes that are not housekeeping
 }
 \description{
-This function returns a Boolean vector with TRUE for those genes that are
-not housekeeping.
+This function returns a Boolean vector with TRUE for those genes
+that are not housekeeping.
 }
 \examples{
 objCOTAN <- COTAN(raw = data("ERCC.cotan"))

@@ -7,18 +7,18 @@
 \S4method{getClusterizationData}{COTAN}(objCOTAN, clusterizationName = NULL)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 
-\item{clusterizationName}{The name of the clusterization.
-If not given the last available clusterization will be returned,
-as it is probably the most significant!}
+\item{clusterizationName}{The name of the clusterization. If not given the
+last available clusterization will be returned, as it is probably the most
+significant!}
 }
 \value{
 a list with 'clusters' and 'coex'
 }
 \description{
-This function extract the asked clusterization column and its coex
-data.frame from the COTAN object.
+This function extract the asked clusterization column and its
+coex data.frame from the \code{COTAN} object.
 }
 \examples{
 

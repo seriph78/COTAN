@@ -7,17 +7,17 @@
 \S4method{getGenesCoex}{COTAN}(objCOTAN, genes = c())
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{A \code{COTAN} object}
 
-\item{genes}{A vector of gene names. It will exclude any gene not on the list.
-By defaults the function will keep all genes.}
+\item{genes}{A vector of gene names. It will exclude any gene not on the
+list. By defaults the function will keep all genes.}
 }
 \value{
 the genes' coex values
 }
 \description{
-This function extract a complete (or a partial after genes dropping)
-genes' coex matrix from the COTAN object.
+This function extract a complete (or a partial after genes
+dropping) genes' coex matrix from the \code{COTAN} object.
 }
 \examples{
 objCOTAN <- COTAN(raw = data("ERCC.cotan"))

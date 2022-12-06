@@ -7,7 +7,7 @@
 \S4method{addClusterizationCoex}{COTAN}(objCOTAN, clusterizationName, coexDF)
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{clusterizationName}{the name of an existing clusterization}
 
@@ -15,10 +15,10 @@
 for each (or some) of the clusters of the clusterization}
 }
 \value{
-the updated COTAN object
+the updated \code{COTAN} object
 }
 \description{
-This function adds a clusterization coex data.frame to the current COTAN object.
+This function adds a clusterization coex data.frame to the current \code{COTAN} object.
 It requires the clusterization to be already present, see \code{\link[=addClusterization]{addClusterization()}}
 }
 \examples{

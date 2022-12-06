@@ -7,25 +7,26 @@
 \S4method{initializeMetaDataset}{COTAN}(objCOTAN, GEO, sequencingMethod = "10X", sampleCondition)
 }
 \arguments{
-\item{objCOTAN}{the COTAN object}
+\item{objCOTAN}{the \code{COTAN} object}
 
-\item{GEO}{a code reporting the GEO identification or other specific dataset code}
+\item{GEO}{a code reporting the GEO identification or other specific data-set
+code}
 
 \item{sequencingMethod}{a string reporting the method used for the sequencing}
 
-\item{sampleCondition}{a string reporting the specific sample condition or time point}
+\item{sampleCondition}{a string reporting the specific sample condition or
+time point}
 }
 \value{
-the given COTAN object with updated metaDataset
+the given \code{COTAN} object with updated metaDataset
 }
 \description{
-initialize meta-data data-set
+Initialize meta-data data-set
 }
 \examples{
-
 data("raw.dataset")
 obj <- COTAN(raw = raw.dataset)
-obj <- initRaw(obj, GEO = "code", sequencingMethod = "10X",
-                    sampleCondition = "mouse dataset")
+obj <- initializeMetaDataset(obj, GEO = "code", sequencingMethod = "10X",
+                             sampleCondition = "mouse dataset")
 
 }
