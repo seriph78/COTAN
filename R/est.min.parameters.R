@@ -8,8 +8,6 @@
 #' @return vector
 #' @export
 #'
-#' @examples
-#' data("ERCC.cotan")
 setGeneric("est.min.parameters", function(object, par) standardGeneric("est.min.parameters"))
 #' @rdname est.min.parameters
 setMethod(

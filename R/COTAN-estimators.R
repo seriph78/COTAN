@@ -14,7 +14,8 @@
 #' @export
 #'
 #' @examples
-#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
 #' objCOTAN <- estimateLambda(objCOTAN)
 #' lambda <- getLambda(objCOTAN)
 #'
@@ -47,7 +48,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
 #' objCOTAN <- estimateNuLinear(objCOTAN)
 #' nu <- getNu(objCOTAN)
 #'
@@ -95,7 +97,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
 #' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' dispersion <- getDispersion(objCOTAN)
@@ -207,7 +210,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
 #' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)

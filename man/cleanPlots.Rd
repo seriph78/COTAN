@@ -24,8 +24,9 @@ lists of ggplot2 plots:
 Retrieves the plots associated to the output of the clena method.
 }
 \examples{
-data("ERCC.cotan")
-list[objCOTAN, data] <- clean(ERCC.cotan)
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+list[objCOTAN, data] <- clean(objCOTAN)
 plots <- cleanPlots(objCOTAN, data[["pcaCells"]], data[["D"]])
 plot(plots[["UDEPlot"]])
 

@@ -27,7 +27,8 @@ new element in the \verb{clustersCoex list} using the passed in \code{coex}
 \code{data.frame}.
 }
 \examples{
-data("ERCC.cotan")
-ERCC.cotan <- addClusterization(ERCC.cotan, "merged", clusters)
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- addClusterization(objCOTAN, "merged", clusters)
 
 }

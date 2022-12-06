@@ -51,9 +51,10 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' ERCC.cotan <- addElementToMetaDataset(ERCC.cotan, "Test", c("These are ", "some values"))
-#' getMetadataDataset(ERCC.cotan)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- addElementToMetaDataset(objCOTAN, "Test", c("These are ", "some values"))
+#' getMetadataDataset(objCOTAN)
 #'
 #' @rdname addElementToMetaDataset
 #'
@@ -123,10 +124,11 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' genes.to.rem <- getGenes(ERCC.cotan)[grep('^MT', getGenes(ERCC.cotan))]
-#' cells.to.rem <- getCells(ERCC.cotan)[which(getCellsSize(ERCC.cotan) == 0)]
-#' ERCC.cotan <- dropGenesCells(ERCC.cotan, genes.to.rem, cells.to.rem)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' genes.to.rem <- getGenes(objCOTAN)[grep('^MT', getGenes(objCOTAN))]
+#' cells.to.rem <- getCells(objCOTAN)[which(getCellsSize(objCOTAN) == 0)]
+#' objCOTAN <- dropGenesCells(objCOTAN, genes.to.rem, cells.to.rem)
 #'
 #' @rdname dropGenesCells
 #'
@@ -178,8 +180,9 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' ERCC.cotan <- addClusterization(ERCC.cotan, "merged", clusters)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- addClusterization(objCOTAN, "merged", clusters)
 #'
 #' @rdname addClusterization
 #'
@@ -239,9 +242,9 @@ setMethod(
 #' @export
 #'
 #' @examples
-#'
-#' data("ERCC.cotan")
-#' ERCC.cotan <- addClusterizationCoex(ERCC.cotan, "merge", coex)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- addClusterizationCoex(objCOTAN, "merge", coex)
 #'
 #' @rdname addClusterizationCoex
 #'
@@ -289,8 +292,9 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' ERCC.cotan <- dropClusterization(ERCC.cotan, "merged")
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- dropClusterization(objCOTAN, "merged")
 #'
 #' @rdname dropClusterization
 #'

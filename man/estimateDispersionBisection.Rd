@@ -39,7 +39,8 @@ It needs to
 be run after \code{\link[=clean]{clean()}}
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 dispersion <- getDispersion(objCOTAN)

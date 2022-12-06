@@ -29,9 +29,11 @@ for the biological question of interest (for instance neural cortex layering mar
 In this case we denote it as local differentiation index (LDI) relative to V.
 }
 \examples{
-data("ERCC.cotan")
-df <- get.gene.coexpression.space(ERCC.cotan,
-  n.genes.for.marker = 10,
-  primary.markers = getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 5)]
-)
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 5)]
+df <- get.gene.coexpression.space(objCOTAN,
+                                  n.genes.for.marker = 10,
+                                  primary.markers = markers)
+
 }

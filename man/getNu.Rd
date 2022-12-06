@@ -16,7 +16,8 @@ the nu array.
 This function extract the nu array.
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- estimateNuLinear(objCOTAN)
 nu <- getNu(objCOTAN)
 

@@ -25,9 +25,12 @@ a ggplot object
 This is the function that create the heatmap of one or more COTAN object.
 }
 \examples{
-data("ERCC.cotan")
+data("ERCCraw")
+rownames(ERCCraw) = ERCCraw$V1
+ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
+objCOTAN <- COTAN(raw = ERCCraw)
 data_dir <- tempdir()
-saveRDS(ERCC.cotan, file = file.path(data_dir, "ERCC.cotan.RDS"))
+saveRDS(objCOTAN, file = file.path(data_dir, "ERCC.cotan.RDS"))
 # some genes
 primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
 # a example of named list of different gene set

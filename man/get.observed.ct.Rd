@@ -23,8 +23,9 @@ A contingency table as dataframe
 This function is used to get the observed contingency table for a given pair of genes.
 }
 \examples{
-data("ERCC.cotan")
-g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-get.observed.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+get.observed.ct(object = objCOTAN, g1 = g1, g2 = g2)
 }

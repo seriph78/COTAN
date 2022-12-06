@@ -16,7 +16,8 @@ The updated \code{COTAN} object
 linear estimator of nu (normalised cells' counts averages)
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- estimateNuLinear(objCOTAN)
 nu <- getNu(objCOTAN)
 

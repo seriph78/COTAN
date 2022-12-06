@@ -23,9 +23,9 @@ current \code{COTAN} object. It requires the clusterization to be already
 present.
 }
 \examples{
-
-data("ERCC.cotan")
-ERCC.cotan <- addClusterizationCoex(ERCC.cotan, "merge", coex)
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- addClusterizationCoex(objCOTAN, "merge", coex)
 
 }
 \seealso{

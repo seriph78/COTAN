@@ -23,9 +23,12 @@
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
+#' data("ERCCraw")
+#' rownames(ERCCraw) = ERCCraw$V1
+#' ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
+#' objCOTAN <- COTAN(raw = ERCCraw)
 #' data_dir <- tempdir()
-#' saveRDS(ERCC.cotan, file = file.path(data_dir, "ERCC.cotan.RDS"))
+#' saveRDS(objCOTAN, file = file.path(data_dir, "ERCC.cotan.RDS"))
 #' # some genes
 #' primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
 #' # a example of named list of different gene set
@@ -179,9 +182,10 @@ setMethod(
 #' @export
 #' @rdname plot_general.heatmap
 #' @examples
-#' data("ERCC.cotan")
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
 #' data_dir <- tempdir()
-#' saveRDS(ERCC.cotan, file = file.path(data_dir, "ERCC.cotan.RDS"))
+#' saveRDS(objCOTAN, file = file.path(data_dir, "ERCC.cotan.RDS"))
 #' # some genes
 #' primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
 #' # a example of named list of different gene set
@@ -353,8 +357,9 @@ setMethod(
 #' @importFrom Matrix forceSymmetric
 #' @rdname plot_GDI
 #' @examples
-#' data("ERCC.cotan")
-#' plot_GDI(ERCC.cotan, cond = "ERCC")
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' plot_GDI(objCOTAN, cond = "raw")
 setGeneric("plot_GDI", function(object, cond, type = "S") standardGeneric("plot_GDI"))
 #' @rdname plot_GDI
 setMethod(
@@ -403,10 +408,11 @@ setMethod(
 #' @export
 #' @rdname get.observed.ct
 #' @examples
-#' data("ERCC.cotan")
-#' g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-#' g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-#' get.observed.ct(object = ERCC.cotan, g1 = g1, g2 = g2)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+#' g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+#' get.observed.ct(object = objCOTAN, g1 = g1, g2 = g2)
 setGeneric("get.observed.ct", function(object, g1, g2) standardGeneric("get.observed.ct"))
 #' @rdname get.observed.ct
 setMethod(
@@ -449,16 +455,17 @@ setMethod(
 #' @importFrom Matrix colSums
 #' @rdname get.expected.ct
 #' @examples
-#' data("ERCC.cotan")
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
 #' repeat {
-#'   g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-#'   if (!(g1 %in% getHousekeepingGenes(ERCC.cotan))) break;
+#'   g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+#'   if (!(g1 %in% getHousekeepingGenes(objCOTAN))) break;
 #' }
 #' repeat {
-#'   g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-#'   if (!(g2 %in% getHousekeepingGenes(ERCC.cotan))) break;
+#'   g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+#'   if (!(g2 %in% getHousekeepingGenes(objCOTAN))) break;
 #' }
-#' get.expected.ct(ERCC.cotan, g1 = g1, g2 = g2)
+#' get.expected.ct(objCOTAN, g1 = g1, g2 = g2)
 setGeneric("get.expected.ct", function(object, g1, g2) standardGeneric("get.expected.ct"))
 #' @rdname get.expected.ct
 setMethod(

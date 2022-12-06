@@ -16,7 +16,8 @@ an array containing all genes expressed in all cells
 This function return the genes expressed in all cells in the dataset.
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- findHousekeepingGenes(objCOTAN)
 hkGenes <- getHousekeepingGenes(objCOTAN)
 

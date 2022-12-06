@@ -16,7 +16,8 @@ an array with the library sizes
 This function extracts the cell raw library size.
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 cellsSize <- getCellsSize(objCOTAN)
 
 }

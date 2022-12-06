@@ -29,8 +29,9 @@
 #'
 #' @rdname plot_GDI
 #' @examples
-#' data("ERCC.cotan")
-#' plot_GDI(ERCC.cotan, cond = "ERCC")
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' plot_GDI(objCOTAN, cond = "raw")
 setGeneric("plot_GDI", function(object, cond = NULL,genes = NULL,type="S", GDI.df = NULL) standardGeneric("plot_GDI"))
 #' @rdname plot_GDI
 setMethod("plot_GDI","scCOTAN",

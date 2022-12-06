@@ -16,7 +16,8 @@ the meta-data data.frame
 This function extract the meta-data stored for the cells.
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 metaCells <- getMetadataCells(objCOTAN)
 
 }

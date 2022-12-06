@@ -184,7 +184,8 @@ setClass(
 #' @export
 #'
 #' @examples
-#' obj <- COTAN(raw = data("raw.dataset"))
+#' data("raw.dataset")
+#' obj <- COTAN(raw = raw.dataset)
 #'
 #' @rdname COTAN
 COTAN <- function(raw = "ANY") {
@@ -209,6 +210,7 @@ COTAN <- function(raw = "ANY") {
 #' @slot lambda vector.
 #' @slot a vector.
 #' @slot hk vector.
+#' @slot n_cells numeric.
 #' @slot meta data.frame.
 #' @slot yes_yes ANY. Unused and deprecated. Kept for backward compatibility
 #'   only
@@ -231,6 +233,7 @@ setClass(
     lambda = "vector",
     a = "vector",
     hk = "vector",
+    n_cells = "numeric",
     meta = "data.frame",
     yes_yes = "ANY", # Unused and deprecated: kept for backward compatibility only
     clusters = "vector",
@@ -259,8 +262,14 @@ setClass(
 #'
 getCOTANSlots <- function(from) {
   if (!is_empty(from@yes_yes)) {
-    warning(paste0("scCOTAN as COTAN: non-empty yes_yes member found:",
-                   " will be discarded"),
+    warning(paste0("scCOTAN as COTAN: non-empty yes_yes member found.",
+                   " Will be discarded!"),
+            call. = FALSE)
+  }
+
+  if (from@n_cells != ncol(from@raw)) {
+    warning(paste0("scCOTAN as COTAN: n_cells member misaligned",
+                   " with raw matrix member. Will be ignored!"),
             call. = FALSE)
   }
 
@@ -487,6 +496,7 @@ setAs("COTAN",
             lambda       = lambda,
             a            = a,
             hk           = hk,
+            n_cells      = ncol(from@raw),
             meta         = from@metaDataset,
             clusters     = clusters,
             cluster_data = cluster_data)
@@ -503,6 +513,7 @@ setAs("COTAN",
         from@lambda       <- lambda
         from@a            <- a
         from@hk           <- hk
+        from@n_cells      <- ncol(value@raw)
         from@meta         <- value@metaDataset
         from@clusters     <- clusters
         from@cluster_data <- cluster_data

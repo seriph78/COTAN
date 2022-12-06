@@ -16,7 +16,8 @@ a character array with the cells' names
 This function extract all cells in the dataset.
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 cellsNames <- getCells(objCOTAN)
 
 }

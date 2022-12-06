@@ -24,9 +24,10 @@ This function remove an array of genes and/or cells from the
 current \code{COTAN} object.
 }
 \examples{
-data("ERCC.cotan")
-genes.to.rem <- getGenes(ERCC.cotan)[grep('^MT', getGenes(ERCC.cotan))]
-cells.to.rem <- getCells(ERCC.cotan)[which(getCellsSize(ERCC.cotan) == 0)]
-ERCC.cotan <- dropGenesCells(ERCC.cotan, genes.to.rem, cells.to.rem)
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+genes.to.rem <- getGenes(objCOTAN)[grep('^MT', getGenes(objCOTAN))]
+cells.to.rem <- getCells(objCOTAN)[which(getCellsSize(objCOTAN) == 0)]
+objCOTAN <- dropGenesCells(objCOTAN, genes.to.rem, cells.to.rem)
 
 }

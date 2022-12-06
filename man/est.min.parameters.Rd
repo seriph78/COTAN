@@ -20,6 +20,3 @@ vector
 \description{
 This function estimates the nu and a parameters to minimize the...
 }
-\examples{
-data("ERCC.cotan")
-}

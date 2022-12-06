@@ -17,7 +17,8 @@ This function extract the raw count table where any positive
 number has been replaced with 1
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 zeroOne <- getZeroOneProj(objCOTAN)
 
 }

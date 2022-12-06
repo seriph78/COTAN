@@ -32,8 +32,8 @@ It can be used genome-wide or by setting some specific genes of interest.
 By default it computes the p-values using the S statistics (\eqn{\chi^{2}})
 }
 \examples{
-
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)

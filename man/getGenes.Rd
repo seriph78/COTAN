@@ -16,7 +16,8 @@ a character array with the genes' names
 This function extract all genes in the dataset.
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 genesNames <- getGenes(objCOTAN)
 
 }

@@ -31,7 +31,6 @@
 #' @importFrom ggrepel geom_text_repel
 #'
 #' @examples
-#'
 #' data("raw.dataset")
 #' obj <- automaticCOTANObjectCreation(
 #'   raw = raw.dataset,

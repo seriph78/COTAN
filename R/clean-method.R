@@ -1,19 +1,19 @@
 #' clean
 #'
-#' Main function that can be used to check and clean the dataset.
-#' It also produces and stores the estimators for nu and lambda
+#' @description Main function that can be used to check and clean the dataset.
+#'   It also produces and stores the estimators for nu and lambda
 #'
-#' @param objCOTAN COTAN object
-#' @param calcExtraData Boolean flag. When FALSE all PCA/cluster related
-#' evaluation will be skipped and the returned "data" list will be empty
+#' @param objCOTAN a COTAN object
+#' @param calcExtraData Boolean flag. When `FALSE` all PCA/cluster related
+#'   evaluation will be skipped and the returned "data" `list` will be empty
 #'
-#' @return lists of objects...
-#' "object" is the COTAN object,
-#' "data" a empty list when cleanExtraData is FALSE otherwise a list with:
-#'        "cluster1" is the first  cell cluster,
-#'        "cluster2" is the second cell cluster,
-#'        "D" is the B cells' group genes,
-#'        "pcaCells" pca numeric data,
+#' @returns A `lists` of 2 objects:
+#' * "objCOTAN" is the updated COTAN object
+#' * "data" is a list that is empty when cleanExtraData is FALSE, otherwise contains:
+#'   1. "cluster1" is the first cell cluster
+#'   2. "cluster2" is the second cell cluster
+#'   3. "D" is the cluster2 cells' group genes
+#'   4. "pcaCells" pca numeric data,
 #'
 #' @export
 #'
@@ -32,10 +32,12 @@
 #' @importFrom Matrix colMeans
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' list[objCOTAN, data] <- clean(ERCC.cotan)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' list[objCOTAN, data] <- clean(objCOTAN)
 #'
 #' @rdname clean
+#'
 setMethod(
   "clean",
   "COTAN",
@@ -45,13 +47,17 @@ setMethod(
     threshold <- round(getNumCells(objCOTAN) * 3 / 1000, digits = 0)
     genesToDrop <- getGenes(objCOTAN)[rowSums(getZeroOneProj(objCOTAN)) <= threshold]
 
-    objCOTAN <- dropGenesCells(objCOTAN, genes = genesToDrop)
+    if (!is_empty(genesToDrop)) {
+      objCOTAN <- dropGenesCells(objCOTAN, genes = genesToDrop)
+    }
 
     # We want to discard cells having less than 2 non-zero counts per 1000 genes
     threshold <- round(getNumGenes(objCOTAN) * 2 / 1000, digits = 0)
     cellsToDrop <- getCells(objCOTAN)[colSums(getZeroOneProj(objCOTAN)) <= threshold]
 
-    objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
+    if (!is_empty(cellsToDrop)) {
+      objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
+    }
 
     logThis(paste0("Genes/cells selection done:",
                    " dropped [", length(genesToDrop), "] genes",
@@ -65,11 +71,6 @@ setMethod(
     objCOTAN <- estimateLambdaLinear(objCOTAN)
     objCOTAN <- estimateNuLinear(objCOTAN)
     objCOTAN <- findHousekeepingGenes(objCOTAN)
-
-    # genesMeans <- getNu(objCOTAN)
-    # genesRng <- round(getNumGenes(objCOTAN)     / 2, digits = 0)
-    #           : round(getNumGenes(objCOTAN) * 3 / 4, digits = 0)
-    # genesMax <- names(sort(genesMeans, decreasing = TRUE)[genesRng])
 
     gc()
 

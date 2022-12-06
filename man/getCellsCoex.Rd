@@ -20,7 +20,8 @@ This function extract a complete (or a partial after cells
 dropping) cells' coex matrix from the \code{COTAN} object.
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)

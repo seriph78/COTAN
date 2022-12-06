@@ -1,101 +1,64 @@
 tm = tempdir()
 stopifnot(file.exists(tm))
 
-#root = "tests/testthat/"
-root = ""
-genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
-cell.names.test <- readRDS(file.path(getwd(), "cell.names.test.RDS"))
+test_that("COTAN_coex_test", {
+  utils::data("test.dataset.col", package = "COTAN")
 
+  obj <- COTAN(raw = test.dataset.col)
+  obj <- initializeMetaDataset(obj, GEO = " ",
+                               sequencingMethod = "10X",
+                               sampleCondition = "example")
 
-test_that("2_cleaning", {
-    utils::data("test.dataset.col", package = "COTAN")
+  obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
 
-    obj <- COTAN(raw = test.dataset.col)
-    obj <- initializeMetaDataset(obj, GEO = " ",
-                                 sequencingMethod = "10X",
-                                 sampleCondition = "example")
+  obj <- estimateDispersionBisection(obj, cores = 12)
 
-    obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
+  obj <- calculateCoex(obj)
 
-    stopifnot(file.exists(tm))
-    saveRDS(obj, file = file.path(tm,"temp.RDS"))
+  saveRDS(obj, file = file.path(tm, "temp.RDS"))
 
-    raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
-    nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
+  genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
 
-    expect_equal(getNormalizedData(obj)[genes.names.test,cell.names.test],
-                 raw.norm)
-    expect_equal(getNu(obj)[cell.names.test], nu)
-})
+  coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
+  expect_equal(as.matrix(getGenesCoex(obj, genes = genes.names.test)), coex_test)
 
-test_that("3_cotan_analysis_test", {
-    obj <- readRDS(file.path(tm, "temp.RDS"))
+  pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)[genes.names.test, ]
 
-    obj <- estimateDispersionBisection(obj, cores = 12)
+  pval_exp  <- readRDS(file.path(getwd(), "pval.test.RDS"))
 
-    saveRDS(obj, file = file.path(tm, "temp.RDS"))
+  if (FALSE) {
+    expect_equal(pval, pval_exp)
+  } else {
+    logPValAct <- log(pval    +10^(-10))
+    logPValExp <- log(pval_exp+10^(-10))
 
-    dispersion <- readRDS(file.path(getwd(), "a.test.RDS"))
-    nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
-    lambda <- readRDS(file.path(getwd(), "lambda.test.RDS"))
-
-    expect_equal(getDispersion(obj)[genes.names.test], dispersion)
-    expect_equal(getNu(obj)[cell.names.test] , nu)
-    expect_equal(getLambda(obj)[genes.names.test], lambda)
-})
-
-
-test_that("4_cotan_coex_test", {
-    obj <- readRDS(file.path(tm, "temp.RDS"))
-
-    obj <- calculateCoex(obj)
-
-    coex <- getGenesCoex(obj, genes = genes.names.test)
-
-    saveRDS(obj, file = file.path(tm, "temp.RDS"))
-
-    coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
-
-    expect_equal(as.matrix(coex), coex_test)
-})
-
-
-test_that("5_calculatePValue_test", {
-    obj <- readRDS(file.path(tm,"temp.RDS"))
-    pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)
-    pval.exp  <- readRDS(file.path(getwd(), "pval.test.RDS"))
-
-    #expect_equal(pval, pval.exp)
-    pval <- pval[genes.names.test, ]
-
-    error <- sqrt(mean((log(pval+10^(-10)) - log(pval.exp+10^(-10)))^2))
-    error_max <- max(abs(log(pval+10^(-10)) - log(pval.exp+10^(-10))))
+    error  <- sqrt(mean((logPValAct - logPValExp)^2))
+    error_max <- max(abs(logPValAct - logPValExp))
 
     if (error > 0.001) {
-        warning("Error difference grater than 0.001!")
+      warning("Error difference grater than 0.001!")
     }
 
     expect_true(error < 10^(-2))
     expect_true(error_max < 10^(-1))
+  }
+
+  GDI <- calculateGDI(obj)[genes.names.test, ]
+
+  GDI_exp <- readRDS(file.path(getwd(),"GDI.test.RDS"))
+  expect_equal(GDI, GDI_exp)
 })
 
 
-test_that("6_calculateGDI_test", {
-  #utils::data("ERCC.cotan", package = "COTAN")
-  object <- readRDS(file.path(tm,"temp.RDS"))
-
-  GDI <- calculateGDI(object)[genes.names.test,]
-  expect_equal(GDI, readRDS(file.path(getwd(),"GDI.test.RDS")))
-})
-
-
-test_that("7_cell_homogeneous_clustering", {
+test_that("Cell Uniform Clustering", {
   obj <- readRDS(file.path(tm,"temp.RDS"))
+
   clusters <- cell_homogeneous_clustering(obj, cond = "test", cores = 12,
                                           out_dir = paste0(tm,"/"))
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
+
   saveRDS(obj, file = file.path(tm, "temp.RDS"))
 
   #clusters <- readRDS(file.path(getwd(),"clusters1.RDS"))
@@ -149,7 +112,7 @@ test_that("7_cell_homogeneous_clustering", {
 #})
 
 
-test_that("8_merge_cell.clusters.test", {
+test_that("Merge Cells Clusters", {
   skip("merge_cell.clusters does not update the returned obj")
 
   obj <- readRDS(file.path(tm,"temp.RDS"))

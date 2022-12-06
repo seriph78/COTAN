@@ -20,11 +20,13 @@
 #' @importFrom Matrix forceSymmetric
 #' @rdname get.gene.coexpression.space
 #' @examples
-#' data("ERCC.cotan")
-#' df <- get.gene.coexpression.space(ERCC.cotan,
-#'   n.genes.for.marker = 10,
-#'   primary.markers = getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 5)]
-#' )
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 5)]
+#' df <- get.gene.coexpression.space(objCOTAN,
+#'                                   n.genes.for.marker = 10,
+#'                                   primary.markers = markers)
+#'
 setGeneric("get.gene.coexpression.space", function(object, n.genes.for.marker = 25, primary.markers) {
   standardGeneric("get.gene.coexpression.space")
 })

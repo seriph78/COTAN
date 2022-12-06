@@ -28,8 +28,9 @@
 #' @importFrom ggrepel geom_text_repel
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' list[objCOTAN, data] <- clean(ERCC.cotan)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' list[objCOTAN, data] <- clean(objCOTAN)
 #' plots <- cleanPlots(objCOTAN, data[["pcaCells"]], data[["D"]])
 #' plot(plots[["UDEPlot"]])
 #'

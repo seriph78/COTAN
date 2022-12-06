@@ -29,6 +29,8 @@ efficiency estimated (nu)}
 
 \item{\code{hk}}{vector.}
 
+\item{\code{n_cells}}{numeric.}
+
 \item{\code{meta}}{data.frame.}
 
 \item{\code{yes_yes}}{ANY. Unused and deprecated. Kept for backward compatibility

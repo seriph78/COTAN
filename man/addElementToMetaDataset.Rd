@@ -21,8 +21,9 @@ This function is used to add a line of information to the
 information \code{data.frame}.
 }
 \examples{
-data("ERCC.cotan")
-ERCC.cotan <- addElementToMetaDataset(ERCC.cotan, "Test", c("These are ", "some values"))
-getMetadataDataset(ERCC.cotan)
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- addElementToMetaDataset(objCOTAN, "Test", c("These are ", "some values"))
+getMetadataDataset(objCOTAN)
 
 }

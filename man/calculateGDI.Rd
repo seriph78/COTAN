@@ -19,8 +19,8 @@ A dataframe
 This function produce a dataframe with the GDI for each genes.
 }
 \examples{
-
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)

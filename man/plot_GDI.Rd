@@ -36,8 +36,10 @@ This function directly evaluate and plot the GDI for a sample.
 This function directly evaluate and plot the GDI for a sample.
 }
 \examples{
-data("ERCC.cotan")
-plot_GDI(ERCC.cotan, cond = "ERCC")
-data("ERCC.cotan")
-plot_GDI(ERCC.cotan, cond = "ERCC")
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+plot_GDI(objCOTAN, cond = "raw")
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+plot_GDI(objCOTAN, cond = "raw")
 }

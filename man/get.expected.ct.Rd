@@ -23,14 +23,15 @@ A contingency table as dataframe
 This function is used to get the expected contingency table for a given pair of genes.
 }
 \examples{
-data("ERCC.cotan")
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 repeat {
-  g1 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-  if (!(g1 \%in\% getHousekeepingGenes(ERCC.cotan))) break;
+  g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+  if (!(g1 \%in\% getHousekeepingGenes(objCOTAN))) break;
 }
 repeat {
-  g2 <- getGenes(ERCC.cotan)[sample(getNumGenes(ERCC.cotan), 1)]
-  if (!(g2 \%in\% getHousekeepingGenes(ERCC.cotan))) break;
+  g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+  if (!(g2 \%in\% getHousekeepingGenes(objCOTAN))) break;
 }
-get.expected.ct(ERCC.cotan, g1 = g1, g2 = g2)
+get.expected.ct(objCOTAN, g1 = g1, g2 = g2)
 }

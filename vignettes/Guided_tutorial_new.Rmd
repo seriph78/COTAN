@@ -69,7 +69,6 @@ This is just an example of a toy dataset. If the user wants to try on a real dat
 ```{r}
 data("test.dataset.col", package = "COTAN")
 
-#ERCCraw = as.data.frame(ERCCraw)
 #rownames(ERCCraw) = ERCCraw$V1
 #ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
 #ERCCraw[1:5,1:5]

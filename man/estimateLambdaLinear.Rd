@@ -16,7 +16,8 @@ The updated \code{COTAN} object
 Linear estimator of lambda (genes' counts averages)
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- estimateLambda(objCOTAN)
 lambda <- getLambda(objCOTAN)
 

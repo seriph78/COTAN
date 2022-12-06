@@ -47,9 +47,10 @@ with these markers with a p-value smaller than the set threshold. Than all relat
 Primary markers will be plotted as groups of rows. Markers list will be plotted as columns.
 }
 \examples{
-data("ERCC.cotan")
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 data_dir <- tempdir()
-saveRDS(ERCC.cotan, file = file.path(data_dir, "ERCC.cotan.RDS"))
+saveRDS(objCOTAN, file = file.path(data_dir, "ERCC.cotan.RDS"))
 # some genes
 primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
 # a example of named list of different gene set

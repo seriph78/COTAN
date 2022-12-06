@@ -38,7 +38,6 @@ It return the COTAN object. It will also store it directly in the output directo
 automaticCOTANObjectCreation
 }
 \examples{
-
 data("raw.dataset")
 obj <- automaticCOTANObjectCreation(
   raw = raw.dataset,

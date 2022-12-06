@@ -36,7 +36,8 @@ probability of zero count matches the number of observed zeros. It assumes
 \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} being already run.
 }
 \examples{
-objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)

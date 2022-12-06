@@ -21,7 +21,8 @@ and in case dropping the corresponding \verb{coex data.frame} from the
 \verb{clustersCoex list}.
 }
 \examples{
-data("ERCC.cotan")
-ERCC.cotan <- dropClusterization(ERCC.cotan, "merged")
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- dropClusterization(objCOTAN, "merged")
 
 }
