@@ -1,9 +1,26 @@
 
-
-geom_flat_violin <-function(mapping = NULL, data = NULL, stat = "ydensity",
-   position = "dodge", trim = TRUE, scale = "area",
-   show.legend = NA, inherit.aes = TRUE, ...) {
-
+#' @importFrom ggplot2 ggproto
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 draw_key_polygon
+#' @importFrom ggplot2 layer
+#'
+#' @importFrom plyr arrange
+#'
+#' @importFrom dplyr group_by
+#' @importFrom dplyr mutate
+#'
+#' @noRd
+#'
+geom_flat_violin <- function(
+    mapping = NULL,
+    data = NULL,
+    stat = "ydensity",
+    position = "dodge",
+    trim = TRUE,
+    scale = "area",
+    show.legend = NA,
+    inherit.aes = TRUE,
+    ...) {
   GeomFlatViolin <- ggplot2::ggproto("GeomFlatViolin", Geom,
      setup_data = function(data, params) {
        "%||%" <- function(a, b) {
@@ -68,35 +85,49 @@ geom_flat_violin <-function(mapping = NULL, data = NULL, stat = "ydensity",
       ...
     )
   )
-          }
+}
 
 
 
-#' library.size.plot
+#' librarySizePlot
 #'
-#' Function that plots the row library size for each cell and sample (if there
-#' are more samples).
+#' @description Function that plots the row library size for each cell and
+#'   sample (if there are more samples).
 #'
-#' @param obj COTAN object
-#' @param split.pattern pattern used to extract, from the column names, the
-#' sample field (default " ")
-#' @param n.col ones the column names are splitted by split.pattern, the column
-#' number with the sample name (default 2)
+#' @param objCOTAN a `COTAN` object
+#' @param splitPattern Pattern used to extract, from the column names, the
+#'   sample field (default " ")
+#' @param numCols Once the column names are splitted by splitPattern, the column
+#'   number with the sample name (default 2)
 #'
-#'@importFrom Matrix colSums
-#'@import ggplot2
-#'@importFrom stringr str_split
+#' @returns the violin-boxplot plot
 #'
-#' @return the violin-boxplot plot
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 position_jitter
+#' @importFrom ggplot2 geom_boxplot
+#' @importFrom ggplot2 labs
+#' @importFrom ggplot2 scale_y_continuous
+#' @importFrom ggplot2 ylim
+#'
+#' @importFrom stringr str_split
+#'
 #' @export
 #'
 #' @examples
-library.size.plot <- function(obj, split.pattern = " ", n.col=2){
-  sizes <- Matrix::colSums(obj@raw)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' lsPlot <- librarySizePlot(objCOTAN)
+#' plot(lsPlot)
+#'
+#' @rdname librarySizePlot
+#'
+librarySizePlot <- function(objCOTAN, splitPattern = " ", numCols = 2) {
+  sizes <- getCellsSize(objCOTAN)
   sizes <- sort(sizes)
   sizes <- as.data.frame(sizes)
   sizes$n <- c(1:dim(sizes)[1])
-  sizes$sample <- str_split(rownames(sizes),pattern = split.pattern,simplify = T)[,n.col]
+  sizes$sample <- str_split(rownames(sizes), pattern = splitPattern, simplify = T)[, numCols]
 
   plot <-
     sizes %>%

@@ -1,16 +1,17 @@
 #' cleanPlots
 #'
-#' Retrieves the plots associated to the output of the clena method.
+#' @description Retrieves the plots associated to the output of the [clean()]
+#'   method.
 #'
 #' @param objCOTAN COTAN object
 #' @param pcaCells pca numeric data
-#' @param D B cells' group genes
+#' @param D cluester2 cells' group genes
 #'
-#' @return lists of ggplot2 plots:
-#' "pcaCells" is for pca cells,
-#' "genes" is for B cells' group genes,
-#' "UDE" is for cell UDE,
-#' "nu" is for cell nu.
+#' @returns lists of ggplot2 plots:
+#'   * "pcaCells" is for pca cells,
+#'   * "genes" is for cluester2 cells' group genes,
+#'   * "UDE" is for cell UDE,
+#'   * "nu" is for cell nu.
 #'
 #' @export
 #'
@@ -35,6 +36,7 @@
 #' plot(plots[["UDEPlot"]])
 #'
 #' @rdname cleanPlots
+#'
 cleanPlots <- function(objCOTAN, pcaCells, D) {
 
   #check if the pca plot is clean enough and from the printed genes,

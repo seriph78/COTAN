@@ -7,7 +7,7 @@
 automaticCOTANObjectCreation(
   raw,
   outDir,
-  saveObj = "NO",
+  saveObj = FALSE,
   GEO,
   sequencingMethod,
   sampleCondition,

@@ -42,7 +42,7 @@
 #' @rdname automaticCOTANObjectCreation
 
 automaticCOTANObjectCreation <-
-  function(raw, outDir, saveObj = "NO",
+  function(raw, outDir, saveObj = FALSE,
            GEO, sequencingMethod, sampleCondition,
            cores = 1) {
     start_time_all <- Sys.time()
@@ -137,11 +137,11 @@ automaticCOTANObjectCreation <-
                                 "n.genes"=getNumGenes(obj) ),
                      file = file.path(outDir, paste0(sampleCondition, "_times.csv")))
 
-    if (toupper(saveObj) == "YES") {
+    if (isTRUE(saveObj)) {
       logThis(paste0("Saving elaborated data locally at ",
                      outDir, sampleCondition, ".cotan.RDS"),
               logLevel = 1)
-      saveRDS(obj,file = file.path(outDir, paste0(sampleCondition, ".cotan.RDS")))
+      saveRDS(obj, file = file.path(outDir, paste0(sampleCondition, ".cotan.RDS")))
     }
 
     return(obj)
