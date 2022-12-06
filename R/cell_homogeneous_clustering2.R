@@ -292,7 +292,7 @@ setMethod("cell_homogeneous_clustering",
 
   gc()
 
-  #obj <- as(estimateDispersion(obj, cores = cores), "scCOTAN")
+  #obj <- as(estimateDispersionBisection(obj, cores = cores), "scCOTAN")
   #print("Analysis step done")
   #gc()
   #saveRDS(obj, paste0(out_dir, "obj_", cond, ".cotan.RDS"))

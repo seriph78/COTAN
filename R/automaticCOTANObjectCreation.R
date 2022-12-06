@@ -109,7 +109,7 @@ automaticCOTANObjectCreation <-
 
     analysis_time <- Sys.time()
 
-    obj <- estimateDispersion(obj, cores = cores)
+    obj <- estimateDispersionBisection(obj, cores = cores)
 
     genes_coex_time <- Sys.time()
     analysis_time <- difftime(genes_coex_time, analysis_time, units = "mins")

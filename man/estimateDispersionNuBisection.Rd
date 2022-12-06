@@ -13,7 +13,7 @@
 )
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{step}{number of genes to solve in batch in a single core. Default is 256.}
 
@@ -24,10 +24,10 @@
 \item{cores}{number of cores to use. Default is 1.}
 }
 \value{
-the updated COTAN object
+the updated \code{COTAN} object
 }
 \description{
-Estimates the 'dispersion' and 'nu' field of a COTAN object by running
+Estimates the 'dispersion' and 'nu' field of a \code{COTAN} object by running
 sequentially a bisection for each parameter. This allows to enforce
 \code{mean('nu') == 1} assumption
 Assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being run already

@@ -35,7 +35,7 @@ By default it computes the p-values using the S statistics (\eqn{\chi^{2}})
 
 objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
-objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 pValue <- calculatePValue(objCOTAN)
 

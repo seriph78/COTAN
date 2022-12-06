@@ -136,8 +136,9 @@ funProbZero <- function(disp, mu) {
 
 #' dispersionBisection
 #'
-#' @description Private function invoked by [estimateDispersion()] for the
-#'   estimation of 'dispersion' slot of a `COTAN` object via a bisection solver
+#' @description Private function invoked by [estimateDispersionBisection()] for
+#'   the estimation of 'dispersion' slot of a `COTAN` object via a bisection
+#'   solver
 #'
 #' @details The goal is to find a dispersion value that reduces to zero the
 #'   difference between the number of estimated and counted zeros
@@ -222,8 +223,8 @@ dispersionBisection <-
 
 #' parallelDispersionBisection
 #'
-#' @description Private function invoked by [estimateDispersion()] for the
-#'   estimation of the `dispersion` slot of a `COTAN` object via a parallel
+#' @description Private function invoked by [estimateDispersionBisection()] for
+#'   the estimation of the `dispersion` slot of a `COTAN` object via a parallel
 #'   bisection solver
 #'
 #' @details The goal is to find a dispersion array that reduces to zero the

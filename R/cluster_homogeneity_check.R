@@ -44,7 +44,7 @@ setMethod("cluster_homogeneity_check","COTAN",
 
             #---------- run this when B cells are to be removed
 
-            obj <- estimateDispersion(obj, cores = cores)
+            obj <- estimateDispersionBisection(obj, cores = cores)
             gc()
 
             # COEX evaluation and storing

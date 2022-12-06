@@ -18,7 +18,7 @@ This function extract the a array.
 \examples{
 objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
-objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 dispersion <- getDispersion(objCOTAN)
 
 }

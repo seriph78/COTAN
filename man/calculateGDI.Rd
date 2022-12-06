@@ -22,7 +22,7 @@ This function produce a dataframe with the GDI for each genes.
 
 objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
-objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 GDI <- calculateGDI(objCOTAN)
 

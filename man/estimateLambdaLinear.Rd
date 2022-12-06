@@ -7,11 +7,17 @@
 \S4method{estimateLambdaLinear}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 }
 \value{
-the updated COTAN object
+The updated \code{COTAN} object
 }
 \description{
-estimateLambdaLinear
+Linear estimator of lambda (genes' counts averages)
+}
+\examples{
+objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+objCOTAN <- estimateLambda(objCOTAN)
+lambda <- getLambda(objCOTAN)
+
 }

@@ -33,7 +33,7 @@ test_that("'scCOTAN' converters",{
   obj <- COTAN(raw = raw)
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
   obj <- clean(obj, calcExtraData = FALSE)[[1]]
-  obj <- estimateDispersion(obj)
+  obj <- estimateDispersionBisection(obj)
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
   coexDF <- as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.5)/pi*2)

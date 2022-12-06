@@ -389,7 +389,7 @@ setMethod(
 #' @examples
 #' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 #' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
-#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #'
 #' @rdname calculateCoex
@@ -614,7 +614,7 @@ setMethod(
 #'
 #' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 #' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
-#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' GDI <- calculateGDI(objCOTAN)
 #'
@@ -692,7 +692,7 @@ setMethod(
 #'
 #' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 #' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
-#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' pValue <- calculatePValue(objCOTAN)
 #'

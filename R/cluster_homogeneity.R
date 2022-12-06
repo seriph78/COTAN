@@ -76,7 +76,7 @@ setMethod("cluster_homogeneity","scCOTAN",
 
                 #dev.off()
 
-                obj = estimateDispersion(obj, cores = cores)
+                obj = estimateDispersionBisection(obj, cores = cores)
                 # saving the structure
                 #saveRDS(obj,file = paste0(out_dir, t, ".cotan.RDS"))
                 gc()

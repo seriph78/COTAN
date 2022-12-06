@@ -308,6 +308,7 @@ setMethod(
 #' @export
 #'
 #' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 #' allClustersCoexDF <- getClustersCoex(objCOTAN)
 #'
 #' @rdname getClustersCoex
@@ -375,6 +376,7 @@ setMethod(
 #' lambda <- getLambda(objCOTAN)
 #'
 #' @rdname getLambda
+#'
 setMethod(
   "getLambda",
   "COTAN",
@@ -407,7 +409,7 @@ setMethod(
 #' @examples
 #' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 #' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
-#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' dispersion <- getDispersion(objCOTAN)
 #'
 #' @rdname getDispersion
@@ -509,7 +511,7 @@ setMethod(
 #' @examples
 #' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 #' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
-#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' genesCoex <- getGenesCoex(objCOTAN)
 #'
@@ -547,7 +549,7 @@ setMethod(
 #' @examples
 #' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
 #' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
-#' objCOTAN <- estimateDispersion(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 #' cellsCoex <- getCellsCoex(objCOTAN)

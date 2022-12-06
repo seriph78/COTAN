@@ -2,15 +2,24 @@
 
 #' estimateLambdaLinear
 #'
-# linear estimator of lambda (genes' averages)
-#' @param objCOTAN a COTAN object
-#' @return the updated COTAN object
+#' @description Linear estimator of lambda (genes' counts averages)
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns The updated `COTAN` object
 #'
 #' @importFrom Matrix mean
 #' @importFrom Matrix rowMeans
+#'
 #' @export
 #'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- estimateLambda(objCOTAN)
+#' lambda <- getLambda(objCOTAN)
+#'
 #' @rdname estimateLambdaLinear
+#'
 setMethod(
   "estimateLambdaLinear",
   "COTAN",
@@ -27,14 +36,23 @@ setMethod(
 
 #' estimateNuLinear
 #'
-#' linear estimator of nu (normalised cells' averages)
-#' @param objCOTAN a COTAN object
-#' @return the updated COTAN object
+#' @description linear estimator of nu (normalised cells' counts averages)
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns The updated `COTAN` object
 #'
 #' @importFrom Matrix colMeans
+#'
 #' @export
 #'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- estimateNuLinear(objCOTAN)
+#' nu <- getNu(objCOTAN)
+#'
 #' @rdname estimateNuLinear
+#'
 setMethod(
   "estimateNuLinear",
   "COTAN",
@@ -51,19 +69,25 @@ setMethod(
 )
 
 
-#' estimateDispersion
+#' estimateDispersionBisection
 #'
-#' This is the main function that estimates the dispersion vector
-#' to store all the negative binomial dispersion factors.
-#' It needs to be run after [clean()]
+#' @description Estimates the negative binomial dispersion factor for each gene.
 #'
-#' @param objCOTAN A COTAN object
-#' @param step number of genes to solve in batch in a single core. Default is 256.
+#' @details Determines the `dispersion` such that, for each gene, the
+#'   probability of zero count matches the number of observed zeros. It assumes
+#'   [es()] being already run.
+#'
+#' It needs to
+#'   be run after [clean()]
+#'
+#' @param objCOTAN A `COTAN` object
+#' @param step number of genes to solve in batch in a single core. Default is
+#'   256.
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param cores number of cores to use. Default is 1.
 #'
-#' @return the updated COTAN object
+#' @returns The updated `COTAN` object
 #'
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
@@ -71,14 +95,15 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("ERCC.cotan")
-#' ERCC.cotan <- clean(ERCC.cotan)
-#' ERCC.cotan <- estimateDispersion(ERCC.cotan)
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+#' dispersion <- getDispersion(objCOTAN)
 #'
-#' @rdname estimateDispersion
+#' @rdname estimateDispersionBisection
 #'
 setMethod(
-  "estimateDispersion",
+  "estimateDispersionBisection",
   "COTAN",
   function(objCOTAN, step = 512, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
@@ -157,18 +182,22 @@ setMethod(
 )
 
 
-#'estimateNuBisection
+#' estimateNuBisection
 #'
-#' Estimates the 'nu' field of a COTAN object by bisection.
-#' Assumes dispersion being already calculated
+#' @description Estimates the `nu` vector of a `COTAN` object by bisection.
 #'
-#' @param objCOTAN a COTAN object
-#' @param step number of genes to solve in batch in a single core. Default is 256.
+#' @details Determines the `nu` parameters such that, for each cell, the
+#'   probability of zero count matches the number of observed zeros. It assumes
+#'   [estimateDispersionBisection()] being already run.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param step number of genes to solve in batch in a single core. Default is
+#'   256.
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param cores number of cores to use. Default is 1.
 #'
-#' @return the updated COTAN object
+#' @return the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
@@ -176,6 +205,13 @@ setMethod(
 #' @importFrom parallel splitIndices
 #'
 #' @export
+#'
+#' @examples
+#' objCOTAN <- COTAN(raw = data("ERCC.cotan"))
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+#' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
+#' nu <- getNu(objCOTAN)
 #'
 #' @rdname estimateNuBisection
 #'
@@ -278,18 +314,18 @@ setMethod(
 
 #'estimateDispersionNuBisection
 #'
-#' Estimates the 'dispersion' and 'nu' field of a COTAN object by running
+#' Estimates the 'dispersion' and 'nu' field of a `COTAN` object by running
 #' sequentially a bisection for each parameter. This allows to enforce
 #' `mean('nu') == 1` assumption
 #' Assumes [estimateNuLinear()] being run already
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param step number of genes to solve in batch in a single core. Default is 256.
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param cores number of cores to use. Default is 1.
 #'
-#' @return the updated COTAN object
+#' @return the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
@@ -310,10 +346,10 @@ setMethod(
 
     iter <- 1
     repeat {
-      objCOTAN <- estimateDispersion(objCOTAN, step = step,
-                                     threshold = threshold,
-                                     maxIterations = maxIterations,
-                                     cores = cores)
+      objCOTAN <- estimateDispersionBisection(objCOTAN, step = step,
+                                              threshold = threshold,
+                                              maxIterations = maxIterations,
+                                              cores = cores)
 
       objCOTAN <- estimateNuBisection(objCOTAN, step = step,
                                       threshold = threshold,

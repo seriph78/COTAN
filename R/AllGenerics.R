@@ -234,21 +234,24 @@ setGeneric(
 )
 
 setGeneric(
-  "estimateDispersion",
+  "estimateDispersionBisection",
   function(objCOTAN, step = 256, threshold = 0.001,
-           maxIterations = 1000, cores = 1) standardGeneric("estimateDispersion")
+           maxIterations = 1000, cores = 1)
+    standardGeneric("estimateDispersionBisection")
 )
 
 setGeneric(
   "estimateNuBisection",
   function(objCOTAN, step = 256, threshold = 0.001,
-           maxIterations = 1000, cores = 1) standardGeneric("estimateNuBisection")
+           maxIterations = 1000, cores = 1)
+    standardGeneric("estimateNuBisection")
 )
 
 setGeneric(
   "estimateDispersionNuBisection",
   function(objCOTAN, step = 256, threshold = 0.001,
-           maxIterations = 1000, cores = 1) standardGeneric("estimateDispersionNuBisection")
+           maxIterations = 1000, cores = 1)
+    standardGeneric("estimateDispersionNuBisection")
 )
 
 #-------------------------------------- legacy

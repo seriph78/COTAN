@@ -31,7 +31,7 @@ test_that("2_cleaning", {
 test_that("3_cotan_analysis_test", {
     obj <- readRDS(file.path(tm, "temp.RDS"))
 
-    obj <- estimateDispersion(obj, cores = 12)
+    obj <- estimateDispersionBisection(obj, cores = 12)
 
     saveRDS(obj, file = file.path(tm, "temp.RDS"))
 
@@ -125,7 +125,7 @@ test_that("7_cell_homogeneous_clustering", {
 
     temp.obj <- clean(temp.obj, calcExtraData = FALSE)[["objCOTAN"]]
 
-    temp.obj <- estimateDispersion(temp.obj, cores = 12)
+    temp.obj <- estimateDispersionBisection(temp.obj, cores = 12)
     temp.obj <- calculateCoex(temp.obj)
     gc()
 
@@ -193,7 +193,7 @@ test_that("8_merge_cell.clusters.test", {
 
     temp.obj <- clean(temp.obj, calcExtraData = FALSE)[["objCOTAN"]]
 
-    temp.obj <- estimateDispersion(temp.obj, cores = 12)
+    temp.obj <- estimateDispersionBisection(temp.obj, cores = 12)
     gc()
 
     temp.obj <- calculateCoex(temp.obj)

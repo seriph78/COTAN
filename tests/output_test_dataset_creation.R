@@ -11,7 +11,7 @@ dataset.for.test.creation <- function(){
                                sampleCondition = "example")
 
   obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
-  obj <- estimateDispersion(obj, cores = 10)
+  obj <- estimateDispersionBisection(obj, cores = 10)
   obj <- calculateCoex(obj)
   saveRDS(obj, file = file.path(tm,"temp.RDS") )
 
