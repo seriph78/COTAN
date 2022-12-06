@@ -144,7 +144,7 @@ setMethod(
 
     if (length(genesPosToKeep) == getNumGenes((objCOTAN)) &&
         length(cellsPosToKeep) == getNumCells((objCOTAN))) {
-      logThis("No genes/cells where dropped", logLevel = 1)
+      logThis("No genes/cells where dropped", logLevel = 2)
     }
 
     # as all estimates would be wrong, a completely new object is created

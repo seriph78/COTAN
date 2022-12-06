@@ -338,10 +338,10 @@ setMethod(
   "COTAN",
   function(objCOTAN, step = 512, threshold = 0.001,
            maxIterations = 1000, cores = 1) {
-    logThis("Estimate dispersion/nu: START", logLevel = 2)
+    logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
 
     if (is_empty(getNu(objCOTAN))) {
-      stop("Nu vector needs to be initialised as initial guess")
+      stop("'nu' vector needs to be initialised as initial guess")
     }
 
     iter <- 1
@@ -358,6 +358,13 @@ setMethod(
 
       meanNu <- mean(getNu(objCOTAN))
 
+      if (!is.finite(meanNu)) {
+        stopifnot("Cannot have infinite mean 'nu' only after the first loop" <- (iter == 1))
+        warning(paste0("Infinite 'nu' found: one of the cells expressed all genes\n",
+                       " Returning values after a single loop"))
+        return(objCOTAN)
+      }
+
       logThis(paste("Nu mean:", meanNu), logLevel = 3)
 
       objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
@@ -373,7 +380,7 @@ setMethod(
       }
     }
 
-    logThis("Estimate dispersion/nu: DONE", loglevel = 2)
+    logThis("Estimate dispersion/nu: DONE", logLevel = 2)
 
     return(objCOTAN)
   }

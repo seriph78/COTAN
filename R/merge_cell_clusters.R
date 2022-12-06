@@ -44,13 +44,13 @@
 #' @examples
 #'
 #' @rdname merge_cell.clusters
-setGeneric("merge_cell.clusters", function(obj,cond,cores=1,srat,out_dir ,GEO,
-                                           sc.method,#mt = FALSE, mt_prefix="^mt",
+setGeneric("merge_cell.clusters", function(obj, cond, cores = 1, srat, out_dir ,GEO,
+                                           sc.method, #mt = FALSE, mt_prefix="^mt",
                                            markers = NULL) standardGeneric("merge_cell.clusters"))
 #' @rdname merge_cell.clusters
 setMethod("merge_cell.clusters","scCOTAN",
-         function(obj,cond,cores,srat,out_dir ,GEO,
-                   sc.method,#mt, #mt_prefix,
+         function(obj, cond, cores, srat, out_dir, GEO,
+                  sc.method, #mt, #mt_prefix,
                   markers){
 
            srat <- readRDS(paste0(out_dir,srat))

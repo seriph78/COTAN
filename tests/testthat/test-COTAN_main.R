@@ -6,6 +6,7 @@ root = ""
 genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
 cell.names.test <- readRDS(file.path(getwd(), "cell.names.test.RDS"))
 
+
 test_that("2_cleaning", {
     utils::data("test.dataset.col", package = "COTAN")
 
@@ -90,15 +91,12 @@ test_that("6_calculateGDI_test", {
 
 
 test_that("7_cell_homogeneous_clustering", {
-  #TODO: fix this issue:
-  #skip("cell_homogeneous_clustering does not terminate!")
-
   obj <- readRDS(file.path(tm,"temp.RDS"))
   clusters <- cell_homogeneous_clustering(obj, cond = "test", cores = 12,
                                           out_dir = paste0(tm,"/"))
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
-  saveRDS(temp, file = file.path(tm, "temp.RDS"))
+  saveRDS(obj, file = file.path(tm, "temp.RDS"))
 
   #clusters <- readRDS(file.path(getwd(),"clusters1.RDS"))
 
@@ -133,7 +131,6 @@ test_that("7_cell_homogeneous_clustering", {
 
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
   }
-
 })
 
 #test_that("DEA_on_clusters_test", {
@@ -149,41 +146,39 @@ test_that("7_cell_homogeneous_clustering", {
 #  }
 
 #  expect_true(error < 10^(-2))
-
 #})
 
 
 test_that("8_merge_cell.clusters.test", {
-  #TODO: make clusterization into a data-file!
-  skip("no clusterization available to run test!")
+  skip("merge_cell.clusters does not update the returned obj")
 
-  temp <- readRDS(file.path(tm,"temp.RDS"))
-  temp <- DEA_on_clusters(as(temp,"scCOTAN"))[[1]]
+  obj <- readRDS(file.path(tm,"temp.RDS"))
+  obj <- DEA_on_clusters(as(obj,"scCOTAN"))[[1]]
 
-  initial.cluster.number <- dim(temp@cluster_data)[2]
-  temp <- merge_cell.clusters(obj = temp,
-                              cond = "test",
-                              cores=12,
-                              srat = "Seurat_obj_test_with_cotan_clusters.RDS" ,
-                              out_dir = paste0(tm,"/") ,
-                              GEO = "test",
-                              sc.method = "10X")
+  initial.cluster.number <- dim(obj@cluster_data)[2]
+  obj <- merge_cell.clusters(obj = obj,
+                             cond = "test",
+                             cores = 12,
+                             srat = "Seurat_obj_test_with_cotan_clusters.RDS",
+                             out_dir = paste0(tm,"/"),
+                             GEO = "test",
+                             sc.method = "10X")
 
-  final.cluster.number <- dim(temp@cluster_data)[2]
-  expect_true(final.cluster.number < initial.cluster.number)
-  #saveRDS(temp, file = file.path(tm,"temp.RDS") )
+  expect_true( dim(obj@cluster_data)[2] < initial.cluster.number)
+
+  #saveRDS(obj, file = file.path(tm,"temp.RDS") )
   #cluster_data <- readRDS(file.path(getwd(),"cluster_data_marged.RDS"))
 
   #expect_equal(obj@cluster_data[genes.names.test,], cluster_data)
 
-  for (cl in unique(temp@clusters)) {
-    cells.to_test <-  names(temp@clusters[temp@clusters == cl])
+  for (cl in unique(obj@clusters)) {
+    cells.to_test <-  names(obj@clusters[obj@clusters == cl])
     #temp.obj <- cluster_homogeneity_check(obj = obj,cells = cells.to_test,
     #                                     out_dir = paste0(tm,"/"),
     #                                      cores = cores,
     #                                     code = 12)
 
-    temp.obj <- temp@raw[,colnames(temp@raw) %in% cells.to_test]
+    temp.obj <- obj@raw[,colnames(obj@raw) %in% cells.to_test]
 
     temp.obj <- COTAN(raw = temp.obj)
     temp.obj <- initializeMetaDataset(temp.obj,
@@ -202,9 +197,5 @@ test_that("8_merge_cell.clusters.test", {
     GDI_data <- calculateGDI(temp.obj)
 
     expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
-
   }
 })
-
-
-
