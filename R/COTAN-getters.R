@@ -616,9 +616,8 @@ setMethod(
 #'   coex data.frame from the `COTAN` object.
 #'
 #' @param objCOTAN A `COTAN` object
-#' @param clusterizationName The name of the clusterization. If not given the
-#'   last available clusterization will be returned, as it is probably the most
-#'   significant!
+#' @param clName The name of the clusterization. If not given the last available
+#'   clusterization will be returned, as it is probably the most significant!
 #'
 #' @returns a list with 'clusters' and 'coex'
 #'
@@ -626,38 +625,35 @@ setMethod(
 #'
 #' @examples
 #'
-#' list[cls, clsCoex] <- getClusterizationData(objCOTAN, clusterizationName = "merged")
+#' list[cls, clsCoex] <- getClusterizationData(objCOTAN, clName = "merged")
 #'
 #' @rdname getClusterizationData
 #'
 setMethod(
   "getClusterizationData",
   "COTAN",
-  function(objCOTAN, clusterizationName = NULL) {
-    if (is_empty(clusterizationName)) {
-      clusterizationName <- getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
+  function(objCOTAN, clName = NULL) {
+    if (is_empty(clName)) {
+      clName <- getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
     }
-    if (is_empty(clusterizationName)) {
-      logThis("No clusterizations are present in the 'COTAN' object", logLevel = 3)
-      return( list("clusters" = c(), "coex" = data.frame()) )
+    if (is_empty(clName)) {
+      stop("No clusterizations are present in the 'COTAN' object")
     }
     # clName can still be empty if no clusterization was store in the objCOTAN
-    clName <- clusterizationName
-    if (!startsWith(clName, "CL_")) {
-      clName <- paste0("CL_", clName)
+    internalName <- clName
+    if (!startsWith(internalName, "CL_")) {
+      internalName <- paste0("CL_", clName)
     }
 
-    if (!clName %in% getClusterizations(objCOTAN, keepPrefix = TRUE)) {
-      logThis(paste("Asked clusterization", clusterizationName,
-                    "not present in the 'COTAN' object"), logLevel = 3)
-
-      return( list("clusters" = c(), "coex" = data.frame()) )
+    if (!internalName %in% getClusterizations(objCOTAN, keepPrefix = TRUE)) {
+      stop(paste("Asked clusterization", clName,
+                    "not present in the 'COTAN' object"))
     }
 
-    clusters <- getMetadataCells(objCOTAN)[[clName]]
+    clusters <- getMetadataCells(objCOTAN)[[internalName]]
     names(clusters) <- getCells(objCOTAN)
 
     return( list("clusters" = clusters,
-                 "coex" = getClustersCoex(objCOTAN)[[clName]]) )
+                 "coex" = getClustersCoex(objCOTAN)[[internalName]]) )
   }
 )

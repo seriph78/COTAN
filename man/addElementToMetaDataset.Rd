@@ -18,7 +18,7 @@ the updated \code{COTAN} object
 }
 \description{
 This function is used to add a line of information to the
-information data frame (metadata).
+information \code{data.frame}.
 }
 \examples{
 data("ERCC.cotan")

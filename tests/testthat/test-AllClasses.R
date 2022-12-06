@@ -39,7 +39,7 @@ test_that("'scCOTAN' converters",{
   coexDF <- as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.5)/pi*2)
   colnames(coexDF) <- c(1, 2)
 
-  obj <- addClusterization(obj, clusterizationName = "clusters",
+  obj <- addClusterization(obj, clName = "clusters",
                            clusters = rep(colnames(coexDF), 10),
                            coexDF = coexDF)
 

@@ -13,9 +13,9 @@ test_that("COTAN getters", {
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
   obj <- calculateCoex(obj, actOnCells = TRUE,  optimizeForSpeed = TRUE)
 
-  obj <- addClusterization(obj, clusterizationName = "Test",
+  obj <- addClusterization(obj, clName = "Test",
                            clusters = rep(c(1, 2), 10))
-  obj <- addClusterization(obj, clusterizationName = "Test2",
+  obj <- addClusterization(obj, clName = "Test2",
                            clusters = rep(c(2, 1), 10))
 
   expect_equal(getRawData(obj), as(as(raw, "dMatrix"), "sparseMatrix"))

@@ -18,7 +18,7 @@ code}
 time point}
 }
 \value{
-the given \code{COTAN} object with updated metaDataset
+the given \code{COTAN} object with updated \code{metaDataset}
 }
 \description{
 Initialize meta-data data-set

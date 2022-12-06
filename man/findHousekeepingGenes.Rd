@@ -10,8 +10,12 @@
 \item{objCOTAN}{the \code{COTAN} object}
 }
 \value{
-the given \code{COTAN} object with updated housekeepingGenes
+the given \code{COTAN} object with updated housekeeping genes'
+information
 }
 \description{
-determines the housekeeping genes vector of a \code{COTAN} object
+Determines the housekeeping genes inside a \code{COTAN} object
+}
+\details{
+Houskeeping genes are those genes that are expressed in all cells
 }

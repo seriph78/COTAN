@@ -296,7 +296,7 @@ The next step will find all homogeneous clusters using a GDI check on each clust
 
 ```{r}
 clusters <- cell_homogeneous_clustering(obj, cond = "test", out_dir = out_dir, cores = 10)
-obj <- addClusterization(obj, clusterizationName = "test", clusters = clusters)
+obj <- addClusterization(obj, clName = "test", clusters = clusters)
 ```
 
 Than we can perform a sort of differential expression to detect which genes are enriched or depleted in each cluster.

@@ -4,26 +4,30 @@
 \alias{addClusterizationCoex,COTAN-method}
 \title{addClusterizationCoex}
 \usage{
-\S4method{addClusterizationCoex}{COTAN}(objCOTAN, clusterizationName, coexDF)
+\S4method{addClusterizationCoex}{COTAN}(objCOTAN, clName, coexDF)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{clusterizationName}{the name of an existing clusterization}
+\item{clName}{the name of an existing clusterization}
 
-\item{coexDF}{a data.frame where each column indicates the coex
-for each (or some) of the clusters of the clusterization}
+\item{coexDF}{a \code{data.frame} where each column indicates the coex for all, or
+just some of, the clusters of the clusterization}
 }
 \value{
 the updated \code{COTAN} object
 }
 \description{
-This function adds a clusterization coex data.frame to the current \code{COTAN} object.
-It requires the clusterization to be already present, see \code{\link[=addClusterization]{addClusterization()}}
+This function adds a clusterization coex \code{data.frame} to the
+current \code{COTAN} object. It requires the clusterization to be already
+present.
 }
 \examples{
 
 data("ERCC.cotan")
 ERCC.cotan <- addClusterizationCoex(ERCC.cotan, "merge", coex)
 
+}
+\seealso{
+\code{\link[=addClusterization]{addClusterization()}}
 }

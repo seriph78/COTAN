@@ -4,20 +4,21 @@
 \alias{dropClusterization,COTAN-method}
 \title{dropClusterization}
 \usage{
-\S4method{dropClusterization}{COTAN}(objCOTAN, clusterizationName)
+\S4method{dropClusterization}{COTAN}(objCOTAN, clName)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{clusterizationName}{the name of an existing clusterization.}
+\item{clName}{the name of an existing clusterization.}
 }
 \value{
 the updated \code{COTAN} object
 }
 \description{
-This function drops a clusterization from the current \code{COTAN} object, by removing
-the corresponding column in the \verb{metaCells data.frame} and in case dropping
-the corresponding \verb{coex data.frame} from the \verb{clustersCoex list}.
+This function drops a clusterization from the current \code{COTAN}
+object, by removing the corresponding column in the \verb{metaCells data.frame}
+and in case dropping the corresponding \verb{coex data.frame} from the
+\verb{clustersCoex list}.
 }
 \examples{
 data("ERCC.cotan")

@@ -97,7 +97,7 @@ test_that("7_cell_homogeneous_clustering", {
   clusters <- cell_homogeneous_clustering(obj, cond = "test", cores = 12,
                                           out_dir = paste0(tm,"/"))
 
-  obj <- addClusterization(obj, clusterizationName = "clusters", clusters = clusters)
+  obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
   saveRDS(temp, file = file.path(tm, "temp.RDS"))
 
   #clusters <- readRDS(file.path(getwd(),"clusters1.RDS"))

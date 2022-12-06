@@ -179,7 +179,7 @@ setGeneric(
 
 setGeneric(
   "getClusterizationData",
-  function(objCOTAN, clusterizationName = NULL)
+  function(objCOTAN, clName = NULL)
     standardGeneric("getClusterizationData")
 )
 
@@ -209,17 +209,17 @@ setGeneric(
 
 setGeneric(
   "addClusterization",
-  function(objCOTAN, clusterizationName, clusters, coexDF = NULL) standardGeneric("addClusterization")
+  function(objCOTAN, clName, clusters, coexDF = NULL) standardGeneric("addClusterization")
 )
 
 setGeneric(
   "addClusterizationCoex",
-  function(objCOTAN, clusterizationName, coexDF) standardGeneric("addClusterizationCoex")
+  function(objCOTAN, clName, coexDF) standardGeneric("addClusterizationCoex")
 )
 
 setGeneric(
   "dropClusterization",
-  function(objCOTAN, clusterizationName) standardGeneric("dropClusterization")
+  function(objCOTAN, clName) standardGeneric("dropClusterization")
 )
 
 #-------------------------------------- estimators

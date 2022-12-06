@@ -14,17 +14,19 @@
 \item{cells}{an array of cell names}
 }
 \value{
-a new object with the raw data where the with genes/cells were
-expunged as indicated. The meta-data for the dataset are kept, while the
-rest is dropped as no more relevant with the restricted matrix
+a completely new \code{COTAN} object with the new raw data obtained after
+the indicated genes/cells were expunged. Only the meta-data for the
+data-set are kept, while the rest is dropped as no more relevant with the
+restricted matrix
 }
 \description{
-This function remove an array of genes and/or cells from the current COTAN
-object.
+This function remove an array of genes and/or cells from the
+current \code{COTAN} object.
 }
 \examples{
 data("ERCC.cotan")
 genes.to.rem <- getGenes(ERCC.cotan)[grep('^MT', getGenes(ERCC.cotan))]
 cells.to.rem <- getCells(ERCC.cotan)[which(getCellsSize(ERCC.cotan) == 0)]
 ERCC.cotan <- dropGenesCells(ERCC.cotan, genes.to.rem, cells.to.rem)
+
 }

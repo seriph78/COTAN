@@ -4,31 +4,27 @@
 \alias{addClusterization,COTAN-method}
 \title{addClusterization}
 \usage{
-\S4method{addClusterization}{COTAN}(
-  objCOTAN,
-  clusterizationName,
-  clusters,
-  coexDF = data.frame()
-)
+\S4method{addClusterization}{COTAN}(objCOTAN, clName, clusters, coexDF = data.frame())
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{clusterizationName}{the name of a new clusterization.
-It cannot match an existing name; in case use \code{\link[=dropClusterization]{dropClusterization()}} first.}
+\item{clName}{the name of the clusterization to be added It cannot match an
+existing name; in case use \code{\link[=dropClusterization]{dropClusterization()}} first.}
 
-\item{clusters}{a factors array of cluster names}
+\item{clusters}{a (factors) array of cluster names}
 
-\item{coexDF}{a data.frame where each column indicates the coex
-for each (or some) of the clusters of the clusterization}
+\item{coexDF}{a \code{data.frame} where each column indicates the coex for each
+(or some) of the clusters of the clusterization}
 }
 \value{
 the updated \code{COTAN} object
 }
 \description{
-This function adds a clusterization to the current \code{COTAN} object, by adding a
-new column in the \verb{metaCells data.frame} and adding a new element
-in the \verb{clustersCoex list} using the passed in \verb{coex data.frame}.
+This function adds a clusterization to the current \code{COTAN}
+object, by adding a new column in the \verb{metaCells data.frame} and adding a
+new element in the \verb{clustersCoex list} using the passed in \code{coex}
+\code{data.frame}.
 }
 \examples{
 data("ERCC.cotan")

@@ -438,15 +438,15 @@ getScCOTANSlots <- function(from) {
       warning(paste0("The 'COTAN' object contains more than one clusterization:",
                      "picking up the last one as likely to be the most relevant"))
     }
-    clusterizationName <- names(from@clustersCoex)[length(from@clustersCoex)]
-    cluster_data <- from@clustersCoex[[clusterizationName]]
+    clName <- names(from@clustersCoex)[length(from@clustersCoex)]
+    cluster_data <- from@clustersCoex[[clName]]
   } else {
-    clusterizationName <- "CL_clusters"
+    clName <- "CL_clusters"
     cluster_data <- data.frame()
   }
 
-  if (!is_empty(from@metaCells[[clusterizationName]])) {
-    clusters <- from@metaCells[[clusterizationName]]
+  if (!is_empty(from@metaCells[[clName]])) {
+    clusters <- from@metaCells[[clName]]
     names(clusters) <- rownames(from@metaCells)
   } else {
     # ensure non-empty vector
