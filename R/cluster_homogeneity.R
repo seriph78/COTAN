@@ -106,8 +106,7 @@ setMethod("cluster_homogeneity","scCOTAN",
 
                 #pdf(paste0(out_dir, cond, "_cl.", cl, ".GDI_plots.pdf"), onefile=TRUE)
                 #my.plots[[(cl+1)]] <-
-                obj <- as(obj, "scCOTAN")
-                plot(plot_GDI(obj, genes = list("top 20 GDI genes"=genes.to.label)))
+                plot(GDIPlot(obj, genes = list("top 20 GDI genes" = genes.to.label)))
 
                 dev.off()
                 #graphics.off()

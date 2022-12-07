@@ -22,7 +22,12 @@ get.gene.set.score.on.clusters(obj, genes.list, out_dir, cond)
 a dataframe
 }
 \description{
-This function compute a wheigted parcentage of the expressed genes for each field
-in the gene list (\eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})} where the \eqn{X_i}
-are the values from the function get.clusters.delta.expression and \eqn{\theta = -1/0.1 \cdot ln(0.25)})
+This function compute a wheigted parcentage of the expressed
+genes for each field in the gene list.
+}
+\details{
+Calculates \eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})}, where the
+\eqn{X_i} are the values from the function
+\code{\link[=get.clusters.delta.expression]{get.clusters.delta.expression()}} and \eqn{\theta = -\frac{1}{0.1}
+  \ln(0.25)}
 }

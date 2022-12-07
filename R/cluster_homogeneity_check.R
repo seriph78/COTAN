@@ -13,8 +13,6 @@
 #' @param code string defining the condition/cluster number
 #' @param cores number of cores used
 #'
-#' @import ggrepel
-#' @import ggplot2
 #' @return an array of cells that need to be re-clustered or nothing
 #' @export
 #'
@@ -23,9 +21,6 @@ setGeneric("cluster_homogeneity_check", function(obj,cells,out_dir, cores=1,code
 #' @rdname cluster_homogeneity_check
 setMethod("cluster_homogeneity_check","COTAN",
           function(obj,cells,out_dir, cores,code){
-
-            options(ggrepel.max.overlaps = Inf)
-
 
             raw <- obj@raw[,colnames(obj@raw) %in% cells]
 
@@ -38,6 +33,8 @@ setMethod("cluster_homogeneity_check","COTAN",
 
             #--------------------------------------
             print(paste("n cells", getNumCells(obj)))
+
+            options(ggrepel.max.overlaps = Inf)
 
             list[obj, data] <- clean(obj)
             plots <- cleanPlots(obj, data[["pcaCells"]], data[["D"]])
@@ -61,8 +58,7 @@ setMethod("cluster_homogeneity_check","COTAN",
             plot(plots[["genes"]])
             plot(plots[["UDE"]])
             plot(plots[["nu"]])
-            obj <- as(obj, "scCOTAN")
-            plot(plot_GDI(obj,GDI.df = GDI_data_wt1, genes = list("top 20 GDI genes"=genes.to.label)))
+            plot(GDIPlot(obj, GDI.df = GDI_data_wt1, genes = list("top 20 GDI genes"=genes.to.label)))
 
             dev.off()
             #graphics.off()

@@ -17,7 +17,11 @@
 #' @importFrom Matrix forceSymmetric
 #' @importFrom tidyr pivot_longer
 #'
-#' @import ggplot2
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 facet_grid
+#' @importFrom ggplot2 scale_fill_gradient2
+#'
 #' @import scales
 #'
 #' @export
@@ -337,61 +341,6 @@ setMethod(
       show_heatmap_legend = FALSE,
       annotation_legend_list = lgd, annotation_legend_side = "bottom"
     )
-  }
-)
-
-
-#' plot_GDI
-#'
-#' This function directly evaluate and plot the GDI for a sample.
-#'
-#' @param object A COTAN object
-#' @param cond A string corresponding to the condition/sample (it is used only for the title)
-#' @param type Type of statistic to be used. Default is "S":
-#' Pearson's chi-squared test statistics. "G" is G-test statistics
-#'
-#' @return A ggplot2 object
-#' @export
-#' @import ggplot2
-#' @importFrom  stats quantile
-#' @importFrom Matrix forceSymmetric
-#' @rdname plot_GDI
-#' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
-#' plot_GDI(objCOTAN, cond = "raw")
-setGeneric("plot_GDI", function(object, cond, type = "S") standardGeneric("plot_GDI"))
-#' @rdname plot_GDI
-setMethod(
-  "plot_GDI", "scCOTAN",
-  function(object, cond, type = "S") {
-    ET <- sum.raw.norm <- NULL
-
-    print("GDI plot ")
-    if (type == "S") {
-      GDI <- calculateGDI(object, type = "S")
-    } else if (type == "G") {
-      print("Using G")
-      GDI <- calculateGDI(object, type = "G")
-    }
-
-    plot <- ggplot(GDI, aes(x = sum.raw.norm, y = GDI)) +
-      geom_point(size = 2, alpha = 0.5, color = "#8491B4B2") +
-      geom_hline(yintercept = 1.5, linetype = "dotted", color = "darkred", linewidth = 1) +
-      geom_hline(
-        yintercept = stats::quantile(GDI$GDI)[4], linetype = "dashed",
-        color = "darkblue"
-      ) +
-      geom_hline(
-        yintercept = stats::quantile(GDI$GDI)[3], linetype = "dashed",
-        color = "darkblue"
-      ) +
-      xlab("log normalized reads sum") +
-      ylab("global p val index (GDI)") +
-      ggtitle(paste("GDI ", cond)) +
-      plotTheme("GDI", textSize = 12)
-
-    return(plot)
   }
 )
 

@@ -677,57 +677,58 @@ plotTheme <- function(plotKind = "common", textSize = 14) {
 #'
 #' @rdname vec2mat_rfast
 #'
-setMethod(
-  "vec2mat_rfast",
-  "list",
-  function(x, genes = "all") {
-    numGenes <- length(x$genes)
-    if (genes[1] == "all") {
-      m <- matrix(0, numGenes, numGenes)
-
-      m <- Rfast::lower_tri.assign(m, diag = TRUE, v = x$values)
-      m <- Rfast::upper_tri.assign(m, v = Rfast::upper_tri(Rfast::transpose(m)))
-      rownames(m) <- x$genes
-      colnames(m) <- x$genes
-    } else {
-      m <- matrix(0, nrow = numGenes, ncol = length(genes))
-      rownames(m) <- x$genes
-      colnames(m) <- genes
-
-      for (pos.gene in match(genes, x$genes)) {
-        temp.array <- x$values[pos.gene]
-        p = 1
-        l <- numGenes
-        s <- pos.gene
-        while (p < (pos.gene)) {
-          l <- l - 1
-          s <- s + l
-          temp.array <- c(temp.array, x$values[s])
-          p <- p + 1
-        }
-        if(pos.gene < numGenes) {
-          #linear part
-          start.reading.position <- 1
-          i <- 1
-          while (i < (pos.gene)) {
-            start.reading.position <- start.reading.position + (numGenes - (i - 1))
-            i <- i + 1
-          }
-          start.reading.position = start.reading.position+1
-
-          end.reading.position <- 0
-          for (i in c(0:(pos.gene-1))) {
-            end.reading.position <- end.reading.position + (numGenes-i)
-          }
-
-          temp.array <- c(temp.array, x$values[start.reading.position:end.reading.position])
-        }
-        m[,x$genes[pos.gene]] <- temp.array
-      }
-    }
-    return(m)
+vec2mat_rfast <-function(x, genes = "all") {
+  if (!isa(x, "list") || !identical(names(x), c("genes", "values"))) {
+    stop("Passed 'x' argument is not a list with 2 elements 'genes' and 'values'")
   }
-)
+
+  numGenes <- length(x[["genes"]])
+  if (genes[1] == "all") {
+    m <- matrix(0, numGenes, numGenes)
+
+    m <- Rfast::lower_tri.assign(m, diag = TRUE, v = x$values)
+    m <- Rfast::upper_tri.assign(m, v = Rfast::upper_tri(Rfast::transpose(m)))
+    rownames(m) <- x$genes
+    colnames(m) <- x$genes
+  } else {
+    m <- matrix(0, nrow = numGenes, ncol = length(genes))
+    rownames(m) <- x$genes
+    colnames(m) <- genes
+
+    for (pos.gene in match(genes, x$genes)) {
+      temp.array <- x$values[pos.gene]
+      p = 1
+      l <- numGenes
+      s <- pos.gene
+      while (p < (pos.gene)) {
+        l <- l - 1
+        s <- s + l
+        temp.array <- c(temp.array, x$values[s])
+        p <- p + 1
+      }
+      if(pos.gene < numGenes) {
+        #linear part
+        start.reading.position <- 1
+        i <- 1
+        while (i < (pos.gene)) {
+          start.reading.position <- start.reading.position + (numGenes - (i - 1))
+          i <- i + 1
+        }
+        start.reading.position = start.reading.position+1
+
+        end.reading.position <- 0
+        for (i in c(0:(pos.gene-1))) {
+          end.reading.position <- end.reading.position + (numGenes-i)
+        }
+
+        temp.array <- c(temp.array, x$values[start.reading.position:end.reading.position])
+      }
+      m[,x$genes[pos.gene]] <- temp.array
+    }
+  }
+  return(m)
+}
+
 
 
 #' mat2vec_rfast
@@ -760,16 +761,14 @@ setMethod(
 #'
 #' @rdname mat2vec_rfast
 #'
-setMethod(
-  "mat2vec_rfast",
-  "matrix",
-  function(mat) {
-    if (!dim(mat)[1] == dim(mat)[2]) {
-      stop("The matrix is not square!")
-    }
+mat2vec_rfast <- function(mat) {
+  mat <- as.matrix(mat)
 
-    v <- Rfast::lower_tri(mat, diag = TRUE)
-    return(list("genes" = rownames(mat), "values" = v))
+  if (!dim(mat)[1] == dim(mat)[2]) {
+    stop("The matrix is not square!")
   }
-)
+
+  v <- Rfast::lower_tri(mat, diag = TRUE)
+  return(list("genes" = rownames(mat), "values" = v))
+}
 

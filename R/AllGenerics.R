@@ -1,19 +1,4 @@
 
-setGeneric(
-  "clean",
-  function(objCOTAN, calcExtraData = TRUE) standardGeneric("clean")
-)
-
-setGeneric(
-  "cleanPlots",
-  function(objCOTAN, pcaCells, D) standardGeneric("cleanPlots")
-)
-
-setGeneric(
-  "plotCellsHeatmap",
-  function(objCOTAN, cellsName, clusters) standardGeneric("plotCellsHeatmap")
-)
-
 # -------------------------------------- calculate coex
 
 setGeneric(
@@ -208,6 +193,11 @@ setGeneric(
 )
 
 setGeneric(
+  "clean",
+  function(objCOTAN, calcExtraData = TRUE) standardGeneric("clean")
+)
+
+setGeneric(
   "addClusterization",
   function(objCOTAN, clName, clusters, coexDF = NULL) standardGeneric("addClusterization")
 )
@@ -253,16 +243,3 @@ setGeneric(
            maxIterations = 1000, cores = 1)
     standardGeneric("estimateDispersionNuBisection")
 )
-
-#-------------------------------------- legacy
-setGeneric(
-  "vec2mat_rfast",
-  function(x, genes = "all") standardGeneric("vec2mat_rfast")
-)
-
-setGeneric(
-  "mat2vec_rfast",
-  function(mat) standardGeneric("mat2vec_rfast")
-)
-
-

@@ -342,7 +342,7 @@ CC <- sample(getGenes(obj), size = 5)
 
 genes.list <- list("AA" = AA,"BB" = BB,"CC" = CC)
 
-plot_GDI(obj, cond = "test", genes = genes.list)
+GDIPlot(obj, cond = "test", genes = genes.list)
 ```
 
 If a more complex plot is needed, or if we want to analyze more in detail the GDI data, we can get directly the GDI data frame.
