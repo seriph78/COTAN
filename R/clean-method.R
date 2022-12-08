@@ -71,6 +71,7 @@ setMethod(
     objCOTAN <- estimateLambdaLinear(objCOTAN)
     objCOTAN <- estimateNuLinear(objCOTAN)
     objCOTAN <- findHousekeepingGenes(objCOTAN)
+    objCOTAN <- findFullyExpressedCells(objCOTAN)
 
     gc()
 

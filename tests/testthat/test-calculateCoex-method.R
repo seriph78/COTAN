@@ -1,3 +1,5 @@
+tm = tempdir()
+stopifnot(file.exists(tm))
 
 test_that("Calculations on genes", {
   raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
@@ -151,6 +153,16 @@ test_that("Coex vs saved results", {
   obj <- estimateDispersionBisection(obj, cores = 12)
 
   obj <- calculateCoex(obj)
+
+  obj2 <- automaticCOTANObjectCreation(raw = test.dataset.col,
+                                       outDir = paste0(tm, "/"),
+                                       saveObj = FALSE,
+                                       GEO = " ",
+                                       sequencingMethod = "10X",
+                                       sampleCondition = "example",
+                                       cores = 12)
+
+  expect_equal(obj2, obj)
 
   genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
 

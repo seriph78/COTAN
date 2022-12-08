@@ -11,7 +11,7 @@ test_that("clean COTAN object", {
   expect_true(validObject(obj))
 
   expect_equal(names(data), c("cluster1", "cluster2", "D", "pcaCells"))
-  expect_equal(colnames(getMetadataCells(obj)), "nu")
+  expect_equal(colnames(getMetadataCells(obj)), c("nu", "feCells"))
   expect_equal(colnames(getMetadataGenes(obj)), c("lambda","hkGenes"))
 })
 

@@ -13,7 +13,8 @@
 an array containing all genes expressed in all cells
 }
 \description{
-This function return the genes expressed in all cells in the dataset.
+This function returns the genes expressed in all cells of the
+dataset.
 }
 \examples{
 data("raw.dataset")

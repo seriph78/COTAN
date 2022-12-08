@@ -50,6 +50,7 @@ logThis(endTime - startTime, logLevel = 0)
 ```{r}
 startTime <- Sys.time()
 
+objCOTAN <- findFullyExpressedCells(objCOTAN)
 objCOTAN <- estimateNuBisection(objCOTAN)
 
 endTime <- Sys.time()

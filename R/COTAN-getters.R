@@ -50,7 +50,7 @@ setMethod(
   "getNumCells",
   "COTAN",
   function(objCOTAN){
-    return(as.integer(ncol(objCOTAN@raw)))
+    return(ncol(objCOTAN@raw))
   }
 )
 
@@ -75,7 +75,7 @@ setMethod(
   "getNumGenes",
   "COTAN",
   function(objCOTAN){
-    return(as.integer(nrow(objCOTAN@raw)))
+    return(nrow(objCOTAN@raw))
   }
 )
 
@@ -502,10 +502,50 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     if (is_empty(getMetadataGenes(objCOTAN)[["hkGenes"]])) {
-      return(rep(TRUE, getNumGenes(objCOTAN)))
+      out <- rep(TRUE, getNumGenes(objCOTAN))
+      names(out) <- getGenes(objCOTAN)
+      return(out)
     }
     else {
-      return(getMetadataGenes(objCOTAN)[["hkGenes"]] == 0)
+      return(!getMetadataGenes(objCOTAN)[["hkGenes"]])
+    }
+  }
+)
+
+
+#' flagNotFullyExpressedCells
+#'
+#' @description This function returns a Boolean vector with TRUE for those cells
+#'   that are not fully expressed
+#'
+#' @param objCOTAN A `COTAN` object
+#'
+#' @returns an array of Booleans with TRUE for cells that are not fully
+#'   expressed
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- findFullyExpressedCells(objCOTAN)
+#' goodPos <- flagNotFullyExpressedCells(objCOTAN)
+#'
+#' @rdname flagNotFullyExpressedCells
+#'
+setMethod(
+  "flagNotFullyExpressedCells",
+  "COTAN",
+  function(objCOTAN) {
+    if (is_empty(getMetadataCells(objCOTAN)[["feCells"]])) {
+      out <- rep(TRUE, getNumCells(objCOTAN))
+      names(out) <- getCells(objCOTAN)
+      return(out)
+    }
+    else {
+      return(!getMetadataCells(objCOTAN)[["feCells"]])
     }
   }
 )
@@ -513,7 +553,8 @@ setMethod(
 
 #' getHousekeepingGenes
 #'
-#' @description This function return the genes expressed in all cells in the dataset.
+#' @description This function returns the genes expressed in all cells of the
+#'   dataset.
 #'
 #' @param objCOTAN A `COTAN` object
 #'
@@ -536,6 +577,36 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     return(getGenes(objCOTAN)[!flagNotHousekeepingGenes(objCOTAN)])
+  }
+)
+
+
+#' getFullyExpressedCells
+#'
+#' @description This function return the cells that did express all genes of the
+#'   dataset.
+#'
+#' @param objCOTAN A `COTAN` object
+#'
+#' @returns an array containing all genes expressed in all cells
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- findFullyExpressedCells(objCOTAN)
+#' feCells <- getFullyExpressedCells(objCOTAN)
+#'
+#' @rdname getFullyExpressedCells
+#'
+setMethod(
+  "getFullyExpressedCells",
+  "COTAN",
+  function(objCOTAN) {
+    return(getCells(objCOTAN)[!flagNotFullyExpressedCells(objCOTAN)])
   }
 )
 

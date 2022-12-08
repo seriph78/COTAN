@@ -92,13 +92,43 @@ setMethod(
   "findHousekeepingGenes",
   "COTAN",
   function(objCOTAN) {
-    # determine positive UMI
-    cells <- getZeroOneProj(objCOTAN)
+    zeroOne <- getZeroOneProj(objCOTAN)
 
-    # flag the genes with positive UMI count in every single cell
+    # flag the genes with positive UMI count in every cell
     objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes,
-                                        rowSums(cells) == getNumCells(objCOTAN),
+                                        rowSums(zeroOne) == getNumCells(objCOTAN),
                                         "hkGenes", getGenes(objCOTAN))
+
+    return(objCOTAN)
+  }
+)
+#' findFullyExpressedCells
+#'
+#' @description Determines the fully expressed cells inside a `COTAN` object
+#'
+#' @details Fully expressed cells are those cells where all genes are expressed
+#'
+#' @param objCOTAN the `COTAN` object
+#'
+#' @returns the given `COTAN` object with updated fully expressed cells'
+#'   information
+#'
+#' @importFrom Matrix colSums
+#'
+#' @export
+#'
+#' @rdname findFullyExpressedCells
+#'
+setMethod(
+  "findFullyExpressedCells",
+  "COTAN",
+  function(objCOTAN) {
+    zeroOne <- getZeroOneProj(objCOTAN)
+
+    # flag the cells with positive UMI count in every gene
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
+                                        colSums(zeroOne) == getNumGenes(objCOTAN),
+                                        "feCells", getCells(objCOTAN))
 
     return(objCOTAN)
   }

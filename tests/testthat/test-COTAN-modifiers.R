@@ -26,7 +26,7 @@ test_that("metaDataset", {
 })
 
 
-test_that("Housekeeping Genes", {
+test_that("Housekeeping Genes and Fully Expressed Cells", {
   raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
@@ -37,6 +37,11 @@ test_that("Housekeeping Genes", {
 
   expect_equal(flagNotHousekeepingGenes(obj), c(FALSE, rep(TRUE, getNumGenes(obj) - 1)))
   expect_equal(getHousekeepingGenes(obj), c(LETTERS[1]))
+
+  obj <- findFullyExpressedCells(obj)
+
+  expect_equal(flagNotFullyExpressedCells(obj), rep(TRUE, getNumCells(obj)))
+  expect_equal(getFullyExpressedCells(obj), vector(mode = "character"))
 })
 
 

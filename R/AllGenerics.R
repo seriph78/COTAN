@@ -100,8 +100,18 @@ setGeneric(
 )
 
 setGeneric(
+  "flagNotFullyExpressedCells",
+  function(objCOTAN) standardGeneric("flagNotFullyExpressedCells")
+)
+
+setGeneric(
   "getHousekeepingGenes",
   function(objCOTAN) standardGeneric("getHousekeepingGenes")
+)
+
+setGeneric(
+  "getFullyExpressedCells",
+  function(objCOTAN) standardGeneric("getFullyExpressedCells")
 )
 
 setGeneric(
@@ -148,6 +158,11 @@ setGeneric(
 setGeneric(
   "findHousekeepingGenes",
   function(objCOTAN) standardGeneric("findHousekeepingGenes")
+)
+
+setGeneric(
+  "findFullyExpressedCells",
+  function(objCOTAN) standardGeneric("findFullyExpressedCells")
 )
 
 setGeneric(
