@@ -38,7 +38,7 @@
 #'
 #' @rdname scatterPlot
 #'
-scatterPlot <- function(obj, splitPattern = " ",
+scatterPlot <- function(objCOTAN, splitPattern = " ",
                         numCols=2, split.samples = FALSE) {
   lib.size <- getCellsSize(objCOTAN)
   gene.size <- Matrix::colSums(getZeroOneProj(objCOTAN))

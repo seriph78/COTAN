@@ -50,7 +50,7 @@ setMethod(
   "getNumCells",
   "COTAN",
   function(objCOTAN){
-    return(ncol(objCOTAN@raw))
+    return(as.integer(ncol(objCOTAN@raw)))
   }
 )
 
@@ -75,7 +75,7 @@ setMethod(
   "getNumGenes",
   "COTAN",
   function(objCOTAN){
-    return(nrow(objCOTAN@raw))
+    return(as.integer(nrow(objCOTAN@raw)))
   }
 )
 
@@ -183,10 +183,40 @@ setMethod(
 #' cellsSize <- getCellsSize(objCOTAN)
 #'
 #' @rdname getCellsSize
+#'
 setMethod(
-  "getCellsSize", "COTAN",
+  "getCellsSize",
+  "COTAN",
   function(objCOTAN) {
     return(colSums(objCOTAN@raw))
+  }
+)
+
+
+#' getGenesSize
+#'
+#' This function extracts the genes raw library size.
+#'
+#' @param objCOTAN A `COTAN` object
+#'
+#' @return an array with the library sizes
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' genesSize <- getGenesSize(objCOTAN)
+#'
+#' @rdname getGenesSize
+#'
+setMethod(
+  "getGenesSize",
+  "COTAN",
+  function(objCOTAN) {
+    return(rowSums(objCOTAN@raw))
   }
 )
 
@@ -676,5 +706,36 @@ setMethod(
 
     return( list("clusters" = clusters,
                  "coex" = getClustersCoex(objCOTAN)[[internalName]]) )
+  }
+)
+
+#' getDims
+#'
+#' This function extracts the sizes of all slots of the `COTAN` object.
+#'
+#' @param objCOTAN A `COTAN` object
+#'
+#' @return a named `list` with the sizes of the slots.
+#'
+#' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' allSizes <- getDims(objCOTAN)
+#'
+#' @rdname getDims
+#'
+setMethod(
+  "getDims",
+  "COTAN",
+  function(objCOTAN) {
+    return(list("raw"          = dim(objCOTAN@raw),
+                "genesCoex"    = dim(objCOTAN@genesCoex),
+                "cellsCoex"    = dim(objCOTAN@cellsCoex),
+                "metaDataset"  = nrow(objCOTAN@metaDataset),
+                "metaGenes"    = ncol(objCOTAN@metaGenes),
+                "metaCells"    = ncol(objCOTAN@metaCells),
+                "clustersCoex" = length(objCOTAN@clustersCoex)))
   }
 )

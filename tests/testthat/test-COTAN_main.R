@@ -1,7 +1,7 @@
 tm = tempdir()
 stopifnot(file.exists(tm))
 
-test_that("COTAN_coex_test", {
+test_that("Cell Uniform Clustering", {
   utils::data("test.dataset.col", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset.col)
@@ -14,45 +14,6 @@ test_that("COTAN_coex_test", {
   obj <- estimateDispersionBisection(obj, cores = 12)
 
   obj <- calculateCoex(obj)
-
-  saveRDS(obj, file = file.path(tm, "temp.RDS"))
-
-  genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
-
-  coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
-
-  expect_equal(as.matrix(getGenesCoex(obj, genes = genes.names.test)), coex_test)
-
-  pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)[genes.names.test, ]
-
-  pval_exp  <- readRDS(file.path(getwd(), "pval.test.RDS"))
-
-  if (FALSE) {
-    expect_equal(pval, pval_exp)
-  } else {
-    logPValAct <- log(pval    +10^(-10))
-    logPValExp <- log(pval_exp+10^(-10))
-
-    error  <- sqrt(mean((logPValAct - logPValExp)^2))
-    error_max <- max(abs(logPValAct - logPValExp))
-
-    if (error > 0.001) {
-      warning("Error difference grater than 0.001!")
-    }
-
-    expect_true(error < 10^(-2))
-    expect_true(error_max < 10^(-1))
-  }
-
-  GDI <- calculateGDI(obj)[genes.names.test, ]
-
-  GDI_exp <- readRDS(file.path(getwd(),"GDI.test.RDS"))
-  expect_equal(GDI, GDI_exp)
-})
-
-
-test_that("Cell Uniform Clustering", {
-  obj <- readRDS(file.path(tm,"temp.RDS"))
 
   clusters <- cell_homogeneous_clustering(obj, cond = "test", cores = 12,
                                           out_dir = paste0(tm,"/"))

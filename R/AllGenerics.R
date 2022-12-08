@@ -7,56 +7,9 @@ setGeneric(
 )
 
 setGeneric(
-  "observedContingencyTablesYY",
-  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
-    standardGeneric("observedContingencyTablesYY")
-)
-
-setGeneric(
-  "observedContingencyTables",
-  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
-    standardGeneric("observedContingencyTables")
-)
-
-setGeneric(
-  "expectedContingencyTablesNN",
-  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE, optimizeForSpeed = TRUE)
-    standardGeneric("expectedContingencyTablesNN")
-)
-
-setGeneric(
-  "expectedContingencyTables",
-  function(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE, optimizeForSpeed = TRUE)
-    standardGeneric("expectedContingencyTables")
-)
-
-setGeneric(
   "calculateCoex",
   function(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
     standardGeneric("calculateCoex")
-)
-
-setGeneric(
-  "calculateS",
-  function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
-    standardGeneric("calculateS")
-)
-
-setGeneric(
-  "calculateG",
-  function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
-    standardGeneric("calculateG")
-)
-
-setGeneric(
-  "calculateGDI",
-  function(objCOTAN, type = "S") standardGeneric("calculateGDI")
-)
-
-setGeneric(
-  "calculatePValue",
-  function(objCOTAN, statType = "S", geneSubsetCol = c(), geneSubsetRow = c() )
-    standardGeneric("calculatePValue")
 )
 
 #-------------------------------------- getters
@@ -94,6 +47,11 @@ setGeneric(
 setGeneric(
   "getCellsSize",
   function(objCOTAN) standardGeneric("getCellsSize")
+)
+
+setGeneric(
+  "getGenesSize",
+  function(objCOTAN) standardGeneric("getGenesSize")
 )
 
 setGeneric(
@@ -166,6 +124,11 @@ setGeneric(
   "getClusterizationData",
   function(objCOTAN, clName = NULL)
     standardGeneric("getClusterizationData")
+)
+
+setGeneric(
+  "getDims",
+  function(objCOTAN) standardGeneric("getDims")
 )
 
 #-------------------------------------- modifiers

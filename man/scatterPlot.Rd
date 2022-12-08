@@ -4,9 +4,11 @@
 \alias{scatterPlot}
 \title{scatterPlot}
 \usage{
-scatterPlot(obj, splitPattern = " ", numCols = 2, split.samples = FALSE)
+scatterPlot(objCOTAN, splitPattern = " ", numCols = 2, split.samples = FALSE)
 }
 \arguments{
+\item{objCOTAN}{a \code{COTAN} object}
+
 \item{splitPattern}{Pattern used to extract, from the column names, the
 sample field (default " ")}
 
@@ -15,8 +17,6 @@ number with the sample name (default 2)}
 
 \item{split.samples}{Boolean. Whether to plot each sample in a different
 panel (default \code{FALSE})}
-
-\item{objCOTAN}{a \code{COTAN} object}
 }
 \value{
 The scatter plot

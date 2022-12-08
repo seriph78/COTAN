@@ -189,7 +189,7 @@ setClass(
 #'
 #' @rdname COTAN
 COTAN <- function(raw = "ANY") {
-  raw <- as(as(as(as.matrix(raw), "dMatrix"), "generalMatrix"), "CsparseMatrix")
+  raw <- as(as(raw, "Matrix"), "sparseMatrix")
 
   stopifnot("Inputs must have both row and column names!"
             <- (!is_empty(rownames(raw)) && !is_empty(colnames(raw))))

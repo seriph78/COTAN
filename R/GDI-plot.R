@@ -43,7 +43,7 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
                     type = "S", GDI.df = NULL) {
   sum.raw.norm <- NULL
 
-  logThis("GDI plot")
+  logThis("GDI plot", logLevel = 2)
 
   if (is_empty(GDI.df)) {
     GDI <- calculateGDI(objCOTAN, type = type)

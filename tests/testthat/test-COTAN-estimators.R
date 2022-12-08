@@ -29,9 +29,17 @@ test_that("Bisection estimates", {
   expect_equal(length(getDispersion(obj)), getNumGenes(obj))
   expect_equal(getDispersion(obj)[1], -Inf, ignore_attr = TRUE)
 
+  expect_equal(rowSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj), calculateMu(obj))),
+              rep(getNumCells(obj), getNumGenes(obj)),
+              tolerance = 0.001, ignore_attr = TRUE)
+
   obj <- estimateNuBisection(obj, step = 3, cores = 6)
 
   expect_equal(length(getNu(obj)), getNumCells(obj))
+
+  expect_equal(colSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj), calculateMu(obj))),
+               rep(getNumGenes(obj), getNumCells(obj)),
+               tolerance = 0.001, ignore_attr = TRUE)
 
   obj <- estimateDispersionNuBisection(obj)
 
@@ -39,4 +47,12 @@ test_that("Bisection estimates", {
   expect_equal(getDispersion(obj)[1], -Inf, ignore_attr = TRUE)
   expect_equal(length(getNu(obj)), getNumCells(obj))
   expect_equal(mean(getNu(obj)), 1.0)
+
+  expect_equal(rowSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj), calculateMu(obj))),
+               rep(getNumCells(obj), getNumGenes(obj)),
+               tolerance = 0.001, ignore_attr = TRUE)
+
+  expect_equal(colSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj), calculateMu(obj))),
+               rep(getNumGenes(obj), getNumCells(obj)),
+               tolerance = 0.001, ignore_attr = TRUE)
 })
