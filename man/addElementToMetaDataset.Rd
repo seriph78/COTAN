@@ -18,7 +18,8 @@ the updated \code{COTAN} object
 }
 \description{
 This function is used to add a line of information to the
-information \code{data.frame}.
+information \code{data.frame}. If the tag was already used it will update the
+associated value(s) instead.
 }
 \examples{
 data("raw.dataset")

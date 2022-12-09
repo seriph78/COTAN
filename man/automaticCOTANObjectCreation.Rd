@@ -41,9 +41,11 @@ automaticCOTANObjectCreation
 data("raw.dataset")
 obj <- automaticCOTANObjectCreation(
   raw = raw.dataset,
-  outDir = tempdir(),
   GEO = "test_GEO",
   sequencingMethod = "test_method",
-  sampleCondition = "test")
+  sampleCondition = "test",
+  saveObj = TRUE
+  outDir = tempdir(),
+  cores = 12)
 
 }

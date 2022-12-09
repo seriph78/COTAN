@@ -242,7 +242,9 @@ setMethod("cell_homogeneous_clustering",
     #break
   }
 
-  obj <- addElementToMetaDataset(obj,tag = "n. cells left out by clustering:",length(to_recluster_new))
+  obj <- addElementToMetaDataset(obj,
+                                 tag = standardDatasetTags()[7], # "n. cells left out by clustering:",
+                                 length(to_recluster_new))
 
   #--------------------------
 # Da mettere in una funzione esterna!

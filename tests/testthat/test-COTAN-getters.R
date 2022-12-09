@@ -4,8 +4,6 @@ test_that("COTAN getters", {
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
-  tags <- c("GEO:", "scRNAseq method:", "starting n. of cells:", "Condition sample:")
-
   obj <- COTAN(raw = raw)
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
   obj <- clean(obj, calcExtraData = FALSE)[[1]]
@@ -26,8 +24,8 @@ test_that("COTAN getters", {
   expect_equal(getZeroOneProj(obj), sign(getRawData(obj)))
   expect_equal(getCellsSize(obj), colSums(getRawData(obj)))
   expect_equal(getNormalizedData(obj), t(t(getRawData(obj)) * (1/getNu(obj))))
-  expect_equal(getMetadataDataset(obj)[[1]], tags)
-  expect_equal(getMetadataDataset(obj)[[2]], c("V", "10X", "20", "Test"))
+  expect_equal(getMetadataDataset(obj)[[1]], standardDatasetTags()[1:6])
+  expect_equal(getMetadataDataset(obj)[[2]], c("V", "10X", "20", "Test", "TRUE", "TRUE"))
   expect_setequal(colnames(getMetadataGenes(obj)), c("lambda", "hkGenes", "dispersion"))
   expect_equal(rownames(getMetadataGenes(obj)), getGenes(obj))
   expect_setequal(colnames(getMetadataCells(obj)), c("nu", "feCells", names(getClustersCoex(obj))))

@@ -235,7 +235,6 @@ plot.ude
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
-obj <- as(obj, "scCOTAN")
 obj = addElementToMetaDataset(obj, "Threshold low UDE cells:", yset) 
 
 cellsToRemove = rownames(nuDf)[nuDf[["nu"]] < yset]
@@ -295,6 +294,7 @@ obj <- automaticCOTANObjectCreation(
 The next step will find all homogeneous clusters using a GDI check on each cluster.
 
 ```{r}
+obj <- as(obj, "scCOTAN")
 clusters <- cell_homogeneous_clustering(obj, cond = "test", out_dir = out_dir, cores = 10)
 obj <- addClusterization(obj, clName = "test", clusters = clusters)
 ```

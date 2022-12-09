@@ -80,6 +80,11 @@ setGeneric(
 )
 
 setGeneric(
+  "getMetadataElement",
+  function(objCOTAN, tag) standardGeneric("getMetadataElement")
+)
+
+setGeneric(
   "getMetadataGenes",
   function(objCOTAN) standardGeneric("getMetadataGenes")
 )
@@ -183,6 +188,16 @@ setGeneric(
 setGeneric(
   "addClusterizationCoex",
   function(objCOTAN, clName, coexDF) standardGeneric("addClusterizationCoex")
+)
+
+setGeneric(
+  "dropGenesCoex",
+  function(objCOTAN, clName) standardGeneric("dropGenesCoex")
+)
+
+setGeneric(
+  "dropCellsCoex",
+  function(objCOTAN, clName) standardGeneric("dropCellsCoex")
 )
 
 setGeneric(

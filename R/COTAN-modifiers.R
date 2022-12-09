@@ -1,3 +1,54 @@
+
+#' standardDatasetTags
+#'
+#' @returns a character array with the standard labels used in the `metaDataset`
+#' of the `COTAN` objects. DO NOT REORDER!!
+#'
+#' @noRd
+#'
+
+standardDatasetTags <- function() {
+  return(c("GEO:"                                  # 1
+           ,"scRNAseq method:"                     # 2
+           ,"starting n. of cells:"                # 3
+           ,"condition sample:"                    # 4
+           ,"genes' coex is out of sync:"          # 5
+           ,"cells' coex is out of sync:"          # 6
+           ,"n. of cells left out by clustering:"  # 7
+           ))
+}
+
+
+#' updateMetaInfo
+#'
+#' @description Internal function: updates an information `data.frame`
+#'
+#' @param meta the information `data.frame` to update
+#' @param tag the tag of the line
+#' @param value the value or the values to associate to the tag
+#'
+#' @returns the updated `data.frame`
+#'
+#' @noRd
+#'
+updateMetaInfo <- function(meta, tag, value) {
+  # all values are converted to strings
+  newLine <- c(tag, paste0(value))
+
+  if (!is_empty(meta) && (tag %in% meta[[1]])) {
+    # existing tag: update the value
+    rowPos <- which(meta[[1]] %in% tag)
+  } else {
+    # new tag: add a new entry
+    rowPos <- nrow(meta) + 1
+  }
+
+  meta[rowPos, seq_along(newLine)] <- newLine
+
+  return(meta)
+}
+
+
 #' initializeMetaDataset
 #'
 #' @description Initialize meta-data data-set
@@ -27,10 +78,18 @@ setMethod(
   function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
     logThis("Initializing `COTAN` meta-data", logLevel = 2)
 
-    objCOTAN@metaDataset[1,seq_len(2)] = c("GEO:", GEO)
-    objCOTAN@metaDataset[2,seq_len(2)] = c("scRNAseq method:", sequencingMethod)
-    objCOTAN@metaDataset[3,seq_len(2)] = c("starting n. of cells:", getNumCells(objCOTAN))
-    objCOTAN@metaDataset[4,seq_len(2)] = c("Condition sample:", sampleCondition)
+    tags <- standardDatasetTags()
+
+    meta <- objCOTAN@metaDataset
+
+    meta <- updateMetaInfo(meta, tags[1], GEO)
+    meta <- updateMetaInfo(meta, tags[2], sequencingMethod)
+    meta <- updateMetaInfo(meta, tags[3], getNumCells(objCOTAN))
+    meta <- updateMetaInfo(meta, tags[4], sampleCondition)
+    meta <- updateMetaInfo(meta, tags[5], FALSE)
+    meta <- updateMetaInfo(meta, tags[6], FALSE)
+
+    objCOTAN@metaDataset <- meta
 
     return(objCOTAN)
   }
@@ -40,7 +99,8 @@ setMethod(
 #' addElementToMetaDataset
 #'
 #' @description This function is used to add a line of information to the
-#'   information `data.frame`.
+#'   information `data.frame`. If the tag was already used it will update the
+#'   associated value(s) instead.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param tag the new information tag
@@ -62,9 +122,7 @@ setMethod(
   "addElementToMetaDataset",
   "COTAN",
   function(objCOTAN, tag, value) {
-    newLine <- c(tag, value)
-
-    objCOTAN@metaDataset[(nrow(objCOTAN@metaDataset) + 1), seq_along(newLine)] <- newLine
+    objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset, tag, value)
 
     return(objCOTAN)
   }
@@ -299,6 +357,82 @@ setMethod(
 
     # this should not add any new elements to the list!
     objCOTAN@clustersCoex[[internalName]] <- coexDF
+
+    return(objCOTAN)
+  }
+)
+
+
+#' dropGenesCoex
+#'
+#' @description This function drops the `genesCoex` from the given `COTAN`
+#'   object
+#'
+#' @param objCOTAN A `COTAN` object
+#'
+#' @returns The updated `COTAN` object
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#'                                          GEO = "test_GEO",
+#'                                          sequencingMethod = "test_method",
+#'                                          sampleCondition = "test",
+#'                                          cores = 12)
+#' objCOTAN <- dropGenesCoex(objCOTAN)
+#'
+#' @rdname dropGenesCoex
+#'
+setMethod(
+  "dropGenesCoex",
+  "COTAN",
+  function(objCOTAN, clName) {
+    if (!is_empty(objCOTAN@genesCoex)) {
+      objCOTAN@genesCoex <- emptySymmetricMatrix()
+    }
+
+    return(objCOTAN)
+  }
+)
+
+
+#' dropCellsCoex
+#'
+#' @description This function drops the `cellsCoex` from the given `COTAN`
+#'   object
+#'
+#' @param objCOTAN A `COTAN` object
+#'
+#' @returns The updated `COTAN` object
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#'                                          GEO = "test_GEO",
+#'                                          sequencingMethod = "test_method",
+#'                                          sampleCondition = "test",
+#'                                          cores = 12)
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
+#' objCOTAN <- dropCellsCoex(objCOTAN)
+#'
+#' @rdname dropCellsCoex
+#'
+setMethod(
+  "dropCellsCoex",
+  "COTAN",
+  function(objCOTAN, clName) {
+    if (!is_empty(objCOTAN@cellsCoex)) {
+      objCOTAN@cellsCoex <- emptySymmetricMatrix()
+    }
 
     return(objCOTAN)
   }

@@ -281,6 +281,45 @@ setMethod(
 )
 
 
+#' getMetadataElement
+#'
+#' @description This function extracts the value associated with the given tag
+#'   if present or an empty string otherwise.
+#'
+#' @param objCOTAN A `COTAN` object
+#' @param tag The tag associated to the wanted value
+#'
+#' @returns A string with the relevant value
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- initializeMetaDataset(objCOTAN, )
+#' GEO <- getMetadataElement(objCOTAN, "GEO")
+#'
+#' @rdname getMetadataElement
+#'
+setMethod(
+  "getMetadataElement",
+  "COTAN",
+  function(objCOTAN, tag) {
+    meta <- getMetadataDataset(objCOTAN)
+
+    if (is_empty(meta) || !(tag %in% meta[[1]])){
+      out <- ""
+    } else {
+      rowPos <- which(meta[[1]] %in% tag)
+      out <- meta[, -1, drop = FALSE][rowPos, ]
+    }
+
+    return(out)
+  }
+)
+
 #' getMetadataGenes
 #'
 #' @description This function extract the meta-data stored for the genes.

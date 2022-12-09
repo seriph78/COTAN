@@ -4,15 +4,18 @@ test_that("metaDataset", {
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
-  tags <- c("GEO:", "scRNAseq method:", "starting n. of cells:", "Condition sample:")
-
   obj <- COTAN(raw = raw)
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
 
+  genesCoexInSync <- getMetadataElement(obj, standardDatasetTags()[5])
+  cellsCoexInSync <- getMetadataElement(obj, standardDatasetTags()[6])
+
+  expect_equal(c(genesCoexInSync, genesCoexInSync), c("FALSE", "FALSE"))
+
   meta <- getMetadataDataset(obj)
 
-  expect_equal(meta[[1]], tags)
-  expect_equal(meta[[2]], c("V", "10X", "20", "Test"))
+  expect_equal(meta[[1]], standardDatasetTags()[1:6])
+  expect_equal(meta[[2]], c("V", "10X", "20", "Test", genesCoexInSync, cellsCoexInSync))
 
   obj <- addElementToMetaDataset(obj, tag = "Tag_1", value = 1)
   obj <- addElementToMetaDataset(obj, tag = "Tag_2", value = "Test")
@@ -22,7 +25,8 @@ test_that("metaDataset", {
 
   expect_equal(meta[nrow(meta) - 2, 2], as.character(1))
   expect_equal(meta[nrow(meta) - 1, 2], "Test")
-  expect_equal(meta[nrow(meta), ], list("Tag_3", "Array", "of", "strings"), ignore_attr = TRUE)
+  expect_equal(getMetadataElement(obj, "Tag_3"),
+               list("Array", "of", "strings"), ignore_attr = TRUE)
 })
 
 
@@ -54,6 +58,19 @@ test_that("dropGenesCells", {
 
   obj <- COTAN(raw = raw)
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
+  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- estimateDispersionNuBisection(obj, cores = 4, enforceNuAverageToOne = TRUE)
+  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
+  obj <- calculateCoex(obj, actOnCells = TRUE,  optimizeForSpeed = FALSE)
+
+  obj <- dropGenesCoex(obj)
+
+  expect_true(is_empty(getGenesCoex(obj)))
+  expect_false(is_empty(getCellsCoex(obj)))
+
+  obj <- dropCellsCoex(obj)
+
+  expect_true(is_empty(getCellsCoex(obj)))
 
   obj <- dropGenesCells(obj, genes = LETTERS[8:9])
 
@@ -74,6 +91,7 @@ test_that("dropGenesCells", {
   expect_equal(getNumCells(obj), 14)
   expect_true(all(!getCells(obj) %in% c(letters[6:9], letters[18:19])))
 })
+
 
 test_that("Managed clusterizations", {
   raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)

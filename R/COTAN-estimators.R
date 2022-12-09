@@ -344,8 +344,8 @@ setMethod(
            maxIterations = 1000, cores = 1, enforceNuAverageToOne = FALSE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
 
-    suppressWarnings(unavailableNu <- is_empty(getNu(objCOTAN)))
-    if (unavailableNu) {
+    # getNu() would throw a warning when no 'nu' present
+    if (is_empty(getMetadataCells(objCOTAN)[["nu"]])) {
       objCOTAN <- estimateNuBisection(objCOTAN, step = step,
                                       threshold = threshold,
                                       maxIterations = maxIterations,
