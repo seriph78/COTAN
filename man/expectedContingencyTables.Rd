@@ -14,22 +14,39 @@ expectedContingencyTables(
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
-\item{actOnCells}{Boolean, if TRUE, the function works for the cells,
+\item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
 otherwise for the genes}
 
-\item{asDspMatrices}{Boolean, if TRUE the function will return only packed
-dense symmetric matrices}
+\item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
+packed dense symmetric matrices}
 
-\item{optimizeForSpeed}{Boolean, if TRUE, the function will use Rfast
+\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \code{Rfast}
 parallel algorithms that on the flip side use more memory}
 }
 \value{
-a list with the expected contingency tables
+The expected contingency tables as named \code{list} with elements:
+"expectedNN", "expectedNY", "expectedYN", "expectedYY"
 }
 \description{
-calcualte the expected values of contingency tables
+Calculate the expected values of contingency tables
+}
+\details{
+When \code{asDspMatrices == TRUE}, the method will effectively throw away
+the lower half from the returned \code{expectedYN} and \code{expectedNY} matrices,
+but, since they are transpose one of another, the full information is still
+available.
+}
+\note{
+The sum of the returned matrices will have constant value. This value
+is the number of genes/cells depending on \code{actOnCells} being
+\code{TRUE}/\code{FALSE}.
 }
 \examples{
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
 exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 
 }

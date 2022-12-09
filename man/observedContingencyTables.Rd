@@ -9,18 +9,33 @@ observedContingencyTables(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
-\item{cells}{Boolean, if true, the function works for the cells,
-otherwise for the genes
-#' @param asDspMatrices Boolean, if TRUE the function will return only packed
-dense symmetric matrices}
+\item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
+packed dense symmetric matrices}
+
+\item{cells}{Boolean; when \code{TRUE} the function works for the cells,
+otherwise for the genes}
 }
 \value{
-the observed contingency tables
+The observed contingency tables as named \code{list} with elements:
+"observedNN", "observedNY", "observedYN" "observedYY"
 }
 \description{
-calculate observed yes/yes field of contingency table
+Calculate the observed contingency tables
+}
+\details{
+When \code{asDspMatrices == TRUE}, the method will effectively throw away
+the lower half from the returned \code{observedYN} and \code{observedNY} matrices,
+but, since they are transpose one of another, the full information is still
+available.
+}
+\note{
+The sum of the returned matrices will have constant value. This value
+is the number of genes/cells depending on \code{actOnCells} being
+\code{TRUE}/\code{FALSE}.
 }
 \examples{
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
 obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 
 }

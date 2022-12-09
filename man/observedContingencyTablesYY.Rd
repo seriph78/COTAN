@@ -13,20 +13,22 @@ observedContingencyTablesYY(
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
-\item{asDspMatrices}{Boolean, if TRUE the function will return only packed
-dense symmetric matrices}
+\item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
+packed dense symmetric matrices}
 
-\item{cells}{Boolean, if true, the function works for the cells,
+\item{cells}{Boolean; when \code{TRUE} the function works for the cells,
 otherwise for the genes}
 }
 \value{
-a list with the 'Yes/Yes' observed contingency table
-and the 'Yes' observed vector
+A \code{list} with the 'Yes/Yes' observed contingency table and the 'Yes'
+observed vector
 }
 \description{
-calculate observed Yes/Yes field of contingency table
+Calculate observed Yes/Yes field of the contingency table
 }
 \examples{
-obsYY <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+list[obsYY, obsY] <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
 
 }

@@ -9,24 +9,45 @@
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
-\item{actOnCells}{Boolean, if TRUE, the function works for the cells,
+\item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
 otherwise for the genes}
 
-\item{optimizeForSpeed}{Boolean, if TRUE, the function will use Rfast
+\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \link{Rfast}
 parallel algorithms that on the flip side use more memory}
 }
 \value{
-the updated COTAN object
+The updated COTAN object
 }
 \description{
-This function estimates and stores the coex matrix in the 'genesCoex' or
-'cellCoex' field depending on given 'actOnCells' flag
+This function estimates and stores the \emph{coex} matrix in the
+\code{cellCoex} or \code{genesCoex} field depending on given \code{actOnCells} flag
+}
+\details{
+The function calculates the coex matrix, defined by following
+formula:
+
+\deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{(-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
+             {\sqrt{n \sum_{i,j \in \{\text{Y, N}\}}{\frac{1}{1 \vee E_{ij}}}}}}
+
+where \eqn{O} and \eqn{E} are the observed and expected contingency tables
+and \eqn{n} is the relevant numerosity (the number of genes/cells depending
+on given \code{actOnCells} flag).
+
+The formula can be more effectively implemented as:
+
+\deqn{\sqrt{\frac{1}{n}\sum_{i,j \in \{\text{Y, N}\}}{\frac{1}{1 \vee E_{ij}}}}
+        \, \bigl(O_\text{YY}-E_\text{YY}\bigr)}
+
+once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for all
+\eqn{i,j \in \{\text{Y, N}\}} as all marginal sums must be respected.
 }
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 
 }

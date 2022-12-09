@@ -62,6 +62,30 @@ logThis <- function(msg, logLevel = 2, appendLF = TRUE) {
 }
 
 
+#' Internal function to handle names subset...
+#'
+#' @description Returns the given subset or the full list of names if none were
+#'   specified
+#'
+#' @param names The full list of the genes
+#' @param subset The names' subset. When empty all names are returned instead!
+#'
+#' @returns The updated list of names' subset, reordered according to the given
+#'   names' list
+#'
+#' @noRd
+#'
+handleNamesSubsets <- function(names, subset = c()) {
+  if (is_empty(subset)) {
+    subset <- names
+  } else {
+    stopifnot("Passed genes are not a subset of the full list" <- all(subset %in% names))
+    subset = names[names %in% subset]
+  }
+  return(subset)
+}
+
+
 #' setColumnInDF
 #'
 #' @description Private function that append, if missing, or resets, if present,

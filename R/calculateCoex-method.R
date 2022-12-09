@@ -1,10 +1,10 @@
 #' calculateMu
 #'
-#' calculate vector mu = lambda × nu^t
+#' @description Calculate the vector \eqn{\mu = \lambda \times \nu^T}
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN A COTAN object
 #'
-#' @return the Mu matrix
+#' @returns The Mu matrix
 #'
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix dgeMatrix
@@ -12,6 +12,10 @@
 #' @export
 #'
 #' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' mu <- calculateMu(objCOTAN)
 #'
 #' @rdname calculateMu
@@ -38,16 +42,16 @@ setMethod(
 
 #' observedContingencyTablesYY
 #'
-#' calculate observed Yes/Yes field of contingency table
+#' @description Calculate observed Yes/Yes field of the contingency table
 #'
 #' @param objCOTAN A COTAN object
-#' @param cells Boolean, if true, the function works for the cells,
-#' otherwise for the genes
-#' @param asDspMatrices Boolean, if TRUE the function will return only packed
-#' dense symmetric matrices
+#' @param cells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#' @param asDspMatrices Boolean; when `TRUE` the function will return only
+#'   packed dense symmetric matrices
 #'
-#' @return a list with the 'Yes/Yes' observed contingency table
-#' and the 'Yes' observed vector
+#' @returns A `list` with the 'Yes/Yes' observed contingency table and the 'Yes'
+#'   observed vector
 #'
 #' @importFrom Matrix t
 #' @importFrom Matrix crossprod
@@ -59,7 +63,9 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' obsYY <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' list[obsYY, obsY] <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
 #'
 #' @rdname observedContingencyTablesYY
 #'
@@ -95,21 +101,33 @@ observedContingencyTablesYY <- function(objCOTAN,
 
 #' observedContingencyTables
 #'
-#' calculate observed yes/yes field of contingency table
+#' @description Calculate the observed contingency tables
+#'
+#' @details When `asDspMatrices == TRUE`, the method will effectively throw away
+#'   the lower half from the returned `observedYN` and `observedNY` matrices,
+#'   but, since they are transpose one of another, the full information is still
+#'   available.
+#'
+#' @note The sum of the returned matrices will have constant value. This value
+#'   is the number of genes/cells depending on `actOnCells` being
+#'   `TRUE`/`FALSE`.
 #'
 #' @param objCOTAN A COTAN object
-#' @param cells Boolean, if true, the function works for the cells,
-#' otherwise for the genes
-#' #' @param asDspMatrices Boolean, if TRUE the function will return only packed
-#' dense symmetric matrices
+#' @param cells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#' @param asDspMatrices Boolean; when `TRUE` the function will return only
+#'   packed dense symmetric matrices
 #'
-#' @return the observed contingency tables
+#' @returns The observed contingency tables as named `list` with elements:
+#'   "observedNN", "observedNY", "observedYN" "observedYY"
 #'
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix symmetricMatrix
 #' @export
 #'
 #' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
 #' obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 #'
 #' @rdname observedContingencyTables
@@ -192,18 +210,18 @@ observedContingencyTables <- function(objCOTAN,
 
 #' expectedContingencyTablesNN
 #'
-#' calculate the expected No/No filed of contingency tables
+#' @description Calculate the expected No/No field of the contingency table
 #'
 #' @param objCOTAN A COTAN object
-#' @param cells Boolean, if true, the function works for the cells,
-#' otherwise for the genes
-#' @param asDspMatrices Boolean, if TRUE the function will return only packed
-#' dense symmetric matrices
-#' @param optimizeForSpeed Boolean, if TRUE, the function will use Rfast
-#' parallel algorithms that on the flip side use more memory
+#' @param cells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#' @param asDspMatrices Boolean; when `TRUE` the function will return only
+#'   packed dense symmetric matrices
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use [Rfast]
+#'   parallel algorithms that on the flip side use more memory
 #'
-#' @return a list with the 'No/No' observed contingency table
-#' and the 'No' expected vector
+#' @returns a `list` with the 'No/No' expected contingency table and the 'No'
+#'   expected vector
 #'
 #' @importFrom Matrix t
 #'
@@ -218,7 +236,11 @@ observedContingencyTables <- function(objCOTAN,
 #' @export
 #'
 #' @examples
-#' expNN <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
+#' list[expNN, expN] <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
 #'
 #' @rdname expectedContingencyTablesNN
 #'
@@ -274,17 +296,27 @@ expectedContingencyTablesNN <- function(objCOTAN,
 
 #' expectedContingencyTables
 #'
-#' calcualte the expected values of contingency tables
+#' @description Calculate the expected values of contingency tables
+#'
+#' @details When `asDspMatrices == TRUE`, the method will effectively throw away
+#'   the lower half from the returned `expectedYN` and `expectedNY` matrices,
+#'   but, since they are transpose one of another, the full information is still
+#'   available.
+#'
+#' @note The sum of the returned matrices will have constant value. This value
+#'   is the number of genes/cells depending on `actOnCells` being
+#'   `TRUE`/`FALSE`.
 #'
 #' @param objCOTAN A COTAN object
-#' @param actOnCells Boolean, if TRUE, the function works for the cells,
-#' otherwise for the genes
-#' @param asDspMatrices Boolean, if TRUE the function will return only packed
-#' dense symmetric matrices
-#' @param optimizeForSpeed Boolean, if TRUE, the function will use Rfast
-#' parallel algorithms that on the flip side use more memory
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#' @param asDspMatrices Boolean; when `TRUE` the function will return only
+#'   packed dense symmetric matrices
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
+#'   parallel algorithms that on the flip side use more memory
 #'
-#' @return a list with the expected contingency tables
+#' @return The expected contingency tables as named `list` with elements:
+#' "expectedNN", "expectedNY", "expectedYN", "expectedYY"
 #'
 #' @importFrom Rfast Crossprod
 #' @importFrom Rfast Tcrossprod
@@ -297,6 +329,10 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #' @export
 #'
 #' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 #'
 #' @rdname expectedContingencyTables
@@ -384,16 +420,34 @@ expectedContingencyTables <- function(objCOTAN,
 
 #' calculateCoex
 #'
-#' This function estimates and stores the coex matrix in the 'genesCoex' or
-#' 'cellCoex' field depending on given 'actOnCells' flag
+#' @description This function estimates and stores the *coex* matrix in the
+#'   `cellCoex` or `genesCoex` field depending on given `actOnCells` flag
+#'
+#' @details The function calculates the coex matrix, defined by following
+#'   formula:
+#'
+#'   \deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{(-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
+#'              {\sqrt{n \sum_{i,j \in \{\text{Y, N}\}}{\frac{1}{1 \vee E_{ij}}}}}}
+#'
+#'   where \eqn{O} and \eqn{E} are the observed and expected contingency tables
+#'   and \eqn{n} is the relevant numerosity (the number of genes/cells depending
+#'   on given `actOnCells` flag).
+#'
+#' The formula can be more effectively implemented as:
+#'
+#'   \deqn{\sqrt{\frac{1}{n}\sum_{i,j \in \{\text{Y, N}\}}{\frac{1}{1 \vee E_{ij}}}}
+#'         \, \bigl(O_\text{YY}-E_\text{YY}\bigr)}
+#'
+#'   once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for all
+#'   \eqn{i,j \in \{\text{Y, N}\}} as all marginal sums must be respected.
 #'
 #' @param objCOTAN A COTAN object
-#' @param actOnCells Boolean, if TRUE, the function works for the cells,
-#' otherwise for the genes
-#' @param optimizeForSpeed Boolean, if TRUE, the function will use Rfast
-#' parallel algorithms that on the flip side use more memory
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use [Rfast]
+#'   parallel algorithms that on the flip side use more memory
 #'
-#' @return the updated COTAN object
+#' @returns The updated COTAN object
 #'
 #' @export
 #'
@@ -401,10 +455,12 @@ expectedContingencyTables <- function(objCOTAN,
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
 #' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 #'
 #' @rdname calculateCoex
+#'
 setMethod(
   "calculateCoex",
   "COTAN",
@@ -480,17 +536,6 @@ setMethod(
 )
 
 
-# Internal function to handle genes subset...
-handleGenesSubsets <- function(genes, genesSubset = c()) {
-  if (is_empty(genesSubset)) {
-    genesSubset <- genes
-  } else {
-    stopifnot("Passed genes are not a subset of the full list" = all(genesSubset %in% genes))
-    genesSubset = genes[genes %in% genesSubset]
-  }
-  return(genesSubset)
-}
-
 #' calculateS
 #'
 #' calculate the statistics S for genes contingency tables
@@ -511,12 +556,17 @@ handleGenesSubsets <- function(genes, genesSubset = c()) {
 #' @rdname calculateS
 #'
 calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
-  geneSubsetCol <- handleGenesSubsets(getGenes(objCOTAN), geneSubsetCol)
-  geneSubsetRow <- handleGenesSubsets(getGenes(objCOTAN), geneSubsetRow)
+  geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
+  geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
   logThis("Calculating S: START", logLevel = 2)
 
-  coex <- getGenesCoex(objCOTAN)[geneSubsetRow, geneSubsetCol, drop = FALSE]
+  if(identical(geneSubsetRow, getGenes(objCOTAN)) &&
+     identical(geneSubsetCol, getGenes(objCOTAN))) {
+    coex <- getGenesCoex(objCOTAN)
+  } else {
+    coex <- getGenesCoex(objCOTAN)[geneSubsetRow, geneSubsetCol, drop = FALSE]
+  }
 
   stopifnot("Coex is missing" = !is_empty(coex))
 
@@ -550,8 +600,8 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' @rdname calculateG
 #'
 calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
-  geneSubsetCol <- handleGenesSubsets(getGenes(objCOTAN), geneSubsetCol)
-  geneSubsetRow <- handleGenesSubsets(getGenes(objCOTAN), geneSubsetRow)
+  geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
+  geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
   logThis("Calculating G: START", logLevel = 2)
 
@@ -561,38 +611,35 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
   list[expectedNN, expectedNY, expectedYN, expectedYY] <-
     expectedContingencyTables(objCOTAN, actOnCells = FALSE)
 
-  # for (i in c(expectedNN, expectedNY, expectedYN, expectedYY)) {
-  #   stopifnot("Some expected values are 0!" = !any(i == 0))
-  # }
-
   logThis("Estimating G", logLevel = 3)
 
-  tNN <- observedNN * log(observedNN / expectedNN)
+  tNN <- observedNN * log(observedNN / pmax(1, expectedNN))
   tNN[observedNN == 0] <- 0
-  tNN[expectedNN == 0] <- Inf
   tNN <- tNN[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedNN); rm(expectedNN)
 
-  tNY <- observedNY * log(observedNY / expectedNY)
+  tNY <- observedNY * log(observedNY / pmax(1, expectedNY))
   tNY[observedNY == 0] <- 0
-  tNY[expectedNY == 0] <- Inf
   tNY <- tNY[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedNY); rm(expectedNY)
 
-  tYN <- observedYN * log(observedYN / expectedYN)
+  tYN <- observedYN * log(observedYN / pmax(1, expectedYN))
   tYN[observedYN == 0] <- 0
-  tYN[expectedYN == 0] <- Inf
   tYN <- tYN[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedYN); rm(expectedYN)
 
-  tYY <- observedYY * log(observedYY / expectedYY)
+  tYY <- observedYY * log(observedYY / pmax(1, expectedYY))
   tYY[observedYY == 0] <- 0
-  tYY[expectedYY == 0] <- Inf
   tYY <- tYY[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedYY); rm(expectedYY)
   gc()
 
   G <- 2 * (tNN + tNY + tYN + tYY)
+
+  if(identical(geneSubsetRow, getGenes(objCOTAN)) &&
+     identical(geneSubsetCol, getGenes(objCOTAN))) {
+    G <- pack(forceSymmetric(G))
+  }
 
   rm(tNN); rm(tNY); rm(tYN); rm(tYY)
   gc()
@@ -647,8 +694,8 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 
   diag(S) <- 0
   CDSorted <- apply(S, 2, sort, decreasing = TRUE)
-  rg <- round(nrow(CDSorted) / 20, digits = 0)
-  CDSorted <- CDSorted[seq_len(rg), ]
+  rg <- max(1, round(nrow(CDSorted) / 20, digits = 0))
+  CDSorted <- CDSorted[seq_len(rg), , drop = FALSE]
   CDSorted <- pchisq(as.matrix(CDSorted), df = 1, lower.tail = FALSE)
 
   GDI <- log(-log(colMeans(CDSorted)))
@@ -714,6 +761,9 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 #'
 calculatePValue <- function(objCOTAN, statType = "S",
                             geneSubsetCol = c(), geneSubsetRow = c()) {
+  geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
+  geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
+
   if (statType == "S") {
     logThis("Using S", logLevel = 3)
     S <- calculateS(objCOTAN,
@@ -730,11 +780,18 @@ calculatePValue <- function(objCOTAN, statType = "S",
 
   logThis("calculating PValues: START", logLevel = 2)
 
-  strCol <- (if (all(getGenes(objCOTAN) %in% geneSubsetCol)) "genome wide" else "on a set of genes")
-  strRow <- (if (all(getGenes(objCOTAN) %in% geneSubsetRow)) "genome wide" else "on a set of genes")
+  allCols <- identical(geneSubsetCol, getGenes(objCOTAN))
+  allRows <- identical(geneSubsetRow, getGenes(objCOTAN))
+
+  strCol <- if (allCols) "genome wide" else "on a set of genes"
+  strRow <- if (allRows) "genome wide" else "on a set of genes"
   logThis(paste("Get p-values", strCol, "on columns and", strRow, "on rows"), logLevel = 2)
 
   pValues <- pchisq(as.matrix(S), df = 1, lower.tail = FALSE)
+
+  if (allCols && allRows) {
+    pValues <- pack(forceSymmetric(pValues))
+  }
 
   logThis("calculating PValues: DONE", logLevel = 2)
 

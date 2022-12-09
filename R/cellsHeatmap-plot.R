@@ -57,9 +57,7 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
             cluster_rows = FALSE,
             cluster_columns = FALSE)
   } else {
-    if (is_empty(cells)) {
-      cells <- getCells(objCOTAN)
-    }
+    cells <- handleNamesSubsets(getCells(objCOTAN), cells)
 
     Heatmap(coexMat[cells, cells],
             cluster_rows = FALSE,

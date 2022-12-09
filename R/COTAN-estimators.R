@@ -341,12 +341,18 @@ setMethod(
   "estimateDispersionNuBisection",
   "COTAN",
   function(objCOTAN, step = 512, threshold = 0.001,
-           maxIterations = 1000, cores = 1) {
+           maxIterations = 1000, cores = 1, enforceNuAverageToOne = FALSE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
 
-    if (is_empty(getNu(objCOTAN))) {
-      stop("'nu' vector needs to be initialised as initial guess")
+    suppressWarnings(unavailableNu <- is_empty(getNu(objCOTAN)))
+    if (unavailableNu) {
+      objCOTAN <- estimateNuBisection(objCOTAN, step = step,
+                                      threshold = threshold,
+                                      maxIterations = maxIterations,
+                                      cores = cores)
     }
+
+    sumZeros <- getNumCells(objCOTAN) - rowSums(getZeroOneProj(objCOTAN))
 
     iter <- 1
     repeat {
@@ -361,26 +367,31 @@ setMethod(
                                       cores = cores)
 
       meanNu <- mean(getNu(objCOTAN))
+      logThis(paste("Nu mean:", meanNu),
+              logLevel = (if(enforceNuAverageToOne) {1} else {3}))
 
-      if (!is.finite(meanNu)) {
-        stopifnot("Cannot have infinite mean 'nu' only after the first loop" <- (iter == 1))
-        warning(paste0("Infinite 'nu' found: one of the cells expressed all genes\n",
-                       " Returning values after a single loop"))
-        return(objCOTAN)
-      }
-
-      logThis(paste("Nu mean:", meanNu), logLevel = 3)
-
-      objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
-                                          getNu(objCOTAN) / meanNu,
-                                          "nu")
-
-      if (abs(meanNu-1) < threshold / 100) {
-        break
+      if (isTRUE(enforceNuAverageToOne)) {
+        if (!is.finite(meanNu)) {
+          stopifnot("Cannot have infinite mean 'nu' only after the first loop" <- (iter == 1))
+          warning(paste0("Infinite 'nu' found: one of the cells expressed all genes\n",
+                         " Setting 'enforceNuAverageToOne' <- FALSE"))
+        } else {
+          objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
+                                              getNu(objCOTAN) / meanNu,
+                                              "nu")
+        }
       }
 
       if (iter >= maxIterations / 100) {
         stop("Max number of outer iterations reached while finding the solution")
+      }
+
+      genesMarginals <- rowSums(funProbZero(getDispersion(objCOTAN),
+                                            calculateMu(objCOTAN)))
+      solutionFound <- (max(abs(genesMarginals - sumZeros)) < threshold)
+
+      if (solutionFound && (isFALSE(enforceNuAverageToOne) || abs(meanNu - 1) < threshold)) {
+        break
       }
     }
 

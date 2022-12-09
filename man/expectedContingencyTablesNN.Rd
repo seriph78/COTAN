@@ -14,23 +14,28 @@ expectedContingencyTablesNN(
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
-\item{asDspMatrices}{Boolean, if TRUE the function will return only packed
-dense symmetric matrices}
+\item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
+packed dense symmetric matrices}
 
-\item{optimizeForSpeed}{Boolean, if TRUE, the function will use Rfast
+\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \link{Rfast}
 parallel algorithms that on the flip side use more memory}
 
-\item{cells}{Boolean, if true, the function works for the cells,
+\item{cells}{Boolean; when \code{TRUE} the function works for the cells,
 otherwise for the genes}
 }
 \value{
-a list with the 'No/No' observed contingency table
-and the 'No' expected vector
+a \code{list} with the 'No/No' expected contingency table and the 'No'
+expected vector
 }
 \description{
-calculate the expected No/No filed of contingency tables
+Calculate the expected No/No field of the contingency table
 }
 \examples{
-expNN <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
+list[expNN, expN] <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
 
 }

@@ -9,7 +9,8 @@
   step = 512,
   threshold = 0.001,
   maxIterations = 1000,
-  cores = 1
+  cores = 1,
+  enforceNuAverageToOne = FALSE
 )
 }
 \arguments{

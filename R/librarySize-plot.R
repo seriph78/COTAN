@@ -136,7 +136,7 @@ librarySizePlot <- function(objCOTAN, splitPattern = " ", numCols = 2) {
     geom_flat_violin(position = position_nudge(x = .15, y = 0),adjust = 2, alpha = 0.5) +
     geom_point(position = position_jitter(width = .1), size = .4, color = "black", alpha = 0.5) +
     geom_boxplot(aes(x = sample, y = sizes, fill = sample),
-                 outlier.shape = NA, alpha = .8, width = .15, colour = "gray65", size = 0.6)+
+                 outlier.shape = NA, alpha = .8, width = .15, colour = "gray65", size = 0.6) +
     labs(title = "Cell library size",
          y = "Size (read number)",
          x = "") +
@@ -186,14 +186,14 @@ genesSizePlot <- function(objCOTAN, splitPattern = " ", numCols = 2) {
   sizes <- sort(sizes)
   sizes <- as.data.frame(sizes)
   sizes$n <- c(1:dim(sizes)[1])
-  sizes$sample <- str_split(rownames(sizes), pattern = splitPattern,simplify = T)[, numCols]
+  sizes$sample <- str_split(rownames(sizes), pattern = splitPattern, simplify = T)[, numCols]
 
   plot <-
     sizes %>%
     ggplot(aes(x = sample, y = sizes, fill = sample)) +
     #geom_point(size = 0.5) +
     geom_flat_violin(position = position_nudge(x = .15, y = 0), adjust = 2, alpha = 0.5) +
-    geom_point(position = position_jitter(width = .1), size = .4, color="black", alpha = 0.5) +
+    geom_point(position = position_jitter(width = .1), size = .4, color = "black", alpha = 0.5) +
     geom_boxplot(aes(x = sample, y = sizes, fill = sample),
                  outlier.shape = NA, alpha = .8, width = .15, colour = "gray65", size = 0.6)+
     labs(title = "Detected gene number",
