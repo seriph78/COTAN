@@ -285,8 +285,9 @@ It is also possible to run a directly a single function if we don't want to clea
 
 ```{r}
 obj <- automaticCOTANObjectCreation(
-  raw = test.dataset.col, outDir = out_dir, saveObj = TRUE,
-  GEO = "test", sequencingMethod = "10X", sampleCondition = "test.dataset.col")
+  raw = test.dataset.col,
+  GEO = "test", sequencingMethod = "10X", sampleCondition = "test.dataset.col",
+  saveObj = TRUE, outDir = out_dir, cores = 10)
 ```
 
 # Cell cluster

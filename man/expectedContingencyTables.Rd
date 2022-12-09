@@ -45,8 +45,7 @@ is the number of genes/cells depending on \code{actOnCells} being
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
-objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
-objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
+objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 
 }

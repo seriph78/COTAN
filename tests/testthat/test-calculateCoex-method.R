@@ -209,8 +209,6 @@ test_that("Coex vs saved results", {
   obj <- calculateCoex(obj)
 
   obj2 <- automaticCOTANObjectCreation(raw = test.dataset.col,
-                                       outDir = paste0(tm, "/"),
-                                       saveObj = FALSE,
                                        GEO = " ",
                                        sequencingMethod = "10X",
                                        sampleCondition = "example",

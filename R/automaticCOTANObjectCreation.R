@@ -42,8 +42,8 @@
 #' @rdname automaticCOTANObjectCreation
 
 automaticCOTANObjectCreation <-
-  function(raw, outDir, saveObj = FALSE,
-           GEO, sequencingMethod, sampleCondition,
+  function(raw, GEO, sequencingMethod, sampleCondition,
+           saveObj = FALSE, outDir = "",
            cores = 1) {
     start_time_all <- Sys.time()
 
@@ -65,46 +65,46 @@ automaticCOTANObjectCreation <-
     #--------------------------------------
     logThis("Cotan analysis functions started", logLevel = 1)
 
-    if (!file.exists(outDir)) {
-      dir.create(file.path(outDir))
+    list[obj, data] <- clean(obj, calcExtraData = saveObj)
+
+    if (isTRUE(saveObj)) {
+      plots <- cleanPlots(obj, data[["pcaCells"]], data[["D"]])
+
+      if (!file.exists(outDir)) {
+        dir.create(file.path(outDir))
+      }
+
+      if (!file.exists(paste0(outDir, "cleaning"))) {
+        dir.create(file.path(outDir, "cleaning"))
+      }
+      {
+        numIter <- 1
+        pdf(file.path(outDir, "cleaning",
+                      paste0(sampleCondition, "_", numIter, "_plots_without_cleaning.pdf")))
+        plot(plots[["pcaCells"]])
+        plot(plots[["genes"]])
+        dev.off()
+      }
+
+      {
+        pdf(file.path(outDir, "cleaning",
+                      paste0(sampleCondition, "_plots_PCA_efficiency_colored.pdf")))
+        plot(plots[["UDE"]])
+        dev.off()
+      }
+
+      {
+        pdf(file.path(outDir, "cleaning",
+                      paste0(sampleCondition,"_plots_efficiency.pdf")))
+        plot(plots[["nu"]] +
+             annotate(geom = "text", x = 50, y = 0.25,
+                      label = "nothing to remove ", color = "darkred"))
+        dev.off()
+      }
+
+      rm(plots)
+      gc()
     }
-
-    if (!file.exists(paste0(outDir, "cleaning"))) {
-      dir.create(file.path(outDir, "cleaning"))
-    }
-
-    list[obj, data] <- clean(obj)
-    plots <- cleanPlots(obj, data[["pcaCells"]], data[["D"]])
-
-    means <- PC1 <- PC2 <- nu <- NULL
-
-    {
-      numIter <- 1
-      pdf(file.path(outDir, "cleaning",
-                    paste0(sampleCondition, "_", numIter, "_plots_without_cleaning.pdf")))
-      plot(plots[["pcaCells"]])
-      plot(plots[["genes"]])
-      dev.off()
-    }
-
-    {
-      pdf(file.path(outDir, "cleaning",
-                    paste0(sampleCondition, "_plots_PCA_efficiency_colored.pdf")))
-      plot(plots[["UDE"]])
-      dev.off()
-    }
-
-    {
-      pdf(file.path(outDir, "cleaning",
-                    paste0(sampleCondition,"_plots_efficiency.pdf")))
-      plot(plots[["nu"]] +
-           annotate(geom = "text", x = 50, y = 0.25,
-                    label = "nothing to remove ", color = "darkred"))
-      dev.off()
-    }
-
-    rm(plots)
-    gc()
 
     analysis_time <- Sys.time()
 
@@ -127,17 +127,17 @@ automaticCOTANObjectCreation <-
 
     logThis(paste0("Only genes' coex time ", genes_coex_time), logLevel = 3)
 
-    utils::write.csv(data.frame("type" = c("tot_time",
-                                           "analysis_time",
-                                           "genes_coex_time"),
-                                "times"= c(as.numeric(all.time),
-                                           as.numeric(analysis_time),
-                                           as.numeric(genes_coex_time) ),
-                                "n.cells"=getNumCells(obj),
-                                "n.genes"=getNumGenes(obj) ),
-                     file = file.path(outDir, paste0(sampleCondition, "_times.csv")))
+    if (saveObj) {
+      utils::write.csv(data.frame("type" = c("tot_time",
+                                             "analysis_time",
+                                             "genes_coex_time"),
+                                  "times"= c(as.numeric(all.time),
+                                             as.numeric(analysis_time),
+                                             as.numeric(genes_coex_time) ),
+                                  "n.cells"=getNumCells(obj),
+                                  "n.genes"=getNumGenes(obj) ),
+                       file = file.path(outDir, paste0(sampleCondition, "_times.csv")))
 
-    if (isTRUE(saveObj)) {
       logThis(paste0("Saving elaborated data locally at ",
                      outDir, sampleCondition, ".cotan.RDS"),
               logLevel = 1)

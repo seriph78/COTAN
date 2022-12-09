@@ -375,6 +375,7 @@ setMethod(
           stopifnot("Cannot have infinite mean 'nu' only after the first loop" <- (iter == 1))
           warning(paste0("Infinite 'nu' found: one of the cells expressed all genes\n",
                          " Setting 'enforceNuAverageToOne' <- FALSE"))
+          enforceNuAverageToOne <- FALSE
         } else {
           objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
                                               getNu(objCOTAN) / meanNu,

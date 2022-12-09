@@ -12,15 +12,14 @@
 #'
 #' @examples
 #' data("raw.dataset")
-#' obj <- automaticCOTANObjectCreation(
-#'   raw = raw.dataset,
-#'   outDir = tempdir(),
-#'   GEO = "test_GEO",
-#'   sequencingMethod = "test_method",
-#'   sampleCondition = "test")
-#' obj <- estimateNuBisection(obj, cores = 12)
+#' obj <- COTAN(raw = raw.dataset)
+#' obj <- initializeMetaDataset(GEO = "test_GEO",
+#'                              sequencingMethod = "test_method",
+#'                              sampleCondition = "test")
+#' obj <- clean(obj, calcExtraData = FALSE)[[1]]
+#' obj <- estimateDispersionNuBisection(obj, cores = 12)
 #' obj <- calculateCoex(obj, actOnCells = TRUE)
-#' hPlots <- cellsHeatmapPlot(obj, )
+#' hPlots <- cellsHeatmapPlot(obj)
 #'
 #' @rdname cellsHeatmapPlot
 #'

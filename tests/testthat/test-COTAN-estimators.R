@@ -41,7 +41,7 @@ test_that("Bisection estimates", {
                rep(getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  obj <- estimateDispersionNuBisection(obj)
+  obj <- estimateDispersionNuBisection(obj, enforceNuAverageToOne = TRUE)
 
   expect_equal(length(getDispersion(obj)), getNumGenes(obj))
   expect_equal(getDispersion(obj)[1], -Inf, ignore_attr = TRUE)

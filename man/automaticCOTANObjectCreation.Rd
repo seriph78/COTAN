@@ -6,21 +6,16 @@
 \usage{
 automaticCOTANObjectCreation(
   raw,
-  outDir,
-  saveObj = FALSE,
   GEO,
   sequencingMethod,
   sampleCondition,
+  saveObj = FALSE,
+  outDir = "",
   cores = 1
 )
 }
 \arguments{
 \item{raw}{a matrix or dataframe with the raw counts}
-
-\item{outDir}{directory for the output}
-
-\item{saveObj}{the created object is not automatically writen on disk (default NO).
-If "Yes" the object is written in outDir}
 
 \item{GEO}{a code reporting the GEO identification or other specific dataset code}
 
@@ -28,6 +23,11 @@ If "Yes" the object is written in outDir}
 
 \item{sampleCondition}{a string reporting the specific sample condition or time point.
 It will be part of the final file name.}
+
+\item{saveObj}{the created object is not automatically writen on disk (default NO).
+If "Yes" the object is written in outDir}
+
+\item{outDir}{directory for the output}
 
 \item{cores}{number of cores to be used}
 }
