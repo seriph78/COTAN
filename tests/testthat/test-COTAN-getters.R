@@ -16,6 +16,8 @@ test_that("COTAN getters", {
   obj <- addClusterization(obj, clName = "Test2",
                            clusters = rep(c(2, 1), 10))
 
+  metaInfo <- c("V", "10X", "20", "Test", "TRUE", "TRUE", paste0(10/55), paste0(0))
+
   expect_equal(getRawData(obj), as(as(raw, "dMatrix"), "sparseMatrix"))
   expect_equal(getNumGenes(obj), 10)
   expect_equal(getNumCells(obj), 20)
@@ -24,8 +26,8 @@ test_that("COTAN getters", {
   expect_equal(getZeroOneProj(obj), sign(getRawData(obj)))
   expect_equal(getCellsSize(obj), colSums(getRawData(obj)))
   expect_equal(getNormalizedData(obj), t(t(getRawData(obj)) * (1/getNu(obj))))
-  expect_equal(getMetadataDataset(obj)[[1]], standardDatasetTags()[1:6])
-  expect_equal(getMetadataDataset(obj)[[2]], c("V", "10X", "20", "Test", "TRUE", "TRUE"))
+  expect_equal(getMetadataDataset(obj)[[1]], standardDatasetTags()[c(1:6, 8:9)])
+  expect_equal(getMetadataDataset(obj)[[2]], metaInfo)
   expect_setequal(colnames(getMetadataGenes(obj)), c("lambda", "hkGenes", "dispersion"))
   expect_equal(rownames(getMetadataGenes(obj)), getGenes(obj))
   expect_setequal(colnames(getMetadataCells(obj)), c("nu", "feCells", names(getClustersCoex(obj))))

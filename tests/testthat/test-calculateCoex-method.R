@@ -83,6 +83,9 @@ test_that("Calculations on genes", {
   expect_equal(as.matrix(getGenesCoex(obj)),
                coexMatrix(observed, expected, getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
+
+  expect_equal(getMetadataDataset(obj)[[1]], standardDatasetTags()[c(5,6,8)])
+  expect_equal(getMetadataElement(obj, standardDatasetTags()[8]), paste0(10/55))
 })
 
 
@@ -149,6 +152,9 @@ test_that("Calculations on cells", {
   expect_equal(as.matrix(getCellsCoex(obj)),
                coexMatrix(observed, expected, getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
+
+  expect_equal(getMetadataDataset(obj)[[1]], standardDatasetTags()[c(5,6,9)])
+  expect_equal(getMetadataElement(obj, standardDatasetTags()[9]), paste0(0))
 })
 
 

@@ -7,13 +7,15 @@
 #' @noRd
 #'
 standardDatasetTags <- function() {
-  return(c("GEO:"                                  # 1
-           ,"scRNAseq method:"                     # 2
-           ,"starting n. of cells:"                # 3
-           ,"condition sample:"                    # 4
-           ,"genes' coex is in sync:"              # 5
-           ,"cells' coex is in sync:"              # 6
-           ,"n. of cells left out by clustering:"  # 7
+  return(c("GEO:"                                              # 1
+           ,"scRNAseq method:"                                 # 2
+           ,"starting n. of cells:"                            # 3
+           ,"condition sample:"                                # 4
+           ,"genes' coex is in sync:"                          # 5
+           ,"cells' coex is in sync:"                          # 6
+           ,"n. of cells left out by clustering:"              # 7
+           ,"genes' pairs fraction with small expected count:" # 8
+           ,"cells' pairs fraction with small expected count:" # 9
            ))
 }
 
@@ -113,7 +115,7 @@ setMethod(
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
 #' objCOTAN <- addElementToMetaDataset(objCOTAN, "Test", c("These are ", "some values"))
-#' getMetadataDataset(objCOTAN)
+#' meta <- getMetadataDataset(objCOTAN)
 #'
 #' @rdname addElementToMetaDataset
 #'
@@ -142,6 +144,11 @@ setMethod(
 #' @importFrom Matrix rowSums
 #'
 #' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- findHousekeepingGenes(objCOTAN)
 #'
 #' @rdname findHousekeepingGenes
 #'
@@ -173,6 +180,11 @@ setMethod(
 #' @importFrom Matrix colSums
 #'
 #' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- findFullyExpressedCells(objCOTAN)
 #'
 #' @rdname findFullyExpressedCells
 #'

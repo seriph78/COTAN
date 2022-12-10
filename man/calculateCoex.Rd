@@ -20,7 +20,7 @@ The updated COTAN object
 }
 \description{
 This function estimates and stores the \emph{coex} matrix in the
-\code{cellCoex} or \code{genesCoex} field depending on given \code{actOnCells} flag
+\code{cellCoex} or \code{genesCoex} field depending on given \code{actOnCells} flag.
 }
 \details{
 The function calculates the coex matrix, defined by following
@@ -39,7 +39,16 @@ The formula can be more effectively implemented as:
         \, \bigl(O_\text{YY}-E_\text{YY}\bigr)}
 
 once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for all
-\eqn{i,j \in \{\text{Y, N}\}} as all marginal sums must be respected.
+\eqn{i,j \in \{\text{Y, N}\}}.
+
+The latter follows from the fact that the relevant marginal sums of the
+the expected contingency tables were enforced to match the marginal sums
+of the observed ones.
+
+It also calculates the percentage of \emph{problematic} genes/cells pairs.
+A pair is \emph{problematic} when one or more of the expected counts were
+significantly smaller than 1 (\eqn{< 0.5}). These small expected values
+signal that scant information is present for such a pair.
 }
 \examples{
 data("raw.dataset")
@@ -49,4 +58,7 @@ objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 
+}
+\seealso{
+\code{\link[=estimateDispersionNuBisection]{estimateDispersionNuBisection()}} for more details.
 }

@@ -421,7 +421,7 @@ expectedContingencyTables <- function(objCOTAN,
 #' calculateCoex
 #'
 #' @description This function estimates and stores the *coex* matrix in the
-#'   `cellCoex` or `genesCoex` field depending on given `actOnCells` flag
+#'   `cellCoex` or `genesCoex` field depending on given `actOnCells` flag.
 #'
 #' @details The function calculates the coex matrix, defined by following
 #'   formula:
@@ -433,13 +433,25 @@ expectedContingencyTables <- function(objCOTAN,
 #'   and \eqn{n} is the relevant numerosity (the number of genes/cells depending
 #'   on given `actOnCells` flag).
 #'
-#' The formula can be more effectively implemented as:
+#'   The formula can be more effectively implemented as:
 #'
 #'   \deqn{\sqrt{\frac{1}{n}\sum_{i,j \in \{\text{Y, N}\}}{\frac{1}{1 \vee E_{ij}}}}
 #'         \, \bigl(O_\text{YY}-E_\text{YY}\bigr)}
 #'
 #'   once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for all
-#'   \eqn{i,j \in \{\text{Y, N}\}} as all marginal sums must be respected.
+#'   \eqn{i,j \in \{\text{Y, N}\}}.
+#'
+#'
+#'   The latter follows from the fact that the relevant marginal sums of the
+#'   the expected contingency tables were enforced to match the marginal sums
+#'   of the observed ones.
+#'
+#'   It also calculates the percentage of *problematic* genes/cells pairs.
+#'   A pair is *problematic* when one or more of the expected counts were
+#'   significantly smaller than 1 (\eqn{< 0.5}). These small expected values
+#'   signal that scant information is present for such a pair.
+#'
+#' @seealso [estimateDispersionNuBisection()] for more details.
 #'
 #' @param objCOTAN A COTAN object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
@@ -489,6 +501,10 @@ setMethod(
       normFact <- 1 / sqrt(getNumCells(objCOTAN)) # divided by sqrt(m)
     }
 
+    problematicPairsFraction <-
+      sum(pmin(expectedYY@x, expectedYN@x,
+               expectedNY@x, expectedNN@x) < 0.5) / length(expectedYY@x)
+
     coex <- normFact * sqrt(1 / pmax(1, expectedYY@x) +
                             1 / pmax(1, expectedYN@x) +
                             1 / pmax(1, expectedNY@x) +
@@ -524,10 +540,16 @@ setMethod(
       objCOTAN@cellsCoex <- coex
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                              standardDatasetTags()[6], TRUE)
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             standardDatasetTags()[9],
+                                             problematicPairsFraction)
     } else {
       objCOTAN@genesCoex <- coex
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                              standardDatasetTags()[5], TRUE)
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             standardDatasetTags()[8],
+                                             problematicPairsFraction)
     }
 
     rm(coex)
