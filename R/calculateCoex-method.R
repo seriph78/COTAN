@@ -725,8 +725,7 @@ calculateGDI <- function(objCOTAN, statType = "S") {
   CDSorted <- pchisq(as.matrix(CDSorted), df = 1, lower.tail = FALSE)
 
   GDI <- log(-log(colMeans(CDSorted)))
-  GDI <- as.data.frame(GDI)
-  colnames(GDI) <- "GDI"
+  GDI <- set_names(as.data.frame(GDI), "GDI")
   rm(CDSorted)
   gc()
 

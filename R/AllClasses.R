@@ -404,6 +404,7 @@ setIs("scCOTAN",
 #'   'scCOTAN' class
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang set_names
 #'
 #' @importClassesFrom Matrix dgCMatrix
 #' @importClassesFrom Matrix dspMatrix
@@ -416,20 +417,17 @@ setIs("scCOTAN",
 getScCOTANSlots <- function(from) {
   lambda <- vector(mode = "numeric")
   if (!is_empty(from@metaGenes[["lambda"]])) {
-    lambda <- from@metaGenes[["lambda"]]
-    names(lambda) <- rownames(from@metaGenes)
+    lambda <- set_names(from@metaGenes[["lambda"]], rownames(from@metaGenes))
   }
 
   a <- vector(mode = "numeric")
   if (!is_empty(from@metaGenes[["dispersion"]])) {
-    a <- from@metaGenes[["dispersion"]]
-    names(a) <- rownames(from@metaGenes)
+    a <- set_names(from@metaGenes[["dispersion"]], rownames(from@metaGenes))
   }
 
   nu <- vector(mode = "numeric")
   if (!is_empty(from@metaCells[["nu"]])) {
-    nu <- from@metaCells[["nu"]]
-    names(nu) <- rownames(from@metaCells)
+    nu <- set_names(from@metaCells[["nu"]], rownames(from@metaCells))
   }
 
   hk <- vector(mode = "character")
@@ -455,12 +453,10 @@ getScCOTANSlots <- function(from) {
   }
 
   if (!is_empty(from@metaCells[[clName]])) {
-    clusters <- from@metaCells[[clName]]
-    names(clusters) <- rownames(from@metaCells)
+    clusters <- set_names(from@metaCells[[clName]], rownames(from@metaCells))
   } else {
     # ensure non-empty vector
-    clusters <- rep(NA, ncol(from@raw))
-    names(clusters) <- colnames(from@raw)
+    clusters <- set_names(rep(NA, ncol(from@raw)), colnames(from@raw))
   }
 
   if (!is_empty(from@cellsCoex)) {

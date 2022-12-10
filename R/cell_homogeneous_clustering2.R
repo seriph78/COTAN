@@ -1,20 +1,35 @@
+
 #' cell_homogeneous_clustering
 #'
-#'This function imports a Seurat object from in_dir with a file name specified by data set_name.
-#'From this, and using COTAN functions, it splits the data set until all clusters are homogeneous by GDI
-#'(calling the cluster_homogeneity function).
+#' @description This function splits the data set in smaller and smaller
+#'   clusters until all clusters are homogeneous by GDI (calling the
+#'   [cluster_homogeneity()] function).
+#'
+#' @details The code uses the `Seurat` clusterization methods to determine the
+#'   (sub-)clusters.
+#'
+#' @param obj a COTAN object
 #' @param cond a string specifying the experiment condition
-#' @param out_dir an existing directory for the analysis output. In this directory is saved also the final Seurat object.
-#' @param cores number of cores (NB for windows system no more that 1 can be used)
+#' @param out_dir an existing directory for the analysis output. In this
+#'   directory is saved also the final Seurat object.
+#' @param cores number of cores (NB for windows system no more that 1 can be
+#'   used)
+#'
+#' @return the `COTAN` object and it saves, in the out_dir, the `Seurat`
+#'   elaborated data file
+#'
 #' @import Seurat
+#'
 #' @importFrom stringr str_detect
-#' @return the scCOTAN object and it saves, in the out_dir, the Seurat elaborated data file
+#'
 #' @export
 #'
 #' @examples
+#'
+#' @rdname cell_homogeneous_clustering
+#'
 setGeneric("cell_homogeneous_clustering", function(obj,cond,out_dir,cores=1)
   standardGeneric("cell_homogeneous_clustering"))
-#' @rdname cell_homogeneous_clustering
 setMethod("cell_homogeneous_clustering",
           "COTAN",
  function(obj,cond,out_dir,cores){
@@ -24,8 +39,7 @@ setMethod("cell_homogeneous_clustering",
     dir.create(file.path(out_dir_cond))
   }
   #Step 1
-  cell.cluster.vector <- rep(NA, length = getNumCells(obj))
-  names(cell.cluster.vector) <- getCells(obj)
+  cell.cluster.vector <- set_names(rep(NA, length = getNumCells(obj)), getCells(obj))
 
   srat <- CreateSeuratObject(counts = as.data.frame(obj@raw), project = cond,
                              min.cells = 3, min.features = 4)

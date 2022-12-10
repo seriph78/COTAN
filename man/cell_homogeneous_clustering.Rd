@@ -2,25 +2,31 @@
 % Please edit documentation in R/cell_homogeneous_clustering2.R
 \name{cell_homogeneous_clustering}
 \alias{cell_homogeneous_clustering}
-\alias{cell_homogeneous_clustering,COTAN-method}
 \title{cell_homogeneous_clustering}
 \usage{
 cell_homogeneous_clustering(obj, cond, out_dir, cores = 1)
-
-\S4method{cell_homogeneous_clustering}{COTAN}(obj, cond, out_dir, cores = 1)
 }
 \arguments{
+\item{obj}{a COTAN object}
+
 \item{cond}{a string specifying the experiment condition}
 
-\item{out_dir}{an existing directory for the analysis output. In this directory is saved also the final Seurat object.}
+\item{out_dir}{an existing directory for the analysis output. In this
+directory is saved also the final Seurat object.}
 
-\item{cores}{number of cores (NB for windows system no more that 1 can be used)}
+\item{cores}{number of cores (NB for windows system no more that 1 can be
+used)}
 }
 \value{
-the scCOTAN object and it saves, in the out_dir, the Seurat elaborated data file
+the \code{COTAN} object and it saves, in the out_dir, the \code{Seurat}
+elaborated data file
 }
 \description{
-This function imports a Seurat object from in_dir with a file name specified by data set_name.
-From this, and using COTAN functions, it splits the data set until all clusters are homogeneous by GDI
-(calling the cluster_homogeneity function).
+This function splits the data set in smaller and smaller
+clusters until all clusters are homogeneous by GDI (calling the
+\code{\link[=cluster_homogeneity]{cluster_homogeneity()}} function).
+}
+\details{
+The code uses the \code{Seurat} clusterization methods to determine the
+(sub-)clusters.
 }

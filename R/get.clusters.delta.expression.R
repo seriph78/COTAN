@@ -19,7 +19,7 @@ setMethod("get.clusters.delta.expression","scCOTAN",
 
    if(any(is.na(obj@clusters))){
      print("Problem. There are Nas in clusters!")
-     
+
    }
 
     clusters.names = unique(obj@clusters[!is.na(obj@clusters)])
@@ -62,17 +62,15 @@ setMethod("get.clusters.delta.expression","scCOTAN",
 
       increse.expression <- (yes_in - estimator_yes_in)/sum.UDE.cluster
 
-      increse.expression <- as.data.frame(increse.expression)
-
-      colnames(increse.expression) <- paste0("cl.", condition)
+      increse.expression <- set_names(as.data.frame(increse.expression),
+                                      paste0("cl.", condition))
 
       if (dim(increased.expression.tot)[1] == 0) {
-        increased.expression.tot <- as.data.frame(matrix(nrow = nrow(obj@coex)))
-        rownames(increased.expression.tot) <- rownames(obj@coex)
+        increased.expression.tot <- set_names(as.data.frame(matrix(nrow = nrow(obj@coex))),
+                                              rownames(obj@coex))
       }
 
-      increased.expression.tot  <- cbind(increased.expression.tot ,increse.expression )
-
+      increased.expression.tot  <- cbind(increased.expression.tot, increse.expression)
     }
 
     increased.expression.tot<- round(increased.expression.tot, digits = 3)

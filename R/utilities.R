@@ -104,27 +104,22 @@ handleNamesSubsets <- function(names, subset = c()) {
 #' @noRd
 #'
 setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
-  out <- df
-  if(is_empty(out)) {
-    out <- data.frame(colToSet)
-    colnames(out) <- colName
-  }
-  else {
-    if (colName %in% colnames(out)) {
-      out[[colName]] <- colToSet
-    }
-    else {
-      out <- cbind(out, colToSet)
-      colnames(out)[ncol(out)] <- colName
+  if(is_empty(df)) {
+    df <- set_names(data.frame(colToSet), colName)
+  } else {
+    if (colName %in% colnames(df)) {
+      df[[colName]] <- colToSet
+    } else {
+      df <- cbind(df, set_names(data.frame(colToSet), colName))
     }
   }
 
   # default assigned rownames are numbers...
-  if (!is_empty(rowNames) && is.integer(attr(out, "row.names"))) {
-    rownames(out) <- rowNames
+  if (!is_empty(rowNames) && is.integer(attr(df, "row.names"))) {
+    rownames(df) <- rowNames
   }
 
-  return(out)
+  return(df)
 }
 
 

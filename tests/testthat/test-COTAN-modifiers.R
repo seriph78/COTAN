@@ -100,8 +100,7 @@ test_that("Managed clusterizations", {
 
   obj <- COTAN(raw = raw)
 
-  clusters <- rep(c(1, 2), 10)
-  names(clusters) <- getCells(obj)
+  clusters <- set_names(rep(c(1, 2), 10), getCells(obj))
   obj <- addClusterization(obj, clName = "Test",
                            clusters = clusters)
 
@@ -115,18 +114,15 @@ test_that("Managed clusterizations", {
 
   expect_equal(colnames(getMetadataCells(obj)), c("CL_Test", "nu"))
 
-  coexDF <- as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.5)/pi*2)
-  colnames(coexDF) <- c(1, 2)
+  coexDF <- set_names(as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.5)/pi*2), c(1, 2))
 
   obj <- addClusterizationCoex(obj, clName = "Test", coexDF)
 
   expect_equal(getClusterizations(obj, dropNoCoex = TRUE, keepPrefix = TRUE), "CL_Test")
   expect_equal(getClusterizationData(obj)[["coex"]], coexDF)
 
-  clusters2 = rep(c("2", "1"), 10)
-  names(clusters2) <- getCells(obj)
-  coexDF2 <- as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.7)/pi*2)
-  colnames(coexDF2) <- c("1", "2")
+  clusters2 = set_names(rep(c("2", "1"), 10), getCells(obj))
+  coexDF2 <- set_names(as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.7)/pi*2), c("1", "2"))
 
   obj <- addClusterization(obj, clName = "Test2",
                            clusters = clusters2,
@@ -149,12 +145,10 @@ test_that("Managed clusterizations", {
   expect_error(getClusterizationData(obj, clName = "Test"))
 
   # already existing clusterization
-  expect_error(addClusterization(obj, clName = "Test2",
-                                 clusters = rep(0, 20)))
+  expect_error(addClusterization(obj, clName = "Test2", clusters = rep(0, 20)))
 
   # wrong clusters size
-  expect_error(addClusterization(obj, clName = "Test",
-                                 clusters = rep(0, 17)))
+  expect_error(addClusterization(obj, clName = "Test", clusters = rep(0, 17)))
 
   # wrong coex data.frame size
   expect_error(addClusterization(obj, clName = "Test",

@@ -208,8 +208,7 @@ setMethod("merge_cell.clusters","scCOTAN",
 
 
               # Update the homogenus cluster array in cotan object
-              obj.clusters.new <- srat@meta.data$cotan
-              names(obj.clusters.new) <- rownames(srat@meta.data)
+              obj.clusters.new <- set_names(srat@meta.data$cotan, rownames(srat@meta.data))
               if(all(getCells(obj) %in% names(obj.clusters.new))){
                 obj@clusters <- obj.clusters.new
               }else{

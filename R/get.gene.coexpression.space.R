@@ -77,8 +77,7 @@ setMethod(
     CD.sorted <- pchisq(as.matrix(CD.sorted), df = 1, lower.tail = FALSE)
 
     quant.p.val2 <- rowMeans(CD.sorted)
-    quant.p.val2 <- as.data.frame(quant.p.val2)
-    colnames(quant.p.val2) <- "loc.GDI"
+    quant.p.val2 <- set_names(as.data.frame(quant.p.val2), "loc.GDI")
 
     quant.p.val2$names <- rownames(quant.p.val2)
 

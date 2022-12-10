@@ -24,7 +24,8 @@ setMethod("get.gene.set.score.on.clusters","scCOTAN",
           function(obj,genes.list, out_dir,cond) {
             # cluster assignment with expression increment
             expression.cl <- get.clusters.delta.expression(obj)
-            df <- as.data.frame(matrix(nrow = length(names(markers)),ncol = ncol(obj@cluster_data)))
+            df <- as.data.frame(matrix(nrow = length(names(markers)),
+                                       ncol = ncol(obj@cluster_data)))
             rownames(df) <- names(markers)
             colnames(df) <- colnames(obj@cluster_data)
             teta <- -1/0.1 * (log(0.25))

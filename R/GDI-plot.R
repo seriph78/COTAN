@@ -59,8 +59,7 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
   qual_col_pals = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 'qual',]
   col_vector = unlist(mapply(RColorBrewer::brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
 
-  mycolours <- col_vector[seq_along(names(genes))]
-  names(mycolours) <- names(genes)
+  mycolours <- set_names(col_vector[seq_along(names(genes))], names(genes))
 
   textdf <- GDI[!GDI$colors == "none",]
 

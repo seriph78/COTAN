@@ -1,5 +1,5 @@
 #' get.gene.clusters
-#' 
+#'
 #' This function perfor the gene clustering based on a pool of gene marker, using the gene
 #' coexpression space
 #'
@@ -18,8 +18,8 @@
 #' @importFrom stats cutree
 #' @importFrom RColorBrewer brewer.pal
 #'
-#' @return a list of 
-#' 1. the gene coexpression space dataframe, 
+#' @return a list of
+#' 1. the gene coexpression space dataframe,
 #' 2. the eigenvalues plot (using eigenvalue from factoextra package)
 #' 3. the pca component dataframe
 #' 4. the tree plot for the coexpression space genes
@@ -94,8 +94,7 @@ setMethod("get.gene.clusters","scCOTAN",
     }
 
     mylist.names <- colnames(df.secondary.markers)
-    pos.link  <- vector("list", length(mylist.names))
-    names(pos.link) <- mylist.names
+    pos.link  <- set_names(vector("list", length(mylist.names)), mylist.names)
     for (g in rownames(df.secondary.markers)) {
         if(length( which(df.secondary.markers[g,] == min(df.secondary.markers[g,]))) == 1 ){
             pos.link[[which(df.secondary.markers[g,] == min(df.secondary.markers[g,])) ]] =

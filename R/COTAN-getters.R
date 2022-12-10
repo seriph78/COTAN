@@ -431,9 +431,9 @@ setMethod(
 
     if (is_empty(nu)) {
       warning("nu is empty")
+    } else {
+      names(nu) <- getCells(objCOTAN)
     }
-
-    names(nu) <- getCells(objCOTAN)
 
     return(nu)
   }
@@ -468,9 +468,9 @@ setMethod(
 
     if (is_empty(lambda)) {
       warning("lambda is empty")
+    } else {
+      names(lambda) <- getGenes(objCOTAN)
     }
-
-    names(lambda) <- getGenes(objCOTAN)
 
     return(lambda)
   }
@@ -506,9 +506,9 @@ setMethod(
 
     if (is_empty(dispersion)) {
       warning("dispersion is empty")
+    } else {
+      names(dispersion) <- getGenes(objCOTAN)
     }
-
-    names(dispersion) <- getGenes(objCOTAN)
 
     return(dispersion)
   }
@@ -541,9 +541,7 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     if (is_empty(getMetadataGenes(objCOTAN)[["hkGenes"]])) {
-      out <- rep(TRUE, getNumGenes(objCOTAN))
-      names(out) <- getGenes(objCOTAN)
-      return(out)
+      return(set_names(rep(TRUE, getNumGenes(objCOTAN)), getGenes(objCOTAN)))
     }
     else {
       return(!getMetadataGenes(objCOTAN)[["hkGenes"]])
@@ -579,9 +577,7 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     if (is_empty(getMetadataCells(objCOTAN)[["feCells"]])) {
-      out <- rep(TRUE, getNumCells(objCOTAN))
-      names(out) <- getCells(objCOTAN)
-      return(out)
+      return(set_names(rep(TRUE, getNumCells(objCOTAN)), getCells(objCOTAN)))
     }
     else {
       return(!getMetadataCells(objCOTAN)[["feCells"]])
@@ -825,8 +821,8 @@ setMethod(
                     "not present in the 'COTAN' object"))
     }
 
-    clusters <- getMetadataCells(objCOTAN)[[internalName]]
-    names(clusters) <- getCells(objCOTAN)
+    clusters <- set_names(getMetadataCells(objCOTAN)[[internalName]],
+                          getCells(objCOTAN))
 
     return( list("clusters" = clusters,
                  "coex" = getClustersCoex(objCOTAN)[[internalName]]) )

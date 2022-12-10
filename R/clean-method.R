@@ -124,8 +124,7 @@ setMethod(
 
       # ---- next: to check which genes are specific for the B group of cells
       {
-        B <- as.data.frame(toClust[, pos2])
-        colnames(B) <- colnames(toClust)[pos2]
+        B <- set_names(as.data.frame(toClust[, pos2]), colnames(toClust)[pos2])
         #print(utils::head(B, 15))
 
         rm(toClust)
