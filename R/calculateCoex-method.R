@@ -522,10 +522,12 @@ setMethod(
 
     if(actOnCells) {
       objCOTAN@cellsCoex <- coex
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset, standardDatasetTags()[6], TRUE)
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             standardDatasetTags()[6], TRUE)
     } else {
       objCOTAN@genesCoex <- coex
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset, standardDatasetTags()[5], TRUE)
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             standardDatasetTags()[5], TRUE)
     }
 
     rm(coex)

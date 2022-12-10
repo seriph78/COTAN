@@ -9,6 +9,8 @@ test_that("Linear estimates", {
   obj <- estimateLambdaLinear(obj)
 
   expect_equal(getLambda(obj), rowMeans(getRawData(obj), dims = 1))
+  expect_equal(getMetadataDataset(obj)[[1]], standardDatasetTags()[5:6])
+  expect_equal(getMetadataDataset(obj)[[2]], c("FALSE", "FALSE"))
 
   obj <- estimateNuLinear(obj)
 

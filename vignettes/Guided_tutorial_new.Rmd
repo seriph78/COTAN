@@ -235,10 +235,10 @@ plot.ude
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
-obj = addElementToMetaDataset(obj, "Threshold low UDE cells:", yset) 
+obj <- addElementToMetaDataset(obj, "Threshold low UDE cells:", yset) 
 
 cellsToRemove = rownames(nuDf)[nuDf[["nu"]] < yset]
-obj = dropGenesCells(obj, genes = c(), cells = cellsToRemove)
+obj <- dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 ```
 
 Repeat the estimation after the cells are removed

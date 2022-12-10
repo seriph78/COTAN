@@ -135,6 +135,11 @@ test_that("Calculations on cells", {
 
   obj <- calculateCoex(obj, actOnCells = TRUE, optimizeForSpeed = TRUE)
 
+  genesCoexInSync <- getMetadataElement(obj, standardDatasetTags()[5])
+  cellsCoexInSync <- getMetadataElement(obj, standardDatasetTags()[6])
+
+  expect_equal(c(genesCoexInSync, cellsCoexInSync), c("FALSE", "TRUE"))
+
   expect_equal(dim(getCellsCoex(obj)), rep(getNumCells(obj), 2))
 
   # as all cells are repeated altenating
@@ -207,6 +212,11 @@ test_that("Coex vs saved results", {
   obj <- estimateDispersionBisection(obj, cores = 12)
 
   obj <- calculateCoex(obj)
+
+  genesCoexInSync <- getMetadataElement(obj, standardDatasetTags()[[5]])
+  cellsCoexInSync <- getMetadataElement(obj, standardDatasetTags()[[6]])
+
+  expect_equal(c(genesCoexInSync, cellsCoexInSync), c("TRUE", "FALSE"))
 
   obj2 <- automaticCOTANObjectCreation(raw = test.dataset.col,
                                        GEO = " ",

@@ -6,14 +6,13 @@
 #'
 #' @noRd
 #'
-
 standardDatasetTags <- function() {
   return(c("GEO:"                                  # 1
            ,"scRNAseq method:"                     # 2
            ,"starting n. of cells:"                # 3
            ,"condition sample:"                    # 4
-           ,"genes' coex is out of sync:"          # 5
-           ,"cells' coex is out of sync:"          # 6
+           ,"genes' coex is in sync:"              # 5
+           ,"cells' coex is in sync:"              # 6
            ,"n. of cells left out by clustering:"  # 7
            ))
 }
