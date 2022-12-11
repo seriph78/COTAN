@@ -9,30 +9,32 @@ automaticCOTANObjectCreation(
   GEO,
   sequencingMethod,
   sampleCondition,
-  saveObj = FALSE,
-  outDir = "",
-  cores = 1
+  cores = 1,
+  saveObj = TRUE,
+  outDir = "."
 )
 }
 \arguments{
 \item{raw}{a matrix or dataframe with the raw counts}
 
-\item{GEO}{a code reporting the GEO identification or other specific dataset code}
+\item{GEO}{a code reporting the GEO identification or other specific dataset
+code}
 
 \item{sequencingMethod}{a string reporting the method used for the sequencing}
 
-\item{sampleCondition}{a string reporting the specific sample condition or time point.
-It will be part of the final file name.}
-
-\item{saveObj}{the created object is not automatically writen on disk (default NO).
-If "Yes" the object is written in outDir}
-
-\item{outDir}{directory for the output}
+\item{sampleCondition}{a string reporting the specific sample condition or
+time point.}
 
 \item{cores}{number of cores to be used}
+
+\item{saveObj}{Boolean flag; when \code{TRUE} saves intermediate analyses and
+plots to file}
+
+\item{outDir}{an existing directory for the analysis output.}
 }
 \value{
-It return the COTAN object. It will also store it directly in the output directory
+It return the COTAN object. It will also store it directly in the
+output directory
 }
 \description{
 automaticCOTANObjectCreation
@@ -44,7 +46,7 @@ obj <- automaticCOTANObjectCreation(
   GEO = "test_GEO",
   sequencingMethod = "test_method",
   sampleCondition = "test",
-  saveObj = TRUE
+  saveObj = TRUE,
   outDir = tempdir(),
   cores = 12)
 

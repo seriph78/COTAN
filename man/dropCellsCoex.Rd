@@ -22,7 +22,8 @@ objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
                                          GEO = "test_GEO",
                                          sequencingMethod = "test_method",
                                          sampleCondition = "test",
-                                         cores = 12)
+                                         cores = 12,
+                                         saveObj = FALSE)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 objCOTAN <- dropCellsCoex(objCOTAN)

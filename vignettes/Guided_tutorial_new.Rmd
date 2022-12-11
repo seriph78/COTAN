@@ -294,14 +294,14 @@ obj <- automaticCOTANObjectCreation(
 The next step will find all homogeneous clusters using a GDI check on each cluster.
 
 ```{r}
-obj <- as(obj, "scCOTAN")
-clusters <- cell_homogeneous_clustering(obj, cond = "test", out_dir = out_dir, cores = 10)
+clusters <- cellsUniformClustering(obj, cores = 10, saveObj = TRUE, outDir = out_dir)
 obj <- addClusterization(obj, clName = "test", clusters = clusters)
 ```
 
 Than we can perform a sort of differential expression to detect which genes are enriched or depleted in each cluster.
 
 ```{r}
+obj <- as(obj, "scCOTAN")
 list[obj, pval] <- DEA_on_clusters(obj)
 ```
 

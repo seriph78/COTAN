@@ -12,6 +12,7 @@
 #'
 #' @param newLevel the new default logging level. It defaults to 1
 #'
+#' @returns old logging level or default level if not set yet.
 #' @export
 #'
 #' @examples
@@ -21,7 +22,11 @@
 #'
 setLoggingLevel <- function(newLevel = 1) {
   message(paste0("Setting new log level to ", newLevel))
-  options(COTAN.LogLevel = newLevel)
+  oldLevel <- options(COTAN.LogLevel = newLevel)
+  if (is.null(oldLevel)) {
+    oldLevel <- 1
+  }
+  return(invisible(oldLevel))
 }
 
 #' logThis
@@ -54,11 +59,11 @@ logThis <- function(msg, logLevel = 2, appendLF = TRUE) {
     setLoggingLevel() # to default
   }
   currentLevel <- getOption("COTAN.LogLevel")
-  if (currentLevel >= logLevel) {
+  showMessage <- currentLevel >= logLevel
+  if (showMessage) {
     message(msg, appendLF= appendLF)
-    return(TRUE)
   }
-  return(FALSE)
+  return(invisible(showMessage))
 }
 
 
