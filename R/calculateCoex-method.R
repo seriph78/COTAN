@@ -31,11 +31,7 @@ setMethod(
       stop("nu must not be empty, estimate it")
     }
 
-    muEstimator <- getLambda(objCOTAN) %*% t(getNu(objCOTAN))
-
-    rownames(muEstimator) <- getGenes(objCOTAN)
-
-    return(as.matrix(muEstimator))
+    return(getLambda(objCOTAN) %o% getNu(objCOTAN))
   }
 )
 

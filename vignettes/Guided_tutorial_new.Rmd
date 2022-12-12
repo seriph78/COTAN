@@ -301,14 +301,13 @@ obj <- addClusterization(obj, clName = "test", clusters = clusters)
 Than we can perform a sort of differential expression to detect which genes are enriched or depleted in each cluster.
 
 ```{r}
-obj <- as(obj, "scCOTAN")
 list[obj, pval] <- DEA_on_clusters(obj)
 ```
 
 Using the cluster distance, based on the whole transcriptome, we can ththenheck if any of the closest clusters can form a still hohomogeneousigger cluster. We will keep this clusterization for the forther analysis.
 
 ```{r}
-obj <- merge_cell.clusters(obj = obj,cond = "test",cores=10, 
+obj <- merge_cell.clusters(obj = obj, cond = "test", cores=10, 
                            srat = "Seurat_obj_test_with_cotan_clusters.RDS",
                            out_dir = out_dir ,
                            GEO="GSE121380", sc.method="10X 5'"
@@ -317,14 +316,10 @@ obj <- merge_cell.clusters(obj = obj,cond = "test",cores=10,
 ```
 
 ```{r}
-cluster_data <- obj@cluster_data
+clusterData <- getClusterData(obj)[["clusters"]]
 
 ######## This is the best: cosine dissimilarity
-Matrix <- as.matrix(t(cluster_data))
-sim <- Matrix / sqrt(rowSums(Matrix * Matrix))
-sim <- sim %*% t(sim)
-D_sim <- as.dist(1 - sim)
-tree <- hclust(D_sim,method = "ward.D2")
+tree <- hclust(cosineDissimilarity(clusterData), method = "ward.D2")
 
 dend <- as.dendrogram(tree)
 plot(dend)

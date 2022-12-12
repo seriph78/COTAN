@@ -96,17 +96,23 @@ handleNamesSubsets <- function(names, subset = c()) {
 #' @description Private function that append, if missing, or resets, if present,
 #'   a column into a `data.frame`, whether the `data.frame` is empty or not.
 #'
+#' @details The given `rowNames` are used only in the case the `data.frame` has
+#'   only the default row numbers, so this function cannot be used to override
+#'   row names
+#'
 #' @param df the `data.frame`
 #' @param colToSet the the column to add
 #' @param colName the name of the new or existing column in the `data.frame`
 #' @param rowNames when not empty, if the input `data.frame` has no real row
 #'   names, the new row names of the resulting `data.frame`
 #'
-#' @returns the updated/created `data.frame`
+#' @returns the updated, or the newly created, `data.frame`
+#'
+#' @export
 #'
 #' @importFrom rlang is_empty
 #'
-#' @noRd
+#' @rdname setColumnInDF
 #'
 setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
   if(is_empty(df)) {
@@ -493,7 +499,7 @@ parallelNuBisection <-
   # diffZeros negative and the second positive
   nus1 <- initialGuess[goodPos]
 
-  diffs1 <- colSums(funProbZero(dispersion, lambda %*% t(nus1))) - sumZeros
+  diffs1 <- colSums(funProbZero(dispersion, lambda %o% nus1)) - sumZeros
   if (all(abs(diffs1) <= threshold)) {
     output[goodPos] <- nus1
     return(output)
@@ -505,7 +511,7 @@ parallelNuBisection <-
   runPos <- rep(TRUE, length(diffs1))
   iter <- 1
   repeat {
-    diffs2[runPos] <- (colSums(funProbZero(dispersion, lambda %*% t(nus2[runPos]))) -
+    diffs2[runPos] <- (colSums(funProbZero(dispersion, lambda %o% nus2[runPos])) -
                        sumZeros[runPos])
 
     runPos <- (diffs2 * diffs1 >= 0)
@@ -533,7 +539,7 @@ parallelNuBisection <-
   repeat {
     nus[runPos] <- (nus1[runPos] + nus2[runPos]) / 2
 
-    diffs[runPos] <- (colSums(funProbZero(dispersion, lambda %*% t(nus[runPos]))) -
+    diffs[runPos] <- (colSums(funProbZero(dispersion, lambda %o% nus[runPos])) -
                       sumZeros[runPos])
 
     runPos <- (abs(diffs) > threshold)
@@ -556,6 +562,33 @@ parallelNuBisection <-
 
   output[goodPos] <- nus
   return(output)
+}
+
+
+
+#' cosineDissimilarity
+#'
+#' @param m a matrix
+#'
+#' @returns The dissimilarity matrix between columns' data
+#'
+#' @export
+#'
+#' @importFrom Matrix t
+#'
+#' @examples
+#' mat <- matrix(c(1:25), nrow = 5, ncol = 5,
+#'               dimnames = list(paste0("row.", c(1:5)),
+#'                               paste0("col.", c(1:5))))
+#' d
+#'
+#' @rdname cosineDissimilarity
+#'
+cosineDissimilarity <- function(m) {
+  m <- as.matrix(t(m))
+  sim <- m / sqrt(rowSums(m^2))
+  sim <- tcrossprod(sim)
+  return(as.dist(1 - sim))
 }
 
 
