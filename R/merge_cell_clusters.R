@@ -8,7 +8,6 @@
 #' @param obj COTAN object
 #' @param cond sample condition name
 #' @param cores number cores used
-#' @param srat the Seurat object for the same data set (the name should be "cond")
 #' @param out_dir path to a directory for output path to the directory in which there is the Seurat object
 #' @param GEO GEO or other data set code
 #' @param sc.method scRNAseq method
@@ -44,23 +43,24 @@
 #' @examples
 #'
 #' @rdname merge_cell.clusters
-setGeneric("merge_cell.clusters", function(obj, cond, cores = 1, srat, out_dir ,GEO,
+setGeneric("merge_cell.clusters", function(obj, cond, 
+                                           cores = 1,  out_dir ,GEO,
                                            sc.method, #mt = FALSE, mt_prefix="^mt",
                                            markers = NULL) standardGeneric("merge_cell.clusters"))
 #' @rdname merge_cell.clusters
-setMethod("merge_cell.clusters","scCOTAN",
-         function(obj, cond, cores, srat, out_dir, GEO,
+setMethod("merge_cell.clusters","COTAN",
+         function(obj, cond, cores, out_dir, GEO,
                   sc.method, #mt, #mt_prefix,
                   markers){
 
-           srat <- readRDS(paste0(out_dir,srat))
+           #######srat <- readRDS(paste0(out_dir,srat))
 
            #Check if there are NA left clusters
 
-           if (any(is.na(obj@clusters))) {
-             print("Problems! Some NA left!")
-             break
-           }
+           #if (any(is.na(obj@clusters))) {
+          #   print("Problems! Some NA left!")
+          #   break
+          # }
 
 
            ###############
@@ -74,21 +74,15 @@ setMethod("merge_cell.clusters","scCOTAN",
               cl1_not_mergeable_old <- cl1_not_mergeable
 
               #merge small cluster based on distances
-              cluster_data <- obj@cluster_data
+              D_sim <- cosine.dissimilarity(as.matrix(getClustersCoex(obj)[[length(getClustersCoex(obj))]]))
 
-              ######## This is the best: cosine dissimilarity
-              Matrix <- as.matrix(Matrix::t(cluster_data))
-              sim <- Matrix / sqrt(Matrix::rowSums(Matrix * Matrix))
-              sim <- sim %*% Matrix::t(sim)
-              D_sim <- stats::as.dist(1 - sim)
               tree <- stats::hclust(D_sim,method = "ward.D2")
               #plot(tree)
               dend <- stats::as.dendrogram(tree)
 
 
-                ############### This part check if any little two pair of leaf clusters could be merged
+              ############### This part check if any little two pair of leaf clusters could be merged
               # based on the tree
-
 
               id <- NA
               for (i in c(1:length(dendextend::get_nodes_attr(dend,"members")))) {
@@ -110,7 +104,8 @@ setMethod("merge_cell.clusters","scCOTAN",
                 dir.create(dir)
               }
 
-
+              meta.cells <- getClusterizationData(obj)[[1]]
+              
               p = 1
               while (p < length(id)) {
                 p1 <- p
@@ -128,10 +123,13 @@ setMethod("merge_cell.clusters","scCOTAN",
                   next
                 }
 
-                mat <- srat@assays$RNA@counts[,colnames(srat@assays$RNA@counts) %in%
-                                                rownames(srat@meta.data[srat@meta.data$cotan %in% c(cl.1,cl.2),])]
+                #mat <- srat@assays$RNA@counts[,colnames(srat@assays$RNA@counts) %in%
+                 #                               names(obj@clusters[obj@clusters %in% c(cl.1,cl.2)])]
+                                                #rownames(srat@meta.data[srat@meta.data$cotan %in% c(cl.1,cl.2),])]
 
-                merged.obj <- automaticCOTANObjectCreation(raw = mat,
+                
+                cells.to.merge <- names(meta.cells[meta.cells %in% c(cl.1,cl.2)])
+                merged.obj <- automaticCOTANObjectCreation(raw = getRawData(obj)[,cells.to.merge],
                                                            outDir = out_dir,
                                                            GEO = GEO,
                                                            sequencingMethod = sc.method,
@@ -152,11 +150,13 @@ setMethod("merge_cell.clusters","scCOTAN",
                   #to_rec = c(to_rec,cells_to_cluster)
                 }else{
                   print(paste("Clusters", cl.1, "and", cl.2, "can be merged."))
-                  write.csv(colnames(mat),paste0(dir, "merged_clusters_",
-                                                 cl.1, "_", cl.2, "cell_ids.csv"))
+                #  write.csv(colnames(mat),paste0(dir, "merged_clusters_",
+                #                                 cl.1, "_", cl.2, "cell_ids.csv"))
                   min.cl <- min(as.numeric(c(cl.1,cl.2)))
                   max.cl <- max(as.numeric(c(cl.1,cl.2)))
-                  srat@meta.data[srat@meta.data$cotan == max.cl,]$cotan <- min.cl
+                  #srat@meta.data[srat@meta.data$cotan == max.cl,]$cotan <- min.cl
+                  #obj@clusters[obj@clusters == max.cl] <- min.cl
+                  meta.cells[meta.cells == max.cl] <- min.cl
                 }
 
 
@@ -200,62 +200,67 @@ setMethod("merge_cell.clusters","scCOTAN",
                 gc()
               }
 
-              saveRDS(srat,paste0(out_dir, "Seurat_obj_",
-                                  cond, "_with_cotan_clusters_merged.RDS"))
+              #saveRDS(srat,paste0(out_dir, "Seurat_obj_",
+              #                    cond, "_with_cotan_clusters_merged.RDS"))
               #srat <- readRDS(paste0(out_dir_root, "Seurat_obj_",
               #                       cond, "_with_cotan_clusters_merged.RDS"))
               gc()
 
 
               # Update the homogenus cluster array in cotan object
-              obj.clusters.new <- set_names(srat@meta.data$cotan, rownames(srat@meta.data))
-              if(all(getCells(obj) %in% names(obj.clusters.new))){
-                obj@clusters <- obj.clusters.new
-              }else{
-                print("Problem! not all(getCells(obj) %in% names(obj.clusters.new)")
-                break
-              }
 
+              #obj.clusters.new <- set_names(srat@meta.data$cotan, rownames(srat@meta.data))
+              #if(all(getCells(obj) %in% names(obj.clusters.new))){
+              #  obj@clusters <- obj.clusters.new
+              #}else{
+              #  print("Problem! not all(getCells(obj) %in% names(obj.clusters.new)")
+              #  break
+              #}
 
               # New DEA on clusters
-              clusters.names = unique(obj@clusters)[!is.na(unique(obj@clusters))]
-              list.clusters = list(names(obj@clusters[obj@clusters %in% clusters.names[1]]))
-              names(list.clusters)=clusters.names[1]
-              for (c in c(2:length(clusters.names))) {
-                tmp = list(names(obj@clusters[obj@clusters %in% clusters.names[c]]))
-                names(tmp)= clusters.names[c]
-                list.clusters = c(list.clusters,tmp)
-              }
+              #obj <- addClusterization(obj,clName = "first_merged",clusters = meta.cells)
+              
+              list[clusters.coex,pval.table] <- DEA_on_clusters(obj,cell.clusterization = meta.cells)
+              
+              obj <- addClusterization(obj,clName = paste0("merged_",round),coexDF = clusters.coex,
+                                       clusters = meta.cells)
+              
+              #clusters.names = unique(obj@clusters)[!is.na(unique(obj@clusters))]
+              #list.clusters = list(names(obj@clusters[obj@clusters %in% clusters.names[1]]))
+              #names(list.clusters)=clusters.names[1]
+              #for (c in c(2:length(clusters.names))) {
+              #  tmp = list(names(obj@clusters[obj@clusters %in% clusters.names[c]]))
+              #  names(tmp)= clusters.names[c]
+              #  list.clusters = c(list.clusters,tmp)
+              #}
 
-              rm(srat)
+              #rm(srat)
               gc()
 
 
-              obj_list = DEA_on_clusters(obj,list.clusters)
-              gc()
+              
+              #srat <- readRDS(paste0(out_dir, "Seurat_obj_", cond,
+               #                      "_with_cotan_clusters_merged.RDS"))
+              #obj = obj_list[[1]]
 
-              srat <- readRDS(paste0(out_dir, "Seurat_obj_", cond,
-                                     "_with_cotan_clusters_merged.RDS"))
-              obj = obj_list[[1]]
+              #p_value = obj_list[[2]]
 
-              p_value = obj_list[[2]]
+              #rm(obj_list)
+              #gc()
 
-              rm(obj_list)
-              gc()
-
-              write.csv(p_value, file = paste0(out_dir, cond,
+              write.csv(pval.table, file = paste0(out_dir, cond,
                                                "/p_values_clusters_merged.csv"))
-              write.csv(obj@cluster_data,
-                        file = paste0(out_dir, cond, "/coex_clusters_merged.csv"))
-              if (!is.null(markers)) {
-                write.csv(p_value[unlist(markers),],
-                          file = paste0(out_dir, cond, "/p_values_clusters_merged_markers.csv"))
-                write.csv(obj@cluster_data[unlist(markers),],
-                          file = paste0(out_dir, cond, "/coex_clusters_merged_markers.csv"))
-              }
+              #write.csv(obj@cluster_data,
+              #          file = paste0(out_dir, cond, "/coex_clusters_merged.csv"))
+              #if (!is.null(markers)) {
+               # write.csv(p_value[unlist(markers),],
+              #            file = paste0(out_dir, cond, "/p_values_clusters_merged_markers.csv"))
+              #  write.csv(obj@cluster_data[unlist(markers),],
+              #            file = paste0(out_dir, cond, "/coex_clusters_merged_markers.csv"))
+              #}
 
             }
-            saveRDS(obj, file = paste0(out_dir, cond, "_merged_cotan.RDS"))
+            #saveRDS(obj, file = paste0(out_dir, cond, "_merged_cotan.RDS"))
 
             return(obj)
 

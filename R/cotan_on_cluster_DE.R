@@ -4,9 +4,7 @@
 #' COTAN contingency tables on the cluster checked with the previous method
 #'
 #' @param obj A COTAN object
-#' @param cells_list a list with all the cells divided for each group. Name of each element in the list will
-#' be the condition o cell population or cluster number, the arraz will contain all the cell codes (as in the
-#' raw matrix column names).
+#' @param cell.clusterization a vector of cell clusterization. If empty, it takes the last clusterization in obj
 #'
 #' @return a list with two objects: the first is a scCOTAN with the new
 #' object with also the correlation matrix for the genes in each cluster (obj@cluster_data),
@@ -15,24 +13,35 @@
 #' @export
 #'
 #' @examples
-setGeneric("DEA_on_clusters", function(obj, cells_list = NULL)
+setGeneric("DEA_on_clusters", function(obj, cell.clusterization = NULL)
   standardGeneric("DEA_on_clusters"))
 #' @rdname DEA_on_clusters
-setMethod("DEA_on_clusters","scCOTAN",
-          function(obj, cells_list = NULL) {
+setMethod("DEA_on_clusters","COTAN",
+          function(obj, cell.clusterization = NULL) {
 
-            if (is.null(cells_list)) {
-              clusters.names = unique(obj@clusters)[!is.na(unique(obj@clusters))]
-              cells_list = list(names(obj@clusters[obj@clusters %in% clusters.names[1]]))
-              names(cells_list)=clusters.names[1]
-              for (c in c(2:length(clusters.names))) {
-                tmp = list(names(obj@clusters[obj@clusters %in% clusters.names[c]]))
-                names(tmp)= clusters.names[c]
-                cells_list = c(cells_list,tmp)
+            if (is.null(cell.clusterization)) {
+              #cl.name <- getClusterizations(obj)[length(getClusterizations(obj))]
+              clusters.names <- unique(getClusterizationData(obj)[[1]])
+              cell.clusterization <- vector("list", length(clusters.names))
+              names(cell.clusterization) <- clusters.names
+              for (c in clusters.names) {
+                tmp <- getClusterizationData(obj)[[1]]
+                tmp <- tmp[tmp %in% c]
+                cell.clusterization[[as.character(c)]] <- names(tmp)
               }
+            }else{
+              clusters.names <- unique(cell.clusterization)
+              cell.clusterization.list <- vector("list", length(clusters.names))
+              names(cell.clusterization.list) <- clusters.names
+              for (c in clusters.names) {
+                tmp <- cell.clusterization
+                tmp <- tmp[tmp %in% c]
+                cell.clusterization.list[[as.character(c)]] <- names(tmp)
+              }
+              cell.clusterization <- cell.clusterization.list
             }
 
-              cells <- obj@raw
+              cells <- getRawData(obj)
 
               mu_estimator <- calculateMu(obj)
 
@@ -40,17 +49,17 @@ setMethod("DEA_on_clusters","scCOTAN",
 
               mu_estimator <- mu_estimator[noHKFlags,]
               cells <- sign(cells[noHKFlags, ]) # now a zero-one matrix
-              M <- funProbZero(obj@a, mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
+              M <- funProbZero(getDispersion(obj), mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
               N <- 1-M
 
               cluster_data <- data.frame()
               cluster_pval <- data.frame()
               # cells_set  > set of cell code corresponding to cluster
-              for (condition in names(cells_list)) {
+              for (condition in names(cell.clusterization)) {
                 gc()
                   print(paste("cluster", condition))
 
-                  cells_set <- unlist(cells_list[condition])
+                  cells_set <- unlist(cell.clusterization[condition])
 
                   cells_in <- colnames(cells) %in% cells_set
 
@@ -130,12 +139,11 @@ setMethod("DEA_on_clusters","scCOTAN",
                   coex <- as.data.frame(coex)
 
                   cluster_data <- setColumnInDF(cluster_data, colToSet = coex,
-                                                colName = condition, rowNames = rownames(obj@coex))
+                                                colName = condition, rowNames = getGenes(obj))
                   cluster_pval <- setColumnInDF(cluster_pval, colToSet = p_value,
-                                                colName = condition, rowNames = rownames(obj@coex))
+                                                colName = condition, rowNames = getGenes(obj))
               }
-              obj@cluster_data <- cluster_data
 
-              return(list(obj,cluster_pval))
+              return(list(cluster_data,cluster_pval))
           }
 )
