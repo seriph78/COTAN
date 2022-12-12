@@ -32,7 +32,14 @@ setGeneric("get.gene.clusters", function(obj,list.group.markers,n.markers =25, k
 setMethod("get.gene.clusters","scCOTAN",
  function(obj,list.group.markers,n.markers =25, k.cuts = 6,distance = "cosine",hclust.method="ward.D2"){
 
-    g.space <- get.gene.coexpression.space(obj,
+   #Dropping not present genes
+   for (n in names(list.group.markers)) {
+     list.group.markers[[n]] <- list.group.markers[[n]][list.group.markers[[n]] %in% rownames(obj@raw)] 
+     
+   }
+   list.group.markers <- list.group.markers[!is.na(list.group.markers[1:length(list.group.markers)])]
+   
+   g.space <- get.gene.coexpression.space(obj,
                                           n.genes.for.marker = n.markers,
                                           primary.markers = unlist(list.group.markers))
     g.space <- as.data.frame(g.space)
@@ -59,7 +66,7 @@ setMethod("get.gene.clusters","scCOTAN",
 
     cut <- stats::cutree(hc.norm, k = k.cuts)
 
-    tmp <- calculatePValue(object = obj,
+    tmp <- calculatePValue(obj,
                            geneSubsetCol = unlist(list.group.markers),
                            geneSubsetRow = colnames(g.space))
 
@@ -68,11 +75,9 @@ setMethod("get.gene.clusters","scCOTAN",
         tmp$rank <- c(1:nrow(tmp))
         colnames(tmp)[ncol(tmp)] <- paste("rank", m, sep = ".")
     }
-    rank.genes <- tmp[,(length(unlist(list.group.markers))+1):ncol(tmp)]
-    #for (c in c(1:length(colnames(rank.genes)))) {
-        colnames(rank.genes) <- stringr::str_split(colnames(rank.genes), pattern ="[.]",simplify = T)[,2]
-    #}
-
+    rank.genes <- tmp[,(length(unique(unlist(list.group.markers)))+1):ncol(tmp)]
+    colnames(rank.genes) <- stringr::str_split(colnames(rank.genes), pattern ="[.]",simplify = T)[,2]
+    
     df.secondary.markers <- matrix(nrow = dim(rank.genes)[1],ncol = length(list.group.markers))
     rownames(df.secondary.markers) <- rownames(rank.genes)
     colnames(df.secondary.markers) <- names(list.group.markers)
@@ -80,7 +85,7 @@ setMethod("get.gene.clusters","scCOTAN",
 
     for (name in names(list.group.markers)) {
     #    print(name)
-        df.secondary.markers[,name] <- rowSums(as.data.frame(rank.genes[,list.group.markers[[name]]]))
+        df.secondary.markers[,name] <- rowSums(as.data.frame(rank.genes[,list.group.markers[[name]],drop=FALSE]))
         df.secondary.markers[list.group.markers[[name]],name] <- 1
     }
 
@@ -94,6 +99,7 @@ setMethod("get.gene.clusters","scCOTAN",
     }
 
     mylist.names <- colnames(df.secondary.markers)
+
     pos.link  <- set_names(vector("list", length(mylist.names)), mylist.names)
     for (g in rownames(df.secondary.markers)) {
         if(length( which(df.secondary.markers[g,] == min(df.secondary.markers[g,]))) == 1 ){

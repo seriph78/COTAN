@@ -13,7 +13,7 @@
 setGeneric("get.clusters.delta.expression", function(obj)
   standardGeneric("get.clusters.delta.expression"))
 #' @rdname get.clusters.delta.expression
-setMethod("get.clusters.delta.expression","scCOTAN",
+setMethod("get.clusters.delta.expression","COTAN",
  function(obj){
    obj <- as(obj, "scCOTAN")
 
@@ -40,7 +40,8 @@ setMethod("get.clusters.delta.expression","scCOTAN",
 
     mu_estimator <- mu_estimator[noHKFlags,]
     cells <- cells[noHKFlags, ]
-    M = funProbZero(obj@a,mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
+    M = funProbZero(obj@a,
+                    mu_estimator[,colnames(cells)]) # matrix of 0 probabilities
     N = 1-M
 
 
@@ -57,8 +58,8 @@ setMethod("get.clusters.delta.expression","scCOTAN",
 
       estimator_yes_in = rowSums(N[,colnames(cells) %in% cells_set])
 
-      sum.UDE.cluster <- sum(obj@nu[cells_set])
-      print(paste0("Mean UDE ",sum(obj@nu[cells_set])/length(cells_set)))
+      sum.UDE.cluster <- sum(getNu(obj)[cells_set])
+      print(paste0("Mean UDE ",sum.UDE.cluster/length(cells_set)))
 
       increse.expression <- (yes_in - estimator_yes_in)/sum.UDE.cluster
 
@@ -66,12 +67,13 @@ setMethod("get.clusters.delta.expression","scCOTAN",
                                       paste0("cl.", condition))
 
       if (dim(increased.expression.tot)[1] == 0) {
-        increased.expression.tot <- set_names(as.data.frame(matrix(nrow = nrow(obj@coex))),
-                                              rownames(obj@coex))
+        increased.expression.tot <- as.data.frame(matrix(nrow = nrow(obj.old@coex)),
+                                                  row.names = rownames(obj.old@coex))
       }
 
       increased.expression.tot  <- cbind(increased.expression.tot, increse.expression)
     }
+    increased.expression.tot <- increased.expression.tot[,2:ncol(increased.expression.tot)]
 
     increased.expression.tot<- round(increased.expression.tot, digits = 3)
 
