@@ -42,10 +42,8 @@ dataset.for.test.creation <- function(){
 
   #---------------------------------------------------
   # this is a 'scCOTAN' object
-  obj <- cell_homogeneous_clustering(cond = "test", out_dir = paste0(tm,"/"),
-                                     in_dir = paste0(tm,"/"), cores = 2,
-                                     dataset_type = "COTAN", dataset_name = "temp.RDS",
-                                     GEO = "test",sc.method ="10X")
+  obj <- cellsUniformClustering(obj, cores = 2,
+                                saveObj = TRUE, out_dir = paste0(tm, "/"))
   saveRDS(obj@clusters, "tests/testthat/clusters1.RDS")
 
   saveRDS(obj, file = file.path(tm, "temp.RDS"))

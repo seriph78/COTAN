@@ -1,9 +1,9 @@
 library(Matrix)
 
 test_that("Logging levels", {
-  currentLevel <- getOption("COTAN.LogLevel", default = 1)
+  suppressMessages(currentLevel <- setLoggingLevel(0))
 
-  suppressMessages(setLoggingLevel(0))
+  expect_false(is.null(currentLevel))
 
   expect_no_message(suppressMessages(logThis("This should not appear", logLevel = 0)))
 

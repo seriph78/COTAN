@@ -84,8 +84,8 @@ test_that("Calculations on genes", {
                coexMatrix(observed, expected, getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1]], standardDatasetTags()[c(5,6,8)])
-  expect_equal(getMetadataElement(obj, standardDatasetTags()[8]), paste0(10/55))
+  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,7)])
+  expect_equal(getMetadataElement(obj, datasetTags()[7]), paste0(10/55))
 })
 
 
@@ -138,8 +138,8 @@ test_that("Calculations on cells", {
 
   obj <- calculateCoex(obj, actOnCells = TRUE, optimizeForSpeed = TRUE)
 
-  genesCoexInSync <- getMetadataElement(obj, standardDatasetTags()[5])
-  cellsCoexInSync <- getMetadataElement(obj, standardDatasetTags()[6])
+  genesCoexInSync <- getMetadataElement(obj, datasetTags()[5])
+  cellsCoexInSync <- getMetadataElement(obj, datasetTags()[6])
 
   expect_equal(c(genesCoexInSync, cellsCoexInSync), c("FALSE", "TRUE"))
 
@@ -153,8 +153,8 @@ test_that("Calculations on cells", {
                coexMatrix(observed, expected, getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1]], standardDatasetTags()[c(5,6,9)])
-  expect_equal(getMetadataElement(obj, standardDatasetTags()[9]), paste0(0))
+  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,8)])
+  expect_equal(getMetadataElement(obj, datasetTags()[8]), paste0(0))
 })
 
 
@@ -219,8 +219,8 @@ test_that("Coex vs saved results", {
 
   obj <- calculateCoex(obj)
 
-  genesCoexInSync <- getMetadataElement(obj, standardDatasetTags()[[5]])
-  cellsCoexInSync <- getMetadataElement(obj, standardDatasetTags()[[6]])
+  genesCoexInSync <- getMetadataElement(obj, datasetTags()[[5]])
+  cellsCoexInSync <- getMetadataElement(obj, datasetTags()[[6]])
 
   expect_equal(c(genesCoexInSync, cellsCoexInSync), c("TRUE", "FALSE"))
 
@@ -228,7 +228,8 @@ test_that("Coex vs saved results", {
                                        GEO = " ",
                                        sequencingMethod = "10X",
                                        sampleCondition = "example",
-                                       cores = 12)
+                                       cores = 12,
+                                       saveObj = FALSE)
 
   expect_equal(obj2, obj)
 

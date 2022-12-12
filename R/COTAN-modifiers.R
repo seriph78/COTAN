@@ -1,21 +1,21 @@
+# EXTREMELY IMPORTANT: DO NOT CHANGE THE LIST UP TO ELEMENT 8!!
 
-#' standardDatasetTags
+#' datasetTags
 #'
 #' @returns a character array with the standard labels used in the `metaDataset`
-#' of the `COTAN` objects. DO NOT REORDER!!
+#' of the `COTAN` objects.
 #'
-#' @noRd
+#' @rdname datasetTags
 #'
-standardDatasetTags <- function() {
+datasetTags <- function() {
   return(c("GEO:"                                              # 1
            ,"scRNAseq method:"                                 # 2
-           ,"starting n. of cells:"                            # 3
-           ,"condition sample:"                                # 4
+           ,"condition sample:"                                # 3
+           ,"starting n. of cells:"                            # 4
            ,"genes' coex is in sync:"                          # 5
            ,"cells' coex is in sync:"                          # 6
-           ,"n. of cells left out by clustering:"              # 7
-           ,"genes' pairs fraction with small expected count:" # 8
-           ,"cells' pairs fraction with small expected count:" # 9
+           ,"genes' pairs fraction with small expected count:" # 7
+           ,"cells' pairs fraction with small expected count:" # 8
            ))
 }
 
@@ -79,14 +79,14 @@ setMethod(
   function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
     logThis("Initializing `COTAN` meta-data", logLevel = 2)
 
-    tags <- standardDatasetTags()
+    tags <- datasetTags()
 
     meta <- objCOTAN@metaDataset
 
     meta <- updateMetaInfo(meta, tags[1], GEO)
     meta <- updateMetaInfo(meta, tags[2], sequencingMethod)
-    meta <- updateMetaInfo(meta, tags[3], getNumCells(objCOTAN))
-    meta <- updateMetaInfo(meta, tags[4], sampleCondition)
+    meta <- updateMetaInfo(meta, tags[3], sampleCondition)
+    meta <- updateMetaInfo(meta, tags[4], getNumCells(objCOTAN))
     meta <- updateMetaInfo(meta, tags[5], FALSE)
     meta <- updateMetaInfo(meta, tags[6], FALSE)
 
@@ -393,7 +393,8 @@ setMethod(
 #'                                          GEO = "test_GEO",
 #'                                          sequencingMethod = "test_method",
 #'                                          sampleCondition = "test",
-#'                                          cores = 12)
+#'                                          cores = 12,
+#'                                          saveObj = FALSE)
 #' objCOTAN <- dropGenesCoex(objCOTAN)
 #'
 #' @rdname dropGenesCoex
@@ -430,7 +431,8 @@ setMethod(
 #'                                          GEO = "test_GEO",
 #'                                          sequencingMethod = "test_method",
 #'                                          sampleCondition = "test",
-#'                                          cores = 12)
+#'                                          cores = 12,
+#'                                          saveObj = FALSE)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 #' objCOTAN <- dropCellsCoex(objCOTAN)

@@ -9,6 +9,9 @@ setLoggingLevel(newLevel = 1)
 \arguments{
 \item{newLevel}{the new default logging level. It defaults to 1}
 }
+\value{
+old logging level or default level if not set yet.
+}
 \description{
 Set the \code{COTAN} logging level
 }

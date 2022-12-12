@@ -127,14 +127,16 @@ setMethod("merge_cell.clusters","COTAN",
                  #                               names(obj@clusters[obj@clusters %in% c(cl.1,cl.2)])]
                                                 #rownames(srat@meta.data[srat@meta.data$cotan %in% c(cl.1,cl.2),])]
 
+
                 
                 cells.to.merge <- names(meta.cells[meta.cells %in% c(cl.1,cl.2)])
                 merged.obj <- automaticCOTANObjectCreation(raw = getRawData(obj)[,cells.to.merge],
-                                                           outDir = out_dir,
                                                            GEO = GEO,
                                                            sequencingMethod = sc.method,
                                                            sampleCondition = cond.merge,
-                                                           cores = cores)
+                                                           cores = cores,
+                                                           saveObj = FALSE,
+                                                           outDir = out_dir)
 
                 GDI_data_wt1 = calculateGDI(merged.obj)
 

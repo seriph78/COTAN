@@ -539,16 +539,16 @@ setMethod(
     if(actOnCells) {
       objCOTAN@cellsCoex <- coex
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             standardDatasetTags()[6], TRUE)
+                                             datasetTags()[6], TRUE)
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             standardDatasetTags()[9],
+                                             datasetTags()[8],
                                              problematicPairsFraction)
     } else {
       objCOTAN@genesCoex <- coex
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             standardDatasetTags()[5], TRUE)
+                                             datasetTags()[5], TRUE)
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             standardDatasetTags()[8],
+                                             datasetTags()[7],
                                              problematicPairsFraction)
     }
 

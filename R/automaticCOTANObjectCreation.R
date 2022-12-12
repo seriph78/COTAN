@@ -1,16 +1,18 @@
 #' automaticCOTANObjectCreation
 #'
 #' @param raw a matrix or dataframe with the raw counts
-#' @param outDir directory for the output
-#' @param saveObj the created object is not automatically writen on disk (default NO).
-#' If "Yes" the object is written in outDir
-#' @param GEO a code reporting the GEO identification or other specific dataset code
+#' @param GEO a code reporting the GEO identification or other specific dataset
+#'   code
 #' @param sequencingMethod a string reporting the method used for the sequencing
-#' @param sampleCondition a string reporting the specific sample condition or time point.
-#' It will be part of the final file name.
+#' @param sampleCondition a string reporting the specific sample condition or
+#'   time point.
 #' @param cores number of cores to be used
+#' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
+#'   plots to file
+#' @param outDir an existing directory for the analysis output.
 #'
-#' @return It return the COTAN object. It will also store it directly in the output directory
+#' @returns It return the COTAN object. It will also store it directly in the
+#'   output directory
 #'
 #' @export
 #'
@@ -37,7 +39,7 @@
 #'   GEO = "test_GEO",
 #'   sequencingMethod = "test_method",
 #'   sampleCondition = "test",
-#'   saveObj = TRUE
+#'   saveObj = TRUE,
 #'   outDir = tempdir(),
 #'   cores = 12)
 #'
@@ -45,8 +47,7 @@
 
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,
-           saveObj = FALSE, outDir = "",
-           cores = 1) {
+           cores = 1, saveObj = TRUE, outDir = ".") {
     start_time_all <- Sys.time()
 
     obj <- COTAN(raw = raw)
