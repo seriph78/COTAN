@@ -2,25 +2,23 @@
 % Please edit documentation in R/merge_cell_clusters.R
 \name{merge_cell.clusters}
 \alias{merge_cell.clusters}
-\alias{merge_cell.clusters,scCOTAN-method}
+\alias{merge_cell.clusters,COTAN-method}
 \title{merge_cell.clusters}
 \usage{
 merge_cell.clusters(
   obj,
   cond,
   cores = 1,
-  srat,
   out_dir,
   GEO,
   sc.method,
   markers = NULL
 )
 
-\S4method{merge_cell.clusters}{scCOTAN}(
+\S4method{merge_cell.clusters}{COTAN}(
   obj,
   cond,
   cores = 1,
-  srat,
   out_dir,
   GEO,
   sc.method,
@@ -33,8 +31,6 @@ merge_cell.clusters(
 \item{cond}{sample condition name}
 
 \item{cores}{number cores used}
-
-\item{srat}{the Seurat object for the same data set (the name should be "cond")}
 
 \item{out_dir}{path to a directory for output path to the directory in which there is the Seurat object}
 

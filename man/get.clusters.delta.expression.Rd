@@ -2,12 +2,12 @@
 % Please edit documentation in R/get.clusters.delta.expression.R
 \name{get.clusters.delta.expression}
 \alias{get.clusters.delta.expression}
-\alias{get.clusters.delta.expression,scCOTAN-method}
+\alias{get.clusters.delta.expression,COTAN-method}
 \title{get.clusters.delta.expression}
 \usage{
 get.clusters.delta.expression(obj)
 
-\S4method{get.clusters.delta.expression}{scCOTAN}(obj)
+\S4method{get.clusters.delta.expression}{COTAN}(obj)
 }
 \arguments{
 \item{obj}{a COTAN object with defined clusters (field obj@clusters filled)}

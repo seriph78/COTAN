@@ -2,19 +2,17 @@
 % Please edit documentation in R/cotan_on_cluster_DE.R
 \name{DEA_on_clusters}
 \alias{DEA_on_clusters}
-\alias{DEA_on_clusters,scCOTAN-method}
+\alias{DEA_on_clusters,COTAN-method}
 \title{DEA_on_clusters}
 \usage{
-DEA_on_clusters(obj, cells_list = NULL)
+DEA_on_clusters(obj, cell.clusterization = NULL)
 
-\S4method{DEA_on_clusters}{scCOTAN}(obj, cells_list = NULL)
+\S4method{DEA_on_clusters}{COTAN}(obj, cell.clusterization = NULL)
 }
 \arguments{
 \item{obj}{A COTAN object}
 
-\item{cells_list}{a list with all the cells divided for each group. Name of each element in the list will
-be the condition o cell population or cluster number, the arraz will contain all the cell codes (as in the
-raw matrix column names).}
+\item{cell.clusterization}{a vector of cell clusterization. If empty, it takes the last clusterization in obj}
 }
 \value{
 a list with two objects: the first is a scCOTAN with the new

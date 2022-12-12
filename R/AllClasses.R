@@ -252,6 +252,8 @@ setClass(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom stringr str_remove
+#'
 #' @importClassesFrom Matrix dgCMatrix
 #' @importClassesFrom Matrix dspMatrix
 #'
@@ -339,7 +341,14 @@ getCOTANSlots <- function(from) {
     }
 
     if (!is_empty(from@cluster_data)) {
-      clustersCoex <- list(CL_clusters = from@cluster_data)
+      clusterData <- from@cluster_data
+      if (!is_empty(setdiff(colnames(clusterData), from@clusters))) {
+        # It might be possible that the column names have the old extra
+        # prefix 'cl.'. We remove it if present and
+        colnames(clusterData) <- str_remove(colnames(clusterData),
+                                            pattern = "cl\\.")
+      }
+      clustersCoex <- list(CL_clusters = clusterData)
     }
     else if (hasClusters) {
       # keep aligned
