@@ -41,7 +41,7 @@ setMethod(
 #' @description Calculate observed Yes/Yes field of the contingency table
 #'
 #' @param objCOTAN A COTAN object
-#' @param cells Boolean; when `TRUE` the function works for the cells,
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices

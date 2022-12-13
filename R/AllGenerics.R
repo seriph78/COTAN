@@ -236,3 +236,9 @@ setGeneric(
            maxIterations = 1000, cores = 1, enforceNuAverageToOne = FALSE)
     standardGeneric("estimateDispersionNuBisection")
 )
+
+setGeneric(
+  "geneSetEnrichment",
+  function(objCOTAN, expression.cl, genes) standardGeneric("geneSetEnrichment")
+)
+
