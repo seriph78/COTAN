@@ -286,7 +286,7 @@ getCOTANSlots <- function(from) {
   genesCoex <- emptySymmetricMatrix()
   if (!is_empty(from@coex)) {
     if (isa(from@coex, "list")) {
-      genesCoex <- vec2mat_rfast(from@coex[["values"]])
+      genesCoex <- vec2mat_rfast(from@coex)
     }
     else if(isa(from@coex, "dMatrix")) {
       genesCoex <- as.matrix(from@coex)
