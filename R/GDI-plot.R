@@ -7,7 +7,7 @@
 #'   color.
 #' @param cond A string corresponding to the condition/sample (it is used only
 #'   for the title).
-#' @param type Type of statistic to be used. Default is "S": Pearson's
+#' @param statType Type of statistic to be used. Default is "S": Pearson's
 #'   chi-squared test statistics. "G" is G-test statistics
 #' @param GDI.df When the GDI data frame was already calculated, it can be put
 #'   here to speed up the process. Default is NULL.
@@ -40,13 +40,13 @@
 #' @rdname GDIPlot
 #'
 GDIPlot <- function(objCOTAN, genes, cond = "",
-                    type = "S", GDI.df = NULL) {
+                    statType = "S", GDI.df = NULL) {
   sum.raw.norm <- NULL
 
   logThis("GDI plot", logLevel = 2)
 
   if (is_empty(GDI.df)) {
-    GDI <- calculateGDI(objCOTAN, type = type)
+    GDI <- calculateGDI(objCOTAN, statType = statType)
   } else {
     GDI <- GDI.df
   }

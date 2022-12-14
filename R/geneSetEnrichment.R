@@ -16,29 +16,39 @@ setMethod(
   "geneSetEnrichment",
   "COTAN",
    function(objCOTAN, expression.cl, genes) {
-    
-    df <- as.data.frame(matrix(nrow = 1,ncol = ncol(getClusterizationData(objCOTAN)[[1]])+2))
-    rownames(df) <- names(genes)
-    colnames(df) <- c(colnames(getClusterizationData(objCOTAN)[[1]]),"N. detected","N. total")
+    colnames(expression.cl) <- stringr::str_remove(colnames(expression.cl),"cl[.]")
+    df <- as.data.frame(matrix(ncol = ncol(expression.cl)+2))
+    colnames(df) <- c(colnames(getClusterizationData(objCOTAN)[["coex"]]),
+                      "N. detected",
+                      "N. total")
     teta <- -1/0.1 * (log(0.25))
     #not_ass_clusters <- NA
     for (m in names(genes)) {
       n.genes <- sum(getGenes(objCOTAN) %in% genes[[m]])
-      print(paste0("In ",m , "there are ",n.genes, " detected over ",length(genes[[m]]), " genes"))
+      print(paste0("In ",m , " there are ",n.genes, " detected over ",length(genes[[m]]), " genes"))
       df[m,"N. detected"] <- n.genes
       df[m,"N. total"] <- length(genes[[m]])
-      for (ro in colnames(getClusterizationData(objCOTAN)[[1]])) {
-        #pv <- p_value[unlist(genes[[m]]),ro]
+    }
+    for (ro in colnames(getClusterizationData(objCOTAN)[["coex"]])) {
+      for (m in names(genes)) {
+         #pv <- p_value[unlist(genes[[m]]),ro]
         #co <- objCOTAN@cluster_data[unlist(genes[[m]]),ro]
-        ex <- expression.cl[rownames(expression.cl) %in% genes[[m]],ro]
+        ex <- expression.cl[rownames(expression.cl) %in% genes[[m]], ro, drop = FALSE]
         ex[ex < 0 & !is.na(ex)] <- 0
         
+        for (g in rownames(ex)) {
+          occurrencies <- sum(unlist(markers) == g)
+          ex[g,1] <- ex[g,1]/occurrencies 
+        }
+        
+        
         ex <- 1-exp(- teta * ex)
-        df[m,ro] <- sum(ex,na.rm = T)/n.genes
+        
+        df[m,ro] <- sum(ex,na.rm = T)/length(genes[[m]])
       }
     }
     
-    df <- round(df,digits = 1)
+    df <- round(df[2:nrow(df),],digits = 2)
     return(df)
   }
 
