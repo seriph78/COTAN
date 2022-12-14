@@ -55,7 +55,7 @@ test_that("Calculations on genes", {
                matrix(getNumCells(obj), nrow = getNumGenes(obj), ncol = getNumGenes(obj)),
                ignore_attr = TRUE)
 
-  obj <- estimateDispersionBisection(obj, step = 4, cores = 4)
+  obj <- estimateDispersionBisection(obj, cores = 4, chunkSize = 4)
 
   list[expectedNN, expectedN] <-
     expectedContingencyTablesNN(obj, actOnCells = FALSE, asDspMatrices = TRUE)
@@ -116,7 +116,7 @@ test_that("Calculations on cells", {
                matrix(getNumGenes(obj), nrow = getNumCells(obj), ncol = getNumCells(obj)),
                ignore_attr = TRUE)
 
-  obj <- estimateDispersionNuBisection(obj, step = 4, cores = 4,
+  obj <- estimateDispersionNuBisection(obj, cores = 4, chunkSize = 4,
                                        enforceNuAverageToOne = FALSE)
 
   list[expectedNN, expectedN] <-
@@ -166,7 +166,7 @@ test_that("Coex", {
   obj <- COTAN(raw = raw)
   obj <- clean(obj, calcExtraData = FALSE)[[1]]
 
-  obj <- estimateDispersionNuBisection(obj, step = 4, cores = 4)
+  obj <- estimateDispersionNuBisection(obj, cores = 4, chunkSize = 4)
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 

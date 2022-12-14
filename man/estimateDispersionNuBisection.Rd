@@ -2,27 +2,28 @@
 % Please edit documentation in R/COTAN-estimators.R
 \name{estimateDispersionNuBisection,COTAN-method}
 \alias{estimateDispersionNuBisection,COTAN-method}
-\title{estimateDispersionNuBisection}
+\title{stimateDispersionNuBisection}
 \usage{
 \S4method{estimateDispersionNuBisection}{COTAN}(
   objCOTAN,
-  step = 512,
   threshold = 0.001,
-  maxIterations = 1000,
   cores = 1,
+  maxIterations = 50,
+  chunkSize = 1024,
   enforceNuAverageToOne = FALSE
 )
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{step}{number of genes to solve in batch in a single core. Default is 256.}
-
 \item{threshold}{minimal solution precision}
+
+\item{cores}{number of cores to use. Default is 1.}
 
 \item{maxIterations}{max number of iterations (avoids infinite loops)}
 
-\item{cores}{number of cores to use. Default is 1.}
+\item{chunkSize}{number of genes to solve in batch in a single core. Default
+is 1024.}
 }
 \value{
 the updated \code{COTAN} object
@@ -30,6 +31,5 @@ the updated \code{COTAN} object
 \description{
 Estimates the 'dispersion' and 'nu' field of a \code{COTAN} object by running
 sequentially a bisection for each parameter. This allows to enforce
-\code{mean('nu') == 1} assumption
-Assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being run already
+\code{mean('nu') == 1} assumption Assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being run already
 }

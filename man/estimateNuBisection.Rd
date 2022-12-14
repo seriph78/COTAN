@@ -6,23 +6,23 @@
 \usage{
 \S4method{estimateNuBisection}{COTAN}(
   objCOTAN,
-  step = 512,
   threshold = 0.001,
-  maxIterations = 1000,
-  cores = 1
+  cores = 1,
+  maxIterations = 50,
+  chunkSize = 1024
 )
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{step}{number of genes to solve in batch in a single core. Default is
-256.}
-
 \item{threshold}{minimal solution precision}
+
+\item{cores}{number of cores to use. Default is 1.}
 
 \item{maxIterations}{max number of iterations (avoids infinite loops)}
 
-\item{cores}{number of cores to use. Default is 1.}
+\item{chunkSize}{number of genes to solve in batch in a single core. Default
+is 1024.}
 }
 \value{
 the updated \code{COTAN} object

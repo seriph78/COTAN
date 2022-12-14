@@ -6,23 +6,23 @@
 \usage{
 \S4method{estimateDispersionBisection}{COTAN}(
   objCOTAN,
-  step = 512,
   threshold = 0.001,
-  maxIterations = 1000,
-  cores = 1
+  cores = 1,
+  maxIterations = 50,
+  chunkSize = 1024
 )
 }
 \arguments{
 \item{objCOTAN}{A \code{COTAN} object}
 
-\item{step}{number of genes to solve in batch in a single core. Default is
-256.}
-
 \item{threshold}{minimal solution precision}
+
+\item{cores}{number of cores to use. Default is 1.}
 
 \item{maxIterations}{max number of iterations (avoids infinite loops)}
 
-\item{cores}{number of cores to use. Default is 1.}
+\item{chunkSize}{number of genes to solve in batch in a single core. Default
+is 1024.}
 }
 \value{
 The updated \code{COTAN} object
@@ -33,10 +33,9 @@ Estimates the negative binomial dispersion factor for each gene.
 \details{
 Determines the \code{dispersion} such that, for each gene, the
 probability of zero count matches the number of observed zeros. It assumes
-\code{\link[=es]{es()}} being already run.
+\code{\link[=estimateNuLinear]{estimateNuLinear()}} being already run.
 
-It needs to
-be run after \code{\link[=clean]{clean()}}
+It needs to be run after \code{\link[=clean]{clean()}}
 }
 \examples{
 data("raw.dataset")

@@ -88,22 +88,29 @@ test_that("funProbZero with matrices", {
 
 
 test_that("dispersionBisection", {
-  mu      <- matrix(c(7, 5, 4, 3, 7, 5, 4, 3, 7, 5, 4, 3, 7, 5, 4, 3, 7, 5, 4, 3), nrow = 2)
-  zeroOne <- matrix(c(1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1), nrow = 2)
+  lambda   <- c(3,  1.75)
+  nu       <- rep(c(0.5, 1.5), 5)
+  sumZeros <- c(0, 5)
 
-  expect_equal(dispersionBisection(1, zeroOne, mu), -Inf)
-  expect_equal(dispersionBisection(2, zeroOne, mu), 4.0546875)
+  d <- c(dispersionBisection(sumZeros = sumZeros[1], lambda = lambda[1], nu = nu),
+         dispersionBisection(sumZeros = sumZeros[2], lambda = lambda[2], nu = nu))
+
+  expect_equal(d, c(-Inf, 1.98046875))
 })
 
 
 test_that("nuBisection", {
-  lambda     <- c(5.5,  4,2,    1,   5.5, 1.5, 3,   3.5, 1,   4.5)
-  dispersion <- c(-Inf, 4, 2.5, 0.9, 5,   1.9, 3.5, 4,   0.9, 4.5)
-  zeroOne <- matrix(c(1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0), ncol = 2)
-  initialGuess <- c(1.5, 0.5)
+  lambda       <- c(5.5,  4,2,    1,   5.5, 1.5, 3,   3.5, 1,   4.5)
+  dispersion   <- c(-Inf, 4,      2.5, 0.9, 5,   1.9, 3.5, 4,   0.9, 4.5)
+  sumZeros     <- c(3, 6)
+  initialGuess <- c(1, 1.5)
 
-  expect_equal(nuBisection(1, zeroOne, lambda, dispersion, initialGuess), 3.15234375)
-  expect_equal(nuBisection(2, zeroOne, lambda, dispersion, initialGuess), 0.34960938)
+  nu <- c(nuBisection(sumZeros = sumZeros[1], lambda = lambda,
+                      dispersion = dispersion, initialGuess = initialGuess[1]),
+          nuBisection(sumZeros = sumZeros[2], lambda = lambda,
+                      dispersion = dispersion, initialGuess = initialGuess[2]))
+
+  expect_equal(nu, c(3.1484375, 0.349365234375))
 })
 
 
@@ -111,6 +118,17 @@ test_that("plotTheme", {
   expect_warning(plotTheme(plotKind = "Wrong", textSize = 12))
 })
 
+
+test_that("Cosine dissimilarity", {
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  rownames(raw) = LETTERS[1:10]
+  colnames(raw) = letters[1:20]
+
+  cd <- as.matrix(cosineDissimilarity(raw))
+
+  expect_equal(cd[(row(cd) + col(cd)) %% 2 == 1], rep(cd[2,1], 200))
+  expect_equal(cd[(row(cd) + col(cd)) %% 2 == 0], rep(cd[3,1], 200))
+})
 
 test_that("Raw data normalization", {
   utils::data("test.dataset.col", package = "COTAN")

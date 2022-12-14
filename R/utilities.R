@@ -173,9 +173,9 @@ funProbZero <- function(disp, mu) {
 #' @details The goal is to find a dispersion value that reduces to zero the
 #'   difference between the number of estimated and counted zeros
 #'
-#' @param gene name of the relevant gene
-#' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
-#' @param muEstimator a matrix estimator of vector mu
+#' @param sumZeros the number of cells that didn't express the gene
+#' @param lambda the lambda parameter
+#' @param nu the nu vector
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
@@ -184,22 +184,21 @@ funProbZero <- function(disp, mu) {
 #' @noRd
 #'
 dispersionBisection <-
-  function(gene,
-           zeroOneMatrix,
-           muEstimator,
+  function(sumZeros,
+           lambda,
+           nu,
            threshold = 0.001,
-           maxIterations = 1000) {
-  sumZeros <- ncol(zeroOneMatrix) - sum(zeroOneMatrix[gene, ])
+           maxIterations = 50) {
   if (sumZeros == 0){
     # cannot match exactly zero prob of zeros with finite values
     return(-Inf)
   }
-  muEstimator <- muEstimator[gene, ]
+  mu <- lambda * nu
 
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
   disp1 <- 0
-  diff1 <- sum(funProbZero(disp1, muEstimator)) - sumZeros
+  diff1 <- sum(funProbZero(disp1, mu)) - sumZeros
   if (abs(diff1) <= threshold) {
     return(disp1)
   }
@@ -207,7 +206,7 @@ dispersionBisection <-
   disp2 <- -1 * sign(diff1) # we assume error is an increasing function of disp
   iter <- 1
   repeat {
-    diff2 <- sum(funProbZero(disp2, muEstimator)) - sumZeros
+    diff2 <- sum(funProbZero(disp2, mu)) - sumZeros
 
     if (diff2 * diff1 < 0) {
       break
@@ -229,7 +228,7 @@ dispersionBisection <-
   repeat {
     disp <- (disp1 + disp2) / 2
 
-    diff <- sum(funProbZero(disp, muEstimator)) - sumZeros
+    diff <- sum(funProbZero(disp, mu)) - sumZeros
 
     if (abs(diff) <= threshold) {
       return(disp)
@@ -261,8 +260,9 @@ dispersionBisection <-
 #'   difference between the number of estimated and counted zeros
 #'
 #' @param genes names of the relevant genes
-#' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
-#' @param muEstimator a matrix estimator of vector mu
+#' @param sumZeros the number of cells that didn't express the relevant gene
+#' @param lambda the lambda vector
+#' @param nu the nu vector
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
@@ -272,12 +272,13 @@ dispersionBisection <-
 #'
 parallelDispersionBisection <-
   function(genes,
-           zeroOneMatrix,
-           muEstimator,
+           sumZeros,
+           lambda,
+           nu,
            threshold = 0.001,
-           maxIterations = 1000) {
-  sumZeros <- ncol(zeroOneMatrix) - rowSums(zeroOneMatrix[genes, , drop = FALSE])
-  muEstimator <- muEstimator[genes, , drop = FALSE]
+           maxIterations = 50) {
+  sumZeros <- sumZeros[genes]
+  lambda <- lambda[genes]
 
   goodPos <- sumZeros != 0
 
@@ -290,12 +291,14 @@ parallelDispersionBisection <-
   }
 
   sumZeros <- sumZeros[goodPos]
-  muEstimator <- muEstimator[goodPos, , drop = FALSE]
+  lambda <- lambda[goodPos]
+
+  mu <- lambda %o% nu
 
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
   disps1 <- rep(0, length(sumZeros))
-  diffs1 <- rowSums(funProbZero(disps1, muEstimator)) - sumZeros
+  diffs1 <- rowSums(funProbZero(disps1, mu)) - sumZeros
   if (all(abs(diffs1) <= threshold)) {
     output[goodPos] <- disp1
     return(output)
@@ -307,7 +310,7 @@ parallelDispersionBisection <-
   iter <- 1
   repeat {
     diffs2[runPos] <- (rowSums(funProbZero(disps2[runPos],
-                                          muEstimator[runPos, , drop = FALSE])) -
+                                           mu[runPos, , drop = FALSE])) -
                        sumZeros[runPos])
 
     runPos <- (diffs2 * diffs1 >= 0)
@@ -336,7 +339,7 @@ parallelDispersionBisection <-
     disps[runPos] <- (disps1[runPos] + disps2[runPos]) / 2
 
     diffs[runPos] <- (rowSums(funProbZero(disps[runPos],
-                                         muEstimator[runPos, , drop = FALSE])) -
+                                          mu[runPos, , drop = FALSE])) -
                       sumZeros[runPos])
 
     runPos <- abs(diffs) > threshold
@@ -359,7 +362,7 @@ parallelDispersionBisection <-
 
   output[goodPos] <- disps
   return(output)
-  }
+}
 
 
 #' nuBisection
@@ -370,8 +373,7 @@ parallelDispersionBisection <-
 #' @details The goal is to find a nu value that reduces to zero the difference
 #'   between the number of estimated and counted zeros
 #'
-#' @param cell name of the relevant cell
-#' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
+#' @param sumZeros the number non expressed genes in the cell
 #' @param lambda the lambda vector
 #' @param dispersion the dispersion vector
 #' @param initialGuess the initial guess for nu
@@ -383,15 +385,12 @@ parallelDispersionBisection <-
 #' @noRd
 #'
 nuBisection <-
-  function(cell,
-           zeroOneMatrix,
+  function(sumZeros,
            lambda,
            dispersion,
            initialGuess,
            threshold = 0.001,
-           maxIterations = 1000) {
-  sumZeros <- nrow(zeroOneMatrix) - sum(zeroOneMatrix[, cell])
-
+           maxIterations = 50) {
   if (sumZeros == 0) {
     # cannot match exactly zero prob of zeros with finite values
     return(Inf)
@@ -399,7 +398,7 @@ nuBisection <-
 
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
-  nu1 <- initialGuess[cell]
+  nu1 <- initialGuess
   diff1 <- sum(funProbZero(dispersion, nu1 * lambda)) - sumZeros
   if (abs(diff1) <= threshold) {
     return(nu1)
@@ -460,10 +459,10 @@ nuBisection <-
 #'   between the number of estimated and counted zeros
 #'
 #' @param cells names of the relevant cells
-#' @param zeroOneMatrix raw data matrix changed to 0-1 matrix
+#' @param sumZeros the number of genes not expressed in the relevant cell
 #' @param lambda the lambda vector
 #' @param dispersion the dispersion vector
-#' @param initialGuess the initial guess for nu
+#' @param initialGuess the initial guess vector for nu
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
@@ -473,13 +472,13 @@ nuBisection <-
 #'
 parallelNuBisection <-
   function(cells,
-           zeroOneMatrix,
+           sumZeros,
            lambda,
            dispersion,
            initialGuess,
            threshold = 0.001,
-           maxIterations = 1000) {
-  sumZeros <- nrow(zeroOneMatrix) - colSums(zeroOneMatrix[, cells, drop = FALSE])
+           maxIterations = 50) {
+  sumZeros <- sumZeros[cells]
   initialGuess <- initialGuess[cells]
 
   stopifnot("initialGuess must hold only positive values" = all(initialGuess > 0))
