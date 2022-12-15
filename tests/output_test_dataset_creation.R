@@ -42,14 +42,15 @@ dataset.for.test.creation <- function(){
 
   #---------------------------------------------------
   # this is a 'scCOTAN' object
-  obj <- cellsUniformClustering(obj, cores = 2,
-                                saveObj = TRUE, out_dir = paste0(tm, "/"))
-  saveRDS(obj@clusters, "tests/testthat/clusters1.RDS")
+  clusters <- cellsUniformClustering(obj, cores = 2,
+                                     saveObj = TRUE, out_dir = paste0(tm, "/"))
+  saveRDS(clusters, "tests/testthat/clusters1.RDS")
 
-  saveRDS(obj, file = file.path(tm, "temp.RDS"))
+  list[coexDF, pvalDF] <- DEAOnClusters(obj)
+  obj <- addClusterization(obj, clName = "clusters",
+                           clusters = clusters, coexDF = coexDF)
 
-  list[obj, pval] <- DEA_on_clusters(obj)
-  saveRDS(pval[genes.names.test,], "tests/testthat/pval.test.cluster1.RDS")
+  saveRDS(pvalDF[genes.names.test,], "tests/testthat/pval.test.cluster1.RDS")
   saveRDS(obj, file = file.path(tm, "temp.RDS"))
 
   obj <- merge_cell.clusters(obj = obj, cond = "test", cores = 10, out_dir_root = paste0(tm, "/"),

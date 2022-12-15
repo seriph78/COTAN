@@ -134,6 +134,38 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 }
 
 
+#' toClustersList
+#'
+#' @description Given a clusterization, creates a `list` that contains, for each
+#'   cluster, which elements compose the cluster
+#'
+#' @param a clusterization. A named `vector` or `factor` that defines the
+#'   clusters
+#'
+#' @returns a `list` of clusters: one vector of names for each cluster.
+#'
+#' @export
+#'
+#' @importFrom rlang set_names
+#'
+#' @rdname toClusterList
+#'
+toClustersList <- function(clusterization) {
+  clustersNames <- unique(clusterization)
+
+  getCl <- function(cl, clusterization) {
+    names(clusterization[clusterization %in% cl])
+  }
+
+  clustersList <- set_names(lapply(clustersNames, getCl, clusterization),
+                            clustersNames)
+
+  return(clustersList)
+}
+
+
+#------------------- numeric utilities ----------
+
 #' funProbZero
 #'
 #' @description Private function that gives the probability of a sample gene

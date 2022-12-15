@@ -94,13 +94,12 @@ setMethod("merge_cell.clusters","COTAN",
               print(paste0("Created leafs id form marging: ",
                            paste(dendextend::get_nodes_attr(dend,"label",id = id ),collapse=" ")))
 
-              dir <- paste0(out_dir,"cond/","leafs_merge/")
-              if(!file.exists(paste0(out_dir,"cond"))){
-                dir.create(paste0(out_dir,"cond"))
+              if (!file.exists(file.path(out_dir, "cond"))) {
+                dir.create(file.path(out_dir, "cond"))
               }
 
-
-              if(!file.exists(dir)){
+              dir <- file.path(out_dir, "cond", "leafs_merge")
+              if (!file.exists(dir)) {
                 dir.create(dir)
               }
 
@@ -116,7 +115,7 @@ setMethod("merge_cell.clusters","COTAN",
                 cl.2 <- stringr::str_remove(dendextend::get_nodes_attr(dend,"label",id = id[p2]),pattern = "cl.")
 
 
-                cond.merge <- paste0("merge_cl_",cl.1,"_",cl.2)
+                cond.merge <- paste0("merge_cl_", cl.1, "_", cl.2)
                 print(cond.merge)
                 if(cl.1 %in% cl1_not_mergeable){
                   print(paste0("Clusters ", cl.1, " ", cl.2, " already analyzed and not mergeable: skip."))
@@ -194,7 +193,7 @@ setMethod("merge_cell.clusters","COTAN",
                                 ggtitle(paste(cond.merge, getNumCells(obj))) +
                                 plotTheme("GDI", textSize = 12)
 
-                pdf(paste0(dir, cond.merge, ".GDI_plots.pdf"), onefile=TRUE)
+                pdf(file.path(dir, paste0(cond.merge, ".GDI_plots.pdf")), onefile=TRUE)
                 plot(GDI_plot_wt1)
                 graphics.off()
 
@@ -222,10 +221,10 @@ setMethod("merge_cell.clusters","COTAN",
               # New DEA on clusters
               #obj <- addClusterization(obj,clName = "first_merged",clusters = meta.cells)
 
-              list[clusters.coex,pval.table] <- DEA_on_clusters(obj,cell.clusterization = meta.cells)
+              list[coexDF, pvalDF] <- DEAOnClusters(obj, clusterization = meta.cells)
 
-              obj <- addClusterization(obj,clName = paste0("merged_",round),coexDF = clusters.coex,
-                                       clusters = meta.cells)
+              obj <- addClusterization(obj, clName = paste0("merged_", round),
+                                       clusters = meta.cells, coexDF = coexDF)
 
               #clusters.names = unique(obj@clusters)[!is.na(unique(obj@clusters))]
               #list.clusters = list(names(obj@clusters[obj@clusters %in% clusters.names[1]]))
@@ -250,8 +249,9 @@ setMethod("merge_cell.clusters","COTAN",
               #rm(obj_list)
               #gc()
 
-              write.csv(pval.table, file = paste0(out_dir, cond,
-                                               "/p_values_clusters_merged.csv"))
+              write.csv(pvalDF, file =
+                          file.path(out_dir, cond, "p_values_clusters_merged.csv"))
+
               #write.csv(obj@cluster_data,
               #          file = paste0(out_dir, cond, "/coex_clusters_merged.csv"))
               #if (!is.null(markers)) {
