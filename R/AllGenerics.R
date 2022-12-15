@@ -182,7 +182,7 @@ setGeneric(
 
 setGeneric(
   "clean",
-  function(objCOTAN, calcExtraData = TRUE) standardGeneric("clean")
+  function(objCOTAN) standardGeneric("clean")
 )
 
 setGeneric(

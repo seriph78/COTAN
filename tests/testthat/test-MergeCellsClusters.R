@@ -18,7 +18,7 @@ stopifnot(file.exists(tm))
 
 
 test_that("Merge Cells Clusters", {
-  skip("merge_cell.clusters does not update the returned obj")
+  skip("merge_cell.clusters: p_values_clusters_merged.csv not found")
 
   utils::data("test.dataset.col", package = "COTAN")
 
@@ -27,44 +27,43 @@ test_that("Merge Cells Clusters", {
                                sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
+  obj <- clean(obj)
 
   obj <- estimateDispersionBisection(obj, cores = 12)
 
   obj <- calculateCoex(obj)
 
-  obj <- addClusterization(obj, clName = "clusters",
-                           clusters = readRDS(file.path(getwd(), "clusters1.RDS")))
+  clusters <- c(readRDS(file.path(getwd(), "clusters1.RDS")), NA, NA)
 
-  obj <- DEA_on_clusters(as(obj,"scCOTAN"))[[1]]
+  obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
-  initial.cluster.number <- dim(obj@cluster_data)[2]
+  obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = DEA_on_clusters(obj)[[1]])
+
+  initial.cluster.number <- length(unique(clusters))
+
   obj <- merge_cell.clusters(obj = obj,
                              cond = "test",
                              cores = 12,
-                             srat = "Seurat_obj_test_with_cotan_clusters.RDS",
                              out_dir = tm,
                              GEO = "test",
                              sc.method = "10X")
 
-  expect_true( dim(obj@cluster_data)[2] < initial.cluster.number)
+  list[clusters, cluster_coex] <- getClusterizationData(obj)
+
+  expect_true( length(unique(clusters)) < initial.cluster.number)
 
   #cluster_data <- readRDS(file.path(getwd(),"cluster_data_marged.RDS"))
 
   #expect_equal(obj@cluster_data[genes.names.test,], cluster_data)
 
-  for (cl in unique(obj@clusters)) {
-    cells.to_test <-  names(obj@clusters[obj@clusters == cl])
+  raw <- getRawData(obj)
 
-    temp.obj <- obj@raw[,colnames(obj@raw) %in% cells.to_test]
+  for (cl in unique(clusters)) {
+    cellsToDrop <- names(clusters[clusters != cl])
 
-    temp.obj <- COTAN(raw = temp.obj)
-    temp.obj <- initializeMetaDataset(temp.obj,
-                                      GEO = "",
-                                      sequencingMethod = " ",
-                                      sampleCondition = "temp.clustered")
+    temp.obj <- dropGenesCells(obj, cells = cellsToDrop)
 
-    temp.obj <- clean(temp.obj, calcExtraData = FALSE)[["objCOTAN"]]
+    temp.obj <- clean(temp.obj)
 
     temp.obj <- estimateDispersionBisection(temp.obj, cores = 12)
     gc()
@@ -74,6 +73,6 @@ test_that("Merge Cells Clusters", {
 
     GDI_data <- calculateGDI(temp.obj)
 
-    expect_false( dim(GDI_data[GDI_data$GDI >= 1.5,])[1]/dim(GDI_data)[1] > 0.01 )
+    expect_true( sum(GDI_data[["GDI"]] >= 1.5) <= 0.01 * nrow(GDI_data))
   }
 })

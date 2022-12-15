@@ -4,26 +4,13 @@
 \alias{clean,COTAN-method}
 \title{clean}
 \usage{
-\S4method{clean}{COTAN}(objCOTAN, calcExtraData = TRUE)
+\S4method{clean}{COTAN}(objCOTAN)
 }
 \arguments{
 \item{objCOTAN}{a COTAN object}
-
-\item{calcExtraData}{Boolean flag. When \code{FALSE} all PCA/cluster related
-evaluation will be skipped and the returned "data" \code{list} will be empty}
 }
 \value{
-A \code{lists} of 2 objects:
-\itemize{
-\item "objCOTAN" is the updated COTAN object
-\item "data" is a list that is empty when cleanExtraData is FALSE, otherwise contains:
-\enumerate{
-\item "cluster1" is the first cell cluster
-\item "cluster2" is the second cell cluster
-\item "D" is the cluster2 cells' group genes
-\item "pcaCells" pca numeric data,
-}
-}
+The updated COTAN object
 }
 \description{
 Main function that can be used to check and clean the dataset.
@@ -32,6 +19,6 @@ It also produces and stores the estimators for nu and lambda
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-list[objCOTAN, data] <- clean(objCOTAN)
+objCOTAN <- clean(objCOTAN)
 
 }

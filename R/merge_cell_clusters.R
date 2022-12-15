@@ -43,7 +43,7 @@
 #' @examples
 #'
 #' @rdname merge_cell.clusters
-setGeneric("merge_cell.clusters", function(obj, cond, 
+setGeneric("merge_cell.clusters", function(obj, cond,
                                            cores = 1,  out_dir ,GEO,
                                            sc.method, #mt = FALSE, mt_prefix="^mt",
                                            markers = NULL) standardGeneric("merge_cell.clusters"))
@@ -74,7 +74,7 @@ setMethod("merge_cell.clusters","COTAN",
               cl1_not_mergeable_old <- cl1_not_mergeable
 
               #merge small cluster based on distances
-              D_sim <- cosine.dissimilarity(as.matrix(getClustersCoex(obj)[[length(getClustersCoex(obj))]]))
+              D_sim <- cosineDissimilarity(as.matrix(getClustersCoex(obj)[[length(getClustersCoex(obj))]]))
 
               tree <- stats::hclust(D_sim,method = "ward.D2")
               #plot(tree)
@@ -105,7 +105,7 @@ setMethod("merge_cell.clusters","COTAN",
               }
 
               meta.cells <- getClusterizationData(obj)[[1]]
-              
+
               p = 1
               while (p < length(id)) {
                 p1 <- p
@@ -128,7 +128,7 @@ setMethod("merge_cell.clusters","COTAN",
                                                 #rownames(srat@meta.data[srat@meta.data$cotan %in% c(cl.1,cl.2),])]
 
 
-                
+
                 cells.to.merge <- names(meta.cells[meta.cells %in% c(cl.1,cl.2)])
                 merged.obj <- automaticCOTANObjectCreation(raw = getRawData(obj)[,cells.to.merge],
                                                            GEO = GEO,
@@ -221,12 +221,12 @@ setMethod("merge_cell.clusters","COTAN",
 
               # New DEA on clusters
               #obj <- addClusterization(obj,clName = "first_merged",clusters = meta.cells)
-              
+
               list[clusters.coex,pval.table] <- DEA_on_clusters(obj,cell.clusterization = meta.cells)
-              
+
               obj <- addClusterization(obj,clName = paste0("merged_",round),coexDF = clusters.coex,
                                        clusters = meta.cells)
-              
+
               #clusters.names = unique(obj@clusters)[!is.na(unique(obj@clusters))]
               #list.clusters = list(names(obj@clusters[obj@clusters %in% clusters.names[1]]))
               #names(list.clusters)=clusters.names[1]
@@ -240,7 +240,7 @@ setMethod("merge_cell.clusters","COTAN",
               gc()
 
 
-              
+
               #srat <- readRDS(paste0(out_dir, "Seurat_obj_", cond,
                #                      "_with_cotan_clusters_merged.RDS"))
               #obj = obj_list[[1]]

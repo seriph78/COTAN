@@ -58,7 +58,7 @@ test_that("dropGenesCells", {
 
   obj <- COTAN(raw = raw)
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
   obj <- estimateDispersionNuBisection(obj, cores = 4, enforceNuAverageToOne = TRUE)
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
   obj <- calculateCoex(obj, actOnCells = TRUE,  optimizeForSpeed = FALSE)

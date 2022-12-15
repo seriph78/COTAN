@@ -25,7 +25,7 @@ test_that("Calculations on genes", {
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
 
   mu <- calculateMu(obj)
 
@@ -95,7 +95,7 @@ test_that("Calculations on cells", {
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
 
   list[observedYY, observedY] <-
     observedContingencyTablesYY(obj, actOnCells = TRUE, asDspMatrices = TRUE)
@@ -164,7 +164,7 @@ test_that("Coex", {
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
 
   obj <- estimateDispersionNuBisection(obj, cores = 4, chunkSize = 4)
 
@@ -213,7 +213,7 @@ test_that("Coex vs saved results", {
                                sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
+  obj <- clean(obj)
 
   obj <- estimateDispersionBisection(obj, cores = 12)
 

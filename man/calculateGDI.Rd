@@ -23,7 +23,7 @@ gene.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 GDI <- calculateGDI(objCOTAN)

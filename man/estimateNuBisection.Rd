@@ -8,7 +8,7 @@
   objCOTAN,
   threshold = 0.001,
   cores = 1,
-  maxIterations = 50,
+  maxIterations = 100,
   chunkSize = 1024
 )
 }
@@ -38,7 +38,7 @@ probability of zero count matches the number of observed zeros. It assumes
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
+objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
 nu <- getNu(objCOTAN)

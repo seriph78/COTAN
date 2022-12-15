@@ -33,7 +33,7 @@ Calculate the expected No/No field of the contingency table
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 list[expNN, expN] <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
 

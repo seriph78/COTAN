@@ -21,13 +21,13 @@ Heatmap plot of the cells' coex matrix
 }
 \examples{
 data("raw.dataset")
-obj <- COTAN(raw = raw.dataset)
-obj <- initializeMetaDataset(GEO = "test_GEO",
-                             sequencingMethod = "test_method",
-                             sampleCondition = "test")
-obj <- clean(obj, calcExtraData = FALSE)[[1]]
-obj <- estimateDispersionNuBisection(obj, cores = 12)
-obj <- calculateCoex(obj, actOnCells = TRUE)
-hPlots <- cellsHeatmapPlot(obj)
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- initializeMetaDataset(GEO = "test_GEO",
+                                  sequencingMethod = "test_method",
+                                  sampleCondition = "test")
+objCOTAN <- clean(objCOTAN)
+objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
+objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
+hPlots <- cellsHeatmapPlot(objCOTAN)
 
 }

@@ -148,7 +148,7 @@ test_that("prcomp_irlba usage", {
   utils::data("raw.dataset", package = "COTAN")
   pca.tb = readRDS(file.path(getwd(),"pca.tb.RDS"))
 
-  # clean raw.dataset if necessary
+  # strip names column from raw.dataset if necessary
   if (nrow(raw.dataset) != nrow(pca.tb) &&
       rownames(raw.dataset)[[1]] == "HK") {
     raw.dataset <- raw.dataset[2:nrow(raw.dataset),]

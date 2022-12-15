@@ -10,7 +10,7 @@ dataset.for.test.creation <- function(){
   obj <- initializeMetaDataset(obj, GEO = " ", sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
+  obj <- clean(obj)
   obj <- estimateDispersionBisection(obj, cores = 10)
   obj <- calculateCoex(obj)
   saveRDS(obj, file = file.path(tm,"temp.RDS") )

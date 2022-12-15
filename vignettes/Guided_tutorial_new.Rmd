@@ -132,9 +132,8 @@ if(!file.exists(paste0(out_dir, "cleaning"))){
 ```
 
 ```{r}
-list[obj, data] <- clean(obj)
-list[cluster1, cluster2, D, pcaCells] <- data
-list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj, pcaCells, D)
+obj <- clean(obj)
+list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -162,9 +161,8 @@ obj = dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 
 gc()
 
-list[obj, data] <- clean(obj)
-list[cluster1, cluster2, D, pcaCells] <- data
-list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj, pcaCells, D)
+obj <- clean(obj)
+list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -244,9 +242,8 @@ obj <- dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 Repeat the estimation after the cells are removed
 
 ```{r}
-list[obj, data] <- clean(obj)
-list[cluster1, cluster2, D, pcaCells] <- data
-list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj, pcaCells, D)
+obj <- clean(obj)
+list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj)
 
 pcaCellsPlot
 ```

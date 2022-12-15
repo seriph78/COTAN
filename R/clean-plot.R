@@ -4,8 +4,6 @@
 #'   method.
 #'
 #' @param objCOTAN COTAN object
-#' @param pcaCells pca numeric data
-#' @param D cluester2 cells' group genes
 #'
 #' @returns lists of ggplot2 plots:
 #'   * "pcaCells" is for pca cells,
@@ -14,6 +12,20 @@
 #'   * "nu" is for cell nu.
 #'
 #' @export
+#'
+#' @import gsubfn
+#'
+#' @importFrom tibble rownames_to_column
+#' @importFrom tibble column_to_rownames
+#'
+#' @importFrom stats hclust
+#' @importFrom stats cutree
+#'
+#' @importFrom utils head
+#'
+#' @importFrom Matrix t
+#' @importFrom Matrix rowMeans
+#' @importFrom Matrix colMeans
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
@@ -31,20 +43,85 @@
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' list[objCOTAN, data] <- clean(objCOTAN)
-#' plots <- cleanPlots(objCOTAN, data[["pcaCells"]], data[["D"]])
+#' objCOTAN <- clean(objCOTAN)
+#' plots <- cleanPlots(objCOTAN)
 #' plot(plots[["UDEPlot"]])
 #'
 #' @rdname cleanPlots
 #'
-cleanPlots <- function(objCOTAN, pcaCells, D) {
+cleanPlots <- function(objCOTAN) {
+
+  logThis("PCA: START", logLevel = 2)
+
+  rawNorm <- getNormalizedData(objCOTAN)
+
+  pcaCells <- irlba::prcomp_irlba(t(rawNorm), n = 5)[["x"]]
+  rownames(pcaCells) <- getCells(objCOTAN)
+
+  distCells <- stats::dist(scale(pcaCells), method = "euclidean") # mhalanobis
+
+  pcaCells <- as.data.frame(pcaCells)
+
+  logThis("PCA: DONE", logLevel = 2)
+
+  logThis("Hierarchical clustering: START", logLevel = 2)
+
+  hcCells <- hclust(distCells, method = "complete")
+  rm(distCells)
+
+  groups <- cutree(hcCells, k = 2)
+
+  pos1 <- which(groups == 1)
+  pos2 <- which(groups == 2)
+
+  # ensure "A" group is the most numerous
+  if( length(pos1) < length(pos2) ) {
+    # swap pos1 <-> pos2
+    pos3 <- pos1
+    pos1 <- pos2
+    pos2 <- pos3
+  }
+
+  cluster1 <- names(pos1)
+  cluster2 <- names(pos2)
+
+  groups[pos1] <- "A"
+  groups[pos2] <- "B"
+
+  logThis("Hierarchical clustering: DONE", logLevel = 2)
+  gc()
+
+  toClust <- as.matrix(round(rawNorm, digits = 4))
+
+  if (!identical(colnames(toClust), names(groups))) {
+    stop("Error in the cell names")
+  }
+
+  # ---- next: to check which genes are specific for the B group of cells
+  B <- set_names(as.data.frame(toClust[, pos2]), colnames(toClust)[pos2])
+  #print(utils::head(B, 15))
+
+  rm(toClust)
+
+  D <- data.frame("means" = rowMeans(B), "n" = NA)
+  rownames(D) <- rownames(B)
+  D <- rownames_to_column(D)
+  rm(B)
+
+  D <- D[order(D[["means"]], decreasing = TRUE), ]
+  rownames(D) <- c()
+  D <- column_to_rownames(D)
+
+  D <- D[D[["means"]] > 0,]
+  D[["n"]] <- seq_along(D[["means"]])
+
+  gc()
 
   #check if the pca plot is clean enough and from the printed genes,
   #if the smallest group of cells are characterized by particular genes
 
   PC2 <- PC1 <- NULL
 
-  groups <- pcaCells[["groups"]]
   pcaCellsPlot <- ggplot(subset(pcaCells, groups == "A"),
                          aes(x = PC1, y = PC2, colour = groups)) +
                   geom_point(alpha = 0.5, size = 3) +

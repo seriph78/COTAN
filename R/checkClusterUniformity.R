@@ -47,7 +47,7 @@ checkClusterUniformity <- function(objCOTAN, clName, cells,
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-  list[objCOTAN, data] <- clean(objCOTAN, calcExtraData = saveObj)
+  objCOTAN <- clean(objCOTAN)
 
   logThis(paste0("Checking uniformity for the cluster '", clName,
                  "' with ", getNumCells(objCOTAN), " cells"), logLevel = 2)
@@ -65,7 +65,7 @@ checkClusterUniformity <- function(objCOTAN, clName, cells,
 
     pdf(file.path(outDir, paste0("cluster_", clName, "_plots.pdf")))
 
-    plots <- cleanPlots(objCOTAN, data[["pcaCells"]], data[["D"]])
+    plots <- cleanPlots(objCOTAN)
 
     plot(plots[["pcaCells"]])
     plot(plots[["genes"]])

@@ -120,7 +120,7 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' dispersion <- getDispersion(objCOTAN)
 #'
@@ -130,7 +130,7 @@ setMethod(
   "estimateDispersionBisection",
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 50, chunkSize = 1024) {
+           maxIterations = 100, chunkSize = 1024) {
     logThis("Estimate dispersion: START", logLevel = 2)
 
     if (Sys.info()['sysname'] == "Windows" && cores != 1) {
@@ -251,7 +251,7 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
 #' nu <- getNu(objCOTAN)
@@ -262,7 +262,7 @@ setMethod(
   "estimateNuBisection",
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 50, chunkSize = 1024) {
+           maxIterations = 100, chunkSize = 1024) {
     logThis("Estimate nu: START", logLevel = 2)
 
     if (Sys.info()['sysname'] == "Windows" && cores != 1) {
@@ -395,7 +395,7 @@ setMethod(
   "estimateDispersionNuBisection",
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 50, chunkSize = 1024, enforceNuAverageToOne = FALSE) {
+           maxIterations = 100, chunkSize = 1024, enforceNuAverageToOne = FALSE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
 
     # getNu() would show a warning when no 'nu' present
@@ -407,17 +407,22 @@ setMethod(
 
     iter <- 1
     repeat {
+      # a smalle threshold is used in order to ensure the global convergence
       objCOTAN <- estimateDispersionBisection(objCOTAN,
-                                              threshold = threshold,
+                                              threshold = threshold / 10,
                                               cores = cores,
                                               maxIterations = maxIterations,
                                               chunkSize = chunkSize)
 
+      gc()
+
       objCOTAN <- estimateNuBisection(objCOTAN,
-                                      threshold = threshold,
+                                      threshold = threshold / 10,
                                       cores = cores,
                                       maxIterations = maxIterations,
                                       chunkSize = chunkSize)
+
+      gc()
 
       meanNu <- mean(getNu(objCOTAN))
       logThis(paste("Nu mean:", meanNu),
@@ -436,8 +441,8 @@ setMethod(
         }
       }
 
-      if (iter >= (maxIterations)) {
-        warning(paste("Max number of outer iterations", maxIterations / 20,
+      if (iter >= maxIterations) {
+        warning(paste("Max number of outer iterations", maxIterations,
                       "reached while finding the solution"))
         break
       }
@@ -453,7 +458,7 @@ setMethod(
 
       gc()
 
-      if (max(marginalsErrors) < (10 * threshold) &&
+      if (max(marginalsErrors) < threshold &&
           (isFALSE(enforceNuAverageToOne) || abs(meanNu - 1) < threshold)) {
         break
       }

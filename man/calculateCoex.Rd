@@ -53,7 +53,7 @@ signal that scant information is present for such a pair.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)

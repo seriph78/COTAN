@@ -36,7 +36,7 @@ interest. By default it computes the p-values using the S statistics
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 pValue <- calculatePValue(objCOTAN)

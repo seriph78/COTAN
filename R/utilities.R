@@ -188,7 +188,7 @@ dispersionBisection <-
            lambda,
            nu,
            threshold = 0.001,
-           maxIterations = 50) {
+           maxIterations = 100) {
   if (sumZeros == 0){
     # cannot match exactly zero prob of zeros with finite values
     return(-Inf)
@@ -276,7 +276,7 @@ parallelDispersionBisection <-
            lambda,
            nu,
            threshold = 0.001,
-           maxIterations = 50) {
+           maxIterations = 100) {
   sumZeros <- sumZeros[genes]
   lambda <- lambda[genes]
 
@@ -390,7 +390,7 @@ nuBisection <-
            dispersion,
            initialGuess,
            threshold = 0.001,
-           maxIterations = 50) {
+           maxIterations = 100) {
   if (sumZeros == 0) {
     # cannot match exactly zero prob of zeros with finite values
     return(Inf)
@@ -477,7 +477,7 @@ parallelNuBisection <-
            dispersion,
            initialGuess,
            threshold = 0.001,
-           maxIterations = 50) {
+           maxIterations = 100) {
   sumZeros <- sumZeros[cells]
   initialGuess <- initialGuess[cells]
 

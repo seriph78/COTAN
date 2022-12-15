@@ -24,7 +24,7 @@ test_that("Bisection estimates", {
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
 
   obj <- estimateDispersionBisection(obj, cores = 3, chunkSize = 2)
 
