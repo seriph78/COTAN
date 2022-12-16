@@ -14,14 +14,41 @@ be analysed. If empty, the function will use the last clusterization stored
 in the \code{objCOTAN}}
 }
 \value{
-a list with two objects:
+a \code{list} with two objects:
 \itemize{
-\item the correlation matrix for the genes in each cluster,
-\item the corresponding p-values matrix.
+\item 'coex'    - the coexpression \code{data.frame} for the genes in each cluster,
+\item 'p-value' - the corresponding p-values \code{data.frame}.
 }
 }
 \description{
 This function is used to run the differential expression
 analysis using the \code{COTAN} contingency tables on each cluster in the given
 clusterization
+}
+\details{
+The formulae for the coex are similar to those used in the
+\code{\link[=calculateCoex]{calculateCoex()}} method, with the \strong{role} of the second gene taken by the
+In/Out status of the cells with respect to each cluster.
+}
+\examples{
+data("raw.dataset")
+objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+                                         GEO = "S"
+                                         sequencingMethod = "10X",
+                                         sampleCondition = "Test",
+                                         cores = 12,
+                                         saveObj = TRUE,
+                                         outDir = tempdir())
+
+clusters <- cellsUniformClustering(objCOTAN, cores = 12,
+                                   saveObj = TRUE,
+                                   outDir = tempdir())
+list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN)
+
+objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
+                              clusters = clusters, coexDF = coexDF)
+
+}
+\seealso{
+\code{\link[=calculatePValue]{calculatePValue()}} for details about the associated p-values
 }

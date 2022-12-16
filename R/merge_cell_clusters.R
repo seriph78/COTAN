@@ -189,17 +189,15 @@ setMethod("merge_cell.clusters","COTAN",
                                                  aes(x = sum.raw.norm, y = GDI,
                                                      label = rownames(genes.to.label), fill = color),
                                                  label.size = NA, alpha = 0.5,
-                                                 #direction = "both", 
-                                           na.rm = TRUE, 
+                                                 #direction = "both",
+                                           na.rm = TRUE,
                                            #seed = 1234
                                            ) +
                                 ggtitle(paste(cond.merge,"- cell number: ", getNumCells(merged.obj))) +
                                 plotTheme("GDI", textSize = 12)
 
-<<<
                 pdf(file.path(dir, paste0(cond.merge, ".GDI_plots.pdf")), onefile=TRUE)
                 plot(GDI_plot)
->>>
                 graphics.off()
 
                 rm(merged.obj)

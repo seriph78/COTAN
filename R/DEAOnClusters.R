@@ -5,18 +5,39 @@
 #'   analysis using the `COTAN` contingency tables on each cluster in the given
 #'   clusterization
 #'
+#' @details The formulae for the coex are similar to those used in the
+#'   [calculateCoex()] method, with the **role** of the second gene taken by the
+#'   In/Out status of the cells with respect to each cluster.
+#' @seealso [calculatePValue()] for details about the associated p-values
+#'
 #' @param objCOTAN A COTAN object
 #' @param clusterization a `vector` or `factor` with the cell clusterization to
 #'   be analysed. If empty, the function will use the last clusterization stored
 #'   in the `objCOTAN`
 #'
-#' @return a list with two objects:
-#'   * the correlation matrix for the genes in each cluster,
-#'   * the corresponding p-values matrix.
+#' @return a `list` with two objects:
+#'   * 'coex'    - the coexpression `data.frame` for the genes in each cluster,
+#'   * 'p-value' - the corresponding p-values `data.frame`.
 #'
 #' @export
 #'
 #' @examples
+#' data("raw.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#'                                          GEO = "S"
+#'                                          sequencingMethod = "10X",
+#'                                          sampleCondition = "Test",
+#'                                          cores = 12,
+#'                                          saveObj = TRUE,
+#'                                          outDir = tempdir())
+#'
+#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
+#'                                    saveObj = TRUE,
+#'                                    outDir = tempdir())
+#' list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN)
+#'
+#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
+#'                               clusters = clusters, coexDF = coexDF)
 #'
 #' @rdname DEAOnClusters
 #'
@@ -41,87 +62,61 @@ DEAOnClusters <- function(objCOTAN, clusterization = NULL) {
 
   muEstimator <- calculateMu(objCOTAN)[noHKFlags, ]
 
-  M <- funProbZero(getDispersion(objCOTAN)[noHKFlags], muEstimator) # matrix of 0 probabilities
+  probZero <- funProbZero(getDispersion(objCOTAN)[noHKFlags], muEstimator)
+
+  numCells <- getNumCells(objCOTAN)
+
+  exp_yes <- rowSums(zeroOne)
+  exp_no  <- numCells - exp_yes
 
   clusters_coex <- data.frame()
   clusters_pval <- data.frame()
 
   for (cl in names(clustersList)) {
     gc()
-    logThis(paste0("Analysis of cluster: '", cl, "' - START"), logLevel = 3)
+    logThis("*", appendLF = FALSE, logLevel = 1)
+    logThis(paste0(" analysis of cluster: '", cl, "' - START"), logLevel = 3)
 
     cellsIn <- getCells(objCOTAN) %in%  clustersList[[cl]]
 
-                  yes_in  <- rowSums(zeroOne[, cellsIn])
-                  yes_out <- rowSums(zeroOne[,!cellsIn])
-                  no_in   <- sum( cellsIn) - yes_in
-                  no_out  <- sum(!cellsIn) - yes_out
+    numCellsIn  <- sum(cellsIn)
+    numCellsOut <- numCells - numCellsIn
 
-                  estimator_no_in   <- rowSums(M[, cellsIn])
-                  estimator_no_out  <- rowSums(M[,!cellsIn])
+    observedYI  <- rowSums(zeroOne[, cellsIn])
 
-                  estimator_yes_in  <- sum( cellsIn) - estimator_no_in
-                  estimator_yes_out <- sum(!cellsIn) - estimator_no_out
+    estimatedNI <- rowSums(probZero[, cellsIn])
+    estimatedNO <- rowSums(probZero[,!cellsIn])
+    estimatedYI <- numCellsIn  - estimatedNI
+    estimatedYO <- numCellsOut - estimatedNO
 
-                  exp_yes <- rowSums(zeroOne)
-                  exp_no <- ncol(zeroOne) - exp_yes
+    coex <- (observedYI  - estimatedYI) / sqrt(numCells) *
+              sqrt(1 / pmax(1, estimatedNI) +
+                   1 / pmax(1, estimatedNO) +
+                   1 / pmax(1, estimatedYI) +
+                   1 / pmax(1, estimatedYO))
 
-                  new_estimator_no_in <- estimator_no_in
-                  new_estimator_no_in[new_estimator_no_in < 1] <- 1
-                  new_estimator_no_out <- estimator_no_out
-                  new_estimator_no_out[new_estimator_no_out < 1] <- 1
+    pValue <- pchisq(coex^2 * numCells, df <- 1, lower.tail <- FALSE)
 
-                  new_estimator_yes_in <- estimator_yes_in
-                  new_estimator_yes_in[new_estimator_yes_in < 1] <- 1
-                  new_estimator_yes_out <- estimator_yes_out
-                  new_estimator_yes_out[new_estimator_yes_out < 1] <- 1
+    if (any(is.na(pValue))) {
+      warning(paste("Got some NA in the p-value",
+                    which(is.na(S), arr.ind = T), collapse = ", "))
+    }
 
-                  dif_no_in <- (as.matrix(no_in) - estimator_no_in)**2/new_estimator_no_in
-                  dif_no_out <- (as.matrix(no_out) - estimator_no_out)**2/new_estimator_no_out
-                  dif_yes_in <- (as.matrix(yes_in) - estimator_yes_in)**2/new_estimator_yes_in
-                  dif_yes_out <- (as.matrix(yes_out) - estimator_yes_out)**2/new_estimator_yes_out
+    rm(estimatedYO, estimatedYI, estimatedNO, estimatedNI)
+    rm(observedYI)
+    gc()
 
-                  S <- dif_no_in + dif_no_out + dif_yes_in + dif_yes_out
+    clusters_coex <- setColumnInDF(clusters_coex, colToSet = coex,
+                                   colName = cl, rowNames = rownames(zeroOne))
+    clusters_pval <- setColumnInDF(clusters_pval, colToSet = pValue,
+                                   colName = cl, rowNames = rownames(zeroOne))
 
-                  rm(dif_yes_out,dif_no_in,dif_no_out,dif_yes_in)
-                  gc()
-
-                  if (any(is.na(S))) {
-                      print(paste("Error: some NA in matrix S",
-                                  which(is.na(S), arr.ind = T)))
-                      break()
-                  }
-
-                  logThis(paste0("Analysis of cluster: '", cl, "' - calculating p-values"), logLevel = 3)
-
-                  p_value <- as.data.frame(pchisq(as.matrix(S), df<-1, lower.tail<-F))
-
-                  gc()
-
-                  coex <- ((as.matrix(yes_in) - as.matrix(estimator_yes_in))/as.matrix(new_estimator_yes_in)) +
-                      ((as.matrix(no_out) - as.matrix(estimator_no_out))/as.matrix(new_estimator_no_out)) -
-                      ((as.matrix(yes_out) - as.matrix(estimator_yes_out))/as.matrix(new_estimator_yes_out)) -
-                      ((as.matrix(no_in) - as.matrix(estimator_no_in))/as.matrix(new_estimator_no_in))
-
-                  rm(yes_in, yes_out,no_out,no_in)
-                  rm(estimator_yes_out,estimator_yes_in, estimator_no_out, estimator_no_in)
-                  gc()
-
-                  coex <- coex / sqrt(1/new_estimator_yes_in + 1/new_estimator_no_in + 1/new_estimator_yes_out + 1/new_estimator_no_out)
-
-                  coex <- coex/sqrt(getNumCells(objCOTAN))
-                  coex <- as.data.frame(coex)
-
-                  clusters_coex <- setColumnInDF(clusters_coex, colToSet = coex,
-                                                 colName = cl, rowNames = rownames(zeroOne))
-                  clusters_pval <- setColumnInDF(clusters_pval, colToSet = p_value,
-                                                 colName = cl, rowNames = rownames(zeroOne))
-
-    logThis(paste0("Analysis of cluster: '", cl, "' - DONE"), logLevel = 3)
+    logThis(paste0("* analysis of cluster: '", cl, "' - DONE"), logLevel = 3)
   }
+  logThis("", logLevel = 1)
 
   logThis("Differential Expression Analysis - DONE", logLevel = 2)
 
-  return(list(clusters_coex, clusters_pval))
+  return( list("coex" = clusters_coex, "p-value" = clusters_pval) )
 }
 
