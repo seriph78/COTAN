@@ -74,7 +74,7 @@ setMethod("merge_cell.clusters","COTAN",
               cl1_not_mergeable_old <- cl1_not_mergeable
 
               #merge small cluster based on distances
-              D_sim <- cosine.dissimilarity(as.matrix(getClustersCoex(obj)[[length(getClustersCoex(obj))]]))
+              D_sim <- cosineDissimilarity(as.matrix(getClustersCoex(obj)[[length(getClustersCoex(obj))]]))
 
               tree <- stats::hclust(D_sim,method = "ward.D2")
               #plot(tree)
@@ -138,10 +138,10 @@ setMethod("merge_cell.clusters","COTAN",
                                                            saveObj = FALSE,
                                                            outDir = out_dir)
 
-                GDI_data_wt1 = calculateGDI(merged.obj)
+                GDI.data = calculateGDI(merged.obj)
 
                 #Test if the number of genes with GDI > 1.5 is more than 1%
-                if (dim(GDI_data_wt1[GDI_data_wt1$GDI >= 1.5,])[1]/dim(GDI_data_wt1)[1] > 0.01) {
+                if (dim(GDI.data[GDI.data$GDI >= 1.5,])[1]/dim(GDI.data)[1] > 0.01) {
                   print(paste("Clusters", cl.1, "and", cl.2, "too high GDI!"))
                   cl1_not_mergeable <- c(cl1_not_mergeable,cl.1)
                   cl2_not_mergeable <- c(cl2_not_mergeable,cl.2)
@@ -162,22 +162,22 @@ setMethod("merge_cell.clusters","COTAN",
                 }
 
 
-                GDI_data_wt1$color = "normal"
-                genes.to.label = GDI_data_wt1[order(GDI_data_wt1$GDI,decreasing = T),][1:20,]
+                GDI.data$color = "normal"
+                genes.to.label = GDI.data[order(GDI.data$GDI,decreasing = T),][1:20,]
 
-                #genes.to.label = rbind(genes.to.label,GDI_data_wt1[more_genes,])
+                #genes.to.label = rbind(genes.to.label,GDI.data[more_genes,])
                 genes.to.label$color = "dif"
                 #genes.to.label[more_genes,]$color = "mk"
-                GDI_data_wt1[rownames(genes.to.label),]$color = "dif"
-                #GDI_data_wt1[more_genes,]$color = "mk"
+                GDI.data[rownames(genes.to.label),]$color = "dif"
+                #GDI.data[more_genes,]$color = "mk"
 
                 # from here it is just a plot example
                 mycolours <- c("dif" = "#3C5488B2","normal"="#F39B7FE5","hk"="#7E6148B2","mk"="#E64B35B2")
 
-                GDI_plot_wt1 <- ggplot(subset(GDI_data_wt1, !rownames(GDI_data_wt1) %in% unique(rownames(genes.to.label))),
+                GDI_plot <- ggplot(subset(GDI.data, !rownames(GDI.data) %in% unique(rownames(genes.to.label))),
                                        aes(x = sum.raw.norm, y = GDI)) +
                                 geom_point(alpha = 0.4, color = "#8491B4B2", size = 2) +
-                                geom_point(data = subset(GDI_data_wt1, rownames(GDI_data_wt1) %in% c(rownames(genes.to.label), "Lhx1os", "5330434G04Rik")),
+                                geom_point(data = subset(GDI.data, rownames(GDI.data) %in% rownames(genes.to.label)),
                                                          aes(x = sum.raw.norm, y = GDI, color = color), alpha = 1, size = 2) +
                                 # geom_hline(yintercept = quantile(GDI$GDI)[4], linetype = "dashed", color = "darkblue") +
                                 # geom_hline(yintercept = quantile(GDI$GDI)[3], linetype = "dashed", color = "darkblue") +
@@ -186,16 +186,19 @@ setMethod("merge_cell.clusters","COTAN",
                                 scale_fill_manual("color", values = mycolours)  +
                                 xlab("log normalized counts") +
                                 ylab("GDI") +
-                                geom_label_repel(data = genes.to.label,
+                                geom_label(data = genes.to.label,
                                                  aes(x = sum.raw.norm, y = GDI,
                                                      label = rownames(genes.to.label), fill = color),
                                                  label.size = NA, alpha = 0.5,
-                                                 direction = "both", na.rm = TRUE, seed = 1234) +
-                                ggtitle(paste(cond.merge, getNumCells(obj))) +
+                                                 #direction = "both", 
+                                           na.rm = TRUE, 
+                                           #seed = 1234
+                                           ) +
+                                ggtitle(paste(cond.merge,"- cell number: ", getNumCells(merged.obj))) +
                                 plotTheme("GDI", textSize = 12)
 
                 pdf(paste0(dir, cond.merge, ".GDI_plots.pdf"), onefile=TRUE)
-                plot(GDI_plot_wt1)
+                plot(GDI_plot)
                 graphics.off()
 
                 rm(merged.obj)
