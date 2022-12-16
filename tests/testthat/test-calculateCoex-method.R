@@ -74,6 +74,15 @@ test_that("Calculations on genes", {
                matrix(getNumCells(obj), nrow = getNumGenes(obj), ncol = getNumGenes(obj)),
                ignore_attr = TRUE)
 
+  g1 <- getGenes(obj)[sample(10, 1)]
+  g2 <- getGenes(obj)[sample(10, 1)]
+  list[gpObs, gpExp] <- contingencyTables(obj, g1, g2)
+
+  expect_equal(as.vector(gpObs), c(observedYY[g1, g2], observedNY[g1, g2],
+                                   observedYN[g1, g2], observedNN[g1, g2]))
+  expect_equal(as.vector(gpExp), c(expectedYY[g1, g2], expectedNY[g1, g2],
+                                   expectedYN[g1, g2], expectedNN[g1, g2]))
+
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
   expect_equal(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2))

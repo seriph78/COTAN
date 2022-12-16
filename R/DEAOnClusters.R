@@ -82,18 +82,18 @@ DEAOnClusters <- function(objCOTAN, clusterization = NULL) {
     numCellsIn  <- sum(cellsIn)
     numCellsOut <- numCells - numCellsIn
 
-    observedYI  <- rowSums(zeroOne[, cellsIn])
+    observedYI <- rowSums(zeroOne[, cellsIn])
 
-    estimatedNI <- rowSums(probZero[, cellsIn])
-    estimatedNO <- rowSums(probZero[,!cellsIn])
-    estimatedYI <- numCellsIn  - estimatedNI
-    estimatedYO <- numCellsOut - estimatedNO
+    expectedNI <- rowSums(probZero[, cellsIn])
+    expectedNO <- rowSums(probZero[,!cellsIn])
+    expectedYI <- numCellsIn  - expectedNI
+    expectedYO <- numCellsOut - expectedNO
 
-    coex <- (observedYI  - estimatedYI) / sqrt(numCells) *
-              sqrt(1 / pmax(1, estimatedNI) +
-                   1 / pmax(1, estimatedNO) +
-                   1 / pmax(1, estimatedYI) +
-                   1 / pmax(1, estimatedYO))
+    coex <- (observedYI  - expectedYI) / sqrt(numCells) *
+              sqrt(1 / pmax(1, expectedNI) +
+                   1 / pmax(1, expectedNO) +
+                   1 / pmax(1, expectedYI) +
+                   1 / pmax(1, expectedYO))
 
     pValue <- pchisq(coex^2 * numCells, df <- 1, lower.tail <- FALSE)
 
@@ -102,7 +102,7 @@ DEAOnClusters <- function(objCOTAN, clusterization = NULL) {
                     which(is.na(S), arr.ind = T), collapse = ", "))
     }
 
-    rm(estimatedYO, estimatedYI, estimatedNO, estimatedNI)
+    rm(expectedYO, expectedYI, expectedNO, expectedNI)
     rm(observedYI)
     gc()
 

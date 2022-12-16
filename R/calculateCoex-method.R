@@ -265,6 +265,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
       expectedNN <- crossprod(probZero)
       expectedN  <- colSums(probZero)
     }
+    rownames(expectedNN) <- colnames(expectedNN) <- getCells(objCOTAN)
   } else {
     # dimension n x n (n number of genes)
     if (isTRUE(optimizeForSpeed)) {
@@ -275,6 +276,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
       expectedNN <- tcrossprod(probZero)
       expectedN  <- rowSums(probZero)
     }
+    rownames(expectedNN) <- colnames(expectedNN) <- getGenes(objCOTAN)
   }
   rm(probZero)
 
@@ -411,6 +413,91 @@ expectedContingencyTables <- function(objCOTAN,
                "expectedNY" = expectedNY,
                "expectedYN" = expectedYN,
                "expectedYY" = expectedYY) )
+}
+
+
+
+#' contingencyTables
+#'
+#' @description This function returns the observed and expected contingency
+#'   tables for a given pair of genes.
+#'
+#' @details This code mimics the code to calculate the contingency tables from
+#'   [observedContingencyTables()] and [expectedContingencyTables()], but
+#'   restricted to only the relevant genes and thus much faster and less memory
+#'   intensive
+#'
+#' @param objCOTAN The cotan object
+#' @param g1 A gene
+#' @param g2 Another gene
+#'
+#' @return A list containing the observed and expected contingency tables
+#'
+#' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+#' g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+#' list[oct , ect] <- contingencyTables(object = objCOTAN, g1 = g1, g2 = g2)
+#'
+#' @rdname contingencyTables
+#'
+contingencyTables <- function(objCOTAN, g1, g2) {
+  genes <- getGenes(objCOTAN)
+  numCells <- getNumCells(objCOTAN)
+
+  stopifnot("the first gene is unknown"  = (c(g1) %in% genes))
+  stopifnot("the second gene is unknown" = (c(g2) %in% genes))
+
+  dimnames <- list(c(paste(g2, "yes", sep = "."), paste(g2, "no", sep = ".")),
+                   c(paste(g1, "yes", sep = "."), paste(g1, "no", sep = ".")))
+
+  #-------------------------------------------------
+
+  zeroOne <- sign(getRawData(objCOTAN)[c(g1, g2), ])
+  rownames(zeroOne) <- c(g1, g2)
+
+  observedYY <- tcrossprod(zeroOne)
+  observedY  <- rowSums(zeroOne)
+
+  rm(zeroOne)
+  gc()
+
+  observedNY <- t(observedY - observedYY)
+  observedNN <- numCells - observedY - observedNY
+
+  observedCT <- matrix(c(observedYY[g1, g2], observedNY[g2, g1],
+                         observedNY[g1, g2], observedNN[g1, g2]),
+                       ncol = 2, nrow = 2, dimnames = dimnames)
+
+  #-------------------------------------------------
+
+  probZero <- funProbZero(getDispersion(objCOTAN)[c(g1, g2)],
+                          getLambda(objCOTAN)[c(g1, g2)] %o% getNu(objCOTAN))
+  rownames(probZero) <- c(g1, g2)
+
+  if (anyNA(probZero)) {
+    warning("Some NA in estimated probability of zero matrix")
+  }
+
+  expectedNN <- tcrossprod(probZero)
+  expectedN <- rowSums(probZero)
+
+  rm(probZero)
+  gc()
+
+  expectedYN <- t(expectedN - expectedNN)
+  expectedYY <- numCells - expectedN - expectedYN
+
+  expectedCT <- matrix(c(expectedYY[g1, g2], expectedYN[g1, g2],
+                         expectedYN[g2, g1], expectedNN[g1, g2]),
+                       ncol = 2, nrow = 2, dimnames = dimnames)
+
+  #-------------------------------------------------
+
+  return(list("observed" = observedCT, "expected" = expectedCT))
 }
 
 
