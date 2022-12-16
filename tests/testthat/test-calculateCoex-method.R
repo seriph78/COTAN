@@ -25,7 +25,7 @@ test_that("Calculations on genes", {
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
 
   mu <- calculateMu(obj)
 
@@ -55,7 +55,7 @@ test_that("Calculations on genes", {
                matrix(getNumCells(obj), nrow = getNumGenes(obj), ncol = getNumGenes(obj)),
                ignore_attr = TRUE)
 
-  obj <- estimateDispersionBisection(obj, step = 4, cores = 4)
+  obj <- estimateDispersionBisection(obj, cores = 4, chunkSize = 4)
 
   list[expectedNN, expectedN] <-
     expectedContingencyTablesNN(obj, actOnCells = FALSE, asDspMatrices = TRUE)
@@ -95,7 +95,7 @@ test_that("Calculations on cells", {
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
 
   list[observedYY, observedY] <-
     observedContingencyTablesYY(obj, actOnCells = TRUE, asDspMatrices = TRUE)
@@ -116,7 +116,7 @@ test_that("Calculations on cells", {
                matrix(getNumGenes(obj), nrow = getNumCells(obj), ncol = getNumCells(obj)),
                ignore_attr = TRUE)
 
-  obj <- estimateDispersionNuBisection(obj, step = 4, cores = 4,
+  obj <- estimateDispersionNuBisection(obj, cores = 4, chunkSize = 4,
                                        enforceNuAverageToOne = FALSE)
 
   list[expectedNN, expectedN] <-
@@ -164,9 +164,9 @@ test_that("Coex", {
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
 
-  obj <- estimateDispersionNuBisection(obj, step = 4, cores = 4)
+  obj <- estimateDispersionNuBisection(obj, cores = 4, chunkSize = 4)
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
@@ -213,7 +213,7 @@ test_that("Coex vs saved results", {
                                sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
+  obj <- clean(obj)
 
   obj <- estimateDispersionBisection(obj, cores = 12)
 

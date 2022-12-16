@@ -4,14 +4,10 @@
 \alias{cleanPlots}
 \title{cleanPlots}
 \usage{
-cleanPlots(objCOTAN, pcaCells, D)
+cleanPlots(objCOTAN)
 }
 \arguments{
 \item{objCOTAN}{COTAN object}
-
-\item{pcaCells}{pca numeric data}
-
-\item{D}{cluester2 cells' group genes}
 }
 \value{
 lists of ggplot2 plots:
@@ -29,8 +25,8 @@ method.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-list[objCOTAN, data] <- clean(objCOTAN)
-plots <- cleanPlots(objCOTAN, data[["pcaCells"]], data[["D"]])
+objCOTAN <- clean(objCOTAN)
+plots <- cleanPlots(objCOTAN)
 plot(plots[["UDEPlot"]])
 
 }

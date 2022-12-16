@@ -99,17 +99,16 @@ setMethod(
 #'
 #' @details Determines the `dispersion` such that, for each gene, the
 #'   probability of zero count matches the number of observed zeros. It assumes
-#'   [es()] being already run.
+#'   [estimateNuLinear()] being already run.
 #'
-#' It needs to
-#'   be run after [clean()]
+#'   It needs to be run after [clean()]
 #'
 #' @param objCOTAN A `COTAN` object
-#' @param step number of genes to solve in batch in a single core. Default is
-#'   256.
 #' @param threshold minimal solution precision
-#' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param cores number of cores to use. Default is 1.
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#' @param chunkSize number of genes to solve in batch in a single core. Default
+#'   is 1024.
 #'
 #' @returns The updated `COTAN` object
 #'
@@ -121,7 +120,7 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' dispersion <- getDispersion(objCOTAN)
 #'
@@ -130,8 +129,8 @@ setMethod(
 setMethod(
   "estimateDispersionBisection",
   "COTAN",
-  function(objCOTAN, step = 512, threshold = 0.001,
-           maxIterations = 1000, cores = 1) {
+  function(objCOTAN, threshold = 0.001, cores = 1,
+           maxIterations = 100, chunkSize = 1024) {
     logThis("Estimate dispersion: START", logLevel = 2)
 
     if (Sys.info()['sysname'] == "Windows" && cores != 1) {
@@ -141,17 +140,22 @@ setMethod(
     }
 
     genes <- getGenes(objCOTAN)
-    zeroOneMatrix <- getZeroOneProj(objCOTAN)
-    muEstimator <- calculateMu(objCOTAN)
+    sumZeros <- set_names(getNumCells(objCOTAN) -
+                            rowSums(getZeroOneProj(objCOTAN)[genes, , drop = FALSE]),
+                          genes)
+    lambda <- getLambda(objCOTAN)
+    nu <- getNu(objCOTAN)
 
     dispList <- list()
 
-    spIdx <- parallel::splitIndices(length(genes), ceiling(length(genes) / step))
+    spIdx <- parallel::splitIndices(length(genes), ceiling(length(genes) / chunkSize))
 
     spGenes = lapply(spIdx, function(x) genes[x])
 
     numSplits <- length(spGenes)
     splitStep <- max(16, cores * 2)
+
+    gc()
 
     pBegin <- 1
     while (pBegin <= numSplits) {
@@ -165,8 +169,9 @@ setMethod(
         res  <- parallel::mclapply(
                   spGenes[pBegin:pEnd],
                   parallelDispersionBisection,
-                  zeroOneMatrix = zeroOneMatrix,
-                  muEstimator = muEstimator,
+                  sumZeros = sumZeros,
+                  lambda = lambda,
+                  nu = nu,
                   threshold = threshold,
                   maxIterations = maxIterations,
                   mc.cores = cores)
@@ -175,8 +180,9 @@ setMethod(
         res  <- lapply(
                   spGenes[pBegin:pEnd],
                   parallelDispersionBisection,
-                  zeroOneMatrix = zeroOneMatrix,
-                  muEstimator = muEstimator,
+                  sumZeros = sumZeros,
+                  lambda = lambda,
+                  nu = nu,
                   threshold = threshold,
                   maxIterations = maxIterations)
       }
@@ -227,11 +233,11 @@ setMethod(
 #'   [estimateDispersionBisection()] being already run.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param step number of genes to solve in batch in a single core. Default is
-#'   256.
 #' @param threshold minimal solution precision
-#' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param cores number of cores to use. Default is 1.
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#' @param chunkSize number of genes to solve in batch in a single core. Default
+#'   is 1024.
 #'
 #' @return the updated `COTAN` object
 #'
@@ -245,7 +251,7 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
 #' nu <- getNu(objCOTAN)
@@ -255,8 +261,8 @@ setMethod(
 setMethod(
   "estimateNuBisection",
   "COTAN",
-  function(objCOTAN, step = 512, threshold = 0.001,
-           maxIterations = 1000, cores = 1) {
+  function(objCOTAN, threshold = 0.001, cores = 1,
+           maxIterations = 100, chunkSize = 1024) {
     logThis("Estimate nu: START", logLevel = 2)
 
     if (Sys.info()['sysname'] == "Windows" && cores != 1) {
@@ -277,18 +283,23 @@ setMethod(
     # only genes not in housekeeping are used (to align to dispersion vector)
     cells <- getCells(objCOTAN)
     zeroOneMatrix <- getZeroOneProj(objCOTAN)
+    sumZeros <- set_names(getNumGenes(objCOTAN) -
+                            colSums(zeroOneMatrix[, cells, drop = FALSE]),
+                          cells)
     lambda <- getLambda(objCOTAN)
     dispersion <- getDispersion(objCOTAN)
-    oldNu <- getNu(objCOTAN)
+    initialGuess <- getNu(objCOTAN)
 
     nuList <- list()
 
-    spIdx <- parallel::splitIndices(length(cells), ceiling(length(cells) / step))
+    spIdx <- parallel::splitIndices(length(cells), ceiling(length(cells) / chunkSize))
 
     spCells = lapply(spIdx, function(x) cells[x])
 
     numSplits <- length(spCells)
     splitStep <- max(16, cores * 2)
+
+    gc()
 
     pBegin <- 1
     while (pBegin <= numSplits) {
@@ -302,10 +313,10 @@ setMethod(
         res  <- parallel::mclapply(
                   spCells[pBegin:pEnd],
                   parallelNuBisection,
-                  zeroOneMatrix = zeroOneMatrix,
+                  sumZeros = sumZeros,
                   lambda = lambda,
                   dispersion = dispersion,
-                  initialGuess = oldNu,
+                  initialGuess = initialGuess,
                   threshold = threshold,
                   maxIterations = maxIterations,
                   mc.cores = cores)
@@ -314,10 +325,10 @@ setMethod(
         res  <- lapply(
                   spCells[pBegin:pEnd],
                   parallelNuBisection,
-                  zeroOneMatrix = zeroOneMatrix,
+                  sumZeros = sumZeros,
                   lambda = lambda,
                   dispersion = dispersion,
-                  initialGuess = oldNu,
+                  initialGuess = initialGuess,
                   threshold = threshold,
                   maxIterations = maxIterations)
       }
@@ -333,7 +344,7 @@ setMethod(
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
     {
-      if (!identical(nu, oldNu)) {
+      if (!identical(nu, initialGuess)) {
         # flag the coex slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                                datasetTags()[5], FALSE)
@@ -346,7 +357,7 @@ setMethod(
                                         "nu", cells)
 
     {
-      nuChange <- abs(nu - oldNu)
+      nuChange <- abs(nu - initialGuess)
       logThis(paste("nu change (abs)",
                     "| max:",     max(nuChange),
                     "| median: ", median(nuChange),
@@ -359,18 +370,18 @@ setMethod(
 )
 
 
-#'estimateDispersionNuBisection
+#' stimateDispersionNuBisection
 #'
 #' Estimates the 'dispersion' and 'nu' field of a `COTAN` object by running
 #' sequentially a bisection for each parameter. This allows to enforce
-#' `mean('nu') == 1` assumption
-#' Assumes [estimateNuLinear()] being run already
+#' `mean('nu') == 1` assumption Assumes [estimateNuLinear()] being run already
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param step number of genes to solve in batch in a single core. Default is 256.
 #' @param threshold minimal solution precision
-#' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param cores number of cores to use. Default is 1.
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#' @param chunkSize number of genes to solve in batch in a single core. Default
+#'   is 1024.
 #'
 #' @return the updated `COTAN` object
 #'
@@ -383,8 +394,8 @@ setMethod(
 setMethod(
   "estimateDispersionNuBisection",
   "COTAN",
-  function(objCOTAN, step = 512, threshold = 0.001,
-           maxIterations = 1000, cores = 1, enforceNuAverageToOne = FALSE) {
+  function(objCOTAN, threshold = 0.001, cores = 1,
+           maxIterations = 100, chunkSize = 1024, enforceNuAverageToOne = FALSE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
 
     # getNu() would show a warning when no 'nu' present
@@ -396,15 +407,22 @@ setMethod(
 
     iter <- 1
     repeat {
-      objCOTAN <- estimateDispersionBisection(objCOTAN, step = step,
-                                              threshold = threshold,
+      # a smalle threshold is used in order to ensure the global convergence
+      objCOTAN <- estimateDispersionBisection(objCOTAN,
+                                              threshold = threshold / 10,
+                                              cores = cores,
                                               maxIterations = maxIterations,
-                                              cores = cores)
+                                              chunkSize = chunkSize)
 
-      objCOTAN <- estimateNuBisection(objCOTAN, step = step,
-                                      threshold = threshold,
+      gc()
+
+      objCOTAN <- estimateNuBisection(objCOTAN,
+                                      threshold = threshold / 10,
+                                      cores = cores,
                                       maxIterations = maxIterations,
-                                      cores = cores)
+                                      chunkSize = chunkSize)
+
+      gc()
 
       meanNu <- mean(getNu(objCOTAN))
       logThis(paste("Nu mean:", meanNu),
@@ -414,7 +432,7 @@ setMethod(
         if (!is.finite(meanNu)) {
           stopifnot("Cannot have infinite mean 'nu' only after the first loop" <- (iter == 1))
           warning(paste0("Infinite 'nu' found: one of the cells expressed all genes\n",
-                         " Setting 'enforceNuAverageToOne' <- FALSE"))
+                         " Setting 'enforceNuAverageToOne <- FALSE'"))
           enforceNuAverageToOne <- FALSE
         } else {
           objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
@@ -423,17 +441,29 @@ setMethod(
         }
       }
 
-      if (iter >= maxIterations / 100) {
-        stop("Max number of outer iterations reached while finding the solution")
+      if (iter >= maxIterations) {
+        warning(paste("Max number of outer iterations", maxIterations,
+                      "reached while finding the solution"))
+        break
       }
 
       genesMarginals <- rowSums(funProbZero(getDispersion(objCOTAN),
                                             calculateMu(objCOTAN)))
-      solutionFound <- (max(abs(genesMarginals - sumZeros)) < threshold)
 
-      if (solutionFound && (isFALSE(enforceNuAverageToOne) || abs(meanNu - 1) < threshold)) {
+      marginalsErrors <- abs(genesMarginals - sumZeros)
+
+      logThis(paste("Marginal errors | max:", max(marginalsErrors),
+                    "| median", median(marginalsErrors),
+                    "| mean:", mean(marginalsErrors)), logLevel = 2)
+
+      gc()
+
+      if (max(marginalsErrors) < threshold &&
+          (isFALSE(enforceNuAverageToOne) || abs(meanNu - 1) < threshold)) {
         break
       }
+
+      iter <- iter + 1
     }
 
     logThis("Estimate dispersion/nu: DONE", logLevel = 2)

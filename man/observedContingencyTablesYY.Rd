@@ -13,11 +13,11 @@ observedContingencyTablesYY(
 \arguments{
 \item{objCOTAN}{A COTAN object}
 
+\item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
+otherwise for the genes}
+
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
-
-\item{cells}{Boolean; when \code{TRUE} the function works for the cells,
-otherwise for the genes}
 }
 \value{
 A \code{list} with the 'Yes/Yes' observed contingency table and the 'Yes'

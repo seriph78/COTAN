@@ -44,7 +44,7 @@ is the number of genes/cells depending on \code{actOnCells} being
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 

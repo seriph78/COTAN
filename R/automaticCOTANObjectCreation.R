@@ -68,10 +68,10 @@ automaticCOTANObjectCreation <-
     #--------------------------------------
     logThis("Cotan analysis functions started", logLevel = 1)
 
-    list[obj, data] <- clean(obj, calcExtraData = saveObj)
+    obj <- clean(obj)
 
     if (isTRUE(saveObj)) {
-      plots <- cleanPlots(obj, data[["pcaCells"]], data[["D"]])
+      plots <- cleanPlots(obj)
 
       if (!file.exists(outDir)) {
         dir.create(file.path(outDir))

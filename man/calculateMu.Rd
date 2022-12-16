@@ -18,7 +18,7 @@ Calculate the vector \eqn{\mu = \lambda \times \nu^T}
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 mu <- calculateMu(objCOTAN)
 

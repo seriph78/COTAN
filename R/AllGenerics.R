@@ -1,4 +1,9 @@
 
+setGeneric(
+  "geneSetEnrichment",
+  function(objCOTAN, expression.cl, genes) standardGeneric("geneSetEnrichment")
+)
+
 # -------------------------------------- calculate coex
 
 setGeneric(
@@ -177,7 +182,7 @@ setGeneric(
 
 setGeneric(
   "clean",
-  function(objCOTAN, calcExtraData = TRUE) standardGeneric("clean")
+  function(objCOTAN) standardGeneric("clean")
 )
 
 setGeneric(
@@ -218,27 +223,21 @@ setGeneric(
 
 setGeneric(
   "estimateDispersionBisection",
-  function(objCOTAN, step = 256, threshold = 0.001,
-           maxIterations = 1000, cores = 1)
+  function(objCOTAN, threshold = 0.001, cores = 1,
+           maxIterations = 50, chunkSize = 1024)
     standardGeneric("estimateDispersionBisection")
 )
 
 setGeneric(
   "estimateNuBisection",
-  function(objCOTAN, step = 256, threshold = 0.001,
-           maxIterations = 1000, cores = 1)
+  function(objCOTAN, threshold = 0.001, cores = 1,
+           maxIterations = 50, chunkSize = 1024)
     standardGeneric("estimateNuBisection")
 )
 
 setGeneric(
   "estimateDispersionNuBisection",
-  function(objCOTAN, step = 256, threshold = 0.001,
-           maxIterations = 1000, cores = 1, enforceNuAverageToOne = FALSE)
+  function(objCOTAN, threshold = 0.001, cores = 1,
+           maxIterations = 50, chunkSize = 1024, enforceNuAverageToOne = FALSE)
     standardGeneric("estimateDispersionNuBisection")
 )
-
-setGeneric(
-  "geneSetEnrichment",
-  function(objCOTAN, expression.cl, genes) standardGeneric("geneSetEnrichment")
-)
-

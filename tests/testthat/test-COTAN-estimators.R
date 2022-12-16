@@ -24,9 +24,9 @@ test_that("Bisection estimates", {
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
 
-  obj <- estimateDispersionBisection(obj, step = 2, cores = 3)
+  obj <- estimateDispersionBisection(obj, cores = 3, chunkSize = 2)
 
   expect_equal(length(getDispersion(obj)), getNumGenes(obj))
   expect_equal(getDispersion(obj)[1], -Inf, ignore_attr = TRUE)
@@ -35,7 +35,7 @@ test_that("Bisection estimates", {
               rep(getNumCells(obj), getNumGenes(obj)),
               tolerance = 0.001, ignore_attr = TRUE)
 
-  obj <- estimateNuBisection(obj, step = 3, cores = 6)
+  obj <- estimateNuBisection(obj, cores = 6, chunkSize = 3)
 
   expect_equal(length(getNu(obj)), getNumCells(obj))
 

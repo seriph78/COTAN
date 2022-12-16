@@ -6,7 +6,7 @@ test_that("COTAN getters", {
 
   obj <- COTAN(raw = raw)
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
-  obj <- clean(obj, calcExtraData = FALSE)[[1]]
+  obj <- clean(obj)
   obj <- estimateDispersionBisection(obj)
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
   obj <- calculateCoex(obj, actOnCells = TRUE,  optimizeForSpeed = TRUE)

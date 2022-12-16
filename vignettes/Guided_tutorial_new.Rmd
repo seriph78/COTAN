@@ -132,9 +132,8 @@ if(!file.exists(paste0(out_dir, "cleaning"))){
 ```
 
 ```{r}
-list[obj, data] <- clean(obj)
-list[cluster1, cluster2, D, pcaCells] <- data
-list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj, pcaCells, D)
+obj <- clean(obj)
+list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -162,9 +161,8 @@ obj = dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 
 gc()
 
-list[obj, data] <- clean(obj)
-list[cluster1, cluster2, D, pcaCells] <- data
-list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj, pcaCells, D)
+obj <- clean(obj)
+list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -244,9 +242,8 @@ obj <- dropGenesCells(obj, genes = c(), cells = cellsToRemove)
 Repeat the estimation after the cells are removed
 
 ```{r}
-list[obj, data] <- clean(obj)
-list[cluster1, cluster2, D, pcaCells] <- data
-list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj, pcaCells, D)
+obj <- clean(obj)
+list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -301,7 +298,8 @@ obj <- addClusterization(obj, clName = "test", clusters = clusters)
 Than we can perform a sort of differential expression to detect which genes are enriched or depleted in each cluster.
 
 ```{r}
-list[obj, pval] <- DEA_on_clusters(obj)
+list[coexDF, pvalDF] <- DEAOnClusters(obj)
+obj <- addClusterizationCoex(obj, clName = "test", coexDF = coex)
 ```
 
 Using the cluster distance, based on the whole transcriptome, we can ththenheck if any of the closest clusters can form a still hohomogeneousigger cluster. We will keep this clusterization for the forther analysis.

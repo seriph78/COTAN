@@ -6,11 +6,10 @@ test_that("clean COTAN object", {
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  list[obj, data] <- clean(obj, calcExtraData = TRUE)
+  obj <- clean(obj)
 
   expect_true(validObject(obj))
 
-  expect_equal(names(data), c("cluster1", "cluster2", "D", "pcaCells"))
   expect_equal(colnames(getMetadataCells(obj)), c("nu", "feCells"))
   expect_equal(colnames(getMetadataGenes(obj)), c("lambda","hkGenes"))
 })
@@ -23,7 +22,7 @@ test_that("Clean on test dataset", {
                                sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
+  obj <- clean(obj)
 
   obj <- estimateDispersionBisection(obj, cores = 12)
 

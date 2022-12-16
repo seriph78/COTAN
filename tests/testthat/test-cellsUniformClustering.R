@@ -9,7 +9,7 @@ test_that("Cell Uniform Clustering", {
                                sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj, calcExtraData = FALSE)[["objCOTAN"]]
+  obj <- clean(obj)
 
   obj <- estimateDispersionBisection(obj, cores = 12)
 
@@ -44,7 +44,7 @@ test_that("Cell Uniform Clustering", {
     temp.obj <- dropGenesCells(objCOTAN = obj,
                                cells = getCells(obj)[cellsToDrop])
 
-    temp.obj <- clean(temp.obj, calcExtraData = FALSE)[["objCOTAN"]]
+    temp.obj <- clean(temp.obj)
 
     temp.obj <- estimateDispersionBisection(temp.obj, cores = 12)
     temp.obj <- calculateCoex(temp.obj)

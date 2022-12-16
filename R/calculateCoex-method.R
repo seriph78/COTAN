@@ -14,7 +14,7 @@
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' mu <- calculateMu(objCOTAN)
 #'
@@ -234,7 +234,7 @@ observedContingencyTables <- function(objCOTAN,
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' list[expNN, expN] <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
 #'
@@ -327,7 +327,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 #'
@@ -462,7 +462,7 @@ expectedContingencyTables <- function(objCOTAN,
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
@@ -694,7 +694,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' GDI <- calculateGDI(objCOTAN)
@@ -773,7 +773,7 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)[["objCOTAN"]]
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' pValue <- calculatePValue(objCOTAN)

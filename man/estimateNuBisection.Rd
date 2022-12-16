@@ -6,23 +6,23 @@
 \usage{
 \S4method{estimateNuBisection}{COTAN}(
   objCOTAN,
-  step = 512,
   threshold = 0.001,
-  maxIterations = 1000,
-  cores = 1
+  cores = 1,
+  maxIterations = 100,
+  chunkSize = 1024
 )
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{step}{number of genes to solve in batch in a single core. Default is
-256.}
-
 \item{threshold}{minimal solution precision}
+
+\item{cores}{number of cores to use. Default is 1.}
 
 \item{maxIterations}{max number of iterations (avoids infinite loops)}
 
-\item{cores}{number of cores to use. Default is 1.}
+\item{chunkSize}{number of genes to solve in batch in a single core. Default
+is 1024.}
 }
 \value{
 the updated \code{COTAN} object
@@ -38,7 +38,7 @@ probability of zero count matches the number of observed zeros. It assumes
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- clean(objCOTAN, calcExtraData = FALSE)
+objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
 nu <- getNu(objCOTAN)
