@@ -88,6 +88,8 @@ cleanPlots <- function(objCOTAN) {
   groups[pos1] <- "A"
   groups[pos2] <- "B"
 
+  pcaCells <- cbind(pcaCells, groups)
+  
   logThis("Hierarchical clustering: DONE", logLevel = 2)
   gc()
 
@@ -131,15 +133,22 @@ cleanPlots <- function(objCOTAN) {
                   scale_color_manual("groups", values = c("A" = "#8491B4B2", "B"="#E64B35FF")) +
                   plotTheme("pca")
 
-  minN <- max(D[["n"]])- 15
-  genesPlot    <- ggplot(D, aes(x = n, y = means)) +
-                  ggtitle(label = "B cell group genes mean expression",
-                          subtitle = " - B group NOT removed -") +
-                  geom_text_repel(data = subset(D, n > minN),
-                        aes(n, means, label = rownames(D[D[["n"]] > minN,])),
-                        nudge_y = 0.05, nudge_x = 0.05, direction = "x",
-                        angle = 90, vjust = 0, segment.size = 0.2) +
-                  plotTheme("genes")
+  minN <- min(D[["n"]])+ 15
+genesPlot    <- ggplot(D, aes(x = n, y = means)) + geom_point()+
+                ggtitle(label = "B cell group genes mean expression",
+                        subtitle = " - B group NOT removed -") +
+                geom_label(data = subset(D, n < minN),
+                      aes(n, means, label = rownames(D[D[["n"]] < minN,])),
+                      #nudge_y = 0.05, 
+                      nudge_x = 400    
+                      #direction = "x",
+                      #angle = 90, 
+                      #vjust = 0, 
+                      #segment.size = 0.2
+                      ) +
+                plotTheme("genes")+
+  theme(plot.title = element_text(hjust = 1),
+        plot.subtitle = element_text(hjust = 0.95,vjust = -25))
 
 
   nuEst = round(getNu(objCOTAN), digits = 7)

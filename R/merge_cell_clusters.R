@@ -198,6 +198,7 @@ setMethod("merge_cell.clusters","COTAN",
 
                 pdf(file.path(dir, paste0(cond.merge, ".GDI_plots.pdf")), onefile=TRUE)
                 plot(GDI_plot)
+
                 graphics.off()
 
                 rm(merged.obj)
