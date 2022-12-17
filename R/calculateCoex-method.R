@@ -385,7 +385,6 @@ expectedContingencyTables <- function(objCOTAN,
   }
   rm(probZero)
   gc()
-  logThis(" done", logLevel = 3)
 
   expectedYY <- forceSymmetric(as(expectedYY, "denseMatrix"))
 
@@ -408,6 +407,7 @@ expectedContingencyTables <- function(objCOTAN,
       expectedNY <- t(expectedYN)
     }
   }
+  logThis(" done", logLevel = 3)
 
   return( list("expectedNN" = expectedNN,
                "expectedNY" = expectedNY,

@@ -74,14 +74,17 @@ test_that("Calculations on genes", {
                matrix(getNumCells(obj), nrow = getNumGenes(obj), ncol = getNumGenes(obj)),
                ignore_attr = TRUE)
 
-  g1 <- getGenes(obj)[sample(10, 1)]
-  g2 <- getGenes(obj)[sample(10, 1)]
+  # take a gene pair ensuring to poll only the upper triangle side of the matrices
+  # as the flag 'asDspMatrices = TRUE' makes them incorrect on the other side
+  e1 <- sample(10, 1); e2 <- sample(10, 1)
+  g1 <- getGenes(obj)[min(e1, e2)]
+  g2 <- getGenes(obj)[max(e1, e2)]
   list[gpObs, gpExp] <- contingencyTables(obj, g1, g2)
 
-  expect_equal(as.vector(gpObs), c(observedYY[g1, g2], observedNY[g1, g2],
-                                   observedYN[g1, g2], observedNN[g1, g2]))
-  expect_equal(as.vector(gpExp), c(expectedYY[g1, g2], expectedNY[g1, g2],
-                                   expectedYN[g1, g2], expectedNN[g1, g2]))
+  expect_equal(as.vector(gpObs), c(observedYY[g1, g2], observedYN[g1, g2],
+                                   observedNY[g1, g2], observedNN[g1, g2]))
+  expect_equal(as.vector(gpExp), c(expectedYY[g1, g2], expectedYN[g1, g2],
+                                   expectedNY[g1, g2], expectedNN[g1, g2]))
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
