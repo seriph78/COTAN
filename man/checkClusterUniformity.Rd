@@ -14,7 +14,7 @@ checkClusterUniformity(
 )
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{clName}{the tag of the cluster}
 

@@ -7,7 +7,7 @@
 calculateS(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{geneSubsetCol}{an array of genes. It will be put in columns.
 If left empty the function will do it genome-wide.}

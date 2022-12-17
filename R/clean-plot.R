@@ -3,9 +3,9 @@
 #' @description Retrieves the plots associated to the output of the [clean()]
 #'   method.
 #'
-#' @param objCOTAN COTAN object
+#' @param objCOTAN a `COTAN` object
 #'
-#' @returns lists of ggplot2 plots:
+#' @returns a `list` of `ggplot2` plots:
 #'   * "pcaCells" is for pca cells,
 #'   * "genes" is for cluester2 cells' group genes,
 #'   * "UDE" is for cell UDE,
@@ -89,7 +89,7 @@ cleanPlots <- function(objCOTAN) {
   groups[pos2] <- "B"
 
   pcaCells <- cbind(pcaCells, groups)
-  
+
   logThis("Hierarchical clustering: DONE", logLevel = 2)
   gc()
 
@@ -139,11 +139,11 @@ genesPlot    <- ggplot(D, aes(x = n, y = means)) + geom_point()+
                         subtitle = " - B group NOT removed -") +
                 geom_label(data = subset(D, n < minN),
                       aes(n, means, label = rownames(D[D[["n"]] < minN,])),
-                      #nudge_y = 0.05, 
-                      nudge_x = 400    
+                      #nudge_y = 0.05,
+                      nudge_x = 400
                       #direction = "x",
-                      #angle = 90, 
-                      #vjust = 0, 
+                      #angle = 90,
+                      #vjust = 0,
                       #segment.size = 0.2
                       ) +
                 plotTheme("genes")+

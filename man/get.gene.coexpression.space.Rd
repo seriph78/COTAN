@@ -10,7 +10,7 @@ get.gene.coexpression.space(object, n.genes.for.marker = 25, primary.markers)
 \S4method{get.gene.coexpression.space}{scCOTAN}(object, n.genes.for.marker = 25, primary.markers)
 }
 \arguments{
-\item{object}{The COTAN object.}
+\item{object}{a \code{COTAN} object.}
 
 \item{n.genes.for.marker}{The number of genes correlated with the primary markers that
 we want to consider.

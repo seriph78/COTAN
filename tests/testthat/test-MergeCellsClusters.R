@@ -10,11 +10,7 @@ test_that("Merge Cells Clusters", {
                                sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj)
-
-  obj <- estimateDispersionBisection(obj, cores = 12)
-
-  obj <- calculateCoex(obj)
+  obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
   clusters <- c(readRDS(file.path(getwd(), "clusters1.RDS")), NA, NA)
 
@@ -66,12 +62,7 @@ test_that("Merge Cells Clusters", {
 
     temp.obj <- dropGenesCells(obj, cells = cellsToDrop)
 
-    temp.obj <- clean(temp.obj)
-
-    temp.obj <- estimateDispersionBisection(temp.obj, cores = 12)
-    gc()
-
-    temp.obj <- calculateCoex(temp.obj)
+    temp.obj <- proceedToCoex(temp.obj, cores = 12, saveObj = FALSE)
     gc()
 
     GDI_data <- calculateGDI(temp.obj)

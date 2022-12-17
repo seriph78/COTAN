@@ -11,7 +11,7 @@ calculateGDI(objCOTAN, statType = "S")
 it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 (G-test)}
 
-\item{object}{A COTAN object}
+\item{object}{a \code{COTAN} object}
 }
 \value{
 A \code{data.frame} with thr GDI data

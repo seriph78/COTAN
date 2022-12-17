@@ -4,7 +4,7 @@
 \alias{initializeMetaDataset,COTAN-method}
 \title{initializeMetaDataset}
 \usage{
-\S4method{initializeMetaDataset}{COTAN}(objCOTAN, GEO, sequencingMethod = "10X", sampleCondition)
+\S4method{initializeMetaDataset}{COTAN}(objCOTAN, GEO, sequencingMethod, sampleCondition)
 }
 \arguments{
 \item{objCOTAN}{the \code{COTAN} object}

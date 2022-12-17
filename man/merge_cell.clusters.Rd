@@ -26,7 +26,7 @@ merge_cell.clusters(
 )
 }
 \arguments{
-\item{obj}{COTAN object}
+\item{obj}{a \code{COTAN} object}
 
 \item{cond}{sample condition name}
 
@@ -41,10 +41,10 @@ merge_cell.clusters(
 \item{markers}{a list of marker genes. Default NULL}
 }
 \value{
-a COTAN object
+the updated \code{COTAN} object
 }
 \description{
-This function takes in input a COTAN object with an already homogeneous clusters
+This function takes in input a \code{COTAN} object with an already homogeneous clusters
 and, through the cosine distance and the hclust (with ward.D2 method), checks if merging
 two leaf clusters will form a still homogeneous cluster (this is done iteratively).
 All structures are saved on disk.

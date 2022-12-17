@@ -7,7 +7,7 @@
 DEAOnClusters(objCOTAN, clusterization = NULL)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{clusterization}{a \code{vector} or \code{factor} with the cell clusterization to
 be analysed. If empty, the function will use the last clusterization stored

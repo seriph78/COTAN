@@ -3,9 +3,9 @@
 #' @description Main function that can be used to check and clean the dataset.
 #'   It also produces and stores the estimators for nu and lambda
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #'
-#' @returns The updated COTAN object
+#' @returns The updated `COTAN` object
 #'
 #' @export
 #'

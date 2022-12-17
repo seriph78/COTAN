@@ -7,7 +7,7 @@
 observedContingencyTables(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}

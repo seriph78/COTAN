@@ -222,11 +222,7 @@ test_that("Coex vs saved results", {
                                sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj)
-
-  obj <- estimateDispersionBisection(obj, cores = 12)
-
-  obj <- calculateCoex(obj)
+  obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
   genesCoexInSync <- getMetadataElement(obj, datasetTags()[[5]])
   cellsCoexInSync <- getMetadataElement(obj, datasetTags()[[6]])

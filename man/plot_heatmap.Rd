@@ -16,13 +16,13 @@ will be considered}
 
 \item{conditions}{An array of prefixes indicating the different files.}
 
-\item{dir}{The directory in which are all COTAN files (corresponding to the previous prefixes)}
+\item{dir}{The directory in which are all \code{COTAN} files (corresponding to the previous prefixes)}
 }
 \value{
 a ggplot object
 }
 \description{
-This is the function that create the heatmap of one or more COTAN object.
+This is the function that create the heatmap of one or more \code{COTAN} object.
 }
 \examples{
 data("ERCCraw")

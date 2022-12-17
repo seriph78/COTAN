@@ -7,10 +7,10 @@
 \S4method{clean}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 }
 \value{
-The updated COTAN object
+The updated \code{COTAN} object
 }
 \description{
 Main function that can be used to check and clean the dataset.

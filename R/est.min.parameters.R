@@ -2,7 +2,7 @@
 #'
 #' This function estimates the nu and a parameters to minimize the...
 #'
-#' @param object A COTAN object
+#' @param object a `COTAN` object
 #' @param par A vector of inizial a and log(nu)
 #' @importFrom stats nlminb
 #' @return vector

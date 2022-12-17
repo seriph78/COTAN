@@ -10,9 +10,7 @@ dataset.for.test.creation <- function(){
   obj <- initializeMetaDataset(obj, GEO = " ", sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj)
-  obj <- estimateDispersionBisection(obj, cores = 10)
-  obj <- calculateCoex(obj)
+  obj <- proceeeToCoex(obj, cores = 12, saveObj = FALSE)
   saveRDS(obj, file = file.path(tm,"temp.RDS") )
 
   cell.names.test  <- getCells(obj)[c(1:10,2474:2484,4990:5000)]

@@ -6,7 +6,7 @@
 #' (UMI number). It helps to define where to drop "cells" that are simple
 #' background signal.
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param yCut y threshold of library size to drop
 #'
 #' @returns an ECD plot

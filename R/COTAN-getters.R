@@ -1,4 +1,4 @@
-# COTAN objects (read-only) accessors
+# `COTAN` objects (read-only) accessors
 
 #' getRawData
 #'

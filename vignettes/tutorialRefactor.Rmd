@@ -1,5 +1,5 @@
 The purpose of this tutorial is to demonstrate the use 
-of the COTAN framework refactor
+of the `COTAN` framework refactor
 
 In this example a dataset was used for which the clusters with which to group 
 the cells were already known
@@ -21,7 +21,7 @@ sourceFiles <- list.files(path = ".", pattern = "*.R", all.files = TRUE)
 invisible(sapply(sourceFiles, source)) 
 ```
 
-creation of the COTAN object and initialization of the initial parameters
+creation of the `COTAN` object and initialization of the initial parameters
 ```{r}
 # Log-level 2 was chosen to showcase better how the package works
 # In normal usage a level of 0 or 1 is more appropriate 

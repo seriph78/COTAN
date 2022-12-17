@@ -82,7 +82,7 @@ out_dir <- paste0(tempdir(),"/")
 
 # Analytical pipeline
 
-Initialize the COTAN object with the row count table and the metadata for the experiment.
+Initialize the `COTAN` object with the row count table and the metadata for the experiment.
 
 ```{r}
 obj = COTAN(raw = test.dataset.col)
@@ -390,7 +390,7 @@ Sometimes we can also be interested in the numbers present directly in the conti
 get.expected.ct(object = obj,g1 = "EIF3F",g2 = "SLC37A1")
 ```
 
-Another useful function is extract.coex. This can be used to extract the whole or a partial coex matrix from a COTAN object.
+Another useful function is extract.coex. This can be used to extract the whole or a partial coex matrix from a `COTAN` object.
 
 ```{r}
 # For the whole matrix

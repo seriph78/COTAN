@@ -7,14 +7,14 @@
 COTAN(raw = "ANY")
 }
 \arguments{
-\item{raw}{any object that can be converted to a matrix, but with row \link{genes}
-and column \link{cells} names}
+\item{raw}{any object that can be converted to a matrix, but with row (genes)
+and column (cells) names}
 }
 \value{
-a 'COTAN' object
+a \code{COTAN} object
 }
 \description{
-Constructor of the class COTAN
+Constructor of the class \code{COTAN}
 }
 \examples{
 data("raw.dataset")

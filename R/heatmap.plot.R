@@ -3,14 +3,14 @@
 
 #' plot_heatmap
 #'
-#' This is the function that create the heatmap of one or more COTAN object.
+#' This is the function that create the heatmap of one or more `COTAN` object.
 #'
 #' @param p_val.tr p-value threshold. Default is 0.05
 #' @param df_genes this is a list of gene array. The first array will define genes in the columns.
 #' @param sets This is a numeric array indicating from which fields of the previous list
 #' will be considered
 #' @param conditions An array of prefixes indicating the different files.
-#' @param dir The directory in which are all COTAN files (corresponding to the previous prefixes)
+#' @param dir The directory in which are all `COTAN` files (corresponding to the previous prefixes)
 #'
 #' @return a ggplot object
 #'
@@ -170,8 +170,8 @@ setMethod(
 #' Primary markers will be plotted as groups of rows. Markers list will be plotted as columns.
 #' @param prim.markers A set of genes plotted as rows.
 #' @param markers.list A set of genes plotted as columns.
-#' @param dir The directory where the COTAN object is stored.
-#' @param condition The prefix for the COTAN object file.
+#' @param dir The directory where the `COTAN` object is stored.
+#' @param condition The prefix for the `COTAN` object file.
 #' @param p_value The p-value threshold
 #' @param symmetric A boolean: default F. If T the union of prim.markers and marker.list
 #' is sets as both rows and column genes

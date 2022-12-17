@@ -7,7 +7,7 @@
 \S4method{geneSetEnrichment}{COTAN}(objCOTAN, expression.cl, genes)
 }
 \arguments{
-\item{objCOTAN}{a COTAN objCOTANect}
+\item{objCOTAN}{a \code{COTAN} objCOTANect}
 
 \item{expression.cl}{the dataframe for the increased or decreased expression
 of every gene in the cluster compared to the whole background}

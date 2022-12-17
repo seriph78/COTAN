@@ -1,12 +1,12 @@
 
 #' geneSetEnrichment
-#' 
+#'
 #' Function to get a cumulative score of enrichment in a cluster over a gene set
 #'
-#' @param objCOTAN a COTAN objCOTANect
+#' @param objCOTAN a `COTAN` objCOTANect
 #' @param genes a named list of genes
-#' @param expression.cl the dataframe for the increased or decreased expression 
-#' of every gene in the cluster compared to the whole background   
+#' @param expression.cl the dataframe for the increased or decreased expression
+#' of every gene in the cluster compared to the whole background
 #'
 #' @return a dataframe
 #' @export
@@ -35,19 +35,19 @@ setMethod(
         #co <- objCOTAN@cluster_data[unlist(genes[[m]]),ro]
         ex <- expression.cl[rownames(expression.cl) %in% genes[[m]], ro, drop = FALSE]
         ex[ex < 0 & !is.na(ex)] <- 0
-        
+
         for (g in rownames(ex)) {
           occurrencies <- sum(unlist(markers) == g)
-          ex[g,1] <- ex[g,1]/occurrencies 
+          ex[g,1] <- ex[g,1]/occurrencies
         }
-        
-        
+
+
         ex <- 1-exp(- teta * ex)
-        
+
         df[m,ro] <- sum(ex,na.rm = T)/length(genes[[m]])
       }
     }
-    
+
     df <- round(df[2:nrow(df),],digits = 2)
     return(df)
   }

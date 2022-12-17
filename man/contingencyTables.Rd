@@ -7,11 +7,11 @@
 contingencyTables(objCOTAN, g1, g2)
 }
 \arguments{
-\item{objCOTAN}{The cotan object}
+\item{objCOTAN}{a \code{COTAN} object}
 
-\item{g1}{A gene}
+\item{g1}{a gene}
 
-\item{g2}{Another gene}
+\item{g2}{another gene}
 }
 \value{
 A list containing the observed and expected contingency tables
@@ -31,6 +31,6 @@ data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
 g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
 g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-list[oct , ect] <- contingencyTables(object = objCOTAN, g1 = g1, g2 = g2)
+list[oCT, eCT] <- contingencyTables(object = objCOTAN, g1 = g1, g2 = g2)
 
 }

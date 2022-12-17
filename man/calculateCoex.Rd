@@ -7,7 +7,7 @@
 \S4method{calculateCoex}{COTAN}(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
 otherwise for the genes}
@@ -16,7 +16,7 @@ otherwise for the genes}
 parallel algorithms that on the flip side use more memory}
 }
 \value{
-The updated COTAN object
+The updated \code{COTAN} object
 }
 \description{
 This function estimates and stores the \emph{coex} matrix in the

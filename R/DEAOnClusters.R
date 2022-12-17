@@ -10,7 +10,7 @@
 #'   In/Out status of the cells with respect to each cluster.
 #' @seealso [calculatePValue()] for details about the associated p-values
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param clusterization a `vector` or `factor` with the cell clusterization to
 #'   be analysed. If empty, the function will use the last clusterization stored
 #'   in the `objCOTAN`

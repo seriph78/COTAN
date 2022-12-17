@@ -7,7 +7,7 @@
 ECDPlot(objCOTAN, yCut)
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{yCut}{y threshold of library size to drop}
 }

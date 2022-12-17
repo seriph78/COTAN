@@ -1,8 +1,8 @@
 #' emptySparseMatrix
 #'
-#' @description Useful to default initialize COTAN slots
+#' @description Useful to default initialize `COTAN` slots
 #'
-#' @returns an empty matrix of type dgCMatrix
+#' @returns an empty matrix of type `dgCMatrix`
 #'
 #' @importClassesFrom Matrix dgCMatrix
 #'
@@ -14,9 +14,9 @@ emptySparseMatrix <- function() {
 
 #' emptySymmetricMatrix
 #'
-#' @description Useful to default initialize COTAN slots
+#' @description Useful to default initialize `COTAN` slots
 #'
-#' @returns an empty matrix of type dspMatrix
+#' @returns an empty matrix of type `dspMatrix`
 #'
 #' @importClassesFrom Matrix dspMatrix
 #'
@@ -27,14 +27,16 @@ emptySymmetricMatrix <- function() {
 }
 
 
-#' Definition of COTAN class
+#' Definition of the `COTAN` class
 #'
-#' @slot raw raw UMI count matrix 𝑛×𝑚 (gene number × cell number)
-#' @slot genesCoex correlation of COTAN between genes, 𝑛×𝑛
-#' @slot cellsCoex correlation of COTAN between cells, 𝑚×𝑚
-#' @slot metaDataset data.frame
-#' @slot metaCells data.frame
-#' @slot clustersCoex a list of coex data.frames for each clustering in the metaCells
+#' @slot raw `dgCMatrix` - the raw UMI count matrix 𝑛×𝑚 (gene number × cell
+#'   number)
+#' @slot genesCoex `dspMatrix` - the correlation of `COTAN` between genes, 𝑛×𝑛
+#' @slot cellsCoex `dspMatrix` - the correlation of `COTAN` between cells, 𝑚×𝑚
+#' @slot metaDataset `data.frame`
+#' @slot metaCells `data.frame`
+#' @slot clustersCoex a `list` of coex `data.frames` for each clustering in the
+#'   metaCells
 #'
 #' @importFrom rlang is_empty
 #'
@@ -170,12 +172,12 @@ setClass(
 
 #' COTAN
 #'
-#' @description Constructor of the class COTAN
+#' @description Constructor of the class `COTAN`
 #'
-#' @param raw any object that can be converted to a matrix, but with row [genes]
-#'   and column [cells] names
+#' @param raw any object that can be converted to a matrix, but with row (genes)
+#'   and column (cells) names
 #'
-#' @returns a 'COTAN' object
+#' @returns a `COTAN` object
 #'
 #' @importFrom methods new
 #'
@@ -200,24 +202,24 @@ COTAN <- function(raw = "ANY") {
 
 #' scCOTAN-class (for legacy usage)
 #'
-#' Define scCOTAN structure
+#' Define `scCOTAN` structure
 #'
-#' @slot raw ANY. To store the raw data matrix
-#' @slot raw.norm ANY. To store the raw data matrix divided for the cell
+#' @slot raw `ANY`. To store the raw data matrix
+#' @slot raw.norm `ANY`. To store the raw data matrix divided for the cell
 #'   efficiency estimated (nu)
-#' @slot coex ANY. The coex matrix
-#' @slot nu vector.
-#' @slot lambda vector.
-#' @slot a vector.
-#' @slot hk vector.
-#' @slot n_cells numeric.
-#' @slot meta data.frame.
-#' @slot yes_yes ANY. Unused and deprecated. Kept for backward compatibility
+#' @slot coex `ANY`. The coex matrix
+#' @slot nu `vector`.
+#' @slot lambda `vector`.
+#' @slot a `vector`.
+#' @slot hk `vector`.
+#' @slot n_cells `numeric`.
+#' @slot meta `data.frame`.
+#' @slot yes_yes `ANY`. Unused and deprecated. Kept for backward compatibility
 #'   only
-#' @slot clusters vector.
-#' @slot cluster_data data.frame.
+#' @slot clusters `vector`.
+#' @slot cluster_data `data.frame`.
 #'
-#' @returns a 'scCOTAN' object
+#' @returns a `scCOTAN` object
 #'
 #' @export
 #'
@@ -241,14 +243,15 @@ setClass(
   )
 ) -> scCOTAN
 
+
 #' getCOTANSlots
 #'
 #' @description Helper function to be shared by coerce() and replace()
 #'
-#' @param a 'scCOTAN' object
+#' @param a `scCOTAN` object
 #'
-#' @returns a list with all non trivially converted slots of the equivalent
-#'   'COTAN' class
+#' @returns a `list` with all non trivially converted slots of the equivalent
+#'   `COTAN` class
 #'
 #' @importFrom rlang is_empty
 #'
@@ -359,10 +362,10 @@ getCOTANSlots <- function(from) {
   return(list(raw, genesCoex, cellsCoex, metaGenes, metaCells, clustersCoex))
 }
 
-#' setIs(): 'scCOTAN' -> 'COTAN'
+#' setIs():  `scCOTAN` -> `COTAN`
 #'
-#' @description Automatically converts an object from class 'scCOTAN' into
-#'   'COTAN'
+#' @description Automatically converts an object from class `scCOTAN` into
+#'   `COTAN`
 #'
 #' @import gsubfn
 #'
@@ -407,10 +410,10 @@ setIs("scCOTAN",
 #'
 #' @description Helper function to be shared by coerce() and replace()
 #'
-#' @param a 'COTAN' object
+#' @param a `COTAN` object
 #'
-#' @returns a list with all non trivially converted slots of the equivalent
-#'   'scCOTAN' class
+#' @returns a `list` with all non trivially converted slots of the equivalent
+#'   `scCOTAN` class
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
@@ -475,9 +478,9 @@ getScCOTANSlots <- function(from) {
   return(list(raw.norm, nu, lambda, a, hk, clusters, cluster_data))
 }
 
-#' setAs(): 'COTAN' -> 'scCOTAN'
+#' setAs(): `COTAN` -> `scCOTAN`
 #'
-#' @description Explicitly converts an object from class 'COTAN' into 'scCOTAN'
+#' @description Explicitly converts an object from class `COTAN` into `scCOTAN`
 #'
 #' @import gsubfn
 #'

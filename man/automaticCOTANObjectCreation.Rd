@@ -33,19 +33,20 @@ plots to file}
 \item{outDir}{an existing directory for the analysis output.}
 }
 \value{
-It return the COTAN object. It will also store it directly in the
-output directory
+The new \code{COTAN} object with genes' coex calculated. When asked, it
+will also store it, along all relevant clean-plots, in the output
+directory.
 }
 \description{
 automaticCOTANObjectCreation
 }
 \examples{
 data("raw.dataset")
-obj <- automaticCOTANObjectCreation(
+objCOTAN <- automaticCOTANObjectCreation(
   raw = raw.dataset,
-  GEO = "test_GEO",
-  sequencingMethod = "test_method",
-  sampleCondition = "test",
+  GEO = "code",
+  sequencingMethod = "10X",
+  sampleCondition = "mouse dataset",
   saveObj = TRUE,
   outDir = tempdir(),
   cores = 12)

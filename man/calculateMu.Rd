@@ -7,7 +7,7 @@
 \S4method{calculateMu}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 }
 \value{
 The Mu matrix

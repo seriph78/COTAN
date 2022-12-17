@@ -24,11 +24,8 @@
 #' @rdname cellsHeatmapPlot
 #'
 cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
-
   coexMat <- getCellsCoex(objCOTAN)
-  if (is_empty(coexMat)) {
-    stop("cellsCoex filed of the COTAN object is empty")
-  }
+  stopifnot("cells coex not found in the COTAN" <- !is_empty(coexMat))
 
   diag(coexMat) <- 0
 

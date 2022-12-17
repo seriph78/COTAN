@@ -3,7 +3,7 @@
 #' This function perfor the gene clustering based on a pool of gene marker, using the gene
 #' coexpression space
 #'
-#' @param obj a COTAN object
+#' @param obj a `COTAN` object
 #' @param list.group.markers a named list with a name for each group a one or more marker gene for each group.
 #' @param n.markers number of correlated genes to keep as other markers (default 25)
 #' @param k.cuts number of estimated cluster (this define the high for the tree cut)
@@ -34,11 +34,11 @@ setMethod("get.gene.clusters","scCOTAN",
 
    #Dropping not present genes
    for (n in names(list.group.markers)) {
-     list.group.markers[[n]] <- list.group.markers[[n]][list.group.markers[[n]] %in% rownames(obj@raw)] 
-     
+     list.group.markers[[n]] <- list.group.markers[[n]][list.group.markers[[n]] %in% rownames(obj@raw)]
+
    }
    list.group.markers <- list.group.markers[!is.na(list.group.markers[1:length(list.group.markers)])]
-   
+
    g.space <- get.gene.coexpression.space(obj,
                                           n.genes.for.marker = n.markers,
                                           primary.markers = unlist(list.group.markers))
@@ -77,7 +77,7 @@ setMethod("get.gene.clusters","scCOTAN",
     }
     rank.genes <- tmp[,(length(unique(unlist(list.group.markers)))+1):ncol(tmp)]
     colnames(rank.genes) <- stringr::str_split(colnames(rank.genes), pattern ="[.]",simplify = T)[,2]
-    
+
     df.secondary.markers <- matrix(nrow = dim(rank.genes)[1],ncol = length(list.group.markers))
     rownames(df.secondary.markers) <- rownames(rank.genes)
     colnames(df.secondary.markers) <- names(list.group.markers)

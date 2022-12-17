@@ -1,5 +1,11 @@
 
 setGeneric(
+  "proceedToCoex",
+  function(objCOTAN, cores, saveObj = TRUE, outDir = ".")
+    standardGeneric("proceedToCoex")
+)
+
+setGeneric(
   "geneSetEnrichment",
   function(objCOTAN, expression.cl, genes) standardGeneric("geneSetEnrichment")
 )
@@ -155,7 +161,7 @@ setGeneric(
 
 setGeneric(
   "initializeMetaDataset",
-  function(objCOTAN, GEO, sequencingMethod = "10X", sampleCondition) {
+  function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
     standardGeneric("initializeMetaDataset")
   }
 )

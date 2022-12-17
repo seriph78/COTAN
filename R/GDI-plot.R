@@ -2,17 +2,17 @@
 #'
 #' This function directly evaluate and plot the GDI for a sample.
 #'
-#' @param objCOTAN A COTAN object
-#' @param genes A named list of genes to label. Each array will have different
+#' @param objCOTAN a `COTAN` object
+#' @param genes a named `list` of genes to label. Each array will have different
 #'   color.
-#' @param cond A string corresponding to the condition/sample (it is used only
+#' @param cond a string corresponding to the condition/sample (it is used only
 #'   for the title).
-#' @param statType Type of statistic to be used. Default is "S": Pearson's
+#' @param statType type of statistic to be used. Default is "S": Pearson's
 #'   chi-squared test statistics. "G" is G-test statistics
-#' @param GDI.df When the GDI data frame was already calculated, it can be put
-#'   here to speed up the process. Default is NULL.
+#' @param GDI.df when the GDI data frame was already calculated, it can be put
+#'   here to speed up the process (default is `NULL`)
 #'
-#' @returns A ggplot2 object
+#' @returns A `ggplot2` object
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point

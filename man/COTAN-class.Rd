@@ -3,23 +3,25 @@
 \docType{class}
 \name{COTAN-class}
 \alias{COTAN-class}
-\title{Definition of COTAN class}
+\title{Definition of the \code{COTAN} class}
 \description{
-Definition of COTAN class
+Definition of the \code{COTAN} class
 }
 \section{Slots}{
 
 \describe{
-\item{\code{raw}}{raw UMI count matrix 𝑛×𝑚 (gene number × cell number)}
+\item{\code{raw}}{\code{dgCMatrix} - the raw UMI count matrix 𝑛×𝑚 (gene number × cell
+number)}
 
-\item{\code{genesCoex}}{correlation of COTAN between genes, 𝑛×𝑛}
+\item{\code{genesCoex}}{\code{dspMatrix} - the correlation of \code{COTAN} between genes, 𝑛×𝑛}
 
-\item{\code{cellsCoex}}{correlation of COTAN between cells, 𝑚×𝑚}
+\item{\code{cellsCoex}}{\code{dspMatrix} - the correlation of \code{COTAN} between cells, 𝑚×𝑚}
 
-\item{\code{metaDataset}}{data.frame}
+\item{\code{metaDataset}}{\code{data.frame}}
 
-\item{\code{metaCells}}{data.frame}
+\item{\code{metaCells}}{\code{data.frame}}
 
-\item{\code{clustersCoex}}{a list of coex data.frames for each clustering in the metaCells}
+\item{\code{clustersCoex}}{a \code{list} of coex \code{data.frames} for each clustering in the
+metaCells}
 }}
 

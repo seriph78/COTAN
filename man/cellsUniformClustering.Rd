@@ -13,7 +13,7 @@ cellsUniformClustering(
 )
 }
 \arguments{
-\item{objCOTAN}{a COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{cores}{number of cores (NB for windows system no more that 1 can be
 used)}

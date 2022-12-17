@@ -10,7 +10,7 @@ get.clusters.delta.expression(obj)
 \S4method{get.clusters.delta.expression}{COTAN}(obj)
 }
 \arguments{
-\item{obj}{a COTAN object with defined clusters (field obj@clusters filled)}
+\item{obj}{a \code{COTAN} object with defined clusters (field obj@clusters filled)}
 }
 \value{
 a dataframe

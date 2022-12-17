@@ -7,7 +7,7 @@
 #'   the \eqn{99\%} of the genes. If the GDI results to be too high, the cluster
 #'   is deemed **non-uniform**
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param clName the tag of the cluster
 #' @param cells the cells in the cluster names
 #' @param cores number of cores used
@@ -47,15 +47,11 @@ checkClusterUniformity <- function(objCOTAN, clName, cells,
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-  objCOTAN <- clean(objCOTAN)
+  objCOTAN <- proceedToCoex(objCOTAN, cores = cores, saveObj = FALSE)
+  gc()
 
   logThis(paste0("Checking uniformity for the cluster '", clName,
                  "' with ", getNumCells(objCOTAN), " cells"), logLevel = 2)
-
-  objCOTAN <- estimateDispersionBisection(objCOTAN, cores = cores)
-
-  objCOTAN <- calculateCoex(objCOTAN)
-  gc()
 
   GDI_data <- calculateGDI(objCOTAN)
 

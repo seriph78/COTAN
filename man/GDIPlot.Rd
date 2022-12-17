@@ -7,22 +7,22 @@
 GDIPlot(objCOTAN, genes, cond = "", statType = "S", GDI.df = NULL)
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
-\item{genes}{A named list of genes to label. Each array will have different
+\item{genes}{a named \code{list} of genes to label. Each array will have different
 color.}
 
-\item{cond}{A string corresponding to the condition/sample (it is used only
+\item{cond}{a string corresponding to the condition/sample (it is used only
 for the title).}
 
-\item{statType}{Type of statistic to be used. Default is "S": Pearson's
+\item{statType}{type of statistic to be used. Default is "S": Pearson's
 chi-squared test statistics. "G" is G-test statistics}
 
-\item{GDI.df}{When the GDI data frame was already calculated, it can be put
-here to speed up the process. Default is NULL.}
+\item{GDI.df}{when the GDI data frame was already calculated, it can be put
+here to speed up the process (default is \code{NULL})}
 }
 \value{
-A ggplot2 object
+A \code{ggplot2} object
 }
 \description{
 This function directly evaluate and plot the GDI for a sample.

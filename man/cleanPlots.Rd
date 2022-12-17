@@ -7,10 +7,10 @@
 cleanPlots(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 }
 \value{
-lists of ggplot2 plots:
+a \code{list} of \code{ggplot2} plots:
 \itemize{
 \item "pcaCells" is for pca cells,
 \item "genes" is for cluester2 cells' group genes,

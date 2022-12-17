@@ -28,9 +28,9 @@ plot_general.heatmap(
 
 \item{markers.list}{A set of genes plotted as columns.}
 
-\item{dir}{The directory where the COTAN object is stored.}
+\item{dir}{The directory where the \code{COTAN} object is stored.}
 
-\item{condition}{The prefix for the COTAN object file.}
+\item{condition}{The prefix for the \code{COTAN} object file.}
 
 \item{p_value}{The p-value threshold}
 

@@ -2,7 +2,7 @@
 #'
 #' @description Calculate the vector \eqn{\mu = \lambda \times \nu^T}
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns The Mu matrix
 #'
@@ -40,7 +40,7 @@ setMethod(
 #'
 #' @description Calculate observed Yes/Yes field of the contingency table
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
@@ -108,7 +108,7 @@ observedContingencyTablesYY <- function(objCOTAN,
 #'   is the number of genes/cells depending on `actOnCells` being
 #'   `TRUE`/`FALSE`.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param cells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
@@ -208,7 +208,7 @@ observedContingencyTables <- function(objCOTAN,
 #'
 #' @description Calculate the expected No/No field of the contingency table
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param cells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
@@ -305,7 +305,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'   is the number of genes/cells depending on `actOnCells` being
 #'   `TRUE`/`FALSE`.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
@@ -427,9 +427,9 @@ expectedContingencyTables <- function(objCOTAN,
 #'   restricted to only the relevant genes and thus much faster and less memory
 #'   intensive
 #'
-#' @param objCOTAN The cotan object
-#' @param g1 A gene
-#' @param g2 Another gene
+#' @param objCOTAN a `COTAN` object
+#' @param g1 a gene
+#' @param g2 another gene
 #'
 #' @return A list containing the observed and expected contingency tables
 #'
@@ -440,7 +440,7 @@ expectedContingencyTables <- function(objCOTAN,
 #' objCOTAN <- COTAN(raw = raw.dataset)
 #' g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
 #' g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-#' list[oct , ect] <- contingencyTables(object = objCOTAN, g1 = g1, g2 = g2)
+#' list[oCT, eCT] <- contingencyTables(object = objCOTAN, g1 = g1, g2 = g2)
 #'
 #' @rdname contingencyTables
 #'
@@ -536,13 +536,13 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 #'
 #' @seealso [estimateDispersionNuBisection()] for more details.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param optimizeForSpeed Boolean; when `TRUE` the function will use [Rfast]
 #'   parallel algorithms that on the flip side use more memory
 #'
-#' @returns The updated COTAN object
+#' @returns The updated `COTAN` object
 #'
 #' @export
 #'
@@ -649,7 +649,7 @@ setMethod(
 #'
 #' calculate the statistics S for genes contingency tables
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param geneSubsetCol an array of genes. It will be put in columns.
 #' If left empty the function will do it genome-wide.
 #' @param geneSubsetRow an array of genes. It will be put in rows.
@@ -693,7 +693,7 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' calculate the statistics G-test for genes contingency tables
 #' It is proportional to the genes' precence mutual information.
 #'
-#' @param objCOTAN A COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param geneSubsetCol an array of genes. It will be put in columns.
 #' If left empty the function will do it genome-wide.
 #' @param geneSubsetRow an array of genes. It will be put in rows.
@@ -764,7 +764,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' @description This function produces a`data.frame` with the GDI for each
 #'   gene.
 #'
-#' @param object A COTAN object
+#' @param object a `COTAN` object
 #' @param statType Which statistics to use to compute the p-values. By default
 #'   it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 #'   (G-test)
@@ -839,7 +839,7 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 #'   interest. By default it computes the p-values using the S statistics
 #'   (\eqn{\chi^{2}})
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param statType Which statistics to use to compute the p-values. By default
 #'   it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 #'   (G-test)

@@ -10,7 +10,7 @@ est.min.parameters(object, par)
 \S4method{est.min.parameters}{scCOTAN}(object, par)
 }
 \arguments{
-\item{object}{A COTAN object}
+\item{object}{a \code{COTAN} object}
 
 \item{par}{A vector of inizial a and log(nu)}
 }

@@ -11,7 +11,7 @@ observedContingencyTablesYY(
 )
 }
 \arguments{
-\item{objCOTAN}{A COTAN object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
 otherwise for the genes}

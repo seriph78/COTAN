@@ -1,11 +1,11 @@
 #' merge_cell.clusters
 #'
-#' This function takes in input a COTAN object with an already homogeneous clusters
+#' This function takes in input a `COTAN` object with an already homogeneous clusters
 #' and, through the cosine distance and the hclust (with ward.D2 method), checks if merging
 #' two leaf clusters will form a still homogeneous cluster (this is done iteratively).
 #' All structures are saved on disk.
 #'
-#' @param obj COTAN object
+#' @param obj a `COTAN` object
 #' @param cond sample condition name
 #' @param cores number cores used
 #' @param out_dir path to a directory for output path to the directory in which there is the Seurat object
@@ -13,7 +13,7 @@
 #' @param sc.method scRNAseq method
 #' @param markers a list of marker genes. Default NULL
 #'
-#' @return a COTAN object
+#' @return the updated `COTAN` object
 #'
 #' @importFrom Matrix t
 #' @importFrom Matrix rowSums

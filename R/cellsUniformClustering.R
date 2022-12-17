@@ -115,7 +115,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #'   cells from **non-uniform** clusters are then pooled together for another
 #'   iteration of the entire process, until all clusters are deemed **uniform**.
 #'
-#' @param objCOTAN a COTAN object
+#' @param objCOTAN a `COTAN` object
 #' @param cores number of cores (NB for windows system no more that 1 can be
 #'   used)
 #' @param maxIterations Max number of re-clustering iterations. Defaults to 25.

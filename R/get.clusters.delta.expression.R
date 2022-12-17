@@ -4,7 +4,7 @@
 #'This function estimate the change in gene expression inside the cluster for each genes
 #'compared to the average situation in the data set
 #'
-#' @param obj a COTAN object with defined clusters (field obj@clusters filled)
+#' @param obj a `COTAN` object with defined clusters (field obj@clusters filled)
 #'
 #' @return a dataframe
 #' @export

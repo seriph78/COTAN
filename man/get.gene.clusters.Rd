@@ -24,7 +24,7 @@ get.gene.clusters(
 )
 }
 \arguments{
-\item{obj}{a COTAN object}
+\item{obj}{a \code{COTAN} object}
 
 \item{list.group.markers}{a named list with a name for each group a one or more marker gene for each group.}
 

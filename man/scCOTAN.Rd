@@ -6,38 +6,38 @@
 \alias{scCOTAN}
 \title{scCOTAN-class (for legacy usage)}
 \value{
-a 'scCOTAN' object
+a \code{scCOTAN} object
 }
 \description{
-Define scCOTAN structure
+Define \code{scCOTAN} structure
 }
 \section{Slots}{
 
 \describe{
-\item{\code{raw}}{ANY. To store the raw data matrix}
+\item{\code{raw}}{\code{ANY}. To store the raw data matrix}
 
-\item{\code{raw.norm}}{ANY. To store the raw data matrix divided for the cell
+\item{\code{raw.norm}}{\code{ANY}. To store the raw data matrix divided for the cell
 efficiency estimated (nu)}
 
-\item{\code{coex}}{ANY. The coex matrix}
+\item{\code{coex}}{\code{ANY}. The coex matrix}
 
-\item{\code{nu}}{vector.}
+\item{\code{nu}}{\code{vector}.}
 
-\item{\code{lambda}}{vector.}
+\item{\code{lambda}}{\code{vector}.}
 
-\item{\code{a}}{vector.}
+\item{\code{a}}{\code{vector}.}
 
-\item{\code{hk}}{vector.}
+\item{\code{hk}}{\code{vector}.}
 
-\item{\code{n_cells}}{numeric.}
+\item{\code{n_cells}}{\code{numeric}.}
 
-\item{\code{meta}}{data.frame.}
+\item{\code{meta}}{\code{data.frame}.}
 
-\item{\code{yes_yes}}{ANY. Unused and deprecated. Kept for backward compatibility
+\item{\code{yes_yes}}{\code{ANY}. Unused and deprecated. Kept for backward compatibility
 only}
 
-\item{\code{clusters}}{vector.}
+\item{\code{clusters}}{\code{vector}.}
 
-\item{\code{cluster_data}}{data.frame.}
+\item{\code{cluster_data}}{\code{data.frame}.}
 }}
 

@@ -1,4 +1,4 @@
-# COTAN parameters' estimates methods
+# `COTAN` parameters' estimates methods
 
 #' estimateLambdaLinear
 #'

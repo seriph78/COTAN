@@ -6,7 +6,7 @@
 #' for the biological question of interest (for instance neural cortex layering markers).
 #' In this case we denote it as local differentiation index (LDI) relative to V.
 #'
-#' @param object The COTAN object.
+#' @param object a `COTAN` object.
 #' @param n.genes.for.marker The number of genes correlated with the primary markers that
 #' we want to consider.
 #' By default this is 25.

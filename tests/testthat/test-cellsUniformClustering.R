@@ -9,16 +9,14 @@ test_that("Cell Uniform Clustering", {
                                sequencingMethod = "10X",
                                sampleCondition = "example")
 
-  obj <- clean(obj)
-
-  obj <- estimateDispersionBisection(obj, cores = 12)
-
-  obj <- calculateCoex(obj)
+  obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
   currentLevel <- setLoggingLevel(2)
 
   clusters <- cellsUniformClustering(obj, cores = 12,
                                      saveObj = FALSE, outDir = tm)
+
+  gc()
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
@@ -44,10 +42,7 @@ test_that("Cell Uniform Clustering", {
     temp.obj <- dropGenesCells(objCOTAN = obj,
                                cells = getCells(obj)[cellsToDrop])
 
-    temp.obj <- clean(temp.obj)
-
-    temp.obj <- estimateDispersionBisection(temp.obj, cores = 12)
-    temp.obj <- calculateCoex(temp.obj)
+    temp.obj <- proceedToCoex(temp.obj, cores = 12, saveObj = FALSE)
     gc()
 
     GDI_data <- calculateGDI(temp.obj)
