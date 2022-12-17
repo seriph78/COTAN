@@ -200,9 +200,9 @@ cellsUniformClustering <-
     cellsToRecluster <- vector(mode = "character")
     sratClusters <- unique(metaData[["seurat_clusters"]])
     for (cl in sratClusters) {
-      logThis(paste("In iteration", iter,
-                    "checking uniformity of cluster:", cl,
-                    "of", length(sratClusters)), logLevel = 1)
+      logThis(paste0("In iteration ", iter,
+                     " checking uniformity of cluster '", cl,
+                     "' of ", length(sratClusters), " clusters" ), logLevel = 1)
       if (cl != "singleton") {
         cells <- rownames(metaData[metaData[["seurat_clusters"]] == cl,])
         if (length(cells) < 10) {
@@ -278,7 +278,8 @@ cellsUniformClustering <-
 
     unclusteredCells <- is.na(outputClusters)
     outputClusters[!unclusteredCells] <- clNamesMap[outputClusters[!unclusteredCells]]
-    outputClusters <- as.character(as.roman(outputClusters))
+    outputClusters <- set_names(as.character(as.roman(outputClusters)),
+                                getCells(objCOTAN))
   }
 
   if (saveObj) {

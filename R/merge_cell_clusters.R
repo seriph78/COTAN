@@ -30,6 +30,7 @@
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 geom_tile
 #' @importFrom ggplot2 geom_hline
+#' @importFrom ggplot2 geom_label
 #' @importFrom ggplot2 aes
 #' @importFrom ggplot2 ggtitle
 #' @importFrom ggplot2 xlab

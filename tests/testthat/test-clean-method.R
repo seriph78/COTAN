@@ -28,7 +28,7 @@ test_that("Clean on test dataset", {
 
   raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
   lambda <- readRDS(file.path(getwd(), "lambda.test.RDS"))
-  dispersion <- readRDS(file.path(getwd(), "a.test.RDS"))
+  dispersion <- readRDS(file.path(getwd(), "dispersion.test.RDS"))
   nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
 
   genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))

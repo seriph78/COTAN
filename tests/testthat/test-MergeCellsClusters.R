@@ -12,31 +12,26 @@ test_that("Merge Cells Clusters", {
 
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
-  clusters <- c(readRDS(file.path(getwd(), "clusters1.RDS")), NA, NA)
+  clusters <- readRDS(file.path(getwd(), "clusters1.RDS"))
+  genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
-  list[coexDF, pValueDF] <- DEAOnClusters(obj)
+  list[coexDF, pValDF] <- DEAOnClusters(obj)
 
   obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = coexDF)
 
-  expect_equal(colnames(coexDF),   unique(clusters))
-  expect_equal(rownames(coexDF),   getGenes(obj)[flagNotHousekeepingGenes(obj)])
+  expect_equal(colnames(coexDF), unique(clusters))
+  expect_equal(rownames(coexDF), getGenes(obj))
 
-  expect_equal(colnames(pValueDF), unique(clusters))
-  expect_equal(rownames(pValueDF), getGenes(obj)[flagNotHousekeepingGenes(obj)])
+  expect_equal(colnames(pValDF), unique(clusters))
+  expect_equal(rownames(pValDF), getGenes(obj))
 
-  coexPiece   <- c(-0.0054302803499579, -0.00654552572775876, -0.0608531866528491,
-                   -0.0686568746635675, -0.00670647495847967, -0.042799959379387,
-                    0.0266844833336902, -0.0127147843243859,  -0.0953799186930419,
-                   -0.0323098265214701, -0.0450473968910211,  -0.00922233120011961)
-  pValuePiece <- c( 0.863895661692466,   0.320043515678809,    0.857677582786368,
-                    0.870787782582908,   0.149310637904463,    0.999302205563701,
-                    0.909151014780023,   0.950244976264801,    1,
-                    0.730821136021827,   0.793247447396414,    0.500113489568265)
+  coexDF_exp <- readRDS(file.path(getwd(), "coex.test.cluster1.RDS"))
+  pValDF_exp <- readRDS(file.path(getwd(), "pval.test.cluster1.RDS"))
 
-  expect_true(all.equal(coexDF  [["0"]][1:12], coexPiece  ))
-  expect_true(all.equal(pValueDF[["2"]][1:12], pValuePiece))
+  expect_equal(coexDF[genes.names.test, ], coexDF_exp)
+  expect_equal(pValDF[genes.names.test, ], pValDF_exp)
 
   skip("Partial skip: merge_cell.clusters: p_values_clusters_merged.csv not found")
 

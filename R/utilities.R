@@ -151,6 +151,8 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #' @rdname toClusterList
 #'
 toClustersList <- function(clusterization) {
+  stopifnot("passed clusterization has no names" <- !is_empty(names(clusterization)))
+
   clustersNames <- unique(clusterization)
 
   getCl <- function(cl, clusterization) {

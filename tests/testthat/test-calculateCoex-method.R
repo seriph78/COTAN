@@ -245,12 +245,11 @@ test_that("Coex vs saved results", {
 
   coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
-  expect_equal(as.matrix(getGenesCoex(obj, genes = genes.names.test)), coex_test)
+  expect_equal(getGenesCoex(obj, genes = genes.names.test), coex_test)
 
-  pval <- calculatePValue(obj, geneSubsetCol = genes.names.test,
-                          geneSubsetRow = genes.names.test)
+  pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)
 
-  pval_exp  <- readRDS(file.path(getwd(), "pval.test.RDS"))
+  pval_exp <- readRDS(file.path(getwd(), "pval.test.RDS"))
 
   expect_equal(pval, pval_exp)
 
