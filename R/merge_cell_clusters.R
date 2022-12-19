@@ -75,7 +75,10 @@ setMethod("merge_cell.clusters","COTAN",
               cl1_not_mergeable_old <- cl1_not_mergeable
 
               #merge small cluster based on distances
-              D_sim <- cosineDissimilarity(as.matrix(getClustersCoex(obj)[[length(getClustersCoex(obj))]]))
+              #To drop the cluster with only zeros (NA)
+              ### To be fixed! Where it come from?
+              mat.coex <- getClustersCoex(obj)[[length(getClustersCoex(obj))]][, colSums(getClustersCoex(obj)[[length(getClustersCoex(obj))]] != 0) > 0]
+              D_sim <- cosineDissimilarity(as.matrix(mat.coex))
 
               tree <- stats::hclust(D_sim,method = "ward.D2")
               #plot(tree)
