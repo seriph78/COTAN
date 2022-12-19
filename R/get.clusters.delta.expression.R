@@ -67,8 +67,8 @@ setMethod("get.clusters.delta.expression","COTAN",
                                       paste0("cl.", condition))
 
       if (dim(increased.expression.tot)[1] == 0) {
-        increased.expression.tot <- as.data.frame(matrix(nrow = nrow(obj.old@coex)),
-                                                  row.names = rownames(obj.old@coex))
+        increased.expression.tot <- as.data.frame(matrix(nrow = nrow(obj@coex)),
+                                                  row.names = rownames(obj@coex))
       }
 
       increased.expression.tot  <- cbind(increased.expression.tot, increse.expression)

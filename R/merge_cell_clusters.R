@@ -254,8 +254,7 @@ setMethod("merge_cell.clusters","COTAN",
               #rm(obj_list)
               #gc()
 
-              write.csv(pvalDF, file =
-                          file.path(out_dir, cond, "p_values_clusters_merged.csv"))
+              write.csv(pvalDF, paste0(out_dir, cond, "p_values_clusters_merged.csv"))
 
               #write.csv(obj@cluster_data,
               #          file = paste0(out_dir, cond, "/coex_clusters_merged.csv"))
