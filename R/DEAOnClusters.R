@@ -56,13 +56,9 @@ DEAOnClusters <- function(objCOTAN, clusterization = NULL) {
 
   clustersList <- toClustersList(clusterization)
 
-  noHKFlags <- flagNotHousekeepingGenes(objCOTAN)
+  zeroOne <- getZeroOneProj(objCOTAN)
 
-  zeroOne <- getZeroOneProj(objCOTAN)[noHKFlags, ]
-
-  muEstimator <- calculateMu(objCOTAN)[noHKFlags, ]
-
-  probZero <- funProbZero(getDispersion(objCOTAN)[noHKFlags], muEstimator)
+  probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
 
   numCells <- getNumCells(objCOTAN)
 

@@ -85,7 +85,7 @@ setMethod(
       stats::quantile(quant.p.val2$loc.GDI, probs = 0.1), ]
     genes.raw <- quant.p.val2$names
 
-    to.plot_cl.genes <- getGenesCoex(obj)
+    to.plot_cl.genes <- getGenesCoex(object)
     to.plot_cl.genes <- to.plot_cl.genes[
       rownames(to.plot_cl.genes) %in% genes.raw,
       colnames(to.plot_cl.genes) %in% all.genes.to.an
