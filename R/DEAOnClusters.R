@@ -82,6 +82,10 @@ DEAOnClusters <- function(objCOTAN, clusterization = NULL) {
     numCellsIn  <- sum(cellsIn)
     numCellsOut <- numCells - numCellsIn
 
+    if (numCellsIn == 0) {
+      warning(paste0("Cluster '", cl, "' has no cells assigned to it!"))
+    }
+
     observedYI <- rowSums(zeroOne[, cellsIn])
 
     expectedNI <- rowSums(probZero[, cellsIn])
