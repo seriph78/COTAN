@@ -130,8 +130,6 @@ setMethod("merge_cell.clusters","COTAN",
                  #                               names(obj@clusters[obj@clusters %in% c(cl.1,cl.2)])]
                                                 #rownames(srat@meta.data[srat@meta.data$cotan %in% c(cl.1,cl.2),])]
 
-
-
                 cells.to.merge <- names(meta.cells[meta.cells %in% c(cl.1,cl.2)])
                 merged.obj <- automaticCOTANObjectCreation(raw = getRawData(obj)[,cells.to.merge],
                                                            GEO = GEO,
@@ -157,8 +155,8 @@ setMethod("merge_cell.clusters","COTAN",
                   print(paste("Clusters", cl.1, "and", cl.2, "can be merged."))
                 #  write.csv(colnames(mat),paste0(dir, "merged_clusters_",
                 #                                 cl.1, "_", cl.2, "cell_ids.csv"))
-                  min.cl <- min(as.numeric(c(cl.1,cl.2)))
-                  max.cl <- max(as.numeric(c(cl.1,cl.2)))
+                  min.cl <- min(c(cl.1,cl.2))
+                  max.cl <- max(c(cl.1,cl.2))
                   #srat@meta.data[srat@meta.data$cotan == max.cl,]$cotan <- min.cl
                   #obj@clusters[obj@clusters == max.cl] <- min.cl
                   meta.cells[meta.cells == max.cl] <- min.cl
