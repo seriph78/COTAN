@@ -686,7 +686,7 @@ setMethod(
       return(objCOTAN@genesCoex)
     }
     else {
-      return(objCOTAN@genesCoex[, genes])
+      return(objCOTAN@genesCoex[, genes, drop = FALSE])
     }
   }
 )
@@ -733,7 +733,7 @@ setMethod(
       return(objCOTAN@cellsCoex)
     }
     else {
-      return(objCOTAN@cellsCoex[, cells])
+      return(objCOTAN@cellsCoex[, cells, drop = FALSE])
     }
   }
 )

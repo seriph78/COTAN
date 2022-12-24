@@ -278,8 +278,7 @@ cellsUniformClustering <-
 
     unclusteredCells <- is.na(outputClusters)
     outputClusters[!unclusteredCells] <- clNamesMap[outputClusters[!unclusteredCells]]
-    outputClusters <- set_names(as.character(as.roman(outputClusters)),
-                                getCells(objCOTAN))
+    outputClusters <- set_names(as.character(outputClusters), getCells(objCOTAN))
     outputClusters[unclusteredCells] = "not_clustered"
   }
 

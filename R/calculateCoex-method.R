@@ -801,15 +801,16 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 
   logThis("Calculate GDI dataframe: START", logLevel = 2)
 
-  diag(S) <- 0
-  CDSorted <- apply(S, 2, sort, decreasing = TRUE)
-  rg <- max(1, round(nrow(CDSorted) / 20, digits = 0))
-  CDSorted <- CDSorted[seq_len(rg), , drop = FALSE]
-  CDSorted <- pchisq(as.matrix(CDSorted), df = 1, lower.tail = FALSE)
+  top5pcRows <- as.integer(max(1:round(getNumGenes(objCOTAN) / 20, digits = 0)))
 
-  GDI <- log(-log(colMeans(CDSorted)))
+  diag(S) <- 0
+  pValueSorted <- apply(S, 2, sort, decreasing = TRUE)
+  pValueSorted <- pValueSorted[1:top5pcRows, , drop = FALSE]
+  pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1, lower.tail = FALSE)
+
+  GDI <- log(-log(colMeans(pValueSorted)))
   GDI <- set_names(as.data.frame(GDI), "GDI")
-  rm(CDSorted)
+  rm(pValueSorted)
   gc()
 
   sum.raw.norm <- log(rowSums(getNormalizedData(objCOTAN)))
