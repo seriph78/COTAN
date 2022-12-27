@@ -21,6 +21,12 @@ a \code{data.frame} with the cumulative score
 This function returns a cumulative score of enrichment in a
 cluster over a gene set
 }
+\details{
+Calculates \eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})}, where the
+\eqn{X_i} are the values from the function
+\code{\link[=get.clusters.delta.expression]{get.clusters.delta.expression()}} and \eqn{\theta = -\frac{1}{0.1}
+  \ln(0.25)}
+}
 \examples{
 data("raw.dataset")
 objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
