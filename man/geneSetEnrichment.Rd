@@ -23,9 +23,8 @@ cluster over a gene set
 }
 \details{
 Calculates \eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})}, where the
-\eqn{X_i} are the values from the function
-\code{\link[=get.clusters.delta.expression]{get.clusters.delta.expression()}} and \eqn{\theta = -\frac{1}{0.1}
-  \ln(0.25)}
+\eqn{X_i} are the positive values from \code{\link[=DEAOnClusters]{DEAOnClusters()}} and \eqn{\theta =
+  -\frac{1}{0.1} \ln(0.25)}
 }
 \examples{
 data("raw.dataset")

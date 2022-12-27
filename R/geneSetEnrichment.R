@@ -5,9 +5,8 @@
 #'   cluster over a gene set
 #'
 #' @details Calculates \eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})}, where the
-#'   \eqn{X_i} are the values from the function
-#'   [get.clusters.delta.expression()] and \eqn{\theta = -\frac{1}{0.1}
-#'   \ln(0.25)}
+#'   \eqn{X_i} are the positive values from [DEAOnClusters()] and \eqn{\theta =
+#'   -\frac{1}{0.1} \ln(0.25)}
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clustersCoex the `data.frame` for the increased or decreased

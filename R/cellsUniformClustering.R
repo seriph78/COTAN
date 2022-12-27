@@ -31,6 +31,9 @@
 #' @importFrom Seurat RunUMAP
 #' @importFrom Seurat DimPlot
 #'
+#' @importFrom grDevices pdf
+#' @importFrom grDevices dev.off
+#'
 #' @importFrom ggplot2 annotate
 #'
 #' @noRd
@@ -128,6 +131,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #' @export
 #'
 #' @importFrom stringr str_detect
+#' @importFrom stringr str_pad
 #'
 #' @examples
 #' data("raw.dataset")
@@ -211,7 +215,7 @@ cellsUniformClustering <-
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
           clusterIsUniform <- checkClusterUniformity(objCOTAN = objCOTAN,
-                                                     clName = cl,
+                                                     cluster = cl,
                                                      cells = cells,
                                                      cores = cores,
                                                      saveObj = saveObj,
@@ -248,8 +252,8 @@ cellsUniformClustering <-
       flagInUniformCl <- !rownames(metaData) %in% cellsToRecluster
       goodClusters <- metaData[flagInUniformCl, ]["seurat_clusters"]
       outputClusters[rownames(goodClusters)] <-
-        paste0(stringr::str_pad(iter, width = 2, pad = "0"), "_",
-               stringr::str_pad(goodClusters[[1]], width = 4, pad = "0"))
+        paste0(str_pad(iter, width = 2, pad = "0"), "_",
+               str_pad(goodClusters[[1]], width = 4, pad = "0"))
     }
 
     if (sum(is.na(outputClusters)) != length(cellsToRecluster)) {

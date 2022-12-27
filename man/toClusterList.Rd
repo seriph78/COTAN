@@ -4,7 +4,7 @@
 \alias{toClustersList}
 \title{toClustersList}
 \usage{
-toClustersList(clusterization)
+toClustersList(clusters)
 }
 \arguments{
 \item{a}{clusterization. A named \code{vector} or \code{factor} that defines the

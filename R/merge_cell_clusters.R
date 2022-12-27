@@ -39,6 +39,9 @@
 #' @importFrom ggplot2 scale_fill_manual
 #' @importFrom ggrepel geom_text_repel
 #'
+#' @importFrom grDevices pdf
+#' @importFrom grDevices dev.off
+#'
 #' @export
 #'
 #' @examples

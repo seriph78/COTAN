@@ -33,6 +33,12 @@ test_that("Merge Cells Clusters", {
   expect_equal(coexDF[genes.names.test, ], coexDF_exp)
   expect_equal(pValDF[genes.names.test, ], pValDF_exp)
 
+
+  deltaExpression <- clustersDeltaExpression(obj)
+
+  expect_equal(rownames(deltaExpression), getGenes(obj))
+  expect_equal(colnames(deltaExpression), unique(clusters))
+
   #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
   groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
                        G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))

@@ -6,7 +6,7 @@
 \usage{
 checkClusterUniformity(
   objCOTAN,
-  clName,
+  cluster,
   cells,
   cores = 1,
   saveObj = TRUE,
@@ -16,9 +16,9 @@ checkClusterUniformity(
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{clName}{the tag of the cluster}
+\item{cluster}{the tag of the cluster}
 
-\item{cells}{the cells in the cluster names}
+\item{cells}{the cells in the cluster}
 
 \item{cores}{number of cores used}
 
@@ -51,7 +51,7 @@ objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
 clusters <- cellsUniformClustering(objCOTAN, cores = 12,
                                    saveObj = TRUE,
                                    outDir = tempdir())
-isUniform <- checkClusterUniformity(objCOTAN, clName = clusters[1],
+isUniform <- checkClusterUniformity(objCOTAN, cluster = clusters[1],
                                     cells = getCells(objCOTAN)[clusters \%in clusters[1]],
                                     cores = cores, saveObj = TRUE, outDir = tempdir())
 

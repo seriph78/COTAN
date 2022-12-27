@@ -8,8 +8,8 @@
 #'   is deemed **non-uniform**
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clName the tag of the cluster
-#' @param cells the cells in the cluster names
+#' @param cluster the tag of the cluster
+#' @param cells the cells in the cluster
 #' @param cores number of cores used
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
@@ -18,6 +18,9 @@
 #' @return an array of cells that need to be re-clustered or nothing
 #'
 #' @importFrom utils head
+#'
+#' @importFrom grDevices pdf
+#' @importFrom grDevices dev.off
 #'
 #' @export
 #'
@@ -33,14 +36,14 @@
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
 #'                                    saveObj = TRUE,
 #'                                    outDir = tempdir())
-#' isUniform <- checkClusterUniformity(objCOTAN, clName = clusters[1],
+#' isUniform <- checkClusterUniformity(objCOTAN, cluster = clusters[1],
 #'                                     cells = getCells(objCOTAN)[clusters %in clusters[1]],
 #'                                     cores = cores, saveObj = TRUE, outDir = tempdir())
 #'
 #' @rdname checkClusterUniformity
 #'
 
-checkClusterUniformity <- function(objCOTAN, clName, cells,
+checkClusterUniformity <- function(objCOTAN, cluster, cells,
                                    cores = 1, saveObj = TRUE, outDir = ".") {
 
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
@@ -50,7 +53,7 @@ checkClusterUniformity <- function(objCOTAN, clName, cells,
   objCOTAN <- proceedToCoex(objCOTAN, cores = cores, saveObj = FALSE)
   gc()
 
-  logThis(paste0("Checking uniformity for the cluster '", clName,
+  logThis(paste0("Checking uniformity for the cluster '", cluster,
                  "' with ", getNumCells(objCOTAN), " cells"), logLevel = 2)
 
   GDI_data <- calculateGDI(objCOTAN)
@@ -59,7 +62,7 @@ checkClusterUniformity <- function(objCOTAN, clName, cells,
   if (saveObj) {
     prevOptVale <- options(ggrepel.max.overlaps = Inf)
 
-    pdf(file.path(outDir, paste0("cluster_", clName, "_plots.pdf")))
+    pdf(file.path(outDir, paste0("cluster_", cluster, "_plots.pdf")))
 
     plots <- cleanPlots(objCOTAN)
 
@@ -85,7 +88,7 @@ checkClusterUniformity <- function(objCOTAN, clName, cells,
                          0.01 * nrow(GDI_data))
 
   if (!clusterIsUniform && saveObj) {
-    outFile <- file.path(outDir, paste0("non-uniform_cluster_", clName, ".csv"))
+    outFile <- file.path(outDir, paste0("non-uniform_cluster_", cluster, ".csv"))
     write.csv(cells, file = outFile)
   }
 

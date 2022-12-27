@@ -45,6 +45,7 @@ library(tidyverse)
 library(htmlwidgets)
 library(MASS)
 library(gsubfn)
+library(grDevices)
 #library(dendextend)
 
 # Log-level 2 was chosen to showcase better how the package works

@@ -150,16 +150,16 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #'
 #' @rdname toClusterList
 #'
-toClustersList <- function(clusterization) {
-  stopifnot("passed clusterization has no names" <- !is_empty(names(clusterization)))
+toClustersList <- function(clusters) {
+  stopifnot("passed clusterization has no names" <- !is_empty(names(clusters)))
 
-  clustersNames <- unique(clusterization)
+  clustersNames <- unique(clusters)
 
-  getCl <- function(cl, clusterization) {
-    names(clusterization[clusterization %in% cl])
+  getCl <- function(cl, clusters) {
+    names(clusters[clusters %in% cl])
   }
 
-  clustersList <- set_names(lapply(clustersNames, getCl, clusterization),
+  clustersList <- set_names(lapply(clustersNames, getCl, clusters),
                             clustersNames)
 
   return(clustersList)
