@@ -44,3 +44,25 @@ a \code{list} of
 This function perform the genes' clustering based on a pool of
 gene markers, using the genes' coexpression space
 }
+\examples{
+data("raw.dataset")
+objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+                                         GEO = "S"
+                                         sequencingMethod = "10X",
+                                         sampleCondition = "Test",
+                                         cores = 12,
+                                         saveObj = TRUE,
+                                         outDir = tempdir())
+clusters <- cellsUniformClustering(objCOTAN, cores = 12,
+                                   saveObj = TRUE,
+                                   outDir = tempdir())
+list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN, clusters = clusters)
+objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
+                              clusters = clusters, coexDF = coexDF)
+groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
+                     G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
+list[g.space, plot.eig, pca_clusters, dend] <-
+  establishGenesClusters(objCOTAN, groupMarkers = groupMarkers,
+                         numGenesPerMarker = 11)
+
+}

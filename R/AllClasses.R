@@ -359,7 +359,7 @@ getCOTANSlots <- function(from) {
     if (!is_empty(clusterData)) {
       if (!all(colnames(clusterData) %in% from@clusters)) {
         # It might be possible that the column names have the old extra
-        # prefix 'cl.'. We remove it if present and
+        # prefix 'cl.'. It will be remove in such cases.
         colnames(clusterData) <- str_remove(colnames(clusterData), pattern = "cl\\.")
       }
 

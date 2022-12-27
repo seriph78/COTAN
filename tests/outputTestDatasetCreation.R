@@ -43,7 +43,7 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
                                      saveObj = FALSE, outDir = tm)
   saveRDS(clusters, file.path(testsDir, "clusters1.RDS"))
 
-  list[coexDF, pvalDF] <- DEAOnClusters(obj, clusterization = clusters)
+  list[coexDF, pvalDF] <- DEAOnClusters(obj, clusters = clusters)
   obj <- addClusterization(obj, clName = "clusters",
                            clusters = clusters, coexDF = coexDF)
 

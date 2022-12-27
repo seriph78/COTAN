@@ -5,11 +5,6 @@ setGeneric(
     standardGeneric("proceedToCoex")
 )
 
-setGeneric(
-  "geneSetEnrichment",
-  function(objCOTAN, expression.cl, genes) standardGeneric("geneSetEnrichment")
-)
-
 # -------------------------------------- calculate coex
 
 setGeneric(

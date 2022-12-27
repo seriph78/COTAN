@@ -227,7 +227,7 @@ setMethod("merge_cell.clusters","COTAN",
               # New DEA on clusters
               #obj <- addClusterization(obj,clName = "first_merged",clusters = meta.cells)
 
-              list[coexDF, pvalDF] <- DEAOnClusters(obj, clusterization = meta.cells)
+              list[coexDF, pvalDF] <- DEAOnClusters(obj, clusters = meta.cells)
 
               obj <- addClusterization(obj, clName = paste0("merged_", round),
                                        clusters = meta.cells, coexDF = coexDF)

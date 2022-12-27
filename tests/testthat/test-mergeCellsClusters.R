@@ -33,6 +33,19 @@ test_that("Merge Cells Clusters", {
   expect_equal(coexDF[genes.names.test, ], coexDF_exp)
   expect_equal(pValDF[genes.names.test, ], pValDF_exp)
 
+  #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
+  groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
+                       G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
+
+  e.df <- geneSetEnrichment(clustersCoex = coexDF, groupMarkers = groupMarkers)
+
+  expect_equal(nrow(e.df), length(groupMarkers))
+  expect_equal(ncol(e.df), ncol(coexDF) + 2)
+  expect_lte(max(e.df[,1:(ncol(e.df)-2)]), 1)
+  expect_gte(min(e.df[,1:(ncol(e.df)-2)]), 0)
+  expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0)
+  expect_equal(e.df[["N. total"]], sapply(groupMarkers, length), ignore_attr = TRUE)
+
   skip("Partial skip: merge_cell.clusters: p_values_clusters_merged.csv not found")
 
   obj <- merge_cell.clusters(obj = obj,

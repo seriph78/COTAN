@@ -11,7 +11,7 @@
 #' @seealso [calculatePValue()] for details about the associated p-values
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clusterization a `vector` or `factor` with the cell clusterization to
+#' @param clusters a `vector` or `factor` with the cell clusterization to
 #'   be analysed. If empty, the function will use the last clusterization stored
 #'   in the `objCOTAN`
 #'
@@ -34,27 +34,27 @@
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
 #'                                    saveObj = TRUE,
 #'                                    outDir = tempdir())
-#' list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN)
+#' list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN, clusters = clusters)
 #'
 #' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
 #'                               clusters = clusters, coexDF = coexDF)
 #'
 #' @rdname DEAOnClusters
 #'
-DEAOnClusters <- function(objCOTAN, clusterization = NULL) {
-  if (is_empty(clusterization)) {
-    clusterization <- getClusterizationData(objCOTAN)[["clusters"]]
+DEAOnClusters <- function(objCOTAN, clusters = NULL) {
+  if (is_empty(clusters)) {
+    clusters <- getClusterizationData(objCOTAN)[["clusters"]]
   }
 
   stopifnot("Passed/retrieved clusterization has the wrong size" <-
-              (length(clusterization) == getNumCells(objCOTAN)))
+              (length(clusters) == getNumCells(objCOTAN)))
 
   stopifnot("Some cells in the clusterization are not part of the 'COTAN' object" <-
-              all(names(clusterization) %in% getCells(objCOTAN)))
+              all(names(clusters) %in% getCells(objCOTAN)))
 
   logThis("Differential Expression Analysis - START", logLevel = 2)
 
-  clustersList <- toClustersList(clusterization)
+  clustersList <- toClustersList(clusters)
 
   zeroOne <- getZeroOneProj(objCOTAN)
 

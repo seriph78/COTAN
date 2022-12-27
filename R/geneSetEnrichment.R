@@ -1,55 +1,78 @@
 
 #' geneSetEnrichment
 #'
-#' Function to get a cumulative score of enrichment in a cluster over a gene set
+#' @description This function returns a cumulative score of enrichment in a
+#'   cluster over a gene set
 #'
-#' @param objCOTAN a `COTAN` objCOTANect
-#' @param genes a named list of genes
-#' @param expression.cl the dataframe for the increased or decreased expression
-#' of every gene in the cluster compared to the whole background
+#' @param objCOTAN a `COTAN` object
+#' @param clustersCoex the `data.frame` for the increased or decreased
+#'   expression of every gene in the cluster compared to the whole background
+#' @param groupMarkers a named `list` of arrays of genes
 #'
-#' @return a dataframe
+#' @returns a `data.frame` with the cumulative score
+#'
 #' @export
 #'
+#' @importFrom stringr str_remove
+#'
 #' @examples
-setMethod(
-  "geneSetEnrichment",
-  "COTAN",
-   function(objCOTAN, expression.cl, genes) {
-    colnames(expression.cl) <- stringr::str_remove(colnames(expression.cl),"cl[.]")
-    df <- as.data.frame(matrix(ncol = ncol(expression.cl)+2))
-    colnames(df) <- c(colnames(getClusterizationData(objCOTAN)[["coex"]]),
-                      "N. detected",
-                      "N. total")
-    teta <- -1/0.1 * (log(0.25))
-    #not_ass_clusters <- NA
-    for (m in names(genes)) {
-      n.genes <- sum(getGenes(objCOTAN) %in% genes[[m]])
-      print(paste0("In ",m , " there are ",n.genes, " detected over ",length(genes[[m]]), " genes"))
-      df[m,"N. detected"] <- n.genes
-      df[m,"N. total"] <- length(genes[[m]])
+#' data("raw.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#'                                          GEO = "S"
+#'                                          sequencingMethod = "10X",
+#'                                          sampleCondition = "Test",
+#'                                          cores = 12,
+#'                                          saveObj = TRUE,
+#'                                          outDir = tempdir())
+#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
+#'                                    saveObj = TRUE,
+#'                                    outDir = tempdir())
+#' list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN, clusters = clusters)
+#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
+#'                               clusters = clusters, coexDF = coexDF)
+#' groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
+#'                      G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
+#' enrichment <- geneSetEnrichment(objCOTAN, coexDF, groupMarkers)
+#'
+#' @rdname geneSetEnrichment
+#'
+geneSetEnrichment <- function(clustersCoex, groupMarkers) {
+  # It might be possible that the column names have the old extra
+  # prefix 'cl.'. It will be remove in such cases.
+  clNamesMap <- set_names(colnames(clustersCoex),
+                          str_remove(colnames(clustersCoex), "cl\\."))
+  clustersNames <- names(clNamesMap)
+
+  df <- as.data.frame(matrix(nrow = length(groupMarkers),
+                             ncol = ncol(clustersCoex) + 2))
+
+  colnames(df) <- c(clustersNames, "N. detected", "N. total")
+  rownames(df) <- names(groupMarkers)
+
+  # TODO: add comment on this constant in the @details above!
+  teta <- -1/0.1 * log(0.25)
+
+  # not_assigned_clusters <- NA
+  for (groupName in names(groupMarkers)) {
+    genes <- unlist(groupMarkers[[groupName]])
+
+    ex <- clustersCoex[rownames(clustersCoex) %in% genes, , drop = FALSE]
+    numDetected <- nrow(ex)
+
+    logThis(paste0("In group ", groupName, " there are ", numDetected,
+                   " detected over ", length(genes), " genes"), logLevel = 3)
+
+    # drop reductions
+    ex[ex < 0 & !is.na(ex)] <- 0
+    ex <- 1 - exp(-teta * ex)
+
+    for (cl in clustersNames) {
+      df[groupName, cl] <- sum(ex[, clNamesMap[cl]], na.rm = TRUE) / length(genes)
     }
-    for (ro in colnames(getClusterizationData(objCOTAN)[["coex"]])) {
-      for (m in names(genes)) {
-         #pv <- p_value[unlist(genes[[m]]),ro]
-        #co <- objCOTAN@cluster_data[unlist(genes[[m]]),ro]
-        ex <- expression.cl[rownames(expression.cl) %in% genes[[m]], ro, drop = FALSE]
-        ex[ex < 0 & !is.na(ex)] <- 0
 
-        for (g in rownames(ex)) {
-          occurrencies <- sum(unlist(markers) == g)
-          ex[g,1] <- ex[g,1]/occurrencies
-        }
-
-
-        ex <- 1-exp(- teta * ex)
-
-        df[m,ro] <- sum(ex,na.rm = T)/length(genes[[m]])
-      }
-    }
-
-    df <- round(df[2:nrow(df),],digits = 2)
-    return(df)
+    df[groupName, "N. detected"] <- numDetected
+    df[groupName, "N. total"] <- length(genes)
   }
 
-)
+  return(df)
+}

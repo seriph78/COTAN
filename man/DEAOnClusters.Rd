@@ -4,12 +4,12 @@
 \alias{DEAOnClusters}
 \title{DEAOnClusters}
 \usage{
-DEAOnClusters(objCOTAN, clusterization = NULL)
+DEAOnClusters(objCOTAN, clusters = NULL)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{clusterization}{a \code{vector} or \code{factor} with the cell clusterization to
+\item{clusters}{a \code{vector} or \code{factor} with the cell clusterization to
 be analysed. If empty, the function will use the last clusterization stored
 in the \code{objCOTAN}}
 }
@@ -43,7 +43,7 @@ objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
 clusters <- cellsUniformClustering(objCOTAN, cores = 12,
                                    saveObj = TRUE,
                                    outDir = tempdir())
-list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN)
+list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN, clusters = clusters)
 
 objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
                               clusters = clusters, coexDF = coexDF)
