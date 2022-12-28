@@ -56,11 +56,12 @@ setLoggingLevel(2)
 Download the dataset for mouse cortex E17.5.
 
 ```{r eval=FALSE, include=FALSE}
-if (!file.exists("inst/extdata/E175_only_cortical_cells.txt.gz")) {
+data_dir = tempdir()
+if (FALSE && !file.exists(file.path(dataDir, "E175_only_cortical_cells.txt.gz"))) {
   download.file(paste0("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/",
                        "GSM2861nnn/GSM2861514/suppl/",
                        "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"),
-                paste0(data_dir, "/E175_only_cortical_cells.txt.gz"),
+                file.path(dataDir, "/E175_only_cortical_cells.txt.gz"),
                 method = "wget", quiet = FALSE)
 }
 ```
@@ -150,26 +151,8 @@ pdf(file.path(outDir, "cleaning",
               paste0(t, "_", n_it, "_plots_before_cells_exlusion.pdf")))
 pcaCellsPlot
 genesPlot
+
 dev.off()
-
-if (length(cluster1) < length(cluster2)) {
-  cellsToRemove = cluster1
-}else{
-  cellsToRemove = cluster2
-}
-n_it = n_it+1
-obj = dropGenesCells(obj, genes = c(), cells = cellsToRemove)
-
-gc()
-
-obj <- clean(obj)
-list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj)
-
-pcaCellsPlot
-```
-
-```{r}
-genesPlot
 ```
 
 Run this only in the last iteration, instead of the previous code, when B cells group has not been removed
@@ -261,7 +244,7 @@ dev.off()
 
 ## COTAN analysis
 
-In this part, all the contingency tables are computed and used to get the statistics. To store efficiency, only the yes_yes matrix is stored. Note that if will be necessary re-computing the yes-yes table, the yes-yes table should be canceled before running cotan_analysis.
+In this part, all the contingency tables are computed and used to get the statistics.
 
 ```{r}
 obj = estimateDispersionBisection(obj, cores = 10)
@@ -284,7 +267,7 @@ It is also possible to run a directly a single function if we don't want to clea
 obj <- automaticCOTANObjectCreation(
   raw = test.dataset.col,
   GEO = "test", sequencingMethod = "10X", sampleCondition = "test.dataset.col",
-  saveObj = TRUE, outDir = outDir, cores = 10)
+  saveObj = FALSE, outDir = outDir, cores = 10)
 ```
 
 # Cell cluster
@@ -292,7 +275,7 @@ obj <- automaticCOTANObjectCreation(
 The next step will find all homogeneous clusters using a GDI check on each cluster.
 
 ```{r}
-clusters <- cellsUniformClustering(obj, cores = 10, saveObj = TRUE, outDir = outDir)
+clusters <- cellsUniformClustering(obj, cores = 10, saveObj = FALSE, outDir = outDir)
 obj <- addClusterization(obj, clName = "test", clusters = clusters)
 ```
 
@@ -300,21 +283,38 @@ Than we can perform a sort of differential expression to detect which genes are 
 
 ```{r}
 list[coexDF, pvalDF] <- DEAOnClusters(obj)
-obj <- addClusterizationCoex(obj, clName = "test", coexDF = coex)
+obj <- addClusterizationCoex(obj, clName = "test", coexDF = coexDF)
 ```
 
-Using the cluster distance, based on the whole transcriptome, we can ththenheck if any of the closest clusters can form a still hohomogeneousigger cluster. We will keep this clusterization for the forther analysis.
+Using the cluster distance, based on the whole transcriptome, we can check if any of the closest clusters can together form a still uniform cluster. We will keep this clusterization for the forther analysis.
 
 ```{r}
 list[mergedClusters, mergedCoexDF, mergedPValueDf] <-
   mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 10,
                             distance = "cosine", hclustMethod = "ward.D2",
-                            saveObj = TRUE, outDir = outDir)
+                            saveObj = FALSE, outDir = outDir)
+
+obj <- addClusterization(obj, clName = "merged",
+                         clusters = mergedClusters, coexDF = mergedCoexDF)
 ```
+
+Coex heatmap for clustered cells
+
+```{r}
+obj <- estimateDispersionNuBisection(obj, cores = 10, enforceNuAverageToOne = FALSE)
+
+obj <- calculateCoex(obj, actOnCells = TRUE)
+
+cellsHPlot <- cellsHeatmapPlot(objCOTAN = obj, clusters = clusters)
+
+plot(cellsHPlot)
+```
+
+Use cosine distance to plot nearest clusters
 
 ```{r}
 ######## This is the best: cosine dissimilarity
-tree <- hclust(cosineDissimilarity(mergedClusters), method = "ward.D2")
+tree <- hclust(cosineDissimilarity(mergedCoexDF), method = "ward.D2")
 
 dend <- as.dendrogram(tree)
 plot(dend)
@@ -333,10 +333,14 @@ CC <- sample(getGenes(obj), size = 5)
 
 genes.list <- list("AA" = AA,"BB" = BB,"CC" = CC)
 
+# needs to be recalculated after the changes in nu/dispersion above
+obj <- calculateCoex(obj, actOnCells = FALSE)
+
 GDIPlot(obj, cond = "test", genes = genes.list)
 ```
 
 If a more complex plot is needed, or if we want to analyze more in detail the GDI data, we can get directly the GDI data frame.
+
 
 ```{r}
 quant.p = calculateGDI(obj)
@@ -358,41 +362,40 @@ CC <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
 
 list.genes = list("Ref.col"= BB, "AA"=AA, "Const."=CC )
 
-plot_heatmap(df_genes = list.genes,sets = c(1:3),conditions = "test",dir = out_dir)
+#TODO: fix the function
+#plot_heatmap(df_genes = list.genes, sets = c(1:3), conditions = c("test"), dir = outDir)
 ```
 
 We can also plot a general heatmap of coex values based on some markers like the following one.
 
 ```{r}
-plot_general.heatmap(prim.markers = AA, condition = "test",dir = out_dir, p_value = 0.001)
+plot_general.heatmap(prim.markers = AA, condition = "test",dir = outDir, p_value = 0.001)
 ```
 
 ```{r}
-plot_general.heatmap(prim.markers = AA ,markers.list = BB ,symmetric = FALSE, condition = "test",dir = out_dir, p_value = 0.001)
+plot_general.heatmap(prim.markers = AA ,markers.list = BB ,symmetric = FALSE, condition = "test",dir = outDir, p_value = 0.001)
 ```
 
 ## Get data tables
 
 Sometimes we can also be interested in the numbers present directly in the contingency tables for two specific genes. To get them we can use two functions:
 
-1.  get.observed.ct to produce the observed data
+contingencyTables() to produce the observed and expected data
 
 ```{r}
- get.observed.ct(object = obj, g1 = "EIF3F",g2 = "SLC37A1")
+list[observedCT, expectedCT] <- contingencyTables(obj, g1 = "EIF3F", g2 = "SLC37A1")
+print("Observed CT")
+observedCT
+print("Expected CT")
+expectedCT
 ```
 
-2.  get.expected.ct to produce the expected values
-
-```{r}
-get.expected.ct(object = obj,g1 = "EIF3F",g2 = "SLC37A1")
-```
-
-Another useful function is extract.coex. This can be used to extract the whole or a partial coex matrix from a `COTAN` object.
+Another useful function is getGenesCoex(). This can be used to extract the whole or a partial coex matrix from a `COTAN` object.
 
 ```{r}
 # For the whole matrix
 coex <- getGenesCoex(obj)
-coex[1:5,1:5]
+coex[1:5, 1:5]
 ```
 
 ```{r}
@@ -405,11 +408,11 @@ head(coex)
 The next few lines are just to clean.
 
 ```{r}
-if (file.exists(paste0(out_dir, t, ".cotan.RDS"))) {
+if (file.exists(paste0(outDir, t, ".cotan.RDS"))) {
   #Delete file if it exists
-  file.remove(paste0(out_dir, t, ".cotan.RDS"))
+  file.remove(paste0(outDir, t, ".cotan.RDS"))
 }
-unlink(paste0(out_dir, "cleaning"), recursive = TRUE)
+unlink(paste0(outDir, "cleaning"), recursive = TRUE)
 
 print(sessionInfo())
 ```

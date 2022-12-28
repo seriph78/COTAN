@@ -135,6 +135,8 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #' @importFrom stringr str_detect
 #' @importFrom stringr str_pad
 #'
+#' @importFrom utils as.roman
+#'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,

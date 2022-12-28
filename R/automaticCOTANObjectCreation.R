@@ -21,6 +21,7 @@
 #'
 #' @importFrom grDevices pdf
 #' @importFrom grDevices dev.off
+#' @importFrom grDevices colors
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 annotate
@@ -59,6 +60,7 @@ setMethod(
 
       plots <- cleanPlots(objCOTAN)
 
+      sampleCondition <- getMetadataElement(objCOTAN, datasetTags()[[3]])
       {
         numIter <- 1
         pdf(file.path(outDirCleaning,

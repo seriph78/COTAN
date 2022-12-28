@@ -654,7 +654,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, genes = c()) {
     if (!is_empty(objCOTAN@genesCoex) &&
-        isFALSE(getMetadataElement(objCOTAN, datasetTags()[5])) ) {
+        isFALSE(as.logical(getMetadataElement(objCOTAN, datasetTags()[5]))) ) {
       stop(paste0("Cannot return genes' coex as the matrix is",
                   " out of sync with the other parameters.",
                   " It is still ossible to access the data directly!"))
@@ -701,7 +701,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, cells = c()) {
     if (!is_empty(objCOTAN@genesCoex) &&
-        isFALSE(getMetadataElement(objCOTAN, datasetTags()[6])) ) {
+        isFALSE(as.logical(getMetadataElement(objCOTAN, datasetTags()[6]))) ) {
       stop(paste0("Cannot return genes' coex as the matrix is",
                   " out of sync with the other parameters.",
                   " It is still ossible to access the data directly!"))

@@ -28,7 +28,7 @@
 #' @rdname cellsHeatmapPlot
 #'
 cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
-  coexMat <- getCellsCoex(objCOTAN)
+  coexMat <- as.matrix(getCellsCoex(objCOTAN))
   stopifnot("cells coex not found in the COTAN" <- !is_empty(coexMat))
 
   diag(coexMat) <- 0
@@ -36,24 +36,24 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
   # if clustering is needed
   if (!is_empty(clusters)) {
     # identifier for each cluster
-    clustersIdentifier <- unique(sort(clusters))
+    clustersTags <- unique(clusters)
 
     # size of each cluster
-    clustersSize <- sapply(clustersIdentifier, function(x) sum(clusters == x))
+    clustersList <- toClustersList(clusters)
+    clustersSize <- sapply(clustersList, length)
 
-    # cell names ordered by the identifier of the cluster to which they belong
-    nameSort <- names(sort(clusters))
-    coexMat <- coexMat[nameSort, nameSort]
-
-    colnames(coexMat) <- clusters[nameSort]
-    rownames(coexMat) <- clusters[nameSort]
+    # cell names grouped by the identifier of the cluster to which they belong
+    cellNames <- unlist(clustersList)
+    coexMat <- coexMat[cellNames, cellNames]
+    colnames(coexMat) <- cellNames
+    rownames(coexMat) <- cellNames
 
     Heatmap(coexMat,
             border = TRUE,
             column_split = factor(rep(clustersIdentifier, clustersSize),
-                                  levels = title),
+                                  levels = clustersIdentifier),
             row_split = factor(rep(clustersIdentifier, clustersSize),
-                               levels = title),
+                               levels = clustersIdentifier),
             cluster_rows = FALSE,
             cluster_columns = FALSE)
   } else {

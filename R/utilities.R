@@ -613,6 +613,8 @@ parallelNuBisection <-
 #'
 #' @importFrom Matrix t
 #'
+#' @importFrom stats as.dist
+#'
 #' @examples
 #' mat <- matrix(c(1:25), nrow = 5, ncol = 5,
 #'               dimnames = list(paste0("row.", c(1:5)),

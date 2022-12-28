@@ -6,7 +6,7 @@
 \title{plot_general.heatmap}
 \usage{
 plot_general.heatmap(
-  prim.markers = c("Satb2", "Bcl11b", "Cux1", "Fezf2", "Tbr1"),
+  prim.markers,
   markers.list = c(),
   dir,
   condition,
@@ -15,7 +15,7 @@ plot_general.heatmap(
 )
 
 \S4method{plot_general.heatmap}{ANY}(
-  prim.markers = c("Satb2", "Bcl11b", "Cux1", "Fezf2", "Tbr1"),
+  prim.markers,
   markers.list = c(),
   dir,
   condition,

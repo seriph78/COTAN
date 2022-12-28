@@ -40,6 +40,8 @@ emptySymmetricMatrix <- function() {
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom methods validObject
+#'
 #' @importClassesFrom Matrix dgCMatrix
 #' @importClassesFrom Matrix dspMatrix
 #'
@@ -523,6 +525,7 @@ getScCOTANSlots <- function(from) {
 #'
 #' @import gsubfn
 #'
+#' @importFrom methods as
 #' @importFrom methods setAs
 #'
 #' @export

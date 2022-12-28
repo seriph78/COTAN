@@ -1,5 +1,3 @@
-## Main functions
-
 
 #' plot_heatmap
 #'
@@ -18,11 +16,12 @@
 #' @importFrom tidyr pivot_longer
 #'
 #' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 facet_grid
 #' @importFrom ggplot2 scale_fill_gradient2
 #'
-#' @import scales
+#' @importFrom scales squish
 #'
 #' @export
 #'
@@ -56,11 +55,11 @@ setMethod(
     time <- g2 <- NULL
     print("plot heatmap")
     gr <- df_genes[[1]]
-    ge <- unique(array(sort(unlist(df_genes[sets]))))
+    ge <- unique(sort(unlist(df_genes[sets])))
     df.to.print <- data.frame()
     for (ET in conditions) {
       print(paste0("Loading condition", ET))
-      obj <- readRDS(paste0(dir, ET, ".cotan.RDS"))
+      obj <- readRDS(file.path(dir, paste0(ET, ".cotan.RDS")))
       obj <- as(obj, "scCOTAN")
 
       if (any(gr %in% rownames(obj@coex)) == FALSE) {
@@ -154,7 +153,7 @@ setMethod(
                facet_grid(type ~ g1, scales = "free", space = "free") +
                scale_fill_gradient2(low = "#E64B35FF", mid = "gray93", high = "#3C5488FF",
                                     midpoint = 0,na.value = "grey80", space = "Lab",
-                                    guide = "colourbar", aesthetics = "fill", oob = scales::squish) +
+                                    guide = "colourbar", aesthetics = "fill", oob = squish) +
                plotTheme("heatmap", textSize = 9)
 
     return(heatmap)
@@ -177,14 +176,20 @@ setMethod(
 #' is sets as both rows and column genes
 #'
 #' @return A ggplot2 object
-#' @import ComplexHeatmap
+#'
+#' @export
+#'
+#' @importFrom ComplexHeatmap Heatmap
+#' @importFrom ComplexHeatmap Legend
+#' @importFrom ComplexHeatmap draw
 #' @importFrom grid gpar
-#' @importFrom  stats quantile
+#' @importFrom stats quantile
 #' @importFrom circlize colorRamp2
 #' @importFrom Matrix forceSymmetric
 #' @importFrom rlang is_empty
-#' @export
+#'
 #' @rdname plot_general.heatmap
+#'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
@@ -202,7 +207,7 @@ setMethod(
 #'   prim.markers = primary.markers, p_value = 0.05, markers.list = gene.sets.list,
 #'   condition = "ERCC", dir = paste0(data_dir, "/")
 #' )
-setGeneric("plot_general.heatmap", function(prim.markers = c("Satb2", "Bcl11b", "Cux1", "Fezf2", "Tbr1"),
+setGeneric("plot_general.heatmap", function(prim.markers,
                                             markers.list = c(),
                                             dir, condition,
                                             p_value = 0.001,
@@ -212,7 +217,7 @@ setGeneric("plot_general.heatmap", function(prim.markers = c("Satb2", "Bcl11b", 
 #' @rdname plot_general.heatmap
 setMethod(
   "plot_general.heatmap", "ANY",
-  function(prim.markers = c("Satb2", "Bcl11b", "Cux1", "Fezf2", "Tbr1"), markers.list = c(), dir,
+  function(prim.markers, markers.list = c(), dir,
            condition, p_value = 0.001, symmetric = TRUE) {
     print("ploting a general heatmap")
     ET <- NULL
@@ -227,7 +232,8 @@ setMethod(
       markers.list <- as.list(markers.list)
     }
 
-    obj <- readRDS(paste0(dir, condition, ".cotan.RDS"))
+    obj <- readRDS(file.path(dir, paste0(condition, ".cotan.RDS")))
+    obj <- as(obj, "scCOTAN")
 
     no_genes <- unique(c(unlist(markers.list), prim.markers))[!unique(c(
       unlist(markers.list),
@@ -235,11 +241,11 @@ setMethod(
     ))
     %in% rownames(obj@coex)]
 
-    if (!rlang::is_empty(no_genes)) {
+    if (!is_empty(no_genes)) {
       print(paste0(no_genes, " not present!"))
     }
 
-    pval <- calculatePValue(object = obj)
+    pval <- calculatePValue(obj)
     diag(pval) <- 1
     pval <- pval[, unique(c(unlist(markers.list), prim.markers))]
 
@@ -302,12 +308,12 @@ setMethod(
 
     to.plot <- coex[reorder_idx_row, reorder_idx_col]
 
-    col_fun <- circlize::colorRamp2(
+    col_fun <- colorRamp2(
       c(
-        round(stats::quantile(as.matrix(to.plot), probs = 0.001),
+        round(quantile(as.matrix(to.plot), probs = 0.001),
           digits = 3
         ), 0,
-        round(stats::quantile(as.matrix(to.plot), probs = 0.999),
+        round(quantile(as.matrix(to.plot), probs = 0.999),
           digits = 3
         )
       ),
@@ -316,7 +322,7 @@ setMethod(
 
     # The next line is to set the columns and raws order
     # need to be implemented
-    part1 <- ComplexHeatmap::Heatmap(as.matrix(to.plot),
+    part1 <- Heatmap(as.matrix(to.plot),
       cluster_rows = FALSE,
       cluster_columns = FALSE,
       row_split = cl.genes.rows$cl,
@@ -324,20 +330,20 @@ setMethod(
       col = col_fun,
       show_row_names = FALSE,
       show_column_names = FALSE,
-      column_title_gp = grid::gpar(
+      column_title_gp = gpar(
         fill = "#8491B44C", font = 3,
         col = "#3C5488FF"
       ),
-      row_title_gp = grid::gpar(fill = "#8491B44C", font = 3, col = "#3C5488FF")
+      row_title_gp = gpar(fill = "#8491B44C", font = 3, col = "#3C5488FF")
     )
-    lgd <- ComplexHeatmap::Legend(
+    lgd <- Legend(
       col_fun = col_fun, title = "coex", grid_width =
         unit(0.3, "cm"),
       direction = "horizontal", title_position = "topcenter",
-      title_gp = grid::gpar(fontsize = 10, fontface = "bold", col = "#3C5488FF"),
-      labels_gp = grid::gpar(col = "#3C5488FF", font = 3)
+      title_gp = gpar(fontsize = 10, fontface = "bold", col = "#3C5488FF"),
+      labels_gp = gpar(col = "#3C5488FF", font = 3)
     )
-    ComplexHeatmap::draw(part1,
+    draw(part1,
       show_heatmap_legend = FALSE,
       annotation_legend_list = lgd, annotation_legend_side = "bottom"
     )

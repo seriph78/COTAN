@@ -249,6 +249,8 @@ setMethod(
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
 #'
+#' @importFrom stats median
+#'
 #' @export
 #'
 #' @examples

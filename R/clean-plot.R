@@ -40,7 +40,11 @@
 #' @importFrom ggplot2 ylab
 #' @importFrom ggplot2 scale_color_gradient2
 #' @importFrom ggplot2 scale_color_manual
+#' @importFrom ggplot2 geom_label
 #' @importFrom ggrepel geom_text_repel
+#'
+#' @importFrom graphics par
+#' @importFrom graphics title
 #'
 #' @examples
 #' data("raw.dataset")
