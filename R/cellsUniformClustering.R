@@ -130,6 +130,8 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #'
 #' @export
 #'
+#' @importFrom rlang set_names
+#'
 #' @importFrom stringr str_detect
 #' @importFrom stringr str_pad
 #'
@@ -153,6 +155,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 cellsUniformClustering <-
   function(objCOTAN, cores = 1, maxIterations = 25,
            saveObj = TRUE, outDir = ".") {
+  logThis("Creating cells' uniform clustering: START", logLevel = 2)
 
   cond <- getMetadataElement(objCOTAN, datasetTags()[3])
 
@@ -174,7 +177,8 @@ cellsUniformClustering <-
       dir.create(file.path(outDirIter))
     }
 
-    logThis(paste("In iteration", iter, "the number of cells to re-cluster is",
+    logThis(paste0("In iteration ", iter, " "), logLevel = 1, appendLF = FALSE)
+    logThis(paste("the number of cells to re-cluster is",
                   sum(is.na(outputClusters)), "cells belonging to",
                   numClustersToRecluster, "clusters"), logLevel = 2)
 
@@ -204,14 +208,14 @@ cellsUniformClustering <-
     cellsToRecluster <- vector(mode = "character")
     sratClusters <- unique(metaData[["seurat_clusters"]])
     for (cl in sratClusters) {
-      logThis(paste0("In iteration ", iter,
-                     " checking uniformity of cluster '", cl,
-                     "' of ", length(sratClusters), " clusters" ), logLevel = 1)
+      logThis("*", logLevel = 1, appendLF = FALSE)
+      logThis(paste0(" checking uniformity of cluster '", cl,
+                     "' of ", length(sratClusters), " clusters" ), logLevel = 2)
       if (cl != "singleton") {
         cells <- rownames(metaData[metaData[["seurat_clusters"]] == cl,])
         if (length(cells) < 10) {
-          logThis(paste("In iteration", iter, "cluster", cl,
-                        "has too few cells: will be reclustered!"), logLevel = 2)
+          logThis(paste("cluster", cl, "has too few cells: will be reclustered!"),
+                  logLevel = 3)
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
           clusterIsUniform <- checkClusterUniformity(objCOTAN = objCOTAN,
@@ -221,21 +225,20 @@ cellsUniformClustering <-
                                                      saveObj = saveObj,
                                                      outDir = outDirIter)
           if (!clusterIsUniform) {
-            logThis(paste("In iteration", iter, "cluster", cl,
-                          "has too high GDI: will be reclustered!"), logLevel = 2)
+            logThis(paste("cluster", cl, "has too high GDI: will be reclustered!"),
+                    logLevel = 3)
             numClustersToRecluster <- numClustersToRecluster + 1
             cellsToRecluster <- c(cellsToRecluster, cells)
           } else {
-            logThis(paste("In iteration", iter, "cluster", cl,
-                          "is uniform"), logLevel = 2)
+            logThis(paste("cluster", cl, "is uniform"), logLevel = 3)
           }
         }
       }
     }
-    logThis(paste("In iteration", iter,
-                  "found", length(sratClusters) - numClustersToRecluster,
+    logThis("", logLevel = 1)
+    logThis(paste("Found", length(sratClusters) - numClustersToRecluster,
                   "uniform and ", numClustersToRecluster,
-                  "non-uniform clusters"), logLevel = 1)
+                  "non-uniform clusters"), logLevel = 2)
 
     if (numClustersToRecluster == length(sratClusters)) {
       warning(paste("In iteration", iter, "no uniform clusters found!"))
@@ -262,7 +265,7 @@ cellsUniformClustering <-
     }
 
     if (length(cellsToRecluster) <= 50 || iter >= maxIterations) {
-      logThis(paste("In iteration", iter, "NO new possible uniform clusters!",
+      logThis(paste("NO new possible uniform clusters!",
                     "Unclustered cell left:", length(cellsToRecluster)), logLevel = 1)
       break
     }
@@ -277,11 +280,11 @@ cellsUniformClustering <-
 
   # replace the clusters' tags
   {
-    clNames <- unique(sort(outputClusters))
-    clNamesMap <- set_names(seq_along(clNames), clNames)
+    clTags <- unique(sort(outputClusters))
+    clTagsMap <- set_names(seq_along(clTags), clTags)
 
     unclusteredCells <- is.na(outputClusters)
-    outputClusters[!unclusteredCells] <- clNamesMap[outputClusters[!unclusteredCells]]
+    outputClusters[!unclusteredCells] <- clTagsMap[outputClusters[!unclusteredCells]]
     outputClusters <- set_names(as.character(outputClusters), getCells(objCOTAN))
     outputClusters[unclusteredCells] = "not_clustered"
   }
@@ -301,7 +304,6 @@ cellsUniformClustering <-
     if (!dim(srat)[2] == getNumCells(objCOTAN)) {
       warning("Number of cells got wrong")
       return(outputClusters)
-      break
     }
 
     logThis("Cluster, UMAP and Saving the Seurat dataset", logLevel = 2)
@@ -315,6 +317,8 @@ cellsUniformClustering <-
 
   rm(srat)
   gc()
+
+  logThis("Creating cells' uniform clustering: DONE", logLevel = 2)
 
   return(outputClusters)
 }

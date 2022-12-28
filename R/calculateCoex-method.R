@@ -6,7 +6,10 @@
 #'
 #' @returns The Mu matrix
 #'
+#' @importFrom rlang is_empty
+#'
 #' @importFrom Matrix t
+#'
 #' @importClassesFrom Matrix dgeMatrix
 #'
 #' @export
@@ -48,6 +51,8 @@ setMethod(
 #'
 #' @returns A `list` with the 'Yes/Yes' observed contingency table and the 'Yes'
 #'   observed vector
+#'
+#' @importFrom rlang is_empty
 #'
 #' @importFrom Matrix t
 #' @importFrom Matrix crossprod
@@ -659,6 +664,8 @@ setMethod(
 #'
 #' @export
 #'
+#' @importFrom rlang is_empty
+#'
 #' @examples
 #' S <- calculateS(objCOTAN)
 #'
@@ -773,7 +780,10 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #'
 #' @export
 #'
+#' @importFrom rlang set_names
+#'
 #' @importFrom stats pchisq
+#'
 #' @importFrom Matrix rowSums
 #' @importFrom Matrix colMeans
 #' @importFrom Matrix forceSymmetric

@@ -22,6 +22,8 @@
 #'
 #' @export
 #'
+#' @importFrom rlang set_names
+#'
 #' @importFrom stats quantile
 #' @importFrom stats pchisq
 #'
@@ -121,7 +123,7 @@ genesCoexSpace <-
 #'   (default 25)
 #' @param kCuts the number of estimated cluster (this defines the high for the
 #'   tree cut)
-#' @param distance type of distance to use (default "cosine"... "euclidean" is
+#' @param distance type of distance to use (default is `cosine`, `euclidean` is
 #'   also available)
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
@@ -134,6 +136,8 @@ genesCoexSpace <-
 #'
 #' @export
 #'
+#' @importFrom rlang set_names
+#'
 #' @importFrom factoextra fviz_eig
 #'
 #' @importFrom dendextend set
@@ -143,6 +147,7 @@ genesCoexSpace <-
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom RColorBrewer brewer.pal.info
 #'
+#' @importFrom stats dist
 #' @importFrom stats hclust
 #' @importFrom stats cutree
 #' @importFrom stats prcomp

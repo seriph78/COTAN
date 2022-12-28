@@ -29,6 +29,9 @@
 #'
 #' @importFrom stats quantile
 #'
+#' @importFrom rlang set_names
+#' @importFrom rlang is_empty
+#'
 #' @export
 #'
 #' @examples

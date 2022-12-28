@@ -57,4 +57,6 @@ test_that("Bisection estimates", {
   expect_equal(colSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj), calculateMu(obj))),
                rep(getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
+
+  expect_error(estimateDispersionNuNlminb(obj))
 })

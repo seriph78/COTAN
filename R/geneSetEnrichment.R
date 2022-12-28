@@ -17,6 +17,8 @@
 #'
 #' @export
 #'
+#' @importFrom rlang set_names
+#'
 #' @importFrom stringr str_remove
 #'
 #' @examples
@@ -43,14 +45,14 @@
 geneSetEnrichment <- function(clustersCoex, groupMarkers) {
   # It might be possible that the column names have the old extra
   # prefix 'cl.'. It will be remove in such cases.
-  clNamesMap <- set_names(colnames(clustersCoex),
-                          str_remove(colnames(clustersCoex), "cl\\."))
-  clustersNames <- names(clNamesMap)
+  clTagsMap <- set_names(colnames(clustersCoex),
+                         str_remove(colnames(clustersCoex), "cl\\."))
+  clustersTags <- names(clTagsMap)
 
   df <- as.data.frame(matrix(nrow = length(groupMarkers),
                              ncol = ncol(clustersCoex) + 2))
 
-  colnames(df) <- c(clustersNames, "N. detected", "N. total")
+  colnames(df) <- c(clustersTags, "N. detected", "N. total")
   rownames(df) <- names(groupMarkers)
 
   # TODO: add comment on this constant in the @details above!
@@ -70,8 +72,8 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers) {
     ex[ex < 0 & !is.na(ex)] <- 0
     ex <- 1 - exp(-teta * ex)
 
-    for (cl in clustersNames) {
-      df[groupName, cl] <- sum(ex[, clNamesMap[cl]], na.rm = TRUE) / length(genes)
+    for (cl in clustersTags) {
+      df[groupName, cl] <- sum(ex[, clTagsMap[cl]], na.rm = TRUE) / length(genes)
     }
 
     df[groupName, "N. detected"] <- numDetected

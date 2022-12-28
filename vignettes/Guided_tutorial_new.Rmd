@@ -78,7 +78,7 @@ data("test.dataset.col", package = "COTAN")
 Define a directory where the output will be stored.
 
 ```{r}
-out_dir <- paste0(tempdir(),"/")
+outDir <- tempdir()
 ```
 
 # Analytical pipeline
@@ -123,12 +123,12 @@ n_it = 1
 First, we create a directory to store all information regarding the data cleaning.
 
 ```{r}
-if(!file.exists(out_dir)){
-  dir.create(file.path(out_dir))
+if(!file.exists(outDir)){
+  dir.create(file.path(outDir))
 }
 
-if(!file.exists(paste0(out_dir, "cleaning"))){   
-  dir.create(file.path(out_dir, "cleaning"))
+if(!file.exists(file.path(outDir, "cleaning"))){   
+  dir.create(file.path(outDir, "cleaning"))
 }
 ```
 
@@ -146,7 +146,7 @@ genesPlot
 Run this when B cells need to be removed.
 
 ```{r eval=TRUE, include=TRUE}
-pdf(file.path(out_dir, "cleaning",
+pdf(file.path(outDir, "cleaning",
               paste0(t, "_", n_it, "_plots_before_cells_exlusion.pdf")))
 pcaCellsPlot
 genesPlot
@@ -175,7 +175,7 @@ genesPlot
 Run this only in the last iteration, instead of the previous code, when B cells group has not been removed
 
 ```{r}
-pdf(file.path(out_dir, "cleaning",
+pdf(file.path(outDir, "cleaning",
               paste0(t, "_", n_it, "_plots_before_cells_exlusion.pdf")))
 pcaCellsPlot
 genesPlot
@@ -192,7 +192,7 @@ genesPlot
 To color the PCA based on nu_j (so the cells' efficiency)
 
 ```{r}
-pdf(file.path(out_dir, "cleaning",
+pdf(file.path(outDir, "cleaning",
               paste0(t, "_plots_PCA_efficiency_colored.pdf")))
 UDEPlot
 
@@ -224,7 +224,7 @@ plot.ude <- ggplot(nuDf, aes(x = n, y = nu)) +
                      color = "darkred", size = 4.5)
 
 
-pdf(file.path(out_dir, "cleaning", paste0(t, "_plots_efficiency.pdf")))
+pdf(file.path(outDir, "cleaning", paste0(t, "_plots_efficiency.pdf")))
 plot.ude
 dev.off()
 
@@ -252,7 +252,7 @@ pcaCellsPlot
 In case we do not want to remove anything, we can run:
 
 ```{r}
-pdf(file.path(out_dir, "cleaning", paste(t, "_plots_efficiency.pdf")))
+pdf(file.path(outDir, "cleaning", paste(t, "_plots_efficiency.pdf")))
 
 UDEPlot
 
@@ -273,7 +273,7 @@ COEX evaluation and storing
 obj = calculateCoex(obj)
 
 # saving the structure
-saveRDS(obj, file = paste(out_dir, t, ".cotan.RDS"))
+saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
 ```
 
 ## Automatic run
@@ -284,7 +284,7 @@ It is also possible to run a directly a single function if we don't want to clea
 obj <- automaticCOTANObjectCreation(
   raw = test.dataset.col,
   GEO = "test", sequencingMethod = "10X", sampleCondition = "test.dataset.col",
-  saveObj = TRUE, outDir = out_dir, cores = 10)
+  saveObj = TRUE, outDir = outDir, cores = 10)
 ```
 
 # Cell cluster
@@ -292,7 +292,7 @@ obj <- automaticCOTANObjectCreation(
 The next step will find all homogeneous clusters using a GDI check on each cluster.
 
 ```{r}
-clusters <- cellsUniformClustering(obj, cores = 10, saveObj = TRUE, outDir = out_dir)
+clusters <- cellsUniformClustering(obj, cores = 10, saveObj = TRUE, outDir = outDir)
 obj <- addClusterization(obj, clName = "test", clusters = clusters)
 ```
 
@@ -306,19 +306,15 @@ obj <- addClusterizationCoex(obj, clName = "test", coexDF = coex)
 Using the cluster distance, based on the whole transcriptome, we can ththenheck if any of the closest clusters can form a still hohomogeneousigger cluster. We will keep this clusterization for the forther analysis.
 
 ```{r}
-obj <- merge_cell.clusters(obj = obj, cond = "test", cores=10, 
-                           srat = "Seurat_obj_test_with_cotan_clusters.RDS",
-                           out_dir = out_dir ,
-                           GEO="GSE121380", sc.method="10X 5'"
-                           #mt = TRUE, mt_prefix="^MT"
-                           )
+list[mergedClusters, mergedCoexDF, mergedPValueDf] <-
+  mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 10,
+                            distance = "cosine", hclustMethod = "ward.D2",
+                            saveObj = TRUE, outDir = outDir)
 ```
 
 ```{r}
-clusterData <- getClusterData(obj)[["clusters"]]
-
 ######## This is the best: cosine dissimilarity
-tree <- hclust(cosineDissimilarity(clusterData), method = "ward.D2")
+tree <- hclust(cosineDissimilarity(mergedClusters), method = "ward.D2")
 
 dend <- as.dendrogram(tree)
 plot(dend)

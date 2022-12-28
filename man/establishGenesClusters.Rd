@@ -22,7 +22,7 @@ more marker genes for each group.}
 \item{kCuts}{the number of estimated cluster (this defines the high for the
 tree cut)}
 
-\item{distance}{type of distance to use (default "cosine"... "euclidean" is
+\item{distance}{type of distance to use (default is \code{cosine}, \code{euclidean} is
 also available)}
 
 \item{hclustMethod}{default is "ward.D2" but can be any method defined by

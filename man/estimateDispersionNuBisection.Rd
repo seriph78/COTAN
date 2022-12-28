@@ -2,7 +2,7 @@
 % Please edit documentation in R/COTAN-estimators.R
 \name{estimateDispersionNuBisection,COTAN-method}
 \alias{estimateDispersionNuBisection,COTAN-method}
-\title{stimateDispersionNuBisection}
+\title{estimateDispersionNuBisection}
 \usage{
 \S4method{estimateDispersionNuBisection}{COTAN}(
   objCOTAN,
@@ -32,4 +32,14 @@ the updated \code{COTAN} object
 Estimates the 'dispersion' and 'nu' field of a \code{COTAN} object by running
 sequentially a bisection for each parameter. This allows to enforce
 \code{mean('nu') == 1} assumption Assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being run already
+}
+\examples{
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- clean(objCOTAN)
+objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12,
+                                          enforceNuAverageToOne = FALSE)
+dispersion <- getDispersion(objCOTAN)
+nu <- getNu(objCOTAN)
+
 }

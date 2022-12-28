@@ -1,7 +1,5 @@
-tm = tempdir()
-stopifnot(file.exists(tm))
 
-test_that("Merge Cells Clusters", {
+test_that("Merge Uniform Cells Clusters", {
 
   utils::data("test.dataset.col", package = "COTAN")
 
@@ -52,35 +50,29 @@ test_that("Merge Cells Clusters", {
   expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0)
   expect_equal(e.df[["N. total"]], sapply(groupMarkers, length), ignore_attr = TRUE)
 
-  skip("Partial skip: merge_cell.clusters: p_values_clusters_merged.csv not found")
+  list[mergedClusters, mergedCoexDF, mergedPValueDF] <-
+    mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 12,
+                              distance = "cosine", hclustMethod = "ward.D2",
+                              saveObj = FALSE)
 
-  obj <- merge_cell.clusters(obj = obj,
-                             cond = "test",
-                             cores = 12,
-                             out_dir = tm,
-                             GEO = "test",
-                             sc.method = "10X")
+  expect_lt(length(unique(mergedClusters)), length(unique(clusters)))
+  expect_setequal(mergedClusters, colnames(mergedCoexDF))
+  expect_setequal(colnames(mergedCoexDF), colnames(mergedPValueDF))
 
-  list[clusters_merged, clusters_merged_coex] <- getClusterizationData(obj)
+  #cluster_data <- readRDS(file.path(getwd(), "cluster_data_merged.RDS"))
+  #expect_equal(mergedClusters[genes.names.test], cluster_data)
 
-  expect_true( length(unique(clusters_merged)) < length(unique(clusters)))
+  for (cl in unique(mergedClusters)) {
+    cellsToDrop <- names(clusters)[mergedClusters != cl]
 
-  #cluster_data <- readRDS(file.path(getwd(),"cluster_data_marged.RDS"))
+    clObj <- dropGenesCells(obj, cells = cellsToDrop)
 
-  #expect_equal(obj@cluster_data[genes.names.test,], cluster_data)
+    clObj <- proceedToCoex(clObj, cores = 12, saveObj = FALSE)
 
-  raw <- getRawData(obj)
+    GDIData <- calculateGDI(clObj)
 
-  for (cl in unique(clusters_merged)) {
-    cellsToDrop <- names(clusters[clusters_merged != cl])
+    expect_lte(sum(GDIData[["GDI"]] >= 1.5), 0.01 * nrow(GDIData))
 
-    temp.obj <- dropGenesCells(obj, cells = cellsToDrop)
-
-    temp.obj <- proceedToCoex(temp.obj, cores = 12, saveObj = FALSE)
     gc()
-
-    GDI_data <- calculateGDI(temp.obj)
-
-    expect_true( sum(GDI_data[["GDI"]] >= 1.5) <= 0.01 * nrow(GDI_data))
   }
 })

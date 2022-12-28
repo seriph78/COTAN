@@ -13,6 +13,8 @@
 #'
 #' @export
 #'
+#' @importFrom rlang is_empty
+#'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,

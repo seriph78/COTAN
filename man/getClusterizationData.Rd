@@ -20,7 +20,6 @@ This function extract the asked clusterization column and its
 coex data.frame from the \code{COTAN} object.
 }
 \examples{
-
 list[cls, clsCoex] <- getClusterizationData(objCOTAN, clName = "merged")
 
 }

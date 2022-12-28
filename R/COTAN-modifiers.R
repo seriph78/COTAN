@@ -30,6 +30,8 @@ datasetTags <- function() {
 #'
 #' @returns the updated `data.frame`
 #'
+#' @importFrom rlang is_empty
+#'
 #' @noRd
 #'
 updateMetaInfo <- function(meta, tag, value) {
@@ -166,6 +168,8 @@ setMethod(
     return(objCOTAN)
   }
 )
+
+
 #' findFullyExpressedCells
 #'
 #' @description Determines the fully expressed cells inside a `COTAN` object
@@ -217,8 +221,6 @@ setMethod(
 #'   the indicated genes/cells were expunged. Only the meta-data for the
 #'   data-set are kept, while the rest is dropped as no more relevant with the
 #'   restricted matrix
-#'
-#' @importFrom rlang is_empty
 #'
 #' @export
 #'
@@ -335,8 +337,6 @@ setMethod(
 #'   just some of, the clusters of the clusterization
 #'
 #' @returns the updated `COTAN` object
-#'
-#' @importFrom rlang is_empty
 #'
 #' @export
 #'
@@ -463,8 +463,6 @@ setMethod(
 #' @param clName the name of an existing clusterization.
 #'
 #' @returns the updated `COTAN` object
-#'
-#' @importFrom rlang is_empty
 #'
 #' @export
 #'

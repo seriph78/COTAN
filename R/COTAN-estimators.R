@@ -112,6 +112,8 @@ setMethod(
 #'
 #' @returns The updated `COTAN` object
 #'
+#' @importFrom rlang set_names
+#'
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
 #'
@@ -242,6 +244,7 @@ setMethod(
 #' @return the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang set_names
 #'
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
@@ -370,7 +373,7 @@ setMethod(
 )
 
 
-#' stimateDispersionNuBisection
+#' estimateDispersionNuBisection
 #'
 #' Estimates the 'dispersion' and 'nu' field of a `COTAN` object by running
 #' sequentially a bisection for each parameter. This allows to enforce
@@ -385,9 +388,18 @@ setMethod(
 #'
 #' @return the updated `COTAN` object
 #'
+#' @export
+#'
 #' @importFrom rlang is_empty
 #'
-#' @export
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- clean(objCOTAN)
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12,
+#'                                           enforceNuAverageToOne = FALSE)
+#' dispersion <- getDispersion(objCOTAN)
+#' nu <- getNu(objCOTAN)
 #'
 #' @rdname estimateDispersionNuBisection
 #'
@@ -471,3 +483,102 @@ setMethod(
     return(objCOTAN)
   }
 )
+
+
+#' estimateDispersionNuNlminb
+#'
+#' @description This function estimates the nu and dispersion parameters to
+#'   minimize the discrepancy between the observed and expected probability of
+#'   zero.
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns The updated `COTAN` object
+#'
+#' @export
+#'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom stats nlminb
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- clean(objCOTAN)
+#' objCOTAN <- estimateDispersionNuNlminb(objCOTAN, cores = 12,
+#'                                        enforceNuAverageToOne = FALSE)
+#' dispersion <- getDispersion(objCOTAN)
+#' nu <- getNu(objCOTAN)
+#'
+#' @rdname estimateDispersionNuNlminb
+#'
+setMethod(
+  "estimateDispersionNuNlminb",
+  "COTAN",
+  function(objCOTAN, threshold = 0.001, cores = 1,
+           maxIterations = 100, chunkSize = 1024, enforceNuAverageToOne = FALSE) {
+    logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
+
+    # TODO: handle HK genes/FE cells
+    flagNotFullyExpressedCells()
+
+    # getNu() would show a warning when no 'nu' present
+    if (is_empty(getMetadataCells(objCOTAN)[["nu"]])) {
+      objCOTAN <- estimateNuLinear(objCOTAN)
+    }
+
+    lambda <- getLambda(objCOTAN)
+
+    zeroOne <- getZeroOneProj(objCOTAN)
+    zeroGenes <- rowSums(zeroOne == 0)
+    zeroCells <- colSums(zeroOne == 0)
+
+    rm(zeroOne)
+    gc()
+
+    stopifnot("Method cannot handle HK genes or FE cells yet" <-
+                (all(zeroGenes != 0) && all(zeroCells != 0)))
+
+    errorFunction <- function(par, lambda, zeroGenes,
+                              zeroCells, enforceNuAverageToOne) {
+      numGenes <- length(lambda)
+      dispersion <- par[1:numGenes]
+      nu <- exp(par[numGenes + 1:length(par)])
+
+      probZero <- funProbZero(dispersion, lambda %o% nu)
+
+      diffGenes <- rowSums(probZero) - zeroGenes
+      diffCells <- colSums(probZero) - zeroCells
+
+      diffNu <- 0
+      if (enforceNuAverageToOne) {
+        diffNu <- mean(nu) - 1
+      }
+
+      diff <- c(diffGenes, diffCells, diffNu)
+      error <- sqrt(sum(diff^2)/length(diff))
+    }
+
+    solution <- nlminb(
+      start = c(a = getDispersion(objCOTAN), nu = log(getNu(objCOTAN))),
+      lambda = lambda, zeroGenes = zeroGenes, zeroCells = zeroCells,
+      objective = errorFunction,
+      control = list(iter.max = maxIterations, abs.tol = threshold,
+                     trace = 2, step.min = 0.001, step.max = 0.1))
+
+    numGenes <- length(lambda)
+    dispersion <- solution[1:numGenes]
+    nu <- exp(solution[numGenes + 1:length(par)])
+
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
+                                        "dispersion", genes)
+
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
+                                        "nu", cells)
+
+    logThis("Estimate 'dispersion'/'nu': DONE", logLevel = 2)
+
+    return(test.nlminb)
+  }
+)
+

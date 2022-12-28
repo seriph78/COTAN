@@ -50,9 +50,15 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
   saveRDS(coexDF[genes.names.test, ], file.path(testsDir, "coex.test.cluster1.RDS"))
   saveRDS(pvalDF[genes.names.test, ], file.path(testsDir, "pval.test.cluster1.RDS"))
 
-  obj <- merge_cell.clusters(obj = obj, cond = "test", cores = 12, out_dir = tm,
-                             GEO = "test", sc.method = "10X")
+  list[mergedClusters, mCoexDF, mPValueDf] <-
+    mergeUniformCellsClusters(objCOTAN = obj,
+                              clusters = NULL,
+                              cores = 12,
+                              distance = "cosine",
+                              hclustMethod = "ward.D2",
+                              saveObj = FALSE,
+                              outDir = tm)
 
-  saveRDS(getClusterizationData(obj)[[1]][genes.names.test,],
-          file.path(testsDir, "cluster_data_marged.RDS"))
+  saveRDS(mergedClusters[genes.names.test],
+          file.path(testsDir, "cluster_data_merged.RDS"))
 }

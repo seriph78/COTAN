@@ -8,8 +8,6 @@
 #'
 #' @returns the raw count sparse matrix
 #'
-#' @importFrom rlang is_empty
-#'
 #' @export
 #'
 #' @examples
@@ -34,8 +32,6 @@ setMethod(
 #' @param objCOTAN A `COTAN` object
 #'
 #' @returns the number of cells in the sample (𝑚).
-#'
-#' @importFrom rlang is_empty
 #'
 #' @export
 #'
@@ -88,8 +84,6 @@ setMethod(
 #'
 #' @returns a character array with the cells' names
 #'
-#' @importFrom rlang is_empty
-#'
 #' @export
 #'
 #' @examples
@@ -115,8 +109,6 @@ setMethod(
 #' @param objCOTAN A `COTAN` object
 #'
 #' @returns a character array with the genes' names
-#'
-#' @importFrom rlang is_empty
 #'
 #' @export
 #'
@@ -145,8 +137,6 @@ setMethod(
 #'
 #' @returns the raw count matrix projected to 0/1
 #'
-#' @importFrom rlang is_empty
-#'
 #' @export
 #'
 #' @examples
@@ -173,8 +163,6 @@ setMethod(
 #'
 #' @return an array with the library sizes
 #'
-#' @importFrom rlang is_empty
-#'
 #' @export
 #'
 #' @examples
@@ -200,8 +188,6 @@ setMethod(
 #' @param objCOTAN A `COTAN` object
 #'
 #' @return an array with the library sizes
-#'
-#' @importFrom rlang is_empty
 #'
 #' @export
 #'
@@ -260,8 +246,6 @@ setMethod(
 #' @param objCOTAN A `COTAN` object
 #'
 #' @returns the meta-data data.frame
-#'
-#' @importFrom rlang is_empty
 #'
 #' @export
 #'
@@ -328,8 +312,6 @@ setMethod(
 #'
 #' @returns the meta-data data.frame
 #'
-#' @importFrom rlang is_empty
-#'
 #' @export
 #'
 #' @examples
@@ -355,8 +337,6 @@ setMethod(
 #' @param objCOTAN A `COTAN` object
 #'
 #' @returns the meta-data data.frame
-#'
-#' @importFrom rlang is_empty
 #'
 #' @export
 #'
@@ -525,6 +505,7 @@ setMethod(
 #' @returns an array of Booleans with TRUE for genes that are not housekeeping
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang set_names
 #'
 #' @export
 #'
@@ -561,6 +542,7 @@ setMethod(
 #'   expressed
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang set_names
 #'
 #' @export
 #'
@@ -595,8 +577,6 @@ setMethod(
 #'
 #' @returns an array containing all genes expressed in all cells
 #'
-#' @importFrom rlang is_empty
-#'
 #' @export
 #'
 #' @examples
@@ -624,8 +604,6 @@ setMethod(
 #' @param objCOTAN A `COTAN` object
 #'
 #' @returns an array containing all genes expressed in all cells
-#'
-#' @importFrom rlang is_empty
 #'
 #' @export
 #'
@@ -794,8 +772,10 @@ setMethod(
 #'
 #' @export
 #'
-#' @examples
+#' @importFrom rlang is_empty
+#' @importFrom rlang set_names
 #'
+#' @examples
 #' list[cls, clsCoex] <- getClusterizationData(objCOTAN, clName = "merged")
 #'
 #' @rdname getClusterizationData

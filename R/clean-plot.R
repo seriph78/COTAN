@@ -15,6 +15,8 @@
 #'
 #' @import gsubfn
 #'
+#' @importFrom rlang set_names
+#'
 #' @importFrom tibble rownames_to_column
 #' @importFrom tibble column_to_rownames
 #'

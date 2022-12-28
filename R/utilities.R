@@ -78,6 +78,8 @@ logThis <- function(msg, logLevel = 2, appendLF = TRUE) {
 #' @returns The updated list of names' subset, reordered according to the given
 #'   names' list
 #'
+#' @importFrom rlang is_empty
+#'
 #' @noRd
 #'
 handleNamesSubsets <- function(names, subset = c()) {
@@ -111,6 +113,7 @@ handleNamesSubsets <- function(names, subset = c()) {
 #' @export
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang set_names
 #'
 #' @rdname setColumnInDF
 #'
@@ -146,6 +149,7 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #'
 #' @export
 #'
+#' @importFrom rlang is_empty
 #' @importFrom rlang set_names
 #'
 #' @rdname toClusterList

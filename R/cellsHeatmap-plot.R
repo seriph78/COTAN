@@ -10,6 +10,10 @@
 #'
 #' @export
 #'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom ComplexHeatmap Heatmap
+#'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)

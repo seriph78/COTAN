@@ -7,6 +7,8 @@
 #'
 #' @returns The updated `COTAN` object
 #'
+#' @importFrom rlang is_empty
+#'
 #' @export
 #'
 #' @examples

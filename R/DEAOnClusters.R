@@ -21,6 +21,10 @@
 #'
 #' @export
 #'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom stats pchisq
+#'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
