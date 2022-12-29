@@ -50,10 +50,10 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
 
     Heatmap(coexMat,
             border = TRUE,
-            column_split = factor(rep(clustersIdentifier, clustersSize),
-                                  levels = clustersIdentifier),
-            row_split = factor(rep(clustersIdentifier, clustersSize),
-                               levels = clustersIdentifier),
+            column_split = factor(rep(clustersTags, clustersSize),
+                                  levels = clustersTags),
+            row_split = factor(rep(clustersTags, clustersSize),
+                               levels = clustersTags),
             cluster_rows = FALSE,
             cluster_columns = FALSE)
   } else {

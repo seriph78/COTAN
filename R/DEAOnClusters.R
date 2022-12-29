@@ -12,7 +12,7 @@
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clusters a `vector` or `factor` with the cell clusterization to
-#'   be analysed. If empty, the function will use the last clusterization stored
+#'   be analyzed. If empty, the function will use the last clusterization stored
 #'   in the `objCOTAN`
 #'
 #' @return a `list` with two objects:
@@ -28,7 +28,7 @@
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
-#'                                          GEO = "S"
+#'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
 #'                                          cores = 12,
@@ -38,7 +38,7 @@
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
 #'                                    saveObj = TRUE,
 #'                                    outDir = tempdir())
-#' list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN, clusters = clusters)
+#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 #'
 #' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
 #'                               clusters = clusters, coexDF = coexDF)

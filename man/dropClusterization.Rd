@@ -23,6 +23,9 @@ and in case dropping the corresponding \verb{coex data.frame} from the
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- dropClusterization(objCOTAN, "merged")
+clusters <- rep(rep(1:10, rep(c(3,4,5,6,7),2)), times = 100)
+names(clusters) <- getCells(objCOTAN)
+objCOTAN <- addClusterization(objCOTAN, "dummy", clusters)
+objCOTAN <- dropClusterization(objCOTAN, "dummy")
 
 }

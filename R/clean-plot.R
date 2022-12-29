@@ -7,7 +7,7 @@
 #'
 #' @returns a `list` of `ggplot2` plots:
 #'   * "pcaCells" is for pca cells,
-#'   * "genes" is for cluester2 cells' group genes,
+#'   * "genes" is for cluster2 cells' group genes,
 #'   * "UDE" is for cell UDE,
 #'   * "nu" is for cell nu.
 #'

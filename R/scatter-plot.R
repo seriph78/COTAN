@@ -7,7 +7,7 @@
 #' @param objCOTAN a `COTAN` object
 #' @param splitPattern Pattern used to extract, from the column names, the
 #'   sample field (default " ")
-#' @param numCols Once the column names are splitted by splitPattern, the column
+#' @param numCols Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
 #' @param split.samples Boolean. Whether to plot each sample in a different
 #'   panel (default `FALSE`)

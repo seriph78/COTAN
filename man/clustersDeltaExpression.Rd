@@ -23,7 +23,7 @@ the cluster compared to the average situation in the data set.
 \examples{
 data("raw.dataset")
 objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
-                                         GEO = "S"
+                                         GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",
                                          cores = 12,

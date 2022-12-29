@@ -14,7 +14,7 @@ it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 \item{object}{a \code{COTAN} object}
 }
 \value{
-A \code{data.frame} with thr GDI data
+A \code{data.frame} with the GDI data
 }
 \description{
 This function produces a\code{data.frame} with the GDI for each

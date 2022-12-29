@@ -25,7 +25,13 @@ present.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- addClusterizationCoex(objCOTAN, "merge", coex)
+clusters <- rep(rep(1:10, rep(c(3,4,5,6,7),2)), times = 100)
+names(clusters) <- getCells(objCOTAN)
+objCOTAN <- addClusterization(objCOTAN, "dummy", clusters)
+coexDF <- as.data.frame(matrix(0, ncol=10, nrow=getNumGenes(objCOTAN)))
+colnames(coexDF) <- c(1:10)
+rownames(coexDF) <- getGenes(objCOTAN)
+objCOTAN <- addClusterizationCoex(objCOTAN, clName = "dummy", coexDF = coexDF)
 
 }
 \seealso{

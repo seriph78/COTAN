@@ -7,7 +7,7 @@
 #' @param objCOTAN a `COTAN` object
 #' @param splitPattern Pattern used to extract, from the column names, the
 #'   sample field (default " ")
-#' @param numCols Once the column names are splitted by splitPattern, the column
+#' @param numCols Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
 #' @param genePrefix Prefix for the mitochondrial genes (default "^MT-" for
 #'   Human, mouse "^mt-")
@@ -31,7 +31,7 @@
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' lsPlot <- librarySizePlot(objCOTAN)
+#' lsPlot <- librarySizePlot(objCOTAN)[["plot"]]
 #' plot(lsPlot)
 #'
 #' @rdname mitochondrialPercentagePlot

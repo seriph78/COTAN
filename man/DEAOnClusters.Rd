@@ -10,7 +10,7 @@ DEAOnClusters(objCOTAN, clusters = NULL)
 \item{objCOTAN}{a \code{COTAN} object}
 
 \item{clusters}{a \code{vector} or \code{factor} with the cell clusterization to
-be analysed. If empty, the function will use the last clusterization stored
+be analyzed. If empty, the function will use the last clusterization stored
 in the \code{objCOTAN}}
 }
 \value{
@@ -33,7 +33,7 @@ In/Out status of the cells with respect to each cluster.
 \examples{
 data("raw.dataset")
 objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
-                                         GEO = "S"
+                                         GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",
                                          cores = 12,
@@ -43,7 +43,7 @@ objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
 clusters <- cellsUniformClustering(objCOTAN, cores = 12,
                                    saveObj = TRUE,
                                    outDir = tempdir())
-list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN, clusters = clusters)
+coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 
 objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
                               clusters = clusters, coexDF = coexDF)

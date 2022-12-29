@@ -20,7 +20,7 @@ the G matrix
 }
 \description{
 calculate the statistics G-test for genes contingency tables
-It is proportional to the genes' precence mutual information.
+It is proportional to the genes' presence mutual information.
 }
 \examples{
 G <- calculateG(objCOTAN)

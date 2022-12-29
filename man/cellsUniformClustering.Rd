@@ -41,7 +41,7 @@ iteration of the entire process, until all clusters are deemed \strong{uniform}.
 \examples{
 data("raw.dataset")
 objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
-                                         GEO = "S"
+                                         GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",
                                          cores = 12,

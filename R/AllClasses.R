@@ -145,12 +145,12 @@ setClass(
                       " 'clustersCoex' must be the same as those of the raw data."))
         }
         if (!all(colnames(coexDF) %in% object@metaCells[[name]])) {
-          badClustersNames <- colnames(coexDF)[!colnames(coexDF) %in% object@metaCells[[name]]]
+          badClustersTags <- colnames(coexDF)[!colnames(coexDF) %in% object@metaCells[[name]]]
           stop(paste0("The column names of the data.frames in 'clustersCoex' must",
-                      " be a subset of the names in the clusterization.",
+                      " be a subset of the tags in the clusterization.",
                       " The data.frame for clusterization '", name, "' does not",
                       " satisfy this condition with the names [",
-                      paste(badClustersNames, collapse = ","), "] vs cluester names [",
+                      paste(badClustersNames, collapse = ","), "] vs cluster tags [",
                       paste(unique(object@metaCells[[name]]), collapse = ","), "]."))
         }
       }

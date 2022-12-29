@@ -18,7 +18,7 @@ Converts a square matrix into a compact form, by forcibly make
 it symmetric
 }
 \details{
-This is a lagacy function related to old \code{scCOTAN} objects. Use the
+This is a legacy function related to old \code{scCOTAN} objects. Use the
 more appropriate \code{Matrix::dspMatrix} type for similar functionality
 }
 \examples{

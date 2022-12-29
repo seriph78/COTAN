@@ -29,7 +29,7 @@ Calculates \eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})}, where the
 \examples{
 data("raw.dataset")
 objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
-                                         GEO = "S"
+                                         GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",
                                          cores = 12,
@@ -38,7 +38,7 @@ objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
 clusters <- cellsUniformClustering(objCOTAN, cores = 12,
                                    saveObj = TRUE,
                                    outDir = tempdir())
-list[coexDF, pvalDF] <- DEAOnClusters(objCOTAN, clusters = clusters)
+coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
                               clusters = clusters, coexDF = coexDF)
 groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),

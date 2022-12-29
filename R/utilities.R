@@ -41,7 +41,7 @@ setLoggingLevel <- function(newLevel = 1) {
 #'
 #' @param msg the message to print
 #' @param logLevel the logging level of the current message. It defaults to 2
-#' @param appendLF whther to add a new-line character at the end of the message
+#' @param appendLF whether to add a new-line character at the end of the message
 #'
 #' @returns whether the message has been printed
 #'
@@ -746,7 +746,7 @@ plotTheme <- function(plotKind = "common", textSize = 14) {
 #'
 #' @description Converts a compacted symmetric matrix back into a proper matrix
 #'
-#' @details This is a lagacy function related to old `scCOTAN` objects. Use the
+#' @details This is a legacy function related to old `scCOTAN` objects. Use the
 #'   more appropriate `Matrix::dspMatrix` type for similar functionality
 #'
 #' @seealso [calculateCoex()] or [expectedContingencyTables()] for actual
@@ -832,7 +832,7 @@ vec2mat_rfast <-function(x, genes = "all") {
 #' @description Converts a square matrix into a compact form, by forcibly make
 #'   it symmetric
 #'
-#' @details This is a lagacy function related to old `scCOTAN` objects. Use the
+#' @details This is a legacy function related to old `scCOTAN` objects. Use the
 #'   more appropriate `Matrix::dspMatrix` type for similar functionality
 #'
 #' @seealso [calculateCoex()] or [expectedContingencyTables()] for actual

@@ -13,7 +13,7 @@ cleanPlots(objCOTAN)
 a \code{list} of \code{ggplot2} plots:
 \itemize{
 \item "pcaCells" is for pca cells,
-\item "genes" is for cluester2 cells' group genes,
+\item "genes" is for cluster2 cells' group genes,
 \item "UDE" is for cell UDE,
 \item "nu" is for cell nu.
 }

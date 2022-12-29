@@ -698,7 +698,7 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' calculateG
 #'
 #' calculate the statistics G-test for genes contingency tables
-#' It is proportional to the genes' precence mutual information.
+#' It is proportional to the genes' presence mutual information.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param geneSubsetCol an array of genes. It will be put in columns.
@@ -776,7 +776,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #'   it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 #'   (G-test)
 #'
-#' @returns A `data.frame` with thr GDI data
+#' @returns A `data.frame` with the GDI data
 #'
 #' @export
 #'

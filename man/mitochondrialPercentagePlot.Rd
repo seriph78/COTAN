@@ -17,7 +17,7 @@ mitochondrialPercentagePlot(
 \item{splitPattern}{Pattern used to extract, from the column names, the
 sample field (default " ")}
 
-\item{numCols}{Once the column names are splitted by splitPattern, the column
+\item{numCols}{Once the column names are split by splitPattern, the column
 number with the sample name (default 2)}
 
 \item{genePrefix}{Prefix for the mitochondrial genes (default "^MT-" for
@@ -33,7 +33,7 @@ sample.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-lsPlot <- librarySizePlot(objCOTAN)
+lsPlot <- librarySizePlot(objCOTAN)[["plot"]]
 plot(lsPlot)
 
 }

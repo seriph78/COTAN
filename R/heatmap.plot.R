@@ -1,18 +1,22 @@
 
-#' plot_heatmap
+#' heatmapPlot
 #'
-#' This is the function that create the heatmap of one or more `COTAN` object.
+#' @description This function creates the `heatmap` of one or more `COTAN`
+#'   objects.
 #'
-#' @param p_val.tr p-value threshold. Default is 0.05
-#' @param df_genes this is a list of gene array. The first array will define genes in the columns.
-#' @param sets This is a numeric array indicating from which fields of the previous list
-#' will be considered
+#' @param genesLists A `list` of genes' `array`s. The first `array` defines the
+#'   genes in the columns.
+#' @param sets A numeric array indicating which fields in the
+#'   previous `list` should be used.
 #' @param conditions An array of prefixes indicating the different files.
-#' @param dir The directory in which are all `COTAN` files (corresponding to the previous prefixes)
+#' @param pValueThreshold The p-value threshold. Default is 0.05.
+#' @param dir The directory in which are all `COTAN` files (corresponding to the
+#'   previous prefixes)
 #'
-#' @return a ggplot object
+#' @returns a `ggplot` object
 #'
 #' @importFrom Matrix forceSymmetric
+#'
 #' @importFrom tidyr pivot_longer
 #'
 #' @importFrom ggplot2 ggplot
@@ -40,125 +44,90 @@
 #'   "2.R" = c("ERCC-00170", "ERCC-00158"),
 #'   "3.S" = c("ERCC-00160", "ERCC-00162")
 #' )
-#' plot_heatmap(
-#'   p_v = 0.05, df_genes = gene.sets.list,
+#' heatmapPlot(
+#'   pValueThreshold = 0.05, genesLists = gene.sets.list,
 #'   sets = c(2, 3), conditions = c("ERCC"), dir = paste0(data_dir, "/")
 #' )
 #'
-#' @rdname plot_heatmap
-setGeneric("plot_heatmap", function(p_val.tr = 0.05, df_genes, sets, conditions, dir) {
-  standardGeneric("plot_heatmap")
-})
-setMethod(
-  "plot_heatmap", "ANY",
-  function(p_val.tr = 0.05, df_genes, sets, conditions, dir) {
-    time <- g2 <- NULL
-    print("plot heatmap")
-    gr <- df_genes[[1]]
-    ge <- unique(sort(unlist(df_genes[sets])))
-    df.to.print <- data.frame()
-    for (ET in conditions) {
-      print(paste0("Loading condition", ET))
-      obj <- readRDS(file.path(dir, paste0(ET, ".cotan.RDS")))
-      obj <- as(obj, "scCOTAN")
+#' @rdname heatmapPlot
+#'
+heatmapPlot <- function(genesLists, sets, conditions,
+                        pValueThreshold = 0.05, dir) {
+  #time <- g2 <- NULL
+  logThis("heatmap plot: START", logLevel = 2)
 
-      if (any(gr %in% rownames(obj@coex)) == FALSE) {
-        print(paste0("primary markers all absent in ", ET))
-        stop()
-      }
-      p_val <- calculatePValue(obj, geneSubsetCol = gr, geneSubsetRow = ge)
-      p_val <- as.data.frame(p_val)
+  colGenes <- genesLists[[1]]
+  allGenes <- unique(sort(unlist(genesLists[sets])))
 
-      # this to add some eventually effective housekeeping genes
-      if (any(ge %in% obj@hk)) {
-        genes.to.add <- ge[ge %in% obj@hk]
-        temp.hk.rows <- as.data.frame(matrix(
-                          ncol = ncol(p_val),
-                          nrow = length(genes.to.add)
-                        ))
-        rownames(temp.hk.rows) <- genes.to.add
-        colnames(temp.hk.rows) <- colnames(p_val)
-        temp.hk.rows <- 1
-        p_val <- rbind(p_val, temp.hk.rows)
-      }
+  df.to.print <- data.frame()
+  for (cond in conditions) {
+    logThis(paste0("Loading condition '", cond, "'"), logLevel = 3)
+    obj <- readRDS(file.path(dir, paste0(cond, ".cotan.RDS")))
 
-      if (any(gr %in% obj@hk)) {
-        genes.to.add <- gr[gr %in% obj@hk]
-        temp.hk.cols <- as.data.frame(matrix(
-                          ncol = length(genes.to.add),
-                          nrow = nrow(p_val)
-                        ))
-        colnames(temp.hk.cols) <- genes.to.add
-        rownames(temp.hk.cols) <- rownames(p_val)
-        temp.hk.cols <- 1
-        p_val <- cbind(p_val, temp.hk.cols)
-      }
+    stopifnot("primary markers all absent" <- any(colGenes %in% getGenes(obj)))
 
-      p_val$g2 <- as.vector(rownames(p_val))
-      df.temp.pval <- pivot_longer(p_val, cols = seq_along(colnames(p_val)) - 1, names_to = "g1", values_to = "p_val")
+    pValue <- calculatePValue(obj, geneSubsetCol = colGenes, geneSubsetRow = allGenes)
+    pValue <- as.data.frame(pValue)
 
-      coex <- getGenesCoex(obj, genes = gr)
-      diag(coex) <- 0
-      coex <- coex[rownames(coex) %in% ge, ]
-      # this to add some eventually effective housekeeping genes
-      if (any(ge %in% obj@hk)) {
-        temp.hk.rows <- 0
-        coex <- rbind(coex, temp.hk.rows)
-      }
+    pValue$g2 <- as.vector(rownames(pValue))
+    df.temp.pval <- pivot_longer(pValue, cols = seq_along(colnames(pValue)) - 1,
+                                 names_to = "g1", values_to = "pValue")
 
-      if (any(gr %in% obj@hk)) {
-        temp.hk.cols <- 0
-        coex <- cbind(coex, temp.hk.cols)
-      }
-      #---------------------------------------------------------
-      coex <- as.data.frame(coex)
-      coex$g2 <- as.vector(rownames(coex))
-      df.temp.coex <- pivot_longer(coex, cols = seq_along(colnames(p_val)) - 1, names_to = "g1", values_to = "coex")
-      df.temp <- merge(df.temp.coex, df.temp.pval)
-      df.temp$time <- ET
-      df.temp$type <- NA
-      df.temp$absent <- NA
-      df.temp2 <- data.frame()
-      for (type in names(df_genes)[sets]) {
-        for (g1 in gr) {
-          tt <- df.temp[df.temp$g2 %in% df_genes[[type]] & df.temp$g1 == g1, ]
-          # control if the subset is smaller than the number of wanted genes
-          if (dim(tt)[1] < length(df_genes[[type]])) {
-            n.row <- length(df_genes[[type]]) - dim(tt)[1]
-            t.rows <- as.data.frame(matrix(nrow = n.row, ncol = 7))
-            colnames(t.rows) <- colnames(tt)
-            t.rows[, "g1"] <- g1
-            t.rows[, "time"] <- ET
-            t.rows[, "absent"] <- "yes"
-            t.rows[, "p_val"] <- 1
-            t.rows[, "g2"] <- df_genes[[type]][!df_genes[[type]] %in% tt$g2]
-            tt <- rbind(tt, t.rows)
-          }
-          tt$type <- type
-          df.temp2 <- rbind(df.temp2, tt)
+    #---------------------------------------------------------
+    coex <- getGenesCoex(obj)
+    diag(coex) <- 0
+    coex <- coex[getGenes(obj) %in% allGenes, getGenes(obj) %in% colGenes]
+    coex <- as.data.frame(coex)
+
+    coex$g2 <- as.vector(rownames(coex))
+    df.temp.coex <- pivot_longer(coex, cols = seq_along(colnames(pValue)) - 1,
+                                 names_to = "g1", values_to = "coex")
+
+    df.temp <- merge(df.temp.coex, df.temp.pval)
+    df.temp$time <- cond
+    df.temp$type <- NA
+    df.temp$absent <- NA
+    df.temp2 <- data.frame()
+    for (type in names(genesLists)[sets]) {
+      for (g1 in colGenes) {
+        tt <- df.temp[df.temp$g2 %in% genesLists[[type]] & df.temp$g1 == g1, ]
+        # control if the subset is smaller than the number of wanted genes
+        if (dim(tt)[1] < length(genesLists[[type]])) {
+          n.row <- length(genesLists[[type]]) - dim(tt)[1]
+          t.rows <- as.data.frame(matrix(nrow = n.row, ncol = 7))
+          colnames(t.rows) <- colnames(tt)
+          t.rows[, "g1"] <- g1
+          t.rows[, "time"] <- cond
+          t.rows[, "absent"] <- "yes"
+          t.rows[, "pValue"] <- 1
+          t.rows[, "g2"] <- genesLists[[type]][!genesLists[[type]] %in% tt$g2]
+          tt <- rbind(tt, t.rows)
         }
-        print(type)
+        tt$type <- type
+        df.temp2 <- rbind(df.temp2, tt)
       }
-      df.temp <- df.temp2
-      df.temp$t_hk <- ifelse((df.temp$g2 %in% obj@hk) | (df.temp$g1 %in% obj@hk), "hk", "n")
-      df.temp[df.temp$p_val > p_val.tr, ]$coex <- 0
-      df.to.print <- rbind(df.to.print, df.temp)
+      print(type)
     }
-    print(paste("min coex:", min(df.to.print$coex, na.rm = TRUE),
-                "max coex",  max(df.to.print$coex, na.rm = TRUE)))
-
-    heatmap <- ggplot(data = subset(df.to.print, type %in% names(df_genes)[sets]),
-                      aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
-               geom_tile(aes(fill = coex), colour = "black", show.legend = TRUE) +
-               facet_grid(type ~ g1, scales = "free", space = "free") +
-               scale_fill_gradient2(low = "#E64B35FF", mid = "gray93", high = "#3C5488FF",
-                                    midpoint = 0,na.value = "grey80", space = "Lab",
-                                    guide = "colourbar", aesthetics = "fill", oob = squish) +
-               plotTheme("heatmap", textSize = 9)
-
-    return(heatmap)
+    df.temp <- df.temp2
+    df.temp$t_hk <- ifelse((df.temp$g2 %in% obj@hk) | (df.temp$g1 %in% obj@hk), "hk", "n")
+    df.temp[df.temp$pValue > pValueThreshold, ]$coex <- 0
+    df.to.print <- rbind(df.to.print, df.temp)
   }
-)
+  print(paste("min coex:", min(df.to.print$coex, na.rm = TRUE),
+              "max coex",  max(df.to.print$coex, na.rm = TRUE)))
+
+  heatmap <- ggplot(data = subset(df.to.print, type %in% names(genesLists)[sets]),
+                    aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
+             geom_tile(aes(fill = coex), colour = "black", show.legend = TRUE) +
+             facet_grid(type ~ g1, scales = "free", space = "free") +
+             scale_fill_gradient2(low = "#E64B35FF", mid = "gray93", high = "#3C5488FF",
+                                  midpoint = 0,na.value = "grey80", space = "Lab",
+                                  guide = "colourbar", aesthetics = "fill", oob = squish) +
+             plotTheme("heatmap", textSize = 9)
+
+  return(heatmap)
+}
+
 
 
 #' plot_general.heatmap
@@ -220,7 +189,6 @@ setMethod(
   function(prim.markers, markers.list = c(), dir,
            condition, p_value = 0.001, symmetric = TRUE) {
     print("ploting a general heatmap")
-    ET <- NULL
 
     if (symmetric == TRUE) {
       markers.list <- as.list(c(unlist(prim.markers), unlist(markers.list)))

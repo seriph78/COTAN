@@ -48,7 +48,7 @@ setMethod(
 
 #' estimateNuLinear
 #'
-#' @description linear estimator of nu (normalised cells' counts averages)
+#' @description linear estimator of nu (normalized cells' counts averages)
 #'
 #' @param objCOTAN a `COTAN` object
 #'
@@ -117,6 +117,9 @@ setMethod(
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
 #'
+#' @importFrom parallelly supportsMulticore
+#' @importFrom parallelly availableCores
+#'
 #' @export
 #'
 #' @examples
@@ -135,11 +138,16 @@ setMethod(
            maxIterations = 100, chunkSize = 1024) {
     logThis("Estimate dispersion: START", logLevel = 2)
 
-    if (Sys.info()['sysname'] == "Windows" && cores != 1) {
-      warning(paste0("On windows the numebr of cores used will be 1!",
-                     " Multicore is not supported."))
+    cores <- max(1, cores)
+    if (!supportsMulticore() && cores != 1) {
+      warning(paste0("On this system multicore is not supported;",
+                     " this can happen on some systems like 'windows'.",
+                     "The number of cores used will be set 1!"))
       cores <- 1
     }
+    cores <- min(cores, availableCores(omit = 1))
+
+    logThis(paste("Effective number of cores used:", cores), logLevel = 3)
 
     genes <- getGenes(objCOTAN)
     sumZeros <- set_names(getNumCells(objCOTAN) -
@@ -249,6 +257,9 @@ setMethod(
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
 #'
+#' @importFrom parallelly supportsMulticore
+#' @importFrom parallelly availableCores
+#'
 #' @importFrom stats median
 #'
 #' @export
@@ -270,11 +281,16 @@ setMethod(
            maxIterations = 100, chunkSize = 1024) {
     logThis("Estimate nu: START", logLevel = 2)
 
-    if (Sys.info()['sysname'] == "Windows" && cores != 1) {
-      warning(paste0("On windows the numebr of cores used will be 1!",
-                     " Multicore is not supported."))
+    cores <- max(1, cores)
+    if (!supportsMulticore() && cores != 1) {
+      warning(paste0("On this system multicore is not supported;",
+                     " this can happen on some systems like 'windows'.",
+                     "The number of cores used will be set 1!"))
       cores <- 1
     }
+    cores <- min(cores, availableCores(omit = 1))
+
+    logThis(paste("Effective number of cores used:", cores), logLevel = 3)
 
     # parameters estimation
     if (is_empty(getNu(objCOTAN))) {

@@ -13,7 +13,7 @@
 The updated \code{COTAN} object
 }
 \description{
-linear estimator of nu (normalised cells' counts averages)
+linear estimator of nu (normalized cells' counts averages)
 }
 \examples{
 data("raw.dataset")

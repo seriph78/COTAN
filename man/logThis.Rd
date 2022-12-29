@@ -11,7 +11,7 @@ logThis(msg, logLevel = 2, appendLF = TRUE)
 
 \item{logLevel}{the logging level of the current message. It defaults to 2}
 
-\item{appendLF}{whther to add a new-line character at the end of the message}
+\item{appendLF}{whether to add a new-line character at the end of the message}
 }
 \value{
 whether the message has been printed

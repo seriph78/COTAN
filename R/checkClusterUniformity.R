@@ -27,7 +27,7 @@
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
-#'                                          GEO = "S"
+#'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
 #'                                          cores = 12,
@@ -37,7 +37,7 @@
 #'                                    saveObj = TRUE,
 #'                                    outDir = tempdir())
 #' isUniform <- checkClusterUniformity(objCOTAN, cluster = clusters[1],
-#'                                     cells = getCells(objCOTAN)[clusters %in clusters[1]],
+#'                                     cells = getCells(objCOTAN)[clusters %in% clusters[1]],
 #'                                     cores = cores, saveObj = TRUE, outDir = tempdir())
 #'
 #' @rdname checkClusterUniformity

@@ -286,7 +286,7 @@ list[coexDF, pvalDF] <- DEAOnClusters(obj)
 obj <- addClusterizationCoex(obj, clName = "test", coexDF = coexDF)
 ```
 
-Using the cluster distance, based on the whole transcriptome, we can check if any of the closest clusters can together form a still uniform cluster. We will keep this clusterization for the forther analysis.
+Using the cluster distance, based on the whole transcriptome, we can check if any of the closest clusters can together form a still uniform cluster. We will keep this clusterization for the further analysis.
 
 ```{r}
 list[mergedClusters, mergedCoexDF, mergedPValueDf] <-
@@ -363,7 +363,7 @@ CC <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
 list.genes = list("Ref.col"= BB, "AA"=AA, "Const."=CC )
 
 #TODO: fix the function
-#plot_heatmap(df_genes = list.genes, sets = c(1:3), conditions = c("test"), dir = outDir)
+#heatmapPlot(genesLists = list.genes, sets = c(1:3), conditions = c("test"), dir = outDir)
 ```
 
 We can also plot a general heatmap of coex values based on some markers like the following one.

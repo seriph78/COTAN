@@ -20,7 +20,7 @@ a matrix
 Converts a compacted symmetric matrix back into a proper matrix
 }
 \details{
-This is a lagacy function related to old \code{scCOTAN} objects. Use the
+This is a legacy function related to old \code{scCOTAN} objects. Use the
 more appropriate \code{Matrix::dspMatrix} type for similar functionality
 }
 \examples{

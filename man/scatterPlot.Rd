@@ -12,7 +12,7 @@ scatterPlot(objCOTAN, splitPattern = " ", numCols = 2, split.samples = FALSE)
 \item{splitPattern}{Pattern used to extract, from the column names, the
 sample field (default " ")}
 
-\item{numCols}{Once the column names are splitted by splitPattern, the column
+\item{numCols}{Once the column names are split by splitPattern, the column
 number with the sample name (default 2)}
 
 \item{split.samples}{Boolean. Whether to plot each sample in a different
