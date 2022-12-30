@@ -25,7 +25,7 @@ cell and sample
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-lsPlot <- genesSizePlot(objCOTAN)
-plot(lsPlot)
+gsPlot <- genesSizePlot(objCOTAN)
+plot(gsPlot)
 
 }

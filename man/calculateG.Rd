@@ -23,6 +23,9 @@ calculate the statistics G-test for genes contingency tables
 It is proportional to the genes' presence mutual information.
 }
 \examples{
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 G <- calculateG(objCOTAN)
 
 }

@@ -31,14 +31,14 @@
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
 #'                                          cores = 12,
-#'                                          saveObj = TRUE,
+#'                                          saveObj = FALSE,
 #'                                          outDir = tempdir())
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = TRUE,
+#'                                    saveObj = FALSE,
 #'                                    outDir = tempdir())
 #' isUniform <- checkClusterUniformity(objCOTAN, cluster = clusters[1],
 #'                                     cells = getCells(objCOTAN)[clusters %in% clusters[1]],
-#'                                     cores = cores, saveObj = TRUE, outDir = tempdir())
+#'                                     cores = 12, saveObj = FALSE, outDir = tempdir())
 #'
 #' @rdname checkClusterUniformity
 #'

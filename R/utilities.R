@@ -619,7 +619,7 @@ parallelNuBisection <-
 #' mat <- matrix(c(1:25), nrow = 5, ncol = 5,
 #'               dimnames = list(paste0("row.", c(1:5)),
 #'                               paste0("col.", c(1:5))))
-#' d
+#' dist <- cosineDissimilarity(mat)
 #'
 #' @rdname cosineDissimilarity
 #'
@@ -663,7 +663,6 @@ cosineDissimilarity <- function(m) {
 #'
 #' @examples
 #' theme <- plotTheme("pca")
-#' theme
 #'
 #' @rdname plotTheme
 #'

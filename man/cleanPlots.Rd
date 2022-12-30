@@ -27,6 +27,6 @@ data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- clean(objCOTAN)
 plots <- cleanPlots(objCOTAN)
-plot(plots[["UDEPlot"]])
+plot(plots[["nu"]])
 
 }

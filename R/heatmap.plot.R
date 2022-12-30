@@ -113,8 +113,8 @@ heatmapPlot <- function(genesLists, sets, conditions,
     df.temp[df.temp$pValue > pValueThreshold, ]$coex <- 0
     df.to.print <- rbind(df.to.print, df.temp)
   }
-  print(paste("min coex:", min(df.to.print$coex, na.rm = TRUE),
-              "max coex",  max(df.to.print$coex, na.rm = TRUE)))
+  logThis(paste("min coex:", min(df.to.print$coex, na.rm = TRUE),
+                "max coex",  max(df.to.print$coex, na.rm = TRUE)), logLevel = 2)
 
   heatmap <- ggplot(data = subset(df.to.print, type %in% names(genesLists)[sets]),
                     aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
@@ -132,17 +132,19 @@ heatmapPlot <- function(genesLists, sets, conditions,
 
 #' plot_general.heatmap
 #'
-#' This function is used to plot an heatmap made using only some genes, as markers,
-#' and collecting all other genes correlated
-#' with these markers with a p-value smaller than the set threshold. Than all relations are plotted.
-#' Primary markers will be plotted as groups of rows. Markers list will be plotted as columns.
+#' @description This function is used to plot an heatmap made using only some
+#'   genes, as markers, and collecting all other genes correlated with these
+#'   markers with a p-value smaller than the set threshold. Than all relations
+#'   are plotted. Primary markers will be plotted as groups of rows. Markers
+#'   list will be plotted as columns.
+#'
 #' @param prim.markers A set of genes plotted as rows.
 #' @param markers.list A set of genes plotted as columns.
 #' @param dir The directory where the `COTAN` object is stored.
 #' @param condition The prefix for the `COTAN` object file.
 #' @param p_value The p-value threshold
-#' @param symmetric A boolean: default F. If T the union of prim.markers and marker.list
-#' is sets as both rows and column genes
+#' @param symmetric A boolean: default F. If T the union of prim.markers and
+#'   marker.list is sets as both rows and column genes
 #'
 #' @return A ggplot2 object
 #'
@@ -151,10 +153,15 @@ heatmapPlot <- function(genesLists, sets, conditions,
 #' @importFrom ComplexHeatmap Heatmap
 #' @importFrom ComplexHeatmap Legend
 #' @importFrom ComplexHeatmap draw
+#'
 #' @importFrom grid gpar
+#'
 #' @importFrom stats quantile
+#'
 #' @importFrom circlize colorRamp2
+#'
 #' @importFrom Matrix forceSymmetric
+#'
 #' @importFrom rlang is_empty
 #'
 #' @rdname plot_general.heatmap
@@ -210,7 +217,7 @@ setMethod(
     %in% rownames(obj@coex)]
 
     if (!is_empty(no_genes)) {
-      print(paste0(no_genes, " not present!"))
+      warning(paste0(no_genes, " not present!"))
     }
 
     pval <- calculatePValue(obj)

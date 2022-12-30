@@ -176,8 +176,8 @@ librarySizePlot <- function(objCOTAN, splitPattern = " ", numCols = 2) {
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' lsPlot <- genesSizePlot(objCOTAN)
-#' plot(lsPlot)
+#' gsPlot <- genesSizePlot(objCOTAN)
+#' plot(gsPlot)
 #'
 #' @rdname genesSizePlot
 #'

@@ -245,7 +245,7 @@ setGeneric(
 
 setGeneric(
   "estimateDispersionNuNlminb",
-  function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 50, chunkSize = 1024, enforceNuAverageToOne = FALSE)
+  function(objCOTAN, threshold = 0.001, maxIterations = 100,
+           chunkSize = 1024, enforceNuAverageToOne = FALSE)
     standardGeneric("estimateDispersionNuNlminb")
 )

@@ -7,7 +7,6 @@
 \S4method{estimateDispersionNuNlminb}{COTAN}(
   objCOTAN,
   threshold = 0.001,
-  cores = 1,
   maxIterations = 100,
   chunkSize = 1024,
   enforceNuAverageToOne = FALSE
@@ -23,14 +22,4 @@ The updated \code{COTAN} object
 This function estimates the nu and dispersion parameters to
 minimize the discrepancy between the observed and expected probability of
 zero.
-}
-\examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- clean(objCOTAN)
-objCOTAN <- estimateDispersionNuNlminb(objCOTAN, cores = 12,
-                                       enforceNuAverageToOne = FALSE)
-dispersion <- getDispersion(objCOTAN)
-nu <- getNu(objCOTAN)
-
 }

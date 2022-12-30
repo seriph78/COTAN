@@ -144,10 +144,10 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
 #'                                          cores = 12,
-#'                                          saveObj = TRUE,
+#'                                          saveObj = FALSE,
 #'                                          outDir = tempdir())
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = TRUE,
+#'                                    saveObj = FALSE,
 #'                                    outDir = tempdir())
 #' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
 #'                               clusters = clusters)

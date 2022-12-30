@@ -34,17 +34,18 @@ plot_general.heatmap(
 
 \item{p_value}{The p-value threshold}
 
-\item{symmetric}{A boolean: default F. If T the union of prim.markers and marker.list
-is sets as both rows and column genes}
+\item{symmetric}{A boolean: default F. If T the union of prim.markers and
+marker.list is sets as both rows and column genes}
 }
 \value{
 A ggplot2 object
 }
 \description{
-This function is used to plot an heatmap made using only some genes, as markers,
-and collecting all other genes correlated
-with these markers with a p-value smaller than the set threshold. Than all relations are plotted.
-Primary markers will be plotted as groups of rows. Markers list will be plotted as columns.
+This function is used to plot an heatmap made using only some
+genes, as markers, and collecting all other genes correlated with these
+markers with a p-value smaller than the set threshold. Than all relations
+are plotted. Primary markers will be plotted as groups of rows. Markers
+list will be plotted as columns.
 }
 \examples{
 data("raw.dataset")

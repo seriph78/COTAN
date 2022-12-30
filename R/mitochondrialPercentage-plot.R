@@ -31,8 +31,8 @@
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' lsPlot <- librarySizePlot(objCOTAN)[["plot"]]
-#' plot(lsPlot)
+#' mpPlot <- mitochondrialPercentagePlot(objCOTAN)[["plot"]]
+#' plot(mpPlot)
 #'
 #' @rdname mitochondrialPercentagePlot
 #'

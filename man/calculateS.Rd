@@ -22,6 +22,9 @@ the S matrix
 calculate the statistics S for genes contingency tables
 }
 \examples{
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 S <- calculateS(objCOTAN)
 
 }

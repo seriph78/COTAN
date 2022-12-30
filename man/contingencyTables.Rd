@@ -29,8 +29,11 @@ intensive
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- clean(objCOTAN)
+objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
 g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-list[oCT, eCT] <- contingencyTables(object = objCOTAN, g1 = g1, g2 = g2)
+ctList <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
+ctList[["observed"]]
 
 }

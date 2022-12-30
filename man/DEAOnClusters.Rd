@@ -37,11 +37,11 @@ objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",
                                          cores = 12,
-                                         saveObj = TRUE,
+                                         saveObj = FALSE,
                                          outDir = tempdir())
 
 clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-                                   saveObj = TRUE,
+                                   saveObj = FALSE,
                                    outDir = tempdir())
 coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 

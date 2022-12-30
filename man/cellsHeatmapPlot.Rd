@@ -22,7 +22,8 @@ Heatmap plot of the cells' coex matrix
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- initializeMetaDataset(GEO = "test_GEO",
+objCOTAN <- initializeMetaDataset(objCOTAN,
+                                  GEO = "test_GEO",
                                   sequencingMethod = "test_method",
                                   sampleCondition = "test")
 objCOTAN <- clean(objCOTAN)

@@ -513,32 +513,18 @@ setMethod(
 #'
 #' @returns The updated `COTAN` object
 #'
-#' @export
-#'
 #' @importFrom rlang is_empty
 #'
 #' @importFrom stats nlminb
-#'
-#' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionNuNlminb(objCOTAN, cores = 12,
-#'                                        enforceNuAverageToOne = FALSE)
-#' dispersion <- getDispersion(objCOTAN)
-#' nu <- getNu(objCOTAN)
 #'
 #' @rdname estimateDispersionNuNlminb
 #'
 setMethod(
   "estimateDispersionNuNlminb",
   "COTAN",
-  function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 100, chunkSize = 1024, enforceNuAverageToOne = FALSE) {
+  function(objCOTAN, threshold = 0.001, maxIterations = 100,
+           chunkSize = 1024, enforceNuAverageToOne = FALSE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
-
-    # TODO: handle HK genes/FE cells
-    flagNotFullyExpressedCells()
 
     # getNu() would show a warning when no 'nu' present
     if (is_empty(getMetadataCells(objCOTAN)[["nu"]])) {
@@ -561,7 +547,7 @@ setMethod(
                               zeroCells, enforceNuAverageToOne) {
       numGenes <- length(lambda)
       dispersion <- par[1:numGenes]
-      nu <- exp(par[numGenes + 1:length(par)])
+      nu <- exp(par[(numGenes + 1):length(par)])
 
       probZero <- funProbZero(dispersion, lambda %o% nu)
 
@@ -578,15 +564,16 @@ setMethod(
     }
 
     solution <- nlminb(
-      start = c(a = getDispersion(objCOTAN), nu = log(getNu(objCOTAN))),
+      start = c(rep(0,getNumGenes(objCOTAN)), log(getNu(objCOTAN))),
       lambda = lambda, zeroGenes = zeroGenes, zeroCells = zeroCells,
+      enforceNuAverageToOne = enforceNuAverageToOne,
       objective = errorFunction,
       control = list(iter.max = maxIterations, abs.tol = threshold,
                      trace = 2, step.min = 0.001, step.max = 0.1))
 
     numGenes <- length(lambda)
-    dispersion <- solution[1:numGenes]
-    nu <- exp(solution[numGenes + 1:length(par)])
+    dispersion <- solution$par[1:numGenes]
+    nu <- exp(solution$par[(numGenes + 1):length(par)])
 
     objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
                                         "dispersion", genes)

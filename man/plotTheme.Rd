@@ -32,7 +32,6 @@ Supported kinds are:
 }
 \examples{
 theme <- plotTheme("pca")
-theme
 
 }
 \seealso{

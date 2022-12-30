@@ -165,7 +165,7 @@ setMethod(
 #'   GEO = "code",
 #'   sequencingMethod = "10X",
 #'   sampleCondition = "mouse dataset",
-#'   saveObj = TRUE,
+#'   saveObj = FALSE,
 #'   outDir = tempdir(),
 #'   cores = 12)
 #'

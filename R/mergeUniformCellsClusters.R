@@ -43,22 +43,21 @@
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
 #'                                          cores = 12,
-#'                                          saveObj = TRUE,
+#'                                          saveObj = FALSE,
 #'                                          outDir = tempdir())
 #'
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = TRUE,
+#'                                    saveObj = FALSE,
 #'                                    outDir = tempdir())
 #'
-#' list[mergedClusters, mergedCoexDF, mergedPValueDf] <-
-#'   mergeUniformCellsClusters(objCOTAN = obj,
+#' mergedList <- mergeUniformCellsClusters(objCOTAN = obj,
 #'                             clusters = clusters,
 #'                             cores = 12,
 #'                             distance = "cosine",
 #'                             hclustMethod = "ward.D2",
-#'                             saveObj = TRUE,
+#'                             saveObj = FALSE,
 #'                             outDir = tempdir())
-#'
+#' mergedClusters <- mergedList[["clusters"]]
 #'
 #' @rdname mergeUniformCellsClusters
 #'
