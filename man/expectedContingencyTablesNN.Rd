@@ -35,6 +35,8 @@ data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
-list[expNN, expN] <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+expectedNList <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+expectedNN <- expectedNList[[1]]
+expectedN  <- expectedNList[[2]]
 
 }

@@ -66,7 +66,9 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' list[obsYY, obsY] <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+#' observedYList <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+#' observedYY <- observedYList[[1]]
+#' observedY  <- observedYList[[2]]
 #'
 #' @rdname observedContingencyTablesYY
 #'
@@ -241,7 +243,9 @@ observedContingencyTables <- function(objCOTAN,
 #' objCOTAN <- COTAN(raw = raw.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
-#' list[expNN, expN] <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+#' expectedNList <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+#' expectedNN <- expectedNList[[1]]
+#' expectedN  <- expectedNList[[2]]
 #'
 #' @rdname expectedContingencyTablesNN
 #'

@@ -18,7 +18,7 @@ Linear estimator of lambda (genes' counts averages)
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- estimateLambda(objCOTAN)
+objCOTAN <- estimateLambdaLinear(objCOTAN)
 lambda <- getLambda(objCOTAN)
 
 }

@@ -18,7 +18,7 @@ This function extract the lambda array (mean expression for each gene).
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- estimateLambda(objCOTAN)
+objCOTAN <- estimateLambdaLinear(objCOTAN)
 lambda <- getLambda(objCOTAN)
 
 }

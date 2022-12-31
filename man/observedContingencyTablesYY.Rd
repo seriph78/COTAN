@@ -29,6 +29,8 @@ Calculate observed Yes/Yes field of the contingency table
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-list[obsYY, obsY] <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+observedYList <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+observedYY <- observedYList[[1]]
+observedY  <- observedYList[[2]]
 
 }

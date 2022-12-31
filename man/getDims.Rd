@@ -17,7 +17,20 @@ This function extracts the sizes of all slots of the \code{COTAN} object.
 }
 \examples{
 data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+                                         GEO = "S",
+                                         sequencingMethod = "10X",
+                                         sampleCondition = "Test",
+                                         cores = 12,
+                                         saveObj = FALSE,
+                                         outDir = tempdir())
+clusters <- cellsUniformClustering(objCOTAN, cores = 12,
+                                   saveObj = FALSE,
+                                   outDir = tempdir())
+coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+
+objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
+                              clusters = clusters, coexDF = coexDF)
 allSizes <- getDims(objCOTAN)
 
 }

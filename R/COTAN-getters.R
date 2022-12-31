@@ -435,7 +435,7 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- estimateLambda(objCOTAN)
+#' objCOTAN <- estimateLambdaLinear(objCOTAN)
 #' lambda <- getLambda(objCOTAN)
 #'
 #' @rdname getLambda
@@ -731,6 +731,8 @@ setMethod(
 #' @export
 #'
 #' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
 #' clusterizations <- getClusterizations(objCOTAN)
 #'
 #' @rdname getClusterizations
@@ -776,7 +778,25 @@ setMethod(
 #' @importFrom rlang set_names
 #'
 #' @examples
-#' list[cls, clsCoex] <- getClusterizationData(objCOTAN, clName = "merged")
+#' data("raw.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#'                                          GEO = "S",
+#'                                          sequencingMethod = "10X",
+#'                                          sampleCondition = "Test",
+#'                                          cores = 12,
+#'                                          saveObj = FALSE,
+#'                                          outDir = tempdir())
+#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
+#'                                    saveObj = FALSE,
+#'                                    outDir = tempdir())
+#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+#'
+#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
+#'                               clusters = clusters, coexDF = coexDF)
+#'
+#' clDataList <- getClusterizationData(objCOTAN, clName = "merged")
+#' clusters <- clDataList[[1]]
+#' coexDF   <- clDataList[[2]]
 #'
 #' @rdname getClusterizationData
 #'
@@ -821,7 +841,20 @@ setMethod(
 #'
 #' @examples
 #' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#'                                          GEO = "S",
+#'                                          sequencingMethod = "10X",
+#'                                          sampleCondition = "Test",
+#'                                          cores = 12,
+#'                                          saveObj = FALSE,
+#'                                          outDir = tempdir())
+#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
+#'                                    saveObj = FALSE,
+#'                                    outDir = tempdir())
+#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+#'
+#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
+#'                               clusters = clusters, coexDF = coexDF)
 #' allSizes <- getDims(objCOTAN)
 #'
 #' @rdname getDims

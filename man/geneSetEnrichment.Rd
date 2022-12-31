@@ -43,6 +43,7 @@ objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
                               clusters = clusters, coexDF = coexDF)
 groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
                      G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
-enrichment <- geneSetEnrichment(objCOTAN, coexDF, groupMarkers)
+enrichment <- geneSetEnrichment(clustersCoex = coexDF,
+                                groupMarkers = groupMarkers)
 
 }
