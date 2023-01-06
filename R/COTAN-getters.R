@@ -632,6 +632,7 @@ setMethod(
 #' @param objCOTAN A `COTAN` object
 #' @param genes A vector of gene names. It will exclude any gene not on the
 #'   list. By defaults the function will keep all genes.
+#' @param zeroDiagonal When TRUE sets the diagonal to zero.
 #'
 #' @return the genes' coex values
 #'
@@ -652,7 +653,7 @@ setMethod(
 setMethod(
   "getGenesCoex",
   "COTAN",
-  function(objCOTAN, genes = c()) {
+  function(objCOTAN, genes = c(), zeroDiagonal = TRUE) {
     if (!is_empty(objCOTAN@genesCoex) &&
         isFALSE(as.logical(getMetadataElement(objCOTAN, datasetTags()[5]))) ) {
       stop(paste0("Cannot return genes' coex as the matrix is",
@@ -660,12 +661,17 @@ setMethod(
                   " It is still ossible to access the data directly!"))
     }
 
-    if (is_empty(genes)) {
-      return(objCOTAN@genesCoex)
+    ret <- objCOTAN@genesCoex
+
+    if (isTRUE(zeroDiagonal)) {
+      ret@x[cumsum(seq(nrow(ret)))] <- 0
     }
-    else {
-      return(objCOTAN@genesCoex[, genes, drop = FALSE])
+
+    if (!is_empty(genes)) {
+      ret <- ret[, getGenes(objCOTAN) %in% genes, drop = FALSE]
     }
+
+    return(ret)
   }
 )
 
@@ -678,6 +684,7 @@ setMethod(
 #' @param objCOTAN A `COTAN` object
 #' @param cells A vector of cell names. It will exclude any cell not on the
 #'   list. By defaults the function will keep all cells.
+#' @param zeroDiagonal When TRUE sets the diagonal to zero.
 #'
 #' @returns the cells' coex values
 #'
@@ -699,20 +706,25 @@ setMethod(
 setMethod(
   "getCellsCoex",
   "COTAN",
-  function(objCOTAN, cells = c()) {
-    if (!is_empty(objCOTAN@genesCoex) &&
+  function(objCOTAN, cells = c(), zeroDiagonal = TRUE) {
+    if (!is_empty(objCOTAN@cellsCoex) &&
         isFALSE(as.logical(getMetadataElement(objCOTAN, datasetTags()[6]))) ) {
-      stop(paste0("Cannot return genes' coex as the matrix is",
+      stop(paste0("Cannot return cells' coex as the matrix is",
                   " out of sync with the other parameters.",
                   " It is still ossible to access the data directly!"))
     }
 
-    if (is_empty(cells)) {
-      return(objCOTAN@cellsCoex)
+    ret <- objCOTAN@cellsCoex
+
+    if (isTRUE(zeroDiagonal)) {
+      ret@x[cumsum(seq(nrow(ret)))] <- 0
     }
-    else {
-      return(objCOTAN@cellsCoex[, cells, drop = FALSE])
+
+    if (!is_empty(cells)) {
+      ret <- ret[, getCells(objCOTAN) %in% cells, drop = FALSE]
     }
+
+    return(ret)
   }
 )
 

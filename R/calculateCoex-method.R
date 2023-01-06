@@ -571,7 +571,8 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 setMethod(
   "calculateCoex",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE) {
+  function(objCOTAN, actOnCells = FALSE,
+           optimizeForSpeed = TRUE) {
     if (isTRUE(actOnCells)) { kind <- "cells'" } else { kind <- "genes'" }
     logThis(paste("Calculate", kind, "coex: START"), logLevel = 1)
 
@@ -659,13 +660,16 @@ setMethod(
 
 #' calculateS
 #'
-#' calculate the statistics S for genes contingency tables
+#' @description This function calculates the statistics S for genes contingency
+#'   tables
+#'
+#' @details It always has the diagonal set to zero.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param geneSubsetCol an array of genes. It will be put in columns.
-#' If left empty the function will do it genome-wide.
-#' @param geneSubsetRow an array of genes. It will be put in rows.
-#' If left empty the function will do it genome-wide.
+#' @param geneSubsetCol an array of genes. It will be put in columns. If left
+#'   empty the function will do it genome-wide.
+#' @param geneSubsetRow an array of genes. It will be put in rows. If left empty
+#'   the function will do it genome-wide.
 #'
 #' @return the S matrix
 #'
@@ -687,11 +691,10 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 
   logThis("Calculating S: START", logLevel = 2)
 
-  if(identical(geneSubsetRow, getGenes(objCOTAN)) &&
-     identical(geneSubsetCol, getGenes(objCOTAN))) {
-    coex <- getGenesCoex(objCOTAN)
-  } else {
-    coex <- getGenesCoex(objCOTAN)[geneSubsetRow, geneSubsetCol, drop = FALSE]
+  coex <- getGenesCoex(objCOTAN, zeroDiagonal = TRUE)
+  if(!identical(geneSubsetRow, getGenes(objCOTAN)) ||
+     !identical(geneSubsetCol, getGenes(objCOTAN))) {
+    coex <- coex[geneSubsetRow, geneSubsetCol, drop = FALSE]
   }
 
   stopifnot("Coex is missing" = !is_empty(coex))
@@ -707,14 +710,17 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 
 #' calculateG
 #'
-#' calculate the statistics G-test for genes contingency tables
-#' It is proportional to the genes' presence mutual information.
+#' @description This function calculates the statistics G-test for genes
+#'   contingency tables.
+#'
+#' @details  It always has the diagonal set to zero. It is proportional to the
+#'   genes' presence mutual information.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param geneSubsetCol an array of genes. It will be put in columns.
-#' If left empty the function will do it genome-wide.
-#' @param geneSubsetRow an array of genes. It will be put in rows.
-#' If left empty the function will do it genome-wide.
+#' @param geneSubsetCol an array of genes. It will be put in columns. If left
+#'   empty the function will do it genome-wide.
+#' @param geneSubsetRow an array of genes. It will be put in rows. If left empty
+#'   the function will do it genome-wide.
 #'
 #' @return the G matrix
 #'
@@ -744,21 +750,25 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 
   tNN <- observedNN * log(observedNN / pmax(1, expectedNN))
   tNN[observedNN == 0] <- 0
+  diag(tNN) <- 0
   tNN <- tNN[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedNN); rm(expectedNN)
 
   tNY <- observedNY * log(observedNY / pmax(1, expectedNY))
   tNY[observedNY == 0] <- 0
+  diag(tNY) <- 0
   tNY <- tNY[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedNY); rm(expectedNY)
 
   tYN <- observedYN * log(observedYN / pmax(1, expectedYN))
   tYN[observedYN == 0] <- 0
+  diag(tYN) <- 0
   tYN <- tYN[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedYN); rm(expectedYN)
 
   tYY <- observedYY * log(observedYY / pmax(1, expectedYY))
   tYY[observedYY == 0] <- 0
+  diag(tYY) <- 0
   tYY <- tYY[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedYY); rm(expectedYY)
   gc()
@@ -826,7 +836,6 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 
   top5pcRows <- as.integer(max(1:round(getNumGenes(objCOTAN) / 20, digits = 0)))
 
-  diag(S) <- 0
   pValueSorted <- apply(S, 2, sort, decreasing = TRUE)
   pValueSorted <- pValueSorted[1:top5pcRows, , drop = FALSE]
   pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1, lower.tail = FALSE)

@@ -394,7 +394,7 @@ Another useful function is getGenesCoex(). This can be used to extract the whole
 
 ```{r}
 # For the whole matrix
-coex <- getGenesCoex(obj)
+coex <- getGenesCoex(obj, zeroDiagonal = FALSE)
 coex[1:5, 1:5]
 ```
 

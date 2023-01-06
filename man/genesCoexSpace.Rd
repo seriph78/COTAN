@@ -37,8 +37,8 @@ data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- proceedToCoex(objCOTAN, cores = 12)
 markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
-GCS <- genesCoexpressionSpace(objCOTAN,
-                              primaryMarkers = markers,
-                              numGenesPerMarker = 15)
+GCS <- genesCoexSpace(objCOTAN,
+                      primaryMarkers = markers,
+                      numGenesPerMarker = 15)
 
 }

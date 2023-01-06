@@ -75,7 +75,6 @@ heatmapPlot <- function(genesLists, sets, conditions,
 
     #---------------------------------------------------------
     coex <- getGenesCoex(obj)
-    diag(coex) <- 0
     coex <- coex[getGenes(obj) %in% allGenes, getGenes(obj) %in% colGenes]
     coex <- as.data.frame(coex)
 
@@ -138,15 +137,15 @@ heatmapPlot <- function(genesLists, sets, conditions,
 #'   are plotted. Primary markers will be plotted as groups of rows. Markers
 #'   list will be plotted as columns.
 #'
-#' @param prim.markers A set of genes plotted as rows.
-#' @param markers.list A set of genes plotted as columns.
-#' @param dir The directory where the `COTAN` object is stored.
-#' @param condition The prefix for the `COTAN` object file.
-#' @param p_value The p-value threshold
-#' @param symmetric A boolean: default F. If T the union of prim.markers and
-#'   marker.list is sets as both rows and column genes
+#' @param objCOTAN A `COTAN` object.
+#' @param primaryMarkers A set of genes plotted as rows.
+#' @param secondaryMarkers A set of genes plotted as columns.
+#' @param pValue The p-value threshold
+#' @param symmetric A Boolean: default FALSE. If TRUE the union of
+#'   `primaryMarkers` and `secondaryMarkers` is used for both rows and column
+#'   genes
 #'
-#' @return A ggplot2 object
+#' @returns A ggplot2 object
 #'
 #' @export
 #'
@@ -164,131 +163,101 @@ heatmapPlot <- function(genesLists, sets, conditions,
 #'
 #' @importFrom rlang is_empty
 #'
-#' @rdname plot_general.heatmap
+#' @rdname genesHeatmapPlot
 #'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' data_dir <- tempdir()
-#' saveRDS(objCOTAN, file = file.path(data_dir, "ERCC.cotan.RDS"))
 #' # some genes
 #' primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
 #' # a example of named list of different gene set
-#' gene.sets.list <- list(
+#' gene.sets.list <- list(objCOTAN,
 #'   "primary.markers" = primary.markers,
 #'   "2.R" = c("ERCC-00170", "ERCC-00158"),
 #'   "3.S" = c("ERCC-00160", "ERCC-00162")
 #' )
-#' plot_general.heatmap(
-#'   prim.markers = primary.markers, p_value = 0.05, markers.list = gene.sets.list,
+#' genesHeatmapPlot(
+#'   primaryMarkers = primary.markers, pValue = 0.05, secondaryMarkers = gene.sets.list,
 #'   condition = "ERCC", dir = paste0(data_dir, "/")
 #' )
-setGeneric("plot_general.heatmap", function(prim.markers,
-                                            markers.list = c(),
-                                            dir, condition,
-                                            p_value = 0.001,
-                                            symmetric = TRUE) {
-  standardGeneric("plot_general.heatmap")
-})
-#' @rdname plot_general.heatmap
-setMethod(
-  "plot_general.heatmap", "ANY",
-  function(prim.markers, markers.list = c(), dir,
-           condition, p_value = 0.001, symmetric = TRUE) {
-    print("ploting a general heatmap")
-
-    if (symmetric == TRUE) {
-      markers.list <- as.list(c(unlist(prim.markers), unlist(markers.list)))
+genesHeatmapPlot <-
+  function(objCOTAN, primaryMarkers, secondaryMarkers = c(),
+           pValue = 0.001, symmetric = TRUE) {
+    if (isTRUE(symmetric)) {
+      secondaryMarkers <- as.list(c(unlist(primaryMarkers), unlist(secondaryMarkers)))
     }
 
-    if (is.null(markers.list)) {
-      markers.list <- as.list(prim.markers)
+    if (is_empty(secondaryMarkers)) {
+      secondaryMarkers <- as.list(primaryMarkers)
     } else {
-      markers.list <- as.list(markers.list)
+      secondaryMarkers <- as.list(secondaryMarkers)
     }
 
-    obj <- readRDS(file.path(dir, paste0(condition, ".cotan.RDS")))
-    obj <- as(obj, "scCOTAN")
+    allMarkers <- unique(c(unlist(secondaryMarkers), unlist(primaryMarkers)))
+    unexpressedGenes <- allMarkers[!allMarkers %in% getGenes(objCOTAN)]
 
-    no_genes <- unique(c(unlist(markers.list), prim.markers))[!unique(c(
-      unlist(markers.list),
-      prim.markers
-    ))
-    %in% rownames(obj@coex)]
-
-    if (!is_empty(no_genes)) {
-      warning(paste0(no_genes, " not present!"))
+    if (!is_empty(unexpressedGenes)) {
+      warning(paste("The markers", paste(no_genes, collapse = ", "),
+                    "are not present in the COTAN object!"))
     }
 
-    pval <- calculatePValue(obj)
-    diag(pval) <- 1
-    pval <- pval[, unique(c(unlist(markers.list), prim.markers))]
+    pval <- calculatePValue(objCOTAN)[, allMarkers]
 
-    pval.red <- apply(pval, 1, FUN = min)
-    genes.row <- names(pval.red[pval.red < p_value])
+    pvalFloored <- apply(pval, 1, FUN = min)
+    rowGenes <- names(pvalFloored)[pvalFloored < pValue]
 
-    genes.row <- unique(c(unique(c(unlist(markers.list), prim.markers)), genes.row))
+    rowGenes <- unique(c(allMarkers, rowGenes))
     pval <- as.data.frame(pval)
 
-    coex <- getGenesCoex(obj)
-    diag(coex) <- 0
+    coex <- getGenesCoex(obj)[getGenes(objCOTAN) %in% rowGenes, ]
     if (symmetric == TRUE) {
-      coex <- coex[rownames(coex) %in% genes.row, colnames(coex) %in% genes.row]
-    } else {
-      coex <- coex[rownames(coex) %in% genes.row, ]
+      coex <- coex[ , getGenes(objCOTAN) %in% rowGenes]
     }
 
-    list.rows <- c()
-    for (m in unlist(markers.list)) {
-      genes <- rownames(pval[pval[, m] < p_value, ])
+    listRows <- c()
+    for (m in unlist(secondaryMarkers)) {
+      genes <- rownames(pval[pval[, m] < pValue, ])
       genes <- genes[genes %in% rownames(coex[coex[, m] > 0, ])]
-      list.rows[[m]] <- genes
+      listRows[[m]] <- genes
     }
 
-    list.cols <- c()
-    for (m in prim.markers) {
-      genes <- rownames(pval[pval[, m] < p_value, ])
+    clGenesRows <- c()
+    for (g in names(listRows)) {
+      tmp <- data.frame("genes" = listRows[[g]], "cl" = rep(g, length(listRows[[g]])))
+      clGenesRows <- rbind(clGenesRows, tmp)
+    }
+
+    reorder_idx_row <- match(clGenesRows[["genes"]], rownames(coex))
+
+    listCols <- c()
+    for (m in primaryMarkers) {
+      genes <- rownames(pval[pval[, m] < pValue, ])
       genes <- genes[genes %in% rownames(coex[coex[, m] > 0, ])]
-      list.cols[[m]] <- genes
+      listCols[[m]] <- genes
     }
-
-    cl.genes.rows <- c()
-    for (ll in names(list.rows)) {
-      tmp <- data.frame("genes" = list.rows[[ll]], "cl" = rep(ll, length(list.rows[[ll]])))
-      cl.genes.rows <- rbind(cl.genes.rows, tmp)
-    }
-
-    cl.genes.rows <- cl.genes.rows[cl.genes.rows$genes %in% rownames(coex), ]
-
-    reorder_idx_row <- match(cl.genes.rows$gene, rownames(coex))
-
 
     if (symmetric == TRUE) {
-      cl.genes.cols <- data.frame()
-      for (ll in names(list.rows)) {
-        tmp <- data.frame("genes" = list.rows[[ll]], "cl" = rep(ll, length(list.rows[[ll]])))
-        cl.genes.cols <- rbind(cl.genes.cols, tmp)
-      }
+      clGenesCols <- clGenesRows
     } else {
-      cl.genes.cols <- data.frame()
-      for (ll in names(list.cols)) {
-        tmp <- data.frame("genes" = list.cols[[ll]], "cl" = rep(ll, length(list.cols[[ll]])))
-        cl.genes.cols <- rbind(cl.genes.cols, tmp)
+      clGenesCols <- data.frame()
+      for (g in names(listCols)) {
+        tmp <- data.frame("genes" = listCols[[g]], "cl" = rep(g, length(listCols[[g]])))
+        clGenesCols <- rbind(clGenesCols, tmp)
       }
     }
-    cl.genes.cols <- cl.genes.cols[cl.genes.cols$genes %in% colnames(coex), ]
 
-    reorder_idx_col <- match(cl.genes.cols$gene, colnames(coex))
+    clGenesCols <- clGenesCols[clGenesCols[["genes"]] %in% colnames(coex), ]
 
+    reorder_idx_col <- match(clGenesCols[["genes"]], colnames(coex))
 
-    to.plot <- coex[reorder_idx_row, reorder_idx_col]
+    coex <- coex[reorder_idx_row, reorder_idx_col]
 
     col_fun <- colorRamp2(
       c(
-        round(quantile(as.matrix(to.plot), probs = 0.001),
+        round(quantile(as.matrix(coex), probs = 0.001),
           digits = 3
         ), 0,
-        round(quantile(as.matrix(to.plot), probs = 0.999),
+        round(quantile(as.matrix(coex), probs = 0.999),
           digits = 3
         )
       ),
@@ -297,11 +266,11 @@ setMethod(
 
     # The next line is to set the columns and raws order
     # need to be implemented
-    part1 <- Heatmap(as.matrix(to.plot),
+    part1 <- Heatmap(as.matrix(coex),
       cluster_rows = FALSE,
       cluster_columns = FALSE,
-      row_split = cl.genes.rows$cl,
-      column_split = cl.genes.cols$cl,
+      row_split = clGenesRows[["cl"]],
+      column_split = clGenesCols[["cl"]],
       col = col_fun,
       show_row_names = FALSE,
       show_column_names = FALSE,
@@ -323,6 +292,71 @@ setMethod(
       annotation_legend_list = lgd, annotation_legend_side = "bottom"
     )
   }
-)
 
+
+#' cellsHeatmapPlot
+#'
+#' @description Heatmap plot of the cells' coex matrix
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param cells Which cells to plot (all if no argument is given)
+#' @param clusters Use this clusterization to select/reorder the cells to plot
+#'
+#' @returns the cells' coex `Heatmap` plot
+#'
+#' @export
+#'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom ComplexHeatmap Heatmap
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- initializeMetaDataset(objCOTAN,
+#'                                   GEO = "test_GEO",
+#'                                   sequencingMethod = "test_method",
+#'                                   sampleCondition = "test")
+#' objCOTAN <- clean(objCOTAN)
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
+#' hPlots <- cellsHeatmapPlot(objCOTAN)
+#'
+#' @rdname cellsHeatmapPlot
+#'
+cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
+  coexMat <- as.matrix(getCellsCoex(objCOTAN))
+  stopifnot("cells coex not found in the COTAN" <- !is_empty(coexMat))
+
+  # if clustering is needed
+  if (!is_empty(clusters)) {
+    # identifier for each cluster
+    clustersTags <- unique(clusters)
+
+    # size of each cluster
+    clustersList <- toClustersList(clusters)
+    clustersSize <- sapply(clustersList, length)
+
+    # cell names grouped by the identifier of the cluster to which they belong
+    cellNames <- unlist(clustersList)
+    coexMat <- coexMat[cellNames, cellNames]
+    colnames(coexMat) <- cellNames
+    rownames(coexMat) <- cellNames
+
+    Heatmap(coexMat,
+            border = TRUE,
+            column_split = factor(rep(clustersTags, clustersSize),
+                                  levels = clustersTags),
+            row_split = factor(rep(clustersTags, clustersSize),
+                               levels = clustersTags),
+            cluster_rows = FALSE,
+            cluster_columns = FALSE)
+  } else {
+    cells <- handleNamesSubsets(getCells(objCOTAN), cells)
+
+    Heatmap(coexMat[cells, cells],
+            cluster_rows = FALSE,
+            cluster_columns = FALSE)
+  }
+}
 

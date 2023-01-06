@@ -9,18 +9,22 @@ calculateG(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{geneSubsetCol}{an array of genes. It will be put in columns.
-If left empty the function will do it genome-wide.}
+\item{geneSubsetCol}{an array of genes. It will be put in columns. If left
+empty the function will do it genome-wide.}
 
-\item{geneSubsetRow}{an array of genes. It will be put in rows.
-If left empty the function will do it genome-wide.}
+\item{geneSubsetRow}{an array of genes. It will be put in rows. If left empty
+the function will do it genome-wide.}
 }
 \value{
 the G matrix
 }
 \description{
-calculate the statistics G-test for genes contingency tables
-It is proportional to the genes' presence mutual information.
+This function calculates the statistics G-test for genes
+contingency tables.
+}
+\details{
+It always has the diagonal set to zero. It is proportional to the
+genes' presence mutual information.
 }
 \examples{
 data("raw.dataset")

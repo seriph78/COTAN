@@ -63,12 +63,12 @@ geom_flat_violin <- function(
 
      draw_key = ggplot2::draw_key_polygon,
 
-       default_aes = ggplot2::aes(
-         weight = 1, colour = "grey20", fill = "white", linewidth = 0.5,
-         alpha = NA, linetype = "solid"
-       ),
+     default_aes = ggplot2::aes(
+       weight = 1, colour = "grey20", fill = "white", linewidth = 0.5,
+       alpha = NA, linetype = "solid"
+     ),
 
-       required_aes = c("x", "y")
+     required_aes = c("x", "y")
   )
 
   layer(
@@ -156,15 +156,17 @@ librarySizePlot <- function(objCOTAN, splitPattern = " ", numCols = 2) {
 #' @param objCOTAN a `COTAN` object
 #' @param splitPattern Pattern used to extract, from the column names, the
 #'   sample field (default " ")
-#' @param numCols Once the column names are split by splitPattern, the column
+#' @param numCol Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
 #'
 #' @returns the violin-boxplot plot
 #'
 #' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 position_nudge
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 position_jitter
 #' @importFrom ggplot2 geom_boxplot
+#' @importFrom ggplot2 aes
 #' @importFrom ggplot2 labs
 #' @importFrom ggplot2 scale_y_continuous
 #' @importFrom ggplot2 ylim
@@ -181,12 +183,13 @@ librarySizePlot <- function(objCOTAN, splitPattern = " ", numCols = 2) {
 #'
 #' @rdname genesSizePlot
 #'
-genesSizePlot <- function(objCOTAN, splitPattern = " ", numCols = 2) {
+genesSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2) {
   sizes <- Matrix::colSums(getZeroOneProj(objCOTAN))
   sizes <- sort(sizes)
   sizes <- as.data.frame(sizes)
   sizes$n <- c(1:dim(sizes)[1])
-  sizes$sample <- str_split(rownames(sizes), pattern = splitPattern, simplify = T)[, numCols]
+  splitNames <- str_split(rownames(sizes), pattern = splitPattern, simplify = TRUE)
+  sizes$sample <- splitNames[, min(numCol, ncol(splitNames))]
 
   plot <-
     sizes %>%

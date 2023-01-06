@@ -4,13 +4,15 @@
 \alias{getGenesCoex,COTAN-method}
 \title{getGenesCoex}
 \usage{
-\S4method{getGenesCoex}{COTAN}(objCOTAN, genes = c())
+\S4method{getGenesCoex}{COTAN}(objCOTAN, genes = c(), zeroDiagonal = TRUE)
 }
 \arguments{
 \item{objCOTAN}{A \code{COTAN} object}
 
 \item{genes}{A vector of gene names. It will exclude any gene not on the
 list. By defaults the function will keep all genes.}
+
+\item{zeroDiagonal}{When TRUE sets the diagonal to zero.}
 }
 \value{
 the genes' coex values

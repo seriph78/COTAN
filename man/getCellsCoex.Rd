@@ -4,13 +4,15 @@
 \alias{getCellsCoex,COTAN-method}
 \title{getCellsCoex}
 \usage{
-\S4method{getCellsCoex}{COTAN}(objCOTAN, cells = c())
+\S4method{getCellsCoex}{COTAN}(objCOTAN, cells = c(), zeroDiagonal = TRUE)
 }
 \arguments{
 \item{objCOTAN}{A \code{COTAN} object}
 
 \item{cells}{A vector of cell names. It will exclude any cell not on the
 list. By defaults the function will keep all cells.}
+
+\item{zeroDiagonal}{When TRUE sets the diagonal to zero.}
 }
 \value{
 the cells' coex values

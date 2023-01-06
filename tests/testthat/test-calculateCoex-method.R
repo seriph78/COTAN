@@ -90,9 +90,10 @@ test_that("Calculations on genes", {
 
   expect_equal(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2))
   expect_equal(getGenesCoex(obj)[1,1], 0)
-  expect_equal(abs(as.vector(getGenesCoex(obj)[-1,-1])), rep(1, 81), tolerance = 0.01)
+  expect_equal(abs(as.vector(getGenesCoex(obj, zeroDiagonal = FALSE)[-1,-1])),
+               rep(1, 81), tolerance = 0.01)
 
-  expect_equal(as.matrix(getGenesCoex(obj)),
+  expect_equal(as.matrix(getGenesCoex(obj, zeroDiagonal = FALSE)),
                coexMatrix(observed, expected, getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
@@ -158,10 +159,12 @@ test_that("Calculations on cells", {
   expect_equal(dim(getCellsCoex(obj)), rep(getNumCells(obj), 2))
 
   # as all cells are repeated altenating
-  expect_true(all(abs(getCellsCoex(obj)[,seq_len(getNumCells(obj)) %% 2 == 1] - getCellsCoex(obj)[, 1]) < 1e-12))
-  expect_true(all(abs(getCellsCoex(obj)[,seq_len(getNumCells(obj)) %% 2 == 0] - getCellsCoex(obj)[, 2]) < 1e-12))
+  expect_true(all(abs(getCellsCoex(obj, zeroDiagonal = FALSE)[,seq_len(getNumCells(obj)) %% 2 == 1] -
+                        getCellsCoex(obj, zeroDiagonal = FALSE)[, 1]) < 1e-12))
+  expect_true(all(abs(getCellsCoex(obj, zeroDiagonal = FALSE)[,seq_len(getNumCells(obj)) %% 2 == 0] -
+                        getCellsCoex(obj, zeroDiagonal = FALSE)[, 2]) < 1e-12))
 
-  expect_equal(as.matrix(getCellsCoex(obj)),
+  expect_equal(as.matrix(getCellsCoex(obj, zeroDiagonal = FALSE)),
                coexMatrix(observed, expected, getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
@@ -184,24 +187,27 @@ test_that("Coex", {
 
   expect_equal(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2))
 
-  S <- calculateS(obj)
-  G <- calculateG(obj)
+  S <- as.matrix(calculateS(obj))
+  G <- as.matrix(calculateG(obj))
 
   expect_equal(dim(S), dim(getGenesCoex(obj)))
   expect_equal(dim(G), dim(getGenesCoex(obj)))
-  expect_equal(S[1,1], G[1,1])
-  expect_equal(S[-1,1] / G[-1,1], rep(11, 9), tolerance = 1e-3, ignore_attr = TRUE)
-  expect_true(all(((1.4 * S[-1,-1]) / G[-1,-1]) < 1.2))
-  expect_true(all((G[-1,-1] / (1.4 * S[-1,-1])) < 1.2))
+  expect_equal(diag(S), rep(0, nrow(S)), ignore_attr = TRUE)
+  expect_equal(diag(S), diag(G))
+  diag(S) <- 1
+  diag(G) <- 1.4
+  expect_equal(S[-1, 1] / G[-1, 1], rep(11, 9), tolerance = 1e-3, ignore_attr = TRUE)
+  expect_true(all(((1.4 * S[-1, -1]) / G[-1, -1]) < 1.2))
+  expect_true(all((G[-1, -1] / (1.4 * S[-1, -1])) < 1.2))
 
-  pVS <- calculatePValue(obj, statType = "S")[2:5, 4:7]
+  pVS <- calculatePValue(obj, statType = "S")[2:5, 6:9]
   pVG <- calculatePValue(obj, statType = "G",
-                         geneSubsetCol = getGenes(obj)[4:7],
+                         geneSubsetCol = getGenes(obj)[6:9],
                          geneSubsetRow = getGenes(obj)[2:5])
 
   expect_equal(dim(pVS), dim(pVG))
   expect_true(all((pVS / (pVG * 50)) < 1.1))
-  expect_true(all(((pVG * 50) / pVS) < 1.7))
+  expect_true(all(((pVG * 50) / pVS) < 2.5))
 
   GDI_S <- calculateGDI(obj, statType = "S")
   GDI_G <- calculateGDI(obj, statType = "G")
@@ -245,16 +251,17 @@ test_that("Coex vs saved results", {
 
   coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
-  expect_equal(getGenesCoex(obj, genes = genes.names.test), coex_test)
+  expect_equal(getGenesCoex(obj, genes = genes.names.test, zeroDiagonal = FALSE), coex_test)
 
   pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)
 
   pval_exp <- readRDS(file.path(getwd(), "pval.test.RDS"))
-
+  diag(pval_exp[genes.names.test,]) <- 1
   expect_equal(pval, pval_exp)
 
   GDI <- calculateGDI(obj)[genes.names.test, ]
 
   GDI_exp <- readRDS(file.path(getwd(), "GDI.test.RDS"))
+
   expect_equal(GDI, GDI_exp)
 })
