@@ -24,6 +24,9 @@
 
 \item{chunkSize}{number of genes to solve in batch in a single core. Default
 is 1024.}
+
+\item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
+equal to 1}
 }
 \value{
 the updated \code{COTAN} object

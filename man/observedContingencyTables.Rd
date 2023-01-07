@@ -9,11 +9,11 @@ observedContingencyTables(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
+\item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
+otherwise for the genes}
+
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
-
-\item{cells}{Boolean; when \code{TRUE} the function works for the cells,
-otherwise for the genes}
 }
 \value{
 The observed contingency tables as named \code{list} with elements:

@@ -15,6 +15,8 @@ mergeUniformCellsClusters(
 )
 }
 \arguments{
+\item{objCOTAN}{a \code{COTAN} object}
+
 \item{clusters}{The clusterization to merge. If not given the last available
 clusterization will be used, as it is probably the most significant!}
 
@@ -30,8 +32,6 @@ also available)}
 plots to file}
 
 \item{outDir}{an existing directory for the analysis output.}
-
-\item{obj}{a \code{COTAN} object}
 }
 \value{
 the new clusterization
@@ -60,13 +60,13 @@ clusters <- cellsUniformClustering(objCOTAN, cores = 12,
                                    saveObj = FALSE,
                                    outDir = tempdir())
 
-mergedList <- mergeUniformCellsClusters(objCOTAN = obj,
-                            clusters = clusters,
-                            cores = 12,
-                            distance = "cosine",
-                            hclustMethod = "ward.D2",
-                            saveObj = FALSE,
-                            outDir = tempdir())
+mergedList <- mergeUniformCellsClusters(objCOTAN,
+                                        clusters = clusters,
+                                        cores = 12,
+                                        distance = "cosine",
+                                        hclustMethod = "ward.D2",
+                                        saveObj = FALSE,
+                                        outDir = tempdir())
 mergedClusters <- mergedList[["clusters"]]
 
 }

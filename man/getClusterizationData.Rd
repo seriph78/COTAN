@@ -36,7 +36,7 @@ coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
                               clusters = clusters, coexDF = coexDF)
 
-clDataList <- getClusterizationData(objCOTAN, clName = "merged")
+clDataList <- getClusterizationData(objCOTAN, clName = "clusters")
 clusters <- clDataList[[1]]
 coexDF   <- clDataList[[2]]
 

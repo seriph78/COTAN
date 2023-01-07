@@ -4,7 +4,7 @@
 \alias{dropGenesCoex,COTAN-method}
 \title{dropGenesCoex}
 \usage{
-\S4method{dropGenesCoex}{COTAN}(objCOTAN, clName)
+\S4method{dropGenesCoex}{COTAN}(objCOTAN)
 }
 \arguments{
 \item{objCOTAN}{A \code{COTAN} object}

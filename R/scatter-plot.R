@@ -7,9 +7,9 @@
 #' @param objCOTAN a `COTAN` object
 #' @param splitPattern Pattern used to extract, from the column names, the
 #'   sample field (default " ")
-#' @param numCols Once the column names are split by splitPattern, the column
+#' @param numCol Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
-#' @param split.samples Boolean. Whether to plot each sample in a different
+#' @param splitSamples Boolean. Whether to plot each sample in a different
 #'   panel (default `FALSE`)
 #'
 #' @returns The scatter plot
@@ -39,13 +39,14 @@
 #' @rdname scatterPlot
 #'
 scatterPlot <- function(objCOTAN, splitPattern = " ",
-                        numCols = 2, split.samples = FALSE) {
+                        numCol = 2, splitSamples = FALSE) {
   lib.size <- getCellsSize(objCOTAN)
   gene.size <- Matrix::colSums(getZeroOneProj(objCOTAN))
 
   to.plot <- cbind(lib.size, gene.size)
   to.plot <- as.data.frame(to.plot)
-  to.plot$sample <- stringr::str_split(rownames(to.plot),pattern = splitPattern,simplify = T)[,numCols]
+  splitNames <- str_split(rownames(to.plot), pattern = splitPattern, simplify = TRUE)
+  to.plot$sample <- splitNames[, min(numCol, ncol(splitNames))]
 
   plot <- ggplot(to.plot, aes(x=lib.size,y=gene.size, color = sample)) +
     geom_point(size = 0.5, alpha= 0.8) +
@@ -58,7 +59,7 @@ scatterPlot <- function(objCOTAN, splitPattern = " ",
                   labels = trans_format("log10", math_format(10^.x))) +
     plotTheme("size-plot")
 
-  if (split.samples == T){
+  if (splitSamples == T){
     plot <- plot + facet_grid(cols = vars(sample))
   }
 

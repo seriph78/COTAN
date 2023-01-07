@@ -2,7 +2,7 @@
 % Please edit documentation in R/heatmap-plot.R
 \name{genesHeatmapPlot}
 \alias{genesHeatmapPlot}
-\title{plot_general.heatmap}
+\title{genesHeatmapPlot}
 \usage{
 genesHeatmapPlot(
   objCOTAN,
@@ -21,7 +21,7 @@ genesHeatmapPlot(
 
 \item{pValue}{The p-value threshold}
 
-\item{symmetric}{A Boolean: default FALSE. If TRUE the union of
+\item{symmetric}{A Boolean: default \code{TRUE}. When \code{TRUE} the union of
 \code{primaryMarkers} and \code{secondaryMarkers} is used for both rows and column
 genes}
 }
@@ -38,16 +38,15 @@ list will be plotted as columns.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 # some genes
-primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
+primary.markers <- c("Pcbp2", "Snrpe", "Nfyb")
 # a example of named list of different gene set
-gene.sets.list <- list(objCOTAN,
-  "primary.markers" = primary.markers,
-  "2.R" = c("ERCC-00170", "ERCC-00158"),
-  "3.S" = c("ERCC-00160", "ERCC-00162")
-)
-genesHeatmapPlot(
-  primaryMarkers = primary.markers, pValue = 0.05, secondaryMarkers = gene.sets.list,
-  condition = "ERCC", dir = paste0(data_dir, "/")
-)
+gene.sets.list <- list("G1" = primary.markers,
+                       "G2" = c("Prpf40a", "Ergic2"),
+                       "G3" = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
+genesHeatmapPlot(objCOTAN,
+                 primaryMarkers = primary.markers,
+                 secondaryMarkers = gene.sets.list,
+                 pValue = 0.05, symmetric = FALSE)
 }

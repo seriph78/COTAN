@@ -198,12 +198,12 @@ setGeneric(
 
 setGeneric(
   "dropGenesCoex",
-  function(objCOTAN, clName) standardGeneric("dropGenesCoex")
+  function(objCOTAN) standardGeneric("dropGenesCoex")
 )
 
 setGeneric(
   "dropCellsCoex",
-  function(objCOTAN, clName) standardGeneric("dropCellsCoex")
+  function(objCOTAN) standardGeneric("dropCellsCoex")
 )
 
 setGeneric(

@@ -14,14 +14,14 @@ expectedContingencyTablesNN(
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
+\item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
+otherwise for the genes}
+
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
 
 \item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \link{Rfast}
 parallel algorithms that on the flip side use more memory}
-
-\item{cells}{Boolean; when \code{TRUE} the function works for the cells,
-otherwise for the genes}
 }
 \value{
 a \code{list} with the 'No/No' expected contingency table and the 'No'

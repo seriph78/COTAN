@@ -410,7 +410,7 @@ setMethod(
 setMethod(
   "dropGenesCoex",
   "COTAN",
-  function(objCOTAN, clName) {
+  function(objCOTAN) {
     if (!is_empty(objCOTAN@genesCoex)) {
       objCOTAN@genesCoex <- emptySymmetricMatrix()
     }
@@ -450,7 +450,7 @@ setMethod(
 setMethod(
   "dropCellsCoex",
   "COTAN",
-  function(objCOTAN, clName) {
+  function(objCOTAN) {
     if (!is_empty(objCOTAN@cellsCoex)) {
       objCOTAN@cellsCoex <- emptySymmetricMatrix()
     }

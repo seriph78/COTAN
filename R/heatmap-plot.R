@@ -34,6 +34,7 @@
 #' rownames(ERCCraw) = ERCCraw$V1
 #' ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
 #' objCOTAN <- COTAN(raw = ERCCraw)
+#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 #' data_dir <- tempdir()
 #' saveRDS(objCOTAN, file = file.path(data_dir, "ERCC.cotan.RDS"))
 #' # some genes
@@ -108,7 +109,8 @@ heatmapPlot <- function(genesLists, sets, conditions,
       print(type)
     }
     df.temp <- df.temp2
-    df.temp$t_hk <- ifelse((df.temp$g2 %in% obj@hk) | (df.temp$g1 %in% obj@hk), "hk", "n")
+    df.temp$t_hk <- ifelse((df.temp$g2 %in% getHousekeepingGenes(obj)) |
+                             (df.temp$g1 %in% getHousekeepingGenes(obj)), "hk", "n")
     df.temp[df.temp$pValue > pValueThreshold, ]$coex <- 0
     df.to.print <- rbind(df.to.print, df.temp)
   }
@@ -129,7 +131,7 @@ heatmapPlot <- function(genesLists, sets, conditions,
 
 
 
-#' plot_general.heatmap
+#' genesHeatmapPlot
 #'
 #' @description This function is used to plot an heatmap made using only some
 #'   genes, as markers, and collecting all other genes correlated with these
@@ -141,7 +143,7 @@ heatmapPlot <- function(genesLists, sets, conditions,
 #' @param primaryMarkers A set of genes plotted as rows.
 #' @param secondaryMarkers A set of genes plotted as columns.
 #' @param pValue The p-value threshold
-#' @param symmetric A Boolean: default FALSE. If TRUE the union of
+#' @param symmetric A Boolean: default `TRUE`. When `TRUE` the union of
 #'   `primaryMarkers` and `secondaryMarkers` is used for both rows and column
 #'   genes
 #'
@@ -168,18 +170,17 @@ heatmapPlot <- function(genesLists, sets, conditions,
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 #' # some genes
-#' primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
+#' primary.markers <- c("Pcbp2", "Snrpe", "Nfyb")
 #' # a example of named list of different gene set
-#' gene.sets.list <- list(objCOTAN,
-#'   "primary.markers" = primary.markers,
-#'   "2.R" = c("ERCC-00170", "ERCC-00158"),
-#'   "3.S" = c("ERCC-00160", "ERCC-00162")
-#' )
-#' genesHeatmapPlot(
-#'   primaryMarkers = primary.markers, pValue = 0.05, secondaryMarkers = gene.sets.list,
-#'   condition = "ERCC", dir = paste0(data_dir, "/")
-#' )
+#' gene.sets.list <- list("G1" = primary.markers,
+#'                        "G2" = c("Prpf40a", "Ergic2"),
+#'                        "G3" = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
+#' genesHeatmapPlot(objCOTAN,
+#'                  primaryMarkers = primary.markers,
+#'                  secondaryMarkers = gene.sets.list,
+#'                  pValue = 0.05, symmetric = FALSE)
 genesHeatmapPlot <-
   function(objCOTAN, primaryMarkers, secondaryMarkers = c(),
            pValue = 0.001, symmetric = TRUE) {
@@ -197,7 +198,7 @@ genesHeatmapPlot <-
     unexpressedGenes <- allMarkers[!allMarkers %in% getGenes(objCOTAN)]
 
     if (!is_empty(unexpressedGenes)) {
-      warning(paste("The markers", paste(no_genes, collapse = ", "),
+      warning(paste("The markers", paste(unexpressedGenes, collapse = ", "),
                     "are not present in the COTAN object!"))
     }
 
@@ -209,7 +210,7 @@ genesHeatmapPlot <-
     rowGenes <- unique(c(allMarkers, rowGenes))
     pval <- as.data.frame(pval)
 
-    coex <- getGenesCoex(obj)[getGenes(objCOTAN) %in% rowGenes, ]
+    coex <- getGenesCoex(objCOTAN)[getGenes(objCOTAN) %in% rowGenes, ]
     if (symmetric == TRUE) {
       coex <- coex[ , getGenes(objCOTAN) %in% rowGenes]
     }

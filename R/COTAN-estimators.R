@@ -403,6 +403,8 @@ setMethod(
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param chunkSize number of genes to solve in batch in a single core. Default
 #'   is 1024.
+#' @param enforceNuAverageToOne a Boolean on whether to keep the average `nu`
+#'   equal to 1
 #'
 #' @return the updated `COTAN` object
 #'
@@ -510,6 +512,12 @@ setMethod(
 #'   zero.
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#' @param chunkSize number of genes to solve in batch in a single core. Default
+#'   is 1024.
+#' @param enforceNuAverageToOne a Boolean on whether to keep the average `nu`
+#'   equal to 1
 #'
 #' @returns The updated `COTAN` object
 #'

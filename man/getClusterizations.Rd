@@ -9,11 +9,14 @@
 \arguments{
 \item{objCOTAN}{A \code{COTAN} object}
 
-\item{dropNoCoex}{When TRUE drops the names from the clusterizations with
-empty associated coex data.frame}
+\item{dropNoCoex}{When \code{TRUE} drops the names from the clusterizations with
+empty associated coex \code{data.frame}}
+
+\item{keepPrefix}{When \code{TRUE} returns the internal name of the
+clusterization: the one with the 'CL_' prefix.}
 }
 \value{
-a vector of clusterizations names without the 'CL_' prefix
+a vector of clusterizations names, usually without the 'CL_' prefix
 }
 \description{
 This function extract the list of clusterizations defined in the

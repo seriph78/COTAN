@@ -11,8 +11,6 @@ geneSetEnrichment(clustersCoex, groupMarkers)
 expression of every gene in the cluster compared to the whole background}
 
 \item{groupMarkers}{a named \code{list} of arrays of genes}
-
-\item{objCOTAN}{a \code{COTAN} object}
 }
 \value{
 a \code{data.frame} with the cumulative score

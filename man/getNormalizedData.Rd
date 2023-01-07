@@ -18,6 +18,7 @@ This function extracts the normalized count table.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- estimateNuLinear(objCOTAN)
 rawNorm <- getNormalizedData(objCOTAN)
 
 }

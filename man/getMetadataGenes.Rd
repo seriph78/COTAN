@@ -18,6 +18,7 @@ This function extract the meta-data stored for the genes.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- estimateLambdaLinear(objCOTAN)
 metaGenes <- getMetadataGenes(objCOTAN)
 
 }

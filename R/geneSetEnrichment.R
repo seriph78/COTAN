@@ -8,7 +8,6 @@
 #'   \eqn{X_i} are the positive values from [DEAOnClusters()] and \eqn{\theta =
 #'   -\frac{1}{0.1} \ln(0.25)}
 #'
-#' @param objCOTAN a `COTAN` object
 #' @param clustersCoex the `data.frame` for the increased or decreased
 #'   expression of every gene in the cluster compared to the whole background
 #' @param groupMarkers a named `list` of arrays of genes

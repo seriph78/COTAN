@@ -7,7 +7,7 @@
 #' @param objCOTAN a `COTAN` object
 #' @param splitPattern Pattern used to extract, from the column names, the
 #'   sample field (default " ")
-#' @param numCols Once the column names are split by splitPattern, the column
+#' @param numCol Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
 #' @param genePrefix Prefix for the mitochondrial genes (default "^MT-" for
 #'   Human, mouse "^mt-")
@@ -37,15 +37,15 @@
 #' @rdname mitochondrialPercentagePlot
 #'
 mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
-                                        numCols = 2, genePrefix = "^MT-"){
+                                        numCol = 2, genePrefix = "^MT-"){
   sizes <- getCellsSize(objCOTAN)
   sizes <- as.data.frame(sizes)
   sizes$n <- c(1:dim(sizes)[1])
-  sizes$sample <- stringr::str_split(rownames(sizes),
-                                     pattern = splitPattern,simplify = T)[, numCols]
+  splitNames <- str_split(rownames(sizes), pattern = splitPattern, simplify = TRUE)
+  sizes$sample <- splitNames[, min(numCol, ncol(splitNames))]
 
-  mitGenes <- getGenes(obj)[stringr::str_detect(getGenes(obj), pattern = genePrefix)]
-  mitGenesData <- as.data.frame(getRawData(obj)[getGenes(obj) %in% mitGenes, ])
+  mitGenes <- getGenes(objCOTAN)[stringr::str_detect(getGenes(objCOTAN), pattern = genePrefix)]
+  mitGenesData <- as.data.frame(getRawData(objCOTAN)[getGenes(objCOTAN) %in% mitGenes, ])
   if(!identical(colnames(mitGenesData), rownames(sizes))){
     warning("Problem with cells' order!")
   }

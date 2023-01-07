@@ -116,7 +116,7 @@ observedContingencyTablesYY <- function(objCOTAN,
 #'   `TRUE`/`FALSE`.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param cells Boolean; when `TRUE` the function works for the cells,
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
@@ -216,7 +216,7 @@ observedContingencyTables <- function(objCOTAN,
 #' @description Calculate the expected No/No field of the contingency table
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param cells Boolean; when `TRUE` the function works for the cells,
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
@@ -794,7 +794,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' @description This function produces a`data.frame` with the GDI for each
 #'   gene.
 #'
-#' @param object a `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #' @param statType Which statistics to use to compute the p-values. By default
 #'   it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 #'   (G-test)

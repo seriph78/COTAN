@@ -32,6 +32,7 @@ data("ERCCraw")
 rownames(ERCCraw) = ERCCraw$V1
 ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
 objCOTAN <- COTAN(raw = ERCCraw)
+objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 data_dir <- tempdir()
 saveRDS(objCOTAN, file = file.path(data_dir, "ERCC.cotan.RDS"))
 # some genes

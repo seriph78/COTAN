@@ -7,11 +7,11 @@
 calculateGDI(objCOTAN, statType = "S")
 }
 \arguments{
+\item{objCOTAN}{a \code{COTAN} object}
+
 \item{statType}{Which statistics to use to compute the p-values. By default
 it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 (G-test)}
-
-\item{object}{a \code{COTAN} object}
 }
 \value{
 A \code{data.frame} with the GDI data

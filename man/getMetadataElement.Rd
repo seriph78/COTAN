@@ -21,7 +21,9 @@ if present or an empty string otherwise.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- initializeMetaDataset(objCOTAN, )
+objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
+                                  sequencingMethod = "10X",
+                                  sampleCondition = "mouse dataset")
 GEO <- getMetadataElement(objCOTAN, "GEO")
 
 }

@@ -119,8 +119,8 @@ genesCoexSpace <-
 #' @param objCOTAN a `COTAN` object
 #' @param groupMarkers a named `list` with an element for each group of one or
 #'   more marker genes for each group.
-#' @param numMarkers the number of correlated genes to keep as other markers
-#'   (default 25)
+#' @param numGenesPerMarker the number of correlated genes to keep as other
+#'   markers (default 25)
 #' @param kCuts the number of estimated cluster (this defines the high for the
 #'   tree cut)
 #' @param distance type of distance to use (default is `cosine`, `euclidean` is

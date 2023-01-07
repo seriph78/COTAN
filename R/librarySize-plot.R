@@ -1,5 +1,6 @@
 
 #' @importFrom ggplot2 ggproto
+#' @importFrom ggplot2 Geom
 #' @importFrom ggplot2 aes
 #' @importFrom ggplot2 draw_key_polygon
 #' @importFrom ggplot2 layer
@@ -8,6 +9,7 @@
 #'
 #' @importFrom dplyr group_by
 #' @importFrom dplyr mutate
+#' @importFrom dplyr `%>%`
 #'
 #' @noRd
 #'
@@ -21,7 +23,7 @@ geom_flat_violin <- function(
     show.legend = NA,
     inherit.aes = TRUE,
     ...) {
-  GeomFlatViolin <- ggplot2::ggproto("GeomFlatViolin", Geom,
+  GeomFlatViolin <- ggproto("GeomFlatViolin", Geom,
      setup_data = function(data, params) {
        "%||%" <- function(a, b) {
          if (!is.null(a)) a else b
@@ -89,7 +91,7 @@ geom_flat_violin <- function(
 
 
 
-#' librarySizePlot
+#' cellSizePlot
 #'
 #' @description Function that plots the raw library size for each cell and
 #'   sample.
@@ -97,7 +99,7 @@ geom_flat_violin <- function(
 #' @param objCOTAN a `COTAN` object
 #' @param splitPattern Pattern used to extract, from the column names, the
 #'   sample field (default " ")
-#' @param numCols Once the column names are split by splitPattern, the column
+#' @param numCol Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
 #'
 #' @returns the violin-boxplot plot
@@ -117,17 +119,18 @@ geom_flat_violin <- function(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' lsPlot <- librarySizePlot(objCOTAN)
+#' lsPlot <- cellSizePlot(objCOTAN)
 #' plot(lsPlot)
 #'
-#' @rdname librarySizePlot
+#' @rdname cellSizePlot
 #'
-librarySizePlot <- function(objCOTAN, splitPattern = " ", numCols = 2) {
+cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2) {
   sizes <- getCellsSize(objCOTAN)
   sizes <- sort(sizes)
   sizes <- as.data.frame(sizes)
   sizes$n <- c(1:dim(sizes)[1])
-  sizes$sample <- str_split(rownames(sizes), pattern = splitPattern, simplify = T)[, numCols]
+  splitNames <- str_split(rownames(sizes), pattern = splitPattern, simplify = TRUE)
+  sizes$sample <- splitNames[, min(numCol, ncol(splitNames))]
 
   plot <-
     sizes %>%

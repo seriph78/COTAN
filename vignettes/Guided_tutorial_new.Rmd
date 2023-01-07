@@ -362,18 +362,17 @@ CC <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
 
 list.genes = list("Ref.col"= BB, "AA"=AA, "Const."=CC )
 
-#TODO: fix the function
-#heatmapPlot(genesLists = list.genes, sets = c(1:3), conditions = c("test"), dir = outDir)
+heatmapPlot(genesLists = list.genes, sets = c(1:3), conditions = c("test"), dir = outDir)
 ```
 
 We can also plot a general heatmap of coex values based on some markers like the following one.
 
 ```{r}
-plot_general.heatmap(prim.markers = AA, condition = "test",dir = outDir, p_value = 0.001)
+genesHeatmapPlot(obj, primaryMarkers = AA, pValue = 0.001, symmetric = TRUE)
 ```
 
 ```{r}
-plot_general.heatmap(prim.markers = AA ,markers.list = BB ,symmetric = FALSE, condition = "test",dir = outDir, p_value = 0.001)
+genesHeatmapPlot(obj, primaryMarkers = AA, secondaryMarkers = BB, symmetric = FALSE, pValue = 0.001)
 ```
 
 ## Get data tables

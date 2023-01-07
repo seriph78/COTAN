@@ -4,7 +4,7 @@
 \alias{dropCellsCoex,COTAN-method}
 \title{dropCellsCoex}
 \usage{
-\S4method{dropCellsCoex}{COTAN}(objCOTAN, clName)
+\S4method{dropCellsCoex}{COTAN}(objCOTAN)
 }
 \arguments{
 \item{objCOTAN}{A \code{COTAN} object}

@@ -7,8 +7,7 @@
 toClustersList(clusters)
 }
 \arguments{
-\item{a}{clusterization. A named \code{vector} or \code{factor} that defines the
-clusters}
+\item{clusters}{A named \code{vector} or \code{factor} that defines the clusters}
 }
 \value{
 a \code{list} of clusters: one vector of names for each cluster.

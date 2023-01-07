@@ -142,8 +142,7 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #' @description Given a clusterization, creates a `list` that contains, for each
 #'   cluster, which elements compose the cluster
 #'
-#' @param a clusterization. A named `vector` or `factor` that defines the
-#'   clusters
+#' @param clusters A named `vector` or `factor` that defines the clusters
 #'
 #' @returns a `list` of clusters: one vector of names for each cluster.
 #'
@@ -655,6 +654,7 @@ cosineDissimilarity <- function(m) {
 #' @importFrom ggplot2 theme
 #' @importFrom ggplot2 element_text
 #' @importFrom ggplot2 element_blank
+#' @importFrom ggplot2 element_rect
 #' @importFrom ggplot2 unit
 #'
 #' @importFrom ggthemes theme_tufte

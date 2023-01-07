@@ -222,6 +222,7 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- estimateNuLinear(objCOTAN)
 #' rawNorm <- getNormalizedData(objCOTAN)
 #'
 #' @rdname getNormalizedData
@@ -282,7 +283,9 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- initializeMetaDataset(objCOTAN, )
+#' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
+#'                                   sequencingMethod = "10X",
+#'                                   sampleCondition = "mouse dataset")
 #' GEO <- getMetadataElement(objCOTAN, "GEO")
 #'
 #' @rdname getMetadataElement
@@ -317,6 +320,7 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- estimateLambdaLinear(objCOTAN)
 #' metaGenes <- getMetadataGenes(objCOTAN)
 #'
 #' @rdname getMetadataGenes
@@ -343,6 +347,7 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- estimateNuLinear(objCOTAN)
 #' metaCells <- getMetadataCells(objCOTAN)
 #'
 #' @rdname getMetadataCells
@@ -735,10 +740,12 @@ setMethod(
 #'   `COTAN` object.
 #'
 #' @param objCOTAN A `COTAN` object
-#' @param dropNoCoex When TRUE drops the names from the clusterizations with
-#'   empty associated coex data.frame
+#' @param dropNoCoex When `TRUE` drops the names from the clusterizations with
+#'   empty associated coex `data.frame`
+#' @param keepPrefix When `TRUE` returns the internal name of the
+#'   clusterization: the one with the 'CL_' prefix.
 #'
-#' @returns a vector of clusterizations names without the 'CL_' prefix
+#' @returns a vector of clusterizations names, usually without the 'CL_' prefix
 #'
 #' @export
 #'
@@ -806,7 +813,7 @@ setMethod(
 #' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
 #'                               clusters = clusters, coexDF = coexDF)
 #'
-#' clDataList <- getClusterizationData(objCOTAN, clName = "merged")
+#' clDataList <- getClusterizationData(objCOTAN, clName = "clusters")
 #' clusters <- clDataList[[1]]
 #' coexDF   <- clDataList[[2]]
 #'

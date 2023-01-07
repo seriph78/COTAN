@@ -19,6 +19,9 @@ establishGenesClusters(
 \item{groupMarkers}{a named \code{list} with an element for each group of one or
 more marker genes for each group.}
 
+\item{numGenesPerMarker}{the number of correlated genes to keep as other
+markers (default 25)}
+
 \item{kCuts}{the number of estimated cluster (this defines the high for the
 tree cut)}
 
@@ -27,9 +30,6 @@ also available)}
 
 \item{hclustMethod}{default is "ward.D2" but can be any method defined by
 \code{\link[stats:hclust]{stats::hclust()}} function}
-
-\item{numMarkers}{the number of correlated genes to keep as other markers
-(default 25)}
 }
 \value{
 a \code{list} of

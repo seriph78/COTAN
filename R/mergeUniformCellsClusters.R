@@ -9,7 +9,7 @@
 #' @details This function uses [checkClusterUniformity()] to check whether
 #'   merged clusters' uniformity
 #'
-#' @param obj a `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #' @param clusters The clusterization to merge. If not given the last available
 #'   clusterization will be used, as it is probably the most significant!
 #' @param cores number cores used
@@ -50,13 +50,13 @@
 #'                                    saveObj = FALSE,
 #'                                    outDir = tempdir())
 #'
-#' mergedList <- mergeUniformCellsClusters(objCOTAN = obj,
-#'                             clusters = clusters,
-#'                             cores = 12,
-#'                             distance = "cosine",
-#'                             hclustMethod = "ward.D2",
-#'                             saveObj = FALSE,
-#'                             outDir = tempdir())
+#' mergedList <- mergeUniformCellsClusters(objCOTAN,
+#'                                         clusters = clusters,
+#'                                         cores = 12,
+#'                                         distance = "cosine",
+#'                                         hclustMethod = "ward.D2",
+#'                                         saveObj = FALSE,
+#'                                         outDir = tempdir())
 #' mergedClusters <- mergedList[["clusters"]]
 #'
 #' @rdname mergeUniformCellsClusters
