@@ -638,6 +638,8 @@ setMethod(
 #' @param genes A vector of gene names. It will exclude any gene not on the
 #'   list. By defaults the function will keep all genes.
 #' @param zeroDiagonal When TRUE sets the diagonal to zero.
+#' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
+#'   have been updated since the coex matrix was calculated.
 #'
 #' @return the genes' coex values
 #'
@@ -658,9 +660,10 @@ setMethod(
 setMethod(
   "getGenesCoex",
   "COTAN",
-  function(objCOTAN, genes = c(), zeroDiagonal = TRUE) {
-    if (!is_empty(objCOTAN@genesCoex) &&
-        isFALSE(as.logical(getMetadataElement(objCOTAN, datasetTags()[5]))) ) {
+  function(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
+    if (!is_empty(objCOTAN@genesCoex) && isFALSE(ignoreSync) &&
+        isFALSE(as.logical(getMetadataElement(objCOTAN,
+                                              datasetTags()[["gsync"]]))) ) {
       stop(paste0("Cannot return genes' coex as the matrix is",
                   " out of sync with the other parameters.",
                   " It is still ossible to access the data directly!"))
@@ -689,7 +692,9 @@ setMethod(
 #' @param objCOTAN A `COTAN` object
 #' @param cells A vector of cell names. It will exclude any cell not on the
 #'   list. By defaults the function will keep all cells.
-#' @param zeroDiagonal When TRUE sets the diagonal to zero.
+#' @param zeroDiagonal When `TRUE` sets the diagonal to zero.
+#' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
+#'   have been updated since the coex matrix was calculated.
 #'
 #' @returns the cells' coex values
 #'
@@ -711,9 +716,10 @@ setMethod(
 setMethod(
   "getCellsCoex",
   "COTAN",
-  function(objCOTAN, cells = c(), zeroDiagonal = TRUE) {
-    if (!is_empty(objCOTAN@cellsCoex) &&
-        isFALSE(as.logical(getMetadataElement(objCOTAN, datasetTags()[6]))) ) {
+  function(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
+    if (!is_empty(objCOTAN@cellsCoex) && isFALSE(ignoreSync) &&
+        isFALSE(as.logical(getMetadataElement(objCOTAN,
+                                              datasetTags()[["csync"]]))) ) {
       stop(paste0("Cannot return cells' coex as the matrix is",
                   " out of sync with the other parameters.",
                   " It is still ossible to access the data directly!"))

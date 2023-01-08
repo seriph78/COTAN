@@ -4,7 +4,7 @@
 \alias{getCellsCoex,COTAN-method}
 \title{getCellsCoex}
 \usage{
-\S4method{getCellsCoex}{COTAN}(objCOTAN, cells = c(), zeroDiagonal = TRUE)
+\S4method{getCellsCoex}{COTAN}(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
 }
 \arguments{
 \item{objCOTAN}{A \code{COTAN} object}
@@ -12,7 +12,10 @@
 \item{cells}{A vector of cell names. It will exclude any cell not on the
 list. By defaults the function will keep all cells.}
 
-\item{zeroDiagonal}{When TRUE sets the diagonal to zero.}
+\item{zeroDiagonal}{When \code{TRUE} sets the diagonal to zero.}
+
+\item{ignoreSync}{When \code{TRUE} ignores whether the \code{lambda}/\code{nu}/\code{dispersion}
+have been updated since the coex matrix was calculated.}
 }
 \value{
 the cells' coex values

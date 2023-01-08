@@ -4,7 +4,7 @@
 \alias{getGenesCoex,COTAN-method}
 \title{getGenesCoex}
 \usage{
-\S4method{getGenesCoex}{COTAN}(objCOTAN, genes = c(), zeroDiagonal = TRUE)
+\S4method{getGenesCoex}{COTAN}(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
 }
 \arguments{
 \item{objCOTAN}{A \code{COTAN} object}
@@ -13,6 +13,9 @@
 list. By defaults the function will keep all genes.}
 
 \item{zeroDiagonal}{When TRUE sets the diagonal to zero.}
+
+\item{ignoreSync}{When \code{TRUE} ignores whether the \code{lambda}/\code{nu}/\code{dispersion}
+have been updated since the coex matrix was calculated.}
 }
 \value{
 the genes' coex values

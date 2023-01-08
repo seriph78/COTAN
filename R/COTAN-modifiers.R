@@ -2,21 +2,31 @@
 
 #' datasetTags
 #'
-#' @returns a character array with the standard labels used in the `metaDataset`
-#' of the `COTAN` objects.
+#' @returns a named character array with the standard labels used in the
+#'   `metaDataset` of the `COTAN` objects.
+#'
+#' @export
+#'
+#' @examples
+#' data("raw.dataset")
+#' objCOTAN <- COTAN(raw = raw.dataset)
+#' objCOTAN <- addElementToMetaDataset(objCOTAN,
+#'                                     datasetTags()[["cells"]],
+#'                                     ncols(raw.dataset))
+#' meta <- getMetadataDataset(objCOTAN)
 #'
 #' @rdname datasetTags
 #'
 datasetTags <- function() {
-  return(c("GEO:"                                              # 1
-           ,"scRNAseq method:"                                 # 2
-           ,"condition sample:"                                # 3
-           ,"starting n. of cells:"                            # 4
-           ,"genes' coex is in sync:"                          # 5
-           ,"cells' coex is in sync:"                          # 6
-           ,"genes' pairs fraction with small expected count:" # 7
-           ,"cells' pairs fraction with small expected count:" # 8
-           ))
+  return(c("GEO"   = "GEO:"                                             # 1
+          ,"sc.m"  = "scRNAseq method:"                                 # 2
+          ,"cond"  = "condition sample:"                                # 3
+          ,"cells" = "starting n. of cells:"                            # 4
+          ,"gsync" = "genes' coex is in sync:"                          # 5
+          ,"csync" = "cells' coex is in sync:"                          # 6
+          ,"gbad"  = "genes' pairs fraction with small expected count:" # 7
+          ,"cbad"  = "cells' pairs fraction with small expected count:" # 8
+          ))
 }
 
 
@@ -85,12 +95,12 @@ setMethod(
 
     meta <- objCOTAN@metaDataset
 
-    meta <- updateMetaInfo(meta, tags[1], GEO)
-    meta <- updateMetaInfo(meta, tags[2], sequencingMethod)
-    meta <- updateMetaInfo(meta, tags[3], sampleCondition)
-    meta <- updateMetaInfo(meta, tags[4], getNumCells(objCOTAN))
-    meta <- updateMetaInfo(meta, tags[5], FALSE)
-    meta <- updateMetaInfo(meta, tags[6], FALSE)
+    meta <- updateMetaInfo(meta, tags[["GEO"  ]], GEO)
+    meta <- updateMetaInfo(meta, tags[["sc.m" ]], sequencingMethod)
+    meta <- updateMetaInfo(meta, tags[["cond" ]], sampleCondition)
+    meta <- updateMetaInfo(meta, tags[["cells"]], getNumCells(objCOTAN))
+    meta <- updateMetaInfo(meta, tags[["gsync"]], FALSE)
+    meta <- updateMetaInfo(meta, tags[["csync"]], FALSE)
 
     objCOTAN@metaDataset <- meta
 

@@ -7,9 +7,18 @@
 datasetTags()
 }
 \value{
-a character array with the standard labels used in the \code{metaDataset}
-of the \code{COTAN} objects.
+a named character array with the standard labels used in the
+\code{metaDataset} of the \code{COTAN} objects.
 }
 \description{
 datasetTags
+}
+\examples{
+data("raw.dataset")
+objCOTAN <- COTAN(raw = raw.dataset)
+objCOTAN <- addElementToMetaDataset(objCOTAN,
+                                    datasetTags()[["cells"]],
+                                    ncols(raw.dataset))
+meta <- getMetadataDataset(objCOTAN)
+
 }

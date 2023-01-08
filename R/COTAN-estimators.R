@@ -32,9 +32,9 @@ setMethod(
       if (!identical(lambda, oldLambda)) {
         # flag the coex slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[5], FALSE)
+                                               datasetTags()[["gsync"]], FALSE)
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[6], FALSE)
+                                               datasetTags()[["csync"]], FALSE)
       }
     }
 
@@ -79,9 +79,9 @@ setMethod(
       if (!identical(nu, oldNu)) {
         # flag the coex slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[5], FALSE)
+                                               datasetTags()[["gsync"]], FALSE)
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[6], FALSE)
+                                               datasetTags()[["csync"]], FALSE)
       }
     }
 
@@ -212,9 +212,9 @@ setMethod(
       if (!identical(dispersion, oldDispersion)) {
         # flag the coex slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[5], FALSE)
+                                               datasetTags()[["gsync"]], FALSE)
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[6], FALSE)
+                                               datasetTags()[["csync"]], FALSE)
       }
     }
 
@@ -368,9 +368,9 @@ setMethod(
       if (!identical(nu, initialGuess)) {
         # flag the coex slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[5], FALSE)
+                                               datasetTags()[["gsync"]], FALSE)
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[6], FALSE)
+                                               datasetTags()[["csync"]], FALSE)
       }
     }
 

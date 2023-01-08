@@ -126,7 +126,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.
 #'
-#' @return the new clusterization
+#' @returns the new clusterization
 #'
 #' @export
 #'
@@ -159,7 +159,7 @@ cellsUniformClustering <-
            saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2)
 
-  cond <- getMetadataElement(objCOTAN, datasetTags()[3])
+  cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
   outDirCond <- file.path(outDir, cond)
   if(!file.exists(outDirCond)){

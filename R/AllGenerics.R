@@ -127,12 +127,14 @@ setGeneric(
 
 setGeneric(
   "getGenesCoex",
-  function(objCOTAN, genes = c(), zeroDiagonal = TRUE) standardGeneric("getGenesCoex")
+  function(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
+    standardGeneric("getGenesCoex")
 )
 
 setGeneric(
   "getCellsCoex",
-  function(objCOTAN, cells = c(), zeroDiagonal = TRUE) standardGeneric("getCellsCoex")
+  function(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
+    standardGeneric("getCellsCoex")
 )
 
 setGeneric(

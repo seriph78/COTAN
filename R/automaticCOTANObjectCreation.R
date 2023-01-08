@@ -60,7 +60,7 @@ setMethod(
 
       plots <- cleanPlots(objCOTAN)
 
-      sampleCondition <- getMetadataElement(objCOTAN, datasetTags()[[3]])
+      sampleCondition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
       {
         numIter <- 1
         pdf(file.path(outDirCleaning,

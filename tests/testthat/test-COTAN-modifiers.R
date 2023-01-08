@@ -7,14 +7,14 @@ test_that("metaDataset", {
   obj <- COTAN(raw = raw)
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
 
-  genesCoexInSync <- getMetadataElement(obj, datasetTags()[5])
-  cellsCoexInSync <- getMetadataElement(obj, datasetTags()[6])
+  genesCoexInSync <- getMetadataElement(obj, datasetTags()[["gsync"]])
+  cellsCoexInSync <- getMetadataElement(obj, datasetTags()[["csync"]])
 
   expect_equal(c(genesCoexInSync, genesCoexInSync), c("FALSE", "FALSE"))
 
   meta <- getMetadataDataset(obj)
 
-  expect_equal(meta[[1]], datasetTags()[1:6])
+  expect_equal(meta[[1]], datasetTags()[1:6], ignore_attr = TRUE)
   expect_equal(meta[[2]], c("V", "10X", "Test", "20", genesCoexInSync, cellsCoexInSync))
 
   obj <- addElementToMetaDataset(obj, tag = "Tag_1", value = 1)

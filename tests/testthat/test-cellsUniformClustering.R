@@ -11,8 +11,6 @@ test_that("Cell Uniform Clustering", {
 
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
-  currentLevel <- setLoggingLevel(2)
-
   clusters <- cellsUniformClustering(obj, cores = 12,
                                      saveObj = FALSE, outDir = tm)
 
@@ -31,8 +29,6 @@ test_that("Cell Uniform Clustering", {
   # Test the low GDI (homogeneity) for each defined clusters
 
   ####################################
-
-  setLoggingLevel(currentLevel)
 
   for (cl in sample(unique(clusters[!is.na(clusters)]), size = 5)) {
     print(cl)

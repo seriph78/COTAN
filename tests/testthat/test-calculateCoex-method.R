@@ -97,8 +97,8 @@ test_that("Calculations on genes", {
                coexMatrix(observed, expected, getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,7)])
-  expect_equal(getMetadataElement(obj, datasetTags()[7]), paste0(10/55))
+  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,7)], ignore_attr = TRUE)
+  expect_equal(getMetadataElement(obj, datasetTags()[["gbad"]]), paste0(10/55))
 })
 
 
@@ -151,8 +151,8 @@ test_that("Calculations on cells", {
 
   obj <- calculateCoex(obj, actOnCells = TRUE, optimizeForSpeed = TRUE)
 
-  genesCoexInSync <- getMetadataElement(obj, datasetTags()[5])
-  cellsCoexInSync <- getMetadataElement(obj, datasetTags()[6])
+  genesCoexInSync <- getMetadataElement(obj, datasetTags()[["gsync"]])
+  cellsCoexInSync <- getMetadataElement(obj, datasetTags()[["csync"]])
 
   expect_equal(c(genesCoexInSync, cellsCoexInSync), c("FALSE", "TRUE"))
 
@@ -168,8 +168,8 @@ test_that("Calculations on cells", {
                coexMatrix(observed, expected, getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,8)])
-  expect_equal(getMetadataElement(obj, datasetTags()[8]), paste0(0))
+  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,8)], ignore_attr = TRUE)
+  expect_equal(getMetadataElement(obj, datasetTags()[["cbad"]]), paste0(0))
 })
 
 
@@ -233,8 +233,8 @@ test_that("Coex vs saved results", {
 
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
-  genesCoexInSync <- getMetadataElement(obj, datasetTags()[[5]])
-  cellsCoexInSync <- getMetadataElement(obj, datasetTags()[[6]])
+  genesCoexInSync <- getMetadataElement(obj, datasetTags()[["gsync"]])
+  cellsCoexInSync <- getMetadataElement(obj, datasetTags()[["csync"]])
 
   expect_equal(c(genesCoexInSync, cellsCoexInSync), c("TRUE", "FALSE"))
 

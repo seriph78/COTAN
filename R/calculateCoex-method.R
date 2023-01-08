@@ -635,16 +635,16 @@ setMethod(
     if(actOnCells) {
       objCOTAN@cellsCoex <- coex
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[6], TRUE)
+                                             datasetTags()[["csync"]], TRUE)
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[8],
+                                             datasetTags()[["cbad"]],
                                              problematicPairsFraction)
     } else {
       objCOTAN@genesCoex <- coex
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[5], TRUE)
+                                             datasetTags()[["gsync"]], TRUE)
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[7],
+                                             datasetTags()[["gbad"]],
                                              problematicPairsFraction)
     }
 
