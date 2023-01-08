@@ -43,14 +43,14 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
                                      saveObj = FALSE, outDir = tm)
   saveRDS(clusters, file.path(testsDir, "clusters1.RDS"))
 
-  list[coexDF, pvalDF] <- DEAOnClusters(obj, clusters = clusters)
+  c(coexDF, pvalDF) %<-% DEAOnClusters(obj, clusters = clusters)
   obj <- addClusterization(obj, clName = "clusters",
                            clusters = clusters, coexDF = coexDF)
 
   saveRDS(coexDF[genes.names.test, ], file.path(testsDir, "coex.test.cluster1.RDS"))
   saveRDS(pvalDF[genes.names.test, ], file.path(testsDir, "pval.test.cluster1.RDS"))
 
-  list[mergedClusters, mCoexDF, mPValueDf] <-
+  c(mergedClusters, mCoexDF, mPValueDf) %<-%
     mergeUniformCellsClusters(objCOTAN = obj,
                               clusters = NULL,
                               cores = 12,

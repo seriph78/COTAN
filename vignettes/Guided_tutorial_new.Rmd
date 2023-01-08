@@ -44,7 +44,7 @@ library(plotly)
 library(tidyverse)
 library(htmlwidgets)
 library(MASS)
-library(gsubfn)
+library(zeallot)
 library(grDevices)
 #library(dendextend)
 
@@ -135,7 +135,7 @@ if(!file.exists(file.path(outDir, "cleaning"))){
 
 ```{r}
 obj <- clean(obj)
-list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj)
+c(pcaCellsPlot, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -227,7 +227,7 @@ Repeat the estimation after the cells are removed
 
 ```{r}
 obj <- clean(obj)
-list[pcaCellsPlot, genesPlot, UDEPlot, nuPlot] <- cleanPlots(obj)
+c(pcaCellsPlot, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -282,14 +282,14 @@ obj <- addClusterization(obj, clName = "test", clusters = clusters)
 Than we can perform a sort of differential expression to detect which genes are enriched or depleted in each cluster.
 
 ```{r}
-list[coexDF, pvalDF] <- DEAOnClusters(obj)
+c(coexDF, pvalDF) %<-% DEAOnClusters(obj)
 obj <- addClusterizationCoex(obj, clName = "test", coexDF = coexDF)
 ```
 
 Using the cluster distance, based on the whole transcriptome, we can check if any of the closest clusters can together form a still uniform cluster. We will keep this clusterization for the further analysis.
 
 ```{r}
-list[mergedClusters, mergedCoexDF, mergedPValueDf] <-
+c(mergedClusters, mergedCoexDF, mergedPValueDf) %<-%
   mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 10,
                             distance = "cosine", hclustMethod = "ward.D2",
                             saveObj = FALSE, outDir = outDir)
@@ -382,7 +382,7 @@ Sometimes we can also be interested in the numbers present directly in the conti
 contingencyTables() to produce the observed and expected data
 
 ```{r}
-list[observedCT, expectedCT] <- contingencyTables(obj, g1 = "EIF3F", g2 = "SLC37A1")
+c(observedCT, expectedCT) %<-% contingencyTables(obj, g1 = "EIF3F", g2 = "SLC37A1")
 print("Observed CT")
 observedCT
 print("Expected CT")

@@ -408,7 +408,8 @@ getCOTANSlots <- function(from) {
 #' @description Automatically converts an object from class `scCOTAN` into
 #'   `COTAN`
 #'
-#' @import gsubfn
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
 #'
 #' @importFrom methods setIs
 #'
@@ -419,8 +420,8 @@ getCOTANSlots <- function(from) {
 setIs("scCOTAN",
       "COTAN",
       coerce = function(from) {
-        list[raw, genesCoex, cellsCoex,
-             metaGenes, metaCells, clustersCoex] <- getCOTANSlots(from)
+        c(raw, genesCoex, cellsCoex,
+          metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(from)
 
         new("COTAN",
             raw          = raw,
@@ -433,8 +434,8 @@ setIs("scCOTAN",
       },
       # 'from' arg-name is convention: it is actually a destination!
       replace = function(from, value) {
-        list[raw, genesCoex, cellsCoex,
-             metaGenes, metaCells, clustersCoex] <- getCOTANSlots(value)
+        c(raw, genesCoex, cellsCoex,
+          metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(value)
 
         from@raw          <- raw
         from@genesCoex    <- genesCoex
@@ -523,7 +524,8 @@ getScCOTANSlots <- function(from) {
 #'
 #' @description Explicitly converts an object from class `COTAN` into `scCOTAN`
 #'
-#' @import gsubfn
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
 #'
 #' @importFrom methods as
 #' @importFrom methods setAs
@@ -535,8 +537,8 @@ getScCOTANSlots <- function(from) {
 setAs("COTAN",
       "scCOTAN",
       function(from) {
-        list[raw.norm, nu, lambda, a,
-             hk, clusters, cluster_data] <- getScCOTANSlots(from)
+        c(raw.norm, nu, lambda, a,
+          hk, clusters, cluster_data) %<-% getScCOTANSlots(from)
 
         new("scCOTAN",
             raw          = from@raw,
@@ -553,8 +555,8 @@ setAs("COTAN",
       },
       # 'from' arg-name is convention: it is actually a destination!
       replace = function(from, value) {
-        list[raw.norm, nu, lambda, a,
-             hk, clusters, cluster_data] <- getScCOTANSlots(value)
+        c(raw.norm, nu, lambda, a,
+          hk, clusters, cluster_data) %<-% getScCOTANSlots(value)
 
         from@raw          <- value@raw
         from@raw.norm     <- raw.norm

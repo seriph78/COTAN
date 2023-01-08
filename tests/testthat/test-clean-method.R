@@ -1,4 +1,3 @@
-library(gsubfn)
 
 test_that("clean COTAN object", {
   raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)

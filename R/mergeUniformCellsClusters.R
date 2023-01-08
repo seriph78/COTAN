@@ -94,7 +94,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     oldNumClusters = length(unique(outputClusters))
 
-    list[coexDF, pValueDF] <- DEAOnClusters(objCOTAN, clusters = outputClusters)
+    c(coexDF, pValueDF) %<-% DEAOnClusters(objCOTAN, clusters = outputClusters)
     gc()
 
     ## To drop the cells with only zeros

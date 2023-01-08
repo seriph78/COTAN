@@ -185,7 +185,7 @@ cellsUniformClustering <-
                   numClustersToRecluster, "clusters"), logLevel = 2)
 
     #Step 1
-    list[objSeurat, usedMaxResolution] <-
+    c(objSeurat, usedMaxResolution) %<-%
       seuratClustering(rawData = getRawData(objCOTAN)[,is.na(outputClusters)],
                        cond = cond, iter = iter,
                        minNumClusters = numClustersToRecluster + 1,

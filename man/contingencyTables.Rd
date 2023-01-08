@@ -33,7 +33,6 @@ objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
 g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-ctList <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
-ctList[["observed"]]
+c(observed, expected) \%<-\% contingencyTables(objCOTAN, g1 = g1, g2 = g2)
 
 }

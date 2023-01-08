@@ -13,8 +13,6 @@
 #'
 #' @export
 #'
-#' @import gsubfn
-#'
 #' @importFrom rlang set_names
 #'
 #' @importFrom tibble rownames_to_column

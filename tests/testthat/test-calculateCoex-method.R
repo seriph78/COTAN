@@ -1,6 +1,8 @@
 tm = tempdir()
 stopifnot(file.exists(tm))
 
+library(zeallot)
+
 coexPoint <- function(o, e, n) {
   num <- ( ((o[1] - e[1]) / max(1, e[1])) - ((o[2] - e[2]) / max(1, e[2]))
          - ((o[3] - e[3]) / max(1, e[3])) + ((o[4] - e[4]) / max(1, e[4])) )
@@ -35,7 +37,7 @@ test_that("Calculations on genes", {
   expect_equal(mu[ 1, 20], getLambda(obj)[ 1] * getNu(obj)[20], ignore_attr = TRUE)
   expect_equal(mu[10, 10], getLambda(obj)[10] * getNu(obj)[10], ignore_attr = TRUE)
 
-  list[observedYY, observedY] <-
+  c(observedYY, observedY) %<-%
     observedContingencyTablesYY(obj, actOnCells = FALSE, asDspMatrices = FALSE)
 
   expect_s4_class(observedYY, "dsyMatrix")
@@ -45,7 +47,7 @@ test_that("Calculations on genes", {
   expect_equal(observedY, c(20, rep(10 ,9)), ignore_attr = TRUE)
 
   observed <- observedContingencyTables(obj, actOnCells = FALSE, asDspMatrices = FALSE)
-  list[observedNN, observedNY, observedYN, ] <- observed
+  c(observedNN, observedNY, observedYN, .) %<-% observed
 
   expect_equal(unlist(lapply(c(observedNN, observedNY, observedYN), dim)), rep(dim(observedYY), 3))
   expect_equal(diag(as.matrix(observedNN)), c(0, rep(10, 9)), ignore_attr = TRUE)
@@ -57,7 +59,7 @@ test_that("Calculations on genes", {
 
   obj <- estimateDispersionBisection(obj, cores = 4, chunkSize = 4)
 
-  list[expectedNN, expectedN] <-
+  c(expectedNN, expectedN) %<-%
     expectedContingencyTablesNN(obj, actOnCells = FALSE, asDspMatrices = TRUE)
 
   expect_s4_class(expectedNN, "dspMatrix")
@@ -66,7 +68,7 @@ test_that("Calculations on genes", {
   expect_equal(expectedN, c(0, rep(10, 9)), ignore_attr = TRUE, tolerance = 1e-4)
 
   expected <- expectedContingencyTables(obj, actOnCells = FALSE, asDspMatrices = TRUE)
-  list[, expectedNY, expectedYN, expectedYY] <- expected
+  c(., expectedNY, expectedYN, expectedYY) %<-% expected
 
   expect_equal(substring(names(observed),9), substring(names(expected), 9))
   expect_equal(unlist(lapply(c(expectedYY, expectedNY, expectedYN), dim)), rep(dim(expectedNN), 3))
@@ -79,7 +81,7 @@ test_that("Calculations on genes", {
   e1 <- sample(10, 1); e2 <- sample(10, 1)
   g1 <- getGenes(obj)[min(e1, e2)]
   g2 <- getGenes(obj)[max(e1, e2)]
-  list[gpObs, gpExp] <- contingencyTables(obj, g1, g2)
+  c(gpObs, gpExp) %<-% contingencyTables(obj, g1, g2)
 
   expect_equal(as.vector(gpObs), c(observedYY[g1, g2], observedYN[g1, g2],
                                    observedNY[g1, g2], observedNN[g1, g2]))
@@ -110,7 +112,7 @@ test_that("Calculations on cells", {
   obj <- COTAN(raw = raw)
   obj <- clean(obj)
 
-  list[observedYY, observedY] <-
+  c(observedYY, observedY) %<-%
     observedContingencyTablesYY(obj, actOnCells = TRUE, asDspMatrices = TRUE)
 
   expect_s4_class(observedYY, "dspMatrix")
@@ -120,7 +122,7 @@ test_that("Calculations on cells", {
   expect_equal(observedY, rep(c(7,4), 10), ignore_attr = TRUE)
 
   observed <- observedContingencyTables(obj, actOnCells = TRUE, asDspMatrices = TRUE)
-  list[observedNN, observedNY, observedYN, ] <- observed
+  c(observedNN, observedNY, observedYN, .) %<-% observed
 
   expect_equal(unlist(lapply(c(observedNN, observedNY, observedYN), dim)), rep(dim(observedYY), 3))
   expect_equal(diag(as.matrix(observedNN)), rep(c(3, 6), 10), ignore_attr = TRUE)
@@ -132,7 +134,7 @@ test_that("Calculations on cells", {
   obj <- estimateDispersionNuBisection(obj, cores = 4, chunkSize = 4,
                                        enforceNuAverageToOne = FALSE)
 
-  list[expectedNN, expectedN] <-
+  c(expectedNN, expectedN) %<-%
     expectedContingencyTablesNN(obj, actOnCells = TRUE, asDspMatrices = FALSE)
 
   expect_s4_class(expectedNN, "dsyMatrix")
@@ -141,7 +143,7 @@ test_that("Calculations on cells", {
   expect_equal(expectedN, rep(c(3, 6), 10), ignore_attr = TRUE, tolerance = 1e-3)
 
   expected <- expectedContingencyTables(obj, actOnCells = TRUE, asDspMatrices = FALSE)
-  list[, expectedNY, expectedYN, expectedYY] <- expected
+  c(., expectedNY, expectedYN, expectedYY) %<-% expected
 
   expect_equal(unlist(lapply(c(expectedYY, expectedNY, expectedYN), dim)), rep(dim(expectedNN), 3))
   expect_equal(expectedNY, t(expectedYN))

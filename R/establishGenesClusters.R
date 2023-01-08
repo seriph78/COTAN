@@ -199,7 +199,7 @@ establishGenesClusters <-
 
   primaryMarkers = unlist(groupMarkers)
 
-  list[secondaryMarkers, GCS, rankGenes] <-
+  c(secondaryMarkers, GCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN,
                    numGenesPerMarker = numGenesPerMarker,
                    primaryMarkers = primaryMarkers)

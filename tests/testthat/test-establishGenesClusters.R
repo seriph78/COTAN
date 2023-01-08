@@ -9,7 +9,7 @@ test_that("Establish genes clusters", {
   groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
                        G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
 
-  list[secondaryMarkers, GCS, rankGenes] <-
+  c(secondaryMarkers, GCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN = objCOTAN,
                    primaryMarkers = unlist(groupMarkers),
                    numGenesPerMarker = 11)
@@ -26,7 +26,7 @@ test_that("Establish genes clusters", {
     expect_equal(GCS, GCS_old)
   }
 
-  list[g.space, plot.eig, pca_clusters, tree_plot] <-
+  c(g.space, plot.eig, pca_clusters, tree_plot) %<-%
     establishGenesClusters(objCOTAN = objCOTAN,
                            groupMarkers = groupMarkers,
                            numGenesPerMarker = 11,

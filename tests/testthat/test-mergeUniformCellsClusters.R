@@ -15,7 +15,7 @@ test_that("Merge Uniform Cells Clusters", {
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
-  list[coexDF, pValDF] <- DEAOnClusters(obj)
+  c(coexDF, pValDF) %<-% DEAOnClusters(obj)
 
   obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = coexDF)
 
@@ -50,7 +50,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0)
   expect_equal(e.df[["N. total"]], sapply(groupMarkers, length), ignore_attr = TRUE)
 
-  list[mergedClusters, mergedCoexDF, mergedPValueDF] <-
+  c(mergedClusters, mergedCoexDF, mergedPValueDF) %<-%
     mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 12,
                               distance = "cosine", hclustMethod = "ward.D2",
                               saveObj = FALSE)

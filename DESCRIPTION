@@ -30,7 +30,6 @@ Roxygen: list(markdown = TRUE)
 Imports:
     stats,
     proto,
-    gsubfn,
     plyr,
     dplyr,
     methods,
@@ -55,12 +54,14 @@ Imports:
     stringr,
     Seurat,
     factoextra,
-    dendextend
+    dendextend,
+    zeallot
 Suggests: 
     testthat (>= 3.0.0),
     spelling,
     knitr,
     data.table,
+    gsubfn,
     R.utils,
     tidyverse,
     rmarkdown,

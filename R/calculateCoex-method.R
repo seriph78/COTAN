@@ -143,7 +143,7 @@ observedContingencyTables <- function(objCOTAN,
   numGenes <- getNumGenes(objCOTAN)
   numCells <- getNumCells(objCOTAN)
 
-  list[observedYY, observedY] <-
+  c(observedYY, observedY) %<-%
     observedContingencyTablesYY(objCOTAN,
                                 actOnCells = actOnCells,
                                 asDspMatrices = FALSE)
@@ -356,7 +356,7 @@ expectedContingencyTables <- function(objCOTAN,
   numGenes <- getNumGenes(objCOTAN)
   numCells <- getNumCells(objCOTAN)
 
-  list[expectedNN, expectedN] <-
+  c(expectedNN, expectedN) %<-%
     expectedContingencyTablesNN(objCOTAN,
                                 actOnCells = actOnCells,
                                 asDspMatrices = isFALSE(optimizeForSpeed),
@@ -451,8 +451,7 @@ expectedContingencyTables <- function(objCOTAN,
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
 #' g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-#' ctList <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
-#' ctList[["observed"]]
+#' c(observed, expected) %<-% contingencyTables(objCOTAN, g1 = g1, g2 = g2)
 #'
 #' @rdname contingencyTables
 #'
@@ -579,7 +578,7 @@ setMethod(
     logThis(paste("Retrieving expected", kind, "contingency table"), logLevel = 3)
 
     # four estimators: expectedNN, expectedNY, expectedYN, expectedYY
-    list[expectedNN, expectedNY, expectedYN, expectedYY] <-
+    c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
       expectedContingencyTables(objCOTAN,
                                 actOnCells = actOnCells,
                                 asDspMatrices = TRUE,
@@ -611,7 +610,7 @@ setMethod(
 
     logThis(paste("Retrieving observed", kind, "yes/yes contingency table"), logLevel = 3)
 
-    list[observedYY, ] <-
+    c(observedYY, .) %<-%
       observedContingencyTablesYY(objCOTAN,
                                   actOnCells = actOnCells,
                                   asDspMatrices = TRUE)
@@ -740,10 +739,10 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 
   logThis("Calculating G: START", logLevel = 2)
 
-  list[observedNN, observedNY, observedYN, observedYY] <-
+  c(observedNN, observedNY, observedYN, observedYY) %<-%
     observedContingencyTables(objCOTAN, actOnCells = FALSE)
 
-  list[expectedNN, expectedNY, expectedYN, expectedYY] <-
+  c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
     expectedContingencyTables(objCOTAN, actOnCells = FALSE)
 
   logThis("Estimating G", logLevel = 3)
