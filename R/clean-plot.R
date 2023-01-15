@@ -168,7 +168,7 @@ genesPlot    <- ggplot(D, aes(x = n, y = means)) + geom_point()+
                   geom_point(colour = "#8491B4B2", size = 1) +
                   plotTheme("common")
 
-  return( list("pcaCells" = pcaCellsPlot, "genes" = genesPlot,
+  return( list("pcaCells" = pcaCellsPlot,"pcaCellsData"=pcaCells, "genes" = genesPlot,
                "UDE" = UDEPlot, "nu" = nuPlot) )
 }
 
