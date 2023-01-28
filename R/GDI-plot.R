@@ -67,7 +67,13 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
   }
 
   # drop housekeeping genes i.e. those that has GDI <= -5
-  GDI <- GDI[GDI[["GDI"]] > -5, ]
+  {
+    genesToKeep <- (GDI[["GDI"]] > -5)
+    logThis(paste("Removed", sum(!genesToKeep),
+                  "low GDI genes (such as the housekeeping) in GDI plot"),
+            logLevel = 1)
+    GDI <- GDI[genesToKeep, ]
+  }
 
   qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
   col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors,
