@@ -24,8 +24,12 @@
 #' @importFrom ggplot2 ylab
 #' @importFrom ggplot2 scale_color_manual
 #' @importFrom ggplot2 scale_fill_manual
+#'
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom ggrepel geom_label_repel
+#'
+#' @importFrom RColorBrewer brewer.pal.info
+#' @importFrom RColorBrewer brewer.pal
 #'
 #' @importFrom stats quantile
 #'
@@ -62,8 +66,12 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
     GDI[rownames(GDI) %in% genes[[n]],]$colors <- n
   }
 
-  qual_col_pals = RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == 'qual',]
-  col_vector = unlist(mapply(RColorBrewer::brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+  # drop housekeeping genes i.e. those that has GDI <= -5
+  GDI <- GDI[GDI[["GDI"]] > -5, ]
+
+  qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
+  col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors,
+                             rownames(qual_col_pals)))
 
   mycolours <- set_names(col_vector[seq_along(names(genes))], names(genes))
 
@@ -75,8 +83,8 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
               geom_point(data = subset(GDI, colors != "none"),
                          aes(x = sum.raw.norm, y = GDI, colour = colors),
                          size = 2.5, alpha = 0.8) +
-              geom_hline(yintercept = quantile(GDI$GDI)[4], linetype = "dashed", color = "darkblue") +
-              geom_hline(yintercept = quantile(GDI$GDI)[3], linetype = "dashed", color = "darkblue") +
+              geom_hline(yintercept = quantile(GDI[["GDI"]])[4], linetype = "dashed", color = "darkblue") +
+              geom_hline(yintercept = quantile(GDI[["GDI"]])[3], linetype = "dashed", color = "darkblue") +
               geom_hline(yintercept = 1.5, linetype = "dotted", color = "red", linewidth = 0.5) +
               scale_color_manual("Status", values = mycolours) +
               scale_fill_manual( "Status", values = mycolours) +

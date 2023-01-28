@@ -135,7 +135,7 @@ if(!file.exists(file.path(outDir, "cleaning"))){
 
 ```{r}
 obj <- clean(obj)
-c(pcaCellsPlot, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -227,7 +227,7 @@ Repeat the estimation after the cells are removed
 
 ```{r}
 obj <- clean(obj)
-c(pcaCellsPlot, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
 
 pcaCellsPlot
 ```

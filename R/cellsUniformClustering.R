@@ -56,7 +56,8 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 
   srat <- FindNeighbors(srat, dims = 1:min(25, maxRows))
 
-  resolution <- 0.5
+  initialResolution <- 0.5
+  resolution <- initialResolution
   repeat {
     srat <- FindClusters(srat, resolution = resolution, algorithm = 2)
 
@@ -64,7 +65,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
     # the number of residual cells decrease and to stop clustering
     # if the algorithm gives too many singletons.
     if (minNumClusters < length(unique(srat$seurat_clusters)) ||
-        resolution > 2) {
+        resolution > initialResolution + 1.5) {
       break
     }
 
@@ -90,12 +91,12 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
     pdf(file.path(outDir, "pdf_umap.pdf"))
 
     if (iter == 0) {
-      plot(DimPlot(srat, reduction = "umap", label = TRUE, group.by = "orig.ident"))
+      plot(DimPlot(srat, reduction = "umap", label = FALSE, group.by = "orig.ident"))
     }
 
     plot(DimPlot(srat, reduction = "umap",label = TRUE) +
          annotate(geom="text", x=0, y=30, color = "black",
-                  label = paste0("Cells number: ", nrow(rawData), "\n",
+                  label = paste0("Cells number: ", ncol(rawData), "\n",
                                  "Cl. resolution: ", resolution) ))
 
     dev.off()
@@ -104,7 +105,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 
   logThis("Creating Seurat object: DONE", logLevel = 2)
 
-  return(list("SeuratObj" = srat, "UsedMaxResolution" = resolution > 2))
+  return(list("SeuratObj" = srat, "UsedMaxResolution" = resolution > initialResolution + 1.5))
 }
 
 
