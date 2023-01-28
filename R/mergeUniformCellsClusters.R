@@ -82,7 +82,14 @@ mergeUniformCellsClusters <- function(objCOTAN,
     outputClusters <- getClusterizationData(objCOTAN)[["clusters"]]
   }
 
-  mergeOutDir <- file.path(outDir, "leafs_merge")
+  cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
+
+  outDirCond <- file.path(outDir, cond)
+  if(!file.exists(outDirCond)){
+    dir.create(outDirCond)
+  }
+
+  mergeOutDir <- file.path(outDirCond, "leafs_merge")
   if (isTRUE(saveObj) && !file.exists(mergeOutDir)) {
     dir.create(mergeOutDir)
   }

@@ -18,7 +18,7 @@ data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
 objCOTAN <- addElementToMetaDataset(objCOTAN,
                                     datasetTags()[["cells"]],
-                                    ncols(raw.dataset))
+                                    ncol(raw.dataset))
 meta <- getMetadataDataset(objCOTAN)
 
 }
