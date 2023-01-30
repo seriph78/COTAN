@@ -130,7 +130,12 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2) {
   sizes <- as.data.frame(sizes)
   sizes$n <- c(1:dim(sizes)[1])
   splitNames <- str_split(rownames(sizes), pattern = splitPattern, simplify = TRUE)
-  sizes$sample <- splitNames[, min(numCol, ncol(splitNames))]
+  if (ncol(splitNames) < numCol) {
+    # no splits found take all as a single group
+    sizes$sample <- rep("1", nrow(splitNames))
+  } else {
+    sizes$sample <- splitNames[, numCol]
+  }
 
   plot <-
     sizes %>%
@@ -192,7 +197,12 @@ genesSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2) {
   sizes <- as.data.frame(sizes)
   sizes$n <- c(1:dim(sizes)[1])
   splitNames <- str_split(rownames(sizes), pattern = splitPattern, simplify = TRUE)
-  sizes$sample <- splitNames[, min(numCol, ncol(splitNames))]
+  if (ncol(splitNames) < numCol) {
+    # no splits found take all as a single group
+    sizes$sample <- rep("1", nrow(splitNames))
+  } else {
+    sizes$sample <- splitNames[, numCol]
+  }
 
   plot <-
     sizes %>%

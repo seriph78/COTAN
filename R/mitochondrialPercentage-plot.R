@@ -42,7 +42,12 @@ mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
   sizes <- as.data.frame(sizes)
   sizes$n <- c(1:dim(sizes)[1])
   splitNames <- str_split(rownames(sizes), pattern = splitPattern, simplify = TRUE)
-  sizes$sample <- splitNames[, min(numCol, ncol(splitNames))]
+  if (ncol(splitNames) < numCol) {
+    # no splits found take all as a single group
+    sizes$sample <- rep("1", nrow(splitNames))
+  } else {
+    sizes$sample <- splitNames[, numCol]
+  }
 
   mitGenes <- getGenes(objCOTAN)[stringr::str_detect(getGenes(objCOTAN), pattern = genePrefix)]
   mitGenesData <- as.data.frame(getRawData(objCOTAN)[getGenes(objCOTAN) %in% mitGenes, ])

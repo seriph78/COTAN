@@ -46,7 +46,12 @@ scatterPlot <- function(objCOTAN, splitPattern = " ",
   to.plot <- cbind(lib.size, gene.size)
   to.plot <- as.data.frame(to.plot)
   splitNames <- str_split(rownames(to.plot), pattern = splitPattern, simplify = TRUE)
-  to.plot$sample <- splitNames[, min(numCol, ncol(splitNames))]
+  if (ncol(splitNames) < numCol) {
+    # no splits found take all as a single group
+    to.plot$sample <- rep("1", nrow(splitNames))
+  } else {
+    to.plot$sample <- splitNames[, numCol]
+  }
 
   plot <- ggplot(to.plot, aes(x=lib.size,y=gene.size, color = sample)) +
     geom_point(size = 0.5, alpha= 0.8) +
