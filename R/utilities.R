@@ -180,27 +180,79 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
   return(df)
 }
 
+#------------------- clusters utilities ----------
 
-#' toClustersList
+#' Handle clusterization <-> clusters list conversions and clusters grouping
 #'
-#' @description Given a clusterization, creates a `list` that contains, for each
-#'   cluster, which elements compose the cluster
+#' @description `toClustersList` given a clusterization, creates a `list` of
+#'   clusters (i.e. for each cluster, which elements compose the cluster).
 #'
-#' @param clusters A named `vector` or `factor` that defines the clusters
+#'   `fromClustersList` given a `list` of clusters returns a clusterization (i.e
+#'   a named `vector` that for each element indicates to which cluster it
+#'   belongs).
 #'
-#' @returns a `list` of clusters: one vector of names for each cluster.
+#'   `groupByClusters` given a clusterization returns a permutation, such that
+#'   using the permutation on the input the clusters are grouped together.
 #'
+#'   `groupByClustersList` given the elements' names and a `list` of clusters
+#'   returns a permutation, such that using the permutation on the given names
+#'   the clusters are grouped together.
+#'
+#' @usage toClustersList(clusters)
+#'
+#' @param clusters A named `vector` or `factor` that defines the clusters.
+#' @param clustersList A named `list` whose elements define the various
+#'   clusters.
+#' @param elemNames A `list` of names to which associate a cluster.
+#'
+#' @returns `toClustersList` returns a `list` of clusters.
+#'
+#'   `fromClustersList` returns a clusterization. If the given `elemNames`
+#'   contain values not present in the `clustersList`, those will be marked as
+#'   `"not_clustered"`
+#'
+#'   `groupByClusters` and `groupByClustersList` return a permutation that
+#'   groups the clusters together. For each cluster the positions are guaranteed
+#'   to be in increasing order. In case, all elements not corresponding to any
+#'   cluster are grouped together as the last group.
+#'
+#' @examples
+#' clusters <- set_names(paste0("",sample(7, 100, replace = TRUE)),
+#'                       formatC(1:100,  width = 3, flag = "0"))
+#'
+#' ## create a clusters list froma clusterization
+#' clustersList <- toClustersList(clusters)
+#' head(clustersList, 1)
+#'
+#' ## recreate the clusterization from the cluster list
+#' clusters2 <- fromClustersList(clustersList, names(clusters))
+#' all.equal(clusters, clusters2)
+#'
+#' cl1Size <- length(clustersList[["1"]])
+#'
+#' ## establish the permutation that groups clusters together
+#' perm <- groupByClusters(clusters)
+#' is.unsorted(head(names(clusters)[perm],cl1Size))
+#' head(clusters[perm], cl1Size)
+#'
+#' # it is possible to have the list of the element names different
+#' # from the names in the clusters list
+#' selectedNames <- formatC(11:110,  width = 3, flag = "0")
+#' perm2 <- groupByClustersList(selectedNames, toClustersList(clusters))
+#' all.equal(perm2[91:100], c(91:100))
+#'
+
 #' @export
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
 #'
-#' @rdname toClusterList
+#' @rdname ClustersList
 #'
 toClustersList <- function(clusters) {
   stopifnot("passed clusterization has no names" <- !is_empty(names(clusters)))
 
-  clustersNames <- unique(clusters)
+  clustersNames <- levels(factor(clusters))
 
   getCl <- function(cl, clusters) {
     names(clusters[clusters %in% cl])
@@ -210,6 +262,69 @@ toClustersList <- function(clusters) {
                             clustersNames)
 
   return(clustersList)
+}
+
+
+#' @export
+#'
+#' @importFrom rlang is_empty
+#' @importFrom rlang set_names
+#'
+#' @rdname ClustersList
+#'
+fromClustersList <- function(clustersList, elemNames = c()) {
+  clustersNames <- names(clustersList)
+
+  stopifnot("passed clusterization has no names" <- !is_empty(clustersNames))
+
+  if (is_empty(elemNames)) {
+    elemNames <- unlist(clusterList, use.names = FALSE)
+  }
+
+  clusters <- set_names(rep.int("not_clustered", length(elemNames)), elemNames)
+
+  for (clName in clustersNames) {
+    cluster <- clustersList[[clName]]
+    cluster <- cluster[cluster %in% elemNames]
+    clusters[cluster] <- clName
+  }
+
+  return(clusters)
+}
+
+
+#' @export
+#'
+#' @importFrom rlang is_empty
+#'
+#' @rdname ClustersList
+#'
+groupByClustersList <- function(elemNames, clustersList) {
+  stopifnot("passed no elemNames" <- !is_empty(elemNames))
+  stopifnot("passed no clustersList" <- !is_empty(clustersList))
+
+  positions <- c()
+
+  for (cluster in clustersList) {
+    clPos <- which(elemNames %in% cluster)
+    # clPos should be already sorted
+    positions <- append(positions, clPos)
+  }
+
+  # add all non-clustered elements as tail group!
+  positions <- append(positions, setdiff(seq_len(length(elemNames)), positions))
+
+  return(positions)
+}
+
+#' @export
+#'
+#' @importFrom rlang is_empty
+#'
+#' @rdname ClustersList
+#'
+groupByClusters <- function(clusters) {
+  return(groupByClustersList(names(clusters), toClustersList(clusters)))
 }
 
 

@@ -36,6 +36,42 @@ test_that("Logging", {
 })
 
 
+test_that("Clusterizations manipulations", {
+  set.seed(1675787192)
+  clusters <- factor(paste0("",as.roman(sample(7, 100, replace = TRUE))))
+
+  elemNames <- paste0("el_",1:100)
+  clusters <- set_names(clusters, elemNames)
+
+  clusterList <- toClustersList(clusters)
+
+  expect_equal(length(clusterList), 7)
+  expect_setequal(unname(sapply(clusterList, length)),
+                  as.vector(table(clusters)))
+
+  clusters2 <- fromClustersList(clusterList, elemNames)
+
+  expect_equal(clusters2, as.vector(clusters), ignore_attr = TRUE)
+
+  clusters3 <- fromClustersList(clusterList, elemNames = c())
+  expect_equal(table(clusters2), table(clusters3), ignore_attr = TRUE)
+
+  positions <- groupByClusters(clusters)
+
+  expect_equal(clusters2[positions], clusters3)
+
+  expect_equal(groupByClusters(clusters2), positions)
+  expect_equal(groupByClustersList(elemNames, clusterList), positions)
+
+  # cause mismatches between the element names and the clusterization
+  elemNames <- append(elemNames, paste0("el_",201:210), after = 20)[1:100]
+
+  expect_setequal(fromClustersList(clusterList, elemNames)[21:30], c("not_clustered"))
+
+  expect_equal(groupByClustersList(elemNames, clusterList)[91:100], c(21:30))
+})
+
+
 test_that("Adding columns to data.frames", {
   df <- data.frame()
 
