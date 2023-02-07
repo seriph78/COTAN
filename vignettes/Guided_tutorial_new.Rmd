@@ -301,7 +301,7 @@ obj <- addClusterization(obj, clName = "merged",
 Coex heatmap for clustered cells
 
 ```{r}
-obj <- estimateDispersionNuBisection(obj, cores = 10, enforceNuAverageToOne = FALSE)
+obj <- estimateDispersionNuBisection(obj, cores = 10, enforceNuAverageToOne = TRUE)
 
 obj <- calculateCoex(obj, actOnCells = TRUE)
 

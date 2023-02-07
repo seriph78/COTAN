@@ -1,9 +1,17 @@
 library(Matrix)
 
-test_that("Logging levels", {
-  suppressMessages(currentLevel <- setLoggingLevel(0))
+tm = tempdir()
+stopifnot(file.exists(tm))
 
-  expect_false(is.null(currentLevel))
+test_that("Logging", {
+  logPath <- file.path(tm, "COTAN_Test.log")
+
+  suppressMessages(currentLevel <- setLoggingLevel(0))
+  suppressMessages(currentFile  <- setLoggingFile(logPath))
+
+  expect_false(is.null(currentLevel[[1]]))
+  expect_true(is.null(currentFile[[1]]))
+  expect_true(file.exists(logPath))
 
   expect_no_message(suppressMessages(logThis("This should not appear", logLevel = 0)))
 
@@ -19,8 +27,12 @@ test_that("Logging levels", {
 
   expect_message(logThis("This should appear", logLevel = 3))
 
-  # restore logging level
+  # restore logging status
   suppressMessages(setLoggingLevel(currentLevel))
+  suppressMessages(setLoggingFile(""))
+
+  expect_equal(R.utils::countLines(logPath), 6, ignore_attr = TRUE)
+  file.remove(logPath)
 })
 
 

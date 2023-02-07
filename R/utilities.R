@@ -2,11 +2,11 @@
 #'
 #' @description Set the `COTAN` logging level
 #'
-#' @details
-#' * 0 - Always on log messages.
-#' * 1 - Major log messages.
-#' * 2 - Minor log messages.
-#' * 3 - All log messages.
+#' @details It set the `COTAN.LogLevel` options to uno of the following values:
+#'   * 0 - Always on log messages.
+#'   * 1 - Major log messages.
+#'   * 2 - Minor log messages.
+#'   * 3 - All log messages.
 #'
 #' @seealso [logThis()]
 #'
@@ -28,6 +28,44 @@ setLoggingLevel <- function(newLevel = 1) {
   }
   return(invisible(oldLevel))
 }
+
+
+#' setLoggingFile
+#'
+#' @description Set the log file for all `COTAN` output logs.
+#'
+#' @details By default no logging happens on a file (only on the console). Using
+#'   this function `COTAN` will use the indicated file to dump the logs produced
+#'   by all [logThis()] commands, independently from the log level.
+#'
+#'   It stores the `connection` created by the call to [bzfile()] in the option:
+#'   `COTAN.LogFile`
+#'
+#' @seealso [logThis()]
+#'
+#' @param filename the log file. Defaults to `./COTAN.log`
+#'
+#' @export
+#'
+#' @examples
+#' setLoggingFile('./COTAN_Test1.log') # for debugging purposes only
+#'
+#' @rdname setLoggingLevel
+#'
+setLoggingFile <- function(fileNm = "./COTAN.log") {
+  message(paste0("Setting log file to be: ", fileNm))
+  emptyName <- !(length(fileNm) && any(nzchar(fileNm)))
+  if (emptyName) {
+    oldFile <- options(COTAN.LogFile = NULL)
+  } else {
+    oldFile <- options(COTAN.LogFile = file(fileNm, open = "at"))
+  }
+  oldFile <- oldFile[["COTAN.LogFile"]]
+  if (!is.null(oldFile)) {
+    close(oldFile)
+  }
+}
+
 
 #' logThis
 #'
@@ -54,6 +92,12 @@ setLoggingLevel <- function(newLevel = 1) {
 #' @rdname logThis
 #'
 logThis <- function(msg, logLevel = 2, appendLF = TRUE) {
+  # write to log file if any
+  currentFile <- getOption("COTAN.LogFile")
+  if (!is.null(currentFile)) {
+    writeLines(msg, currentFile)
+    flush(currentFile)
+  }
   # set the logging level global variable
   if (is.null(getOption("COTAN.LogLevel"))) {
     setLoggingLevel() # to default

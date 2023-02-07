@@ -9,7 +9,7 @@
   threshold = 0.001,
   maxIterations = 100,
   chunkSize = 1024,
-  enforceNuAverageToOne = FALSE
+  enforceNuAverageToOne = TRUE
 )
 }
 \arguments{

@@ -183,7 +183,8 @@ test_that("Coex", {
   obj <- COTAN(raw = raw)
   obj <- clean(obj)
 
-  obj <- estimateDispersionNuBisection(obj, cores = 4, chunkSize = 4)
+  obj <- estimateDispersionNuBisection(obj, cores = 4, chunkSize = 4,
+                                       enforceNuAverageToOne = FALSE)
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 

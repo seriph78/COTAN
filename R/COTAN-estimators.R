@@ -394,8 +394,7 @@ setMethod(
 #' estimateDispersionNuBisection
 #'
 #' Estimates the 'dispersion' and 'nu' field of a `COTAN` object by running
-#' sequentially a bisection for each parameter. This allows to enforce
-#' `mean('nu') == 1` assumption Assumes [estimateNuLinear()] being run already
+#' sequentially a bisection for each parameter.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param threshold minimal solution precision
@@ -427,7 +426,8 @@ setMethod(
   "estimateDispersionNuBisection",
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 100, chunkSize = 1024, enforceNuAverageToOne = FALSE) {
+           maxIterations = 100, chunkSize = 1024,
+           enforceNuAverageToOne = TRUE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
 
     # getNu() would show a warning when no 'nu' present
@@ -457,8 +457,7 @@ setMethod(
       gc()
 
       meanNu <- mean(getNu(objCOTAN))
-      logThis(paste("Nu mean:", meanNu),
-              logLevel = (if(enforceNuAverageToOne) {1} else {3}))
+      logThis(paste("Nu mean:", meanNu), logLevel = 2)
 
       if (isTRUE(enforceNuAverageToOne)) {
         if (!is.finite(meanNu)) {
@@ -531,7 +530,7 @@ setMethod(
   "estimateDispersionNuNlminb",
   "COTAN",
   function(objCOTAN, threshold = 0.001, maxIterations = 100,
-           chunkSize = 1024, enforceNuAverageToOne = FALSE) {
+           chunkSize = 1024, enforceNuAverageToOne = TRUE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
 
     # getNu() would show a warning when no 'nu' present
