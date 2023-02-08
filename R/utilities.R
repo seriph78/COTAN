@@ -278,7 +278,7 @@ fromClustersList <- function(clustersList, elemNames = c()) {
   stopifnot("passed clusterization has no names" <- !is_empty(clustersNames))
 
   if (is_empty(elemNames)) {
-    elemNames <- unlist(clusterList, use.names = FALSE)
+    elemNames <- unlist(clustersList, use.names = FALSE)
   }
 
   clusters <- set_names(rep.int("not_clustered", length(elemNames)), elemNames)

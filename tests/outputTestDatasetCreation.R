@@ -3,6 +3,7 @@
 
 outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
   utils::data("test.dataset.col", package = "COTAN")
+  options(parallelly.fork.enable = TRUE)
 
   obj <- COTAN(raw = test.dataset.col)
   obj <- initializeMetaDataset(obj, GEO = " ",
@@ -10,7 +11,7 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
                                sampleCondition = "example")
 
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
-  #saveRDS(obj, file = file.path(tm,"temp.RDS"))
+  #saveRDS(obj, file = file.path(testsDir,"temp.RDS"))
 
   cell.names.test  <- getCells(obj)[c(1:10,2474:2484,4990:5000)]
   genes.names.test <- getGenes(obj)[c(1:10,990:1000,1971:1981)]
@@ -23,7 +24,7 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
   raw.norm.test <- getNormalizedData(obj)[genes.names.test, cell.names.test]
   saveRDS(raw.norm.test, file.path(testsDir, "raw.norm.test.RDS"))
 
-  coex.test <- getGenesCoex(obj, genes = genes.names.test)
+  coex.test <- getGenesCoex(obj, genes = genes.names.test, zeroDiagonal = FALSE)
   saveRDS(coex.test, file.path(testsDir, "coex.test.RDS"))
 
   lambda.test <- getLambda(obj)[genes.names.test]
@@ -39,8 +40,7 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
   pval.test <- calculatePValue(obj, geneSubsetCol = genes.names.test)
   saveRDS(pval.test, file.path(testsDir, "pval.test.RDS"))
 
-  clusters <- cellsUniformClustering(obj, cores = 12,
-                                     saveObj = FALSE, outDir = tm)
+  clusters <- cellsUniformClustering(obj, cores = 12, saveObj = FALSE)
   saveRDS(clusters, file.path(testsDir, "clusters1.RDS"))
 
   c(coexDF, pvalDF) %<-% DEAOnClusters(obj, clusters = clusters)
@@ -56,8 +56,7 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
                               cores = 12,
                               distance = "cosine",
                               hclustMethod = "ward.D2",
-                              saveObj = FALSE,
-                              outDir = tm)
+                              saveObj = FALSE)
 
   saveRDS(mergedClusters[genes.names.test],
           file.path(testsDir, "cluster_data_merged.RDS"))

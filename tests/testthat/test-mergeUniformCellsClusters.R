@@ -19,10 +19,10 @@ test_that("Merge Uniform Cells Clusters", {
 
   obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = coexDF)
 
-  expect_equal(colnames(coexDF), unique(clusters))
+  expect_equal(colnames(coexDF), sort(unique(clusters)))
   expect_equal(rownames(coexDF), getGenes(obj))
 
-  expect_equal(colnames(pValDF), unique(clusters))
+  expect_equal(colnames(pValDF), sort(unique(clusters)))
   expect_equal(rownames(pValDF), getGenes(obj))
 
   coexDF_exp <- readRDS(file.path(getwd(), "coex.test.cluster1.RDS"))
@@ -35,7 +35,7 @@ test_that("Merge Uniform Cells Clusters", {
   deltaExpression <- clustersDeltaExpression(obj)
 
   expect_equal(rownames(deltaExpression), getGenes(obj))
-  expect_equal(colnames(deltaExpression), unique(clusters))
+  expect_equal(colnames(deltaExpression), sort(unique(clusters)))
 
   #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
   groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),

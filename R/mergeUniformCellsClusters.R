@@ -147,7 +147,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
       cl1 <- get_nodes_attr(dend, "label", id = id[p+0])
       cl2 <- get_nodes_attr(dend, "label", id = id[p+1])
 
-      mergedCluster <- paste0(cl1, "_", cl2, "_merge")
+      mergedCluster <- paste0(min(cl1, cl2), "_", max(cl1, cl2), "-merge")
 
       logThis(mergedCluster, logLevel = 3)
 
@@ -191,15 +191,19 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   logThis(paste("The final merged clusterization contains [",
                 length(unique(outputClusters)), "] different clusters:",
-                paste0(unique(outputClusters), collapse = ", ")), logLevel = 3)
+                paste0(unique(sort(outputClusters)), collapse = ", ")), logLevel = 3)
 
   # replace the clusters' tags
+  # non merged clusters keep their tag, while merged one use the lesser one!
+  # there might be holes in the enumeration!
   {
-    clTags <- unique(sort(outputClusters))
-    clTagsMap <- set_names(seq_along(clTags), clTags)
+    clTags <- levels(factor(outputClusters))
+    # here we use the fact that the merged clusters have the smaller cluster as first
+    clTagsMap <- str_split(clTags, pattern = "_", simplify = TRUE)[,1]
+    clTagsMap <- set_names(clTagsMap, clTags)
 
     outputClusters <- clTagsMap[outputClusters]
-    outputClusters <- set_names(as.character(outputClusters), getCells(objCOTAN))
+    outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
     colnames(coexDF)   <- clTagsMap[colnames(coexDF)]
     colnames(pValueDF) <- clTagsMap[colnames(pValueDF)]

@@ -209,7 +209,7 @@ cellsUniformClustering <-
 
     numClustersToRecluster <- 0
     cellsToRecluster <- vector(mode = "character")
-    sratClusters <- unique(metaData[["seurat_clusters"]])
+    sratClusters <- levels(factor(metaData[["seurat_clusters"]]))
     for (cl in sratClusters) {
       logThis("*", logLevel = 1, appendLF = FALSE)
       logThis(paste0(" checking uniformity of cluster '", cl,
@@ -279,17 +279,19 @@ cellsUniformClustering <-
 
   logThis(paste("The final raw clusterization contains [",
                 length(unique(outputClusters)), "] different clusters:",
-                paste0(unique(outputClusters), collapse = ", ")), logLevel = 3)
+                paste0(unique(sort(outputClusters)), collapse = ", ")), logLevel = 3)
 
   # replace the clusters' tags
   {
     clTags <- unique(sort(outputClusters))
-    clTagsMap <- set_names(seq_along(clTags), clTags)
+    numDigits <- floor(log10(length(clTags))) + 1
+    clTagsMap <- formatC(seq_along(clTags), width = numDigits, flag = "0")
+    clTagsMap <- set_names(clTagsMap, clTags)
 
     unclusteredCells <- is.na(outputClusters)
     outputClusters[!unclusteredCells] <- clTagsMap[outputClusters[!unclusteredCells]]
-    outputClusters <- set_names(as.character(outputClusters), getCells(objCOTAN))
     outputClusters[unclusteredCells] = "not_clustered"
+    outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
 
   if (saveObj) {
