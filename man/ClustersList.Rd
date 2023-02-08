@@ -9,9 +9,13 @@
 \usage{
 toClustersList(clusters)
 
-fromClustersList(clustersList, elemNames = c())
+fromClustersList(
+  clustersList,
+  elemNames = c(),
+  throwOnOverlappingClusters = TRUE
+)
 
-groupByClustersList(elemNames, clustersList)
+groupByClustersList(elemNames, clustersList, throwOnOverlappingClusters = TRUE)
 
 groupByClusters(clusters)
 }

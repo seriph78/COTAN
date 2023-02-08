@@ -272,7 +272,8 @@ toClustersList <- function(clusters) {
 #'
 #' @rdname ClustersList
 #'
-fromClustersList <- function(clustersList, elemNames = c()) {
+fromClustersList <- function(clustersList, elemNames = c(),
+                             throwOnOverlappingClusters = TRUE) {
   clustersNames <- names(clustersList)
 
   stopifnot("passed clusterization has no names" <- !is_empty(clustersNames))
@@ -286,6 +287,9 @@ fromClustersList <- function(clustersList, elemNames = c()) {
   for (clName in clustersNames) {
     cluster <- clustersList[[clName]]
     cluster <- cluster[cluster %in% elemNames]
+    stopifnot("Found overlapping clusters" <-
+                (!throwOnOverlappingClusters ||
+                   all(clusters[cluster] == "not_clustered")))
     clusters[cluster] <- clName
   }
 
@@ -299,7 +303,8 @@ fromClustersList <- function(clustersList, elemNames = c()) {
 #'
 #' @rdname ClustersList
 #'
-groupByClustersList <- function(elemNames, clustersList) {
+groupByClustersList <- function(elemNames, clustersList,
+                                throwOnOverlappingClusters = TRUE) {
   stopifnot("passed no elemNames" <- !is_empty(elemNames))
   stopifnot("passed no clustersList" <- !is_empty(clustersList))
 
@@ -308,6 +313,8 @@ groupByClustersList <- function(elemNames, clustersList) {
   for (cluster in clustersList) {
     clPos <- which(elemNames %in% cluster)
     # clPos should be already sorted
+    stopifnot("Found overlapping clusters" <-
+                !(throwOnOverlappingClusters && any(clPos %in% positions)))
     positions <- append(positions, clPos)
   }
 
