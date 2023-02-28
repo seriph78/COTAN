@@ -7,9 +7,9 @@
 \S4method{estimateDispersionBisection}{COTAN}(
   objCOTAN,
   threshold = 0.001,
-  cores = 1,
-  maxIterations = 100,
-  chunkSize = 1024
+  cores = 1L,
+  maxIterations = 100L,
+  chunkSize = 1024L
 )
 }
 \arguments{

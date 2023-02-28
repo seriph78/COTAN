@@ -1,0 +1,7 @@
+linters: linters_with_defaults(
+    defaults = lintr::linters_with_tags(tags = c("default", "best_practices")),
+    object_name_linter("camelCase"),
+    line_length_linter(80)
+  ) # see vignette("lintr")
+encoding: "UTF-8"
+exclusions: list("renv", "packrat") # see ?lintr::exclude

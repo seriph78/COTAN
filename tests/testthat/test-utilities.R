@@ -24,6 +24,7 @@ test_that("Logging", {
   expect_no_message(logThis("This should not appear"))
 
   suppressMessages(setLoggingLevel(3))
+  suppressMessages(setLoggingFile(logPath))
 
   expect_message(logThis("This should appear", logLevel = 3))
 

@@ -4,7 +4,7 @@
 \alias{plotTheme}
 \title{plotTheme}
 \usage{
-plotTheme(plotKind = "common", textSize = 14)
+plotTheme(plotKind = "common", textSize = 14L)
 }
 \arguments{
 \item{plotKind}{a string indicating the plot kind}

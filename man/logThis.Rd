@@ -4,7 +4,7 @@
 \alias{logThis}
 \title{logThis}
 \usage{
-logThis(msg, logLevel = 2, appendLF = TRUE)
+logThis(msg, logLevel = 2L, appendLF = TRUE)
 }
 \arguments{
 \item{msg}{the message to print}
@@ -25,7 +25,8 @@ It uses \code{\link[=message]{message()}} to actually print the messages on the 
 connection, so it is subject to \code{\link[=suppressMessages]{suppressMessages()}}
 }
 \examples{
-logThis("LogLevel 0 messages will always show, ", logLevel = 0, appendLF = FALSE)
+logThis("LogLevel 0 messages will always show, ",
+        logLevel = 0, appendLF = FALSE)
 suppressMessages(logThis("unless all messages are suppressed", logLevel = 0))
 
 }

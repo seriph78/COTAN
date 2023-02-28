@@ -7,8 +7,8 @@
 \S4method{estimateDispersionNuNlminb}{COTAN}(
   objCOTAN,
   threshold = 0.001,
-  maxIterations = 100,
-  chunkSize = 1024,
+  maxIterations = 50L,
+  chunkSize = 1024L,
   enforceNuAverageToOne = TRUE
 )
 }

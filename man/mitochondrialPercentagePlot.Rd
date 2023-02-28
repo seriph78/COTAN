@@ -24,7 +24,7 @@ number with the sample name (default 2)}
 Human, mouse "^mt-")}
 }
 \value{
-a list with the violin-boxplot plot and a sizes df
+a list with the violin-boxplot plot and a sizes data.frame
 }
 \description{
 Function that plots the raw library size for each cell and

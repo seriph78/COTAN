@@ -24,7 +24,7 @@
 #'
 #' @importFrom stringr str_split
 #'
-#' @returns a list with the violin-boxplot plot and a sizes df
+#' @returns a list with the violin-boxplot plot and a sizes data.frame
 #'
 #' @export
 #'

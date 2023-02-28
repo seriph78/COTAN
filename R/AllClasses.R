@@ -9,7 +9,8 @@
 #' @noRd
 #'
 emptySparseMatrix <- function() {
-  return( as(as(as(matrix(0, 0, 0), "dMatrix"), "generalMatrix"), "CsparseMatrix") )
+  return(as(as(as(matrix(0.0, 0L, 0L), "dMatrix"),
+               "generalMatrix"), "CsparseMatrix"))
 }
 
 #' emptySymmetricMatrix
@@ -23,7 +24,8 @@ emptySparseMatrix <- function() {
 #' @noRd
 #'
 emptySymmetricMatrix <- function() {
-  return( as(as(as(matrix(0, 0, 0), "dMatrix"), "symmetricMatrix"), "packedMatrix") )
+  return(as(as(as(matrix(0.0, 0L, 0L), "dMatrix"),
+               "symmetricMatrix"), "packedMatrix"))
 }
 
 
@@ -68,15 +70,14 @@ setClass(
   validity = function(object) {
     if (is_empty(object@raw)) {
       stop("'raw' is empty")
-    }
-    else if (is_empty(object@metaGenes)) { #run the test only at the beginning
+    } else if (is_empty(object@metaGenes)) { #run the test only at the beginning
       if (anyNA(object@raw)) {
         stop("Input 'raw' data contains NA!")
       }
-      if (isFALSE(all.equal(object@raw, round(object@raw), tolerance = 0))) {
+      if (isFALSE(all.equal(object@raw, round(object@raw), tolerance = 0.0))) {
         stop("Input 'raw' data contains non integer numbers.")
       }
-      if (any(object@raw < 0)) {
+      if (any(object@raw < 0.0)) {
         stop("Input 'raw' data must contain only non negative integers.")
       }
     }
@@ -112,57 +113,56 @@ setClass(
     # metaDataset has no required fields as of now
 
     if (!is_empty(object@metaGenes) && nrow(object@metaGenes) != numGenes) {
-      stop(paste0("The number of rows [", nrow(object@metaGenes),
-                  "] of 'metaGenes' must be the same",
-                  " as the number of rows [", numGenes,
-                  "]  of 'raw' when not empty."))
+      stop("The number of rows [", nrow(object@metaGenes), "] of 'metaGenes'",
+           " must be the same as the number of rows [", numGenes, "] of 'raw'",
+           " when not empty.")
     }
 
     if (!is_empty(object@metaCells) && nrow(object@metaCells) != numCells) {
-      stop(paste0("The number of rows [", nrow(object@metaCells),
-                  "] of 'metaCells' must be the same",
-                  " as the number of cols [", numCells,
-                  "]  of 'raw' when not empty."))
+      stop("The number of rows [", nrow(object@metaCells), "] of 'metaCells'",
+           " must be the same as the number of cols [", numCells, "] of 'raw'",
+           " when not empty.")
     }
 
     for (name in names(object@clustersCoex)) {
-      if (substring(name, 1, 3) != "CL_") {
-        stop(paste0("The clusterization name '", name, "' does not start",
-                    " with 'CL_' as per conventions"))
+      if (substring(name, 1L, 3L) != "CL_") {
+        stop("The clusterization name '", name, "' does not start",
+             " with 'CL_' as per conventions")
       }
       if (!name %in% colnames(object@metaCells)) {
-        stop(paste0("The clusterization name '", name, "', found in 'clustersCoex',",
-                    " must be one of the column names of 'metaCells'."))
+        stop("The clusterization name '", name, "', found in 'clustersCoex',",
+             " must be one of the column names of 'metaCells'.")
       }
       coexDF <- object@clustersCoex[[name]]
       if (!is_empty(coexDF)) {
         if (!isa(coexDF, "data.frame")) {
-          stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
-                      " A '", class(coexDF), "' was given instead." ))
+          stop("'clusterCoex' is supposedly composed of data.frames.",
+               " A '", class(coexDF), "' was given instead.")
         }
         if (!identical(rownames(coexDF), rownames(object@raw))) {
-          stop(paste0("The row-names of the non-empty data.frames in",
-                      " 'clustersCoex' must be the same as those of the raw data."))
+          stop("The row-names of the non-empty data.frames in 'clustersCoex'",
+               " must be the same as those of the raw data.")
         }
         if (!all(colnames(coexDF) %in% object@metaCells[[name]])) {
-          badClustersTags <- colnames(coexDF)[!colnames(coexDF) %in% object@metaCells[[name]]]
-          stop(paste0("The column names of the data.frames in 'clustersCoex' must",
-                      " be a subset of the tags in the clusterization.",
-                      " The data.frame for clusterization '", name, "' does not",
-                      " satisfy this condition with the names [",
-                      paste(badClustersNames, collapse = ","), "] vs cluster tags [",
-                      paste(unique(object@metaCells[[name]]), collapse = ","), "]."))
+          badClustersTags <- colnames(coexDF)[!colnames(coexDF) %in%
+                                                object@metaCells[[name]]]
+          stop("The column names of the data.frames in 'clustersCoex' must be",
+               " a subset of the tags in the clusterization.",
+               " The data.frame for clusterization '", name, "' does not",
+               " satisfy this condition with the names [",
+               paste(badClustersNames, collapse = ","), "] vs cluster tags [",
+               paste(unique(object@metaCells[[name]]), collapse = ","), "].")
         }
       }
     }
 
     for (name in colnames(object@metaCells)) {
-      if (substring(name, 1, 3) != "CL_") {
+      if (substring(name, 1L, 3L) != "CL_") {
         next # not a clusterization name
       }
       if (!name %in% names(object@clustersCoex)) {
-        stop(paste0("The clusterization name '", name, "' does not have",
-                    " an element in the 'clusterCoex' list"))
+        stop("The clusterization name '", name, "' does not have",
+             " an element in the 'clusterCoex' list")
       }
     }
 
@@ -181,6 +181,7 @@ setClass(
 #' @returns a `COTAN` object
 #'
 #' @importFrom methods new
+#' @importFrom assertthat assert_that
 #'
 #' @importClassesFrom Matrix dgCMatrix
 #'
@@ -194,8 +195,8 @@ setClass(
 COTAN <- function(raw = "ANY") {
   raw <- as(as(raw, "Matrix"), "sparseMatrix")
 
-  stopifnot("Inputs must have both row and column names!"
-            <- (!is_empty(rownames(raw)) && !is_empty(colnames(raw))))
+  assert_that(!is_empty(rownames(raw)), !is_empty(colnames(raw)),
+              msg = "Inputs must have both row and column names!")
 
   new("COTAN", raw = raw)
 }
@@ -238,7 +239,7 @@ setClass(
     hk = "vector",
     n_cells = "numeric",
     meta = "data.frame",
-    yes_yes = "ANY", # Unused and deprecated: kept for backward compatibility only
+    yes_yes = "ANY", # Unused and deprecated: for backward compatibility only
     clusters = "vector",
     cluster_data = "data.frame"
   )
@@ -257,6 +258,7 @@ setClass(
 #' @importFrom rlang is_empty
 #'
 #' @importFrom stringr str_remove
+#' @importFrom stringr fixed
 #'
 #' @importClassesFrom Matrix dgCMatrix
 #' @importClassesFrom Matrix dspMatrix
@@ -268,39 +270,37 @@ setClass(
 #'
 getCOTANSlots <- function(from) {
   if (!is_empty(from@yes_yes)) {
-    warning(paste0("scCOTAN as COTAN: non-empty yes_yes member found -",
-                   " Will be discarded!"),
+    warning("scCOTAN as COTAN: non-empty yes_yes member found -",
+            " Will be discarded!",
             call. = FALSE)
   }
 
   if (from@n_cells != ncol(from@raw)) {
-    warning(paste0("scCOTAN as COTAN: n_cells member misaligned",
-                   " with raw matrix member - Will be ignored!"),
+    warning("scCOTAN as COTAN: n_cells member misaligned",
+            " with raw matrix member - Will be ignored!",
             call. = FALSE)
   }
 
   if (is_empty(from@raw)) {
-    raw = emptySparseMatrix()
-  } else if(isa(from@raw, "dgCMatrix")) {
-    raw = from@raw
+    raw <- emptySparseMatrix()
+  } else if (isa(from@raw, "dgCMatrix")) {
+    raw <- from@raw
   } else {
-    raw = as(as(as(as.matrix(from@raw), "dMatrix"), "generalMatrix"), "CsparseMatrix")
+    raw <- as(as(as(as.matrix(from@raw), "dMatrix"),
+                 "generalMatrix"), "CsparseMatrix")
   }
 
   genesCoex <- emptySymmetricMatrix()
   if (!is_empty(from@coex)) {
     if (isa(from@coex, "list")) {
       genesCoex <- vec2mat_rfast(from@coex)
-    }
-    else if(isa(from@coex, "dMatrix")) {
+    } else if (isa(from@coex, "dMatrix")) {
       genesCoex <- as.matrix(from@coex)
-    }
-    else if(isa(from@coex, "matrix")) {
+    } else if (isa(from@coex, "matrix")) {
       genesCoex <- from@coex
-    }
-    else {
-      warning(paste0("scCOTAN as COTAN: unsupported coex type '", class(from@coex),
-                     "' - genes' coex will be discarded!"), call. = FALSE)
+    } else {
+      warning("scCOTAN as COTAN: unsupported coex type '", class(from@coex),
+              "' - genes' coex will be discarded!", call. = FALSE)
       genesCoex <- emptySymmetricMatrix()
     }
     # now 'coex' is of type 'matrix'
@@ -345,47 +345,48 @@ getCOTANSlots <- function(from) {
     clusterData <- from@cluster_data
 
     if (!hasClusters && !is_empty(clusterData)) {
-      warning(paste0("scCOTAN as COTAN: cannot have 'cluster_data' along",
-                     " empty 'clusters' - genes' coex will be discarded!"),
+      warning("scCOTAN as COTAN: cannot have 'cluster_data' along",
+              " empty 'clusters' - genes' coex will be discarded!",
               call. = FALSE)
-      clusterData = data.frame()
+      clusterData <- data.frame()
     }
 
     if (!is_empty(clusterData) &&
         !all(rownames(clusterData) %in% rownames(from@raw))) {
-      warning(paste0("scCOTAN as COTAN: 'cluster_data' refers to unknown genes",
-                     " - clusters' coex will be discarded!"), call. = FALSE)
-      clusterData = data.frame()
+      warning("scCOTAN as COTAN: 'cluster_data' refers to unknown genes",
+              " - clusters' coex will be discarded!", call. = FALSE)
+      clusterData <- data.frame()
     }
 
     if (!is_empty(clusterData)) {
       if (!all(colnames(clusterData) %in% from@clusters)) {
         # It might be possible that the column names have the old extra
         # prefix 'cl.'. It will be remove in such cases.
-        colnames(clusterData) <- str_remove(colnames(clusterData), pattern = "cl\\.")
+        colnames(clusterData) <- str_remove(colnames(clusterData),
+                                            pattern = fixed("cl."))
       }
 
       if (!all(colnames(clusterData) %in% from@clusters)) {
-        warning(paste0("scCOTAN as COTAN: 'cluster_data' refers to unknown",
-                       " clusters - clusters' coex will be discarded!"),
+        warning("scCOTAN as COTAN: 'cluster_data' refers to unknown",
+                " clusters - clusters' coex will be discarded!",
                 call. = FALSE)
-        clusterData = data.frame()
+        clusterData <- data.frame()
       }
     }
 
     if (!is_empty(clusterData) &&
         !all(rownames(from@raw) %in% union(rownames(clusterData), from@hk))) {
-      warning(paste0("scCOTAN as COTAN: 'cluster_data' has no information on",
-                     " some genes that are not housekeeping",
-                     " - clusters' coex will be discarded!"), call. = FALSE)
-      clusterData = data.frame()
+      warning("scCOTAN as COTAN: 'cluster_data' has no information",
+              " on some genes that are not housekeeping",
+              " - clusters' coex will be discarded!", call. = FALSE)
+      clusterData <- data.frame()
     }
 
     if (!is_empty(clusterData)) {
       missingGenes <- setdiff(rownames(from@raw), rownames(clusterData))
       if (!is_empty(missingGenes)) {
         # missing genes are housekeeping thus have all zero coex!
-        missingData <- matrix(0, nrow = length(missingGenes),
+        missingData <- matrix(0.0, nrow = length(missingGenes),
                               ncol = ncol(clusterData),
                               dimnames = c(missingGenes, colnames(clusterData)))
         clusterData <- rbind(clusterData, as.data.frame(missingData))
@@ -393,8 +394,7 @@ getCOTANSlots <- function(from) {
         clusterData <- clusterData[rownames(from@raw)]
       }
       clustersCoex <- list(CL_clusters = clusterData)
-    }
-    else if (hasClusters) {
+    } else if (hasClusters) {
       # keep aligned
       clustersCoex <- list("CL_clusters" = data.frame())
     }
@@ -430,7 +430,7 @@ setIs("scCOTAN",
             metaDataset  = from@meta,
             metaGenes    = metaGenes,
             metaCells    = metaCells,
-            clustersCoex = clustersCoex )
+            clustersCoex = clustersCoex)
       },
       # 'from' arg-name is convention: it is actually a destination!
       replace = function(from, value) {
@@ -444,8 +444,9 @@ setIs("scCOTAN",
         from@metaGenes    <- metaGenes
         from@metaCells    <- metaCells
         from@clustersCoex <- clustersCoex
-        from}
-      ) # end setIs
+        from
+      }
+     ) # end setIs
 
 
 #' getScCOTANSlots
@@ -489,21 +490,21 @@ getScCOTANSlots <- function(from) {
     hk <- rownames(from@raw)[from@metaGenes[["hkGenes"]]]
   }
 
-  raw.norm <- emptySparseMatrix()
+  rawNorm <- emptySparseMatrix()
   if (!is_empty(nu)) {
-    raw.norm <- t(t(from@raw) * (1/nu))
+    rawNorm <- t(t(from@raw) * (1.0 / nu))
   }
 
   if (!is_empty(from@clustersCoex)) {
-    if (length(from@clustersCoex) > 1) {
-      warning(paste0("The 'COTAN' object contains more than one clusterization:",
-                     "picking up the last one as likely to be the most relevant"))
+    if (length(from@clustersCoex) > 1L) {
+      warning("COTAN as scCOTAN: more than one clusterization found:",
+              "picking up the last one as likely to be the most relevant")
     }
     clName <- names(from@clustersCoex)[length(from@clustersCoex)]
-    cluster_data <- from@clustersCoex[[clName]]
+    clusterData <- from@clustersCoex[[clName]]
   } else {
     clName <- "CL_clusters"
-    cluster_data <- data.frame()
+    clusterData <- data.frame()
   }
 
   if (!is_empty(from@metaCells[[clName]])) {
@@ -514,10 +515,11 @@ getScCOTANSlots <- function(from) {
   }
 
   if (!is_empty(from@cellsCoex)) {
-    warning("'cellsCoex' is not empty: will be lost in conversion to 'scCOTAN'")
+    warning("COTAN as scCOTAN: 'cellsCoex' is not empty:",
+            " will be lost in conversion")
   }
 
-  return(list(raw.norm, nu, lambda, a, hk, clusters, cluster_data))
+  return(list(rawNorm, nu, lambda, a, hk, clusters, clusterData))
 }
 
 #' setAs(): `COTAN` -> `scCOTAN`
@@ -537,12 +539,12 @@ getScCOTANSlots <- function(from) {
 setAs("COTAN",
       "scCOTAN",
       function(from) {
-        c(raw.norm, nu, lambda, a,
-          hk, clusters, cluster_data) %<-% getScCOTANSlots(from)
+        c(rawNorm, nu, lambda, a,
+          hk, clusters, clusterData) %<-% getScCOTANSlots(from)
 
         new("scCOTAN",
             raw          = from@raw,
-            raw.norm     = raw.norm,
+            raw.norm     = rawNorm,
             coex         = from@genesCoex,
             nu           = nu,
             lambda       = lambda,
@@ -551,15 +553,15 @@ setAs("COTAN",
             n_cells      = ncol(from@raw),
             meta         = from@metaDataset,
             clusters     = clusters,
-            cluster_data = cluster_data)
+            cluster_data = clusterData)
       },
       # 'from' arg-name is convention: it is actually a destination!
       replace = function(from, value) {
-        c(raw.norm, nu, lambda, a,
-          hk, clusters, cluster_data) %<-% getScCOTANSlots(value)
+        c(rawNorm, nu, lambda, a,
+          hk, clusters, clusterData) %<-% getScCOTANSlots(value)
 
         from@raw          <- value@raw
-        from@raw.norm     <- raw.norm
+        from@raw.norm     <- rawNorm
         from@coex         <- value@genesCoex
         from@nu           <- nu
         from@lambda       <- lambda
@@ -568,6 +570,7 @@ setAs("COTAN",
         from@n_cells      <- ncol(value@raw)
         from@meta         <- value@metaDataset
         from@clusters     <- clusters
-        from@cluster_data <- cluster_data
-        from}
-      ) # end setAs
+        from@cluster_data <- clusterData
+        from
+      }
+     ) # end setAs

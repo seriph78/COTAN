@@ -21,7 +21,7 @@
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.
 #'
-#' @returns the new clusterization
+#' @returns a `list` with "clusters", "coexDF" and "pValueDF"
 #'
 #' @export
 #'

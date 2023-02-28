@@ -134,20 +134,11 @@ setMethod(
 setMethod(
   "estimateDispersionBisection",
   "COTAN",
-  function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 100, chunkSize = 1024) {
+  function(objCOTAN, threshold = 0.001, cores = 1L,
+           maxIterations = 100L, chunkSize = 1024L) {
     logThis("Estimate dispersion: START", logLevel = 2)
 
-    cores <- max(1, cores)
-    if (!supportsMulticore() && cores != 1) {
-      warning(paste0("On this system multicore is not supported;",
-                     " this can happen on some systems like 'windows'.",
-                     "The number of cores used will be set 1!"))
-      cores <- 1
-    }
-    cores <- min(cores, availableCores(omit = 1))
-
-    logThis(paste("Effective number of cores used:", cores), logLevel = 3)
+    cores <- handleMultiCore(cores)
 
     genes <- getGenes(objCOTAN)
     sumZeros <- set_names(getNumCells(objCOTAN) -
@@ -277,20 +268,11 @@ setMethod(
 setMethod(
   "estimateNuBisection",
   "COTAN",
-  function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 100, chunkSize = 1024) {
+  function(objCOTAN, threshold = 0.001, cores = 1L,
+           maxIterations = 100L, chunkSize = 1024L) {
     logThis("Estimate nu: START", logLevel = 2)
 
-    cores <- max(1, cores)
-    if (!supportsMulticore() && cores != 1) {
-      warning(paste0("On this system multicore is not supported;",
-                     " this can happen on some systems like 'windows'.",
-                     "The number of cores used will be set 1!"))
-      cores <- 1
-    }
-    cores <- min(cores, availableCores(omit = 1))
-
-    logThis(paste("Effective number of cores used:", cores), logLevel = 3)
+    cores <- handleMultiCore(cores)
 
     # parameters estimation
     if (is_empty(getNu(objCOTAN))) {
@@ -425,8 +407,8 @@ setMethod(
 setMethod(
   "estimateDispersionNuBisection",
   "COTAN",
-  function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 100, chunkSize = 1024,
+  function(objCOTAN, threshold = 0.001, cores = 1L,
+           maxIterations = 100L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
 
@@ -529,8 +511,9 @@ setMethod(
 setMethod(
   "estimateDispersionNuNlminb",
   "COTAN",
-  function(objCOTAN, threshold = 0.001, maxIterations = 100,
-           chunkSize = 1024, enforceNuAverageToOne = TRUE) {
+  function(objCOTAN, threshold = 0.001,
+           maxIterations = 50L, chunkSize = 1024L,
+           enforceNuAverageToOne = TRUE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
 
     # getNu() would show a warning when no 'nu' present

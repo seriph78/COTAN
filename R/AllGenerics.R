@@ -1,8 +1,9 @@
 
 setGeneric(
   "proceedToCoex",
-  function(objCOTAN, cores, saveObj = TRUE, outDir = ".")
+  function(objCOTAN, cores, saveObj = TRUE, outDir = ".") {
     standardGeneric("proceedToCoex")
+  }
 )
 
 # -------------------------------------- calculate coex
@@ -14,8 +15,9 @@ setGeneric(
 
 setGeneric(
   "calculateCoex",
-  function(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
+  function(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE) {
     standardGeneric("calculateCoex")
+  }
 )
 
 #-------------------------------------- getters
@@ -127,26 +129,28 @@ setGeneric(
 
 setGeneric(
   "getGenesCoex",
-  function(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
+  function(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
     standardGeneric("getGenesCoex")
+  }
 )
 
 setGeneric(
   "getCellsCoex",
-  function(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
+  function(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
     standardGeneric("getCellsCoex")
+  }
 )
 
 setGeneric(
   "getClusterizations",
-  function(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE)
+  function(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE) {
     standardGeneric("getClusterizations")
+  }
 )
 
 setGeneric(
   "getClusterizationData",
-  function(objCOTAN, clName = NULL)
-    standardGeneric("getClusterizationData")
+  function(objCOTAN, clName = NULL) standardGeneric("getClusterizationData")
 )
 
 setGeneric(
@@ -190,7 +194,9 @@ setGeneric(
 
 setGeneric(
   "addClusterization",
-  function(objCOTAN, clName, clusters, coexDF = NULL) standardGeneric("addClusterization")
+  function(objCOTAN, clName, clusters, coexDF = NULL) {
+    standardGeneric("addClusterization")
+  }
 )
 
 setGeneric(
@@ -226,28 +232,34 @@ setGeneric(
 
 setGeneric(
   "estimateDispersionBisection",
-  function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 50, chunkSize = 1024)
+  function(objCOTAN, threshold = 0.001, cores = 1L,
+           maxIterations = 50L, chunkSize = 1024L) {
     standardGeneric("estimateDispersionBisection")
+  }
 )
 
 setGeneric(
   "estimateNuBisection",
-  function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 50, chunkSize = 1024)
+  function(objCOTAN, threshold = 0.001, cores = 1L,
+           maxIterations = 50L, chunkSize = 1024L) {
     standardGeneric("estimateNuBisection")
+  }
 )
 
 setGeneric(
   "estimateDispersionNuBisection",
-  function(objCOTAN, threshold = 0.001, cores = 1,
-           maxIterations = 50, chunkSize = 1024, enforceNuAverageToOne = TRUE)
+  function(objCOTAN, threshold = 0.001, cores = 1L,
+           maxIterations = 50L, chunkSize = 1024L,
+           enforceNuAverageToOne = TRUE) {
     standardGeneric("estimateDispersionNuBisection")
+  }
 )
 
 setGeneric(
   "estimateDispersionNuNlminb",
-  function(objCOTAN, threshold = 0.001, maxIterations = 100,
-           chunkSize = 1024, enforceNuAverageToOne = TRUE)
+  function(objCOTAN, threshold = 0.001,
+           maxIterations = 50L, chunkSize = 1024L,
+           enforceNuAverageToOne = TRUE) {
     standardGeneric("estimateDispersionNuNlminb")
+  }
 )

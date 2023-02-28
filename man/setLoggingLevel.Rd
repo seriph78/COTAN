@@ -2,50 +2,32 @@
 % Please edit documentation in R/utilities.R
 \name{setLoggingLevel}
 \alias{setLoggingLevel}
-\alias{setLoggingFile}
 \title{setLoggingLevel}
 \usage{
-setLoggingLevel(newLevel = 1)
-
-setLoggingFile(fileNm = "./COTAN.log")
+setLoggingLevel(newLevel = 1L)
 }
 \arguments{
 \item{newLevel}{the new default logging level. It defaults to 1}
-
-\item{filename}{the log file. Defaults to \code{./COTAN.log}}
 }
 \value{
 old logging level or default level if not set yet.
 }
 \description{
 Set the \code{COTAN} logging level
-
-Set the log file for all \code{COTAN} output logs.
 }
 \details{
-It set the \code{COTAN.LogLevel} options to uno of the following values:
+It set the \code{COTAN.LogLevel} options to one of the following values:
 \itemize{
 \item 0 - Always on log messages.
 \item 1 - Major log messages.
 \item 2 - Minor log messages.
 \item 3 - All log messages.
 }
-
-By default no logging happens on a file (only on the console). Using
-this function \code{COTAN} will use the indicated file to dump the logs produced
-by all \code{\link[=logThis]{logThis()}} commands, independently from the log level.
-
-It stores the \code{connection} created by the call to \code{\link[=bzfile]{bzfile()}} in the option:
-\code{COTAN.LogFile}
 }
 \examples{
 setLoggingLevel(3) # for debugging purposes only
 
-setLoggingFile('./COTAN_Test1.log') # for debugging purposes only
-
 }
 \seealso{
-\code{\link[=logThis]{logThis()}}
-
 \code{\link[=logThis]{logThis()}}
 }

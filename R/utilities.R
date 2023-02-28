@@ -2,7 +2,7 @@
 #'
 #' @description Set the `COTAN` logging level
 #'
-#' @details It set the `COTAN.LogLevel` options to uno of the following values:
+#' @details It set the `COTAN.LogLevel` options to one of the following values:
 #'   * 0 - Always on log messages.
 #'   * 1 - Major log messages.
 #'   * 2 - Minor log messages.
@@ -20,11 +20,11 @@
 #'
 #' @rdname setLoggingLevel
 #'
-setLoggingLevel <- function(newLevel = 1) {
-  message(paste0("Setting new log level to ", newLevel))
+setLoggingLevel <- function(newLevel = 1L) {
+  message("Setting new log level to ", newLevel)
   oldLevel <- options(COTAN.LogLevel = newLevel)
   if (is.null(oldLevel)) {
-    oldLevel <- 1
+    oldLevel <- 1L
   }
   return(invisible(oldLevel))
 }
@@ -43,26 +43,29 @@ setLoggingLevel <- function(newLevel = 1) {
 #'
 #' @seealso [logThis()]
 #'
-#' @param filename the log file. Defaults to `./COTAN.log`
+#' @param logFileName the log file.
 #'
 #' @export
 #'
 #' @examples
 #' setLoggingFile('./COTAN_Test1.log') # for debugging purposes only
 #'
-#' @rdname setLoggingLevel
+#' @rdname setLoggingFile
 #'
-setLoggingFile <- function(fileNm = "./COTAN.log") {
-  message(paste0("Setting log file to be: ", fileNm))
-  emptyName <- !(length(fileNm) && any(nzchar(fileNm)))
-  if (emptyName) {
-    oldFile <- options(COTAN.LogFile = NULL)
-  } else {
-    oldFile <- options(COTAN.LogFile = file(fileNm, open = "at"))
+setLoggingFile <- function(logFileName) {
+  currentFile <- getOption("COTAN.LogFile")
+  if (!is.null(currentFile)) {
+    message("Closing previous log file - ", appendLF = FALSE)
+    flush(currentFile)
+    close(currentFile)
   }
-  oldFile <- oldFile[["COTAN.LogFile"]]
-  if (!is.null(oldFile)) {
-    close(oldFile)
+
+  message("Setting log file to be: ", logFileName)
+  emptyName <- !(length(logFileName) && any(nzchar(logFileName)))
+  if (emptyName) {
+    options(COTAN.LogFile = NULL)
+  } else {
+    options(COTAN.LogFile = file(logFileName, open = "at"))
   }
 }
 
@@ -86,12 +89,13 @@ setLoggingFile <- function(fileNm = "./COTAN.log") {
 #' @export
 #'
 #' @examples
-#' logThis("LogLevel 0 messages will always show, ", logLevel = 0, appendLF = FALSE)
+#' logThis("LogLevel 0 messages will always show, ",
+#'         logLevel = 0, appendLF = FALSE)
 #' suppressMessages(logThis("unless all messages are suppressed", logLevel = 0))
 #'
 #' @rdname logThis
 #'
-logThis <- function(msg, logLevel = 2, appendLF = TRUE) {
+logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
   # write to log file if any
   currentFile <- getOption("COTAN.LogFile")
   if (!is.null(currentFile)) {
@@ -105,9 +109,56 @@ logThis <- function(msg, logLevel = 2, appendLF = TRUE) {
   currentLevel <- getOption("COTAN.LogLevel")
   showMessage <- currentLevel >= logLevel
   if (showMessage) {
-    message(msg, appendLF= appendLF)
+    message(msg, appendLF = appendLF)
   }
   return(invisible(showMessage))
+}
+
+#' handleMultiCore
+#'
+#' @description Check whether session supports multi-core evaluation and
+#'   provides an effective upper bound to the number of cores.
+#'
+#' @details It uses [supportsMulticore()] and [availableCores()] from the
+#'   package `parallelly` to actually check whether the session supports
+#'   multi-core evaluation.
+#'
+#' @seealso the help page of [supportsMulticore()] about the flags influencing
+#'   the multi-core support; e.g. the usage of `R` option
+#'   `parallelly.fork.enable`.
+#'
+#' @param cores the number of cores asked for
+#'
+#' @returns the maximum sensible number of cores to use
+#'
+#' @importFrom parallelly availableCores
+#' @importFrom parallelly supportsMulticore
+#'
+#' @examples
+#' cores <- handleMultiCore(cores = 12)
+#'
+#' @rdname handleMultiCore
+#'
+handleMultiCore <- function(cores) {
+  cores <- max(1L, cores)
+
+  if (!supportsMulticore() && cores != 1L) {
+    if (is.null(getOption("COTAN.MultiCoreWarning"))) {
+      warning("On this system multi-core is not currently supported;",
+              " this can happen on some systems like 'windows'.\n",
+              " In case you can try 'options(parallelly.fork.enable = TRUE)'",
+              " to enable multi-core support.\n",
+              " The number of cores used will be set 1!")
+    }
+    options(COTAN.MultiCoreWarning = "Published")
+    cores <- 1L
+  }
+
+  cores <- min(cores, availableCores(omit = 1L))
+
+  logThis(paste("Effective number of cores used:", cores), logLevel = 3L)
+
+  return(cores)
 }
 
 
@@ -123,6 +174,7 @@ logThis <- function(msg, logLevel = 2, appendLF = TRUE) {
 #'   names' list
 #'
 #' @importFrom rlang is_empty
+#' @importFrom assertthat assert_that
 #'
 #' @noRd
 #'
@@ -130,8 +182,10 @@ handleNamesSubsets <- function(names, subset = c()) {
   if (is_empty(subset)) {
     subset <- names
   } else {
-    stopifnot("Passed genes are not a subset of the full list" <- all(subset %in% names))
-    subset = names[names %in% subset]
+    assert_that(all(subset %in% names),
+                msg = "Passed genes are not a subset of the full list")
+
+    subset <- names[names %in% subset]
   }
   return(subset)
 }
@@ -162,7 +216,7 @@ handleNamesSubsets <- function(names, subset = c()) {
 #' @rdname setColumnInDF
 #'
 setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
-  if(is_empty(df)) {
+  if (is_empty(df)) {
     df <- set_names(data.frame(colToSet), colName)
   } else {
     if (colName %in% colnames(df)) {
@@ -217,10 +271,11 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #'   cluster are grouped together as the last group.
 #'
 #' @examples
-#' clusters <- set_names(paste0("",sample(7, 100, replace = TRUE)),
-#'                       formatC(1:100,  width = 3, flag = "0"))
+#' ## create a clusterization
+#' clusters <- paste0("",sample(7, 100, replace = TRUE))
+#' names(clusters) <- paste0("E_",formatC(1:100,  width = 3, flag = "0"))
 #'
-#' ## create a clusters list froma clusterization
+#' ## create a clusters list from a clusterization
 #' clustersList <- toClustersList(clusters)
 #' head(clustersList, 1)
 #'
@@ -235,9 +290,9 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #' is.unsorted(head(names(clusters)[perm],cl1Size))
 #' head(clusters[perm], cl1Size)
 #'
-#' # it is possible to have the list of the element names different
-#' # from the names in the clusters list
-#' selectedNames <- formatC(11:110,  width = 3, flag = "0")
+#' ## it is possible to have the list of the element names different
+#' ## from the names in the clusters list
+#' selectedNames <- paste0("E_",formatC(11:110,  width = 3, flag = "0"))
 #' perm2 <- groupByClustersList(selectedNames, toClustersList(clusters))
 #' all.equal(perm2[91:100], c(91:100))
 #'
@@ -246,11 +301,13 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
+#' @importFrom assertthat assert_that
 #'
 #' @rdname ClustersList
 #'
 toClustersList <- function(clusters) {
-  stopifnot("passed clusterization has no names" <- !is_empty(names(clusters)))
+  assert_that(!is_empty(names(clusters)),
+              msg = "passed clusterization has no names")
 
   clustersNames <- levels(factor(clusters))
 
@@ -269,6 +326,7 @@ toClustersList <- function(clusters) {
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
+#' @importFrom assertthat assert_that
 #'
 #' @rdname ClustersList
 #'
@@ -276,7 +334,8 @@ fromClustersList <- function(clustersList, elemNames = c(),
                              throwOnOverlappingClusters = TRUE) {
   clustersNames <- names(clustersList)
 
-  stopifnot("passed clusterization has no names" <- !is_empty(clustersNames))
+  assert_that(!is_empty(clustersNames),
+              msg = "Passed clusterization has no names")
 
   if (is_empty(elemNames)) {
     elemNames <- unlist(clustersList, use.names = FALSE)
@@ -287,9 +346,9 @@ fromClustersList <- function(clustersList, elemNames = c(),
   for (clName in clustersNames) {
     cluster <- clustersList[[clName]]
     cluster <- cluster[cluster %in% elemNames]
-    stopifnot("Found overlapping clusters" <-
-                (!throwOnOverlappingClusters ||
-                   all(clusters[cluster] == "not_clustered")))
+    assert_that((!throwOnOverlappingClusters ||
+                   all(clusters[cluster] == "not_clustered")),
+                msg = "Found overlapping clusters")
     clusters[cluster] <- clName
   }
 
@@ -300,21 +359,22 @@ fromClustersList <- function(clustersList, elemNames = c(),
 #' @export
 #'
 #' @importFrom rlang is_empty
+#' @importFrom assertthat assert_that
 #'
 #' @rdname ClustersList
 #'
 groupByClustersList <- function(elemNames, clustersList,
                                 throwOnOverlappingClusters = TRUE) {
-  stopifnot("passed no elemNames" <- !is_empty(elemNames))
-  stopifnot("passed no clustersList" <- !is_empty(clustersList))
+  assert_that(!is_empty(elemNames), msg = "passed no elemNames")
+  assert_that(!is_empty(clustersList), msg = "passed no clustersList")
 
   positions <- c()
 
   for (cluster in clustersList) {
     clPos <- which(elemNames %in% cluster)
     # clPos should be already sorted
-    stopifnot("Found overlapping clusters" <-
-                !(throwOnOverlappingClusters && any(clPos %in% positions)))
+    assert_that(!throwOnOverlappingClusters || !any(clPos %in% positions),
+                msg = "Found overlapping clusters")
     positions <- append(positions, clPos)
   }
 
@@ -347,9 +407,10 @@ groupByClusters <- function(clusters) {
 #'   \eqn{(1 + d \mu)^{-\frac{1}{d}}}{(1 + `disp` * `mu`)^(-1 / `disp`)}
 #'   when \eqn{d > 0}{`disp > 0`} and
 #'   \eqn{\exp{((d - 1) \mu)}}{exp((`disp` - 1) * `mu`)} otherwise.
-#'   The function is continuous in \eqn{d = 0}{`disp = 0`}, increasing in \eqn{d}{`disp`}
-#'   and decreasing in \eqn{\mu}{`mu`}. It returns 0 when
-#'   \eqn{d = -\infty}{`disp = -Inf`} or \eqn{\mu = \infty}{`mu = Inf`}.
+#'   The function is continuous in \eqn{d = 0}{`disp = 0`},
+#'   increasing in \eqn{d}{`disp`} and decreasing in \eqn{\mu}{`mu`}.
+#'   It returns 0 when \eqn{d = -\infty}{`disp = -Inf`} or
+#'   \eqn{\mu = \infty}{`mu = Inf`}.
 #'   It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
 #'
 #' @param disp the estimated dispersion (can be a 𝑛-sized vector)
@@ -360,10 +421,10 @@ groupByClusters <- function(clusters) {
 #' @rdname funProbZero
 #'
 funProbZero <- function(disp, mu) {
-  neg <- disp <= 0
+  neg <- (disp <= 0.0)
   ad <- abs(disp)
-  return( ( neg) * (exp(-(1 + ad) * mu)) +
-          (!neg) * (1 + ad * mu)^(-1 / ad) )
+  return(( neg) * (exp(-(1.0 + ad) * mu)) +
+         (!neg) * (1.0 + ad * mu)^(-1.0 / ad))
 }
 
 
@@ -391,8 +452,8 @@ dispersionBisection <-
            lambda,
            nu,
            threshold = 0.001,
-           maxIterations = 100) {
-  if (sumZeros == 0){
+           maxIterations = 100L) {
+  if (sumZeros == 0L) {
     # cannot match exactly zero prob of zeros with finite values
     return(-Inf)
   }
@@ -400,36 +461,36 @@ dispersionBisection <-
 
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
-  disp1 <- 0
+  disp1 <- 0.0
   diff1 <- sum(funProbZero(disp1, mu)) - sumZeros
   if (abs(diff1) <= threshold) {
     return(disp1)
   }
 
-  disp2 <- -1 * sign(diff1) # we assume error is an increasing function of disp
-  iter <- 1
+  disp2 <- -1.0 * sign(diff1) # we assume error is an increasing function of disp
+  iter <- 1L
   repeat {
     diff2 <- sum(funProbZero(disp2, mu)) - sumZeros
 
-    if (diff2 * diff1 < 0) {
+    if (diff2 * diff1 < 0.0) {
       break
     }
 
     if (iter >= maxIterations) {
-      stop(paste("Max number of iterations reached",
-                 "while finding the solution straddling intervals"))
+      stop("Max number of iterations reached ",
+           "while finding the solution straddling intervals")
     }
-    iter <- iter + 1
+    iter <- iter + 1L
 
-    disp1 <- disp2 # disp2 is closer to producing 0
+    disp1 <- disp2 # disp2 is closer to producing 0.0
 
-    disp2 <- 2 * disp2 # we double at each step
+    disp2 <- 2.0 * disp2 # we double at each step
   }
 
   # once we have found the two bounds to the dispersion value, we use bisection
-  iter <- 1
+  iter <- 1L
   repeat {
-    disp <- (disp1 + disp2) / 2
+    disp <- (disp1 + disp2) / 2.0
 
     diff <- sum(funProbZero(disp, mu)) - sumZeros
 
@@ -438,13 +499,13 @@ dispersionBisection <-
     }
 
     if (iter >= maxIterations) {
-      stop(paste("Max number of iterations reached",
-                 "while finding the solution straddling intervals"))
+      stop("Max number of iterations reached ",
+           "while finding the solution straddling intervals")
     }
-    iter <- iter + 1
+    iter <- iter + 1L
 
     # drop same sign diff point
-    if (diff * diff2 > 0) {
+    if (diff * diff2 > 0.0) {
       disp2 <- disp
     } else {
       disp1 <- disp
@@ -479,17 +540,17 @@ parallelDispersionBisection <-
            lambda,
            nu,
            threshold = 0.001,
-           maxIterations = 100) {
+           maxIterations = 100L) {
   sumZeros <- sumZeros[genes]
   lambda <- lambda[genes]
 
-  goodPos <- sumZeros != 0
+  goodPos <- sumZeros != 0L
 
   # cannot match exactly zero prob of zeros with finite values
   # so we ignore the rows with no zeros from the solver and return -Inf
   output <- rep(-Inf, length(sumZeros))
 
-  if (sum(goodPos) == 0) {
+  if (sum(goodPos) == 0L) {
     return(output)
   }
 
@@ -500,36 +561,38 @@ parallelDispersionBisection <-
 
   # we look for two dispersion values where the first leads to a
   # diffZeros negative and the second positive
-  disps1 <- rep(0, length(sumZeros))
+  disps1 <- rep(0.0, length(sumZeros))
   diffs1 <- rowSums(funProbZero(disps1, mu)) - sumZeros
   if (all(abs(diffs1) <= threshold)) {
-    output[goodPos] <- disp1
+    output[goodPos] <- disps1
     return(output)
   }
 
-  disps2 <- -1 * sign(diffs1) # we assume error is an increasing function of the dispersion
+  # we assume error is an increasing function of the dispersion
+  disps2 <- -1.0 * sign(diffs1)
   diffs2 <- diffs1
   runPos <- rep(TRUE, length(diffs1))
-  iter <- 1
+  iter <- 1L
   repeat {
     diffs2[runPos] <- (rowSums(funProbZero(disps2[runPos],
                                            mu[runPos, , drop = FALSE])) -
                        sumZeros[runPos])
 
-    runPos <- (diffs2 * diffs1 >= 0)
+    runPos <- (diffs2 * diffs1 >= 0.0)
 
     if (!any(runPos)) {
       break
     }
 
     if (iter >= maxIterations) {
-      stop("Max number of iterations reached while finding the solution straddling intervals")
+      stop("Max number of iterations reached while finding",
+           " the solution straddling intervals")
     }
-    iter <- iter + 1
+    iter <- iter + 1L
 
     disps1[runPos] <- disps2[runPos] # disps2 are closer to producing 0
 
-    disps2[runPos] <- 2 * disps2[runPos] # we double at each step
+    disps2[runPos] <- 2.0 * disps2[runPos] # we double at each step
   }
 
   # once we have found the two bounds to the dispersion value, we use bisection
@@ -537,9 +600,9 @@ parallelDispersionBisection <-
   runPos <- rep(TRUE, runNum)
   disps <- disps1
   diffs <- diffs1
-  iter <- 1
+  iter <- 1L
   repeat {
-    disps[runPos] <- (disps1[runPos] + disps2[runPos]) / 2
+    disps[runPos] <- (disps1[runPos] + disps2[runPos]) / 2.0
 
     diffs[runPos] <- (rowSums(funProbZero(disps[runPos],
                                           mu[runPos, , drop = FALSE])) -
@@ -553,10 +616,10 @@ parallelDispersionBisection <-
     if (iter >= maxIterations) {
       stop("Max number of iterations reached while finding the solutions")
     }
-    iter <- iter + 1
+    iter <- iter + 1L
 
     # drop same sign diff point
-    pPos <- runPos & (diffs * diffs2 > 0)
+    pPos <- runPos & (diffs * diffs2 > 0.0)
     disps2[pPos] <- disps[pPos]
 
     nPos <- runPos & !pPos
@@ -593,8 +656,8 @@ nuBisection <-
            dispersion,
            initialGuess,
            threshold = 0.001,
-           maxIterations = 100) {
-  if (sumZeros == 0) {
+           maxIterations = 100L) {
+  if (sumZeros == 0L) {
     # cannot match exactly zero prob of zeros with finite values
     return(Inf)
   }
@@ -607,20 +670,21 @@ nuBisection <-
     return(nu1)
   }
 
-  factor <- 2 ^ sign(diff1)
+  factor <- 2.0 ^ sign(diff1)
   nu2 <- nu1 * factor # we assume error is an decreasing function of nu
-  iter <- 1
+  iter <- 1L
   repeat {
     diff2 <- sum(funProbZero(dispersion, nu2 * lambda)) - sumZeros
 
-    if (diff2 * diff1 < 0) {
+    if (diff2 * diff1 < 0.0) {
       break
     }
 
     if (iter >= maxIterations) {
-      stop("Max number of iterations reached while finding the solution straddling intervals")
+      stop("Max number of iterations reached while ",
+           "finding the solution straddling intervals")
     }
-    iter <- iter + 1
+    iter <- iter + 1L
 
     nu1 <- nu2 # nu2 is closer to producing 0
 
@@ -628,9 +692,9 @@ nuBisection <-
   }
 
   # once we have found the two bounds to the dispersion value, we use bisection
-  iter <- 1
+  iter <- 1L
   repeat {
-    nu <- (nu1 + nu2) / 2
+    nu <- (nu1 + nu2) / 2.0
 
     diff <- sum(funProbZero(dispersion, nu * lambda)) - sumZeros
 
@@ -639,12 +703,13 @@ nuBisection <-
     }
 
     if (iter >= maxIterations) {
-      stop("Max number of iterations reached while finding the solution straddling intervals")
+      stop("Max number of iterations reached while ",
+           "finding the solution straddling intervals")
     }
-    iter <- iter + 1
+    iter <- iter + 1L
 
     # drop same sign diff point
-    if (diff * diff2 > 0) {
+    if (diff * diff2 > 0L) {
       nu2 <- nu
     } else {
       nu1 <- nu
@@ -671,6 +736,8 @@ nuBisection <-
 #'
 #' @returns the dispersion values
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @noRd
 #'
 parallelNuBisection <-
@@ -680,18 +747,19 @@ parallelNuBisection <-
            dispersion,
            initialGuess,
            threshold = 0.001,
-           maxIterations = 100) {
+           maxIterations = 100L) {
   sumZeros <- sumZeros[cells]
   initialGuess <- initialGuess[cells]
 
-  stopifnot("initialGuess must hold only positive values" = all(initialGuess > 0))
+  assert_that(all(initialGuess > 0.0),
+              msg = "initialGuess must hold only positive values")
 
-  goodPos <- sumZeros != 0
+  goodPos <- sumZeros != 0L
 
   # cannot match exactly zero prob of zeros with finite values
   output <- rep(Inf, length(initialGuess))
 
-  if (sum(goodPos) == 0) {
+  if (sum(goodPos) == 0L) {
     return(output)
   }
 
@@ -707,25 +775,28 @@ parallelNuBisection <-
     return(output)
   }
 
-  factors <- 2 ^ sign(diffs1)
-  nus2 <- nus1 * factors # we assume error is an increasing function of the dispersion
+  # we assume error is an increasing function of the dispersion
+  factors <- 2.0 ^ sign(diffs1)
+  nus2 <- nus1 * factors
   diffs2 <- diffs1
   runPos <- rep(TRUE, length(diffs1))
-  iter <- 1
+  iter <- 1L
   repeat {
-    diffs2[runPos] <- (colSums(funProbZero(dispersion, lambda %o% nus2[runPos])) -
+    diffs2[runPos] <- (colSums(funProbZero(dispersion,
+                                           lambda %o% nus2[runPos])) -
                        sumZeros[runPos])
 
-    runPos <- (diffs2 * diffs1 >= 0)
+    runPos <- (diffs2 * diffs1 >= 0.0)
 
     if (!any(runPos)) {
       break
     }
 
     if (iter >= maxIterations) {
-      stop("Max number of iterations reached while finding the solution straddling intervals")
+      stop("Max number of iterations reached while ",
+           "finding the solution straddling intervals")
     }
-    iter <- iter + 1
+    iter <- iter + 1L
 
     nus1[runPos] <- nus2[runPos] # nus2 are closer to producing 0
 
@@ -737,9 +808,9 @@ parallelNuBisection <-
   runPos <- rep(TRUE, runNum)
   nus <- nus1
   diffs <- diffs1
-  iter <- 1
+  iter <- 1L
   repeat {
-    nus[runPos] <- (nus1[runPos] + nus2[runPos]) / 2
+    nus[runPos] <- (nus1[runPos] + nus2[runPos]) / 2.0
 
     diffs[runPos] <- (colSums(funProbZero(dispersion, lambda %o% nus[runPos])) -
                       sumZeros[runPos])
@@ -752,10 +823,10 @@ parallelNuBisection <-
     if (iter >= maxIterations) {
       stop("Max number of iterations reached while finding the solutions")
     }
-    iter <- iter + 1
+    iter <- iter + 1L
 
     # drop same sign diff point
-    pPos <- runPos & (diffs * diffs2 > 0)
+    pPos <- runPos & (diffs * diffs2 > 0.0)
     nus2[pPos] <- nus[pPos]
 
     nPos <- runPos & !pPos
@@ -790,9 +861,9 @@ parallelNuBisection <-
 #'
 cosineDissimilarity <- function(m) {
   m <- as.matrix(t(m))
-  sim <- m / sqrt(rowSums(m^2))
+  sim <- m / sqrt(rowSums(m^2.0))
   sim <- tcrossprod(sim)
-  return(as.dist(1 - sim))
+  return(as.dist(1.0 - sim))
 }
 
 
@@ -832,204 +903,206 @@ cosineDissimilarity <- function(m) {
 #'
 #' @rdname plotTheme
 #'
-plotTheme <- function(plotKind = "common", textSize = 14) {
+plotTheme <- function(plotKind = "common", textSize = 14L) {
   myDarkBlue <- "#3C5488FF"
   ts <- textSize
 
-  basic_theme <- theme(
-    axis.text.x  = element_text(size = ts, angle = 0,  hjust = .5, vjust = .5, face = "plain", colour = myDarkBlue),
-    axis.text.y  = element_text(size = ts, angle = 0,  hjust = 0,  vjust = .5, face = "plain", colour = myDarkBlue),
-    axis.title.x = element_text(size = ts, angle = 0,  hjust = .5, vjust = 0,  face = "plain", colour = myDarkBlue),
-    axis.title.y = element_text(size = ts, angle = 90, hjust = .5, vjust = .5, face = "plain", colour = myDarkBlue) )
+  basicTheme <- theme(
+    axis.text.x  = element_text(size = ts, angle = 0L,  hjust = .5, vjust = .5, face = "plain", colour = myDarkBlue),
+    axis.text.y  = element_text(size = ts, angle = 0L,  hjust = .0, vjust = .5, face = "plain", colour = myDarkBlue),
+    axis.title.x = element_text(size = ts, angle = 0L,  hjust = .5, vjust = .0, face = "plain", colour = myDarkBlue),
+    axis.title.y = element_text(size = ts, angle = 90L, hjust = .5, vjust = .5, face = "plain", colour = myDarkBlue))
 
   if (plotKind == "common") {
-    return(basic_theme)
+    return(basicTheme)
   }
 
   if (plotKind == "pca") {
-    return( basic_theme +
-            theme(legend.title = element_blank(),
-                  legend.text = element_text(size = 12, face = "italic", color = myDarkBlue),
-                  legend.position = "bottom") )
+    return(basicTheme +
+           theme(legend.title = element_blank(),
+                 legend.text = element_text(size = 12L, face = "italic",
+                                            color = myDarkBlue),
+                 legend.position = "bottom"))
   }
 
   if (plotKind == "genes") {
-    return( basic_theme +
-            theme(plot.title = element_text(size = 20, hjust = 0.02, vjust = -10,
-                                            face = "italic", color = myDarkBlue),
-                  plot.subtitle = element_text(vjust = -15, hjust = 0.01,
-                                               color = "darkred")) )
+    return(basicTheme +
+           theme(plot.title = element_text(size = 20L, hjust = 0.02,
+                                           vjust = -10.0, face = "italic",
+                                           color = myDarkBlue),
+                 plot.subtitle = element_text(vjust = -15.0, hjust = 0.01,
+                                              color = "darkred")))
   }
 
   if (plotKind == "UDE") {
-    return( basic_theme +
-            theme(plot.title   = element_text(size = 20, color = myDarkBlue),
-                  legend.title = element_text(size = 14, color = myDarkBlue, face = "italic"),
-                  legend.text  = element_text(size = 11, color = myDarkBlue),
-                  legend.key.width = unit(2, "mm"),
-                  legend.position  ="right") )
+    return(basicTheme +
+           theme(plot.title   = element_text(size = 20L, color = myDarkBlue),
+                 legend.title = element_text(size = 14L, color = myDarkBlue,
+                                             face = "italic"),
+                 legend.text  = element_text(size = 11L, color = myDarkBlue),
+                 legend.key.width = unit(2.0, "mm"),
+                 legend.position = "right"))
   }
 
   if (plotKind == "heatmap") {
-    return( basic_theme +
-            theme( axis.title.x = element_blank(),
-                   axis.title.y = element_blank(),
-                   panel.spacing = unit(0, "lines"),
-                   strip.background = element_rect(fill = "#8491B44C"),
-                   strip.text.y = element_text(size = ts, colour = myDarkBlue),
-                   strip.text.x = element_text(size = ts, angle = 90, colour = myDarkBlue),
-                   legend.text = element_text(color = myDarkBlue, face = "italic"),
-                   legend.position = "bottom",
-                   legend.title = element_blank(),
-                   legend.key.height = unit(2, "mm") ) )
+    return(basicTheme +
+           theme(axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
+                 panel.spacing = unit(0.0, "lines"),
+                 strip.background = element_rect(fill = "#8491B44C"),
+                 strip.text.y = element_text(size = ts, colour = myDarkBlue),
+                 strip.text.x = element_text(size = ts, angle = 90L,
+                                             colour = myDarkBlue),
+                 legend.text = element_text(color = myDarkBlue,
+                                            face = "italic"),
+                 legend.position = "bottom",
+                 legend.title = element_blank(),
+                 legend.key.height = unit(2.0, "mm")))
   }
 
   if (plotKind == "GDI") {
-    return( basic_theme +
-            theme( legend.title = element_blank(),
-                   plot.title = element_text(size = ts + 2, face = "bold.italic", color = myDarkBlue),
-                   legend.text = element_text(color = myDarkBlue, face = "italic"),
-                   legend.position = "bottom") )
+    return(basicTheme +
+           theme(legend.title = element_blank(),
+                 plot.title = element_text(size = ts + 2L,
+                                           face = "bold.italic",
+                                           color = myDarkBlue),
+                 legend.text = element_text(color = myDarkBlue,
+                                            face = "italic"),
+                 legend.position = "bottom"))
   }
 
   if (plotKind == "size-plot") {
-    return( ggthemes::theme_tufte() +
-            theme(legend.position = "none") )
-                  # axis.text.x  = element_blank(),
-                  # axis.ticks.x = element_blank()) )
+    return(ggthemes::theme_tufte() +
+           theme(legend.position = "none"))
+                 # axis.text.x  = element_blank(),
+                 # axis.ticks.x = element_blank()) )
   }
 
-  warning(paste("plotTheme: no match found in listed themes for:", plotKind))
-  return(basic_theme)
+  warning("plotTheme: no match found in listed themes for: ", plotKind)
+  return(basicTheme)
 }
 
 
-#----------------- legacy functions
+#----------------- legacy functions --------------------
 
-
-#' vec2mat_rfast
+#' Handle symmetric matrix <-> vector conversions
 #'
-#' @description Converts a compacted symmetric matrix back into a proper matrix
+#' @description Converts a symmetric matrix into a compacted symmetric matrix
+#'   and vice-versa.
 #'
 #' @details This is a legacy function related to old `scCOTAN` objects. Use the
-#'   more appropriate `Matrix::dspMatrix` type for similar functionality
+#'   more appropriate `Matrix::dspMatrix` type for similar functionality.
 #'
-#' @seealso [calculateCoex()] or [expectedContingencyTables()] for actual
-#'   examples
+#'   `mat2vec_rfast`will forcibly make its argument symmetric.
 #'
-#' @param x a list formed by two arrays: `genes` with the unique gene names and
-#'   `values` with all the values.
-#' @param genes a vector with all wanted genes or the string `"all"`. When equal
+#' @param x a `list` formed by two arrays: `genes` with the unique gene names
+#'   and `values` with all the values.
+#' @param genes an array with all wanted genes or the string `"all"`. When equal
 #'   to `"all"` (the default), it recreates the entire matrix.
+#' @param mat a square (possibly symmetric) matrix with all genes as row and
+#'   column names.
 #'
-#' @returns a matrix
+#' @returns `vec2mat_rfast` returns the reconstructed symmetric matrix
 #'
+#'   `mat2vec_rfast` a `list` formed by two arrays:
+#'   * `genes` with the unique gene names,
+#'   * `values` with all the values.
+#'
+#' @examples
+#' v <- list("genes" = paste0("gene_", c(1:9)), "values" = c(1:45))
+#'
+#' M <- vec2mat_rfast(v)
+#' all.equal(rownames(M), v[["genes"]])
+#' all.equal(colnames(M), v[["genes"]])
+#'
+#' genes <- paste0("gene_", sample.int(ncol(M), 3))
+#'
+#' m <- vec2mat_rfast(v, genes)
+#' all.equal(rownames(m), v[["genes"]])
+#' all.equal(colnames(m), genes)
+#'
+#' v2 <- mat2vec_rfast(M)
+#' all.equal(v, v2)
+#'
+
 #' @importFrom Rfast lower_tri.assign
 #' @importFrom Rfast upper_tri.assign
+#' @importFrom Rfast upper_tri
 #' @importFrom Rfast transpose
 #'
 #' @export
 #'
-#' @examples
-#' v <- list("genes" = paste0("gene.", c(1:10)), "values" = c(1:55))
-#' genes <- c("gene.3", "gene.4", "gene.7")
-#' M <- vec2mat_rfast(v)
-#' m <- vec2mat_rfast(v, genes)
+#' @rdname LegacyFastSymmMatrix
 #'
-#' @rdname vec2mat_rfast
-#'
-vec2mat_rfast <-function(x, genes = "all") {
+vec2mat_rfast <- function(x, genes = "all") {
   if (!isa(x, "list") || !identical(names(x), c("genes", "values"))) {
-    stop("Passed 'x' argument is not a list with 2 elements 'genes' and 'values'")
+    stop("Passed 'x' argument is not a list ",
+         "with 2 elements 'genes' and 'values'")
   }
 
   numGenes <- length(x[["genes"]])
-  if (genes[1] == "all") {
-    m <- matrix(0, numGenes, numGenes)
+  if (genes[[1L]] == "all") {
+    m <- matrix(0.0, numGenes, numGenes)
 
-    m <- Rfast::lower_tri.assign(m, diag = TRUE, v = x$values)
-    m <- Rfast::upper_tri.assign(m, v = Rfast::upper_tri(Rfast::transpose(m)))
-    rownames(m) <- x$genes
-    colnames(m) <- x$genes
+    m <- lower_tri.assign(m, diag = TRUE, v = x[["values"]])
+    m <- upper_tri.assign(m, v = upper_tri(transpose(m)))
+    rownames(m) <- x[["genes"]]
+    colnames(m) <- x[["genes"]]
   } else {
-    m <- matrix(0, nrow = numGenes, ncol = length(genes))
-    rownames(m) <- x$genes
+    m <- matrix(0.0, nrow = numGenes, ncol = length(genes))
+    rownames(m) <- x[["genes"]]
     colnames(m) <- genes
 
-    for (pos.gene in match(genes, x$genes)) {
-      temp.array <- x$values[pos.gene]
-      p = 1
+    for (posGene in match(genes, x[["genes"]])) {
+      tempArray <- x[["values"]][posGene]
+      p <- 1L
       l <- numGenes
-      s <- pos.gene
-      while (p < (pos.gene)) {
-        l <- l - 1
+      s <- posGene
+      while (p < (posGene)) {
+        l <- l - 1L
         s <- s + l
-        temp.array <- c(temp.array, x$values[s])
-        p <- p + 1
+        tempArray <- c(tempArray, x[["values"]][s])
+        p <- p + 1L
       }
-      if(pos.gene < numGenes) {
+      if (posGene < numGenes) {
         #linear part
-        start.reading.position <- 1
-        i <- 1
-        while (i < (pos.gene)) {
-          start.reading.position <- start.reading.position + (numGenes - (i - 1))
-          i <- i + 1
+        startReadingPos <- 1L
+        i <- 1L
+        while (i < (posGene)) {
+          startReadingPos <- startReadingPos + (numGenes - (i - 1L))
+          i <- i + 1L
         }
-        start.reading.position = start.reading.position+1
+        startReadingPos <- startReadingPos + 1L
 
-        end.reading.position <- 0
-        for (i in c(0:(pos.gene-1))) {
-          end.reading.position <- end.reading.position + (numGenes-i)
+        endReadingPos <- 0L
+        for (i in c(0L:(posGene - 1L))) {
+          endReadingPos <- endReadingPos + (numGenes - i)
         }
 
-        temp.array <- c(temp.array, x$values[start.reading.position:end.reading.position])
+        tempArray <-
+          c(tempArray, x[["values"]][startReadingPos:endReadingPos])
       }
-      m[,x$genes[pos.gene]] <- temp.array
+      m[, x[["genes"]][posGene]] <- tempArray
     }
   }
   return(m)
 }
 
 
-
-#' mat2vec_rfast
 #'
-#' @description Converts a square matrix into a compact form, by forcibly make
-#'   it symmetric
-#'
-#' @details This is a legacy function related to old `scCOTAN` objects. Use the
-#'   more appropriate `Matrix::dspMatrix` type for similar functionality
-#'
-#' @seealso [calculateCoex()] or [expectedContingencyTables()] for actual
-#'   examples
-#'
-#' @param mat a possibly symmetric matrix with all genes as row and column names
-#'
-#' @returns a `list` formed by two arrays: `genes` with the unique gene names
-#'   and `values` with all the values.
-#'
-#' @importFrom Rfast lower_tri.assign
-#' @importFrom Rfast upper_tri.assign
-#' @importFrom Rfast transpose
+#' @importFrom Rfast lower_tri
 #'
 #' @export
 #'
-#' @examples
-#' mat <- matrix(0, nrow = 10, ncol = 10)
-#' mat <- Rfast::lower_tri.assign(mat, c(1:55), diag = TRUE)
-#' mat <- Rfast::upper_tri.assign(mat, v = Rfast::upper_tri(Rfast::transpose(mat)))
-#' v <- mat2vec_rfast(mat)
-#'
-#' @rdname mat2vec_rfast
+#' @rdname LegacyFastSymmMatrix
 #'
 mat2vec_rfast <- function(mat) {
   mat <- as.matrix(mat)
 
-  if (!dim(mat)[1] == dim(mat)[2]) {
+  if (!dim(mat)[[1L]] == dim(mat)[[2L]]) {
     stop("The matrix is not square!")
   }
 
-  v <- Rfast::lower_tri(mat, diag = TRUE)
+  v <- lower_tri(mat, diag = TRUE)
   return(list("genes" = rownames(mat), "values" = v))
 }
-

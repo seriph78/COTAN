@@ -34,7 +34,7 @@ plots to file}
 \item{outDir}{an existing directory for the analysis output.}
 }
 \value{
-the new clusterization
+a \code{list} with "clusters", "coexDF" and "pValueDF"
 }
 \description{
 This function takes in input a \code{COTAN} object along with a

@@ -47,6 +47,7 @@ library(MASS)
 library(zeallot)
 library(grDevices)
 #library(dendextend)
+library(qpdf)
 
 # Log-level 2 was chosen to showcase better how the package works
 # In normal usage a level of 0 or 1 is more appropriate 

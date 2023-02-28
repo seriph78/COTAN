@@ -55,10 +55,11 @@ returns a permutation, such that using the permutation on the given names
 the clusters are grouped together.
 }
 \examples{
-clusters <- set_names(paste0("",sample(7, 100, replace = TRUE)),
-                      formatC(1:100,  width = 3, flag = "0"))
+## create a clusterization
+clusters <- paste0("",sample(7, 100, replace = TRUE))
+names(clusters) <- paste0("E_",formatC(1:100,  width = 3, flag = "0"))
 
-## create a clusters list froma clusterization
+## create a clusters list from a clusterization
 clustersList <- toClustersList(clusters)
 head(clustersList, 1)
 
@@ -73,9 +74,9 @@ perm <- groupByClusters(clusters)
 is.unsorted(head(names(clusters)[perm],cl1Size))
 head(clusters[perm], cl1Size)
 
-# it is possible to have the list of the element names different
-# from the names in the clusters list
-selectedNames <- formatC(11:110,  width = 3, flag = "0")
+## it is possible to have the list of the element names different
+## from the names in the clusters list
+selectedNames <- paste0("E_",formatC(11:110,  width = 3, flag = "0"))
 perm2 <- groupByClustersList(selectedNames, toClustersList(clusters))
 all.equal(perm2[91:100], c(91:100))
 

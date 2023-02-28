@@ -5,7 +5,7 @@
 \alias{test.dataset.col}
 \title{test.dataset.col}
 \format{
-A sparce matrix with cells as col names and genes as row names.
+A sparse matrix with cells as col names and genes as row names.
 }
 \usage{
 test.dataset.col

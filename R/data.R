@@ -25,7 +25,7 @@
 #' (GDI score > than 2). This is a dataset sampled from GEO GSE121380 Col1-6
 #' after Seurat cleaning.
 #'
-#' @format A sparce matrix with cells as col names and genes as row names.
+#' @format A sparse matrix with cells as col names and genes as row names.
 #'
 "test.dataset.col"
 

@@ -24,8 +24,9 @@ it returns:
 \eqn{(1 + d \mu)^{-\frac{1}{d}}}{(1 + `disp` * `mu`)^(-1 / `disp`)}
 when \eqn{d > 0}{`disp > 0`} and
 \eqn{\exp{((d - 1) \mu)}}{exp((`disp` - 1) * `mu`)} otherwise.
-The function is continuous in \eqn{d = 0}{`disp = 0`}, increasing in \eqn{d}{`disp`}
-and decreasing in \eqn{\mu}{`mu`}. It returns 0 when
-\eqn{d = -\infty}{`disp = -Inf`} or \eqn{\mu = \infty}{`mu = Inf`}.
+The function is continuous in \eqn{d = 0}{`disp = 0`},
+increasing in \eqn{d}{`disp`} and decreasing in \eqn{\mu}{`mu`}.
+It returns 0 when \eqn{d = -\infty}{`disp = -Inf`} or
+\eqn{\mu = \infty}{`mu = Inf`}.
 It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
 }

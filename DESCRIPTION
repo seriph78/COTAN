@@ -55,7 +55,9 @@ Imports:
     Seurat,
     factoextra,
     dendextend,
-    zeallot
+    zeallot,
+    qpdf,
+    assertthat
 Suggests: 
     testthat (>= 3.0.0),
     spelling,
