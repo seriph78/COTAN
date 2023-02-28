@@ -4,7 +4,7 @@
 \alias{cellSizePlot}
 \title{cellSizePlot}
 \usage{
-cellSizePlot(objCOTAN, splitPattern = " ", numCol = 2)
+cellSizePlot(objCOTAN, splitPattern = " ", numCol = 2L)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}

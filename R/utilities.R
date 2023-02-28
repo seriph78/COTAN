@@ -258,6 +258,12 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #' @param clustersList A named `list` whose elements define the various
 #'   clusters.
 #' @param elemNames A `list` of names to which associate a cluster.
+#' @param throwOnOverlappingClusters When `TRUE`, in case of overlapping
+#'   clusters, the function `fromClustersList` and `groupByClustersList` will
+#'   throw. This is the default. When FALSE, instead, in case of overlapping
+#'   clusters, `fromClustersList` will return the last cluster to which each
+#'   element belongs, while `groupByClustersList` will return a vector of
+#'   positions that is longer than the given `elemNames`.
 #'
 #' @returns `toClustersList` returns a `list` of clusters.
 #'

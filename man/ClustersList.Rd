@@ -26,6 +26,13 @@ groupByClusters(clusters)
 clusters.}
 
 \item{elemNames}{A \code{list} of names to which associate a cluster.}
+
+\item{throwOnOverlappingClusters}{When \code{TRUE}, in case of overlapping
+clusters, the function \code{fromClustersList} and \code{groupByClustersList} will
+throw. This is the default. When FALSE, instead, in case of overlapping
+clusters, \code{fromClustersList} will return the last cluster to which each
+element belongs, while \code{groupByClustersList} will return a vector of
+positions that is longer than the given \code{elemNames}.}
 }
 \value{
 \code{toClustersList} returns a \code{list} of clusters.

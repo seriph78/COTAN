@@ -4,7 +4,7 @@
 \alias{genesSizePlot}
 \title{genesSizePlot}
 \usage{
-genesSizePlot(objCOTAN, splitPattern = " ", numCol = 2)
+genesSizePlot(objCOTAN, splitPattern = " ", numCol = 2L)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
