@@ -9,7 +9,7 @@ automaticCOTANObjectCreation(
   GEO,
   sequencingMethod,
   sampleCondition,
-  cores = 1,
+  cores = 1L,
   saveObj = TRUE,
   outDir = "."
 )

@@ -42,9 +42,9 @@ setMethod(
   "proceedToCoex",
   "COTAN",
   function(objCOTAN, cores, saveObj = TRUE, outDir = ".") {
-    start_time_all <- Sys.time()
+    startTimeAll <- Sys.time()
 
-    logThis("Cotan analysis functions started", logLevel = 1)
+    logThis("Cotan analysis functions started", logLevel = 1L)
 
     objCOTAN <- clean(objCOTAN)
 
@@ -62,7 +62,7 @@ setMethod(
 
       sampleCondition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
       {
-        numIter <- 1
+        numIter <- 1L
         pdf(file.path(outDirCleaning,
                       paste0(sampleCondition, "_",
                              numIter, "_plots_without_cleaning.pdf")))
@@ -84,7 +84,7 @@ setMethod(
                       paste0(sampleCondition,
                              "_plots_efficiency.pdf")))
         plot(plots[["nu"]] +
-               annotate(geom = "text", x = 50, y = 0.25,
+               annotate(geom = "text", x = 50L, y = 0.25,
                         label = "nothing to remove ", color = "darkred"))
         dev.off()
       }
@@ -93,46 +93,48 @@ setMethod(
       gc()
     }
 
-    analysis_time <- Sys.time()
+    analysisTime <- Sys.time()
 
     objCOTAN <- estimateDispersionBisection(objCOTAN, cores = cores)
 
     gc()
 
-    genes_coex_time <- Sys.time()
-    analysis_time <- difftime(genes_coex_time, analysis_time, units = "mins")
+    genesCoexTime <- Sys.time()
+    analysisTime <- difftime(genesCoexTime, analysisTime, units = "mins")
 
-    logThis(paste0("Only analysis time ", analysis_time), logLevel = 3)
+    logThis(paste0("Only analysis time ", analysisTime), logLevel = 3L)
 
-    logThis("Cotan genes' coex estimation started", logLevel = 1)
+    logThis("Cotan genes' coex estimation started", logLevel = 1L)
     objCOTAN <- calculateCoex(objCOTAN)
 
     gc()
 
-    end_time <- Sys.time()
+    endTime <- Sys.time()
 
-    all.time <- difftime(end_time, start_time_all, units = "mins")
-    logThis(paste0("Total time ", all.time), logLevel = 3)
+    allTime <- difftime(endTime, startTimeAll, units = "mins")
+    logThis(paste0("Total time ", allTime), logLevel = 3L)
 
-    genes_coex_time <- difftime(end_time, genes_coex_time, units = "mins")
+    genesCoexTime <- difftime(endTime, genesCoexTime, units = "mins")
 
-    logThis(paste0("Only genes' coex time ", genes_coex_time), logLevel = 3)
+    logThis(paste0("Only genes' coex time ", genesCoexTime), logLevel = 3L)
 
     if (saveObj) {
-      utils::write.csv(data.frame("type" = c("tot_time",
-                                             "analysis_time",
-                                             "genes_coex_time"),
-                                  "times"= c(as.numeric(all.time),
-                                             as.numeric(analysis_time),
-                                             as.numeric(genes_coex_time) ),
-                                  "n.cells"=getNumCells(objCOTAN),
-                                  "n.genes"=getNumGenes(objCOTAN) ),
-                       file = file.path(outDir, paste0(sampleCondition, "_times.csv")))
+      utils::write.csv(data.frame("type"  = c("tot_time",
+                                              "analysis_time",
+                                              "genes_coex_time"),
+                                  "times" = c(as.numeric(allTime),
+                                              as.numeric(analysisTime),
+                                              as.numeric(genesCoexTime)),
+                                  "n.cells" = getNumCells(objCOTAN),
+                                  "n.genes" = getNumGenes(objCOTAN)),
+                       file = file.path(outDir, paste0(sampleCondition,
+                                                       "_times.csv")))
 
       logThis(paste0("Saving elaborated data locally at: ",
                      file.path(outDir, paste0(sampleCondition, ".cotan.RDS"))),
-              logLevel = 1)
-      saveRDS(objCOTAN, file = file.path(outDir, paste0(sampleCondition, ".cotan.RDS")))
+              logLevel = 1L)
+      saveRDS(objCOTAN, file = file.path(outDir, paste0(sampleCondition,
+                                                        ".cotan.RDS")))
     }
 
     return(objCOTAN)
@@ -173,7 +175,7 @@ setMethod(
 
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,
-           cores = 1, saveObj = TRUE, outDir = ".") {
+           cores = 1L, saveObj = TRUE, outDir = ".") {
 
   objCOTAN <- COTAN(raw = raw)
   objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
@@ -182,14 +184,13 @@ automaticCOTANObjectCreation <-
 
   #if (isFALSE(mt)) {
   #  genes_to_rem <- getGenes(objCOTAN)[grep(mt_prefix, getGenes(objCOTAN)),])
-  #  cells_to_rem <- getCells(objCOTAN)[which(getCellsSize(objCOTAN) == 0)])
+  #  cells_to_rem <- getCells(objCOTAN)[which(getCellsSize(objCOTAN) == 0L)])
   #  dropGenesCells(objCOTAN, genes_to_rem, cells_to_rem)
   #}
 
-  logThis(paste0("Condition ", sampleCondition), logLevel = 2)
-  logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2)
+  logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
+  logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)
 
   return(proceedToCoex(objCOTAN, cores = cores,
                        saveObj = saveObj, outDir = outDir))
 }
-

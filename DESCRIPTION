@@ -56,8 +56,9 @@ Imports:
     factoextra,
     dendextend,
     zeallot,
-    qpdf,
-    assertthat
+    assertthat,
+    withr,
+    qpdf
 Suggests: 
     testthat (>= 3.0.0),
     spelling,

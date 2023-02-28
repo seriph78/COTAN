@@ -8,7 +8,7 @@ checkClusterUniformity(
   objCOTAN,
   cluster,
   cells,
-  cores = 1,
+  cores = 1L,
   saveObj = TRUE,
   outDir = "."
 )
@@ -51,8 +51,9 @@ objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
 clusters <- cellsUniformClustering(objCOTAN, cores = 12,
                                    saveObj = FALSE,
                                    outDir = tempdir())
+cellsToCheck <- getCells(objCOTAN)[clusters \%in\% clusters[1]]
 isUniform <- checkClusterUniformity(objCOTAN, cluster = clusters[1],
-                                    cells = getCells(objCOTAN)[clusters \%in\% clusters[1]],
-                                    cores = 12, saveObj = FALSE, outDir = tempdir())
+                                    cells = cellsToCheck, cores = 12,
+                                    saveObj = FALSE, outDir = tempdir())
 
 }

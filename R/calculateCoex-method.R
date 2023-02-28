@@ -77,7 +77,7 @@ observedContingencyTablesYY <- function(objCOTAN,
                                         asDspMatrices = FALSE) {
   zeroOne <- getZeroOneProj(objCOTAN)
 
-  logThis("calculating YY..", logLevel = 3, appendLF = FALSE)
+  logThis("calculating YY..", logLevel = 3L, appendLF = FALSE)
   if (isTRUE(actOnCells)) {
     # for cells
     observedYY <- crossprod(zeroOne)
@@ -95,7 +95,7 @@ observedContingencyTablesYY <- function(objCOTAN,
     observedYY <- pack(observedYY)
   }
 
-  logThis(" done", logLevel = 3)
+  logThis(" done", logLevel = 3L)
 
   return(list("observedYY" = observedYY, "observedY" = observedY))
 }
@@ -151,36 +151,36 @@ observedContingencyTables <- function(objCOTAN,
 
   if (isTRUE(actOnCells)) {
     # dimension m x m (m number of cells)
-    logThis("calculating NY..", logLevel = 3, appendLF = FALSE)
+    logThis("calculating NY..", logLevel = 3L, appendLF = FALSE)
 
     # Any/Yes vector [cycled] = Yes/Yes + No/Yes
     #observedNY <- observedY - observedYY
 
-    logThis("YN..", logLevel = 3, appendLF = FALSE)
+    logThis("YN..", logLevel = 3L, appendLF = FALSE)
     observedYN <- t(observedY - observedYY)
 
-    logThis("NN..", logLevel = 3, appendLF = FALSE)
+    logThis("NN..", logLevel = 3L, appendLF = FALSE)
     observedNN <- numGenes - observedY - observedYN
 
     observedYN <- as(observedYN, "denseMatrix")
   } else {
     # dimension n x n (n number of genes)
-    logThis("calculating YN..", logLevel = 3, appendLF = FALSE)
+    logThis("calculating YN..", logLevel = 3L, appendLF = FALSE)
 
     # Yes/Any vector [cycled] = Yes/Yes + Yes/No
     #observedYN <- observedY - observedYY
 
-    logThis("NY..", logLevel = 3, appendLF = FALSE)
+    logThis("NY..", logLevel = 3L, appendLF = FALSE)
     observedNY <- t(observedY - observedYY)
 
-    logThis("NN..", logLevel = 3, appendLF = FALSE)
+    logThis("NN..", logLevel = 3L, appendLF = FALSE)
     observedNN <- numCells - observedY - observedNY
 
     observedNY <- as(observedNY, "denseMatrix")
   }
   rm(zeroOne)
   gc()
-  logThis(" done", logLevel = 3)
+  logThis(" done", logLevel = 3L)
 
   observedNN <- forceSymmetric(as(observedNN, "denseMatrix"))
 
@@ -189,7 +189,7 @@ observedContingencyTables <- function(objCOTAN,
     observedYY <- pack(observedYY)
     # these operation drops the lower triangle values
     # but the other matrix contains them anyway
-    if( isTRUE(actOnCells) ) {
+    if (isTRUE(actOnCells)) {
       observedNY <- pack(forceSymmetric(t(observedYN)))
       observedYN <- pack(forceSymmetric(  observedYN) )
     } else {
@@ -197,17 +197,17 @@ observedContingencyTables <- function(objCOTAN,
       observedNY <- pack(forceSymmetric(  observedNY) )
     }
   } else {
-    if( isTRUE(actOnCells) ) {
+    if (isTRUE(actOnCells)) {
       observedNY <- t(observedYN)
     } else {
       observedYN <- t(observedNY)
     }
   }
 
-  return( list("observedNN" = observedNN,
-               "observedNY" = observedNY,
-               "observedYN" = observedYN,
-               "observedYY" = observedYY) )
+  return(list("observedNN" = observedNN,
+              "observedNY" = observedNY,
+              "observedYN" = observedYN,
+              "observedYY" = observedYY))
 }
 
 
@@ -236,6 +236,8 @@ observedContingencyTables <- function(objCOTAN,
 #' @importFrom Rfast rowsums
 #' @importFrom Rfast colsums
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @export
 #'
 #' @examples
@@ -257,12 +259,11 @@ expectedContingencyTablesNN <- function(objCOTAN,
   probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
   gc()
 
-  stopifnot("Error: some NA in matrix of probability of zero UMI counts" = !anyNA(probZero))
+  assert_that(!anyNA(probZero),
+              msg = paste0("Error: some NA in matrix of probability",
+                           " of zero UMI counts"))
 
-  numGenes <- getNumGenes(objCOTAN)
-  numCells <- getNumCells(objCOTAN)
-
-  logThis("calculating NN..", logLevel = 3, appendLF = FALSE)
+  logThis("calculating NN..", logLevel = 3L, appendLF = FALSE)
 
   if (isTRUE(actOnCells)) {
     # dimension m x m (m number of cells)
@@ -295,9 +296,9 @@ expectedContingencyTablesNN <- function(objCOTAN,
     expectedNN <- pack(expectedNN)
   }
 
-  logThis(" done", logLevel = 3)
+  logThis(" done", logLevel = 3L)
 
-  return( list("expectedNN" = expectedNN, "expectedN" = expectedN) )
+  return(list("expectedNN" = expectedNN, "expectedN" = expectedN))
 }
 
 
@@ -333,6 +334,8 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix symmetricMatrix
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @export
 #'
 #' @examples
@@ -351,7 +354,9 @@ expectedContingencyTables <- function(objCOTAN,
   # estimate Probabilities of 0 with internal function funProbZero
   probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
 
-  stopifnot("Error: some NA in matrix of probability of zero UMI counts" = !anyNA(probZero))
+  assert_that(!anyNA(probZero),
+              msg = paste0("Error: some NA in matrix of probability",
+                           " of zero UMI counts"))
 
   numGenes <- getNumGenes(objCOTAN)
   numCells <- getNumCells(objCOTAN)
@@ -365,29 +370,29 @@ expectedContingencyTables <- function(objCOTAN,
 
   if (isTRUE(actOnCells)) {
     # dimension m x m (m number of cells)
-    logThis("calculating YN..", logLevel = 3, appendLF = FALSE)
+    logThis("calculating YN..", logLevel = 3L, appendLF = FALSE)
 
     # Any/No vector [cycled] = No/No + Yes/No
     #expectedYN <- expectedN - expectedNN
 
-    logThis("NY..", logLevel = 3, appendLF = FALSE)
+    logThis("NY..", logLevel = 3L, appendLF = FALSE)
     expectedNY <- t(expectedN - expectedNN)
 
-    logThis("YY..", logLevel = 3, appendLF = FALSE)
+    logThis("YY..", logLevel = 3L, appendLF = FALSE)
     expectedYY <- numGenes - expectedN - expectedNY
 
     expectedNY <- as(expectedNY, "denseMatrix")
   } else {
     # dimension n x n (n number of genes)
-    logThis("calculating NY..", logLevel = 3, appendLF = FALSE)
+    logThis("calculating NY..", logLevel = 3L, appendLF = FALSE)
 
     # No/Any vector [cycled] = No/No + No/Yes
     #expectedNY <- expectedN - expectedNN
 
-    logThis("YN..", logLevel = 3, appendLF = FALSE)
+    logThis("YN..", logLevel = 3L, appendLF = FALSE)
     expectedYN <- t(expectedN - expectedNN)
 
-    logThis("YY..", logLevel = 3, appendLF = FALSE)
+    logThis("YY..", logLevel = 3L, appendLF = FALSE)
     expectedYY <- numCells - expectedN - expectedYN
 
     expectedYN <- as(expectedYN, "denseMatrix")
@@ -402,7 +407,7 @@ expectedContingencyTables <- function(objCOTAN,
     expectedYY <- pack(expectedYY)
     # these operation drops the lower triangle values
     # but the other matrix contains them anyway
-    if( isTRUE(actOnCells) ) {
+    if (isTRUE(actOnCells)) {
       expectedYN <- pack(forceSymmetric(t(expectedNY)))
       expectedNY <- pack(forceSymmetric(  expectedNY) )
     } else {
@@ -410,18 +415,18 @@ expectedContingencyTables <- function(objCOTAN,
       expectedYN <- pack(forceSymmetric(  expectedYN) )
     }
   } else {
-    if( isTRUE(actOnCells) ) {
+    if (isTRUE(actOnCells)) {
       expectedYN <- t(expectedNY)
     } else {
       expectedNY <- t(expectedYN)
     }
   }
-  logThis(" done", logLevel = 3)
+  logThis(" done", logLevel = 3L)
 
-  return( list("expectedNN" = expectedNN,
-               "expectedNY" = expectedNY,
-               "expectedYN" = expectedYN,
-               "expectedYY" = expectedYY) )
+  return(list("expectedNN" = expectedNN,
+              "expectedNY" = expectedNY,
+              "expectedYN" = expectedYN,
+              "expectedYY" = expectedYY))
 }
 
 
@@ -442,6 +447,8 @@ expectedContingencyTables <- function(objCOTAN,
 #'
 #' @return A list containing the observed and expected contingency tables
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @export
 #'
 #' @examples
@@ -459,8 +466,8 @@ contingencyTables <- function(objCOTAN, g1, g2) {
   genes <- getGenes(objCOTAN)
   numCells <- getNumCells(objCOTAN)
 
-  stopifnot("the first gene is unknown"  = (c(g1) %in% genes))
-  stopifnot("the second gene is unknown" = (c(g2) %in% genes))
+  assert_that(c(g1) %in% genes, msg = "the first gene is unknown")
+  assert_that(c(g2) %in% genes, msg = "the second gene is unknown")
 
   dimnames <- list(c(paste(g2, "yes", sep = "."), paste(g2, "no", sep = ".")),
                    c(paste(g1, "yes", sep = "."), paste(g1, "no", sep = ".")))
@@ -481,7 +488,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 
   observedCT <- matrix(c(observedYY[g1, g2], observedNY[g2, g1],
                          observedNY[g1, g2], observedNN[g1, g2]),
-                       ncol = 2, nrow = 2, dimnames = dimnames)
+                       ncol = 2L, nrow = 2L, dimnames = dimnames)
 
   #-------------------------------------------------
 
@@ -504,7 +511,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 
   expectedCT <- matrix(c(expectedYY[g1, g2], expectedYN[g1, g2],
                          expectedYN[g2, g1], expectedNN[g1, g2]),
-                       ncol = 2, nrow = 2, dimnames = dimnames)
+                       ncol = 2L, nrow = 2L, dimnames = dimnames)
 
   #-------------------------------------------------
 
@@ -555,6 +562,8 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 #'
 #' @returns The updated `COTAN` object
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @export
 #'
 #' @examples
@@ -572,12 +581,17 @@ setMethod(
   "COTAN",
   function(objCOTAN, actOnCells = FALSE,
            optimizeForSpeed = TRUE) {
-    if (isTRUE(actOnCells)) { kind <- "cells'" } else { kind <- "genes'" }
-    logThis(paste("Calculate", kind, "coex: START"), logLevel = 1)
+    if (isTRUE(actOnCells)) {
+      kind <- "cells'"
+    } else {
+      kind <- "genes'"
+    }
+    logThis(paste("Calculate", kind, "coex: START"), logLevel = 1L)
 
-    logThis(paste("Retrieving expected", kind, "contingency table"), logLevel = 3)
+    logThis(paste("Retrieving expected", kind, "contingency table"),
+            logLevel = 3L)
 
-    # four estimators: expectedNN, expectedNY, expectedYN, expectedYY
+    # four estimators:
     c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
       expectedContingencyTables(objCOTAN,
                                 actOnCells = actOnCells,
@@ -586,29 +600,31 @@ setMethod(
 
     gc()
 
-    logThis(paste("Calculating", kind, "coex normalization factor"), logLevel = 3)
+    logThis(paste("Calculating", kind, "coex normalization factor"),
+            logLevel = 3L)
 
     if (isTRUE(actOnCells)) {
       allNames <- getCells(objCOTAN)
-      normFact <- 1 / sqrt(getNumGenes(objCOTAN)) # divided by sqrt(n)
+      normFact <- 1.0 / sqrt(getNumGenes(objCOTAN)) # divided by sqrt(n)
     } else {
       allNames <- getGenes(objCOTAN)
-      normFact <- 1 / sqrt(getNumCells(objCOTAN)) # divided by sqrt(m)
+      normFact <- 1.0 / sqrt(getNumCells(objCOTAN)) # divided by sqrt(m)
     }
 
     problematicPairsFraction <-
       sum(pmin(expectedYY@x, expectedYN@x,
                expectedNY@x, expectedNN@x) < 0.5) / length(expectedYY@x)
 
-    coex <- normFact * sqrt(1 / pmax(1, expectedYY@x) +
-                            1 / pmax(1, expectedYN@x) +
-                            1 / pmax(1, expectedNY@x) +
-                            1 / pmax(1, expectedNN@x) )
+    coex <- normFact * sqrt(1.0 / pmax(1.0, expectedYY@x) +
+                            1.0 / pmax(1.0, expectedYN@x) +
+                            1.0 / pmax(1.0, expectedNY@x) +
+                            1.0 / pmax(1.0, expectedNN@x))
 
-    rm(expectedYN); rm(expectedNY); rm(expectedNN);
+    rm(expectedYN); rm(expectedNY); rm(expectedNN)
     gc()
 
-    logThis(paste("Retrieving observed", kind, "yes/yes contingency table"), logLevel = 3)
+    logThis(paste("Retrieving observed", kind, "yes/yes contingency table"),
+            logLevel = 3L)
 
     c(observedYY, .) %<-%
       observedContingencyTablesYY(objCOTAN,
@@ -618,11 +634,12 @@ setMethod(
     gc()
 
     # coex estimation
-    logThis(paste("Estimating", kind, "coex"), logLevel = 3)
+    logThis(paste("Estimating", kind, "coex"), logLevel = 3L)
 
     coex <- coex * (observedYY@x - expectedYY@x)
 
-    stopifnot("Matrix@x has the wrong size" = length(coex) == (length(allNames)*(length(allNames)+1)/2))
+    assert_that(2L * length(coex) == length(allNames) * (length(allNames) + 1L),
+                msg = "Matrix@x has the wrong size")
 
     coex <- new("dspMatrix", Dim = dim(expectedYY), x = coex)
     rownames(coex) <- colnames(coex) <- allNames
@@ -631,7 +648,7 @@ setMethod(
     rm(expectedYY)
     gc()
 
-    if(actOnCells) {
+    if (actOnCells) {
       objCOTAN@cellsCoex <- coex
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                              datasetTags()[["csync"]], TRUE)
@@ -650,7 +667,7 @@ setMethod(
     rm(coex)
     gc()
 
-    logThis(paste("Calculate", kind, "coex: DONE"), logLevel = 1)
+    logThis(paste("Calculate", kind, "coex: DONE"), logLevel = 1L)
 
     return(objCOTAN)
   }
@@ -688,19 +705,19 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
   geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
-  logThis("Calculating S: START", logLevel = 2)
+  logThis("Calculating S: START", logLevel = 2L)
 
   coex <- getGenesCoex(objCOTAN, zeroDiagonal = TRUE)
-  if(!identical(geneSubsetRow, getGenes(objCOTAN)) ||
-     !identical(geneSubsetCol, getGenes(objCOTAN))) {
+  if (!identical(geneSubsetRow, getGenes(objCOTAN)) ||
+      !identical(geneSubsetCol, getGenes(objCOTAN))) {
     coex <- coex[geneSubsetRow, geneSubsetCol, drop = FALSE]
   }
 
-  stopifnot("Coex is missing" = !is_empty(coex))
+  assert_that(!is_empty(coex), msg = "Coex is missing")
 
-  S <- (coex)^2 * getNumCells(objCOTAN)
+  S <- (coex)^2.0 * getNumCells(objCOTAN)
 
-  logThis("Calculating S: DONE", logLevel = 2)
+  logThis("Calculating S: DONE", logLevel = 2L)
 
   return(S)
 }
@@ -737,7 +754,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
   geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
-  logThis("Calculating G: START", logLevel = 2)
+  logThis("Calculating G: START", logLevel = 2L)
 
   c(observedNN, observedNY, observedYN, observedYY) %<-%
     observedContingencyTables(objCOTAN, actOnCells = FALSE)
@@ -745,44 +762,44 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
   c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
     expectedContingencyTables(objCOTAN, actOnCells = FALSE)
 
-  logThis("Estimating G", logLevel = 3)
+  logThis("Estimating G", logLevel = 3L)
 
-  tNN <- observedNN * log(observedNN / pmax(1, expectedNN))
-  tNN[observedNN == 0] <- 0
-  diag(tNN) <- 0
+  tNN <- observedNN * log(observedNN / pmax(1.0, expectedNN))
+  tNN[observedNN == 0L] <- 0.0
+  diag(tNN) <- 0.0
   tNN <- tNN[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedNN); rm(expectedNN)
 
-  tNY <- observedNY * log(observedNY / pmax(1, expectedNY))
-  tNY[observedNY == 0] <- 0
-  diag(tNY) <- 0
+  tNY <- observedNY * log(observedNY / pmax(1.0, expectedNY))
+  tNY[observedNY == 0L] <- 0.0
+  diag(tNY) <- 0.0
   tNY <- tNY[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedNY); rm(expectedNY)
 
-  tYN <- observedYN * log(observedYN / pmax(1, expectedYN))
-  tYN[observedYN == 0] <- 0
-  diag(tYN) <- 0
+  tYN <- observedYN * log(observedYN / pmax(1.0, expectedYN))
+  tYN[observedYN == 0L] <- 0.0
+  diag(tYN) <- 0.0
   tYN <- tYN[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedYN); rm(expectedYN)
 
-  tYY <- observedYY * log(observedYY / pmax(1, expectedYY))
-  tYY[observedYY == 0] <- 0
-  diag(tYY) <- 0
+  tYY <- observedYY * log(observedYY / pmax(1.0, expectedYY))
+  tYY[observedYY == 0L] <- 0.0
+  diag(tYY) <- 0.0
   tYY <- tYY[geneSubsetRow, geneSubsetCol, drop = FALSE]
   rm(observedYY); rm(expectedYY)
   gc()
 
-  G <- 2 * (tNN + tNY + tYN + tYY)
+  G <- 2.0 * (tNN + tNY + tYN + tYY)
 
-  if(identical(geneSubsetRow, getGenes(objCOTAN)) &&
-     identical(geneSubsetCol, getGenes(objCOTAN))) {
+  if (identical(geneSubsetRow, getGenes(objCOTAN)) &&
+      identical(geneSubsetCol, getGenes(objCOTAN))) {
     G <- pack(forceSymmetric(G))
   }
 
   rm(tNN); rm(tNY); rm(tYN); rm(tYY)
   gc()
 
-  logThis("Calculating G: DONE", logLevel = 2)
+  logThis("Calculating G: DONE", logLevel = 2L)
 
   return(G)
 }
@@ -822,43 +839,46 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #'
 calculateGDI <- function(objCOTAN, statType = "S") {
   if (statType == "S") {
-    logThis("Using S", logLevel = 3)
+    logThis("Using S", logLevel = 3L)
     S <- calculateS(objCOTAN)
   } else if (statType == "G") {
-    logThis("Using G", logLevel = 3)
+    logThis("Using G", logLevel = 3L)
     S <- calculateG(objCOTAN)
   } else {
     stop("Unrecognised stat type: must be either 'S' or 'G'")
   }
 
-  logThis("Calculate GDI dataframe: START", logLevel = 2)
+  logThis("Calculate GDI dataframe: START", logLevel = 2L)
 
-  top5pcRows <- as.integer(max(1:round(getNumGenes(objCOTAN) / 20, digits = 0)))
+  top5pcRows <- as.integer(max(1L:round(getNumGenes(objCOTAN) / 20.0,
+                                        digits = 0L)))
 
-  pValueSorted <- apply(S, 2, sort, decreasing = TRUE)
-  pValueSorted <- pValueSorted[1:top5pcRows, , drop = FALSE]
-  pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1, lower.tail = FALSE)
+  pValueSorted <- apply(S, c(2L), sort, decreasing = TRUE)
+  pValueSorted <- pValueSorted[1L:top5pcRows, , drop = FALSE]
+  pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1L, lower.tail = FALSE)
 
   GDI <- log(-log(colMeans(pValueSorted)))
   GDI <- set_names(as.data.frame(GDI), "GDI")
   rm(pValueSorted)
   gc()
 
-  sum.raw.norm <- log(rowSums(getNormalizedData(objCOTAN)))
-  GDI <- merge(GDI, as.data.frame(sum.raw.norm), by = "row.names", all.x = TRUE)
+  sumRawNorm <- log(rowSums(getNormalizedData(objCOTAN)))
+  GDI <- merge(GDI, as.data.frame(list(sumRawNorm), col.names = "sum.raw.norm"),
+               by = "row.names", all.x = TRUE)
   GDI <- column_to_rownames(GDI, var = "Row.names")
-  rm(sum.raw.norm)
+  rm(sumRawNorm)
   gc()
 
-  exp.cells <- (rowSums(getZeroOneProj(objCOTAN)) / getNumCells(objCOTAN)) * 100
-  GDI <- merge(GDI, as.data.frame(exp.cells), by = "row.names", all.x = TRUE)
+  expCells <- rowSums(getZeroOneProj(objCOTAN)) / getNumCells(objCOTAN) * 100.0
+  GDI <- merge(GDI, as.data.frame(list(expCells), col.names = "exp.cells"),
+               by = "row.names", all.x = TRUE)
   GDI <- column_to_rownames(GDI, var = "Row.names")
-  rm(exp.cells)
+  rm(expCells)
   gc()
 
   GDI <- GDI[, c("sum.raw.norm", "GDI", "exp.cells")]
 
-  logThis("Calculate GDI dataframe: DONE", logLevel = 2)
+  logThis("Calculate GDI dataframe: DONE", logLevel = 2L)
 
   return(GDI)
 }
@@ -905,12 +925,12 @@ calculatePValue <- function(objCOTAN, statType = "S",
   geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
   if (statType == "S") {
-    logThis("Using S", logLevel = 3)
+    logThis("Using S", logLevel = 3L)
     S <- calculateS(objCOTAN,
                     geneSubsetCol = geneSubsetCol,
                     geneSubsetRow = geneSubsetRow)
   } else if (statType == "G") {
-    logThis("Using G", logLevel = 3)
+    logThis("Using G", logLevel = 3L)
     S <- calculateG(objCOTAN,
                     geneSubsetCol = geneSubsetCol,
                     geneSubsetRow = geneSubsetRow)
@@ -918,23 +938,23 @@ calculatePValue <- function(objCOTAN, statType = "S",
     stop("Unrecognised stat type: must be either 'S' or 'G'")
   }
 
-  logThis("calculating PValues: START", logLevel = 2)
+  logThis("calculating PValues: START", logLevel = 2L)
 
   allCols <- identical(geneSubsetCol, getGenes(objCOTAN))
   allRows <- identical(geneSubsetRow, getGenes(objCOTAN))
 
   strCol <- if (allCols) "genome wide" else "on a set of genes"
   strRow <- if (allRows) "genome wide" else "on a set of genes"
-  logThis(paste("Get p-values", strCol, "on columns and", strRow, "on rows"), logLevel = 2)
+  logThis(paste("Get p-values", strCol, "on columns and", strRow, "on rows"),
+          logLevel = 2L)
 
-  pValues <- pchisq(as.matrix(S), df = 1, lower.tail = FALSE)
+  pValues <- pchisq(as.matrix(S), df = 1L, lower.tail = FALSE)
 
   if (allCols && allRows) {
     pValues <- pack(forceSymmetric(pValues))
   }
 
-  logThis("calculating PValues: DONE", logLevel = 2)
+  logThis("calculating PValues: DONE", logLevel = 2L)
 
   return(pValues)
 }
-

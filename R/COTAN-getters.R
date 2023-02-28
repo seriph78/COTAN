@@ -45,7 +45,7 @@ setMethod(
 setMethod(
   "getNumCells",
   "COTAN",
-  function(objCOTAN){
+  function(objCOTAN) {
     return(ncol(objCOTAN@raw))
   }
 )
@@ -70,7 +70,7 @@ setMethod(
 setMethod(
   "getNumGenes",
   "COTAN",
-  function(objCOTAN){
+  function(objCOTAN) {
     return(nrow(objCOTAN@raw))
   }
 )
@@ -235,7 +235,7 @@ setMethod(
       stop("nu must not be empty, estimate it")
     }
 
-    return( t(t(getRawData(objCOTAN)) * (1/getNu(objCOTAN))) )
+    return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
   }
 )
 
@@ -296,11 +296,11 @@ setMethod(
   function(objCOTAN, tag) {
     meta <- getMetadataDataset(objCOTAN)
 
-    if (is_empty(meta) || !(tag %in% meta[[1]])){
+    if (is_empty(meta) || !(tag %in% meta[[1L]])) {
       out <- ""
     } else {
-      rowPos <- which(meta[[1]] %in% tag)
-      out <- meta[, -1, drop = FALSE][rowPos, ]
+      rowPos <- which(meta[[1L]] %in% tag)
+      out <- meta[, -1L, drop = FALSE][rowPos, ]
     }
 
     return(out)
@@ -528,8 +528,7 @@ setMethod(
   function(objCOTAN) {
     if (is_empty(getMetadataGenes(objCOTAN)[["hkGenes"]])) {
       return(set_names(rep(TRUE, getNumGenes(objCOTAN)), getGenes(objCOTAN)))
-    }
-    else {
+    } else {
       return(!getMetadataGenes(objCOTAN)[["hkGenes"]])
     }
   }
@@ -565,8 +564,7 @@ setMethod(
   function(objCOTAN) {
     if (is_empty(getMetadataCells(objCOTAN)[["feCells"]])) {
       return(set_names(rep(TRUE, getNumCells(objCOTAN)), getCells(objCOTAN)))
-    }
-    else {
+    } else {
       return(!getMetadataCells(objCOTAN)[["feCells"]])
     }
   }
@@ -663,16 +661,16 @@ setMethod(
   function(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
     if (!is_empty(objCOTAN@genesCoex) && isFALSE(ignoreSync) &&
         isFALSE(as.logical(getMetadataElement(objCOTAN,
-                                              datasetTags()[["gsync"]]))) ) {
-      stop(paste0("Cannot return genes' coex as the matrix is",
-                  " out of sync with the other parameters.",
-                  " It is still ossible to access the data directly!"))
+                                              datasetTags()[["gsync"]])))) {
+      stop("Cannot return genes' coex as the matrix is",
+           " out of sync with the other parameters.",
+           " It is still ossible to access the data directly!")
     }
 
     ret <- objCOTAN@genesCoex
 
     if (isTRUE(zeroDiagonal)) {
-      ret@x[cumsum(seq(nrow(ret)))] <- 0
+      ret@x[cumsum(seq_len(nrow(ret)))] <- 0.0
     }
 
     if (!is_empty(genes)) {
@@ -719,16 +717,16 @@ setMethod(
   function(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
     if (!is_empty(objCOTAN@cellsCoex) && isFALSE(ignoreSync) &&
         isFALSE(as.logical(getMetadataElement(objCOTAN,
-                                              datasetTags()[["csync"]]))) ) {
-      stop(paste0("Cannot return cells' coex as the matrix is",
-                  " out of sync with the other parameters.",
-                  " It is still ossible to access the data directly!"))
+                                              datasetTags()[["csync"]])))) {
+      stop("Cannot return cells' coex as the matrix is",
+           " out of sync with the other parameters.",
+           " It is still ossible to access the data directly!")
     }
 
     ret <- objCOTAN@cellsCoex
 
     if (isTRUE(zeroDiagonal)) {
-      ret@x[cumsum(seq(nrow(ret)))] <- 0
+      ret@x[cumsum(seq_len(nrow(ret)))] <- 0.0
     }
 
     if (!is_empty(cells)) {
@@ -772,14 +770,13 @@ setMethod(
 
     if (isTRUE(dropNoCoex)) {
       out <- names(clsCoex[!sapply(clsCoex, is_empty)])
-    }
-    else {
+    } else {
       out <- names(clsCoex)
     }
 
     # drop the internal 'CL_' prefix
     if (isFALSE(keepPrefix)) {
-      out <- substring(out, 4)
+      out <- substring(out, 4L)
     }
 
     return(out)
@@ -830,7 +827,8 @@ setMethod(
   "COTAN",
   function(objCOTAN, clName = NULL) {
     if (is_empty(clName)) {
-      clName <- getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
+      clName <-
+        getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
     }
     if (is_empty(clName)) {
       stop("No clusterizations are present in the 'COTAN' object")
@@ -842,15 +840,14 @@ setMethod(
     }
 
     if (!internalName %in% getClusterizations(objCOTAN, keepPrefix = TRUE)) {
-      stop(paste("Asked clusterization", clName,
-                    "not present in the 'COTAN' object"))
+      stop("Asked clusterization", clName, "not present in the 'COTAN' object")
     }
 
     clusters <- set_names(getMetadataCells(objCOTAN)[[internalName]],
                           getCells(objCOTAN))
 
-    return( list("clusters" = clusters,
-                 "coex" = getClustersCoex(objCOTAN)[[internalName]]) )
+    return(list("clusters" = clusters,
+                "coex" = getClustersCoex(objCOTAN)[[internalName]]))
   }
 )
 

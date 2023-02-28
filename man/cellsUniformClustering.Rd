@@ -6,8 +6,8 @@
 \usage{
 cellsUniformClustering(
   objCOTAN,
-  cores = 1,
-  maxIterations = 25,
+  cores = 1L,
+  maxIterations = 25L,
   saveObj = TRUE,
   outDir = "."
 )

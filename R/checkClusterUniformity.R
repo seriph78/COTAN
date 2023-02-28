@@ -36,15 +36,16 @@
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
 #'                                    saveObj = FALSE,
 #'                                    outDir = tempdir())
+#' cellsToCheck <- getCells(objCOTAN)[clusters %in% clusters[1]]
 #' isUniform <- checkClusterUniformity(objCOTAN, cluster = clusters[1],
-#'                                     cells = getCells(objCOTAN)[clusters %in% clusters[1]],
-#'                                     cores = 12, saveObj = FALSE, outDir = tempdir())
+#'                                     cells = cellsToCheck, cores = 12,
+#'                                     saveObj = FALSE, outDir = tempdir())
 #'
 #' @rdname checkClusterUniformity
 #'
 
 checkClusterUniformity <- function(objCOTAN, cluster, cells,
-                                   cores = 1, saveObj = TRUE, outDir = ".") {
+                                   cores = 1L, saveObj = TRUE, outDir = ".") {
 
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
@@ -54,13 +55,14 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
   gc()
 
   logThis(paste0("Checking uniformity for the cluster '", cluster,
-                 "' with ", getNumCells(objCOTAN), " cells"), logLevel = 2)
+                 "' with ", getNumCells(objCOTAN), " cells"), logLevel = 2L)
 
   GDIData <- calculateGDI(objCOTAN)
 
   # Plots
   if (saveObj) {
-    prevOptVale <- options(ggrepel.max.overlaps = Inf)
+    # this will be restored to previous value on function exit
+    local_options(list(ggrepel.max.overlaps = Inf))
 
     pdf(file.path(outDir, paste0("cluster_", cluster, "_plots.pdf")))
 
@@ -72,11 +74,12 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
     plot(plots[["nu"]])
     rm(plots)
 
-    genesToLabel = head(rownames(GDIData[order(GDIData[["GDI"]], decreasing = T), ]), n = 10)
-    plot(GDIPlot(objCOTAN, GDI.df = GDIData, genes = list("top 10 GDI genes" = genesToLabel)))
+    genesToLabel <- head(rownames(GDIData[order(GDIData[["GDI"]],
+                                                decreasing = TRUE), ]), n = 10L)
+    plot(GDIPlot(objCOTAN, GDI.df = GDIData,
+                 genes = list("top 10 GDI genes" = genesToLabel)))
 
     dev.off()
-    options(ggrepel.max.overlaps = prevOptVale)
   }
 
   rm(objCOTAN)
@@ -88,11 +91,10 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
                          0.01 * nrow(GDIData))
 
   if (!clusterIsUniform && saveObj) {
-    outFile <- file.path(outDir, paste0("non-uniform_cluster_", cluster, ".csv"))
+    outFile <- file.path(outDir,
+                         paste0("non-uniform_cluster_", cluster, ".csv"))
     write.csv(cells, file = outFile)
   }
 
   return(invisible(clusterIsUniform))
 }
-
-

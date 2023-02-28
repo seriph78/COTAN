@@ -24,16 +24,18 @@ setMethod(
   function(objCOTAN) {
 
     # We want to discard genes having less than 3 non-zero counts per 1000 cells
-    threshold <- round(getNumCells(objCOTAN) * 3 / 1000, digits = 0)
-    genesToDrop <- getGenes(objCOTAN)[rowSums(getZeroOneProj(objCOTAN)) <= threshold]
+    threshold <- round(getNumCells(objCOTAN) * 3.0 / 1000.0, digits = 0L)
+    genesToDrop <-
+      getGenes(objCOTAN)[rowSums(getZeroOneProj(objCOTAN)) <= threshold]
 
     if (!is_empty(genesToDrop)) {
       objCOTAN <- dropGenesCells(objCOTAN, genes = genesToDrop)
     }
 
     # We want to discard cells having less than 2 non-zero counts per 1000 genes
-    threshold <- round(getNumGenes(objCOTAN) * 2 / 1000, digits = 0)
-    cellsToDrop <- getCells(objCOTAN)[colSums(getZeroOneProj(objCOTAN)) <= threshold]
+    threshold <- round(getNumGenes(objCOTAN) * 2.0 / 1000.0, digits = 0L)
+    cellsToDrop <-
+      getCells(objCOTAN)[colSums(getZeroOneProj(objCOTAN)) <= threshold]
 
     if (!is_empty(cellsToDrop)) {
       objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
@@ -42,11 +44,11 @@ setMethod(
     logThis(paste0("Genes/cells selection done:",
                    " dropped [", length(genesToDrop), "] genes",
                    " and [", length(cellsToDrop), "] cells"),
-            logLevel = 1)
+            logLevel = 1L)
 
     logThis(paste0("Working on [", getNumGenes(objCOTAN), "]",
                    " genes and [", getNumCells(objCOTAN), "] cells"),
-            logLevel = 2)
+            logLevel = 2L)
 
     objCOTAN <- estimateLambdaLinear(objCOTAN)
     objCOTAN <- estimateNuLinear(objCOTAN)

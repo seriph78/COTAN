@@ -16,6 +16,8 @@ test_that("Cell Uniform Clustering", {
 
   gc()
 
+  expect_equal(length(levels(factor(clusters))), 19)
+
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
   expect_equal(getClusterizationData(obj)[["clusters"]], clusters, ignore_attr = TRUE)

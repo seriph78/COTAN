@@ -51,9 +51,9 @@
 #'
 GDIPlot <- function(objCOTAN, genes, cond = "",
                     statType = "S", GDI.df = NULL) {
-  sum.raw.norm <- NULL
+  sumRawNorm <- NULL
 
-  logThis("GDI plot", logLevel = 2)
+  logThis("GDI plot", logLevel = 2L)
 
   if (is_empty(GDI.df)) {
     GDI <- calculateGDI(objCOTAN, statType = statType)
@@ -61,49 +61,56 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
     GDI <- GDI.df
   }
 
-  GDI$colors <- "none"
+  GDI[["colors"]] <- "none"
   for (n in names(genes)) {
-    GDI[rownames(GDI) %in% genes[[n]],]$colors <- n
+    genesSelec <- rownames(GDI) %in% genes[[n]]
+    if (any(genesSelec)) {
+      GDI[genesSelec, "colors"] <- n
+    } else {
+      logThis(paste("GDIPlot - none of the genes in group", n,
+                    "is present: will be ignored"), logLevel = 1L)
+    }
   }
 
   # drop housekeeping genes i.e. those that has GDI <= -5
   {
-    genesToKeep <- (GDI[["GDI"]] > -5)
-    logThis(paste("Removed", sum(!genesToKeep),
-                  "low GDI genes (such as the housekeeping) in GDI plot"),
-            logLevel = 1)
+    genesToKeep <- (GDI[["GDI"]] > -5.0)
+    logThis(paste("Removed", sum(!genesToKeep), "low GDI genes",
+                  "(such as the housekeeping) in GDI plot"), logLevel = 1L)
     GDI <- GDI[genesToKeep, ]
   }
 
-  qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
-  col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors,
-                             rownames(qual_col_pals)))
+  qualColPals <- brewer.pal.info[brewer.pal.info[["category"]] == "qual", ]
+  colVector <- unlist(mapply(brewer.pal, qualColPals[["maxcolors"]],
+                             rownames(qualColPals)))
 
-  mycolours <- set_names(col_vector[seq_along(names(genes))], names(genes))
+  mycolours <- set_names(colVector[seq_along(names(genes))], names(genes))
 
-  textdf <- GDI[!GDI$colors == "none",]
+  textdf <- GDI[!GDI[["colors"]] == "none", ]
 
-  GDI_plot <- ggplot(subset(GDI, colors == "none"),
-                     aes(x = sum.raw.norm, y = GDI)) +
-              geom_point(alpha = 0.3, color = "#8491B4B2", size = 2.5) +
-              geom_point(data = subset(GDI, colors != "none"),
-                         aes(x = sum.raw.norm, y = GDI, colour = colors),
-                         size = 2.5, alpha = 0.8) +
-              geom_hline(yintercept = quantile(GDI[["GDI"]])[4], linetype = "dashed", color = "darkblue") +
-              geom_hline(yintercept = quantile(GDI[["GDI"]])[3], linetype = "dashed", color = "darkblue") +
-              geom_hline(yintercept = 1.5, linetype = "dotted", color = "red", linewidth = 0.5) +
-              scale_color_manual("Status", values = mycolours) +
-              scale_fill_manual( "Status", values = mycolours) +
-              xlab("log normalized counts") +
-              ylab("GDI") +
-              geom_label_repel(data = textdf,
-                               aes(x = sum.raw.norm, y = GDI,
-                                   label = rownames(textdf), fill = colors),
-                               label.size = NA, max.overlaps = 40, alpha = 0.8,
-                               direction = "both", na.rm = TRUE, seed = 1234) +
-              ggtitle(paste("GDI plot ", cond)) +
-              plotTheme("GDI", textSize = 10)
+  plot <- ggplot(subset(GDI, colors == "none"),
+                 aes(x = sumRawNorm, y = GDI)) +
+          geom_point(alpha = 0.3, color = "#8491B4B2", size = 2.5) +
+          geom_point(data = subset(GDI, colors != "none"),
+                     aes(x = sumRawNorm, y = GDI, colour = colors),
+                     size = 2.5, alpha = 0.8) +
+          geom_hline(yintercept = quantile(GDI[["GDI"]])[[4L]],
+                     linetype = "dashed", color = "darkblue") +
+          geom_hline(yintercept = quantile(GDI[["GDI"]])[[3L]],
+                     linetype = "dashed", color = "darkblue") +
+          geom_hline(yintercept = 1.5, linetype = "dotted",
+                     color = "red", linewidth = 0.5) +
+          scale_color_manual("Status", values = mycolours) +
+          scale_fill_manual( "Status", values = mycolours) +
+          xlab("log normalized counts") +
+          ylab("GDI") +
+          geom_label_repel(data = textdf,
+                           aes(x = sumRawNorm, y = GDI,
+                               label = rownames(textdf), fill = colors),
+                           label.size = NA, max.overlaps = 40L, alpha = 0.8,
+                           direction = "both", na.rm = TRUE, seed = 1234L) +
+          ggtitle(paste("GDI plot ", cond)) +
+          plotTheme("GDI", textSize = 10L)
 
-  return(GDI_plot)
-
+  return(plot)
 }
