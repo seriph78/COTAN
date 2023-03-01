@@ -1,25 +1,30 @@
 
-#' mergeUniformCellsClusters
+# --------------------- Uniform Clusters ----------------------
+
+#' @description `mergeUniformCellsClusters` takes in a **uniform**
+#'   clusterization and iteratively checks whether merging two *near* clusters
+#'   would form a **uniform** cluster still.
 #'
-#' @description This function takes in input a `COTAN` object along with a
-#'   uniform clusterization and, through the *cosine distance* and the `hclust`,
-#'   checks if merging two leaf clusters will form a still uniform cluster
-#'   (this is done iteratively). All structures are saved on disk on request.
-#'
-#' @details This function uses [checkClusterUniformity()] to check whether
-#'   merged clusters' uniformity
+#' @details `mergeUniformCellsClusters` uses the *cosine distance* and the
+#'   [stats::hclust()] function to establish *near clusters pairs*. It will use
+#'   the [checkClusterUniformity()] function to check whether the merged
+#'   clusters are **uniform**. The function will stop once no *near pairs* of
+#'   clusters are mergeable.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clusters The clusterization to merge. If not given the last available
 #'   clusterization will be used, as it is probably the most significant!
+#' @param GDIThreshold the threshold level that discriminates uniform clusters.
+#'   It defaults to \eqn{1.5}
 #' @param cores number cores used
-#' @param distance type of distance to use (default is `cosine`, `euclidean` is
-#'   also available)
-#' @param hclustMethod default is "ward.D2" but can be any method defined by
-#'   [stats::hclust()] function
+#' @param distance type of distance to use. It defaults to `"cosine"`, but
+#'   `"euclidean"` is also available)
+#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
+#'   defined by the [stats::hclust()] function.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
-#' @param outDir an existing directory for the analysis output.
+#' @param outDir an existing directory for the analysis output. The effective
+#'   output will be paced in a sub-folder.
 #'
 #' @returns a `list` with "clusters", "coexDF" and "pValueDF"
 #'
@@ -38,37 +43,43 @@
 #'
 #' @examples
 #' data("raw.dataset")
+#'
 #' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
 #'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
 #'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
+#'                                          saveObj = FALSE)
 #'
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
+#'                                    saveObj = FALSE)
+#'
+#' checkClusterUniformity(objCOTAN,
+#'                        cluster = clusters[1],
+#'                        cells = getCells(objCOTAN)[clusters %in% clusters[1]],
+#'                        cores = 12,
+#'                        saveObj = FALSE)
+#'
+#' objCOTAN <- addClusterization(objCOTAN, clName = "uniformClusters",
+#'                               clusters = clusters)
 #'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
 #'                                         clusters = clusters,
 #'                                         cores = 12,
 #'                                         distance = "cosine",
 #'                                         hclustMethod = "ward.D2",
-#'                                         saveObj = FALSE,
-#'                                         outDir = tempdir())
-#' mergedClusters <- mergedList[["clusters"]]
+#'                                         saveObj = FALSE)
 #'
-#' @rdname mergeUniformCellsClusters
+#' objCOTAN <- addClusterization(objCOTAN, clName = "mergedUniformClusters",
+#'                               clusters = mergedList[["clusters"]],
+#'                               coexDF = mergedList[["coexDF"]])
 #'
-
-# @param GEO GEO or other data set code
-# @param sc.method scRNAseq method
-# @param cond sample condition name
-# @param markers a `list` of marker genes. Default `NULL`
+#' @rdname UniformClusters
+#'
 
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
+                                      GDIThreshold = 1.5,
                                       cores = 1,
                                       distance = "cosine",
                                       hclustMethod = "ward.D2",
@@ -165,6 +176,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
       clusterIsUniform <- checkClusterUniformity(objCOTAN,
                                                  cluster = mergedCluster,
                                                  cells = mergedCells,
+                                                 GDIThreshold = GDIThreshold,
                                                  cores = cores,
                                                  saveObj = saveObj,
                                                  outDir = mergeOutDir)

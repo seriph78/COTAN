@@ -1,5 +1,5 @@
 
-#' get clusterization running the `Seurat` package
+#' Get a clusterization running the `Seurat` package
 #'
 #' @description The function uses the [Seurat-package] to clusterize the given
 #'   counts raw data.
@@ -113,26 +113,38 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
               "UsedMaxResolution" = resolution > initialResolution + 1.5))
 }
 
+# --------------------- Uniform Clusters ----------------------
 
-#' cellsUniformClustering
+#' Uniform Clusters
 #'
-#' @description The function finds a clusterizations that is **uniform** by GDI
+#' @description This group of functions takes in input a `COTAN` object and
+#'   handle the task of dividing the dataset into **Uniform Clusters**, that is
+#'   clusters that have an homogeneous genes' expression.
 #'
-#' @details Once a preliminary *clusterization* is obtained from `Seurat`
-#'   package methods, each cluster is checked for uniformity by looking at its
-#'   GDI. If The GDI is too high, the cluster is deemed **non-uniform**. All
-#'   cells from **non-uniform** clusters are then pooled together for another
-#'   iteration of the entire process, until all clusters are deemed **uniform**.
+#' @description `cellsUniformClustering` finds a **Uniform** clusterizations by
+#'   means of the `GDI`
+#'
+#' @details In `cellsUniformClustering`, once a preliminary *clusterization* is
+#'   obtained from the `Seurat` package methods, each cluster is checked for
+#'   **uniformity** via the function [checkClusterUniformity()]. Once all
+#'   clusters are checked, all cells from the **non-uniform** clustersare pooled
+#'   together for another iteration of the entire process, until all clusters
+#'   are deemed **uniform**. In the case only a few cells are left out
+#'   (\eqn{\leq 50}), those are flagged as `"not_clustered"` and the process is
+#'   stopped.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param cores number of cores (NB for windows system no more that 1 can be
-#'   used)
-#' @param maxIterations Max number of re-clustering iterations. Defaults to 25.
+#' @param GDIThreshold the threshold level that discriminates uniform clusters.
+#'   It defaults to \eqn{1.5}
+#' @param cores number of cores used
+#' @param maxIterations Max number of re-clustering iterations. It defaults to
+#'   \eqn{25}.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
-#' @param outDir an existing directory for the analysis output.
+#' @param outDir an existing directory for the analysis output. The effective
+#'   output will be paced in a sub-folder.
 #'
-#' @returns the new clusterization
+#' @returns `cellsUniformClustering` returns the newly found clusterization
 #'
 #' @export
 #'
@@ -143,26 +155,12 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #'
 #' @importFrom utils as.roman
 #'
-#' @examples
-#' data("raw.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
-#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
-#'                               clusters = clusters)
+#' @rdname UniformClusters
 #'
-#' @rdname cellsUniformClustering
-#'
-cellsUniformClustering <-
-  function(objCOTAN, cores = 1L, maxIterations = 25L,
-           saveObj = TRUE, outDir = ".") {
+
+cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.5,
+                                   cores = 1L, maxIterations = 25L,
+                                   saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
 
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
@@ -226,12 +224,14 @@ cellsUniformClustering <-
                         "will be reclustered!"), logLevel = 3L)
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
-          clusterIsUniform <- checkClusterUniformity(objCOTAN = objCOTAN,
-                                                     cluster = cl,
-                                                     cells = cells,
-                                                     cores = cores,
-                                                     saveObj = saveObj,
-                                                     outDir = outDirIter)
+          clusterIsUniform <-
+            checkClusterUniformity(objCOTAN = objCOTAN,
+                                   cluster = cl,
+                                   cells = cells,
+                                   cores = cores,
+                                   GDIThreshold = GDIThreshold,
+                                   saveObj = saveObj,
+                                   outDir = outDirIter)
           if (!clusterIsUniform) {
             logThis(paste("cluster", cl, "has too high GDI:",
                           "will be reclustered!"), logLevel = 3L)
