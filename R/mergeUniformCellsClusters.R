@@ -83,7 +83,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       cores = 1,
                                       distance = "cosine",
                                       hclustMethod = "ward.D2",
-                                      saveObj = FALSE,
+                                      saveObj = TRUE,
                                       outDir = ".") {
   logThis("Merging cells' uniform clustering: START", logLevel = 2)
 

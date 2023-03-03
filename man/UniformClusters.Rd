@@ -33,7 +33,7 @@ mergeUniformCellsClusters(
   cores = 1,
   distance = "cosine",
   hclustMethod = "ward.D2",
-  saveObj = FALSE,
+  saveObj = TRUE,
   outDir = "."
 )
 }

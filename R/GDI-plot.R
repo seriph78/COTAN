@@ -9,6 +9,8 @@
 #'   for the title).
 #' @param statType type of statistic to be used. Default is "S": Pearson's
 #'   chi-squared test statistics. "G" is G-test statistics
+#' @param GDIThreshold the threshold level that discriminates uniform clusters.
+#'   It defaults to \eqn{1.5}
 #' @param GDI.df when the GDI data frame was already calculated, it can be put
 #'   here to speed up the process (default is `NULL`)
 #'
@@ -50,7 +52,8 @@
 #' @rdname GDIPlot
 #'
 GDIPlot <- function(objCOTAN, genes, cond = "",
-                    statType = "S", GDI.df = NULL) {
+                    statType = "S", GDIThreshold = 1.5,
+                    GDI.df = NULL) {
   sumRawNorm <- NULL
 
   logThis("GDI plot", logLevel = 2L)
@@ -98,7 +101,7 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
                      linetype = "dashed", color = "darkblue") +
           geom_hline(yintercept = quantile(GDI[["GDI"]])[[3L]],
                      linetype = "dashed", color = "darkblue") +
-          geom_hline(yintercept = 1.5, linetype = "dotted",
+          geom_hline(yintercept = GDIThreshold, linetype = "dotted",
                      color = "red", linewidth = 0.5) +
           scale_color_manual("Status", values = mycolours) +
           scale_fill_manual( "Status", values = mycolours) +
