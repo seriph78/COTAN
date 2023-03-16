@@ -25,6 +25,8 @@
 #'
 #' @importFrom stats pchisq
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
@@ -50,13 +52,14 @@ DEAOnClusters <- function(objCOTAN, clusters = NULL) {
     clusters <- getClusterizationData(objCOTAN)[["clusters"]]
   }
 
-  stopifnot("Passed/retrieved clusterization has the wrong size" <-
-              (length(clusters) == getNumCells(objCOTAN)))
+  assert_that(length(clusters) == getNumCells(objCOTAN),
+              msg = "Passed/retrieved clusterization has the wrong size")
 
-  stopifnot("Some cells in the clusterization are not part of the 'COTAN' object" <-
-              all(names(clusters) %in% getCells(objCOTAN)))
+  assert_that(all(names(clusters) %in% getCells(objCOTAN)),
+              msg = paste("Some cells in the clusterization",
+                          "are not part of the 'COTAN' object"))
 
-  logThis("Differential Expression Analysis - START", logLevel = 2)
+  logThis("Differential Expression Analysis - START", logLevel = 2L)
 
   clustersList <- toClustersList(clusters)
 
@@ -66,61 +69,57 @@ DEAOnClusters <- function(objCOTAN, clusters = NULL) {
 
   numCells <- getNumCells(objCOTAN)
 
-  exp_yes <- rowSums(zeroOne)
-  exp_no  <- numCells - exp_yes
-
-  clusters_coex <- data.frame()
-  clusters_pval <- data.frame()
+  clustersCoex <- data.frame()
+  clustersPVal <- data.frame()
 
   for (cl in names(clustersList)) {
     gc()
-    logThis("*", appendLF = FALSE, logLevel = 1)
-    logThis(paste0(" analysis of cluster: '", cl, "' - START"), logLevel = 3)
+    logThis("*", appendLF = FALSE, logLevel = 1L)
+    logThis(paste0(" analysis of cluster: '", cl, "' - START"), logLevel = 3L)
 
     cellsIn <- getCells(objCOTAN) %in%  clustersList[[cl]]
 
     numCellsIn  <- sum(cellsIn)
     numCellsOut <- numCells - numCellsIn
 
-    if (numCellsIn == 0) {
-      warning(paste0("Cluster '", cl, "' has no cells assigned to it!"))
+    if (numCellsIn == 0L) {
+      warning("Cluster '", cl, "' has no cells assigned to it!")
     }
 
     observedYI <- rowSums(zeroOne[, cellsIn])
 
-    expectedNI <- rowSums(probZero[, cellsIn])
-    expectedNO <- rowSums(probZero[,!cellsIn])
+    expectedNI <- rowSums(probZero[,  cellsIn])
+    expectedNO <- rowSums(probZero[, !cellsIn])
     expectedYI <- numCellsIn  - expectedNI
     expectedYO <- numCellsOut - expectedNO
 
     coex <- (observedYI  - expectedYI) / sqrt(numCells) *
-              sqrt(1 / pmax(1, expectedNI) +
-                   1 / pmax(1, expectedNO) +
-                   1 / pmax(1, expectedYI) +
-                   1 / pmax(1, expectedYO))
+              sqrt(1.0 / pmax(1.0, expectedNI) +
+                   1.0 / pmax(1.0, expectedNO) +
+                   1.0 / pmax(1.0, expectedYI) +
+                   1.0 / pmax(1.0, expectedYO))
 
-    pValue <- pchisq(coex^2 * numCells, df <- 1, lower.tail <- FALSE)
+    pValue <- pchisq(coex^2L * numCells, df = 1L, lower.tail = FALSE)
 
-    if (any(is.na(pValue))) {
-      warning(paste("Got some NA in the p-value",
-                    which(is.na(S), arr.ind = T), collapse = ", "))
+    if (anyNA(pValue)) {
+      warning("Got some NA in the p-value",
+              toString(which(is.na(pValue), arr.ind = TRUE)))
     }
 
     rm(expectedYO, expectedYI, expectedNO, expectedNI)
     rm(observedYI)
     gc()
 
-    clusters_coex <- setColumnInDF(clusters_coex, colToSet = coex,
-                                   colName = cl, rowNames = rownames(zeroOne))
-    clusters_pval <- setColumnInDF(clusters_pval, colToSet = pValue,
-                                   colName = cl, rowNames = rownames(zeroOne))
+    clustersCoex <- setColumnInDF(clustersCoex, colToSet = coex,
+                                  colName = cl, rowNames = rownames(zeroOne))
+    clustersPVal <- setColumnInDF(clustersPVal, colToSet = pValue,
+                                  colName = cl, rowNames = rownames(zeroOne))
 
-    logThis(paste0("* analysis of cluster: '", cl, "' - DONE"), logLevel = 3)
+    logThis(paste0("* analysis of cluster: '", cl, "' - DONE"), logLevel = 3L)
   }
-  logThis("", logLevel = 1)
+  logThis("", logLevel = 1L)
 
-  logThis("Differential Expression Analysis - DONE", logLevel = 2)
+  logThis("Differential Expression Analysis - DONE", logLevel = 2L)
 
-  return( list("coex" = clusters_coex, "p-value" = clusters_pval) )
+  return(list("coex" = clustersCoex, "p-value" = clustersPVal))
 }
-

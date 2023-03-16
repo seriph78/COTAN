@@ -39,6 +39,9 @@
 #' @importFrom stats hclust
 #' @importFrom stats as.dendrogram
 #'
+#' @importFrom stringr str_split
+#' @importFrom stringr fixed
+#'
 #' @importFrom dendextend get_nodes_attr
 #'
 #' @examples
@@ -80,12 +83,12 @@
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
                                       GDIThreshold = 1.5,
-                                      cores = 1,
+                                      cores = 1L,
                                       distance = "cosine",
                                       hclustMethod = "ward.D2",
                                       saveObj = TRUE,
                                       outDir = ".") {
-  logThis("Merging cells' uniform clustering: START", logLevel = 2)
+  logThis("Merging cells' uniform clustering: START", logLevel = 2L)
 
   outputClusters <- clusters
   if (is_empty(outputClusters)) {
@@ -96,7 +99,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
   outDirCond <- file.path(outDir, cond)
-  if(!file.exists(outDirCond)){
+  if (!file.exists(outDirCond)) {
     dir.create(outDirCond)
   }
 
@@ -106,24 +109,25 @@ mergeUniformCellsClusters <- function(objCOTAN,
   }
 
   notMergeable <- c()
-  iter <- 0
+  iter <- 0L
   repeat {
-    iter <- iter + 1
-    logThis(paste0("Start merging smallest clusters: iteration ", iter), logLevel = 3)
+    iter <- iter + 1L
+    logThis(paste0("Start merging smallest clusters: iteration ", iter),
+            logLevel = 3L)
 
-    oldNumClusters = length(unique(outputClusters))
+    oldNumClusters <- length(unique(outputClusters))
 
     c(coexDF, pValueDF) %<-% DEAOnClusters(objCOTAN, clusters = outputClusters)
     gc()
 
     ## To drop the cells with only zeros
     ## TODO: To be fixed! Where it come from?
-    coexDF <- coexDF[, colSums(coexDF != 0) > 0]
+    coexDF <- coexDF[, colSums(coexDF != 0.0) > 0L]
 
     #merge small cluster based on distances
     if (distance == "cosine") {
       coexDist <- cosineDissimilarity(as.matrix(coexDF))
-    } else if(distance == "euclidean") {
+    } else if (distance == "euclidean") {
       coexDist <- dist(t(as.matrix(coexDF)))
     } else {
       stop("only 'cosine' and 'euclidean' distances are supported")
@@ -141,33 +145,33 @@ mergeUniformCellsClusters <- function(objCOTAN,
     {
       members <- get_nodes_attr(dend, "members")
       for (i in seq_along(members)) {
-        if (members[i] == 2) {
-          id <- c(id, i + 1, i + 2)
+        if (members[i] == 2L) {
+          id <- c(id, i + 1L, i + 2L)
         }
       }
     }
 
     logThis(paste0("Created leafs ID for merging: ",
                    paste(get_nodes_attr(dend, "label", id = id),
-                         collapse = " ")), logLevel = 2)
+                         collapse = " ")), logLevel = 2L)
 
-    p = 1
+    p <- 1L
     while (p < length(id)) {
-      logThis("*", logLevel = 1, appendLF = FALSE)
+      logThis("*", logLevel = 1L, appendLF = FALSE)
 
-      cl1 <- get_nodes_attr(dend, "label", id = id[p+0])
-      cl2 <- get_nodes_attr(dend, "label", id = id[p+1])
+      cl1 <- get_nodes_attr(dend, "label", id = id[p + 0L])
+      cl2 <- get_nodes_attr(dend, "label", id = id[p + 1L])
 
       mergedCluster <- paste0(min(cl1, cl2), "_", max(cl1, cl2), "-merge")
 
-      logThis(mergedCluster, logLevel = 3)
+      logThis(mergedCluster, logLevel = 3L)
 
-      p  <- p+2
+      p  <- p + 2L
 
       if (mergedCluster %in% notMergeable) {
         logThis(paste0("Clusters ", cl1, " and ", cl2,
                        " already analyzed and not mergeable: skip."),
-                logLevel = 3)
+                logLevel = 3L)
         next
       }
 
@@ -185,11 +189,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
       if (!clusterIsUniform) {
         logThis(paste("Merging clusters", cl1, "and", cl2,
-                      "results in a too high GDI"), logLevel = 3)
+                      "results in a too high GDI"), logLevel = 3L)
 
         notMergeable <- c(notMergeable, mergedCluster)
       } else {
-        logThis(paste("Clusters", cl1, "and", cl2, "can be merged"), logLevel = 3)
+        logThis(paste("Clusters", cl1, "and", cl2, "can be merged"),
+                logLevel = 3L)
 
         outputClusters[mergedCells] <- mergedCluster
       }
@@ -203,15 +208,16 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   logThis(paste("The final merged clusterization contains [",
                 length(unique(outputClusters)), "] different clusters:",
-                paste0(unique(sort(outputClusters)), collapse = ", ")), logLevel = 3)
+                toString(unique(sort(outputClusters)))), logLevel = 3L)
 
   # replace the clusters' tags
   # non merged clusters keep their tag, while merged one use the lesser one!
   # there might be holes in the enumeration!
   {
     clTags <- levels(factor(outputClusters))
-    # here we use the fact that the merged clusters have the smaller cluster as first
-    clTagsMap <- str_split(clTags, pattern = "_", simplify = TRUE)[,1]
+    # here we use the fact that the merged clusters have
+    # the 'smaller' cluster as the first in the pair
+    clTagsMap <- str_split(clTags, pattern = fixed("_"), simplify = TRUE)[, 1L]
     clTagsMap <- set_names(clTagsMap, clTags)
 
     outputClusters <- clTagsMap[outputClusters]
@@ -221,7 +227,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     colnames(pValueDF) <- clTagsMap[colnames(pValueDF)]
   }
 
-  logThis("Merging cells' uniform clustering: DONE", logLevel = 2)
+  logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 
   return(list("clusters" = outputClusters,
               "coexDF" = coexDF, "pValueDF" = pValueDF))

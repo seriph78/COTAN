@@ -30,7 +30,7 @@ mergeUniformCellsClusters(
   objCOTAN,
   clusters = NULL,
   GDIThreshold = 1.5,
-  cores = 1,
+  cores = 1L,
   distance = "cosine",
   hclustMethod = "ward.D2",
   saveObj = TRUE,

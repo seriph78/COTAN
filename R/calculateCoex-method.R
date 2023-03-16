@@ -527,8 +527,10 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 #' @details The function calculates the coex matrix, defined by following
 #'   formula:
 #'
-#'   \deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{(-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
-#'              {\sqrt{n \sum_{i,j \in \{\text{Y, N}\}}{\frac{1}{1 \vee E_{ij}}}}}}
+#'   \deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{
+#'                     (-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
+#'              {\sqrt{n \sum_{i,j \in \{\text{Y, N}\}}{
+#'                             \frac{1}{1 \vee E_{ij}}}}}}
 #'
 #'   where \eqn{O} and \eqn{E} are the observed and expected contingency tables
 #'   and \eqn{n} is the relevant numerosity (the number of genes/cells depending
@@ -536,7 +538,8 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 #'
 #'   The formula can be more effectively implemented as:
 #'
-#'   \deqn{\sqrt{\frac{1}{n}\sum_{i,j \in \{\text{Y, N}\}}{\frac{1}{1 \vee E_{ij}}}}
+#'   \deqn{\sqrt{\frac{1}{n}\sum_{i,j \in \{\text{Y, N}\}}{
+#'                                \frac{1}{1 \vee E_{ij}}}}
 #'         \, \bigl(O_\text{YY}-E_\text{YY}\bigr)}
 #'
 #'   once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for all
@@ -615,12 +618,16 @@ setMethod(
       sum(pmin(expectedYY@x, expectedYN@x,
                expectedNY@x, expectedNN@x) < 0.5) / length(expectedYY@x)
 
+    logThis(paste0("Fraction of genes with very low",
+                   " expected contingency tables: ",
+                   problematicPairsFraction), logLevel = 3L)
+
     coex <- normFact * sqrt(1.0 / pmax(1.0, expectedYY@x) +
                             1.0 / pmax(1.0, expectedYN@x) +
                             1.0 / pmax(1.0, expectedNY@x) +
                             1.0 / pmax(1.0, expectedNN@x))
 
-    rm(expectedYN); rm(expectedNY); rm(expectedNN)
+    rm(expectedYN, expectedNY, expectedNN)
     gc()
 
     logThis(paste("Retrieving observed", kind, "yes/yes contingency table"),
@@ -644,8 +651,7 @@ setMethod(
     coex <- new("dspMatrix", Dim = dim(expectedYY), x = coex)
     rownames(coex) <- colnames(coex) <- allNames
 
-    rm(observedYY)
-    rm(expectedYY)
+    rm(observedYY, expectedYY)
     gc()
 
     if (actOnCells) {
@@ -693,6 +699,8 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
@@ -715,7 +723,7 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 
   assert_that(!is_empty(coex), msg = "Coex is missing")
 
-  S <- (coex)^2.0 * getNumCells(objCOTAN)
+  S <- coex^2L * getNumCells(objCOTAN)
 
   logThis("Calculating S: DONE", logLevel = 2L)
 
@@ -768,25 +776,25 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
   tNN[observedNN == 0L] <- 0.0
   diag(tNN) <- 0.0
   tNN <- tNN[geneSubsetRow, geneSubsetCol, drop = FALSE]
-  rm(observedNN); rm(expectedNN)
+  rm(observedNN, expectedNN)
 
   tNY <- observedNY * log(observedNY / pmax(1.0, expectedNY))
   tNY[observedNY == 0L] <- 0.0
   diag(tNY) <- 0.0
   tNY <- tNY[geneSubsetRow, geneSubsetCol, drop = FALSE]
-  rm(observedNY); rm(expectedNY)
+  rm(observedNY, expectedNY)
 
   tYN <- observedYN * log(observedYN / pmax(1.0, expectedYN))
   tYN[observedYN == 0L] <- 0.0
   diag(tYN) <- 0.0
   tYN <- tYN[geneSubsetRow, geneSubsetCol, drop = FALSE]
-  rm(observedYN); rm(expectedYN)
+  rm(observedYN, expectedYN)
 
   tYY <- observedYY * log(observedYY / pmax(1.0, expectedYY))
   tYY[observedYY == 0L] <- 0.0
   diag(tYY) <- 0.0
   tYY <- tYY[geneSubsetRow, geneSubsetCol, drop = FALSE]
-  rm(observedYY); rm(expectedYY)
+  rm(observedYY, expectedYY)
   gc()
 
   G <- 2.0 * (tNN + tNY + tYN + tYY)
@@ -796,7 +804,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
     G <- pack(forceSymmetric(G))
   }
 
-  rm(tNN); rm(tNY); rm(tYN); rm(tYY)
+  rm(tNN, tNY, tYN, tYY)
   gc()
 
   logThis("Calculating G: DONE", logLevel = 2L)

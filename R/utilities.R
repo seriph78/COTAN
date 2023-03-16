@@ -307,6 +307,7 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @rdname ClustersList
@@ -332,6 +333,7 @@ toClustersList <- function(clusters) {
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @rdname ClustersList
@@ -365,6 +367,7 @@ fromClustersList <- function(clustersList, elemNames = c(),
 #' @export
 #'
 #' @importFrom rlang is_empty
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @rdname ClustersList
@@ -473,7 +476,8 @@ dispersionBisection <-
     return(disp1)
   }
 
-  disp2 <- -1.0 * sign(diff1) # we assume error is an increasing function of disp
+  # we assume error is an increasing function of disp
+  disp2 <- -1.0 * sign(diff1)
   iter <- 1L
   repeat {
     diff2 <- sum(funProbZero(disp2, mu)) - sumZeros

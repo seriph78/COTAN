@@ -4,7 +4,7 @@
 \alias{scatterPlot}
 \title{scatterPlot}
 \usage{
-scatterPlot(objCOTAN, splitPattern = " ", numCol = 2, splitSamples = FALSE)
+scatterPlot(objCOTAN, splitPattern = " ", numCol = 2L, splitSamples = FALSE)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}

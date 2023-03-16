@@ -31,7 +31,8 @@ objCOTAN <- addClusterization(objCOTAN, "dummy", clusters)
 coexDF <- as.data.frame(matrix(0, ncol=10, nrow=getNumGenes(objCOTAN)))
 colnames(coexDF) <- c(1:10)
 rownames(coexDF) <- getGenes(objCOTAN)
-objCOTAN <- addClusterizationCoex(objCOTAN, clName = "dummy", coexDF = coexDF)
+objCOTAN <- addClusterizationCoex(objCOTAN, clName = "dummy",
+                                  coexDF = coexDF)
 
 }
 \seealso{

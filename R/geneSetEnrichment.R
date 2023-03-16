@@ -19,6 +19,7 @@
 #' @importFrom rlang set_names
 #'
 #' @importFrom stringr str_remove
+#' @importFrom stringr fixed
 #'
 #' @examples
 #' data("raw.dataset")
@@ -35,7 +36,8 @@
 #' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 #' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
 #'                               clusters = clusters, coexDF = coexDF)
-#' groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
+#' groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"),
+#'                      G2 = c("Prpf40a", "Ergic2"),
 #'                      G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
 #' enrichment <- geneSetEnrichment(clustersCoex = coexDF,
 #'                                 groupMarkers = groupMarkers)
@@ -46,17 +48,17 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers) {
   # It might be possible that the column names have the old extra
   # prefix 'cl.'. It will be remove in such cases.
   clTagsMap <- set_names(colnames(clustersCoex),
-                         str_remove(colnames(clustersCoex), "cl\\."))
+                         str_remove(colnames(clustersCoex), fixed("cl.")))
   clustersTags <- names(clTagsMap)
 
   df <- as.data.frame(matrix(nrow = length(groupMarkers),
-                             ncol = ncol(clustersCoex) + 2))
+                             ncol = ncol(clustersCoex) + 2L))
 
   colnames(df) <- c(clustersTags, "N. detected", "N. total")
   rownames(df) <- names(groupMarkers)
 
   # TODO: add comment on this constant in the @details above!
-  teta <- -1/0.1 * log(0.25)
+  teta <- -1.0 / 0.1 * log(0.25)
 
   # not_assigned_clusters <- NA
   for (groupName in names(groupMarkers)) {
@@ -66,14 +68,15 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers) {
     numDetected <- nrow(ex)
 
     logThis(paste0("In group ", groupName, " there are ", numDetected,
-                   " detected over ", length(genes), " genes"), logLevel = 3)
+                   " detected over ", length(genes), " genes"), logLevel = 3L)
 
     # drop reductions
-    ex[ex < 0 & !is.na(ex)] <- 0
-    ex <- 1 - exp(-teta * ex)
+    ex[ex < 0.0 & !is.na(ex)] <- 0.0
+    ex <- 1.0 - exp(-teta * ex)
 
     for (cl in clustersTags) {
-      df[groupName, cl] <- sum(ex[, clTagsMap[cl]], na.rm = TRUE) / length(genes)
+      df[groupName, cl] <-
+        sum(ex[, clTagsMap[cl]], na.rm = TRUE) / length(genes)
     }
 
     df[groupName, "N. detected"] <- numDetected

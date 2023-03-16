@@ -4,7 +4,7 @@
 \alias{genesCoexSpace}
 \title{genesCoexSpace}
 \usage{
-genesCoexSpace(objCOTAN, primaryMarkers, numGenesPerMarker = 25)
+genesCoexSpace(objCOTAN, primaryMarkers, numGenesPerMarker = 25L)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object.}

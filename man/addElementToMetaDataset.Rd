@@ -24,7 +24,8 @@ associated value(s) instead.
 \examples{
 data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
-objCOTAN <- addElementToMetaDataset(objCOTAN, "Test", c("These are ", "some values"))
+objCOTAN <- addElementToMetaDataset(objCOTAN, "Test",
+                                    c("These are ", "some values"))
 meta <- getMetadataDataset(objCOTAN)
 
 }

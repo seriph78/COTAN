@@ -25,7 +25,7 @@ setMethod(
   "estimateLambdaLinear",
   "COTAN",
   function(objCOTAN) {
-    lambda <- rowMeans(getRawData(objCOTAN), dims = 1)
+    lambda <- rowMeans(getRawData(objCOTAN), dims = 1L)
 
     {
       oldLambda <- getMetadataGenes(objCOTAN)[["lambda"]]
@@ -71,7 +71,7 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     # raw column averages divided by global_mean
-    nu <- colMeans(getRawData(objCOTAN), dims = 1)
+    nu <- colMeans(getRawData(objCOTAN), dims = 1L)
     nu <- nu / mean(nu)
 
     {
@@ -136,37 +136,39 @@ setMethod(
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
-    logThis("Estimate dispersion: START", logLevel = 2)
+    logThis("Estimate dispersion: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
 
     genes <- getGenes(objCOTAN)
     sumZeros <- set_names(getNumCells(objCOTAN) -
-                            rowSums(getZeroOneProj(objCOTAN)[genes, , drop = FALSE]),
+                            rowSums(getZeroOneProj(objCOTAN)[genes, ,
+                                                             drop = FALSE]),
                           genes)
     lambda <- getLambda(objCOTAN)
     nu <- getNu(objCOTAN)
 
     dispList <- list()
 
-    spIdx <- parallel::splitIndices(length(genes), ceiling(length(genes) / chunkSize))
+    spIdx <- parallel::splitIndices(length(genes),
+                                    ceiling(length(genes) / chunkSize))
 
-    spGenes = lapply(spIdx, function(x) genes[x])
+    spGenes <- lapply(spIdx, function(x) genes[x])
 
     numSplits <- length(spGenes)
-    splitStep <- max(16, cores * 2)
+    splitStep <- max(16L, cores * 2L)
 
     gc()
 
-    pBegin <- 1
+    pBegin <- 1L
     while (pBegin <= numSplits) {
-      pEnd <- min(pBegin + splitStep - 1, numSplits)
+      pEnd <- min(pBegin + splitStep - 1L, numSplits)
 
-      logThis(paste0("Executing ", (pEnd - pBegin + 1), " genes batches from",
+      logThis(paste0("Executing ", (pEnd - pBegin + 1L), " genes batches from",
                      " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
-              logLevel = 3)
+              logLevel = 3L)
 
-      if (cores != 1) {
+      if (cores != 1L) {
         res  <- parallel::mclapply(
                   spGenes[pBegin:pEnd],
                   parallelDispersionBisection,
@@ -176,8 +178,7 @@ setMethod(
                   threshold = threshold,
                   maxIterations = maxIterations,
                   mc.cores = cores)
-      }
-      else {
+      } else {
         res  <- lapply(
                   spGenes[pBegin:pEnd],
                   parallelDispersionBisection,
@@ -191,9 +192,9 @@ setMethod(
       dispList <- append(dispList, res)
       rm(res)
 
-      pBegin <- pEnd + 1
+      pBegin <- pEnd + 1L
     }
-    logThis("Estimate dispersion: DONE", logLevel = 2)
+    logThis("Estimate dispersion: DONE", logLevel = 2L)
 
     gc()
 
@@ -216,9 +217,9 @@ setMethod(
     logThis(paste("dispersion",
                   "| min:", min(getDispersion(objCOTAN)[goodPos]),
                   "| max:", max(getDispersion(objCOTAN)[goodPos]),
-                  "| % negative:", (sum(getDispersion(objCOTAN) < 0) * 100 /
-                                    getNumGenes(objCOTAN)) ),
-            logLevel = 1)
+                  "| % negative:", (sum(getDispersion(objCOTAN) < 0.0) * 100.0 /
+                                    getNumGenes(objCOTAN))),
+            logLevel = 1L)
 
     return(objCOTAN)
   }
@@ -270,7 +271,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
-    logThis("Estimate nu: START", logLevel = 2)
+    logThis("Estimate nu: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
 
@@ -295,24 +296,25 @@ setMethod(
 
     nuList <- list()
 
-    spIdx <- parallel::splitIndices(length(cells), ceiling(length(cells) / chunkSize))
+    spIdx <- parallel::splitIndices(length(cells),
+                                    ceiling(length(cells) / chunkSize))
 
-    spCells = lapply(spIdx, function(x) cells[x])
+    spCells <- lapply(spIdx, function(x) cells[x])
 
     numSplits <- length(spCells)
-    splitStep <- max(16, cores * 2)
+    splitStep <- max(16L, cores * 2L)
 
     gc()
 
-    pBegin <- 1
+    pBegin <- 1L
     while (pBegin <= numSplits) {
-      pEnd <- min(pBegin + splitStep - 1, numSplits)
+      pEnd <- min(pBegin + splitStep - 1L, numSplits)
 
-      logThis(paste0("Executing ", (pEnd - pBegin + 1), " cells batches from",
+      logThis(paste0("Executing ", (pEnd - pBegin + 1L), " cells batches from",
                      " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
-              logLevel = 3)
+              logLevel = 3L)
 
-      if (cores != 1) {
+      if (cores != 1L) {
         res  <- parallel::mclapply(
                   spCells[pBegin:pEnd],
                   parallelNuBisection,
@@ -323,8 +325,7 @@ setMethod(
                   threshold = threshold,
                   maxIterations = maxIterations,
                   mc.cores = cores)
-      }
-      else {
+      } else {
         res  <- lapply(
                   spCells[pBegin:pEnd],
                   parallelNuBisection,
@@ -339,11 +340,11 @@ setMethod(
       nuList <- append(nuList, res)
       rm(res)
 
-      pBegin <- pEnd + 1
+      pBegin <- pEnd + 1L
     }
 
     gc()
-    logThis("Estimate nu: DONE", logLevel = 2)
+    logThis("Estimate nu: DONE", logLevel = 2L)
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
     {
@@ -364,8 +365,8 @@ setMethod(
       logThis(paste("nu change (abs)",
                     "| max:",     max(nuChange),
                     "| median: ", median(nuChange),
-                    "| mean: ",   mean(nuChange) ),
-              logLevel = 1)
+                    "| mean: ",   mean(nuChange)),
+              logLevel = 1L)
     }
 
     return(objCOTAN)
@@ -393,6 +394,8 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
@@ -410,7 +413,7 @@ setMethod(
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
-    logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
+    logThis("Estimate 'dispersion'/'nu': START", logLevel = 2L)
 
     # getNu() would show a warning when no 'nu' present
     if (is_empty(getMetadataCells(objCOTAN)[["nu"]])) {
@@ -419,11 +422,11 @@ setMethod(
 
     sumZeros <- getNumCells(objCOTAN) - rowSums(getZeroOneProj(objCOTAN))
 
-    iter <- 1
+    iter <- 1L
     repeat {
       # a smalle threshold is used in order to ensure the global convergence
       objCOTAN <- estimateDispersionBisection(objCOTAN,
-                                              threshold = threshold / 10,
+                                              threshold = threshold / 10.0,
                                               cores = cores,
                                               maxIterations = maxIterations,
                                               chunkSize = chunkSize)
@@ -431,7 +434,7 @@ setMethod(
       gc()
 
       objCOTAN <- estimateNuBisection(objCOTAN,
-                                      threshold = threshold / 10,
+                                      threshold = threshold / 10.0,
                                       cores = cores,
                                       maxIterations = maxIterations,
                                       chunkSize = chunkSize)
@@ -439,13 +442,15 @@ setMethod(
       gc()
 
       meanNu <- mean(getNu(objCOTAN))
-      logThis(paste("Nu mean:", meanNu), logLevel = 2)
+      logThis(paste("Nu mean:", meanNu), logLevel = 2L)
 
       if (isTRUE(enforceNuAverageToOne)) {
         if (!is.finite(meanNu)) {
-          stopifnot("Cannot have infinite mean 'nu' only after the first loop" <- (iter == 1))
-          warning(paste0("Infinite 'nu' found: one of the cells expressed all genes\n",
-                         " Setting 'enforceNuAverageToOne <- FALSE'"))
+          assert_that(iter == 1L,
+                      msg = paste("Cannot have infinite mean 'nu'",
+                                  "only after the first loop"))
+          warning("Infinite 'nu' found: one of the cells expressed all genes\n",
+                  " Setting 'enforceNuAverageToOne <- FALSE'")
           enforceNuAverageToOne <- FALSE
         } else {
           objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
@@ -455,8 +460,8 @@ setMethod(
       }
 
       if (iter >= maxIterations) {
-        warning(paste("Max number of outer iterations", maxIterations,
-                      "reached while finding the solution"))
+        warning("Max number of outer iterations", maxIterations,
+                "reached while finding the solution")
         break
       }
 
@@ -467,19 +472,19 @@ setMethod(
 
       logThis(paste("Marginal errors | max:", max(marginalsErrors),
                     "| median", median(marginalsErrors),
-                    "| mean:", mean(marginalsErrors)), logLevel = 2)
+                    "| mean:", mean(marginalsErrors)), logLevel = 2L)
 
       gc()
 
       if (max(marginalsErrors) < threshold &&
-          (isFALSE(enforceNuAverageToOne) || abs(meanNu - 1) < threshold)) {
+          (isFALSE(enforceNuAverageToOne) || abs(meanNu - 1.0) < threshold)) {
         break
       }
 
-      iter <- iter + 1
+      iter <- iter + 1L
     }
 
-    logThis("Estimate dispersion/nu: DONE", logLevel = 2)
+    logThis("Estimate dispersion/nu: DONE", logLevel = 2L)
 
     return(objCOTAN)
   }
@@ -506,6 +511,8 @@ setMethod(
 #'
 #' @importFrom stats nlminb
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @rdname estimateDispersionNuNlminb
 #'
 setMethod(
@@ -514,7 +521,7 @@ setMethod(
   function(objCOTAN, threshold = 0.001,
            maxIterations = 50L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
-    logThis("Estimate 'dispersion'/'nu': START", logLevel = 2)
+    logThis("Estimate 'dispersion'/'nu': START", logLevel = 2L)
 
     # getNu() would show a warning when no 'nu' present
     if (is_empty(getMetadataCells(objCOTAN)[["nu"]])) {
@@ -524,56 +531,57 @@ setMethod(
     lambda <- getLambda(objCOTAN)
 
     zeroOne <- getZeroOneProj(objCOTAN)
-    zeroGenes <- rowSums(zeroOne == 0)
-    zeroCells <- colSums(zeroOne == 0)
+    zeroGenes <- rowSums(zeroOne == 0L)
+    zeroCells <- colSums(zeroOne == 0L)
 
     rm(zeroOne)
     gc()
 
-    stopifnot("Method cannot handle HK genes or FE cells yet" <-
-                (all(zeroGenes != 0) && all(zeroCells != 0)))
+    assert_that(all(zeroGenes != 0L), all(zeroCells != 0L),
+                msg = "Method cannot handle HK genes or FE cells yet")
 
-    errorFunction <- function(par, lambda, zeroGenes,
+
+    errorFunction <- function(params, lambda, zeroGenes,
                               zeroCells, enforceNuAverageToOne) {
       numGenes <- length(lambda)
-      dispersion <- par[1:numGenes]
-      nu <- exp(par[(numGenes + 1):length(par)])
+      dispersion <- params[1L:numGenes]
+      nu <- exp(params[(numGenes + 1L):length(params)])
 
       probZero <- funProbZero(dispersion, lambda %o% nu)
 
       diffGenes <- rowSums(probZero) - zeroGenes
       diffCells <- colSums(probZero) - zeroCells
 
-      diffNu <- 0
+      diffNu <- 0.0
       if (enforceNuAverageToOne) {
-        diffNu <- mean(nu) - 1
+        diffNu <- mean(nu) - 1.0
       }
 
       diff <- c(diffGenes, diffCells, diffNu)
-      error <- sqrt(sum(diff^2)/length(diff))
+      error <- sqrt(sum(diff^2L) / length(diff))
+      return(error)
     }
 
     solution <- nlminb(
-      start = c(rep(0,getNumGenes(objCOTAN)), log(getNu(objCOTAN))),
+      start = c(rep(0.0, getNumGenes(objCOTAN)), log(getNu(objCOTAN))),
       lambda = lambda, zeroGenes = zeroGenes, zeroCells = zeroCells,
       enforceNuAverageToOne = enforceNuAverageToOne,
       objective = errorFunction,
       control = list(iter.max = maxIterations, abs.tol = threshold,
-                     trace = 2, step.min = 0.001, step.max = 0.1))
+                     trace = 2L, step.min = 0.001, step.max = 0.1))
 
     numGenes <- length(lambda)
-    dispersion <- solution$par[1:numGenes]
-    nu <- exp(solution$par[(numGenes + 1):length(par)])
+    dispersion <- solution[["par"]][1L:numGenes]
+    nu <- exp(solution[["par"]][(numGenes + 1L):length(solution[["par"]])])
 
     objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
-                                        "dispersion", genes)
+                                        "dispersion", getGenes(objCOTAN))
 
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
-                                        "nu", cells)
+                                        "nu", getCells(objCOTAN))
 
-    logThis("Estimate 'dispersion'/'nu': DONE", logLevel = 2)
+    logThis("Estimate 'dispersion'/'nu': DONE", logLevel = 2L)
 
-    return(test.nlminb)
+    return(objCOTAN)
   }
 )
-

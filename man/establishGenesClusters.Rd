@@ -7,8 +7,8 @@
 establishGenesClusters(
   objCOTAN,
   groupMarkers,
-  numGenesPerMarker = 25,
-  kCuts = 6,
+  numGenesPerMarker = 25L,
+  kCuts = 6L,
   distance = "cosine",
   hclustMethod = "ward.D2"
 )
@@ -59,7 +59,8 @@ clusters <- cellsUniformClustering(objCOTAN, cores = 12,
 coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
                               clusters = clusters, coexDF = coexDF)
-groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
+groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"),
+                     G2 = c("Prpf40a", "Ergic2"),
                      G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
 resList <-  establishGenesClusters(objCOTAN, groupMarkers = groupMarkers,
                                    numGenesPerMarker = 11)

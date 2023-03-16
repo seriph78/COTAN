@@ -43,16 +43,15 @@
 #' @rdname genesCoexSpace
 #'
 genesCoexSpace <-
-  function(objCOTAN, primaryMarkers, numGenesPerMarker = 25) {
+  function(objCOTAN, primaryMarkers, numGenesPerMarker = 25L) {
   # da sistemare: output tanh of reduced coex matrix
-  logThis("Calculating gene coexpression space - START", logLevel = 2)
+  logThis("Calculating gene coexpression space - START", logLevel = 2L)
 
   {
     genesBelong <- primaryMarkers %in% getGenes(objCOTAN)
     if (!all(genesBelong)) {
-      warning(paste0("Genes [",
-                     paste0(primaryMarkers[!genesBelong], collapse = ", "),
-                     "] are not present in the 'COTAN' object!"))
+      warning("Genes [", toString(primaryMarkers[!genesBelong]),
+              "] are not present in the 'COTAN' object!")
       primaryMarkers <- primaryMarkers[genesBelong]
     }
     rm(genesBelong)
@@ -63,31 +62,37 @@ genesCoexSpace <-
   secondaryMarkers <- primaryMarkers
 
   for (marker in primaryMarkers) {
-    lowestPValueGenesPos <- order(pValue[, marker])[1:numGenesPerMarker]
-    secondaryMarkers <- c(secondaryMarkers, getGenes(objCOTAN)[lowestPValueGenesPos])
+    lowestPValueGenesPos <- order(pValue[, marker])[1L:numGenesPerMarker]
+    secondaryMarkers <- c(secondaryMarkers,
+                          getGenes(objCOTAN)[lowestPValueGenesPos])
   }
   # now the secondary markers are unique and sorted accordingly
   # to the original genes' list
-  secondaryMarkers <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% unique(secondaryMarkers)]
+  secondaryMarkers <-
+    getGenes(objCOTAN)[getGenes(objCOTAN) %in% unique(secondaryMarkers)]
 
-  logThis(paste("Number of selected secondary markers:", length(secondaryMarkers)), logLevel = 1)
+  logThis(paste("Number of selected secondary markers:",
+                length(secondaryMarkers)), logLevel = 1L)
 
   pValue <- pValue[secondaryMarkers, ]
 
   rankGenes <- data.frame()
   for (marker in primaryMarkers) {
     rankGenes <- setColumnInDF(rankGenes,
-                               colToSet = rank(pValue[, marker], ties.method = "first"),
-                               colName = marker, rowNames = secondaryMarkers)
+                               colToSet = rank(pValue[, marker],
+                                               ties.method = "first"),
+                               colName = marker,
+                               rowNames = secondaryMarkers)
   }
 
-  top10pcCols <- as.integer(max(1, round(length(secondaryMarkers) / 10, digits = 0)))
+  top10pcCols <- as.integer(max(1L, round(length(secondaryMarkers) / 10.0,
+                                          digits = 0L)))
 
   pValueSorted <- calculateS(objCOTAN, geneSubsetCol = secondaryMarkers)
   # put on the left the smalles pValues for each row
-  pValueSorted <- t(apply(t(pValueSorted), 2, sort, decreasing = TRUE))
-  pValueSorted <- pValueSorted[, 1:top10pcCols, drop = FALSE]
-  pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1, lower.tail = FALSE)
+  pValueSorted <- t(apply(t(pValueSorted), 2L, sort, decreasing = TRUE))
+  pValueSorted <- pValueSorted[, 1L:top10pcCols, drop = FALSE]
+  pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1L, lower.tail = FALSE)
 
   LDI <- set_names(as.data.frame(rowMeans(pValueSorted)), "Local.GDI")
 
@@ -102,10 +107,11 @@ genesCoexSpace <-
   GCS <- getGenesCoex(objCOTAN, genes = secondaryMarkers)[goodGenes, ]
   GCS <- tanh(GCS * sqrt(getNumCells(objCOTAN)))
 
-  logThis(paste0("Number of columns (V set - secondary markers): ", dim(GCS)[2]), logLevel = 3)
-  logThis(paste0("Number of rows (U set): ", dim(GCS)[1]), logLevel = 3)
+  logThis(paste0("Number of columns (V set - secondary markers): ",
+                 dim(GCS)[[2L]]), logLevel = 3L)
+  logThis(paste0("Number of rows (U set): ", dim(GCS)[[1L]]), logLevel = 3L)
 
-  logThis("Calculating gene coexpression space - DONE", logLevel = 2)
+  logThis("Calculating gene coexpression space - DONE", logLevel = 2L)
 
   return(list("SecondaryMarkers" = secondaryMarkers, "GCS" = GCS,
               "rankGenes" = rankGenes))
@@ -156,6 +162,8 @@ genesCoexSpace <-
 #'
 #' @importFrom stringr str_split
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
@@ -171,7 +179,8 @@ genesCoexSpace <-
 #' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 #' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
 #'                               clusters = clusters, coexDF = coexDF)
-#' groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
+#' groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"),
+#'                      G2 = c("Prpf40a", "Ergic2"),
 #'                      G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
 #' resList <-  establishGenesClusters(objCOTAN, groupMarkers = groupMarkers,
 #'                                    numGenesPerMarker = 11)
@@ -180,15 +189,17 @@ genesCoexSpace <-
 #' @rdname establishGenesClusters
 #'
 establishGenesClusters <-
-  function(objCOTAN, groupMarkers, numGenesPerMarker = 25,
-           kCuts = 6, distance = "cosine", hclustMethod = "ward.D2"){
-  logThis("Establishing gene clusters - START", logLevel = 2)
+  function(objCOTAN, groupMarkers, numGenesPerMarker = 25L,
+           kCuts = 6L, distance = "cosine", hclustMethod = "ward.D2") {
+  logThis("Establishing gene clusters - START", logLevel = 2L)
 
-  stopifnot("Group markers must have names for each group" <- !is.null(names(groupMarkers)))
+  assert_that(!is.null(names(groupMarkers)),
+              msg = "Group markers must have names for each group")
 
   maxCol <- brewer.pal.info[c("Set2", "Set1", "Set3"), "maxcolors"]
 
-  stopifnot("kCuts greater than number of possible supported colors" = kCuts <= sum(maxCol))
+  assert_that(kCuts <= sum(maxCol),
+              msg = "kCuts greater than number of possible supported colors")
 
   # Dropping the genes not present
   filterGenes <- function(markers, genes) {
@@ -197,7 +208,7 @@ establishGenesClusters <-
   groupMarkers <- lapply(groupMarkers, filterGenes, getGenes(objCOTAN))
   groupMarkers <- groupMarkers[!is.na(groupMarkers)]
 
-  primaryMarkers = unlist(groupMarkers)
+  primaryMarkers <- unlist(groupMarkers)
 
   c(secondaryMarkers, GCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN,
@@ -207,37 +218,40 @@ establishGenesClusters <-
 
   GCSPca <- prcomp(GCS, center = TRUE, scale. = FALSE)
 
-  SMRelevance <- matrix(nrow = length(secondaryMarkers), ncol = length(groupMarkers),
+  SMRelevance <- matrix(nrow = length(secondaryMarkers),
+                        ncol = length(groupMarkers),
                         dimnames = list(secondaryMarkers, names(groupMarkers)))
 
   for (name in names(groupMarkers)) {
-    SMRelevance[ , name] <- rowSums(rankGenes[, groupMarkers[[name]], drop = FALSE])
-    SMRelevance[groupMarkers[[name]], name] <- 1
+    SMRelevance[, name] <- rowSums(rankGenes[, groupMarkers[[name]],
+                                             drop = FALSE])
+    SMRelevance[groupMarkers[[name]], name] <- 1L
   }
 
-  tempCoex = getGenesCoex(objCOTAN, genes = primaryMarkers)[secondaryMarkers, ]
+  tempCoex <- getGenesCoex(objCOTAN, genes = primaryMarkers)[secondaryMarkers, ]
 
   for (name in names(groupMarkers)) {
-    antiCorrelated <- tempCoex[, groupMarkers[[name]]] < 0
-    toChange <- rownames(tempCoex)[rowSums(antiCorrelated) > 0]
-    SMRelevance[toChange, name] <- 100000
+    antiCorrelated <- tempCoex[, groupMarkers[[name]]] < 0.0
+    toChange <- rownames(tempCoex)[rowSums(antiCorrelated) > 0L]
+    SMRelevance[toChange, name] <- 100000.0
   }
 
-  pos.link  <- set_names(vector("list", length(groupMarkers)), names(groupMarkers))
+  posLink <- set_names(vector("list", length(groupMarkers)),
+                        names(groupMarkers))
 
   for (g in secondaryMarkers) {
     w <- which(SMRelevance[g, ] == min(SMRelevance[g, ]))
-    if (length(w) != 1) {
+    if (length(w) != 1L) {
       next
     }
-    pos.link[[w]] = c(pos.link[[w]], g)
+    posLink[[w]] <- c(posLink[[w]], g)
   }
 
-  plotEigen <- fviz_eig(GCSPca, addlabels = TRUE, ncp = 10)
+  plotEigen <- fviz_eig(GCSPca, addlabels = TRUE, ncp = 10L)
 
   if (distance == "cosine") {
     coexDist <- cosineDissimilarity(t(GCS))
-  } else if(distance == "euclidean") {
+  } else if (distance == "euclidean") {
     coexDist <- dist(GCS)
   } else {
     stop("only 'cosine' and 'euclidean' distances are supported")
@@ -246,70 +260,73 @@ establishGenesClusters <-
 
   dend <- as.dendrogram(hcNorm)
 
-  pca1 <- as.data.frame(GCSPca[["x"]][, 1:10])
+  pca1 <- as.data.frame(GCSPca[["x"]][, 1L:10L])
   pca1 <- pca1[order.dendrogram(dend), ]
 
   highlight <- rep("not_marked", nrow(pca1))
-  for (n in names(pos.link)) {
-    highlight[rownames(pca1) %in% pos.link[[n]]] <- paste0("Genes related to ", n)
+  for (n in names(posLink)) {
+    highlight[rownames(pca1) %in% posLink[[n]]] <-
+      paste0("Genes related to ", n)
   }
   pca1[["highlight"]] <- highlight
 
   hClust <- cutree(hcNorm, k = kCuts)[rownames(pca1)]
   pca1[["hclust"]] <- hClust
 
-  col_vector = brewer.pal(min(kCuts, maxCol[1]), name = "Set2")
-  if (kCuts > maxCol[1]) {
-    col_vector <- c(col_vector, brewer.pal(min(kCuts - maxCol[1], maxCol[2]),
-                                           name = "Set1"))
+  colVector <- brewer.pal(min(kCuts, maxCol[[1L]]), name = "Set2")
+  if (kCuts > maxCol[[1L]]) {
+    colVector <- c(colVector, brewer.pal(min(kCuts - maxCol[[1L]],
+                                             maxCol[[2L]]),
+                                         name = "Set1"))
   }
-  if (kCuts > sum(maxCol[1:2])) {
-    col_vector <- c(col_vector, brewer.pal(min(kCuts - sum(maxCol[1:2]), maxCol[3]),
-                                           name = "Set3"))
+  if (kCuts > sum(maxCol[1L:2L])) {
+    colVector <- c(colVector, brewer.pal(min(kCuts - sum(maxCol[1L:2L]),
+                                             maxCol[[3L]]),
+                                         name = "Set3"))
   }
 
-  pca1[["sec_markers"]] <- 0
-  pca1[["sec_markers"]][rownames(pca1) %in% secondaryMarkers] <- 1
+  pca1[["sec_markers"]] <- 0.0
+  pca1[["sec_markers"]][rownames(pca1) %in% secondaryMarkers] <- 1.0
 
-  colors = rep("#B09C85FF", nrow(pca1))
-  c = 1
+  colors <- rep("#B09C85FF", nrow(pca1))
+  c <- 1L
   for (to.color in unique(highlight)) {
     if (to.color == "not_marked") {
       next
     }
-    colors[highlight == to.color] = col_vector[c]
-    c <- c + 1
+    colors[highlight == to.color] <- colVector[c]
+    c <- c + 1L
   }
   pca1[["colors"]] <- colors
 
-  pca1 <- pca1[labels(dend),]
+  pca1 <- pca1[labels(dend), ]
 
-  col_branches <- rep("#B09C85FF", nrow(pca1))
+  colBranches <- rep("#B09C85FF", nrow(pca1))
   groupLabels  <- hClust
   for (cl in unique(hClust)) {
-    clPos = (hClust == cl)
-    for(groupName in names(groupMarkers)) {
+    clPos <- (hClust == cl)
+    for (groupName in names(groupMarkers)) {
       for (marker in groupMarkers[[groupName]]) {
-        if (!marker %in% rownames(pca1[clPos,])) {
+        if (!marker %in% rownames(pca1[clPos, ])) {
           next
         }
-        col_branches[clPos] <- colors[rownames(pca1) %in% marker]
-        groupLabels[clPos]  <- groupName
+        colBranches[clPos] <- colors[rownames(pca1) %in% marker]
+        groupLabels[clPos] <- groupName
       }
     }
   }
 
-  pca1[["col_branches"]] <- col_branches
+  pca1[["col_branches"]] <- colBranches
   pca1[["groupLabels"]]  <- groupLabels
 
   uniquePos <- !duplicated(hClust)
   dend <- color_branches(dend, k = kCuts,
-                         col         = col_branches[uniquePos],
+                         col         = colBranches[uniquePos],
                          groupLabels = groupLabels [uniquePos])
 
   dend <- color_labels(dend, labels = rownames(pca1), col = colors)
 
-  logThis("Establishing gene clusters - DONE", logLevel = 2)
+  logThis("Establishing gene clusters - DONE", logLevel = 2L)
 
   return(list("g.space" = GCS, "plot.eig" = plotEigen,
               "pca_clusters" = pca1, "tree_plot" = dend))

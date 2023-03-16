@@ -19,14 +19,14 @@
 #'
 datasetTags <- function() {
   return(c("GEO"   = "GEO:"                                             # 1
-          ,"sc.m"  = "scRNAseq method:"                                 # 2
-          ,"cond"  = "condition sample:"                                # 3
-          ,"cells" = "starting n. of cells:"                            # 4
-          ,"gsync" = "genes' coex is in sync:"                          # 5
-          ,"csync" = "cells' coex is in sync:"                          # 6
-          ,"gbad"  = "genes' pairs fraction with small expected count:" # 7
-          ,"cbad"  = "cells' pairs fraction with small expected count:" # 8
-          ))
+         , "sc.m"  = "scRNAseq method:"                                 # 2
+         , "cond"  = "condition sample:"                                # 3
+         , "cells" = "starting n. of cells:"                            # 4
+         , "gsync" = "genes' coex is in sync:"                          # 5
+         , "csync" = "cells' coex is in sync:"                          # 6
+         , "gbad"  = "genes' pairs fraction with small expected count:" # 7
+         , "cbad"  = "cells' pairs fraction with small expected count:" # 8
+         ))
 }
 
 
@@ -48,12 +48,12 @@ updateMetaInfo <- function(meta, tag, value) {
   # all values are converted to strings
   newLine <- c(tag, paste0(value))
 
-  if (!is_empty(meta) && (tag %in% meta[[1]])) {
+  if (!is_empty(meta) && (tag %in% meta[[1L]])) {
     # existing tag: update the value
-    rowPos <- which(meta[[1]] %in% tag)
+    rowPos <- which(meta[[1L]] %in% tag)
   } else {
     # new tag: add a new entry
-    rowPos <- nrow(meta) + 1
+    rowPos <- nrow(meta) + 1L
   }
 
   meta[rowPos, seq_along(newLine)] <- newLine
@@ -89,15 +89,15 @@ setMethod(
   "initializeMetaDataset",
   "COTAN",
   function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
-    logThis("Initializing `COTAN` meta-data", logLevel = 2)
+    logThis("Initializing `COTAN` meta-data", logLevel = 2L)
 
     tags <- datasetTags()
 
     meta <- objCOTAN@metaDataset
 
-    meta <- updateMetaInfo(meta, tags[["GEO"  ]], GEO)
-    meta <- updateMetaInfo(meta, tags[["sc.m" ]], sequencingMethod)
-    meta <- updateMetaInfo(meta, tags[["cond" ]], sampleCondition)
+    meta <- updateMetaInfo(meta, tags[["GEO"]],   GEO)
+    meta <- updateMetaInfo(meta, tags[["sc.m"]],  sequencingMethod)
+    meta <- updateMetaInfo(meta, tags[["cond"]],  sampleCondition)
     meta <- updateMetaInfo(meta, tags[["cells"]], getNumCells(objCOTAN))
     meta <- updateMetaInfo(meta, tags[["gsync"]], FALSE)
     meta <- updateMetaInfo(meta, tags[["csync"]], FALSE)
@@ -126,7 +126,8 @@ setMethod(
 #' @examples
 #' data("raw.dataset")
 #' objCOTAN <- COTAN(raw = raw.dataset)
-#' objCOTAN <- addElementToMetaDataset(objCOTAN, "Test", c("These are ", "some values"))
+#' objCOTAN <- addElementToMetaDataset(objCOTAN, "Test",
+#'                                     c("These are ", "some values"))
 #' meta <- getMetadataDataset(objCOTAN)
 #'
 #' @rdname addElementToMetaDataset
@@ -171,9 +172,10 @@ setMethod(
     zeroOne <- getZeroOneProj(objCOTAN)
 
     # flag the genes with positive UMI count in every cell
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes,
-                                        rowSums(zeroOne) == getNumCells(objCOTAN),
-                                        "hkGenes", getGenes(objCOTAN))
+    objCOTAN@metaGenes <-
+      setColumnInDF(objCOTAN@metaGenes,
+                    rowSums(zeroOne) == getNumCells(objCOTAN),
+                    "hkGenes", getGenes(objCOTAN))
 
     return(objCOTAN)
   }
@@ -209,9 +211,10 @@ setMethod(
     zeroOne <- getZeroOneProj(objCOTAN)
 
     # flag the cells with positive UMI count in every gene
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
-                                        colSums(zeroOne) == getNumGenes(objCOTAN),
-                                        "feCells", getCells(objCOTAN))
+    objCOTAN@metaCells <-
+      setColumnInDF(objCOTAN@metaCells,
+                    colSums(zeroOne) == getNumGenes(objCOTAN),
+                    "feCells", getCells(objCOTAN))
 
     return(objCOTAN)
   }
@@ -247,9 +250,10 @@ setMethod(
   "dropGenesCells",
   "COTAN",
   function(objCOTAN, genes, cells) {
-    if (any(!genes %in% getGenes(objCOTAN)) ||
-        any(!cells %in% getCells(objCOTAN))) {
-      stop("Asked to drop genes and/or cells that were not present in the 'COTAN' object")
+    if (!all(genes %in% getGenes(objCOTAN)) ||
+        !all(cells %in% getCells(objCOTAN))) {
+      stop("Asked to drop genes and/or cells",
+           " that were not present in the 'COTAN' object")
     }
 
     genesPosToKeep <- which(!(getGenes(objCOTAN) %in% genes))
@@ -257,7 +261,7 @@ setMethod(
 
     if (length(genesPosToKeep) == getNumGenes((objCOTAN)) &&
         length(cellsPosToKeep) == getNumCells((objCOTAN))) {
-      logThis("No genes/cells where dropped", logLevel = 2)
+      logThis("No genes/cells where dropped", logLevel = 2L)
     }
 
     # as all estimates would be wrong, a completely new object is created
@@ -309,18 +313,18 @@ setMethod(
     }
 
     if (internalName %in% colnames(getMetadataCells(objCOTAN))) {
-      stop(paste0("A clusterization with name '", clName, "' already exists."))
+      stop("A clusterization with name '", clName, "' already exists.")
     }
 
     if (length(clusters) != getNumCells(objCOTAN)) {
-      stop(paste0("The passed clusterization has the wrong number of elements [",
-                  length(clusters), "] instead of the expected number of cells [",
-                  getNumCells(objCOTAN), "]."))
+      stop("The passed clusterization has the wrong number of elements [",
+           length(clusters), "] instead of the expected number of cells [",
+           getNumCells(objCOTAN), "].")
     }
     if (!is_empty(coexDF) && !isa(coexDF, "data.frame")) {
-      stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
-                  " A '", class(coexDF), "' was given instead for clusterization '",
-                  clName, "'."))
+      stop("'clusterCoex' is supposedly composed of data.frames.",
+           " A '", class(coexDF), "' was given instead for clusterization '",
+           clName, "'.")
     }
 
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, clusters,
@@ -361,7 +365,8 @@ setMethod(
 #' coexDF <- as.data.frame(matrix(0, ncol=10, nrow=getNumGenes(objCOTAN)))
 #' colnames(coexDF) <- c(1:10)
 #' rownames(coexDF) <- getGenes(objCOTAN)
-#' objCOTAN <- addClusterizationCoex(objCOTAN, clName = "dummy", coexDF = coexDF)
+#' objCOTAN <- addClusterizationCoex(objCOTAN, clName = "dummy",
+#'                                   coexDF = coexDF)
 #'
 #' @rdname addClusterizationCoex
 #'
@@ -370,9 +375,9 @@ setMethod(
   "COTAN",
   function(objCOTAN, clName, coexDF) {
     if (!isa(coexDF, "data.frame")) {
-      stop(paste0("'clusterCoex' is supposedly composed of data.frames.",
-                  " A '", class(coexDF), "' was given instead for clusterization '",
-                  clName, "'."))
+      stop("'clusterCoex' is supposedly composed of data.frames.",
+           " A '", class(coexDF), "' was given instead for clusterization '",
+           clName, "'.")
     }
 
     internalName <- clName
@@ -381,7 +386,7 @@ setMethod(
     }
 
     if (!internalName %in% names(getClustersCoex(objCOTAN))) {
-      stop(paste0("A clusterization with name '", clName, "' does not exists."))
+      stop("A clusterization with name '", clName, "' does not exists.")
     }
 
     # this should not add any new elements to the list!
@@ -504,7 +509,7 @@ setMethod(
     }
 
     if (!internalName %in% names(getClustersCoex(objCOTAN))) {
-      stop(paste0("A clusterization with name '", clName, "' does not exists."))
+      stop("A clusterization with name '", clName, "' does not exists.")
     }
 
     keptCols <- !colnames(objCOTAN@metaCells) %in% internalName

@@ -26,8 +26,10 @@ This function estimates and stores the \emph{coex} matrix in the
 The function calculates the coex matrix, defined by following
 formula:
 
-\deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{(-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
-             {\sqrt{n \sum_{i,j \in \{\text{Y, N}\}}{\frac{1}{1 \vee E_{ij}}}}}}
+\deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{
+                    (-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
+             {\sqrt{n \sum_{i,j \in \{\text{Y, N}\}}{
+                            \frac{1}{1 \vee E_{ij}}}}}}
 
 where \eqn{O} and \eqn{E} are the observed and expected contingency tables
 and \eqn{n} is the relevant numerosity (the number of genes/cells depending
@@ -35,7 +37,8 @@ on given \code{actOnCells} flag).
 
 The formula can be more effectively implemented as:
 
-\deqn{\sqrt{\frac{1}{n}\sum_{i,j \in \{\text{Y, N}\}}{\frac{1}{1 \vee E_{ij}}}}
+\deqn{\sqrt{\frac{1}{n}\sum_{i,j \in \{\text{Y, N}\}}{
+                               \frac{1}{1 \vee E_{ij}}}}
         \, \bigl(O_\text{YY}-E_\text{YY}\bigr)}
 
 once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for all

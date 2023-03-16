@@ -7,7 +7,7 @@
 mitochondrialPercentagePlot(
   objCOTAN,
   splitPattern = " ",
-  numCol = 2,
+  numCol = 2L,
   genePrefix = "^MT-"
 )
 }

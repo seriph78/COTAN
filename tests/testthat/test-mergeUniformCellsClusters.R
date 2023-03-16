@@ -38,7 +38,8 @@ test_that("Merge Uniform Cells Clusters", {
   expect_equal(colnames(deltaExpression), sort(unique(clusters)))
 
   #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
-  groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"), G2 = c("Prpf40a", "Ergic2"),
+  groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"),
+                       G2 = c("Prpf40a", "Ergic2"),
                        G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
 
   e.df <- geneSetEnrichment(clustersCoex = coexDF, groupMarkers = groupMarkers)

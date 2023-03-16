@@ -19,6 +19,8 @@
 #' @importFrom ggplot2 labs
 #' @importFrom ggplot2 scale_x_log10
 #' @importFrom ggplot2 scale_y_log10
+#' @importFrom ggplot2 facet_grid
+#' @importFrom ggplot2 vars
 #'
 #' @importFrom scales trans_breaks
 #' @importFrom scales math_format
@@ -39,22 +41,27 @@
 #' @rdname scatterPlot
 #'
 scatterPlot <- function(objCOTAN, splitPattern = " ",
-                        numCol = 2, splitSamples = FALSE) {
-  lib.size <- getCellsSize(objCOTAN)
-  gene.size <- Matrix::colSums(getZeroOneProj(objCOTAN))
+                        numCol = 2L, splitSamples = FALSE) {
+  cellsSize <- getCellsSize(objCOTAN)
+  genesSize <- Matrix::colSums(getZeroOneProj(objCOTAN))
 
-  to.plot <- cbind(lib.size, gene.size)
-  to.plot <- as.data.frame(to.plot)
-  splitNames <- str_split(rownames(to.plot), pattern = splitPattern, simplify = TRUE)
-  if (ncol(splitNames) < numCol) {
-    # no splits found take all as a single group
-    to.plot$sample <- rep("1", nrow(splitNames))
-  } else {
-    to.plot$sample <- splitNames[, numCol]
+  toPlot <- cbind(cellsSize, genesSize)
+  toPlot <- as.data.frame(toPlot)
+
+  {
+    splitNames <- str_split(rownames(toPlot),
+                            pattern = splitPattern, simplify = TRUE)
+    if (ncol(splitNames) < numCol) {
+      # no splits found take all as a single group
+      sampleCol <- rep("1", nrow(splitNames))
+    } else {
+      sampleCol <- splitNames[, numCol]
+    }
+    toPlot <- setColumnInDF(toPlot, sampleCol, colName = "sample")
   }
 
-  plot <- ggplot(to.plot, aes(x=lib.size,y=gene.size, color = sample)) +
-    geom_point(size = 0.5, alpha= 0.8) +
+  plot <- ggplot(toPlot, aes(x = cellsSize, y = genesSize, color = sample)) +
+    geom_point(size = 0.5, alpha = 0.8) +
     labs(title = "Scatter plot of library size VS gene detected for each cell",
          y = "Gene number",
          x = "Library size (UMI)") +
@@ -64,7 +71,7 @@ scatterPlot <- function(objCOTAN, splitPattern = " ",
                   labels = trans_format("log10", math_format(10^.x))) +
     plotTheme("size-plot")
 
-  if (splitSamples == T){
+  if (splitSamples == TRUE) {
     plot <- plot + facet_grid(cols = vars(sample))
   }
 

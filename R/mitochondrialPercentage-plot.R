@@ -23,6 +23,7 @@
 #' @importFrom Matrix rowSums
 #'
 #' @importFrom stringr str_split
+#' @importFrom stringr str_detect
 #'
 #' @returns a list with the violin-boxplot plot and a sizes data.frame
 #'
@@ -37,44 +38,51 @@
 #' @rdname mitochondrialPercentagePlot
 #'
 mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
-                                        numCol = 2, genePrefix = "^MT-"){
+                                        numCol = 2L, genePrefix = "^MT-") {
   sizes <- getCellsSize(objCOTAN)
   sizes <- as.data.frame(sizes)
-  sizes$n <- c(1:dim(sizes)[1])
-  splitNames <- str_split(rownames(sizes), pattern = splitPattern, simplify = TRUE)
-  if (ncol(splitNames) < numCol) {
-    # no splits found take all as a single group
-    sizes$sample <- rep("1", nrow(splitNames))
-  } else {
-    sizes$sample <- splitNames[, numCol]
+  sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
+  {
+    splitNames <- str_split(rownames(sizes),
+                            pattern = splitPattern, simplify = TRUE)
+    if (ncol(splitNames) < numCol) {
+      # no splits found take all as a single group
+      sampleCol <- rep("1", nrow(splitNames))
+    } else {
+      sampleCol <- splitNames[, numCol]
+    }
+    sizes <- setColumnInDF(sizes, sampleCol, colName = "sample")
   }
 
-  mitGenes <- getGenes(objCOTAN)[stringr::str_detect(getGenes(objCOTAN), pattern = genePrefix)]
-  mitGenesData <- as.data.frame(getRawData(objCOTAN)[getGenes(objCOTAN) %in% mitGenes, ])
-  if(!identical(colnames(mitGenesData), rownames(sizes))){
+  mitGenes <- getGenes(objCOTAN)[str_detect(getGenes(objCOTAN),
+                                            pattern = genePrefix)]
+  mitGenesData <- getRawData(objCOTAN)[getGenes(objCOTAN) %in% mitGenes, ]
+  if (!identical(colnames(mitGenesData), rownames(sizes))) {
     warning("Problem with cells' order!")
   }
   mitGenesData <- t(mitGenesData)
-  sizes$sum.mit <- Matrix::rowSums(mitGenesData)
-  sizes$mit.percentage <- round(sizes$sum.mit / sizes$sizes * 100, digits = 2)
+  sizes <- setColumnInDF(sizes, rowSums(mitGenesData), colName = "sum.mit")
+  sizes <- setColumnInDF(sizes, colName = "mit.percentage",
+                         colToSet = round(100.0 * sizes[["sum.mit"]] /
+                                            sizes[["sizes"]], digits = 2L))
 
   plot <-
     sizes %>%
-    ggplot(aes(x = sample, y = mit.percentage, fill = sample)) +
+    ggplot(aes(x = "sample", y = "mit.percentage", fill = "sample")) +
     #geom_point(size = 0.5) +
-    geom_flat_violin(position = position_nudge(x = .15, y = 0),adjust =2, alpha = 0.5) +
-    geom_point(position = position_jitter(width = .1), size = .4, color="black", alpha= 0.5) +
-    geom_boxplot(aes(x = sample, y = mit.percentage, fill = sample),
-                 outlier.shape = NA, alpha = .8, width = .15, colour = "gray65", size = 0.6)+
+    geom_flat_violin(position = position_nudge(x = .15, y = 0.0),
+                     adjust = 2.0, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .1),
+               size = .4, color = "black", alpha = 0.5) +
+    geom_boxplot(aes(x = "sample", y = "mit.percentage", fill = "sample"),
+                 outlier.shape = NA, alpha = .8,
+                 width = .15, colour = "gray65", size = 0.6) +
     labs(title = "Mitochondrial percentage of reads",
          y = "% (mit. reads / tot reads * 100)",
          x = "") +
-    scale_y_continuous(expand = c(0, 0)) +
-    #ylim(0,max(sizes$sizes))+
+    scale_y_continuous(expand = c(0.0, 0.0)) +
+    #ylim(0,max(sizes$sizes)) +
     plotTheme("size-plot")
 
   return(list("plot" = plot, "sizes" = sizes))
 }
-
-
-
