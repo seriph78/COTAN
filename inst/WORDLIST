@@ -105,6 +105,7 @@ iteratively
 logThis
 mRNA
 mclapply
+mergeable
 mergeUniformCellsClusters
 metaCells
 mitochondrialPercentagePlot

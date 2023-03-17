@@ -29,7 +29,6 @@ RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 Imports:
     stats,
-    proto,
     plyr,
     dplyr,
     methods,
@@ -57,10 +56,10 @@ Imports:
     dendextend,
     zeallot,
     assertthat,
-    withr,
-    qpdf
+    withr
 Suggests: 
     testthat (>= 3.0.0),
+    proto,
     spelling,
     knitr,
     data.table,
@@ -73,7 +72,8 @@ Suggests:
     Rtsne,
     plotly,
     BiocStyle,
-    cowplot
+    cowplot,
+    qpdf
 Config/testthat/edition: 3
 Language: en-US
 biocViews: 

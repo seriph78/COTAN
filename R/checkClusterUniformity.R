@@ -65,7 +65,7 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
 
     genesToLabel <- head(rownames(GDIData[order(GDIData[["GDI"]],
                                                 decreasing = TRUE), ]), n = 10L)
-    plot(GDIPlot(objCOTAN, GDI.df = GDIData, GDIThreshold = GDIThreshold,
+    plot(GDIPlot(objCOTAN, GDIIn = GDIData, GDIThreshold = GDIThreshold,
                  genes = list("top 10 GDI genes" = genesToLabel)))
 
     dev.off()

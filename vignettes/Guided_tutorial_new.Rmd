@@ -48,10 +48,6 @@ library(zeallot)
 library(grDevices)
 #library(dendextend)
 library(qpdf)
-
-# Log-level 2 was chosen to showcase better how the package works
-# In normal usage a level of 0 or 1 is more appropriate 
-setLoggingLevel(2)
 ```
 
 Download the dataset for mouse cortex E17.5.
@@ -81,6 +77,12 @@ Define a directory where the output will be stored.
 
 ```{r}
 outDir <- tempdir()
+
+# Log-level 2 was chosen to showcase better how the package works
+# In normal usage a level of 0 or 1 is more appropriate 
+setLoggingLevel(2)
+
+setLoggingFile(file.path(outDir, "vignette.log"))
 ```
 
 # Analytical pipeline
@@ -241,6 +243,8 @@ pdf(file.path(outDir, "cleaning", paste(t, "_plots_efficiency.pdf")))
 UDEPlot
 
 dev.off()
+
+UDEPlot
 ```
 
 ## COTAN analysis
@@ -254,7 +258,7 @@ obj = estimateDispersionBisection(obj, cores = 10)
 COEX evaluation and storing
 
 ```{r}
-obj = calculateCoex(obj)
+obj <- calculateCoex(obj)
 
 # saving the structure
 saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
@@ -341,7 +345,6 @@ GDIPlot(obj, cond = "test", genes = genes.list)
 ```
 
 If a more complex plot is needed, or if we want to analyze more in detail the GDI data, we can get directly the GDI data frame.
-
 
 ```{r}
 quant.p = calculateGDI(obj)

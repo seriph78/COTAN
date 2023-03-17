@@ -94,9 +94,9 @@ would form a \strong{uniform} cluster still.
 In \code{cellsUniformClustering}, once a preliminary \emph{clusterization} is
 obtained from the \code{Seurat} package methods, each cluster is checked for
 \strong{uniformity} via the function \code{\link[=checkClusterUniformity]{checkClusterUniformity()}}. Once all
-clusters are checked, all cells from the \strong{non-uniform} clustersare pooled
-together for another iteration of the entire process, until all clusters
-are deemed \strong{uniform}. In the case only a few cells are left out
+clusters are checked, all cells from the \strong{non-uniform} clusters are
+pooled together for another iteration of the entire process, until all
+clusters are deemed \strong{uniform}. In the case only a few cells are left out
 (\eqn{\leq 50}), those are flagged as \code{"not_clustered"} and the process is
 stopped.
 

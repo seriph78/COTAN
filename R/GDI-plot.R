@@ -11,7 +11,7 @@
 #'   chi-squared test statistics. "G" is G-test statistics
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
 #'   It defaults to \eqn{1.5}
-#' @param GDI.df when the GDI data frame was already calculated, it can be put
+#' @param GDIIn when the GDI data frame was already calculated, it can be put
 #'   here to speed up the process (default is `NULL`)
 #'
 #' @returns A `ggplot2` object
@@ -53,22 +53,20 @@
 #'
 GDIPlot <- function(objCOTAN, genes, cond = "",
                     statType = "S", GDIThreshold = 1.5,
-                    GDI.df = NULL) {
-  sumRawNorm <- NULL
-
+                    GDIIn = NULL) {
   logThis("GDI plot", logLevel = 2L)
 
-  if (is_empty(GDI.df)) {
-    GDI <- calculateGDI(objCOTAN, statType = statType)
+  if (is_empty(GDIIn)) {
+    GDIDf <- calculateGDI(objCOTAN, statType = statType)
   } else {
-    GDI <- GDI.df
+    GDIDf <- GDIIn
   }
 
-  GDI[["colors"]] <- "none"
+  GDIDf[["colors"]] <- "none"
   for (n in names(genes)) {
-    genesSelec <- rownames(GDI) %in% genes[[n]]
+    genesSelec <- rownames(GDIDf) %in% genes[[n]]
     if (any(genesSelec)) {
-      GDI[genesSelec, "colors"] <- n
+      GDIDf[genesSelec, "colors"] <- n
     } else {
       logThis(paste("GDIPlot - none of the genes in group", n,
                     "is present: will be ignored"), logLevel = 1L)
@@ -77,39 +75,39 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
 
   # drop housekeeping genes i.e. those that has GDI <= -5
   {
-    genesToKeep <- (GDI[["GDI"]] > -5.0)
+    genesToKeep <- (GDIDf[["GDI"]] > -5.0)
     logThis(paste("Removed", sum(!genesToKeep), "low GDI genes",
                   "(such as the housekeeping) in GDI plot"), logLevel = 1L)
-    GDI <- GDI[genesToKeep, ]
+    GDIDf <- GDIDf[genesToKeep, ]
   }
 
   qualColPals <- brewer.pal.info[brewer.pal.info[["category"]] == "qual", ]
   colVector <- unlist(mapply(brewer.pal, qualColPals[["maxcolors"]],
                              rownames(qualColPals)))
 
-  mycolours <- set_names(colVector[seq_along(names(genes))], names(genes))
+  myColours <- set_names(colVector[seq_along(names(genes))], names(genes))
 
-  textdf <- GDI[!GDI[["colors"]] == "none", ]
+  labelledGenes <- GDIDf[["colors"]] != "none"
 
-  plot <- ggplot(subset(GDI, colors == "none"),
-                 aes(x = sumRawNorm, y = GDI)) +
+  plot <- ggplot(subset(GDIDf, colors == "none"),
+                 aes(x = sum.raw.norm, y = GDI)) +
           geom_point(alpha = 0.3, color = "#8491B4B2", size = 2.5) +
-          geom_point(data = subset(GDI, colors != "none"),
-                     aes(x = sumRawNorm, y = GDI, colour = colors),
+          geom_point(data = subset(GDIDf, colors != "none"),
+                     aes(x = sum.raw.norm, y = GDI, colour = colors),
                      size = 2.5, alpha = 0.8) +
-          geom_hline(yintercept = quantile(GDI[["GDI"]])[[4L]],
+          geom_hline(yintercept = quantile(GDIDf[["GDI"]])[[4L]],
                      linetype = "dashed", color = "darkblue") +
-          geom_hline(yintercept = quantile(GDI[["GDI"]])[[3L]],
+          geom_hline(yintercept = quantile(GDIDf[["GDI"]])[[3L]],
                      linetype = "dashed", color = "darkblue") +
           geom_hline(yintercept = GDIThreshold, linetype = "dotted",
                      color = "red", linewidth = 0.5) +
-          scale_color_manual("Status", values = mycolours) +
-          scale_fill_manual( "Status", values = mycolours) +
+          scale_color_manual("Status", values = myColours) +
+          scale_fill_manual( "Status", values = myColours) +
           xlab("log normalized counts") +
           ylab("GDI") +
-          geom_label_repel(data = textdf,
-                           aes(x = sumRawNorm, y = GDI,
-                               label = rownames(textdf), fill = colors),
+          geom_label_repel(data = GDIDf[labelledGenes, ],
+                           aes(x = sum.raw.norm, y = GDI, fill = colors),
+                           label = rownames(GDIDf)[labelledGenes],
                            label.size = NA, max.overlaps = 40L, alpha = 0.8,
                            direction = "both", na.rm = TRUE, seed = 1234L) +
           ggtitle(paste("GDI plot ", cond)) +

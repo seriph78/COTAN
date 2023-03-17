@@ -127,9 +127,9 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #' @details In `cellsUniformClustering`, once a preliminary *clusterization* is
 #'   obtained from the `Seurat` package methods, each cluster is checked for
 #'   **uniformity** via the function [checkClusterUniformity()]. Once all
-#'   clusters are checked, all cells from the **non-uniform** clustersare pooled
-#'   together for another iteration of the entire process, until all clusters
-#'   are deemed **uniform**. In the case only a few cells are left out
+#'   clusters are checked, all cells from the **non-uniform** clusters are
+#'   pooled together for another iteration of the entire process, until all
+#'   clusters are deemed **uniform**. In the case only a few cells are left out
 #'   (\eqn{\leq 50}), those are flagged as `"not_clustered"` and the process is
 #'   stopped.
 #'

@@ -10,7 +10,7 @@ GDIPlot(
   cond = "",
   statType = "S",
   GDIThreshold = 1.5,
-  GDI.df = NULL
+  GDIIn = NULL
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ chi-squared test statistics. "G" is G-test statistics}
 \item{GDIThreshold}{the threshold level that discriminates uniform clusters.
 It defaults to \eqn{1.5}}
 
-\item{GDI.df}{when the GDI data frame was already calculated, it can be put
+\item{GDIIn}{when the GDI data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
 }
 \value{

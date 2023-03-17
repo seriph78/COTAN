@@ -123,26 +123,24 @@ cleanPlots <- function(objCOTAN) {
   #check if the pca plot is clean enough and from the printed genes,
   #if the smallest group of cells are characterized by particular genes
 
-  PC2 <- PC1 <- NULL
-
   pcaCellsPlot <- ggplot(subset(pcaCells, groups == "A"),
                          aes(x = PC1, y = PC2, colour = groups)) +
                   geom_point(alpha = 0.5, size = 3L) +
                   geom_point(data = subset(pcaCells, groups != "A"),
                              aes(x = PC1, y = PC2, colour = groups),
                              alpha = 0.8, size = 3L) +
-                  scale_color_manual("groups", values = c("A" = "#8491B4B2",
-                                                          "B" = "#E64B35FF")) +
+                  scale_color_manual(groups, values = c("A" = "#8491B4B2",
+                                                        "B" = "#E64B35FF")) +
                   plotTheme("pca")
 
   minN <- min(D[["n"]]) + 15.0
   lowD <- D[["n"]] < minN
-  genesPlot <-  ggplot(D, aes(x = "n", y = "means")) +
+  genesPlot <-  ggplot(D, aes(x = n, y = means)) +
                 geom_point() +
                 ggtitle(label = "B cell group genes mean expression",
                         subtitle = " - B group NOT removed -") +
                 geom_label(data = subset(D, lowD),
-                      aes("n", "means", label = rownames(D)[lowD]),
+                      aes(x = n, y = means, label = rownames(D)[lowD]),
                       #nudge_y = 0.05,
                       nudge_x = 400.0
                       #direction = "x",
@@ -166,8 +164,8 @@ cleanPlots <- function(objCOTAN) {
                   plotTheme("UDE")
 
   nuDf <- data.frame("nu" = sort(getNu(objCOTAN)),
-                    "n" = c(1L:getNumCells(objCOTAN)))
-  nuPlot       <- ggplot(nuDf, aes(x = "n", y = "nu")) +
+                     "n" = seq_len(getNumCells(objCOTAN)))
+  nuPlot       <- ggplot(nuDf, aes(x = n, y = nu)) +
                   geom_point(colour = "#8491B4B2", size = 1L) +
                   plotTheme("common")
 
