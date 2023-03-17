@@ -48,7 +48,9 @@ setLoggingLevel <- function(newLevel = 1L) {
 #' @export
 #'
 #' @examples
-#' setLoggingFile('./COTAN_Test1.log') # for debugging purposes only
+#' setLoggingFile("./COTAN_Test1.log") # for debugging purposes only
+#' logThis("Some log message")
+#' setLoggingFile("") # closes the log file
 #'
 #' @rdname setLoggingFile
 #'
@@ -91,7 +93,8 @@ setLoggingFile <- function(logFileName) {
 #' @examples
 #' logThis("LogLevel 0 messages will always show, ",
 #'         logLevel = 0, appendLF = FALSE)
-#' suppressMessages(logThis("unless all messages are suppressed", logLevel = 0))
+#' suppressMessages(logThis("unless all messages are suppressed",
+#'                          logLevel = 0))
 #'
 #' @rdname logThis
 #'
@@ -134,10 +137,7 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
 #' @importFrom parallelly availableCores
 #' @importFrom parallelly supportsMulticore
 #'
-#' @examples
-#' cores <- handleMultiCore(cores = 12)
-#'
-#' @rdname handleMultiCore
+#' @noRd
 #'
 handleMultiCore <- function(cores) {
   cores <- max(1L, cores)

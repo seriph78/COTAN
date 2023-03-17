@@ -283,10 +283,13 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName the name of the clusterization to be added It cannot match an
-#'   existing name; in case use [dropClusterization()] first.
+#'   existing name; in case use [dropClusterization()] first
 #' @param clusters a (factors) array of cluster names
 #' @param coexDF a `data.frame` where each column indicates the coex for each
 #'   (or some) of the clusters of the clusterization
+#' @param override When TRUE silently allows overriding data for an existing
+#'   clusterization name. Otherwise (default behavior) it will avoid potential
+#'   data losses
 #'
 #' @returns the updated `COTAN` object
 #'
@@ -299,20 +302,21 @@ setMethod(
 #' objCOTAN <- COTAN(raw = raw.dataset)
 #' clusters <- sample(1:10, getNumCells(objCOTAN), replace = TRUE)
 #' names(clusters) <- getCells(objCOTAN)
-#' objCOTAN <- addClusterization(objCOTAN, "dummy", clusters)
+#' objCOTAN <- addClusterization(objCOTAN, "dummy", clusters, override = TRUE)
 #'
 #' @rdname addClusterization
 #'
 setMethod(
   "addClusterization",
   "COTAN",
-  function(objCOTAN, clName, clusters, coexDF = data.frame()) {
+  function(objCOTAN, clName, clusters,
+           coexDF = data.frame(), override = FALSE) {
     internalName <- clName
     if (!startsWith(internalName, "CL_")) {
       internalName <- paste0("CL_", clName)
     }
 
-    if (internalName %in% colnames(getMetadataCells(objCOTAN))) {
+    if (!override && (internalName %in% colnames(getMetadataCells(objCOTAN)))) {
       stop("A clusterization with name '", clName, "' already exists.")
     }
 

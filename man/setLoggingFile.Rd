@@ -21,7 +21,9 @@ It stores the \code{connection} created by the call to \code{\link[=bzfile]{bzfi
 \code{COTAN.LogFile}
 }
 \examples{
-setLoggingFile('./COTAN_Test1.log') # for debugging purposes only
+setLoggingFile("./COTAN_Test1.log") # for debugging purposes only
+logThis("Some log message")
+setLoggingFile("") # closes the log file
 
 }
 \seealso{

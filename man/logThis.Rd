@@ -27,7 +27,8 @@ connection, so it is subject to \code{\link[=suppressMessages]{suppressMessages(
 \examples{
 logThis("LogLevel 0 messages will always show, ",
         logLevel = 0, appendLF = FALSE)
-suppressMessages(logThis("unless all messages are suppressed", logLevel = 0))
+suppressMessages(logThis("unless all messages are suppressed",
+                         logLevel = 0))
 
 }
 \seealso{

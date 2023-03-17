@@ -194,14 +194,17 @@ setGeneric(
 
 setGeneric(
   "addClusterization",
-  function(objCOTAN, clName, clusters, coexDF = NULL) {
+  function(objCOTAN, clName, clusters,
+           coexDF = data.frame(), override = FALSE) {
     standardGeneric("addClusterization")
   }
 )
 
 setGeneric(
   "addClusterizationCoex",
-  function(objCOTAN, clName, coexDF) standardGeneric("addClusterizationCoex")
+  function(objCOTAN, clName, coexDF) {
+    standardGeneric("addClusterizationCoex")
+  }
 )
 
 setGeneric(

@@ -1,6 +1,7 @@
 
 #' @importFrom ggplot2 ggproto
 #' @importFrom ggplot2 Geom
+#' @importFrom ggplot2 GeomPolygon
 #' @importFrom ggplot2 aes
 #' @importFrom ggplot2 resolution
 #' @importFrom ggplot2 draw_key_polygon
@@ -61,7 +62,8 @@ geom_flat_violin <- function(
        # Needed for coord_polar and such
        newdata <- rbind(newdata, newdata[1L, ])
 
-       ggplot2:::ggname("geom_flat_violin", ggplot2:::GeomPolygon$draw_panel(newdata, panel_scales, coord))
+       ggplot2:::ggname("geom_flat_violin",
+                        GeomPolygon$draw_panel(newdata, panel_scales, coord))
      },
 
      draw_key = draw_key_polygon,
@@ -126,32 +128,37 @@ geom_flat_violin <- function(
 #' @rdname cellSizePlot
 #'
 cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
-  sizes <- getCellsSize(objCOTAN)
-  sizes <- sort(sizes)
+  sizes <- sort(getCellsSize(objCOTAN))
   sizes <- as.data.frame(sizes)
-  sizes$n <- seq_len(dim(sizes)[1L])
-  splitNames <- str_split(rownames(sizes), pattern = splitPattern,
-                          simplify = TRUE)
-  if (ncol(splitNames) < numCol) {
-    # no splits found take all as a single group
-    sizes$sample <- rep("1", nrow(splitNames))
-  } else {
-    sizes$sample <- splitNames[, numCol]
+  sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
+  {
+    splitNames <- str_split(rownames(sizes),
+                            pattern = splitPattern, simplify = TRUE)
+    if (ncol(splitNames) < numCol) {
+      # no splits found take all as a single group
+      sampleCol <- rep("1", nrow(splitNames))
+    } else {
+      sampleCol <- splitNames[, numCol]
+    }
+    sizes <- setColumnInDF(sizes, sampleCol, colName = "sample")
   }
 
   plot <-
     sizes %>%
     ggplot(aes(x = sample, y = sizes, fill = sample)) +
     #geom_point(size = 0.5) +
-    geom_flat_violin(position = position_nudge(x = .15, y = .0), adjust = 2.0, alpha = 0.5) +
-    geom_point(position = position_jitter(width = .1), size = .4, color = "black", alpha = 0.5) +
+    geom_flat_violin(position = position_nudge(x = .15, y = .0),
+                     adjust = 2.0, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .1),
+               size = .4, color = "black", alpha = 0.5) +
     geom_boxplot(aes(x = sample, y = sizes, fill = sample),
-                 outlier.shape = NA, alpha = .8, width = .15, colour = "gray65", size = 0.6) +
+                 outlier.shape = NA, alpha = .8, width = .15,
+                 colour = "gray65", size = 0.6) +
     labs(title = "Cell library size",
          y = "Size (read number)",
          x = "") +
     scale_y_continuous(expand = c(0L, 0L)) +
-    ylim(0.0, max(sizes$sizes)) +
+    ylim(0.0, max(sizes[["sizes"]])) +
     plotTheme("size-plot")
 
   return(plot)
@@ -183,6 +190,8 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #'
 #' @importFrom stringr str_split
 #'
+#' @importFrom Matrix colSums
+#'
 #' @export
 #'
 #' @examples
@@ -194,31 +203,37 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #' @rdname genesSizePlot
 #'
 genesSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
-  sizes <- Matrix::colSums(getZeroOneProj(objCOTAN))
-  sizes <- sort(sizes)
+  sizes <- sort(colSums(getZeroOneProj(objCOTAN)))
   sizes <- as.data.frame(sizes)
-  sizes$n <- seq_len(dim(sizes)[1L])
-  splitNames <- str_split(rownames(sizes), pattern = splitPattern, simplify = TRUE)
-  if (ncol(splitNames) < numCol) {
-    # no splits found take all as a single group
-    sizes$sample <- rep("1", nrow(splitNames))
-  } else {
-    sizes$sample <- splitNames[, numCol]
+  sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
+  {
+    splitNames <- str_split(rownames(sizes),
+                            pattern = splitPattern, simplify = TRUE)
+    if (ncol(splitNames) < numCol) {
+      # no splits found take all as a single group
+      sampleCol <- rep("1", nrow(splitNames))
+    } else {
+      sampleCol <- splitNames[, numCol]
+    }
+    sizes <- setColumnInDF(sizes, sampleCol, colName = "sample")
   }
 
   plot <-
     sizes %>%
     ggplot(aes(x = sample, y = sizes, fill = sample)) +
     #geom_point(size = 0.5) +
-    geom_flat_violin(position = position_nudge(x = .15, y = .0), adjust = 2.0, alpha = 0.5) +
-    geom_point(position = position_jitter(width = .1), size = .4, color = "black", alpha = 0.5) +
+    geom_flat_violin(position = position_nudge(x = .15, y = .0),
+                     adjust = 2.0, alpha = 0.5) +
+    geom_point(position = position_jitter(width = .1),
+               size = .4, color = "black", alpha = 0.5) +
     geom_boxplot(aes(x = sample, y = sizes, fill = sample),
-                 outlier.shape = NA, alpha = .8, width = .15, colour = "gray65", size = 0.6) +
+                 outlier.shape = NA, alpha = .8, width = .15,
+                 colour = "gray65", size = 0.6) +
     labs(title = "Detected gene number",
          y = "Size (number of genes)",
          x = "") +
     scale_y_continuous(expand = c(0L, 0L)) +
-    ylim(0L, max(sizes$sizes)) +
+    ylim(0L, max(sizes[["sizes"]])) +
     plotTheme("size-plot")
 
   return(plot)

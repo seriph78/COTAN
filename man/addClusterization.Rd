@@ -4,18 +4,28 @@
 \alias{addClusterization,COTAN-method}
 \title{addClusterization}
 \usage{
-\S4method{addClusterization}{COTAN}(objCOTAN, clName, clusters, coexDF = data.frame())
+\S4method{addClusterization}{COTAN}(
+  objCOTAN,
+  clName,
+  clusters,
+  coexDF = data.frame(),
+  override = FALSE
+)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
 \item{clName}{the name of the clusterization to be added It cannot match an
-existing name; in case use \code{\link[=dropClusterization]{dropClusterization()}} first.}
+existing name; in case use \code{\link[=dropClusterization]{dropClusterization()}} first}
 
 \item{clusters}{a (factors) array of cluster names}
 
 \item{coexDF}{a \code{data.frame} where each column indicates the coex for each
 (or some) of the clusters of the clusterization}
+
+\item{override}{When TRUE silently allows overriding data for an existing
+clusterization name. Otherwise (default behavior) it will avoid potential
+data losses}
 }
 \value{
 the updated \code{COTAN} object
@@ -31,6 +41,6 @@ data("raw.dataset")
 objCOTAN <- COTAN(raw = raw.dataset)
 clusters <- sample(1:10, getNumCells(objCOTAN), replace = TRUE)
 names(clusters) <- getCells(objCOTAN)
-objCOTAN <- addClusterization(objCOTAN, "dummy", clusters)
+objCOTAN <- addClusterization(objCOTAN, "dummy", clusters, override = TRUE)
 
 }
