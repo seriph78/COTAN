@@ -58,8 +58,13 @@ setLoggingFile <- function(logFileName) {
   currentFile <- getOption("COTAN.LogFile")
   if (!is.null(currentFile)) {
     message("Closing previous log file - ", appendLF = FALSE)
-    flush(currentFile)
-    close(currentFile)
+    tryCatch({
+      flush(currentFile)
+      close(currentFile)
+    }, error = function(e) {
+      message("Connection to previous log file broken, will be discarded")
+      options(COTAN.LogFile = NULL)
+    })
   }
 
   message("Setting log file to be: ", logFileName)
@@ -102,8 +107,12 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
   # write to log file if any
   currentFile <- getOption("COTAN.LogFile")
   if (!is.null(currentFile)) {
-    writeLines(msg, currentFile)
-    flush(currentFile)
+    tryCatch({
+      writeLines(msg, currentFile)
+      flush(currentFile)
+    }, error = function(e) {
+      setLoggingFile("")
+    })
   }
   # set the logging level global variable
   if (is.null(getOption("COTAN.LogLevel"))) {
