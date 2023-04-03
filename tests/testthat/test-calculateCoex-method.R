@@ -227,12 +227,12 @@ test_that("Coex", {
 
 
 test_that("Coex vs saved results", {
-  utils::data("sampled.dataset", package = "COTAN")
+  utils::data("test.dataset", package = "COTAN")
 
-  obj <- COTAN(raw = sampled.dataset)
+  obj <- COTAN(raw = test.dataset)
   obj <- initializeMetaDataset(obj, GEO = " ",
-                               sequencingMethod = "10X",
-                               sampleCondition = "example")
+                               sequencingMethod = "artificial",
+                               sampleCondition = "test")
 
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
@@ -241,10 +241,10 @@ test_that("Coex vs saved results", {
 
   expect_equal(c(genesCoexInSync, cellsCoexInSync), c("TRUE", "FALSE"))
 
-  obj2 <- automaticCOTANObjectCreation(raw = sampled.dataset,
+  obj2 <- automaticCOTANObjectCreation(raw = test.dataset,
                                        GEO = " ",
-                                       sequencingMethod = "10X",
-                                       sampleCondition = "example",
+                                       sequencingMethod = "artificial",
+                                       sampleCondition = "test",
                                        cores = 12,
                                        saveObj = FALSE)
 

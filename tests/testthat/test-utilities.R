@@ -180,11 +180,11 @@ test_that("Cosine dissimilarity", {
 })
 
 test_that("Raw data normalization", {
-  utils::data("sampled.dataset", package = "COTAN")
+  utils::data("test.dataset", package = "COTAN")
   genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
   cell.names.test <- readRDS(file.path(getwd(), "cell.names.test.RDS"))
 
-  raw <- sampled.dataset[genes.names.test, cell.names.test]
+  raw <- test.dataset[genes.names.test, cell.names.test]
 
   nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
   raw.norm <- as.matrix(readRDS(file.path(getwd(), "raw.norm.test.RDS")))
