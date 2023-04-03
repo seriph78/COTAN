@@ -18,8 +18,8 @@ This function returns a Boolean vector with TRUE for those cells
 that are not fully expressed
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- findFullyExpressedCells(objCOTAN)
 goodPos <- flagNotFullyExpressedCells(objCOTAN)
 

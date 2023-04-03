@@ -120,8 +120,8 @@ geom_flat_violin <- function(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' lsPlot <- cellSizePlot(objCOTAN)
 #' plot(lsPlot)
 #'
@@ -195,8 +195,8 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' gsPlot <- genesSizePlot(objCOTAN)
 #' plot(gsPlot)
 #'

@@ -31,8 +31,8 @@ expected vector
 Calculate the expected No/No field of the contingency table
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 expectedNList <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)

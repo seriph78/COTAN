@@ -168,8 +168,8 @@ heatmapPlot <- function(genesLists, sets, conditions,
 #' @rdname genesHeatmapPlot
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 #' # some genes
 #' primary.markers <- c("Pcbp2", "Snrpe", "Nfyb")
@@ -312,8 +312,8 @@ genesHeatmapPlot <-
 #' @importFrom ComplexHeatmap Heatmap
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- initializeMetaDataset(objCOTAN,
 #'                                   GEO = "test_GEO",
 #'                                   sequencingMethod = "test_method",

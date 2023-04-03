@@ -33,8 +33,8 @@ denote it as local differentiation index (LDI) relative to the selected
 subset.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- proceedToCoex(objCOTAN, cores = 12)
 markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
 GCS <- genesCoexSpace(objCOTAN,

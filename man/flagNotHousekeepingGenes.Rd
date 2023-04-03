@@ -17,8 +17,8 @@ This function returns a Boolean vector with TRUE for those genes
 that are not housekeeping.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- findHousekeepingGenes(objCOTAN)
 goodPos <- flagNotHousekeepingGenes(objCOTAN)
 

@@ -17,8 +17,8 @@ empty, each data.frame contains a coex column for each cluster.
 This function extract the complete clusterCoex list
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 allClustersCoexDF <- getClustersCoex(objCOTAN)
 
 }

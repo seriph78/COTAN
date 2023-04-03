@@ -16,8 +16,8 @@ the normalized count dataframe (i.e. divided by nu).
 This function extracts the normalized count table.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- estimateNuLinear(objCOTAN)
 rawNorm <- getNormalizedData(objCOTAN)
 

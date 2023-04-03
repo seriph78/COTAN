@@ -1,9 +1,9 @@
 
 test_that("Merge Uniform Cells Clusters", {
 
-  utils::data("test.dataset.col", package = "COTAN")
+  utils::data("sampled.dataset", package = "COTAN")
 
-  obj <- COTAN(raw = test.dataset.col)
+  obj <- COTAN(raw = sampled.dataset)
   obj <- initializeMetaDataset(obj, GEO = " ",
                                sequencingMethod = "10X",
                                sampleCondition = "example")

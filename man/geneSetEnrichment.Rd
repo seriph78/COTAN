@@ -25,8 +25,8 @@ Calculates \eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})}, where the
   -\frac{1}{0.1} \ln(0.25)}
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+data("test.dataset")
+objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",

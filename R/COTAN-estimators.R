@@ -14,8 +14,8 @@
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- estimateLambdaLinear(objCOTAN)
 #' lambda <- getLambda(objCOTAN)
 #'
@@ -59,8 +59,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- estimateNuLinear(objCOTAN)
 #' nu <- getNu(objCOTAN)
 #'
@@ -123,8 +123,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' dispersion <- getDispersion(objCOTAN)
@@ -257,8 +257,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
@@ -397,8 +397,8 @@ setMethod(
 #' @importFrom assertthat assert_that
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12,
 #'                                           enforceNuAverageToOne = FALSE)

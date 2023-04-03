@@ -41,8 +41,8 @@
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 #' genes <- c("Pcbp2", "Snrpe", "Nfyb", "Prpf40a", "Ergic2",
 #'            "Ncl", "Cd47", "Macrod2", "Fth1", "Supt16")

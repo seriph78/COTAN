@@ -36,8 +36,8 @@ Estimates the 'dispersion' and 'nu' field of a \code{COTAN} object by running
 sequentially a bisection for each parameter.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12,
                                           enforceNuAverageToOne = FALSE)

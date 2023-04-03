@@ -24,8 +24,8 @@ the given \code{COTAN} object with updated \code{metaDataset}
 Initialize meta-data data-set
 }
 \examples{
-data("raw.dataset")
-obj <- COTAN(raw = raw.dataset)
+data("test.dataset")
+obj <- COTAN(raw = test.dataset)
 obj <- initializeMetaDataset(obj, GEO = "code", sequencingMethod = "10X",
                              sampleCondition = "mouse dataset")
 

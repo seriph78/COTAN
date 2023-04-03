@@ -14,13 +14,13 @@ test_that("Empty matrices", {
 })
 
 test_that("'COTAN' constructor", {
-  utils::data("test.dataset.col", package = "COTAN")
+  utils::data("test.dataset", package = "COTAN")
 
-  obj <- COTAN(raw = test.dataset.col)
+  obj <- COTAN(raw = test.dataset)
 
   expect_s4_class(obj, "COTAN")
 
-  expect_equal(obj@raw, as(as.matrix(test.dataset.col), "sparseMatrix"))
+  expect_equal(obj@raw, as(as.matrix(test.dataset), "sparseMatrix"))
 })
 
 test_that("'scCOTAN' converters",{

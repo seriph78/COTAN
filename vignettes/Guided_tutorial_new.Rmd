@@ -66,7 +66,7 @@ if (FALSE && !file.exists(file.path(dataDir, "E175_only_cortical_cells.txt.gz"))
 This is just an example of a toy dataset. If the user wants to try on a real dataset, they can be used the previous command to download it and the next commented line to use as input data. There are also available online many other examples at the [link](https://seriph78.github.io/Cotan_paper/index.html).
 
 ```{r}
-data("test.dataset.col", package = "COTAN")
+data("sampled.dataset", package = "COTAN")
 
 #rownames(ERCCraw) = ERCCraw$V1
 #ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
@@ -90,7 +90,7 @@ setLoggingFile(file.path(outDir, "vignette.log"))
 Initialize the `COTAN` object with the row count table and the metadata for the experiment.
 
 ```{r}
-obj = COTAN(raw = test.dataset.col)
+obj = COTAN(raw = sampled.dataset)
 #obj = initializeMetaDataset(obj, GEO = "GSM2861514",
 #                            sequencingMethod = "Drop_seq",
 #                            sampleCondition = "mouse cortex E17.5")
@@ -270,8 +270,8 @@ It is also possible to run a directly a single function if we don't want to clea
 
 ```{r}
 obj <- automaticCOTANObjectCreation(
-  raw = test.dataset.col,
-  GEO = "test", sequencingMethod = "10X", sampleCondition = "test.dataset.col",
+  raw = sampled.dataset,
+  GEO = "test", sequencingMethod = "10X", sampleCondition = "sampled.dataset",
   saveObj = FALSE, outDir = outDir, cores = 10)
 ```
 

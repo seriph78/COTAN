@@ -2,10 +2,10 @@
 # Creates the files to be reloaded by the tests for comparisons
 
 outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
-  utils::data("test.dataset.col", package = "COTAN")
+  utils::data("sampled.dataset", package = "COTAN")
   options(parallelly.fork.enable = TRUE)
 
-  obj <- COTAN(raw = test.dataset.col)
+  obj <- COTAN(raw = sampled.dataset)
   obj <- initializeMetaDataset(obj, GEO = " ",
                                sequencingMethod = "10X",
                                sampleCondition = "example")

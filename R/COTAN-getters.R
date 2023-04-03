@@ -11,8 +11,8 @@
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' rawData <- getRawData(objCOTAN)
 #'
 #' @rdname getRawData
@@ -36,8 +36,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' numCells <- getNumCells(objCOTAN)
 #'
 #' @rdname getNumCells
@@ -61,8 +61,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' numGenes <- getNumGenes(objCOTAN)
 #'
 #' @rdname getNumGenes
@@ -87,8 +87,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' cellsNames <- getCells(objCOTAN)
 #'
 #' @rdname getCells
@@ -113,8 +113,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' genesNames <- getGenes(objCOTAN)
 #'
 #' @rdname getGenes
@@ -140,8 +140,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' zeroOne <- getZeroOneProj(objCOTAN)
 #'
 #' @rdname getZeroOneProj
@@ -166,8 +166,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' cellsSize <- getCellsSize(objCOTAN)
 #'
 #' @rdname getCellsSize
@@ -192,8 +192,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' genesSize <- getGenesSize(objCOTAN)
 #'
 #' @rdname getGenesSize
@@ -220,8 +220,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- estimateNuLinear(objCOTAN)
 #' rawNorm <- getNormalizedData(objCOTAN)
 #'
@@ -251,8 +251,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' dataSetInfo <- getMetadataDataset(objCOTAN)
 #'
 #' @rdname getMetadataDataset
@@ -281,8 +281,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
 #'                                   sequencingMethod = "10X",
 #'                                   sampleCondition = "mouse dataset")
@@ -318,8 +318,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- estimateLambdaLinear(objCOTAN)
 #' metaGenes <- getMetadataGenes(objCOTAN)
 #'
@@ -345,8 +345,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- estimateNuLinear(objCOTAN)
 #' metaCells <- getMetadataCells(objCOTAN)
 #'
@@ -373,8 +373,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' allClustersCoexDF <- getClustersCoex(objCOTAN)
 #'
 #' @rdname getClustersCoex
@@ -401,8 +401,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- estimateNuLinear(objCOTAN)
 #' nu <- getNu(objCOTAN)
 #'
@@ -438,8 +438,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- estimateLambdaLinear(objCOTAN)
 #' lambda <- getLambda(objCOTAN)
 #'
@@ -475,8 +475,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' dispersion <- getDispersion(objCOTAN)
@@ -515,8 +515,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- findHousekeepingGenes(objCOTAN)
 #' goodPos <- flagNotHousekeepingGenes(objCOTAN)
 #'
@@ -551,8 +551,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- findFullyExpressedCells(objCOTAN)
 #' goodPos <- flagNotFullyExpressedCells(objCOTAN)
 #'
@@ -583,8 +583,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- findHousekeepingGenes(objCOTAN)
 #' hkGenes <- getHousekeepingGenes(objCOTAN)
 #'
@@ -611,8 +611,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- findFullyExpressedCells(objCOTAN)
 #' feCells <- getFullyExpressedCells(objCOTAN)
 #'
@@ -646,8 +646,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
@@ -701,8 +701,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
@@ -754,8 +754,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' clusterizations <- getClusterizations(objCOTAN)
 #'
 #' @rdname getClusterizations
@@ -800,8 +800,8 @@ setMethod(
 #' @importFrom rlang set_names
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#' data("test.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
 #'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
@@ -862,8 +862,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#' data("test.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
 #'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",

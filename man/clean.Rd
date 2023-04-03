@@ -17,8 +17,8 @@ Main function that can be used to check and clean the dataset.
 It also produces and stores the estimators for nu and lambda
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- clean(objCOTAN)
 
 }

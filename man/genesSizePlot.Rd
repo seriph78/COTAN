@@ -23,8 +23,8 @@ Function that plots the raw gene number (reads > 0) for each
 cell and sample
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 gsPlot <- genesSizePlot(objCOTAN)
 plot(gsPlot)
 

@@ -8,11 +8,11 @@
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- addElementToMetaDataset(objCOTAN,
 #'                                     datasetTags()[["cells"]],
-#'                                     ncol(raw.dataset))
+#'                                     ncol(test.dataset))
 #' meta <- getMetadataDataset(objCOTAN)
 #'
 #' @rdname datasetTags
@@ -78,8 +78,8 @@ updateMetaInfo <- function(meta, tag, value) {
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' obj <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' obj <- COTAN(raw = test.dataset)
 #' obj <- initializeMetaDataset(obj, GEO = "code", sequencingMethod = "10X",
 #'                              sampleCondition = "mouse dataset")
 #'
@@ -124,8 +124,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- addElementToMetaDataset(objCOTAN, "Test",
 #'                                     c("These are ", "some values"))
 #' meta <- getMetadataDataset(objCOTAN)
@@ -159,8 +159,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- findHousekeepingGenes(objCOTAN)
 #'
 #' @rdname findHousekeepingGenes
@@ -198,8 +198,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- findFullyExpressedCells(objCOTAN)
 #'
 #' @rdname findFullyExpressedCells
@@ -238,8 +238,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' genes.to.rem <- getGenes(objCOTAN)[grep('^MT', getGenes(objCOTAN))]
 #' cells.to.rem <- getCells(objCOTAN)[which(getCellsSize(objCOTAN) == 0)]
 #' objCOTAN <- dropGenesCells(objCOTAN, genes.to.rem, cells.to.rem)
@@ -298,8 +298,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' clusters <- sample(1:10, getNumCells(objCOTAN), replace = TRUE)
 #' names(clusters) <- getCells(objCOTAN)
 #' objCOTAN <- addClusterization(objCOTAN, "dummy", clusters, override = TRUE)
@@ -361,8 +361,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' clusters <- sample(1:10, getNumCells(objCOTAN), replace = TRUE)
 #' names(clusters) <- getCells(objCOTAN)
 #' objCOTAN <- addClusterization(objCOTAN, "dummy", clusters)
@@ -415,8 +415,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#' data("test.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
 #'                                          GEO = "test_GEO",
 #'                                          sequencingMethod = "test_method",
 #'                                          sampleCondition = "test",
@@ -453,8 +453,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#' data("test.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
 #'                                          GEO = "test_GEO",
 #'                                          sequencingMethod = "test_method",
 #'                                          sampleCondition = "test",
@@ -494,8 +494,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' clusters <- sample(1:10, getNumCells(objCOTAN), replace = TRUE)
 #' names(clusters) <- getCells(objCOTAN)
 #' objCOTAN <- addClusterization(objCOTAN, "dummy", clusters)

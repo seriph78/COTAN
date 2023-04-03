@@ -188,8 +188,8 @@ setClass(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' obj <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' obj <- COTAN(raw = test.dataset)
 #'
 #' @rdname COTAN
 COTAN <- function(raw = "ANY") {

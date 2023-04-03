@@ -23,8 +23,8 @@ This function extract the list of clusterizations defined in the
 \code{COTAN} object.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 clusterizations <- getClusterizations(objCOTAN)
 
 }

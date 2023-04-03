@@ -37,8 +37,8 @@ new element in the \verb{clustersCoex list} using the passed in \code{coex}
 \code{data.frame}.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 clusters <- sample(1:10, getNumCells(objCOTAN), replace = TRUE)
 names(clusters) <- getCells(objCOTAN)
 objCOTAN <- addClusterization(objCOTAN, "dummy", clusters, override = TRUE)

@@ -2,9 +2,9 @@ tm = tempdir()
 stopifnot(file.exists(tm))
 
 test_that("Cell Uniform Clustering", {
-  utils::data("test.dataset.col", package = "COTAN")
+  utils::data("sampled.dataset", package = "COTAN")
 
-  obj <- COTAN(raw = test.dataset.col)
+  obj <- COTAN(raw = sampled.dataset)
   obj <- initializeMetaDataset(obj, GEO = " ",
                                sequencingMethod = "10X",
                                sampleCondition = "example")

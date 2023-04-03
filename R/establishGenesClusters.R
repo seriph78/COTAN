@@ -32,8 +32,8 @@
 #' @importFrom Matrix rowMeans
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- proceedToCoex(objCOTAN, cores = 12)
 #' markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
 #' GCS <- genesCoexSpace(objCOTAN,
@@ -165,8 +165,8 @@ genesCoexSpace <-
 #' @importFrom assertthat assert_that
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#' data("test.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
 #'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",

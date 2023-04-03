@@ -38,8 +38,8 @@ probability of zero count matches the number of observed zeros. It assumes
 It needs to be run after \code{\link[=clean]{clean()}}
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 dispersion <- getDispersion(objCOTAN)

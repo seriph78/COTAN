@@ -16,8 +16,8 @@ a named \code{list} with the sizes of the slots.
 This function extracts the sizes of all slots of the \code{COTAN} object.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+data("test.dataset")
+objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",

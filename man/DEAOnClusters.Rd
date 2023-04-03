@@ -31,8 +31,8 @@ The formulae for the coex are similar to those used in the
 In/Out status of the cells with respect to each cluster.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+data("test.dataset")
+objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",

@@ -21,8 +21,8 @@ This function estimates the change in genes' expression inside
 the cluster compared to the average situation in the data set.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+data("test.dataset")
+objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",

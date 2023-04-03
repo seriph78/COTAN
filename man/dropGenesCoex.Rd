@@ -17,8 +17,8 @@ This function drops the \code{genesCoex} from the given \code{COTAN}
 object
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+data("test.dataset")
+objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = "test_GEO",
                                          sequencingMethod = "test_method",
                                          sampleCondition = "test",

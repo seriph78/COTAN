@@ -36,8 +36,8 @@ are plotted. Primary markers will be plotted as groups of rows. Markers
 list will be plotted as columns.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 # some genes
 primary.markers <- c("Pcbp2", "Snrpe", "Nfyb")

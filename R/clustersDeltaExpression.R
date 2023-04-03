@@ -18,8 +18,8 @@
 #' @importFrom assertthat assert_that
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+#' data("test.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
 #'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",

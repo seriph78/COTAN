@@ -27,8 +27,8 @@ restricted to only the relevant genes and thus much faster and less memory
 intensive
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]

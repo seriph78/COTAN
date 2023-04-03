@@ -34,8 +34,8 @@ is the number of genes/cells depending on \code{actOnCells} being
 \code{TRUE}/\code{FALSE}.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 
 }

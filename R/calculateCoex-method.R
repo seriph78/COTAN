@@ -15,8 +15,8 @@
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' mu <- calculateMu(objCOTAN)
@@ -64,8 +64,8 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' observedYList <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
 #' observedYY <- observedYList[[1]]
 #' observedY  <- observedYList[[2]]
@@ -129,8 +129,8 @@ observedContingencyTablesYY <- function(objCOTAN,
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 #'
 #' @rdname observedContingencyTables
@@ -241,8 +241,8 @@ observedContingencyTables <- function(objCOTAN,
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' expectedNList <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
@@ -339,8 +339,8 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
@@ -452,8 +452,8 @@ expectedContingencyTables <- function(objCOTAN,
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
@@ -570,8 +570,8 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
@@ -702,8 +702,8 @@ setMethod(
 #' @importFrom assertthat assert_that
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 #' S <- calculateS(objCOTAN)
 #'
@@ -751,8 +751,8 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 #' G <- calculateG(objCOTAN)
 #'
@@ -836,8 +836,8 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' @importFrom Matrix forceSymmetric
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
@@ -918,8 +918,8 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 #' @importClassesFrom Matrix dspMatrix
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
