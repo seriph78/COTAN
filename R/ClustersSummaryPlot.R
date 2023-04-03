@@ -1,7 +1,7 @@
 #Conditions is a named list containing the condition name and in each arrays, the cell regarding that condition
 # default null: just one condition
 
-#' clusters.summary.plot
+#' ClustersSummaryPlot
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param condition name of the column in the MetadataCells dataframe containing 
@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @examples
-clusters.summary.plot <- function(objCOTAN, condition = NULL, cl.name = "merge_round"){
+ClustersSummaryPlot <- function(objCOTAN, condition = NULL, cl.name = "merge_round"){
   MetadataCells <- getMetadataCells(objCOTAN)
   last.clusterization <- paste0("CL_",cl.name)
   
@@ -85,6 +85,9 @@ clusters.summary.plot <- function(objCOTAN, condition = NULL, cl.name = "merge_r
   Df <- df %>% 
     gather(keys, values, CellNumber:CellPercentage)
   
+  if(!"cond" %in% colnames(Df)){
+    Df$cond = "NoCond"
+  }
   
   statistics.plot <- ggplot(Df, aes(Cluster,values, fill=cond)) +
     geom_bar(position="dodge", stat="identity", color="black") +
@@ -104,7 +107,7 @@ clusters.summary.plot <- function(objCOTAN, condition = NULL, cl.name = "merge_r
 
 
 
-#' clusters.tree.plot
+#' ClustersTreePlot
 #'
 #' @param objCOTAN 
 #' @param k numeric scalar (OR a vector) with the number of clusters the tree should be cut into.
@@ -114,7 +117,7 @@ clusters.summary.plot <- function(objCOTAN, condition = NULL, cl.name = "merge_r
 #' @import RColorBrewer
 #'
 #' @examples
-clusters.tree.plot <- function(objCOTAN, k){
+ClustersTreePlot <- function(objCOTAN, k){
   cluster_data <- getClusterizationData(objCOTAN)[["coex"]]
   
   ######## This is the best: cosine dissimilarity
