@@ -16,8 +16,8 @@ the number of genes in the sample (𝑛).
 This function extracts the number of genes in the sample (𝑛)
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 numGenes <- getNumGenes(objCOTAN)
 
 }

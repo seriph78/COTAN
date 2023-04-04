@@ -16,8 +16,8 @@ the number of cells in the sample (𝑚).
 This function extracts the number of cells in the sample (𝑚)
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 numCells <- getNumCells(objCOTAN)
 
 }

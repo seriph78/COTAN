@@ -2,21 +2,23 @@ tm = tempdir()
 stopifnot(file.exists(tm))
 
 test_that("Cell Uniform Clustering", {
-  utils::data("test.dataset.col", package = "COTAN")
+  utils::data("test.dataset", package = "COTAN")
 
-  obj <- COTAN(raw = test.dataset.col)
+  obj <- COTAN(raw = test.dataset)
   obj <- initializeMetaDataset(obj, GEO = " ",
-                               sequencingMethod = "10X",
-                               sampleCondition = "example")
+                               sequencingMethod = "artificial",
+                               sampleCondition = "test")
 
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
+  GDIThreshold <- 1.5
   clusters <- cellsUniformClustering(obj, cores = 12,
+                                     GDIThreshold = GDIThreshold,
                                      saveObj = FALSE, outDir = tm)
 
   gc()
 
-  expect_equal(length(levels(factor(clusters))), 19)
+  expect_equal(length(levels(factor(clusters))), 4)
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
@@ -32,7 +34,7 @@ test_that("Cell Uniform Clustering", {
 
   ####################################
 
-  for (cl in sample(unique(clusters[!is.na(clusters)]), size = 5)) {
+  for (cl in sample(unique(clusters[!is.na(clusters)]), size = 2)) {
     print(cl)
 
     cellsToDrop <- which(clusters != cl)
@@ -45,6 +47,6 @@ test_that("Cell Uniform Clustering", {
 
     GDI_data <- calculateGDI(temp.obj)
 
-    expect_lt(nrow(GDI_data[GDI_data[["GDI"]] >= 1.5, ]), 0.01 * nrow(GDI_data))
+    expect_lt(nrow(GDI_data[GDI_data[["GDI"]] >= GDIThreshold, ]), 0.01 * nrow(GDI_data))
   }
 })

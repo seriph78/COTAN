@@ -31,8 +31,8 @@ Function that plots the raw library size for each cell and
 sample.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 mpPlot <- mitochondrialPercentagePlot(objCOTAN)[["plot"]]
 plot(mpPlot)
 

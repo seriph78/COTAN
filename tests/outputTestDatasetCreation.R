@@ -2,19 +2,19 @@
 # Creates the files to be reloaded by the tests for comparisons
 
 outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
-  utils::data("test.dataset.col", package = "COTAN")
+  utils::data("test.dataset", package = "COTAN")
   options(parallelly.fork.enable = TRUE)
 
-  obj <- COTAN(raw = test.dataset.col)
+  obj <- COTAN(raw = test.dataset)
   obj <- initializeMetaDataset(obj, GEO = " ",
-                               sequencingMethod = "10X",
-                               sampleCondition = "example")
+                               sequencingMethod = "artificial",
+                               sampleCondition = "test")
 
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
   #saveRDS(obj, file = file.path(testsDir,"temp.RDS"))
 
-  cell.names.test  <- getCells(obj)[c(1:10,2474:2484,4990:5000)]
-  genes.names.test <- getGenes(obj)[c(1:10,990:1000,1971:1981)]
+  cell.names.test  <- getCells(obj)[c(1:10,591:610,991:1000)]
+  genes.names.test <- getGenes(obj)[c(1:10,291:310,591:600)]
   saveRDS(cell.names.test, file.path(testsDir, "cell.names.test.RDS"))
   saveRDS(genes.names.test, file.path(testsDir, "genes.names.test.RDS"))
 

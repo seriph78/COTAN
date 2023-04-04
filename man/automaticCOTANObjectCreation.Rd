@@ -41,9 +41,9 @@ directory.
 automaticCOTANObjectCreation
 }
 \examples{
-data("raw.dataset")
+data("test.dataset")
 objCOTAN <- automaticCOTANObjectCreation(
-  raw = raw.dataset,
+  raw = test.dataset,
   GEO = "code",
   sequencingMethod = "10X",
   sampleCondition = "mouse dataset",

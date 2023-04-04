@@ -20,8 +20,8 @@ This function plots the empirical distribution function of library sizes
 background signal.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 plot(ECDPlot(objCOTAN, yCut = 100))
 
 }

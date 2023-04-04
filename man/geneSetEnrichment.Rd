@@ -25,8 +25,8 @@ Calculates \eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})}, where the
   -\frac{1}{0.1} \ln(0.25)}
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+data("test.dataset")
+objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",
@@ -39,9 +39,9 @@ clusters <- cellsUniformClustering(objCOTAN, cores = 12,
 coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
                               clusters = clusters, coexDF = coexDF)
-groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"),
-                     G2 = c("Prpf40a", "Ergic2"),
-                     G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
+groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+                     G2 = c("g-000300", "g-000330"),
+                     G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
 enrichment <- geneSetEnrichment(clustersCoex = coexDF,
                                 groupMarkers = groupMarkers)
 

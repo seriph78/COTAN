@@ -16,8 +16,8 @@ an array with the library sizes
 This function extracts the genes raw library size.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 genesSize <- getGenesSize(objCOTAN)
 
 }

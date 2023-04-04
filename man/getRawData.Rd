@@ -16,8 +16,8 @@ the raw count sparse matrix
 This function extracts the raw count table.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 rawData <- getRawData(objCOTAN)
 
 }

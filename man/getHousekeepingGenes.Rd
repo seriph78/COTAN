@@ -17,8 +17,8 @@ This function returns the genes expressed in all cells of the
 dataset.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- findHousekeepingGenes(objCOTAN)
 hkGenes <- getHousekeepingGenes(objCOTAN)
 

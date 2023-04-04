@@ -20,8 +20,8 @@ Determines the fully expressed cells inside a \code{COTAN} object
 Fully expressed cells are those cells where all genes are expressed
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- findFullyExpressedCells(objCOTAN)
 
 }

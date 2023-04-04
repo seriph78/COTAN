@@ -26,8 +26,8 @@ Plot that check the relation between the library size and the
 number of genes detected.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 scPlot <- scatterPlot(objCOTAN)
 plot(scPlot)
 

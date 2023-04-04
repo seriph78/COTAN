@@ -14,12 +14,12 @@ test_that("clean COTAN object", {
 })
 
 test_that("Clean on test dataset", {
-  utils::data("test.dataset.col", package = "COTAN")
+  utils::data("test.dataset", package = "COTAN")
 
-  obj <- COTAN(raw = test.dataset.col)
+  obj <- COTAN(raw = test.dataset)
   obj <- initializeMetaDataset(obj, GEO = " ",
-                               sequencingMethod = "10X",
-                               sampleCondition = "example")
+                               sequencingMethod = "artificial",
+                               sampleCondition = "test")
 
   obj <- clean(obj)
 

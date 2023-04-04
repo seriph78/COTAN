@@ -27,8 +27,8 @@ It always has the diagonal set to zero. It is proportional to the
 genes' presence mutual information.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 G <- calculateG(objCOTAN)
 

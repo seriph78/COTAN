@@ -17,7 +17,7 @@ a \code{COTAN} object
 Constructor of the class \code{COTAN}
 }
 \examples{
-data("raw.dataset")
-obj <- COTAN(raw = raw.dataset)
+data("test.dataset")
+obj <- COTAN(raw = test.dataset)
 
 }

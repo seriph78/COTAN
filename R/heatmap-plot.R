@@ -168,18 +168,18 @@ heatmapPlot <- function(genesLists, sets, conditions,
 #' @rdname genesHeatmapPlot
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 #' # some genes
-#' primary.markers <- c("Pcbp2", "Snrpe", "Nfyb")
+#' primaryMarkers <- c("g-000010", "g-000020", "g-000030")
 #' # a example of named list of different gene set
-#' gene.sets.list <- list("G1" = primary.markers,
-#'                        "G2" = c("Prpf40a", "Ergic2"),
-#'                        "G3" = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
+#' groupMarkers <- list(G1 = primaryMarkers,
+#'                      G2 = c("g-000300", "g-000330"),
+#'                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
 #' genesHeatmapPlot(objCOTAN,
 #'                  primaryMarkers = primary.markers,
-#'                  secondaryMarkers = gene.sets.list,
+#'                  secondaryMarkers = groupMarkers,
 #'                  pValue = 0.05, symmetric = FALSE)
 genesHeatmapPlot <-
   function(objCOTAN, primaryMarkers, secondaryMarkers = c(),
@@ -312,8 +312,8 @@ genesHeatmapPlot <-
 #' @importFrom ComplexHeatmap Heatmap
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- initializeMetaDataset(objCOTAN,
 #'                                   GEO = "test_GEO",
 #'                                   sequencingMethod = "test_method",

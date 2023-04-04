@@ -24,10 +24,10 @@ Retrieves the plots associated to the output of the \code{\link[=clean]{clean()}
 method.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- clean(objCOTAN)
 plots <- cleanPlots(objCOTAN)
-plot(plots[["nu"]])
+plot(plots[["UDE"]])
 
 }

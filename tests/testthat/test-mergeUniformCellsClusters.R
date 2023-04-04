@@ -1,12 +1,12 @@
 
 test_that("Merge Uniform Cells Clusters", {
 
-  utils::data("test.dataset.col", package = "COTAN")
+  utils::data("test.dataset", package = "COTAN")
 
-  obj <- COTAN(raw = test.dataset.col)
+  obj <- COTAN(raw = test.dataset)
   obj <- initializeMetaDataset(obj, GEO = " ",
-                               sequencingMethod = "10X",
-                               sampleCondition = "example")
+                               sequencingMethod = "artificial",
+                               sampleCondition = "test")
 
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
@@ -38,9 +38,9 @@ test_that("Merge Uniform Cells Clusters", {
   expect_equal(colnames(deltaExpression), sort(unique(clusters)))
 
   #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
-  groupMarkers <- list(G1 = c("Pcbp2", "Snrpe", "Nfyb"),
-                       G2 = c("Prpf40a", "Ergic2"),
-                       G3 = c("Ncl", "Cd47", "Macrod2", "Fth1", "Supt16"))
+  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+                       G2 = c("g-000300", "g-000330"),
+                       G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
 
   e.df <- geneSetEnrichment(clustersCoex = coexDF, groupMarkers = groupMarkers)
 
@@ -51,8 +51,11 @@ test_that("Merge Uniform Cells Clusters", {
   expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0)
   expect_equal(e.df[["N. total"]], sapply(groupMarkers, length), ignore_attr = TRUE)
 
+  GDIThreshold <- 1.5
+
   c(mergedClusters, mergedCoexDF, mergedPValueDF) %<-%
     mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 12,
+                              GDIThreshold = GDIThreshold,
                               distance = "cosine", hclustMethod = "ward.D2",
                               saveObj = FALSE)
 
@@ -72,7 +75,7 @@ test_that("Merge Uniform Cells Clusters", {
 
     GDIData <- calculateGDI(clObj)
 
-    expect_lte(sum(GDIData[["GDI"]] >= 1.5), 0.01 * nrow(GDIData))
+    expect_lte(sum(GDIData[["GDI"]] >= GDIThreshold), 0.01 * nrow(GDIData))
 
     gc()
   }

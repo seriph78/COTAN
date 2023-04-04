@@ -112,9 +112,9 @@ clusters are \strong{uniform}. The function will stop once no \emph{near pairs} 
 clusters are mergeable.
 }
 \examples{
-data("raw.dataset")
+data("test.dataset")
 
-objCOTAN <- automaticCOTANObjectCreation(raw = raw.dataset,
+objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",

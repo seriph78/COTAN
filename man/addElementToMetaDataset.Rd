@@ -22,8 +22,8 @@ information \code{data.frame}. If the tag was already used it will update the
 associated value(s) instead.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- addElementToMetaDataset(objCOTAN, "Test",
                                     c("These are ", "some values"))
 meta <- getMetadataDataset(objCOTAN)

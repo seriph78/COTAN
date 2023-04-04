@@ -27,8 +27,8 @@ result of a call to dropGenesCells()]) and applies all steps until the
 genes' coex matrix is stored in the object
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- initializeMetaDataset(objCOTAN,
                                   GEO = "code",
                                   sequencingMethod = "10X",

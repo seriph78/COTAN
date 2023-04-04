@@ -20,8 +20,8 @@ Determines the housekeeping genes inside a \code{COTAN} object
 Houskeeping genes are those genes that are expressed in all cells
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- findHousekeepingGenes(objCOTAN)
 
 }

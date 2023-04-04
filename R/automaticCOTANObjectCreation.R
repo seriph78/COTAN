@@ -27,8 +27,8 @@
 #' @importFrom ggplot2 annotate
 #'
 #' @examples
-#' data("raw.dataset")
-#' objCOTAN <- COTAN(raw = raw.dataset)
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- initializeMetaDataset(objCOTAN,
 #'                                   GEO = "code",
 #'                                   sequencingMethod = "10X",
@@ -161,9 +161,9 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("raw.dataset")
+#' data("test.dataset")
 #' objCOTAN <- automaticCOTANObjectCreation(
-#'   raw = raw.dataset,
+#'   raw = test.dataset,
 #'   GEO = "code",
 #'   sequencingMethod = "10X",
 #'   sampleCondition = "mouse dataset",

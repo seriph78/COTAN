@@ -14,11 +14,11 @@ a named character array with the standard labels used in the
 datasetTags
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- addElementToMetaDataset(objCOTAN,
                                     datasetTags()[["cells"]],
-                                    ncol(raw.dataset))
+                                    ncol(test.dataset))
 meta <- getMetadataDataset(objCOTAN)
 
 }

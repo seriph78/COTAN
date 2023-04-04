@@ -17,8 +17,8 @@ This function return the cells that did express all genes of the
 dataset.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- findFullyExpressedCells(objCOTAN)
 feCells <- getFullyExpressedCells(objCOTAN)
 

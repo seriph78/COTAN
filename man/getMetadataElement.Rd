@@ -19,8 +19,8 @@ This function extracts the value associated with the given tag
 if present or an empty string otherwise.
 }
 \examples{
-data("raw.dataset")
-objCOTAN <- COTAN(raw = raw.dataset)
+data("test.dataset")
+objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
                                   sequencingMethod = "10X",
                                   sampleCondition = "mouse dataset")
