@@ -7,12 +7,13 @@
 #' @param condition name of the column in the MetadataCells dataframe containing 
 #' the condition. Default NULL
 #' @param cl.name name of the clustering to consider (without the initial "CL_")
+#' @param plot.title
 #'
 #' @return a list of a dataframe with the data and a ggplot object
 #' @export
 #'
 #' @examples
-ClustersSummaryPlot <- function(objCOTAN, condition = NULL, cl.name = "merge_round"){
+ClustersSummaryPlot <- function(objCOTAN, condition = NULL, cl.name = "merge_round", plot.title = NULL){
   MetadataCells <- getMetadataCells(objCOTAN)
   last.clusterization <- paste0("CL_",cl.name)
   
@@ -66,8 +67,8 @@ ClustersSummaryPlot <- function(objCOTAN, condition = NULL, cl.name = "merge_rou
         cells.array <- rownames(MetadataCells[MetadataCells[last.clusterization] == as.character(cl) & MetadataCells[,condition] == cond,])
         
         
-        df[df$Cluster == cl & df[,condition] == cond,]$ExpGenes25 <- sum(rowSums(getZeroOneProj(objCOTAN)[,cells.array]) > (cl.dim/100)*25)
-        df[df$Cluster == cl & df[,condition] == cond,]$ExpGenes <- sum(rowSums(getZeroOneProj(objCOTAN)[,cells.array]) > 0)
+        df[df$Cluster == cl & df[,condition] == cond,]$ExpGenes25 <- sum(rowSums(getZeroOneProj(objCOTAN)[,cells.array, drop = FALSE]) > (cl.dim/100)*25)
+        df[df$Cluster == cl & df[,condition] == cond,]$ExpGenes <- sum(rowSums(getZeroOneProj(objCOTAN)[,cells.array, drop = FALSE]) > 0)
         
         
       }
@@ -85,8 +86,10 @@ ClustersSummaryPlot <- function(objCOTAN, condition = NULL, cl.name = "merge_rou
   Df <- df %>% 
     gather(keys, values, CellNumber:CellPercentage)
   
-  if(!"cond" %in% colnames(Df)){
+  if(!condition %in% colnames(df)){
     Df$cond = "NoCond"
+  }else{
+    Df$cond <- Df[,condition]
   }
   
   statistics.plot <- ggplot(Df, aes(Cluster,values, fill=cond)) +
@@ -96,6 +99,7 @@ ClustersSummaryPlot <- function(objCOTAN, condition = NULL, cl.name = "merge_rou
     scale_y_continuous(expand = expansion(mult = c(.05, .4)))+
     coord_flip()+
     theme_classic()+
+    ggtitle(plot.title) +
     scale_fill_brewer(palette = "Accent")
   
   results <- list("Data"=df,"Plot"=statistics.plot)
