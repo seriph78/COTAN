@@ -4,7 +4,12 @@
 \alias{ClustersSummaryPlot}
 \title{ClustersSummaryPlot}
 \usage{
-ClustersSummaryPlot(objCOTAN, condition = NULL, cl.name = "merge_round")
+ClustersSummaryPlot(
+  objCOTAN,
+  condition = NULL,
+  cl.name = "merge_round",
+  plot.title = NULL
+)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
@@ -13,6 +18,8 @@ ClustersSummaryPlot(objCOTAN, condition = NULL, cl.name = "merge_round")
 the condition. Default NULL}
 
 \item{cl.name}{name of the clustering to consider (without the initial "CL_")}
+
+\item{plot.title}{}
 }
 \value{
 a list of a dataframe with the data and a ggplot object

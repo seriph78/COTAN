@@ -194,35 +194,30 @@ test_that("Raw data normalization", {
 
 
 test_that("prcomp_irlba usage", {
-  utils::data("raw.dataset", package = "COTAN")
-  pca.tb = readRDS(file.path(getwd(),"pca.tb.RDS"))
+  utils::data("test.dataset", package = "COTAN")
 
-  # strip names column from raw.dataset if necessary
-  if (nrow(raw.dataset) != nrow(pca.tb) &&
-      rownames(raw.dataset)[[1]] == "HK") {
-    raw.dataset <- raw.dataset[2:nrow(raw.dataset),]
-  }
+  pca <- irlba::prcomp_irlba(test.dataset, n = 5)
 
-  pca <- irlba::prcomp_irlba(raw.dataset, n = 5)
-
-  pca.raw <- pca$x
+  pcaRaw <- pca[["x"]]
   rm(pca)
 
-  rownames(pca.raw) <- rownames(raw.dataset)
-  colnames(pca.raw) <- paste0("PC_", c(1:5))
+  rownames(pcaRaw) <- rownames(test.dataset)
+  colnames(pcaRaw) <- paste0("PC_", seq_len(ncol(pcaRaw)))
 
-  correlation1.value <- cor(pca.raw[,1], pca.tb[,1])
-  correlation2.value <- cor(pca.raw[,2], pca.tb[,2])
-  pca.tb[,1] <- correlation1.value*pca.tb[,1]
-  pca.tb[,2] <- correlation2.value*pca.tb[,2]
-  x1 <- pca.raw[rownames(pca.tb),1] - pca.tb[,1]
-  x2 <- pca.raw[rownames(pca.tb),2] - pca.tb[,2]
+  #saveRDS(pcaRaw, file = "pca.test.RDS")
 
-  dist1 <- sqrt(sum(x1^2))
-  dist2 <- sqrt(sum(x2^2))
+  pcaExp = readRDS(file.path(getwd(), "pca.test.RDS"))
+  expect_equal(nrow(pcaRaw), nrow(pcaExp))
 
-  expect_true(dist1 < 10^(-4))
-  expect_true(dist2 < 10^(-4))
+  pcaExp <- pcaExp[rownames(pcaRaw), ]
+
+  correlations <- c(cor(pcaRaw[, 1], pcaExp[, 1]),
+                    cor(pcaRaw[, 2], pcaExp[, 2]))
+
+  dists <- c(sqrt(sum((pcaRaw[, 1] - correlations[[1]] * pcaExp[, 1])^2)),
+             sqrt(sum((pcaRaw[, 2] - correlations[[2]] * pcaExp[, 2])^2)))
+
+  expect_lt(max(dists), 10^(-4))
 })
 
 

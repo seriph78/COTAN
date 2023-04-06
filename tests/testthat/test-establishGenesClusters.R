@@ -1,6 +1,5 @@
 
 test_that("Establish genes clusters", {
-
   data("test.dataset")
   objCOTAN <- COTAN(raw = test.dataset)
   objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
@@ -22,12 +21,13 @@ test_that("Establish genes clusters", {
   expect_equal(colnames(GCS), secondaryMarkers)
   expect_lte(max(abs(GCS)), 1)
 
-  if (FALSE) {
+  if (TRUE) {
+    # saveRDS(GCS, file = "genes.coex.space.RDS")
     GCS_old <- readRDS(file.path(getwd(), "genes.coex.space.RDS"))
     expect_equal(GCS, GCS_old)
   }
 
-  c(g.space, plot.eig, pca_clusters, tree_plot) %<-%
+  c(gSpace, plotEigen, pcaClusters, treePlot) %<-%
     establishGenesClusters(objCOTAN = objCOTAN,
                            groupMarkers = groupMarkers,
                            numGenesPerMarker = 11,
@@ -38,20 +38,21 @@ test_that("Establish genes clusters", {
   pcaExtraCols <- c("highlight", "hclust", "sec_markers",
                      "colors", "col_branches", "groupLabels")
 
-  expect_s3_class(pca_clusters, "data.frame")
-  expect_equal(ncol(pca_clusters), 16)
-  expect_equal(colnames(pca_clusters), c(paste0("PC", c(1:10)), pcaExtraCols))
+  expect_s3_class(pcaClusters, "data.frame")
+  expect_equal(ncol(pcaClusters), 16)
+  expect_equal(colnames(pcaClusters), c(paste0("PC", c(1:10)), pcaExtraCols))
 
-  if (FALSE) {
-    pca_clusters_old <- readRDS(file.path(getwd(), "pca.clusters.RDS"))
-    expect_equal(pca_clusters, pca_clusters_old)
+  if (TRUE) {
+    # saveRDS(pcaClusters, "pca.clusters.RDS")
+    pcaClustersExp <- readRDS(file.path(getwd(), "pca.clusters.RDS"))
+    expect_equal(pcaClusters, pcaClustersExp)
   }
 
-  expect_equal(nrow(g.space), nrow(pca_clusters))
-  expect_equal(GCS, g.space)
+  expect_equal(nrow(gSpace), nrow(pcaClusters))
+  expect_equal(GCS, gSpace)
 
-  expect_s3_class(plot.eig, "ggplot")
-  expect_equal(dim(plot.eig$data), c(10, 2))
+  expect_s3_class(plotEigen, "ggplot")
+  expect_equal(dim(plotEigen[["data"]]), c(10, 2))
 
-  expect_s3_class(tree_plot, "dendrogram")
+  expect_s3_class(treePlot, "dendrogram")
 })

@@ -44,7 +44,7 @@
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
-#' genes <- c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330"),
+#' genes <- c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",
 #'            "g-000510", "g-000530", "g-000550", "g-000570", "g-000590")
 #' gdiPlot <- GDIPlot(objCOTAN, genes = genes, cond = "raw")
 #' plot(gdiPlot)

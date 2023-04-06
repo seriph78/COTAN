@@ -7,8 +7,6 @@
 ClustersTreePlot(objCOTAN, k)
 }
 \arguments{
-\item{objCOTAN}{}
-
 \item{k}{numeric scalar (OR a vector) with the number of clusters the tree should be cut into.}
 }
 \value{

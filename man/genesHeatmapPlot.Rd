@@ -46,7 +46,7 @@ groupMarkers <- list(G1 = primaryMarkers,
                      G2 = c("g-000300", "g-000330"),
                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
 genesHeatmapPlot(objCOTAN,
-                 primaryMarkers = primary.markers,
+                 primaryMarkers = primaryMarkers,
                  secondaryMarkers = groupMarkers,
                  pValue = 0.05, symmetric = FALSE)
 }
