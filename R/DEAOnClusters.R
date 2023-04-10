@@ -49,6 +49,7 @@
 #'
 DEAOnClusters <- function(objCOTAN, clusters = NULL) {
   if (is_empty(clusters)) {
+    # pick the last clusterization
     clusters <- getClusterizationData(objCOTAN)[["clusters"]]
   }
 

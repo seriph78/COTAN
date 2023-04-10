@@ -92,7 +92,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   outputClusters <- clusters
   if (is_empty(outputClusters)) {
-    # pick last clusterization
+    # pick the last clusterization
     outputClusters <- getClusterizationData(objCOTAN)[["clusters"]]
   }
 
