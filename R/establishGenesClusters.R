@@ -150,9 +150,6 @@ genesCoexSpace <-
 #' @importFrom dendextend color_labels
 #' @importFrom dendextend color_branches
 #'
-#' @importFrom RColorBrewer brewer.pal
-#' @importFrom RColorBrewer brewer.pal.info
-#'
 #' @importFrom stats dist
 #' @importFrom stats hclust
 #' @importFrom stats cutree
@@ -196,10 +193,7 @@ establishGenesClusters <-
   assert_that(!is.null(names(groupMarkers)),
               msg = "Group markers must have names for each group")
 
-  maxCol <- brewer.pal.info[c("Set2", "Set1", "Set3"), "maxcolors"]
-
-  assert_that(kCuts <= sum(maxCol),
-              msg = "kCuts greater than number of possible supported colors")
+  colVector = getColorsVector(kCuts)
 
   # Dropping the genes not present
   filterGenes <- function(markers, genes) {
@@ -272,18 +266,6 @@ establishGenesClusters <-
 
   hClust <- cutree(hcNorm, k = kCuts)[rownames(pca1)]
   pca1[["hclust"]] <- hClust
-
-  colVector <- brewer.pal(min(kCuts, maxCol[[1L]]), name = "Set2")
-  if (kCuts > maxCol[[1L]]) {
-    colVector <- c(colVector, brewer.pal(min(kCuts - maxCol[[1L]],
-                                             maxCol[[2L]]),
-                                         name = "Set1"))
-  }
-  if (kCuts > sum(maxCol[1L:2L])) {
-    colVector <- c(colVector, brewer.pal(min(kCuts - sum(maxCol[1L:2L]),
-                                             maxCol[[3L]]),
-                                         name = "Set3"))
-  }
 
   pca1[["sec_markers"]] <- 0.0
   pca1[["sec_markers"]][rownames(pca1) %in% secondaryMarkers] <- 1.0

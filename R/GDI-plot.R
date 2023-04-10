@@ -30,9 +30,6 @@
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom ggrepel geom_label_repel
 #'
-#' @importFrom RColorBrewer brewer.pal.info
-#' @importFrom RColorBrewer brewer.pal
-#'
 #' @importFrom stats quantile
 #'
 #' @importFrom rlang set_names
@@ -82,10 +79,8 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
   }
 
   qualColPals <- brewer.pal.info[brewer.pal.info[["category"]] == "qual", ]
-  colVector <- unlist(mapply(brewer.pal, qualColPals[["maxcolors"]],
-                             rownames(qualColPals)))
 
-  myColours <- set_names(colVector[seq_along(names(genes))], names(genes))
+  myColours <- set_names(getColorsVector(length(names(genes))), names(genes))
 
   labelledGenes <- GDIDf[["colors"]] != "none"
 

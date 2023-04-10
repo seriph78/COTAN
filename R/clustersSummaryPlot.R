@@ -156,46 +156,104 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 
 
 
-
-
-
-#' ClustersTreePlot
+#' clustersTreePlot
 #'
-#' @param objCOTAN
-#' @param k numeric scalar (OR a vector) with the number of clusters the tree
-#'   should be cut into.
+#' @description This function returns the dendogram plot where the given
+#'   clusters are placed on the base of their relative distance
 #'
-#' @returns the dendrogram
+#' @param objCOTAN a `COTAN` object
+#' @param kCuts the number of estimated cluster (this defines the high for the
+#'   tree cut)
+#' @param clName The name of the clusterization. If not given the last available
+#'   clusterization will be returned, as it is probably the most significant!
+#' @param distance type of distance to use (default is `cosine`, `euclidean` is
+#'   also available)
+#' @param hclustMethod default is "ward.D2" but can be any method defined by
+#'   [[stats::hclust()]] function
+#'
+#' @returns a `ggplot2` object representing the dendrogram plot
+#'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom dendextend set
+#' @importFrom dendextend color_labels
+#' @importFrom dendextend branches_color
+#'
+#' @importFrom stats dist
+#' @importFrom stats hclust
+#' @importFrom stats cutree
+#' @importFrom stats as.dendrogram
 #'
 #' @export
-#' @import RColorBrewer
 #'
 #' @examples
-ClustersTreePlot <- function(objCOTAN, k){
-  cluster_data <- getClusterizationData(objCOTAN)[["coex"]]
+#' data("test.dataset")
+#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
+#'                                          GEO = "S",
+#'                                          sequencingMethod = "10X",
+#'                                          sampleCondition = "Test",
+#'                                          cores = 12,
+#'                                          saveObj = FALSE,
+#'                                          outDir = tempdir())
+#'
+#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
+#'                                    saveObj = FALSE,
+#'                                    outDir = tempdir())
+#'
+#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
+#'                               clusters = clusters)
+#'
+#' treePlot <- clustersTreePlot(objCOTAN, 2)
+#'
+#' @rdname clustersTreePlot
+#'
+clustersTreePlot <- function(objCOTAN, kCuts,
+                             clName = NULL,
+                             distance = "cosine",
+                             hclustMethod = "ward.D2") {
 
-  ######## This is the best: cosine dissimilarity
-  Matrix <- as.matrix(t(cluster_data))
-  sim <- Matrix / sqrt(rowSums(Matrix * Matrix))
-  sim <- sim %*% t(sim)
-  D_sim <- as.dist(1 - sim)
-  tree <- hclust(D_sim,method = "ward.D2")
+  emptyName <- !(length(clName) && any(nzchar(clName)))
+  if (emptyName) {
+    clNames <- getClusterizations(objCOTAN)
+    clName <- clNames[length(clNames)]
+    rm(clNames)
+  }
 
-  ############
+  c(clusters, coexDF) %<-% getClusterizationData(objCOTAN, clName = clName)
 
-  qual_col_pals = brewer.pal.info[brewer.pal.info$category == 'qual',]
-  col_vector = unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+  if (kCuts > length(unique(clusters))) {
+    logThis("The number of cuts must be not more than the number of clusters",
+            logLevel = 1L)
+    kCuts <- length(unique(clusters))
+  }
 
-  ########
-  dend <- as.dendrogram(tree)
-  #colnames(df) <- str_remove_all(colnames(df), pattern = "cl.")
-  cut = cutree(tree, k = k)
-  dend =branches_color(dend,k=k,col=col_vector[1:k],groupLabels = T)
-  dend =color_labels(dend,k=k)
-  dend = set(dend = dend, "branches_lwd", 4)
+  colVector <- getColorsVector(kCuts)
 
+  if (is_empty(coexDF)) {
+    logThis("Coex dataframe is missing: will be calculated and stored",
+            logLevel = 1L)
+    coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+    objCOTAN <- addClusterizationCoex(objCOTAN, clName = clName,
+                                      coexDF = coexDF)
+  }
+  rm(clusters)
 
-return(dend)
+  #merge small cluster based on distances
+  if (distance == "cosine") {
+    # This is the best: cosine dissimilarity
+    coexDist <- cosineDissimilarity(as.matrix(coexDF))
+  } else if (distance == "euclidean") {
+    coexDist <- dist(t(as.matrix(coexDF)))
+  } else {
+    stop("only 'cosine' and 'euclidean' distances are supported")
+  }
 
+  hcNorm <- hclust(coexDist, method = hclustMethod)
+
+  dend <- as.dendrogram(hcNorm)
+  dend <- branches_color(dend, k = kCuts, col = colVector, groupLabels = TRUE)
+  dend <- color_labels(dend, k = kCuts)
+  dend <- set(dend = dend, "branches_lwd", 4L)
+
+  return(dend)
 }
-

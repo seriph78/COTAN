@@ -1001,6 +1001,46 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   return(basicTheme)
 }
 
+#' getColorsVector
+#'
+#' @description This function returns a list of colors based on the
+#'   [[brewer.pal()]] function
+#'
+#' @details The colors are taken from the [[brewer.pal.info()]] sets with
+#'   `Set1`, `Set2`, `Set3` placed first.
+#'
+#' @param numNeededColors The number of returned colors
+#'
+#' @returns an array fo RGB colors of the wanted size
+#'
+#' @importFrom RColorBrewer brewer.pal
+#' @importFrom RColorBrewer brewer.pal.info
+#'
+#' @export
+#'
+#' @examples
+#' colorsVector <- getColorsVector(17)
+#'
+#' @rdname getColorsVector
+#'
+getColorsVector <- function(numNeededColors) {
+  qualColPalets <- brewer.pal.info[brewer.pal.info[["category"]] == "qual", ]
+  numColPalets <- nrow(qualColPalets)
+
+  qualColPalets <- rbind(qualColPalets[(numColPalets - 2L):numColPalets, ],
+                         qualColPalets[1L:(numColPalets - 3L), ])
+
+  colVector <- unlist(mapply(brewer.pal, qualColPalets[["maxcolors"]],
+                             rownames(qualColPalets)))
+
+  rm(qualColPalets, numColPalets)
+
+  assert_that(numNeededColors <= length(colVector),
+              msg = paste("Needed more colors than the number",
+                          "of possible supported colors:", length(colVector)))
+
+  return(colVector[1L:numNeededColors])
+}
 
 #----------------- legacy functions --------------------
 

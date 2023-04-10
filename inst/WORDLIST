@@ -3,13 +3,10 @@ Bioc
 COEX
 COexpression
 Coex
-ClustersSummaryPlot
-ClustersTreePlot
 DEAOnClusters
 ECD
 ECDPlot
 ERCC
-FindClustersMarkers
 GDI
 GDIPlot
 GSE
@@ -40,12 +37,15 @@ clusterCoex
 clusterization
 clusterizations
 clustersDeltaExpression
+clustersSummaryPlot
+clustersTreePlot
 coex
 coexDF
 coexpression
 contingencyTables
 cosineDissimilarity
 datasetTags
+dendogram
 devtools
 df
 dropCellsCoex
@@ -67,6 +67,7 @@ expectedNY
 expectedYN
 expectedYY
 factoextra
+findClustersMarkers
 findFullyExpressedCells
 findHousekeepingGenes
 flagNotFullyExpressedCells
