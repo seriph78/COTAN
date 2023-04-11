@@ -1,15 +1,13 @@
 
 
-#' ECDPlot
-#'
-#' This function plots the empirical distribution function of library sizes
-#' (UMI number). It helps to define where to drop "cells" that are simple
-#' background signal.
+#' @details `ECDPlot()` plots the empirical distribution function of library
+#'   sizes (UMI number). It helps to define where to drop "cells" that are
+#'   simple background signal.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param yCut y threshold of library size to drop
 #'
-#' @returns an ECD plot
+#' @returns `ECDPlot()` returns an ECD plot
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
@@ -18,11 +16,10 @@
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' plot(ECDPlot(objCOTAN, yCut = 100))
+#' ## These plots might help to identify genes/cells that need to be dropped
+#' plot <- ECDPlot(objCOTAN, yCut = 100)
 #'
-#' @rdname ECDPlot
+#' @rdname RawDataCleaning
 #'
 ECDPlot <- function(objCOTAN, yCut) {
   libSize <- sort(getCellsSize(objCOTAN), decreasing = TRUE)

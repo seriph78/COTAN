@@ -170,12 +170,6 @@ genesCoexSpace <-
 #'                                          cores = 12,
 #'                                          saveObj = FALSE,
 #'                                          outDir = tempdir())
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
-#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
-#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
-#'                               clusters = clusters, coexDF = coexDF)
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
 #'                      G2 = c("g-000300", "g-000330"),
 #'                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))

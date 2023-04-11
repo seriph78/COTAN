@@ -11,9 +11,6 @@
 #'
 #' @export
 #'
-#' @examples
-#' objCOTAN <- clean(objCOTAN)
-#'
 #' @rdname RawDataCleaning
 #'
 setMethod(

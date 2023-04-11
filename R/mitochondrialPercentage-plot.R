@@ -1,11 +1,9 @@
 
-#' mitochondrialPercentagePlot
-#'
-#' @description Function that plots the raw library size for each cell and
-#'   sample.
+#' @details `mitochondrialPercentagePlot()` plots the raw library size for each
+#'   cell and sample.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param splitPattern Pattern used to extract, from the column names, the
+#' @param splitPattern a pattern used to extract, from the column names, the
 #'   sample field (default " ")
 #' @param numCol Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
@@ -25,17 +23,16 @@
 #' @importFrom stringr str_split
 #' @importFrom stringr str_detect
 #'
-#' @returns a list with the violin-boxplot plot and a sizes data.frame
+#' @returns `mitochondrialPercentagePlot()` returns a `list` with:
+#'   * "plot" a `violin-boxplot` object
+#'   * "sizes" a sizes `data.frame`
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' mpPlot <- mitochondrialPercentagePlot(objCOTAN)[["plot"]]
-#' plot(mpPlot)
+#' mitPercPlot <- mitochondrialPercentagePlot(objCOTAN)[["plot"]]
 #'
-#' @rdname mitochondrialPercentagePlot
+#' @rdname RawDataCleaning
 #'
 mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
                                         numCol = 2L, genePrefix = "^MT-") {

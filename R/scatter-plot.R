@@ -1,18 +1,18 @@
 
 #' scatterPlot
 #'
-#' @description Plot that check the relation between the library size and the
-#'   number of genes detected.
+#' @details `scatterPlot()` creates a plot that check the relation between the
+#'   library size and the number of genes detected.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param splitPattern Pattern used to extract, from the column names, the
 #'   sample field (default " ")
 #' @param numCol Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
-#' @param splitSamples Boolean. Whether to plot each sample in a different
-#'   panel (default `FALSE`)
+#' @param splitSamples Boolean. Whether to plot each sample in a different panel
+#'   (default `FALSE`)
 #'
-#' @returns The scatter plot
+#' @returns `scatterPlot()` returns the scatter plot
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
@@ -33,12 +33,9 @@
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' scPlot <- scatterPlot(objCOTAN)
-#' plot(scPlot)
 #'
-#' @rdname scatterPlot
+#' @rdname RawDataCleaning
 #'
 scatterPlot <- function(objCOTAN, splitPattern = " ",
                         numCol = 2L, splitSamples = FALSE) {

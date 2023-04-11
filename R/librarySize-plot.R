@@ -94,9 +94,7 @@ geom_flat_violin <- function(
 
 
 
-#' cellSizePlot
-#'
-#' @description Function that plots the raw library size for each cell and
+#' @details `cellSizePlot()` plots the raw library size for each cell and
 #'   sample.
 #'
 #' @param objCOTAN a `COTAN` object
@@ -105,7 +103,7 @@ geom_flat_violin <- function(
 #' @param numCol Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
 #'
-#' @returns the violin-boxplot plot
+#' @returns `cellSizePlot()` returns the `violin-boxplot` plot
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
@@ -120,12 +118,9 @@ geom_flat_violin <- function(
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' lsPlot <- cellSizePlot(objCOTAN)
-#' plot(lsPlot)
 #'
-#' @rdname cellSizePlot
+#' @rdname RawDataCleaning
 #'
 cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
   sizes <- sort(getCellsSize(objCOTAN))
@@ -165,9 +160,7 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 }
 
 
-#' genesSizePlot
-#'
-#' @description Function that plots the raw gene number (reads > 0) for each
+#' @details `genesSizePlot()` plots the raw gene number (reads > 0) for each
 #'   cell and sample
 #'
 #' @param objCOTAN a `COTAN` object
@@ -176,7 +169,7 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #' @param numCol Once the column names are split by splitPattern, the column
 #'   number with the sample name (default 2)
 #'
-#' @returns the violin-boxplot plot
+#' @returns `genesSizePlot()` returns the `violin-boxplot` plot
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 position_nudge
@@ -195,12 +188,9 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' gsPlot <- genesSizePlot(objCOTAN)
-#' plot(gsPlot)
 #'
-#' @rdname genesSizePlot
+#' @rdname RawDataCleaning
 #'
 genesSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
   sizes <- sort(colSums(getZeroOneProj(objCOTAN)))
