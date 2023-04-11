@@ -226,13 +226,12 @@ setMethod(
 )
 
 
-#' estimateNuBisection
-#'
-#' @description Estimates the `nu` vector of a `COTAN` object by bisection.
-#'
-#' @details Determines the `nu` parameters such that, for each cell, the
-#'   probability of zero count matches the number of observed zeros. It assumes
-#'   [estimateDispersionBisection()] being already run.
+#' @details `estimateNuBisection()` estimates the `nu` vector of a `COTAN`
+#'   object by bisection. It determines the `nu` parameters such that, for each
+#'   cell, the probability of zero counts matches the number of observed zeros.
+#'   It assumes [estimateDispersionBisection()] being already run. Since this
+#'   breaks the assumption that the average `nu` is `1`, it is recommended not
+#'   to run this in isolation but use `estimateDispersionNuBisection()` instead.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param threshold minimal solution precision
@@ -241,7 +240,7 @@ setMethod(
 #' @param chunkSize number of genes to solve in batch in a single core. Default
 #'   is 1024.
 #'
-#' @return the updated `COTAN` object
+#' @returns `estimateNuBisection()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
@@ -254,17 +253,7 @@ setMethod(
 #'
 #' @importFrom stats median
 #'
-#' @export
-#'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
-#' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
-#' nu <- getNu(objCOTAN)
-#'
-#' @rdname estimateNuBisection
+#' @rdname ParametersEstimations
 #'
 setMethod(
   "estimateNuBisection",
@@ -374,10 +363,9 @@ setMethod(
 )
 
 
-#' estimateDispersionNuBisection
-#'
-#' Estimates the 'dispersion' and 'nu' field of a `COTAN` object by running
-#' sequentially a bisection for each parameter.
+#' @details `estimateDispersionNuBisection()` estimates the `dispersion` and
+#'   `nu` field of a `COTAN` object by running sequentially a bisection for each
+#'   parameter.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param threshold minimal solution precision
@@ -388,7 +376,7 @@ setMethod(
 #' @param enforceNuAverageToOne a Boolean on whether to keep the average `nu`
 #'   equal to 1
 #'
-#' @return the updated `COTAN` object
+#' @returns `estimateDispersionNuBisection()` returns the updated `COTAN` object
 #'
 #' @export
 #'
@@ -397,15 +385,12 @@ setMethod(
 #' @importFrom assertthat assert_that
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12,
-#'                                           enforceNuAverageToOne = FALSE)
-#' dispersion <- getDispersion(objCOTAN)
+#'                                           enforceNuAverageToOne = TRUE)
 #' nu <- getNu(objCOTAN)
+#' dispersion <- getDispersion(objCOTAN)
 #'
-#' @rdname estimateDispersionNuBisection
+#' @rdname ParametersEstimations
 #'
 setMethod(
   "estimateDispersionNuBisection",
@@ -491,11 +476,11 @@ setMethod(
 )
 
 
-#' estimateDispersionNuNlminb
-#'
-#' @description This function estimates the nu and dispersion parameters to
-#'   minimize the discrepancy between the observed and expected probability of
-#'   zero.
+#' @details `estimateDispersionNuNlminb()` estimates the `nu` and
+#'   `dispersion` parameters to minimize the discrepancy between the observed
+#'   and expected probability of zero. It uses the [[stats::nlminb()]] solver,
+#'   but since the joint parameters have too high dimensionality, it converges
+#'   too slowly to be actually useful in real cases.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param threshold minimal solution precision
@@ -505,7 +490,7 @@ setMethod(
 #' @param enforceNuAverageToOne a Boolean on whether to keep the average `nu`
 #'   equal to 1
 #'
-#' @returns The updated `COTAN` object
+#' @returns `estimateDispersionNuNlminb()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
@@ -513,7 +498,7 @@ setMethod(
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @rdname estimateDispersionNuNlminb
+#' @rdname ParametersEstimations
 #'
 setMethod(
   "estimateDispersionNuNlminb",

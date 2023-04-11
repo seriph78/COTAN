@@ -4,6 +4,9 @@
 \alias{estimateLambdaLinear,COTAN-method}
 \alias{estimateNuLinear,COTAN-method}
 \alias{estimateDispersionBisection,COTAN-method}
+\alias{estimateNuBisection,COTAN-method}
+\alias{estimateDispersionNuBisection,COTAN-method}
+\alias{estimateDispersionNuNlminb,COTAN-method}
 \alias{getNu,COTAN-method}
 \alias{getLambda,COTAN-method}
 \alias{getDispersion,COTAN-method}
@@ -19,6 +22,31 @@
   cores = 1L,
   maxIterations = 100L,
   chunkSize = 1024L
+)
+
+\S4method{estimateNuBisection}{COTAN}(
+  objCOTAN,
+  threshold = 0.001,
+  cores = 1L,
+  maxIterations = 100L,
+  chunkSize = 1024L
+)
+
+\S4method{estimateDispersionNuBisection}{COTAN}(
+  objCOTAN,
+  threshold = 0.001,
+  cores = 1L,
+  maxIterations = 100L,
+  chunkSize = 1024L,
+  enforceNuAverageToOne = TRUE
+)
+
+\S4method{estimateDispersionNuNlminb}{COTAN}(
+  objCOTAN,
+  threshold = 0.001,
+  maxIterations = 50L,
+  chunkSize = 1024L,
+  enforceNuAverageToOne = TRUE
 )
 
 \S4method{getNu}{COTAN}(objCOTAN)
@@ -38,6 +66,9 @@
 
 \item{chunkSize}{number of genes to solve in batch in a single core. Default
 is 1024.}
+
+\item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
+equal to 1}
 }
 \value{
 \code{estimateLambdaLinear()} returns the updated \code{COTAN} object
@@ -45,6 +76,12 @@ is 1024.}
 \code{estimateNuLinear()} returns the updated \code{COTAN} object
 
 \code{estimateDispersionBisection()} returns the updated \code{COTAN} object
+
+\code{estimateNuBisection()} returns the updated \code{COTAN} object
+
+\code{estimateDispersionNuBisection()} returns the updated \code{COTAN} object
+
+\code{estimateDispersionNuNlminb()} returns the updated \code{COTAN} object
 
 \code{getNu()} returns the nu array
 
@@ -74,6 +111,23 @@ dispersion factor for each gene (a). Determines the \code{dispersion} such that,
 for each gene, the probability of zero count matches the number of observed
 zeros. It assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being already run.
 
+\code{estimateNuBisection()} estimates the \code{nu} vector of a \code{COTAN}
+object by bisection. It determines the \code{nu} parameters such that, for each
+cell, the probability of zero counts matches the number of observed zeros.
+It assumes \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} being already run. Since this
+breaks the assumption that the average \code{nu} is \code{1}, it is recommended not
+to run this in isolation but use \code{estimateDispersionNuBisection()} instead.
+
+\code{estimateDispersionNuBisection()} estimates the \code{dispersion} and
+\code{nu} field of a \code{COTAN} object by running sequentially a bisection for each
+parameter.
+
+\code{estimateDispersionNuNlminb()} estimates the \code{nu} and
+\code{dispersion} parameters to minimize the discrepancy between the observed
+and expected probability of zero. It uses the [\code{\link[stats:nlminb]{stats::nlminb()}}] solver,
+but since the joint parameters have too high dimensionality, it converges
+too slowly to be actually useful in real cases.
+
 \code{getNu()} extracts the nu array (normalized cells' counts averages)
 
 \code{getLambda()} extracts the lambda array (mean expression for each
@@ -92,6 +146,11 @@ objCOTAN <- estimateNuLinear(objCOTAN)
 nu <- getNu(objCOTAN)
 
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+dispersion <- getDispersion(objCOTAN)
+
+objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12,
+                                          enforceNuAverageToOne = TRUE)
+nu <- getNu(objCOTAN)
 dispersion <- getDispersion(objCOTAN)
 
 }
