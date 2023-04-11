@@ -143,27 +143,19 @@ setMethod(
 )
 
 
-#' findHousekeepingGenes
+#' @details `findHousekeepingGenes()` determines the housekeeping genes inside
+#'   the raw data
 #'
-#' @description Determines the housekeeping genes inside a `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
-#' @details Houskeeping genes are those genes that are expressed in all cells
-#'
-#' @param objCOTAN the `COTAN` object
-#'
-#' @returns the given `COTAN` object with updated housekeeping genes'
-#'   information
+#' @returns `findHousekeepingGenes()` returns the given `COTAN` object with
+#'   updated housekeeping genes' information
 #'
 #' @importFrom Matrix rowSums
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- findHousekeepingGenes(objCOTAN)
-#'
-#' @rdname findHousekeepingGenes
+#' @rdname RawDataCleaning
 #'
 setMethod(
   "findHousekeepingGenes",
@@ -182,27 +174,19 @@ setMethod(
 )
 
 
-#' findFullyExpressedCells
+#' @details `findFullyExpressedCells()` determines the fully expressed cells
+#'   inside the raw data
 #'
-#' @description Determines the fully expressed cells inside a `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
-#' @details Fully expressed cells are those cells where all genes are expressed
-#'
-#' @param objCOTAN the `COTAN` object
-#'
-#' @returns the given `COTAN` object with updated fully expressed cells'
-#'   information
+#' @returns `findFullyExpressedCells()` returns the given `COTAN` object with
+#'   updated fully expressed cells' information
 #'
 #' @importFrom Matrix colSums
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- findFullyExpressedCells(objCOTAN)
-#'
-#' @rdname findFullyExpressedCells
+#' @rdname RawDataCleaning
 #'
 setMethod(
   "findFullyExpressedCells",
@@ -221,30 +205,23 @@ setMethod(
 )
 
 
-#' dropGenesCells
 #'
-#' @description  This function remove an array of genes and/or cells from the
+#'
+#' @details `dropGenesCells()` removes an array of genes and/or cells from the
 #'   current `COTAN` object.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param genes an array of gene names
 #' @param cells an array of cell names
 #'
-#' @returns a completely new `COTAN` object with the new raw data obtained after
-#'   the indicated genes/cells were expunged. Only the meta-data for the
-#'   data-set are kept, while the rest is dropped as no more relevant with the
-#'   restricted matrix
+#' @returns `dropGenesCells()` returns a completely new `COTAN` object with the
+#'   new raw data obtained after the indicated genes/cells were expunged. Only
+#'   the meta-data for the data-set are kept, while the rest is dropped as no
+#'   more relevant with the restricted matrix
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' genes.to.rem <- getGenes(objCOTAN)[grep('^MT', getGenes(objCOTAN))]
-#' cells.to.rem <- getCells(objCOTAN)[which(getCellsSize(objCOTAN) == 0)]
-#' objCOTAN <- dropGenesCells(objCOTAN, genes.to.rem, cells.to.rem)
-#'
-#' @rdname dropGenesCells
+#' @rdname RawDataCleaning
 #'
 setMethod(
   "dropGenesCells",

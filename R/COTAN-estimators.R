@@ -1,12 +1,22 @@
-# `COTAN` parameters' estimates methods
+# ----- `COTAN` parameters' estimates methods -----
 
-#' estimateLambdaLinear
+#' Estimation of the `COTAN` model's parameters
 #'
-#' @description Linear estimator of lambda (genes' counts averages)
+#' @description These functions are used to estimate the `COTAN` model's
+#'   parameters. That is the average count for each gene (lambda) the average
+#'   count for each cell (nu) and the dispersion parameter for each gene to
+#'   match the probability of zero.
+#'
+#'   The estimator methods are named `Linear` if they can be calculated as a
+#'   linear statistic of the raw data or `Bisection` if they are found via a
+#'   parallel bisectio solver.
+#'
+#' @details `estimateLambdaLinear()` does a linear estimation of lambda (genes'
+#'   counts averages)
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns The updated `COTAN` object
+#' @returns `estimateLambdaLinear()` returns the updated `COTAN` object
 #'
 #' @importFrom Matrix mean
 #' @importFrom Matrix rowMeans
@@ -16,10 +26,11 @@
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
+#'
 #' objCOTAN <- estimateLambdaLinear(objCOTAN)
 #' lambda <- getLambda(objCOTAN)
 #'
-#' @rdname estimateLambdaLinear
+#' @rdname ParametersEstimations
 #'
 setMethod(
   "estimateLambdaLinear",
@@ -46,25 +57,22 @@ setMethod(
 )
 
 
-#' estimateNuLinear
-#'
-#' @description linear estimator of nu (normalized cells' counts averages)
+#' @details `estimateNuLinear()` does a linear estimation of nu (normalized
+#'   cells' counts averages)
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns The updated `COTAN` object
+#' @returns `estimateNuLinear()` returns the updated `COTAN` object
 #'
 #' @importFrom Matrix colMeans
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- estimateNuLinear(objCOTAN)
 #' nu <- getNu(objCOTAN)
 #'
-#' @rdname estimateNuLinear
+#' @rdname ParametersEstimations
 #'
 setMethod(
   "estimateNuLinear",
@@ -93,24 +101,19 @@ setMethod(
 )
 
 
-#' estimateDispersionBisection
+#' @details `estimateDispersionBisection()` estimates the negative binomial
+#'   dispersion factor for each gene (a). Determines the `dispersion` such that,
+#'   for each gene, the probability of zero count matches the number of observed
+#'   zeros. It assumes [estimateNuLinear()] being already run.
 #'
-#' @description Estimates the negative binomial dispersion factor for each gene.
-#'
-#' @details Determines the `dispersion` such that, for each gene, the
-#'   probability of zero count matches the number of observed zeros. It assumes
-#'   [estimateNuLinear()] being already run.
-#'
-#'   It needs to be run after [clean()]
-#'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #' @param threshold minimal solution precision
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param chunkSize number of genes to solve in batch in a single core. Default
 #'   is 1024.
 #'
-#' @returns The updated `COTAN` object
+#' @returns `estimateDispersionBisection()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang set_names
 #'
@@ -123,13 +126,10 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 #' dispersion <- getDispersion(objCOTAN)
 #'
-#' @rdname estimateDispersionBisection
+#' @rdname ParametersEstimations
 #'
 setMethod(
   "estimateDispersionBisection",

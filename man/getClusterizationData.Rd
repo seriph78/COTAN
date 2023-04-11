@@ -7,7 +7,7 @@
 \S4method{getClusterizationData}{COTAN}(objCOTAN, clName = NULL)
 }
 \arguments{
-\item{objCOTAN}{A \code{COTAN} object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{clName}{The name of the clusterization. If not given the last available
 clusterization will be returned, as it is probably the most significant!}

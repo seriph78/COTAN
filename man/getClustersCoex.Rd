@@ -7,7 +7,7 @@
 \S4method{getClustersCoex}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A \code{COTAN} object}
+\item{objCOTAN}{a \code{COTAN} object}
 }
 \value{
 the list with a coex data.frame for each clusterization When not

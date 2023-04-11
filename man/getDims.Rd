@@ -7,7 +7,7 @@
 \S4method{getDims}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A \code{COTAN} object}
+\item{objCOTAN}{a \code{COTAN} object}
 }
 \value{
 a named \code{list} with the sizes of the slots.

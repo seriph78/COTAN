@@ -7,7 +7,7 @@
 \S4method{getNormalizedData}{COTAN}(objCOTAN)
 }
 \arguments{
-\item{objCOTAN}{A \code{COTAN} object}
+\item{objCOTAN}{a \code{COTAN} object}
 }
 \value{
 the normalized count dataframe (i.e. divided by nu).

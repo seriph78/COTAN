@@ -7,7 +7,7 @@
 \S4method{getGenesCoex}{COTAN}(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
 }
 \arguments{
-\item{objCOTAN}{A \code{COTAN} object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{genes}{A vector of gene names. It will exclude any gene not on the
 list. By defaults the function will keep all genes.}

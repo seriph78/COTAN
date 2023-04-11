@@ -1,11 +1,9 @@
-#' cleanPlots
-#'
-#' @description Retrieves the plots associated to the output of the [clean()]
-#'   method.
+#' @details `cleanPlots()` creates the plots associated to the output of the
+#'   [clean()] method.
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns a `list` of `ggplot2` plots:
+#' @returns `cleanPlots()` returns a `list` of `ggplot2` plots:
 #'   * "pcaCells" is for pca cells,
 #'   * "pcaCellsData" is the data of the pca cells,
 #'   * "genes" is for cluster2 cells' group genes,
@@ -46,13 +44,9 @@
 #' @importFrom graphics title
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
 #' plots <- cleanPlots(objCOTAN)
-#' plot(plots[["UDE"]])
 #'
-#' @rdname cleanPlots
+#' @rdname RawDataCleaning
 #'
 cleanPlots <- function(objCOTAN) {
 

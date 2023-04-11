@@ -7,7 +7,7 @@
 \S4method{getClusterizations}{COTAN}(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE)
 }
 \arguments{
-\item{objCOTAN}{A \code{COTAN} object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{dropNoCoex}{When \code{TRUE} drops the names from the clusterizations with
 empty associated coex \code{data.frame}}

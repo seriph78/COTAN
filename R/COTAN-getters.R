@@ -7,7 +7,7 @@
 #'
 #' @details `getRawData()` extracts the raw count table.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns `getRawData()` returns the raw count sparse matrix
 #'
@@ -32,7 +32,7 @@ setMethod(
 
 #' @details `getNumCells()` extracts the number of cells in the sample (𝑚)
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns `getNumCells()` returns the number of cells in the sample (𝑚).
 #'
@@ -53,7 +53,7 @@ setMethod(
 
 #' @details `getNumGenes()` extracts the number of genes in the sample (𝑛)
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns `getNumGenes()` returns the number of genes in the sample (𝑛).
 #'
@@ -75,7 +75,7 @@ setMethod(
 
 #' @details `getCells()` extract all cells in the dataset.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns `getCells()` returns a character array with the cells' names
 #'
@@ -97,7 +97,7 @@ setMethod(
 
 #' @details `getGenes()` extract all genes in the dataset.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns `getGenes()` returns a character array with the genes' names
 #'
@@ -120,7 +120,7 @@ setMethod(
 #' @details `getZeroOneProj()` extracts the raw count table where any
 #'   positive number has been replaced with `1`
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns `getZeroOneProj()` returns the raw count matrix projected to `0` or
 #'   `1`
@@ -143,7 +143,7 @@ setMethod(
 
 #' @details `getCellsSize()` extracts the cell raw library size.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @return `getCellsSize()` returns an array with the library sizes
 #'
@@ -165,7 +165,7 @@ setMethod(
 
 #' @details `getGenesSize()` extracts the genes raw library size.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @return `getGenesSize()` returns an array with the library sizes
 #'
@@ -188,7 +188,7 @@ setMethod(
 #' @details `getMetadataDataset()` extracts the meta-data stored for the
 #'   current data-set.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns `getMetadataDataset()` returns the meta-data `data.frame`
 #'
@@ -211,7 +211,7 @@ setMethod(
 #' @details `getMetadataElement()` extracts the value associated with the
 #'   given tag if present or an empty string otherwise.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #' @param tag The tag associated to the wanted value
 #'
 #' @returns `getMetadataElement()` returns a string with the relevant value
@@ -253,7 +253,7 @@ setMethod(
 #'
 #' @description This function extracts the normalized count table.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns the normalized count dataframe (i.e. divided by nu).
 #'
@@ -286,7 +286,7 @@ setMethod(
 #'
 #' @description This function extract the meta-data stored for the genes.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns the meta-data data.frame
 #'
@@ -313,7 +313,7 @@ setMethod(
 #'
 #' @description This function extract the meta-data stored for the cells.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns the meta-data data.frame
 #'
@@ -336,25 +336,17 @@ setMethod(
 )
 
 
-#' getNu
+#' @details `getNu()` extracts the nu array (normalized cells' counts averages)
 #'
-#' @description This function extract the nu array.
+#' @param objCOTAN a `COTAN` object
 #'
-#' @param objCOTAN A `COTAN` object
-#'
-#' @returns the nu array.
+#' @returns `getNu()` returns the nu array
 #'
 #' @importFrom rlang is_empty
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- estimateNuLinear(objCOTAN)
-#' nu <- getNu(objCOTAN)
-#'
-#' @rdname getNu
+#' @rdname ParametersEstimations
 #'
 setMethod(
   "getNu",
@@ -373,25 +365,18 @@ setMethod(
 )
 
 
-#' getLambda
+#' @details `getLambda()` extracts the lambda array (mean expression for each
+#'   gene)
 #'
-#' This function extract the lambda array (mean expression for each gene).
+#' @param objCOTAN a `COTAN` object
 #'
-#' @param objCOTAN A `COTAN` object
-#'
-#' @returns the lambda array
+#' @returns `getLambda()` returns the lambda array
 #'
 #' @importFrom rlang is_empty
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- estimateLambdaLinear(objCOTAN)
-#' lambda <- getLambda(objCOTAN)
-#'
-#' @rdname getLambda
+#' @rdname ParametersEstimations
 #'
 setMethod(
   "getLambda",
@@ -410,26 +395,17 @@ setMethod(
 )
 
 
-#' getDispersion
+#' @details `getDispersion()` extracts the dispersion array (a)
 #'
-#' @description This function extract the a array.
+#' @param objCOTAN a `COTAN` object
 #'
-#' @param objCOTAN A `COTAN` object
-#'
-#' @returns the dispersion array
+#' @returns `getDispersion()` returns the dispersion array
 #'
 #' @importFrom rlang is_empty
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
-#' dispersion <- getDispersion(objCOTAN)
-#'
-#' @rdname getDispersion
+#' @rdname ParametersEstimations
 #'
 setMethod(
   "getDispersion",
@@ -448,14 +424,26 @@ setMethod(
 )
 
 
-#' flagNotHousekeepingGenes
+# ----------- Raw data cleaning ------------
+
+#' Raw data cleaning
 #'
-#' @description This function returns a Boolean vector with TRUE for those genes
-#'   that are not housekeeping.
+#' @description These methods are to be used to clean the raw data. That is drop
+#'   any number of genes/cells that are too sparse or too present to allow
+#'   proper calibration of the `COTAN` model.
 #'
-#' @param objCOTAN A `COTAN` object
+#'   We call genes that are expressed in all cells *House Keeping* while cells
+#'   that express all genes in the data are called *Fully Expressed*. In case it
+#'   has been made quite easy to excelude the flagged genes/cells in the user
+#'   calculations.
 #'
-#' @returns an array of Booleans with TRUE for genes that are not housekeeping
+#' @details `flagNotHousekeepingGenes()` returns a Boolean array with TRUE for
+#'   those genes that are not housekeeping.
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `flagNotHousekeepingGenes()` returns a Booleans array with TRUE for
+#'   genes that are not housekeeping
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
@@ -465,10 +453,17 @@ setMethod(
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
+#'
+#' genes.to.rem <- getGenes(objCOTAN)[grep('^MT', getGenes(objCOTAN))]
+#' cells.to.rem <- getCells(objCOTAN)[which(getCellsSize(objCOTAN) == 0)]
+#' objCOTAN <- dropGenesCells(objCOTAN, genes.to.rem, cells.to.rem)
+#'
+#' objCOTAN <- clean(objCOTAN)
+#'
 #' objCOTAN <- findHousekeepingGenes(objCOTAN)
 #' goodPos <- flagNotHousekeepingGenes(objCOTAN)
 #'
-#' @rdname flagNotHousekeepingGenes
+#' @rdname RawDataCleaning
 #'
 setMethod(
   "flagNotHousekeepingGenes",
@@ -483,15 +478,13 @@ setMethod(
 )
 
 
-#' flagNotFullyExpressedCells
+#' @details `flagNotFullyExpressedCells()`returns a Boolean vector with TRUE for
+#'   those cells that are not fully expressed
 #'
-#' @description This function returns a Boolean vector with TRUE for those cells
-#'   that are not fully expressed
+#' @param objCOTAN a `COTAN` object
 #'
-#' @param objCOTAN A `COTAN` object
-#'
-#' @returns an array of Booleans with TRUE for cells that are not fully
-#'   expressed
+#' @returns `flagNotFullyExpressedCells()` returns an array of Booleans with
+#'   TRUE for cells that are not fully expressed
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
@@ -499,12 +492,10 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- findFullyExpressedCells(objCOTAN)
 #' goodPos <- flagNotFullyExpressedCells(objCOTAN)
 #'
-#' @rdname flagNotFullyExpressedCells
+#' @rdname RawDataCleaning
 #'
 setMethod(
   "flagNotFullyExpressedCells",
@@ -519,24 +510,20 @@ setMethod(
 )
 
 
-#' getHousekeepingGenes
+#' @details `getHousekeepingGenes()` returns the genes expressed in all cells of
+#'   the dataset
 #'
-#' @description This function returns the genes expressed in all cells of the
-#'   dataset.
+#' @param objCOTAN a `COTAN` object
 #'
-#' @param objCOTAN A `COTAN` object
-#'
-#' @returns an array containing all genes expressed in all cells
+#' @returns `getHousekeepingGenes()` returns an array containing all genes
+#'   that are expressed in all cells
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- findHousekeepingGenes(objCOTAN)
 #' hkGenes <- getHousekeepingGenes(objCOTAN)
 #'
-#' @rdname getHousekeepingGenes
+#' @rdname RawDataCleaning
 #'
 setMethod(
   "getHousekeepingGenes",
@@ -547,24 +534,20 @@ setMethod(
 )
 
 
-#' getFullyExpressedCells
+#' @details `getFullyExpressedCells()` returns the cells that did express
+#'   all genes of the dataset
 #'
-#' @description This function return the cells that did express all genes of the
-#'   dataset.
+#' @param objCOTAN a `COTAN` object
 #'
-#' @param objCOTAN A `COTAN` object
-#'
-#' @returns an array containing all genes expressed in all cells
+#' @returns `getFullyExpressedCells()` returns an array containing all cells
+#'   that express all genes
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- findFullyExpressedCells(objCOTAN)
 #' feCells <- getFullyExpressedCells(objCOTAN)
 #'
-#' @rdname getFullyExpressedCells
+#' @rdname RawDataCleaning
 #'
 setMethod(
   "getFullyExpressedCells",
@@ -581,7 +564,7 @@ setMethod(
 #' @description This function extract a complete (or a partial after genes
 #'   dropping) genes' coex matrix from the `COTAN` object.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #' @param genes A vector of gene names. It will exclude any gene not on the
 #'   list. By defaults the function will keep all genes.
 #' @param zeroDiagonal When TRUE sets the diagonal to zero.
@@ -636,7 +619,7 @@ setMethod(
 #' @description This function extract a complete (or a partial after cells
 #'   dropping) cells' coex matrix from the `COTAN` object.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #' @param cells A vector of cell names. It will exclude any cell not on the
 #'   list. By defaults the function will keep all cells.
 #' @param zeroDiagonal When `TRUE` sets the diagonal to zero.
@@ -694,7 +677,7 @@ setMethod(
 #' @description This function extract the list of clusterizations defined in the
 #'   `COTAN` object.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #' @param dropNoCoex When `TRUE` drops the names from the clusterizations with
 #'   empty associated coex `data.frame`
 #' @param keepPrefix When `TRUE` returns the internal name of the
@@ -740,7 +723,7 @@ setMethod(
 #' @description This function extract the asked clusterization column and its
 #'   coex data.frame from the `COTAN` object.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #' @param clName The name of the clusterization. If not given the last available
 #'   clusterization will be returned, as it is probably the most significant!
 #'
@@ -808,7 +791,7 @@ setMethod(
 #'
 #' @description This function extract the complete clusterCoex list
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns the list with a coex data.frame for each clusterization When not
 #'   empty, each data.frame contains a coex column for each cluster.
@@ -835,7 +818,7 @@ setMethod(
 #'
 #' This function extracts the sizes of all slots of the `COTAN` object.
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @return a named `list` with the sizes of the slots.
 #'

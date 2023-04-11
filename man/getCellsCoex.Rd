@@ -7,7 +7,7 @@
 \S4method{getCellsCoex}{COTAN}(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
 }
 \arguments{
-\item{objCOTAN}{A \code{COTAN} object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{cells}{A vector of cell names. It will exclude any cell not on the
 list. By defaults the function will keep all cells.}

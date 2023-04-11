@@ -1,22 +1,20 @@
-#' clean
-#'
-#' @description Main function that can be used to check and clean the dataset.
-#'   It also produces and stores the estimators for nu and lambda
+#' @details `clean()` is the main method that can be used to check and clean the
+#'   dataset. It will discard any genes that has less than 3 non-zero counts per
+#'   thousand cells and all cells expressing less than 2 per thousand genes. It
+#'   also produces and stores the estimators for nu and lambda
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns The updated `COTAN` object
+#' @returns `clean()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
 #'
-#' @rdname clean
+#' @rdname RawDataCleaning
 #'
 setMethod(
   "clean",

@@ -34,7 +34,7 @@
 \S4method{getMetadataElement}{COTAN}(objCOTAN, tag)
 }
 \arguments{
-\item{objCOTAN}{A \code{COTAN} object}
+\item{objCOTAN}{a \code{COTAN} object}
 
 \item{tag}{The tag associated to the wanted value}
 }
