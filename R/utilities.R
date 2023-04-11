@@ -1,3 +1,5 @@
+#----------------- log functions --------------------
+
 #' setLoggingLevel
 #'
 #' @description Set the `COTAN` logging level
@@ -125,6 +127,8 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
   }
   return(invisible(showMessage))
 }
+
+#----------------- miscellanea --------------------
 
 #' handleMultiCore
 #'
@@ -885,6 +889,7 @@ cosineDissimilarity <- function(m) {
   return(as.dist(1.0 - sim))
 }
 
+#----------------- plot utilities --------------------
 
 #' plotTheme
 #'

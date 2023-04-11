@@ -1,21 +1,26 @@
-# `COTAN` objects (read-only) accessors
+# ------- `COTAN` raw data accessors --------
 
-#' getRawData
+#' Raw data `COTAN` accessors
 #'
-#' @description This function extracts the raw count table.
+#' @description These methods extract information out of a just created `COTAN`
+#'   object. The accessors have **read-only** access to the object.
+#'
+#' @details `getRawData()` extracts the raw count table.
 #'
 #' @param objCOTAN A `COTAN` object
 #'
-#' @returns the raw count sparse matrix
+#' @returns `getRawData()` returns the raw count sparse matrix
 #'
 #' @export
 #'
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
+#'
 #' rawData <- getRawData(objCOTAN)
 #'
-#' @rdname getRawData
+#' @rdname RawDataGetters
+#'
 setMethod(
   "getRawData",
   "COTAN",
@@ -25,22 +30,18 @@ setMethod(
 )
 
 
-#' getNumCells
-#'
-#' @description This function extracts the number of cells in the sample (𝑚)
+#' @details `getNumCells()` extracts the number of cells in the sample (𝑚)
 #'
 #' @param objCOTAN A `COTAN` object
 #'
-#' @returns the number of cells in the sample (𝑚).
+#' @returns `getNumCells()` returns the number of cells in the sample (𝑚).
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' numCells <- getNumCells(objCOTAN)
 #'
-#' @rdname getNumCells
+#' @rdname RawDataGetters
 #'
 setMethod(
   "getNumCells",
@@ -50,22 +51,18 @@ setMethod(
   }
 )
 
-#' getNumGenes
-#'
-#' @description This function extracts the number of genes in the sample (𝑛)
+#' @details `getNumGenes()` extracts the number of genes in the sample (𝑛)
 #'
 #' @param objCOTAN A `COTAN` object
 #'
-#' @returns the number of genes in the sample (𝑛).
+#' @returns `getNumGenes()` returns the number of genes in the sample (𝑛).
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' numGenes <- getNumGenes(objCOTAN)
 #'
-#' @rdname getNumGenes
+#' @rdname RawDataGetters
 #'
 setMethod(
   "getNumGenes",
@@ -76,22 +73,18 @@ setMethod(
 )
 
 
-#' getCells
-#'
-#' @description This function extract all cells in the dataset.
+#' @details `getCells()` extract all cells in the dataset.
 #'
 #' @param objCOTAN A `COTAN` object
 #'
-#' @returns a character array with the cells' names
+#' @returns `getCells()` returns a character array with the cells' names
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' cellsNames <- getCells(objCOTAN)
 #'
-#' @rdname getCells
+#' @rdname RawDataGetters
 #'
 setMethod(
   "getCells",
@@ -102,22 +95,18 @@ setMethod(
 )
 
 
-#' getGenes
-#'
-#' @description This function extract all genes in the dataset.
+#' @details `getGenes()` extract all genes in the dataset.
 #'
 #' @param objCOTAN A `COTAN` object
 #'
-#' @returns a character array with the genes' names
+#' @returns `getGenes()` returns a character array with the genes' names
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' genesNames <- getGenes(objCOTAN)
 #'
-#' @rdname getGenes
+#' @rdname RawDataGetters
 #'
 setMethod(
   "getGenes",
@@ -128,23 +117,20 @@ setMethod(
 )
 
 
-#' getZeroOneProj
-#'
-#' @description This function extract the raw count table where any positive
-#'   number has been replaced with 1
+#' @details `getZeroOneProj()` extracts the raw count table where any
+#'   positive number has been replaced with `1`
 #'
 #' @param objCOTAN A `COTAN` object
 #'
-#' @returns the raw count matrix projected to 0/1
+#' @returns `getZeroOneProj()` returns the raw count matrix projected to `0` or
+#'   `1`
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' zeroOne <- getZeroOneProj(objCOTAN)
 #'
-#' @rdname getZeroOneProj
+#' @rdname RawDataGetters
 #'
 setMethod(
   "getZeroOneProj",
@@ -155,22 +141,18 @@ setMethod(
 )
 
 
-#' getCellsSize
-#'
-#' This function extracts the cell raw library size.
+#' @details `getCellsSize()` extracts the cell raw library size.
 #'
 #' @param objCOTAN A `COTAN` object
 #'
-#' @return an array with the library sizes
+#' @return `getCellsSize()` returns an array with the library sizes
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' cellsSize <- getCellsSize(objCOTAN)
 #'
-#' @rdname getCellsSize
+#' @rdname RawDataGetters
 #'
 setMethod(
   "getCellsSize",
@@ -181,22 +163,18 @@ setMethod(
 )
 
 
-#' getGenesSize
-#'
-#' This function extracts the genes raw library size.
+#' @details `getGenesSize()` extracts the genes raw library size.
 #'
 #' @param objCOTAN A `COTAN` object
 #'
-#' @return an array with the library sizes
+#' @return `getGenesSize()` returns an array with the library sizes
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' genesSize <- getGenesSize(objCOTAN)
 #'
-#' @rdname getGenesSize
+#' @rdname RawDataGetters
 #'
 setMethod(
   "getGenesSize",
@@ -206,6 +184,70 @@ setMethod(
   }
 )
 
+
+#' @details `getMetadataDataset()` extracts the meta-data stored for the
+#'   current data-set.
+#'
+#' @param objCOTAN A `COTAN` object
+#'
+#' @returns `getMetadataDataset()` returns the meta-data `data.frame`
+#'
+#' @export
+#'
+#' @examples
+#' dataSetInfo <- getMetadataDataset(objCOTAN)
+#'
+#' @rdname RawDataGetters
+#'
+setMethod(
+  "getMetadataDataset",
+  "COTAN",
+  function(objCOTAN) {
+    return(objCOTAN@metaDataset)
+  }
+)
+
+
+#' @details `getMetadataElement()` extracts the value associated with the
+#'   given tag if present or an empty string otherwise.
+#'
+#' @param objCOTAN A `COTAN` object
+#' @param tag The tag associated to the wanted value
+#'
+#' @returns `getMetadataElement()` returns a string with the relevant value
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
+#'                                   sequencingMethod = "10X",
+#'                                   sampleCondition = "mouse dataset")
+#'
+#' GEO <- getMetadataElement(objCOTAN, "GEO")
+#'
+#' @rdname RawDataGetters
+#'
+setMethod(
+  "getMetadataElement",
+  "COTAN",
+  function(objCOTAN, tag) {
+    meta <- getMetadataDataset(objCOTAN)
+
+    if (is_empty(meta) || !(tag %in% meta[[1L]])) {
+      out <- ""
+    } else {
+      rowPos <- which(meta[[1L]] %in% tag)
+      out <- meta[, -1L, drop = FALSE][rowPos, ]
+    }
+
+    return(out)
+  }
+)
+
+
+# ------- `COTAN` estimated data accessors ------
 
 #' getNormalizedData
 #'
@@ -239,73 +281,6 @@ setMethod(
   }
 )
 
-
-#' getMetadataDataset
-#'
-#' @description This function extract the meta-data stored for the data-set.
-#'
-#' @param objCOTAN A `COTAN` object
-#'
-#' @returns the meta-data data.frame
-#'
-#' @export
-#'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' dataSetInfo <- getMetadataDataset(objCOTAN)
-#'
-#' @rdname getMetadataDataset
-#'
-setMethod(
-  "getMetadataDataset",
-  "COTAN",
-  function(objCOTAN) {
-    return(objCOTAN@metaDataset)
-  }
-)
-
-
-#' getMetadataElement
-#'
-#' @description This function extracts the value associated with the given tag
-#'   if present or an empty string otherwise.
-#'
-#' @param objCOTAN A `COTAN` object
-#' @param tag The tag associated to the wanted value
-#'
-#' @returns A string with the relevant value
-#'
-#' @importFrom rlang is_empty
-#'
-#' @export
-#'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
-#'                                   sequencingMethod = "10X",
-#'                                   sampleCondition = "mouse dataset")
-#' GEO <- getMetadataElement(objCOTAN, "GEO")
-#'
-#' @rdname getMetadataElement
-#'
-setMethod(
-  "getMetadataElement",
-  "COTAN",
-  function(objCOTAN, tag) {
-    meta <- getMetadataDataset(objCOTAN)
-
-    if (is_empty(meta) || !(tag %in% meta[[1L]])) {
-      out <- ""
-    } else {
-      rowPos <- which(meta[[1L]] %in% tag)
-      out <- meta[, -1L, drop = FALSE][rowPos, ]
-    }
-
-    return(out)
-  }
-)
 
 #' getMetadataGenes
 #'
@@ -357,33 +332,6 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     return(objCOTAN@metaCells)
-  }
-)
-
-
-#' getClustersCoex
-#'
-#' @description This function extract the complete clusterCoex list
-#'
-#' @param objCOTAN A `COTAN` object
-#'
-#' @returns the list with a coex data.frame for each clusterization When not
-#'   empty, each data.frame contains a coex column for each cluster.
-#'
-#' @export
-#'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' allClustersCoexDF <- getClustersCoex(objCOTAN)
-#'
-#' @rdname getClustersCoex
-#'
-setMethod(
-  "getClustersCoex",
-  "COTAN",
-  function(objCOTAN) {
-    return(objCOTAN@clustersCoex)
   }
 )
 
@@ -626,6 +574,7 @@ setMethod(
   }
 )
 
+# ------- `COTAN` coex data accessors ------
 
 #' getGenesCoex
 #'
@@ -738,6 +687,8 @@ setMethod(
 )
 
 
+# ------- `COTAN` clusterization data accessors ------
+
 #' getClusterizations
 #'
 #' @description This function extract the list of clusterizations defined in the
@@ -782,6 +733,7 @@ setMethod(
     return(out)
   }
 )
+
 
 #' getClusterizationData
 #'
@@ -850,6 +802,34 @@ setMethod(
                 "coex" = getClustersCoex(objCOTAN)[[internalName]]))
   }
 )
+
+
+#' getClustersCoex
+#'
+#' @description This function extract the complete clusterCoex list
+#'
+#' @param objCOTAN A `COTAN` object
+#'
+#' @returns the list with a coex data.frame for each clusterization When not
+#'   empty, each data.frame contains a coex column for each cluster.
+#'
+#' @export
+#'
+#' @examples
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
+#' allClustersCoexDF <- getClustersCoex(objCOTAN)
+#'
+#' @rdname getClustersCoex
+#'
+setMethod(
+  "getClustersCoex",
+  "COTAN",
+  function(objCOTAN) {
+    return(objCOTAN@clustersCoex)
+  }
+)
+
 
 #' getDims
 #'
