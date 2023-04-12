@@ -185,6 +185,18 @@ setMethod(
 )
 
 
+# ---------- Handle meta-data --------
+
+#' Handling *meta-data* in `COTAN` objects
+#'
+#' @description Much of the information stored in the `COTAN` object is
+#'   compacted into three `data.frame`s:
+#'   * "metaDataset" - contains all general information about the data-set
+#'   * "metaGenes" - contains genes' related information along the `lambda` and
+#'     `dispersion` vectors and the housekeeping flag
+#'   * "metaCells" - contains cells' related information along the `nu` vector,
+#'     the fully expressed flag and the clusterizations
+#'
 #' @details `getMetadataDataset()` extracts the meta-data stored for the
 #'   current data-set.
 #'
@@ -195,9 +207,19 @@ setMethod(
 #' @export
 #'
 #' @examples
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
+#'
+#' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
+#'                                   sequencingMethod = "10X",
+#'                                   sampleCondition = "mouse dataset")
+#'
+#' objCOTAN <- addElementToMetaDataset(objCOTAN, "Test",
+#'                                     c("These are ", "some values"))
+#'
 #' dataSetInfo <- getMetadataDataset(objCOTAN)
 #'
-#' @rdname RawDataGetters
+#' @rdname HandleMetaData
 #'
 setMethod(
   "getMetadataDataset",
@@ -221,13 +243,9 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
-#'                                   sequencingMethod = "10X",
-#'                                   sampleCondition = "mouse dataset")
+#' numInitialCells <- getMetadataElement(objCOTAN, "cells")
 #'
-#' GEO <- getMetadataElement(objCOTAN, "GEO")
-#'
-#' @rdname RawDataGetters
+#' @rdname HandleMetaData
 #'
 setMethod(
   "getMetadataElement",
@@ -247,58 +265,18 @@ setMethod(
 )
 
 
-# ------- `COTAN` estimated data accessors ------
-
-#' getNormalizedData
-#'
-#' @description This function extracts the normalized count table.
+#' @details `getMetadataGenes()` extracts the meta-data stored for the genes
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns the normalized count dataframe (i.e. divided by nu).
-#'
-#' @importFrom rlang is_empty
+#' @returns `getMetadataGenes()` returns the genes' meta-data `data.frame`
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- estimateNuLinear(objCOTAN)
-#' rawNorm <- getNormalizedData(objCOTAN)
-#'
-#' @rdname getNormalizedData
-#'
-setMethod(
-  "getNormalizedData",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(getNu(objCOTAN))) {
-      stop("nu must not be empty, estimate it")
-    }
-
-    return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
-  }
-)
-
-
-#' getMetadataGenes
-#'
-#' @description This function extract the meta-data stored for the genes.
-#'
-#' @param objCOTAN a `COTAN` object
-#'
-#' @returns the meta-data data.frame
-#'
-#' @export
-#'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- estimateLambdaLinear(objCOTAN)
 #' metaGenes <- getMetadataGenes(objCOTAN)
 #'
-#' @rdname getMetadataGenes
+#' @rdname HandleMetaData
 #'
 setMethod(
   "getMetadataGenes",
@@ -309,29 +287,83 @@ setMethod(
 )
 
 
-#' getMetadataCells
-#'
-#' @description This function extract the meta-data stored for the cells.
+#' @details `getMetadataCells()` extracts the meta-data stored for the cells
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns the meta-data data.frame
+#' @returns `getMetadataCells()` returns the cells' meta-data `data.frame`
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- estimateNuLinear(objCOTAN)
 #' metaCells <- getMetadataCells(objCOTAN)
 #'
-#' @rdname getMetadataCells
+#' @rdname HandleMetaData
 #'
 setMethod(
   "getMetadataCells",
   "COTAN",
   function(objCOTAN) {
     return(objCOTAN@metaCells)
+  }
+)
+
+
+#' @details `getDims()` extracts the sizes of all slots of the `COTAN` object
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getDims()` returns a named `list` with the sizes of the slots
+#'
+#' @export
+#'
+#' @examples
+#' allSizes <- getDims(objCOTAN)
+#'
+#' @rdname HandleMetaData
+#'
+setMethod(
+  "getDims",
+  "COTAN",
+  function(objCOTAN) {
+    return(list("raw"          = dim(objCOTAN@raw),
+                "genesCoex"    = dim(objCOTAN@genesCoex),
+                "cellsCoex"    = dim(objCOTAN@cellsCoex),
+                "metaDataset"  = nrow(objCOTAN@metaDataset),
+                "metaGenes"    = ncol(objCOTAN@metaGenes),
+                "metaCells"    = ncol(objCOTAN@metaCells),
+                "clustersCoex" = length(objCOTAN@clustersCoex)))
+  }
+)
+
+
+# ------- `COTAN` estimated data accessors ------
+
+#' @details `getNormalizedData()` extracts the *normalized* count table (i.e.
+#'   divided by `nu`)
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getNormalizedData()` returns the normalized count `data.frame`
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' rawNorm <- getNormalizedData(objCOTAN)
+#'
+#' @rdname ParametersEstimations
+#'
+setMethod(
+  "getNormalizedData",
+  "COTAN",
+  function(objCOTAN) {
+    if (is_empty(getNu(objCOTAN))) {
+      stop("nu must not be empty, estimate it")
+    }
+
+    return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
   }
 )
 
@@ -813,47 +845,3 @@ setMethod(
   }
 )
 
-
-#' getDims
-#'
-#' This function extracts the sizes of all slots of the `COTAN` object.
-#'
-#' @param objCOTAN a `COTAN` object
-#'
-#' @return a named `list` with the sizes of the slots.
-#'
-#' @export
-#'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
-#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
-#'
-#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
-#'                               clusters = clusters, coexDF = coexDF)
-#' allSizes <- getDims(objCOTAN)
-#'
-#' @rdname getDims
-#'
-setMethod(
-  "getDims",
-  "COTAN",
-  function(objCOTAN) {
-    return(list("raw"          = dim(objCOTAN@raw),
-                "genesCoex"    = dim(objCOTAN@genesCoex),
-                "cellsCoex"    = dim(objCOTAN@cellsCoex),
-                "metaDataset"  = nrow(objCOTAN@metaDataset),
-                "metaGenes"    = ncol(objCOTAN@metaGenes),
-                "metaCells"    = ncol(objCOTAN@metaCells),
-                "clustersCoex" = length(objCOTAN@clustersCoex)))
-  }
-)

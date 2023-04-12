@@ -1,26 +1,29 @@
 #----------------- log functions --------------------
 
-#' setLoggingLevel
+#' Logging in the `COTAN` package
 #'
-#' @description Set the `COTAN` logging level
+#' @description Logging is currently supported for all `COTAN` functions. It is
+#'   possible to see the outpus on the terminal and/or on a log file. The level
+#'   of ouput on terminal is controlled by the  `COTAN.LogLevel` option while
+#'   the logging on file is always at its maximum verbosity
 #'
-#' @details It set the `COTAN.LogLevel` options to one of the following values:
-#'   * 0 - Always on log messages.
-#'   * 1 - Major log messages.
-#'   * 2 - Minor log messages.
-#'   * 3 - All log messages.
-#'
-#' @seealso [logThis()]
+#' @details `setLoggingLevel()` sets the `COTAN` logging level. It set the
+#'   `COTAN.LogLevel` options to one of the following values:
+#'    * 0 - Always on log messages
+#'    * 1 - Major log messages
+#'    * 2 - Minor log messages
+#'    * 3 - All log messages
 #'
 #' @param newLevel the new default logging level. It defaults to 1
 #'
-#' @returns old logging level or default level if not set yet.
+#' @returns `setLoggingLevel()` returns the old logging level or default level
+#'   if not set yet.
 #' @export
 #'
 #' @examples
 #' setLoggingLevel(3) # for debugging purposes only
 #'
-#' @rdname setLoggingLevel
+#' @rdname LoggingFunctions
 #'
 setLoggingLevel <- function(newLevel = 1L) {
   message("Setting new log level to ", newLevel)
@@ -32,18 +35,12 @@ setLoggingLevel <- function(newLevel = 1L) {
 }
 
 
-#' setLoggingFile
-#'
-#' @description Set the log file for all `COTAN` output logs.
-#'
-#' @details By default no logging happens on a file (only on the console). Using
-#'   this function `COTAN` will use the indicated file to dump the logs produced
-#'   by all [logThis()] commands, independently from the log level.
-#'
-#'   It stores the `connection` created by the call to [bzfile()] in the option:
+#' @details `setLoggingFile()` sets the log file for all `COTAN` output logs. By
+#'   default no logging happens on a file (only on the console). Using this
+#'   function `COTAN` will use the indicated file to dump the logs produced by
+#'   all [logThis()] commands, independently from the log level. It stores the
+#'   `connection` created by the call to [bzfile()] in the option:
 #'   `COTAN.LogFile`
-#'
-#' @seealso [logThis()]
 #'
 #' @param logFileName the log file.
 #'
@@ -54,7 +51,7 @@ setLoggingLevel <- function(newLevel = 1L) {
 #' logThis("Some log message")
 #' setLoggingFile("") # closes the log file
 #'
-#' @rdname setLoggingFile
+#' @rdname LoggingFunctions
 #'
 setLoggingFile <- function(logFileName) {
   currentFile <- getOption("COTAN.LogFile")
@@ -79,21 +76,17 @@ setLoggingFile <- function(logFileName) {
 }
 
 
-#' logThis
-#'
-#' @description Print the given message string if the current log level is
-#'   greater or equal to the given log level.
-#'
-#' @details It uses [message()] to actually print the messages on the [strerr()]
-#'   connection, so it is subject to [suppressMessages()]
-#'
-#' @seealso [setLoggingLevel()] for details on the levels
+#' @details `logThis()` prints the given message string if the current log level
+#'   is greater or equal to the given log level (it always prints its message on
+#'   file if active). It uses [message()] to actually print the messages on the
+#'   [strerr()] connection, so it is subject to [suppressMessages()]
 #'
 #' @param msg the message to print
 #' @param logLevel the logging level of the current message. It defaults to 2
 #' @param appendLF whether to add a new-line character at the end of the message
 #'
-#' @returns whether the message has been printed
+#' @returns `logThis()` returns TRUE if the message has been printed on the
+#'   terminal
 #'
 #' @export
 #'
@@ -103,7 +96,7 @@ setLoggingFile <- function(logFileName) {
 #' suppressMessages(logThis("unless all messages are suppressed",
 #'                          logLevel = 0))
 #'
-#' @rdname logThis
+#' @rdname LoggingFunctions
 #'
 logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
   # write to log file if any
@@ -204,12 +197,9 @@ handleNamesSubsets <- function(names, subset = c()) {
 }
 
 
-#' setColumnInDF
-#'
-#' @description Private function that append, if missing, or resets, if present,
-#'   a column into a `data.frame`, whether the `data.frame` is empty or not.
-#'
-#' @details The given `rowNames` are used only in the case the `data.frame` has
+#' @details `setColumnInDF()` is a function to append, if missing, or resets, if
+#'   present, a column into a `data.frame`, whether the `data.frame` is empty or
+#'   not. The given `rowNames` are used only in the case the `data.frame` has
 #'   only the default row numbers, so this function cannot be used to override
 #'   row names
 #'
@@ -219,14 +209,15 @@ handleNamesSubsets <- function(names, subset = c()) {
 #' @param rowNames when not empty, if the input `data.frame` has no real row
 #'   names, the new row names of the resulting `data.frame`
 #'
-#' @returns the updated, or the newly created, `data.frame`
+#' @returns `setColumnInDF()` returns the updated, or the newly created,
+#'   `data.frame`
 #'
 #' @export
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
 #'
-#' @rdname setColumnInDF
+#' @rdname HandleMetaData
 #'
 setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
   if (is_empty(df)) {

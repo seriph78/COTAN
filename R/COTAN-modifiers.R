@@ -1,21 +1,18 @@
+
+# ------------ Metadata handling ------------
+
 # EXTREMELY IMPORTANT: DO NOT CHANGE THE LIST UP TO ELEMENT 8!!
 
-#' datasetTags
+#' @details `datasetTags()` defines a list of short names associated to an
+#'   enumeration. It also defines the relative long names as they appear in the
+#'   meta-data
 #'
-#' @returns a named character array with the standard labels used in the
-#'   `metaDataset` of the `COTAN` objects.
+#' @returns `datasetTags()` a named `character array` with the standard labels
+#'   used in the `metaDataset` of the `COTAN` objects
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- addElementToMetaDataset(objCOTAN,
-#'                                     datasetTags()[["cells"]],
-#'                                     ncol(test.dataset))
-#' meta <- getMetadataDataset(objCOTAN)
-#'
-#' @rdname datasetTags
+#' @rdname HandleMetaData
 #'
 datasetTags <- function() {
   return(c("GEO"   = "GEO:"                                             # 1
@@ -30,15 +27,14 @@ datasetTags <- function() {
 }
 
 
-#' updateMetaInfo
-#'
-#' @description Internal function: updates an information `data.frame`
+#' @details `updateMetaInfo()` is an internal function: updates an information
+#'   `data.frame`
 #'
 #' @param meta the information `data.frame` to update
 #' @param tag the tag of the line
 #' @param value the value or the values to associate to the tag
 #'
-#' @returns the updated `data.frame`
+#' @returns `updateMetaInfo()` returns the updated `data.frame`
 #'
 #' @importFrom rlang is_empty
 #'
@@ -62,9 +58,7 @@ updateMetaInfo <- function(meta, tag, value) {
 }
 
 
-#' initializeMetaDataset
-#'
-#' @description Initialize meta-data data-set
+#' @details `initializeMetaDataset()` initializes meta-data data-set
 #'
 #' @param objCOTAN the `COTAN` object
 #' @param GEO a code reporting the GEO identification or other specific data-set
@@ -73,17 +67,12 @@ updateMetaInfo <- function(meta, tag, value) {
 #' @param sampleCondition a string reporting the specific sample condition or
 #'   time point
 #'
-#' @returns the given `COTAN` object with updated `metaDataset`
+#' @returns `initializeMetaDataset()` returns the given `COTAN` object with the
+#'   updated `metaDataset`
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' obj <- COTAN(raw = test.dataset)
-#' obj <- initializeMetaDataset(obj, GEO = "code", sequencingMethod = "10X",
-#'                              sampleCondition = "mouse dataset")
-#'
-#' @rdname initializeMetaDataset
+#' @rdname HandleMetaData
 #'
 setMethod(
   "initializeMetaDataset",
@@ -109,28 +98,19 @@ setMethod(
 )
 
 
-#' addElementToMetaDataset
-#'
-#' @description This function is used to add a line of information to the
-#'   information `data.frame`. If the tag was already used it will update the
-#'   associated value(s) instead.
+#' @details `addElementToMetaDataset()` is used to add a line of information to
+#'   the meta-data `data.frame`. If the tag was already used it will update the
+#'   associated value(s) instead
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param tag the new information tag
 #' @param value a value (or an array) containing the information
 #'
-#' @returns the updated `COTAN` object
+#' @returns `addElementToMetaDataset()` returns the updated `COTAN` object
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- addElementToMetaDataset(objCOTAN, "Test",
-#'                                     c("These are ", "some values"))
-#' meta <- getMetadataDataset(objCOTAN)
-#'
-#' @rdname addElementToMetaDataset
+#' @rdname HandleMetaData
 #'
 setMethod(
   "addElementToMetaDataset",
@@ -142,6 +122,8 @@ setMethod(
   }
 )
 
+
+# ------------ Raw data cleaning --------------
 
 #' @details `findHousekeepingGenes()` determines the housekeeping genes inside
 #'   the raw data
@@ -205,8 +187,6 @@ setMethod(
 )
 
 
-#'
-#'
 #' @details `dropGenesCells()` removes an array of genes and/or cells from the
 #'   current `COTAN` object.
 #'
@@ -250,6 +230,8 @@ setMethod(
   }
 )
 
+
+# -------------- Clusterization handling ---------------
 
 #' addClusterization
 #'
@@ -377,6 +359,8 @@ setMethod(
   }
 )
 
+
+# ------------ Data erasers ---------------
 
 #' dropGenesCoex
 #'

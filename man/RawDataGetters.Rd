@@ -9,8 +9,6 @@
 \alias{getZeroOneProj,COTAN-method}
 \alias{getCellsSize,COTAN-method}
 \alias{getGenesSize,COTAN-method}
-\alias{getMetadataDataset,COTAN-method}
-\alias{getMetadataElement,COTAN-method}
 \title{Raw data \code{COTAN} accessors}
 \usage{
 \S4method{getRawData}{COTAN}(objCOTAN)
@@ -28,15 +26,9 @@
 \S4method{getCellsSize}{COTAN}(objCOTAN)
 
 \S4method{getGenesSize}{COTAN}(objCOTAN)
-
-\S4method{getMetadataDataset}{COTAN}(objCOTAN)
-
-\S4method{getMetadataElement}{COTAN}(objCOTAN, tag)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
-
-\item{tag}{The tag associated to the wanted value}
 }
 \value{
 \code{getRawData()} returns the raw count sparse matrix
@@ -55,10 +47,6 @@
 \code{getCellsSize()} returns an array with the library sizes
 
 \code{getGenesSize()} returns an array with the library sizes
-
-\code{getMetadataDataset()} returns the meta-data \code{data.frame}
-
-\code{getMetadataElement()} returns a string with the relevant value
 }
 \description{
 These methods extract information out of a just created \code{COTAN}
@@ -81,12 +69,6 @@ positive number has been replaced with \code{1}
 \code{getCellsSize()} extracts the cell raw library size.
 
 \code{getGenesSize()} extracts the genes raw library size.
-
-\code{getMetadataDataset()} extracts the meta-data stored for the
-current data-set.
-
-\code{getMetadataElement()} extracts the value associated with the
-given tag if present or an empty string otherwise.
 }
 \examples{
 data("test.dataset")
@@ -107,13 +89,5 @@ zeroOne <- getZeroOneProj(objCOTAN)
 cellsSize <- getCellsSize(objCOTAN)
 
 genesSize <- getGenesSize(objCOTAN)
-
-dataSetInfo <- getMetadataDataset(objCOTAN)
-
-objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
-                                  sequencingMethod = "10X",
-                                  sampleCondition = "mouse dataset")
-
-GEO <- getMetadataElement(objCOTAN, "GEO")
 
 }

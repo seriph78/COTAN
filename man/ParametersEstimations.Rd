@@ -7,6 +7,7 @@
 \alias{estimateNuBisection,COTAN-method}
 \alias{estimateDispersionNuBisection,COTAN-method}
 \alias{estimateDispersionNuNlminb,COTAN-method}
+\alias{getNormalizedData,COTAN-method}
 \alias{getNu,COTAN-method}
 \alias{getLambda,COTAN-method}
 \alias{getDispersion,COTAN-method}
@@ -49,6 +50,8 @@
   enforceNuAverageToOne = TRUE
 )
 
+\S4method{getNormalizedData}{COTAN}(objCOTAN)
+
 \S4method{getNu}{COTAN}(objCOTAN)
 
 \S4method{getLambda}{COTAN}(objCOTAN)
@@ -82,6 +85,8 @@ equal to 1}
 \code{estimateDispersionNuBisection()} returns the updated \code{COTAN} object
 
 \code{estimateDispersionNuNlminb()} returns the updated \code{COTAN} object
+
+\code{getNormalizedData()} returns the normalized count \code{data.frame}
 
 \code{getNu()} returns the nu array
 
@@ -128,6 +133,9 @@ and expected probability of zero. It uses the [\code{\link[stats:nlminb]{stats::
 but since the joint parameters have too high dimensionality, it converges
 too slowly to be actually useful in real cases.
 
+\code{getNormalizedData()} extracts the \emph{normalized} count table (i.e.
+divided by \code{nu})
+
 \code{getNu()} extracts the nu array (normalized cells' counts averages)
 
 \code{getLambda()} extracts the lambda array (mean expression for each
@@ -152,5 +160,7 @@ objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12,
                                           enforceNuAverageToOne = TRUE)
 nu <- getNu(objCOTAN)
 dispersion <- getDispersion(objCOTAN)
+
+rawNorm <- getNormalizedData(objCOTAN)
 
 }
