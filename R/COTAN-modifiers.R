@@ -362,30 +362,18 @@ setMethod(
 
 # ------------ Data erasers ---------------
 
-#' dropGenesCoex
+#' @details `dropGenesCoex()` drops the `genesCoex` member from the given
+#'   `COTAN` object
 #'
-#' @description This function drops the `genesCoex` from the given `COTAN`
-#'   object
+#' @param objCOTAN a `COTAN` object
 #'
-#' @param objCOTAN A `COTAN` object
-#'
-#' @returns The updated `COTAN` object
+#' @returns `dropGenesCoex()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "test_GEO",
-#'                                          sequencingMethod = "test_method",
-#'                                          sampleCondition = "test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE)
-#' objCOTAN <- dropGenesCoex(objCOTAN)
-#'
-#' @rdname dropGenesCoex
+#' @rdname CalculatingCOEX
 #'
 setMethod(
   "dropGenesCoex",
@@ -400,32 +388,18 @@ setMethod(
 )
 
 
-#' dropCellsCoex
-#'
-#' @description This function drops the `cellsCoex` from the given `COTAN`
-#'   object
+#' @details `dropCellsCoex()` drops the `cellsCoex` member from the given
+#'   `COTAN` object
 #'
 #' @param objCOTAN A `COTAN` object
 #'
-#' @returns The updated `COTAN` object
+#' @returns `dropCellsCoex()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "test_GEO",
-#'                                          sequencingMethod = "test_method",
-#'                                          sampleCondition = "test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE)
-#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
-#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
-#' objCOTAN <- dropCellsCoex(objCOTAN)
-#'
-#' @rdname dropCellsCoex
+#' @rdname CalculatingCOEX
 #'
 setMethod(
   "dropCellsCoex",

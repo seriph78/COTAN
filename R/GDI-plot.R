@@ -1,6 +1,4 @@
-#' GDIPlot
-#'
-#' This function directly evaluate and plot the GDI for a sample.
+#' @details `GDIPlot()` directly evaluates and plots the GDI for a sample.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param genes a named `list` of genes to label. Each array will have different
@@ -14,7 +12,7 @@
 #' @param GDIIn when the GDI data frame was already calculated, it can be put
 #'   here to speed up the process (default is `NULL`)
 #'
-#' @returns A `ggplot2` object
+#' @returns `GDIPlot()` returns a `ggplot2` object
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
@@ -37,16 +35,7 @@
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
-#' genes <- c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",
-#'            "g-000510", "g-000530", "g-000550", "g-000570", "g-000590")
-#' gdiPlot <- GDIPlot(objCOTAN, genes = genes, cond = "raw")
-#' plot(gdiPlot)
-#'
-#' @rdname GDIPlot
+#' @rdname CalculatingCOEX
 #'
 GDIPlot <- function(objCOTAN, genes, cond = "",
                     statType = "S", GDIThreshold = 1.5,

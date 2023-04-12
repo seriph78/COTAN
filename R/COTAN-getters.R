@@ -210,9 +210,9 @@ setMethod(
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
-#' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
-#'                                   sequencingMethod = "10X",
-#'                                   sampleCondition = "mouse dataset")
+#' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
+#'                                   sequencingMethod = "distribution_sampling",
+#'                                   sampleCondition = "reconstructed_dataset")
 #'
 #' objCOTAN <- addElementToMetaDataset(objCOTAN, "Test",
 #'                                     c("These are ", "some values"))
@@ -591,19 +591,17 @@ setMethod(
 
 # ------- `COTAN` coex data accessors ------
 
-#' getGenesCoex
-#'
-#' @description This function extract a complete (or a partial after genes
-#'   dropping) genes' coex matrix from the `COTAN` object.
+#' @details `getGenesCoex()` extracts a complete (or a partial after genes
+#'   dropping) genes' `COEX` matrix from the `COTAN` object.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param genes A vector of gene names. It will exclude any gene not on the
 #'   list. By defaults the function will keep all genes.
 #' @param zeroDiagonal When TRUE sets the diagonal to zero.
 #' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
-#'   have been updated since the coex matrix was calculated.
+#'   have been updated since the `COEX` matrix was calculated.
 #'
-#' @return the genes' coex values
+#' @returns `getGenesCoex()` returns the genes' `COEX` values
 #'
 #' @importFrom rlang is_empty
 #'
@@ -612,12 +610,55 @@ setMethod(
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
+#' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
+#'                                   sequencingMethod = "distribution_sampling",
+#'                                   sampleCondition = "reconstructed_dataset")
 #' objCOTAN <- clean(objCOTAN)
+#'
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+#'
+#' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
+#'
+#' ## mu <- calculateMu(objCOTAN)
+#' ## observedYList <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+#' obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
+#'
+#' ##expectedNList <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+#' exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
+#'
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' genesCoex <- getGenesCoex(objCOTAN)
 #'
-#' @rdname getGenesCoex
+#' ## S <- calculateS(objCOTAN)
+#' ## G <- calculateG(objCOTAN)
+#' ## pValue <- calculatePValue(objCOTAN)
+#' GDI <- calculateGDI(objCOTAN)
+#'
+#' genes <- c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",
+#'            "g-000510", "g-000530", "g-000550", "g-000570", "g-000590")
+#' gdiPlot <- GDIPlot(objCOTAN, genes = genes, cond = "test")
+#'
+#' ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
+#' ## matrix and derivatives, so it can be dropped it from the `COTAN` object
+#' objCOTAN <- dropGenesCoex(objCOTAN)
+#'
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
+#'
+#' ## Now the `COTAN` object is ready to calculate the cells' `COEX`
+#' ## In case one need to caclualte both it is more sensible to run the above
+#' ## before any `COEX` evaluation
+#'
+#' g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+#' g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+#' tables <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
+#' tables
+#'
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
+#' cellsCoex <- getCellsCoex(objCOTAN)
+#'
+#' objCOTAN <- dropCellsCoex(objCOTAN)
+#'
+#' @rdname CalculatingCOEX
 #'
 setMethod(
   "getGenesCoex",
@@ -646,34 +687,23 @@ setMethod(
 )
 
 
-#' getCellsCoex
-#'
-#' @description This function extract a complete (or a partial after cells
-#'   dropping) cells' coex matrix from the `COTAN` object.
+#' @details `getCellsCoex()` extracts a complete (or a partial after cells
+#'   dropping) cells' `COEX` matrix from the `COTAN` object.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param cells A vector of cell names. It will exclude any cell not on the
 #'   list. By defaults the function will keep all cells.
 #' @param zeroDiagonal When `TRUE` sets the diagonal to zero.
 #' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
-#'   have been updated since the coex matrix was calculated.
+#'   have been updated since the `COEX` matrix was calculated.
 #'
-#' @returns the cells' coex values
+#' @returns `getCellsCoex()` returns the cells' `COEX` values
 #'
 #' @importFrom rlang is_empty
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
-#' objCOTAN <- estimateNuBisection(objCOTAN, cores = 12)
-#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
-#' cellsCoex <- getCellsCoex(objCOTAN)
-#'
-#' @rdname getCellsCoex
+#' @rdname CalculatingCOEX
 #'
 setMethod(
   "getCellsCoex",

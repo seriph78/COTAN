@@ -1,19 +1,20 @@
 
-#' heatmapPlot
+#' Heatmap Plots
 #'
-#' @description This function creates the `heatmap` of one or more `COTAN`
-#'   objects.
+#' @description These functions create heatmap `COEX` plots.
+#'
+#' @details `heatmapPlot()` creates the `heatmap` of one or more `COTAN` objects
 #'
 #' @param genesLists A `list` of genes' `array`s. The first `array` defines the
-#'   genes in the columns.
-#' @param sets A numeric array indicating which fields in the
-#'   previous `list` should be used.
-#' @param conditions An array of prefixes indicating the different files.
-#' @param pValueThreshold The p-value threshold. Default is 0.05.
+#'   genes in the columns
+#' @param sets A numeric array indicating which fields in the previous `list`
+#'   should be used
+#' @param conditions An array of prefixes indicating the different files
+#' @param pValueThreshold The p-value threshold. Default is 0.01
 #' @param dir The directory in which are all `COTAN` files (corresponding to the
 #'   previous prefixes)
 #'
-#' @returns a `ggplot` object
+#' @returns `heatmapPlot()` returns a `ggplot2` object
 #'
 #' @importFrom Matrix forceSymmetric
 #'
@@ -30,30 +31,32 @@
 #' @export
 #'
 #' @examples
-#' data("ERCCraw")
-#' rownames(ERCCraw) = ERCCraw$V1
-#' ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
-#' objCOTAN <- COTAN(raw = ERCCraw)
-#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
-#' data_dir <- tempdir()
-#' saveRDS(objCOTAN, file = file.path(data_dir, "ERCC.cotan.RDS"))
-#' # some genes
-#' primary.markers <- c("ERCC-00154", "ERCC-00156", "ERCC-00164")
-#' # a example of named list of different gene set
-#' gene.sets.list <- list(
-#'   "primary.markers" = primary.markers,
-#'   "2.R" = c("ERCC-00170", "ERCC-00158"),
-#'   "3.S" = c("ERCC-00160", "ERCC-00162")
-#' )
-#' heatmapPlot(
-#'   pValueThreshold = 0.05, genesLists = gene.sets.list,
-#'   sets = c(2, 3), conditions = c("ERCC"), dir = paste0(data_dir, "/")
-#' )
+#' data("test.dataset")
+#' objCOTAN <- COTAN(raw = test.dataset)
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 #'
-#' @rdname heatmapPlot
+#' ## Save the `COTAN` object to file
+#' data_dir <- tempdir()
+#' saveRDS(objCOTAN, file = file.path(data_dir, "test.dataset.cotan.RDS"))
+#'
+#' ## some genes
+#' primaryMarkers <- c("g-000010", "g-000020", "g-000030")
+#'
+#' ## an example of named list of different gene set
+#' groupMarkers <- list(G1 = primaryMarkers,
+#'                      G2 = c("g-000300", "g-000330"),
+#'                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
+#'
+#' hPlot <- heatmapPlot(genesLists = groupMarkers, sets = c(2, 3),
+#'                      pValueThreshold = 0.05, conditions = c("test"),
+#'                      dir = paste0(data_dir, "/"))
+#'
+#' @rdname HeatmapPlots
 #'
 heatmapPlot <- function(genesLists, sets, conditions,
-                        pValueThreshold = 0.05, dir) {
+                        pValueThreshold = 0.01, dir) {
   #time <- g2 <- NULL
   logThis("heatmap plot: START", logLevel = 2)
 
@@ -131,23 +134,21 @@ heatmapPlot <- function(genesLists, sets, conditions,
 
 
 
-#' genesHeatmapPlot
+#' @details `genesHeatmapPlot()` is used to plot an *heatmap* made using only
+#'   some genes, as markers, and collecting all other genes correlated with
+#'   these markers with a p-value smaller than the set threshold. Than all
+#'   relations are plotted. Primary markers will be plotted as groups of rows.
+#'   Markers list will be plotted as columns.
 #'
-#' @description This function is used to plot an heatmap made using only some
-#'   genes, as markers, and collecting all other genes correlated with these
-#'   markers with a p-value smaller than the set threshold. Than all relations
-#'   are plotted. Primary markers will be plotted as groups of rows. Markers
-#'   list will be plotted as columns.
-#'
-#' @param objCOTAN A `COTAN` object.
-#' @param primaryMarkers A set of genes plotted as rows.
-#' @param secondaryMarkers A set of genes plotted as columns.
-#' @param pValue The p-value threshold
+#' @param objCOTAN a `COTAN` object
+#' @param primaryMarkers A set of genes plotted as rows
+#' @param secondaryMarkers A set of genes plotted as columns
+#' @param pValueThreshold The p-value threshold. Default is 0.01
 #' @param symmetric A Boolean: default `TRUE`. When `TRUE` the union of
 #'   `primaryMarkers` and `secondaryMarkers` is used for both rows and column
 #'   genes
 #'
-#' @returns A ggplot2 object
+#' @returns `genesHeatmapPlot()` returns a `ggplot2` object
 #'
 #' @export
 #'
@@ -165,22 +166,13 @@ heatmapPlot <- function(genesLists, sets, conditions,
 #'
 #' @importFrom rlang is_empty
 #'
-#' @rdname genesHeatmapPlot
-#'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
-#' # some genes
-#' primaryMarkers <- c("g-000010", "g-000020", "g-000030")
-#' # a example of named list of different gene set
-#' groupMarkers <- list(G1 = primaryMarkers,
-#'                      G2 = c("g-000300", "g-000330"),
-#'                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
-#' genesHeatmapPlot(objCOTAN,
-#'                  primaryMarkers = primaryMarkers,
-#'                  secondaryMarkers = groupMarkers,
-#'                  pValue = 0.05, symmetric = FALSE)
+#' ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,
+#'                            secondaryMarkers = groupMarkers,
+#'                            pValue = 0.05, symmetric = FALSE)
+#'
+#' @rdname HeatmapPlots
+#'
 genesHeatmapPlot <-
   function(objCOTAN, primaryMarkers, secondaryMarkers = c(),
            pValue = 0.001, symmetric = TRUE) {
@@ -295,15 +287,14 @@ genesHeatmapPlot <-
   }
 
 
-#' cellsHeatmapPlot
-#'
-#' @description Heatmap plot of the cells' coex matrix
+#' @details `cellsHeatmapPlot()` creates the heatmap plot of the cells' `COEX`
+#'   matrix
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param cells Which cells to plot (all if no argument is given)
 #' @param clusters Use this clusterization to select/reorder the cells to plot
 #'
-#' @returns the cells' coex `Heatmap` plot
+#' @returns `cellsHeatmapPlot()` returns the cells' `COEX` *heatmap* plot
 #'
 #' @export
 #'
@@ -312,18 +303,9 @@ genesHeatmapPlot <-
 #' @importFrom ComplexHeatmap Heatmap
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- initializeMetaDataset(objCOTAN,
-#'                                   GEO = "test_GEO",
-#'                                   sequencingMethod = "test_method",
-#'                                   sampleCondition = "test")
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
-#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
-#' hPlots <- cellsHeatmapPlot(objCOTAN)
+#' chPlot <- cellsHeatmapPlot(objCOTAN)
 #'
-#' @rdname cellsHeatmapPlot
+#' @rdname HeatmapPlots
 #'
 cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
   coexMat <- as.matrix(getCellsCoex(objCOTAN))

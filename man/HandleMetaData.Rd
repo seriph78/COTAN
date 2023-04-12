@@ -121,9 +121,9 @@ row names
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
 
-objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "code",
-                                  sequencingMethod = "10X",
-                                  sampleCondition = "mouse dataset")
+objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
+                                  sequencingMethod = "distribution_sampling",
+                                  sampleCondition = "reconstructed_dataset")
 
 objCOTAN <- addElementToMetaDataset(objCOTAN, "Test",
                                     c("These are ", "some values"))

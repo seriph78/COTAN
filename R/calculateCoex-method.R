@@ -1,10 +1,49 @@
-#' calculateMu
+# ----------- Contingency tables --------------
+
+#' Calculating the COEX matrix for genes and cells
 #'
-#' @description Calculate the vector \eqn{\mu = \lambda \times \nu^T}
+#' @description These are the functions and methods used to calculate the
+#'   **COEX** matrices according to the `COTAN` model. From there it is possible
+#'   to calculate the associated *pValue* and the *GDI* (*Global Differential
+#'   Expression*)
+#'
+#' @description The **COEX** matrix is defined by following formula:
+#'
+#'   \deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{
+#'                     (-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
+#'              {\sqrt{n \sum_{i,j \in \{\text{Y, N}\}}{
+#'                             \frac{1}{1 \vee E_{ij}}}}}}
+#'
+#'   where \eqn{O} and \eqn{E} are the observed and expected contingency tables
+#'   and \eqn{n} is the relevant numerosity (the number of genes/cells depending
+#'   on given `actOnCells` flag).
+#'
+#'   The formula can be more effectively implemented as:
+#'
+#'   \deqn{\sqrt{\frac{1}{n}\sum_{i,j \in \{\text{Y, N}\}}{
+#'                                \frac{1}{1 \vee E_{ij}}}}
+#'         \, \bigl(O_\text{YY}-E_\text{YY}\bigr)}
+#'
+#'   once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for
+#'   some constant \eqn{r} for all \eqn{i,j \in \{\text{Y, N}\}}.
+#'
+#'   The latter follows from the fact that the relevant marginal sums of the
+#'   the expected contingency tables were enforced to match the marginal sums
+#'   of the observed ones.
+#'
+#' @seealso [ParametersEstimations] for more details.
+#'
+#' @note The sum of the matrices returned by the function
+#'   `observedContingencyTables()` and `expectedContingencyTables()` will have
+#'   the same value on all elements. This value is the number of genes/cells
+#'   depending on the parameter `actOnCells` being `TRUE/FALSE`.
+#'
+#' @details `calculateMu()` calculates the vector \eqn{\mu = \lambda \times
+#'   \nu^T}
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns The Mu matrix
+#' @returns `calculateMu()` returns the `mu` matrix
 #'
 #' @importFrom rlang is_empty
 #'
@@ -14,14 +53,8 @@
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
-#' mu <- calculateMu(objCOTAN)
+#' @rdname CalculatingCOEX
 #'
-#' @rdname calculateMu
 setMethod(
   "calculateMu",
   "COTAN",
@@ -39,18 +72,17 @@ setMethod(
 )
 
 
-#' observedContingencyTablesYY
-#'
-#' @description Calculate observed Yes/Yes field of the contingency table
+#' @details `observedContingencyTablesYY()` calculates observed *Yes/Yes* field
+#'   of the contingency table
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
+#' @param actOnCells Boolean - when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param asDspMatrices Boolean; when `TRUE` the function will return only
+#' @param asDspMatrices Boolean - when `TRUE` the function will return only
 #'   packed dense symmetric matrices
 #'
-#' @returns A `list` with the 'Yes/Yes' observed contingency table and the 'Yes'
-#'   observed vector
+#' @returns `observedContingencyTablesYY()` returns a `list` with the *Yes/Yes*
+#'   observed contingency table as `matrix` and the *Yes* observed `vector`
 #'
 #' @importFrom rlang is_empty
 #'
@@ -63,14 +95,7 @@ setMethod(
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' observedYList <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
-#' observedYY <- observedYList[[1]]
-#' observedY  <- observedYList[[2]]
-#'
-#' @rdname observedContingencyTablesYY
+#' @rdname CalculatingCOEX
 #'
 observedContingencyTablesYY <- function(objCOTAN,
                                         actOnCells = FALSE,
@@ -101,19 +126,11 @@ observedContingencyTablesYY <- function(objCOTAN,
 }
 
 
-
-#' observedContingencyTables
-#'
-#' @description Calculate the observed contingency tables
-#'
-#' @details When `asDspMatrices == TRUE`, the method will effectively throw away
-#'   the lower half from the returned `observedYN` and `observedNY` matrices,
-#'   but, since they are transpose one of another, the full information is still
-#'   available.
-#'
-#' @note The sum of the returned matrices will have constant value. This value
-#'   is the number of genes/cells depending on `actOnCells` being
-#'   `TRUE`/`FALSE`.
+#' @details `observedContingencyTables()` calculates the observed contingency
+#'   tables. When the parameter `asDspMatrices == TRUE`, the method will
+#'   effectively throw away the lower half from the returned `observedYN` and
+#'   `observedNY` matrices, but, since they are transpose one of another, the
+#'   full information is still available.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
@@ -121,19 +138,16 @@ observedContingencyTablesYY <- function(objCOTAN,
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
 #'
-#' @returns The observed contingency tables as named `list` with elements:
-#'   "observedNN", "observedNY", "observedYN" "observedYY"
+#' @returns `observedContingencyTables()` returns the observed contingency
+#'   tables as named `list` with elements: "observedNN", "observedNY",
+#'   "observedYN", "observedYY"
 #'
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix symmetricMatrix
+#'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
-#'
-#' @rdname observedContingencyTables
+#' @rdname CalculatingCOEX
 #'
 observedContingencyTables <- function(objCOTAN,
                                       actOnCells = FALSE,
@@ -211,9 +225,8 @@ observedContingencyTables <- function(objCOTAN,
 }
 
 
-#' expectedContingencyTablesNN
-#'
-#' @description Calculate the expected No/No field of the contingency table
+#' @details `expectedContingencyTablesNN()` calculates the expected No/No field
+#'   of the contingency table
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
@@ -223,8 +236,8 @@ observedContingencyTables <- function(objCOTAN,
 #' @param optimizeForSpeed Boolean; when `TRUE` the function will use [Rfast]
 #'   parallel algorithms that on the flip side use more memory
 #'
-#' @returns a `list` with the 'No/No' expected contingency table and the 'No'
-#'   expected vector
+#' @returns `expectedContingencyTablesNN()` returns a `list` with the *No/No*
+#'   expected contingency table as `matrix` and the *No* expected `vector`
 #'
 #' @importFrom Matrix t
 #'
@@ -240,16 +253,7 @@ observedContingencyTables <- function(objCOTAN,
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
-#' expectedNList <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
-#' expectedNN <- expectedNList[[1]]
-#' expectedN  <- expectedNList[[2]]
-#'
-#' @rdname expectedContingencyTablesNN
+#' @rdname CalculatingCOEX
 #'
 expectedContingencyTablesNN <- function(objCOTAN,
                                         actOnCells = FALSE,
@@ -302,18 +306,11 @@ expectedContingencyTablesNN <- function(objCOTAN,
 }
 
 
-#' expectedContingencyTables
-#'
-#' @description Calculate the expected values of contingency tables
-#'
-#' @details When `asDspMatrices == TRUE`, the method will effectively throw away
-#'   the lower half from the returned `expectedYN` and `expectedNY` matrices,
-#'   but, since they are transpose one of another, the full information is still
-#'   available.
-#'
-#' @note The sum of the returned matrices will have constant value. This value
-#'   is the number of genes/cells depending on `actOnCells` being
-#'   `TRUE`/`FALSE`.
+#' @details `expectedContingencyTables()` calculates the expected values of
+#'   contingency tables. When the parameter `asDspMatrices == TRUE`, the method
+#'   will effectively throw away the lower half from the returned `expectedYN`
+#'   and `expectedNY` matrices, but, since they are transpose one of another,
+#'   the full information is still available.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
@@ -323,8 +320,9 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
 #'   parallel algorithms that on the flip side use more memory
 #'
-#' @return The expected contingency tables as named `list` with elements:
-#' "expectedNN", "expectedNY", "expectedYN", "expectedYY"
+#' @return `expectedContingencyTables()` returns the expected contingency tables
+#'   as named `list` with elements: "expectedNN", "expectedNY", "expectedYN",
+#'   "expectedYY"
 #'
 #' @importFrom Rfast Crossprod
 #' @importFrom Rfast Tcrossprod
@@ -338,14 +336,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
-#' exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
-#'
-#' @rdname expectedContingencyTables
+#' @rdname CalculatingCOEX
 #'
 expectedContingencyTables <- function(objCOTAN,
                                       actOnCells = FALSE,
@@ -431,36 +422,24 @@ expectedContingencyTables <- function(objCOTAN,
 
 
 
-#' contingencyTables
-#'
-#' @description This function returns the observed and expected contingency
-#'   tables for a given pair of genes.
-#'
-#' @details This code mimics the code to calculate the contingency tables from
-#'   [observedContingencyTables()] and [expectedContingencyTables()], but
-#'   restricted to only the relevant genes and thus much faster and less memory
-#'   intensive
+#' @details `contingencyTables()` returns the observed and expected contingency
+#'   tables for a given pair of genes. The implementation runs the same
+#'   algorithms used to calculate the full observed/expected contingency tables,
+#'   but restricted to only the relevant genes and thus much faster and less
+#'   memory intensive
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param g1 a gene
 #' @param g2 another gene
 #'
-#' @return A list containing the observed and expected contingency tables
+#' @return `contingencyTables()` returns a list containing the observed and
+#'   expected contingency tables
 #'
 #' @importFrom assertthat assert_that
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
-#' g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-#' g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-#' tables <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
-#'
-#' @rdname contingencyTables
+#' @rdname CalculatingCOEX
 #'
 contingencyTables <- function(objCOTAN, g1, g2) {
   genes <- getGenes(objCOTAN)
@@ -519,65 +498,28 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 }
 
 
-#' calculateCoex
-#'
-#' @description This function estimates and stores the *coex* matrix in the
-#'   `cellCoex` or `genesCoex` field depending on given `actOnCells` flag.
-#'
-#' @details The function calculates the coex matrix, defined by following
-#'   formula:
-#'
-#'   \deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{
-#'                     (-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
-#'              {\sqrt{n \sum_{i,j \in \{\text{Y, N}\}}{
-#'                             \frac{1}{1 \vee E_{ij}}}}}}
-#'
-#'   where \eqn{O} and \eqn{E} are the observed and expected contingency tables
-#'   and \eqn{n} is the relevant numerosity (the number of genes/cells depending
-#'   on given `actOnCells` flag).
-#'
-#'   The formula can be more effectively implemented as:
-#'
-#'   \deqn{\sqrt{\frac{1}{n}\sum_{i,j \in \{\text{Y, N}\}}{
-#'                                \frac{1}{1 \vee E_{ij}}}}
-#'         \, \bigl(O_\text{YY}-E_\text{YY}\bigr)}
-#'
-#'   once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for all
-#'   \eqn{i,j \in \{\text{Y, N}\}}.
-#'
-#'
-#'   The latter follows from the fact that the relevant marginal sums of the
-#'   the expected contingency tables were enforced to match the marginal sums
-#'   of the observed ones.
-#'
-#'   It also calculates the percentage of *problematic* genes/cells pairs.
-#'   A pair is *problematic* when one or more of the expected counts were
-#'   significantly smaller than 1 (\eqn{< 0.5}). These small expected values
-#'   signal that scant information is present for such a pair.
-#'
-#' @seealso [estimateDispersionNuBisection()] for more details.
+# --------------- COEX and GDI -----------
+
+#' @details `calculateCoex()` estimates and stores the *coex* matrix in the
+#'   `cellCoex` or `genesCoex` field depending on given `actOnCells` flag. It
+#'   also calculates the percentage of *problematic* genes/cells pairs. A pair
+#'   is *problematic* when one or more of the expected counts were significantly
+#'   smaller than 1 (\eqn{< 0.5}). These small expected values signal that scant
+#'   information is present for such a pair.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use [Rfast]
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use [[Rfast]]
 #'   parallel algorithms that on the flip side use more memory
 #'
-#' @returns The updated `COTAN` object
+#' @returns `calculateCoex()` returns the updated `COTAN` object
 #'
 #' @importFrom assertthat assert_that
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
-#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
-#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
-#'
-#' @rdname calculateCoex
+#' @rdname CalculatingCOEX
 #'
 setMethod(
   "calculateCoex",
@@ -680,12 +622,8 @@ setMethod(
 )
 
 
-#' calculateS
-#'
-#' @description This function calculates the statistics S for genes contingency
-#'   tables
-#'
-#' @details It always has the diagonal set to zero.
+#' @details `calculateS()` calculates the statistics **S** for genes contingency
+#'   tables. It always has the diagonal set to zero.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param geneSubsetCol an array of genes. It will be put in columns. If left
@@ -693,7 +631,7 @@ setMethod(
 #' @param geneSubsetRow an array of genes. It will be put in rows. If left empty
 #'   the function will do it genome-wide.
 #'
-#' @return the S matrix
+#' @returns `calculateS()` returns the `S` matrix
 #'
 #' @export
 #'
@@ -701,13 +639,7 @@ setMethod(
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
-#' S <- calculateS(objCOTAN)
-#'
-#' @rdname calculateS
+#' @rdname CalculatingCOEX
 #'
 calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
@@ -731,14 +663,9 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 }
 
 
-
-#' calculateG
-#'
-#' @description This function calculates the statistics G-test for genes
-#'   contingency tables.
-#'
-#' @details  It always has the diagonal set to zero. It is proportional to the
-#'   genes' presence mutual information.
+#' @details `calculateG()` calculates the statistics *G-test* for genes
+#'   contingency tables. It always has the diagonal set to zero. It is
+#'   proportional to the genes' presence mutual information.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param geneSubsetCol an array of genes. It will be put in columns. If left
@@ -746,17 +673,11 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' @param geneSubsetRow an array of genes. It will be put in rows. If left empty
 #'   the function will do it genome-wide.
 #'
-#' @return the G matrix
+#' @returns `calculateG()` returns the G matrix
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
-#' G <- calculateG(objCOTAN)
-#'
-#' @rdname calculateG
+#' @rdname CalculatingCOEX
 #'
 calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
@@ -813,17 +734,14 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 }
 
 
-#' calculateGDI
-#'
-#' @description This function produces a`data.frame` with the GDI for each
-#'   gene.
+#' @details `calculateGDI()` produces a`data.frame` with the *GDI* for each gene
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param statType Which statistics to use to compute the p-values. By default
-#'   it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
-#'   (G-test)
+#'   it will use the `S` (*Pearson's *\eqn{\chi^{2}}* test*) otherwise the `G`
+#'   (*G-test*)
 #'
-#' @returns A `data.frame` with the GDI data
+#' @returns `calculateGDI()` returns a `data.frame` with the *GDI* data
 #'
 #' @export
 #'
@@ -835,15 +753,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #' @importFrom Matrix colMeans
 #' @importFrom Matrix forceSymmetric
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
-#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
-#' GDI <- calculateGDI(objCOTAN)
-#'
-#' @rdname calculateGDI
+#' @rdname CalculatingCOEX
 #'
 calculateGDI <- function(objCOTAN, statType = "S") {
   if (statType == "S") {
@@ -892,11 +802,9 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 }
 
 
-#' calculatePValue
-#'
-#' @description This function computes the p-values for genes in the COTAN
+#' @details `calculatePValue()` computes the p-values for genes in the `COTAN`
 #'   object. It can be used genome-wide or by setting some specific genes of
-#'   interest. By default it computes the p-values using the S statistics
+#'   interest. By default it computes the *p-values* using the `S` statistics
 #'   (\eqn{\chi^{2}})
 #'
 #' @param objCOTAN a `COTAN` object
@@ -908,7 +816,7 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 #' @param geneSubsetRow an array of genes. It will be put in rows. If left empty
 #'   the function will do it genome-wide.
 #'
-#' @return a p-value matrix as dspMatrix
+#' @return `calculatePValue()` returns a *p-value* `matrix` as `dspMatrix`
 #'
 #' @export
 #'
@@ -917,15 +825,7 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 #'
 #' @importClassesFrom Matrix dspMatrix
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
-#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
-#' pValue <- calculatePValue(objCOTAN)
-#'
-#' @rdname calculatePValue
+#' @rdname CalculatingCOEX
 #'
 calculatePValue <- function(objCOTAN, statType = "S",
                             geneSubsetCol = c(), geneSubsetRow = c()) {
