@@ -1,9 +1,15 @@
 
-#' proceedToCoex
+#' Automatic `COTAN` shortcuts
 #'
-#' @description This function takes a newly created `COTAN` object (or the
-#'   result of a call to dropGenesCells()]) and applies all steps until the
-#'   genes' coex matrix is stored in the object
+#' @description These functions take (or create) a `COTAN` object and run all
+#'   the necessary steps until the genes' `COEX` matrix is calculated.
+#'
+#'   takes a newly created `COTAN` object (or the result of a call to
+#'   dropGenesCells()]) and applies all steps until the genes' `COEX` matrix is
+#'   stored in the object
+#'
+#' @details `proceedToCoex()` takes a newly created `COTAN` object (or the
+#'   result of a call to dropGenesCells()]) and runs [calculateCOEX()]
 #'
 #' @param objCOTAN a newly created `COTAN` object
 #' @param cores number of cores to be used
@@ -11,9 +17,9 @@
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.
 #'
-#' @returns The updated `COTAN` object with genes' coex calculated. When asked,
-#'   it will also store it, along all relevant clean-plots, in the output
-#'   directory.
+#' @returns `proceedToCoex()` returns the updated `COTAN` object with genes'
+#'   `COEX` calculated. If asked to, it will also store the object, along all
+#'   relevant clean-plots, in the output directory.
 #'
 #' @export
 #'
@@ -30,20 +36,23 @@
 #'
 #' @examples
 #' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- initializeMetaDataset(objCOTAN,
-#'                                   GEO = "code",
-#'                                   sequencingMethod = "10X",
-#'                                   sampleCondition = "mouse dataset")
-#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
-#' GDI_DF <- calculateGDI(objCOTAN, statType = "S")
 #'
-#' @rdname proceedToCoex
+#' ## In case one needs to run more steps to clean the datatset the following
+#' ## might apply
+#' ##
+#' ## objCOTAN <- COTAN(raw = test.dataset)
+#' ## objCOTAN <- initializeMetaDataset(objCOTAN,
+#' ##                                   GEO = "test",
+#' ##                                   sequencingMethod = "artificial",
+#' ##                                   sampleCondition = "test dataset")
+#' ## objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
+#'
+#' @rdname automaticCOTANObjectCreation
 #'
 setMethod(
   "proceedToCoex",
   "COTAN",
-  function(objCOTAN, cores, saveObj = TRUE, outDir = ".") {
+  function(objCOTAN, cores = 1L, saveObj = TRUE, outDir = ".") {
     startTimeAll <- Sys.time()
 
     logThis("Cotan analysis functions started", logLevel = 1L)
@@ -143,7 +152,8 @@ setMethod(
   }
 )
 
-#' automaticCOTANObjectCreation
+#' @details `automaticCOTANObjectCreation()` takes a raw dataset, creates and
+#'   initializes a `COTAN` objects and runs proceedToCoex()
 #'
 #' @param raw a matrix or dataframe with the raw counts
 #' @param GEO a code reporting the GEO identification or other specific dataset
@@ -156,14 +166,15 @@ setMethod(
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.
 #'
-#' @returns The new `COTAN` object with genes' coex calculated. When asked, it
-#'   will also store it, along all relevant clean-plots, in the output
-#'   directory.
+#' @returns `automaticCOTANObjectCreation()` returns the new `COTAN` object with
+#'   genes' `COEX` calculated. When asked, it will also store the object, along
+#'   all relevant clean-plots, in the output directory.
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
+#'
+#' ## Otherwise it is possible to run all at once.
 #' objCOTAN <- automaticCOTANObjectCreation(
 #'   raw = test.dataset,
 #'   GEO = "code",

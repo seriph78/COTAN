@@ -1,5 +1,7 @@
 ANalysis
 Bioc
+CellNumber
+CellPercentage
 COEX
 COexpression
 Coex
@@ -7,12 +9,15 @@ DEAOnClusters
 ECD
 ECDPlot
 ERCC
+ExpGenes
 GDI
 GDIPlot
 GSE
 GSM
 Houskeeping
 LDI
+MeanUDE
+MedianUDE
 MetadataCells
 RNAseq
 UDE
@@ -53,6 +58,7 @@ dropClusterization
 dropGenesCells
 dropGenesCoex
 dspMatrix
+eig
 establishGenesClusters
 estimateDispersionBisection
 estimateDispersionNuBisection

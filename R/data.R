@@ -28,6 +28,8 @@
 #' @format A data frame
 #'
 "test.dataset"
+"test.dataset.clusters1"
+"test.dataset.clusters2"
 
 #' sampled.dataset
 #'

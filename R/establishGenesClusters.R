@@ -1,13 +1,16 @@
 
-#' genesCoexSpace
+#' Local Differentiation Index
 #'
 #' @description To make the `GDI` more specific, it may be desirable to restrict
 #'   the set of genes against which `GDI` is computed to a selected subset, with
 #'   the recommendation to include a consistent fraction of cell-identity genes,
 #'   and possibly focusing on markers specific for the biological question of
 #'   interest (for instance neural cortex layering markers). In this case we
-#'   denote it as local differentiation index (LDI) relative to the selected
+#'   denote it as *Local Differentiation Index* (LDI) relative to the selected
 #'   subset.
+#'
+#' @details `genesCoexSpace()` calculates genes groups based on the primary
+#'   markers and uses them to prepare the genes' `COEX` space `data.frame`.
 #'
 #' @param objCOTAN a `COTAN` object.
 #' @param primaryMarkers A vector of primary marker names.
@@ -15,10 +18,10 @@
 #'   markers that we want to consider. By default this is set to 25.
 #'
 #' @returns A `list` with:
-#'   * the coex `data.frame`
-#'   * a named `list` that for each secondary marker, gives the `list` of
-#'     primary markers that selected for it
-#'   * a `data.frame` with the rank of each gene according to its pValue
+#'  * the `COEX` `data.frame`
+#'  * a named `list` that for each secondary marker, gives the `list` of primary
+#'    markers that selected for it
+#'  * a `data.frame` with the rank of each gene according to its *p-value*
 #'
 #' @export
 #'
@@ -40,7 +43,7 @@
 #'                       primaryMarkers = markers,
 #'                       numGenesPerMarker = 15)
 #'
-#' @rdname genesCoexSpace
+#' @rdname GenesCoexSpace
 #'
 genesCoexSpace <-
   function(objCOTAN, primaryMarkers, numGenesPerMarker = 25L) {
@@ -117,11 +120,10 @@ genesCoexSpace <-
               "rankGenes" = rankGenes))
 }
 
-#' establishGenesClusters
-#'
-#' @description This function perform the genes' clustering based on a pool of
-#'   gene markers, using the genes' coexpression space
-#'
+
+#' @details `establishGenesClusters()` perform the genes' clustering based on a
+#'   pool of gene markers, using the genes' `COEX` space
+
 #' @param objCOTAN a `COTAN` object
 #' @param groupMarkers a named `list` with an element for each group of one or
 #'   more marker genes for each group.
@@ -134,11 +136,11 @@ genesCoexSpace <-
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
 #'
-#' @returns a `list` of
-#'   1. the gene coexpression space dataframe
-#'   2. the eigenvalues plot (using eigenvalue from factoextra package)
-#'   3. the pca component dataframe
-#'   4. the tree plot for the coexpression space genes
+#' @returns `establishGenesClusters()` a `list` of:
+#'   * "g.space" the genes' `COEX` space `data.frame`
+#'   * "plot.eig" the eigenvalues plot
+#'   * "pca_clusters" the *pca* components `data.frame`
+#'   * "tree_plot" the tree plot for the genes' `COEX` space
 #'
 #' @export
 #'
@@ -162,22 +164,15 @@ genesCoexSpace <-
 #' @importFrom assertthat assert_that
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
 #'                      G2 = c("g-000300", "g-000330"),
-#'                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
+#'                      G3 = c("g-000510", "g-000530", "g-000550",
+#'                             "g-000570", "g-000590"))
+#'
 #' resList <-  establishGenesClusters(objCOTAN, groupMarkers = groupMarkers,
 #'                                    numGenesPerMarker = 11)
-#' plot(resList[["tree_plot"]])
 #'
-#' @rdname establishGenesClusters
+#' @rdname GenesCoexSpace
 #'
 establishGenesClusters <-
   function(objCOTAN, groupMarkers, numGenesPerMarker = 25L,
