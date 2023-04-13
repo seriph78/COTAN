@@ -1,15 +1,17 @@
 
-#' clustersDeltaExpression
 #'
-#' @description This function estimates the change in genes' expression inside
-#'   the cluster compared to the average situation in the data set.
+#'
+#' @details `clustersDeltaExpression()` estimates the change in genes'
+#'   expression inside the *cluster* compared to the average situation in the
+#'   data set.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clusters The clusterization. If none given the last available
-#'   clusterization will be used, as it is probably the most significant!
+#' @param clusters The *clusterization*. If none is given the last available
+#'   *clusterization* will be used, as it is probably the most significant!
 #'
-#' @returns a `data.frame` with the weighted discrepancy of the expression of
-#'   each gene within the cluster against model expectations
+#' @returns `clustersDeltaExpression()` returns a `data.frame` with the weighted
+#'   discrepancy of the expression of each gene within the *cluster* against
+#'   model expectations
 #'
 #' @export
 #'
@@ -18,22 +20,10 @@
 #' @importFrom assertthat assert_that
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
-#'
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
 #'
 #' deltaExpression <- clustersDeltaExpression(objCOTAN, clusters)
 #'
-#' @rdname clustersDeltaExpression
+#' @rdname HandlingClusterizations
 #'
 clustersDeltaExpression <- function(objCOTAN, clusters = NULL) {
   logThis("clustersDeltaExpression - START", logLevel = 2L)

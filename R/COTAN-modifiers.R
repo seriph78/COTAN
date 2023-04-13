@@ -233,37 +233,28 @@ setMethod(
 
 # -------------- Clusterization handling ---------------
 
-#' addClusterization
-#'
-#' @description This function adds a clusterization to the current `COTAN`
-#'   object, by adding a new column in the `metaCells data.frame` and adding a
-#'   new element in the `clustersCoex list` using the passed in `coex`
-#'   `data.frame`.
+#' @details `addClusterization()` adds a *clusterization* to the current `COTAN`
+#'   object, by adding a new column in the `metaCells` `data.frame` and adding a
+#'   new element in the `clustersCoex` `list` using the passed in `COEX`
+#'   `data.frame` or an empty `data.frame` if none were passed in.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clName the name of the clusterization to be added It cannot match an
-#'   existing name; in case use [dropClusterization()] first
-#' @param clusters a (factors) array of cluster names
-#' @param coexDF a `data.frame` where each column indicates the coex for each
-#'   (or some) of the clusters of the clusterization
-#' @param override When TRUE silently allows overriding data for an existing
-#'   clusterization name. Otherwise (default behavior) it will avoid potential
+#' @param clName the name of the *clusterization* to be added. It cannot match
+#'   an existing name unless `override = TRUE` is used
+#' @param clusters a (factors) array of *cluster* **labels**
+#' @param coexDF a `data.frame` where each column indicates the `COEX` for each
+#'   of the *clusters* of the *clusterization*
+#' @param override When `TRUE` silently allows overriding data for an existing
+#'   *clusterization* name. Otherwise the default behavior will avoid potential
 #'   data losses
 #'
-#' @returns the updated `COTAN` object
+#' @returns `addClusterization()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' clusters <- sample(1:10, getNumCells(objCOTAN), replace = TRUE)
-#' names(clusters) <- getCells(objCOTAN)
-#' objCOTAN <- addClusterization(objCOTAN, "dummy", clusters, override = TRUE)
-#'
-#' @rdname addClusterization
+#' @rdname HandlingClusterizations
 #'
 setMethod(
   "addClusterization",
@@ -302,36 +293,20 @@ setMethod(
   }
 )
 
-#' addClusterizationCoex
-#'
-#' @description This function adds a clusterization coex `data.frame` to the
-#'   current `COTAN` object. It requires the clusterization to be already
-#'   present.
-#'
-#' @seealso [addClusterization()]
+#' @details `addClusterizationCoex()` adds a *clusterization* `COEX`
+#'   `data.frame` to the current `COTAN` object. It requires the named
+#'   *clusterization* to be already present.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName the name of an existing clusterization
 #' @param coexDF a `data.frame` where each column indicates the coex for all, or
 #'   just some of, the clusters of the clusterization
 #'
-#' @returns the updated `COTAN` object
+#' @returns `addClusterizationCoex()` returns the updated `COTAN` object
 #'
 #' @export
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' clusters <- sample(1:10, getNumCells(objCOTAN), replace = TRUE)
-#' names(clusters) <- getCells(objCOTAN)
-#' objCOTAN <- addClusterization(objCOTAN, "dummy", clusters)
-#' coexDF <- as.data.frame(matrix(0, ncol=10, nrow=getNumGenes(objCOTAN)))
-#' colnames(coexDF) <- c(1:10)
-#' rownames(coexDF) <- getGenes(objCOTAN)
-#' objCOTAN <- addClusterizationCoex(objCOTAN, clName = "dummy",
-#'                                   coexDF = coexDF)
-#'
-#' @rdname addClusterizationCoex
+#' @rdname HandlingClusterizations
 #'
 setMethod(
   "addClusterizationCoex",
@@ -360,7 +335,45 @@ setMethod(
 )
 
 
-# ------------ Data erasers ---------------
+#' @details `dropClusterization()` drops a *clusterization* from the current
+#'   `COTAN` object, by removing the corresponding column in the `metaCells`
+#'   `data.frame` and the corresponding `COEX` `data.frame` from the
+#'   `clustersCoex` `list`.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param clName the name of an existing *clusterization*.
+#'
+#' @returns `dropClusterization()` returns the updated `COTAN` object
+#'
+#' @export
+#'
+#' @rdname HandlingClusterizations
+#'
+setMethod(
+  "dropClusterization",
+  "COTAN",
+  function(objCOTAN, clName) {
+    internalName <- clName
+    if (!startsWith(internalName, "CL_")) {
+      internalName <- paste0("CL_", clName)
+    }
+
+    if (!internalName %in% names(getClustersCoex(objCOTAN))) {
+      stop("A clusterization with name '", clName, "' does not exists.")
+    }
+
+    keptCols <- !colnames(objCOTAN@metaCells) %in% internalName
+    objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols, drop = FALSE]
+
+    # assign NULL to drop elements from list
+    objCOTAN@clustersCoex[[internalName]] <- NULL
+
+    return(objCOTAN)
+  }
+)
+
+
+# ------------ COEX erasers ---------------
 
 #' @details `dropGenesCoex()` drops the `genesCoex` member from the given
 #'   `COTAN` object
@@ -408,54 +421,6 @@ setMethod(
     if (!is_empty(objCOTAN@cellsCoex)) {
       objCOTAN@cellsCoex <- emptySymmetricMatrix()
     }
-
-    return(objCOTAN)
-  }
-)
-
-
-#' dropClusterization
-#'
-#' @description This function drops a clusterization from the current `COTAN`
-#'   object, by removing the corresponding column in the `metaCells data.frame`
-#'   and in case dropping the corresponding `coex data.frame` from the
-#'   `clustersCoex list`.
-#'
-#' @param objCOTAN a `COTAN` object
-#' @param clName the name of an existing clusterization.
-#'
-#' @returns the updated `COTAN` object
-#'
-#' @export
-#'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
-#' clusters <- sample(1:10, getNumCells(objCOTAN), replace = TRUE)
-#' names(clusters) <- getCells(objCOTAN)
-#' objCOTAN <- addClusterization(objCOTAN, "dummy", clusters)
-#' objCOTAN <- dropClusterization(objCOTAN, "dummy")
-#'
-#' @rdname dropClusterization
-#'
-setMethod(
-  "dropClusterization",
-  "COTAN",
-  function(objCOTAN, clName) {
-    internalName <- clName
-    if (!startsWith(internalName, "CL_")) {
-      internalName <- paste0("CL_", clName)
-    }
-
-    if (!internalName %in% names(getClustersCoex(objCOTAN))) {
-      stop("A clusterization with name '", clName, "' does not exists.")
-    }
-
-    keptCols <- !colnames(objCOTAN@metaCells) %in% internalName
-    objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols, drop = FALSE]
-
-    # assign NULL to drop elements from list
-    objCOTAN@clustersCoex[[internalName]] <- NULL
 
     return(objCOTAN)
   }

@@ -1,23 +1,18 @@
 
-#' DEAOnClusters
 #'
-#' @description This function is used to run the differential expression
-#'   analysis using the `COTAN` contingency tables on each cluster in the given
-#'   clusterization
 #'
-#' @details The formulae for the coex are similar to those used in the
-#'   [calculateCoex()] method, with the **role** of the second gene taken by the
-#'   In/Out status of the cells with respect to each cluster.
-#' @seealso [calculatePValue()] for details about the associated p-values
+#' @details `DEAOnClusters()` is used to run the Differential Expression
+#'   analysis using the `COTAN` contingency tables on each *cluster* in the
+#'   given *clusterization*
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clusters a `vector` or `factor` with the cell clusterization to
-#'   be analyzed. If empty, the function will use the last clusterization stored
-#'   in the `objCOTAN`
+#' @param clusters a `vector` or `factor` with the cell *clusterization* to
+#'   be analyzed. If empty, the function will use the last *clusterization*
+#'   stored in the `COTAN` object
 #'
-#' @return a `list` with two objects:
-#'   * 'coex'    - the coexpression `data.frame` for the genes in each cluster,
-#'   * 'p-value' - the corresponding p-values `data.frame`.
+#' @return `DEAOnClusters()` returns a `list` with two objects:
+#'   * "coex"    - the coexpression `data.frame` for the genes in each *cluster*
+#'   * "p-value" - the corresponding p-values `data.frame`
 #'
 #' @export
 #'
@@ -27,25 +22,7 @@
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
-#'
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
-#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
-#'
-#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
-#'                               clusters = clusters, coexDF = coexDF)
-#'
-#' @rdname DEAOnClusters
+#' @rdname HandlingClusterizations
 #'
 DEAOnClusters <- function(objCOTAN, clusters = NULL) {
   if (is_empty(clusters)) {

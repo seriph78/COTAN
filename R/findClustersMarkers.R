@@ -1,28 +1,25 @@
 
-#' findClustersMarkers
-#'
-#' @description This function takes an `COTAN` object and an optional
-#'   clusterization and produces a `data.frame` with the `n` most positively
-#'   enriched and the `n` most negatively enriched genes for cluster.
-#'
-#' @details The function also provides whether and the found genes are in the
-#'   given `markers` list or not. It also returns the `pValue` and the
-#'   *adjusted* `pValue` using the [[stats::p.adjust()]] function (the
-#'   adjustment method defaults to `"bonferroni"`).
+#' @details `findClustersMarkers()` takes in a `COTAN` object and a
+#'   *clusterization* and produces a `data.frame` with the `n` most positively
+#'   enriched and the `n` most negatively enriched genes for each *cluster*. The
+#'   function also provides whether and the found genes are in the given
+#'   `markers` list or not. It also returns the *p-value* and the *adjusted*
+#'   *p-value* using the [stats::p.adjust()]
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param n the number of extreme `coex` values to return
-#' @param clusters a clusterization
+#' @param n the number of extreme `COEX` values to return
+#' @param clusters a *clusterization*
 #' @param markers a `list` of marker genes
-#' @param coexDF a `data.frame` with In/Out `coex`. E.G. the result of a call to
-#'   [[DEAOnCluster()]]
-#' @param pValueDF a `data.frame` with In/Out p-value based on `coex`. E.G. the
-#'   result of a call to [[DEAOnCluster()]]
-#' @param deltaExp a `data.frame` with the delta-expression in a cluster. E.G.
-#'   the result of a call to [[clustersDeltaExpression()]]
-#' @param method p-value adjust method. Defaults to `"bonferroni"`
+#' @param coexDF a `data.frame` with *In/Out* `COEX`. E.G. the result of a call
+#'   to [[DEAOnCluster()]]
+#' @param pValueDF a `data.frame` with *In/Out* *p-value* based on the `COEX`.
+#'   E.G. the result of a call to [[DEAOnCluster()]]
+#' @param deltaExp a `data.frame` with the *delta-expression* in a *cluster*.
+#'   E.G. the result of a call to [[clustersDeltaExpression()]]
+#' @param method *p-value* adjustment method. Defaults to `"bonferroni"`
 #'
-#' @returns a `data.frame` containing `n` top/bottom coex score for each cluster
+#' @returns `findClustersMarkers()` returns a `data.frame` containing `n`
+#'   top/bottom `COEX` scores for each *cluster*
 #'
 #' @importFrom stats p.adjust
 #'
@@ -33,22 +30,9 @@
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
-#'
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
-#'
 #' clMarkers <- findClustersMarkers(objCOTAN, clusters = clusters)
 #'
-#' @rdname findClustersMarkers
+#' @rdname HandlingClusterizations
 #'
 findClustersMarkers <- function(
     objCOTAN, n = 10L, clusters = NULL, markers = NULL,

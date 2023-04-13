@@ -2,16 +2,32 @@
 # the cell regarding that condition
 # default null: just one condition
 
-#' clustersSummaryPlot
+#' @details `clustersSummaryPlot()` calculates various statistics about each
+#'   cluster (with an optional further `condition` to separate the cells) and
+#'   puts them together into a plot. The calculated statistics are:
+#'   * "Cluster" the *cluster* **label**
+#'   * "Condition" the further element to sub-divide the clusters
+#'   * "CellNumber" the number of cells in the group
+#'   * "MeanUDE" the average "UDE" in the group of cells
+#'   * "MedianUDE" the median "UDE" in the group of cells
+#'   * "ExpGenes25" the number of genes expressed in at the least 25% of the
+#'     cells in the group
+#'   * "ExpGenes" the number of genes expressed at the least once in any of the
+#'     cells in the group
+#'   * "CellPercentage" fraction of the cells with respect to the total cells
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param condition name of the column in the `metaCells` dataframe containing
-#'   the condition. Defaults to `NULL`
+#' @param condition the name of a column in the `metaCells` `data.frame`
+#'   containing the *condition*. This allows to further separate the cells in
+#'   more sub-groups. When not given condition is assumed to be the same for all
+#'   cells.
+#'
 #' @param clName The name of the clusterization. If not given the last available
 #'   clusterization will be used, as it is probably the most significant!
 #' @param plotTitle The title to use for the returned plot
 #'
-#' @returns a `list` of a `data.frame` and a `ggplot` objects
+#' @returns `clustersSummaryPlot()` returns a `list` with a `data.frame` and a
+#'   `ggplot` objects
 #'   * "data" contains the data,
 #'   * "plot" is the returned plot
 #'
@@ -35,25 +51,9 @@
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
-#'
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
-#'
-#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
-#'                               clusters = clusters)
-#'
 #' dataAndPlot <- clustersSummaryPlot(objCOTAN)
 #'
-#' @rdname clustersSummaryPlot
+#' @rdname HandlingClusterizations
 #'
 clustersSummaryPlot <- function(objCOTAN, condition = NULL,
                                 clName = "", plotTitle = "") {
@@ -156,22 +156,24 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 
 
 
-#' clustersTreePlot
 #'
-#' @description This function returns the dendogram plot where the given
-#'   clusters are placed on the base of their relative distance
+#'
+#' @details `clustersTreePlot()` returns the `dendogram` plot where the given
+#'   *clusters* are placed on the base of their relative distance
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param kCuts the number of estimated cluster (this defines the high for the
+#' @param kCuts the number of estimated *cluster* (this defines the high for the
 #'   tree cut)
-#' @param clName The name of the clusterization. If not given the last available
-#'   clusterization will be returned, as it is probably the most significant!
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be returned, as it is probably the most
+#'   significant!
 #' @param distance type of distance to use (default is `cosine`, `euclidean` is
 #'   also available)
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
-#'   [[stats::hclust()]] function
+#'   [stats::hclust()] function
 #'
-#' @returns a `ggplot2` object representing the dendrogram plot
+#' @returns `clustersTreePlot()` returns a `ggplot2` object representing the
+#'   `dendrogram` plot
 #'
 #' @importFrom rlang is_empty
 #'
@@ -187,25 +189,9 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
-#'
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
-#'
-#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
-#'                               clusters = clusters)
-#'
 #' treePlot <- clustersTreePlot(objCOTAN, 2)
 #'
-#' @rdname clustersTreePlot
+#' @rdname HandlingClusterizations
 #'
 clustersTreePlot <- function(objCOTAN, kCuts,
                              clName = NULL,

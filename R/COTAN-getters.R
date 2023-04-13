@@ -734,27 +734,64 @@ setMethod(
 
 # ------- `COTAN` clusterization data accessors ------
 
-#' getClusterizations
+#' Handling cells' *clusterization* and related functions
 #'
-#' @description This function extract the list of clusterizations defined in the
-#'   `COTAN` object.
+#' @description These functions manage the *clusterizations* and their
+#'   associated *cluster* `COEX` `data.frame`s.
+#'
+#'   A *clusterization* is any partition of the cells where to each cell it is
+#'   assigned a **label**; a group of cells with the same label is called
+#'   *cluster*.
+#'
+#'   For each cluster is also possible to define a `COEX` value for each gene,
+#'   indicating its increased or decreased expression in the *cluster* compared
+#'   to the whole background. A `data.frame` with these values listed in a
+#'   column for each *cluster* is stored separately for each *clusterization* in
+#'   the `clustersCoex` member.
+#'
+#'   The formulae for this *In/Out* `COEX` are similar to those used in the
+#'   [calculateCoex()] method, with the **role** of the second gene taken by the
+#'   *In/Out* status of the cells with respect to each *cluster*.
+#'
+#'
+#' @details `getClusterizations()` extracts the list of the *clusterizations*
+#'   defined in the `COTAN` object.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param dropNoCoex When `TRUE` drops the names from the clusterizations with
 #'   empty associated coex `data.frame`
 #' @param keepPrefix When `TRUE` returns the internal name of the
-#'   clusterization: the one with the 'CL_' prefix.
+#'   clusterization: the one with the `CL_` prefix.
 #'
-#' @returns a vector of clusterizations names, usually without the 'CL_' prefix
+#' @returns `getClusterizations()` returns a vector of *clusterization* names,
+#'   usually without the `CL_` prefix
 #'
 #' @export
 #'
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
+#'
+#' data("test.dataset.clusters1")
+#' clusters <- test.dataset.clusters1
+#'
+#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+#'
+#' objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
+#'                               clusters = clusters, coexDF = coexDF)
+#'
+#' ##objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
+#'
 #' clusterizations <- getClusterizations(objCOTAN)
 #'
-#' @rdname getClusterizations
+#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+#'                      G2 = c("g-000300", "g-000330"),
+#'                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
+#' enrichment <- geneSetEnrichment(clustersCoex = coexDF,
+#'                                 groupMarkers = groupMarkers)
+#'
+#'
+#' @rdname HandlingClusterizations
 #'
 setMethod(
   "getClusterizations",
@@ -780,16 +817,17 @@ setMethod(
 )
 
 
-#' getClusterizationData
-#'
-#' @description This function extract the asked clusterization column and its
-#'   coex data.frame from the `COTAN` object.
+#' @details `getClusterizationData()` extracts the asked *clusterization* and
+#'   its associated `COEX` `data.frame` from the `COTAN` object
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName The name of the clusterization. If not given the last available
 #'   clusterization will be returned, as it is probably the most significant!
 #'
-#' @returns a list with 'clusters' and 'coex'
+#' @returns `getClusterizationData()` returns a `list` with 2 elements:
+#'   * "clusters" the named cluster labels array
+#'   * "coex" the associated `COEX` `data.frame`; it will be **empty** if not
+#'     defined
 #'
 #' @export
 #'
@@ -797,27 +835,10 @@ setMethod(
 #' @importFrom rlang set_names
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
-#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+#' clusterDataList <- getClusterizationData(objCOTAN,
+#'                                          clName = "first_clusterization")
 #'
-#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
-#'                               clusters = clusters, coexDF = coexDF)
-#'
-#' clDataList <- getClusterizationData(objCOTAN, clName = "clusters")
-#' clusters <- clDataList[[1]]
-#' coexDF   <- clDataList[[2]]
-#'
-#' @rdname getClusterizationData
+#' @rdname HandlingClusterizations
 #'
 setMethod(
   "getClusterizationData",
@@ -849,23 +870,20 @@ setMethod(
 )
 
 
-#' getClustersCoex
-#'
-#' @description This function extract the complete clusterCoex list
+#' @details `getClustersCoex()` extracts the full `clusterCoex` member `list`
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns the list with a coex data.frame for each clusterization When not
-#'   empty, each data.frame contains a coex column for each cluster.
+#' @returns `getClustersCoex()` returns the list with a `COEX` `data.frame` for
+#'   each *clusterization*. When not empty, each `data.frame` contains a `COEX`
+#'   column for each *cluster*.
 #'
 #' @export
 #'
 #' @examples
-#' data("test.dataset")
-#' objCOTAN <- COTAN(raw = test.dataset)
 #' allClustersCoexDF <- getClustersCoex(objCOTAN)
 #'
-#' @rdname getClustersCoex
+#' @rdname HandlingClusterizations
 #'
 setMethod(
   "getClustersCoex",

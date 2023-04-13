@@ -1,18 +1,15 @@
 
-#' geneSetEnrichment
+#' @details `geneSetEnrichment()` returns a cumulative score of enrichment in a
+#'   *cluster* over a gene set. In formulae it calculates
+#'   \eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})}, where the \eqn{X_i} are the
+#'   positive values from [DEAOnClusters()] and \eqn{\theta = -\frac{1}{0.1}
+#'   \ln(0.25)}
 #'
-#' @description This function returns a cumulative score of enrichment in a
-#'   cluster over a gene set
-#'
-#' @details Calculates \eqn{\frac{1}{n}\sum_i(1-e^{-\theta X_i})}, where the
-#'   \eqn{X_i} are the positive values from [DEAOnClusters()] and \eqn{\theta =
-#'   -\frac{1}{0.1} \ln(0.25)}
-#'
-#' @param clustersCoex the `data.frame` for the increased or decreased
-#'   expression of every gene in the cluster compared to the whole background
+#' @param clustersCoex the `COEX` `data.frame`
 #' @param groupMarkers a named `list` of arrays of genes
 #'
-#' @returns a `data.frame` with the cumulative score
+#' @returns `geneSetEnrichment()` returns a `data.frame` with the cumulative
+#'   score
 #'
 #' @export
 #'
@@ -21,28 +18,7 @@
 #' @importFrom stringr str_remove
 #' @importFrom stringr fixed
 #'
-#' @examples
-#' data("test.dataset")
-#' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
-#'                                          GEO = "S",
-#'                                          sequencingMethod = "10X",
-#'                                          sampleCondition = "Test",
-#'                                          cores = 12,
-#'                                          saveObj = FALSE,
-#'                                          outDir = tempdir())
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    saveObj = FALSE,
-#'                                    outDir = tempdir())
-#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
-#' objCOTAN <- addClusterization(objCOTAN, clName = "clusters",
-#'                               clusters = clusters, coexDF = coexDF)
-#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-#'                      G2 = c("g-000300", "g-000330"),
-#'                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
-#' enrichment <- geneSetEnrichment(clustersCoex = coexDF,
-#'                                 groupMarkers = groupMarkers)
-#'
-#' @rdname geneSetEnrichment
+#' @rdname HandlingClusterizations
 #'
 geneSetEnrichment <- function(clustersCoex, groupMarkers) {
   # It might be possible that the column names have the old extra
