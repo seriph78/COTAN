@@ -3,7 +3,7 @@ Type: Package
 Title: COexpression Tables ANalysis 
 Version: 2.0.0
 Authors@R: c(
-  person("Galfrè", "Silvia Giulia",email = "silvia.galfre@uniroma1.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
+  person("Galfrè", "Silvia Giulia",email = "silvia.galfre@di.unipi.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
   person("Morandin","Francesco", email = "francesco.morandin@unipr.it", role = "aut",comment = c(ORCID = "0000-0002-2022-2300")),
   person("Pietrosanto","Marco", role = "aut",comment = c(ORCID = "0000-0001-5129-6065")),
   person("Cremisi","Federico", role = "aut",comment = c(ORCID = "0000-0003-4925-2703")),
@@ -22,7 +22,7 @@ Description: Statistical and computational method to analyze the co-expression o
     of gene interactions and becoming a new tool to identify cell-identity marker genes.
 URL: https://github.com/seriph78/COTAN
 BugReports: https://github.com/seriph78/COTAN/issues
-Depends: R (>= 4.1)
+Depends: R (>= 4.2)
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.2.3

@@ -11,3 +11,6 @@ inst/doc
 *.Rproj
 .rhistory
 .lintr
+/doc/
+/Meta/
+COTAN.Rproj

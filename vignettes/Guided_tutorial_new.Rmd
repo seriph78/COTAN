@@ -1,5 +1,5 @@
 ---
-title: "Guided tutorial new"
+title: "Guided tutorial as V.1"
 author: 
 - name: "Silvia Giulia Galfrè"
   affiliation: "Department of Biology, University of Rome Tor Vergata"
@@ -17,7 +17,7 @@ package: COTAN
 output: 
     BiocStyle::html_document
 vignette: >
-  %\VignetteIndexEntry{Guided tutorial new}
+  %\VignetteIndexEntry{Guided tutorial as V.1}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8} 
 ---
@@ -33,6 +33,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r}
+options(parallelly.fork.enable = TRUE)
 library(COTAN)
 library(data.table)
 library(Matrix)
@@ -49,18 +50,25 @@ library(grDevices)
 #library(dendextend)
 library(qpdf)
 ```
+## Introduction
+
+This tutorial contains the same functionalites as the first relase of COTAN tutorial but with the new functions. 
+
+## Get the dataset
 
 Download the dataset for mouse cortex E17.5.
 
-```{r eval=FALSE, include=FALSE}
-data_dir = tempdir()
-if (FALSE && !file.exists(file.path(dataDir, "E175_only_cortical_cells.txt.gz"))) {
+```{r eval=TRUE, include=TRUE}
+dataDir = tempdir()
+if (!file.exists(file.path(dataDir, "E175_only_cortical_cells.txt.gz"))) {
   download.file(paste0("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/",
                        "GSM2861nnn/GSM2861514/suppl/",
                        "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"),
                 file.path(dataDir, "/E175_only_cortical_cells.txt.gz"),
                 method = "wget", quiet = FALSE)
-}
+sample.dataset <- read.csv(paste0(dataDir, "/E175_only_cortical_cells.txt.gz"),sep = "\t",row.names = 1)
+
+  }
 ```
 
 This is just an example of a toy dataset. If the user wants to try on a real dataset, they can be used the previous command to download it and the next commented line to use as input data. There are also available online many other examples at the [link](https://seriph78.github.io/Cotan_paper/index.html).
@@ -90,21 +98,69 @@ setLoggingFile(file.path(outDir, "vignette.log"))
 Initialize the `COTAN` object with the row count table and the metadata for the experiment.
 
 ```{r}
-obj = COTAN(raw = sampled.dataset)
-#obj = initializeMetaDataset(obj, GEO = "GSM2861514",
-#                            sequencingMethod = "Drop_seq",
-#                            sampleCondition = "mouse cortex E17.5")
-obj = initializeMetaDataset(obj, GEO = "test",
-                            sequencingMethod = "10X",
-                            sampleCondition = "test_dataset")
+#obj = COTAN(raw = sampled.dataset)
+obj = COTAN(raw = sample.dataset)
+obj = initializeMetaDataset(obj, GEO = "GSM2861514",
+                            sequencingMethod = "Drop_seq",
+                            sampleCondition = "mouse cortex E17.5")
+#obj = initializeMetaDataset(obj, GEO = "test",
+ #                           sequencingMethod = "10X",
+#                            sampleCondition = "test_dataset")
 ```
 
-Now we can start the cleaning. Analysis requires and starts from a matrix of raw UMI counts after removing possible cell doublets or multiplets and low quality or dying cells (with too high mtRNA percentage, easily done with Seurat or other tools).
+Now we can start the cleaning. Analysis requires and starts from a matrix of raw UMI counts after removing possible cell doublets or multiplets and low quality or dying cells.
+
+## Data cleaning
+
+We can check the library size (UMI number) with an empirical cumulative distribution function
+
+```{r}
+ECDPlot(obj, yCut = 700)
+```
+
+```{r}
+cellSizePlot(obj)
+```
+
+```{r}
+genesSizePlot(obj)
+```
+
+```{r}
+mit <- mitochondrialPercentagePlot(obj,genePrefix = "^Mt")
+mit$plot
+```
+
+During the cleaning, every time we want to remove cells or genes we can use the `dropGenesCells()`function.
+
+To drop cells by cell library size:
+
+```{r}
+obj <- dropGenesCells(obj,cells = names(getCellsSize(obj)[getCellsSize(obj) > 6000]))
+
+```
+
+To drop cells by gene number:
+
+```{r}
+cellGeneNumber <- sort(colSums(as.data.frame(getRawData(obj) > 0)),decreasing = F)
+to.drop <- names(cellGeneNumber[cellGeneNumber > 3000])
+obj <- dropGenesCells(obj,cells = to.drop)
+genesSizePlot(obj)
+```
+
+To drop cells by mitochondrial percentage:
+
+```{r}
+obj <- dropGenesCells(obj,cells = rownames(mit$sizes[mit$sizes$mit.percentage > 1.5,]))
+mit <- mitochondrialPercentagePlot(obj,genePrefix = "^Mt")
+mit$plot
+```
 
 If we do not want to consider the mitochondrial genes we can remove them before starting the analysis.
 
 ```{r}
-genes_to_rem = getGenes(obj)[grep('^MT', getGenes(obj))] 
+genes_to_rem = getGenes(obj)[grep('^Mt', getGenes(obj))] 
 cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
 obj = dropGenesCells(obj, genes_to_rem, cells_to_rem)
 ```
@@ -112,8 +168,8 @@ obj = dropGenesCells(obj, genes_to_rem, cells_to_rem)
 We want also to define a prefix to identify the sample.
 
 ```{r}
-#t = "E17.5_cortex"
-t = "test"
+t = "E17.5_cortex"
+#t = "test"
 
 logThis(paste0("Condition ", t), logLevel = 1)
 #--------------------------------------
@@ -121,8 +177,6 @@ logThis(paste("n cells", getNumCells(obj)), logLevel = 1)
 
 n_it = 1
 ```
-
-## Data cleaning
 
 First, we create a directory to store all information regarding the data cleaning.
 
@@ -147,43 +201,23 @@ pcaCellsPlot
 genesPlot
 ```
 
+We can observe here that the five red cells are reallt enriched in hemoglobin genes so we prefer to remove them.
+
 Run this when B cells need to be removed.
 
 ```{r eval=TRUE, include=TRUE}
-pdf(file.path(outDir, "cleaning",
-              paste0(t, "_", n_it, "_plots_before_cells_exlusion.pdf")))
-pcaCellsPlot
-genesPlot
+to.drop <- rownames(pcaCellsData[pcaCellsData$groups == "B",])
+obj <- dropGenesCells(obj,cells = to.drop)
+ 
+obj <- clean(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
 
-dev.off()
+pcaCellsPlot
 ```
 
-Run this only in the last iteration, instead of the previous code, when B cells group has not been removed
+To color the PCA based on `nu_j` (so the cells' efficiency)
 
 ```{r}
-pdf(file.path(outDir, "cleaning",
-              paste0(t, "_", n_it, "_plots_before_cells_exlusion.pdf")))
-pcaCellsPlot
-genesPlot
-
-dev.off()
-pcaCellsPlot
-
-```
-
-```{r}
-genesPlot
-```
-
-To color the PCA based on nu_j (so the cells' efficiency)
-
-```{r}
-pdf(file.path(outDir, "cleaning",
-              paste0(t, "_plots_PCA_efficiency_colored.pdf")))
-UDEPlot
-
-dev.off()
-
 UDEPlot
 ```
 
@@ -209,11 +243,6 @@ plot.ude <- ggplot(nuDf, aes(x = n, y = nu)) +
                      label = paste("to remove cells with nu < ", yset), 
                      color = "darkred", size = 4.5)
 
-
-pdf(file.path(outDir, "cleaning", paste0(t, "_plots_efficiency.pdf")))
-plot.ude
-dev.off()
-
 plot.ude
 ```
 
@@ -235,18 +264,6 @@ c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
 pcaCellsPlot
 ```
 
-In case we do not want to remove anything, we can run:
-
-```{r}
-pdf(file.path(outDir, "cleaning", paste(t, "_plots_efficiency.pdf")))
-
-UDEPlot
-
-dev.off()
-
-UDEPlot
-```
-
 ## COTAN analysis
 
 In this part, all the contingency tables are computed and used to get the statistics.
@@ -266,63 +283,13 @@ saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
 
 ## Automatic run
 
-It is also possible to run a directly a single function if we don't want to clean anything.
+It is also possible to run directly a single function if we don't want to clean anything.
 
-```{r}
+```{r eval=FALSE, include=TRUE}
 obj <- automaticCOTANObjectCreation(
   raw = sampled.dataset,
   GEO = "test", sequencingMethod = "10X", sampleCondition = "sampled.dataset",
   saveObj = FALSE, outDir = outDir, cores = 10)
-```
-
-# Cell cluster
-
-The next step will find all homogeneous clusters using a GDI check on each cluster.
-
-```{r}
-clusters <- cellsUniformClustering(obj, cores = 10, saveObj = FALSE, outDir = outDir)
-obj <- addClusterization(obj, clName = "test", clusters = clusters)
-```
-
-Than we can perform a sort of differential expression to detect which genes are enriched or depleted in each cluster.
-
-```{r}
-c(coexDF, pvalDF) %<-% DEAOnClusters(obj)
-obj <- addClusterizationCoex(obj, clName = "test", coexDF = coexDF)
-```
-
-Using the cluster distance, based on the whole transcriptome, we can check if any of the closest clusters can together form a still uniform cluster. We will keep this clusterization for the further analysis.
-
-```{r}
-c(mergedClusters, mergedCoexDF, mergedPValueDf) %<-%
-  mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 10,
-                            distance = "cosine", hclustMethod = "ward.D2",
-                            saveObj = FALSE, outDir = outDir)
-
-obj <- addClusterization(obj, clName = "merged",
-                         clusters = mergedClusters, coexDF = mergedCoexDF)
-```
-
-Coex heatmap for clustered cells
-
-```{r}
-obj <- estimateDispersionNuBisection(obj, cores = 10, enforceNuAverageToOne = TRUE)
-
-obj <- calculateCoex(obj, actOnCells = TRUE)
-
-cellsHPlot <- cellsHeatmapPlot(objCOTAN = obj, clusters = clusters)
-
-plot(cellsHPlot)
-```
-
-Use cosine distance to plot nearest clusters
-
-```{r}
-######## This is the best: cosine dissimilarity
-tree <- hclust(cosineDissimilarity(mergedCoexDF), method = "ward.D2")
-
-dend <- as.dendrogram(tree)
-plot(dend)
 ```
 
 # Analysis of the elaborated data
@@ -332,16 +299,23 @@ plot(dend)
 The next function can directly plot the GDI for the dataset with the 1.5 thresholds (in red) and the two higher quantiles (in blue). We can also define some gene sets (in this case three) that we want to specifically label in the GDI plot.
 
 ```{r}
-AA <- sample(getGenes(obj), size = 5)
-BB <- sample(getGenes(obj), size = 5)
-CC <- sample(getGenes(obj), size = 5)
+#AA <- sample(getGenes(obj), size = 5)
+#BB <- sample(getGenes(obj), size = 5)
+#CC <- sample(getGenes(obj), size = 5)
 
-genes.list <- list("AA" = AA,"BB" = BB,"CC" = CC)
+#genes.list <- list("AA" = AA,"BB" = BB,"CC" = CC)
+genes.list <- list(
+"NPGs"=c("Nes","Vim","Sox2","Sox1","Notch1", "Hes1","Hes5","Pax6"),
+"PNGs"=c("Map2","Tubb3","Neurod1","Nefm","Nefl","Dcx","Tbr1"),
+"hk"=c("Calm1","Cox6b1","Ppia","Rpl18","Cox7c","Erh","H3f3a","Taf1","Taf2","Gapdh","Actb","Golph3",  "Zfr", "Sub1", "Tars", "Amacr")
+)
+
+
 
 # needs to be recalculated after the changes in nu/dispersion above
-obj <- calculateCoex(obj, actOnCells = FALSE)
+#obj <- calculateCoex(obj, actOnCells = FALSE)
 
-GDIPlot(obj, cond = "test", genes = genes.list)
+GDIPlot(obj, cond = t, genes = genes.list)
 ```
 
 If a more complex plot is needed, or if we want to analyze more in detail the GDI data, we can get directly the GDI data frame.
@@ -359,24 +333,24 @@ The percentage of cells expressing the gene in the third column of this datafram
 For the Gene Pair Analysis, we can plot a heatmap with the coex values between two gene sets. To do so we need to define, in a list, the different gene sets (list.genes). Then in the function parameter sets w,e can decide which sets need to be considered (in the example from 1 to 3). In the condition parameter we should insert an array with each file name prefix to be considered (in the example, the file name is "E17.5_cortex").
 
 ```{r}
-AA <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
-BB <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
-CC <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
+#AA <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
+#BB <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
+#CC <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
 
 
-list.genes = list("Ref.col"= BB, "AA"=AA, "Const."=CC )
+#list.genes = list("Ref.col"= BB, "AA"=AA, "Const."=CC )
 
-heatmapPlot(genesLists = list.genes, sets = c(1:3), conditions = c("test"), dir = outDir)
+heatmapPlot(genesLists = genes.list, sets = c(1:3), conditions = t, dir = outDir)
 ```
 
 We can also plot a general heatmap of coex values based on some markers like the following one.
 
 ```{r}
-genesHeatmapPlot(obj, primaryMarkers = AA, pValue = 0.001, symmetric = TRUE)
+genesHeatmapPlot(obj, primaryMarkers = c("Satb2","Bcl11b","Vim","Hes1") , pValue = 0.001, symmetric = TRUE)
 ```
 
 ```{r}
-genesHeatmapPlot(obj, primaryMarkers = AA, secondaryMarkers = BB, symmetric = FALSE, pValue = 0.001)
+genesHeatmapPlot(obj, primaryMarkers =  c("Satb2","Bcl11b","Fezf2"), secondaryMarkers = c("Gabra3", "Meg3","Cux1","Neurod6"), symmetric = FALSE, pValue = 0.001)
 ```
 
 ## Get data tables
@@ -386,7 +360,7 @@ Sometimes we can also be interested in the numbers present directly in the conti
 contingencyTables() to produce the observed and expected data
 
 ```{r}
-c(observedCT, expectedCT) %<-% contingencyTables(obj, g1 = "EIF3F", g2 = "SLC37A1")
+c(observedCT, expectedCT) %<-% contingencyTables(obj, g1 = "Satb2", g2 = "Bcl11b")
 print("Observed CT")
 observedCT
 print("Expected CT")
@@ -403,8 +377,7 @@ coex[1:5, 1:5]
 
 ```{r}
 # For a partial matrix
-coex <- getGenesCoex(obj, genes = c("CEP104", "TNFRSF25", "ZBTB48", "STIM1",
-                                    "TRIM5", "APBB1", "DNHD1"))
+coex <- getGenesCoex(obj, genes = c("Satb2","Bcl11b","Fezf2"))
 head(coex)
 ```
 
