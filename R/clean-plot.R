@@ -91,9 +91,8 @@ cleanPlots <- function(objCOTAN) {
 
   toClust <- as.matrix(round(rawNorm, digits = 4L))
 
-  if (!identical(colnames(toClust), names(groups))) {
-    stop("Error in the cell names")
-  }
+  assert_that(identical(colnames(toClust), names(groups)),
+              msg = "Error in the cell names")
 
   # ---- next: to check which genes are specific for the B group of cells
   B <- set_names(as.data.frame(toClust[, pos2]), colnames(toClust)[pos2])

@@ -620,10 +620,10 @@ setMethod(
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 #'
 #' ## mu <- calculateMu(objCOTAN)
-#' ## observedYList <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+#' ## observedY <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
 #' obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 #'
-#' ##expectedNList <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+#' ## expectedN <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
 #' exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 #'
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
@@ -766,6 +766,9 @@ setMethod(
 #' @returns `getClusterizations()` returns a vector of *clusterization* names,
 #'   usually without the `CL_` prefix
 #'
+#' @importFrom rlang is_empty
+#' @importFrom rlang rep_along
+#'
 #' @export
 #'
 #' @examples
@@ -784,7 +787,7 @@ setMethod(
 #'
 #' ##objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
 #'
-#' clusterizations <- getClusterizations(objCOTAN)
+#' clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 #'
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
 #'                      G2 = c("g-000300", "g-000330"),
@@ -806,7 +809,8 @@ setMethod(
     clsCoex <- getClustersCoex(objCOTAN)
 
     if (isTRUE(dropNoCoex)) {
-      out <- names(clsCoex[!sapply(clsCoex, is_empty)])
+      emptyClsCoex <- vapply(clsCoex, is_empty, rep_along(FALSE, clsCoex))
+      out <- names(clsCoex[!emptyClsCoex])
     } else {
       out <- names(clsCoex)
     }

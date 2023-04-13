@@ -6,7 +6,7 @@
 \alias{cellsHeatmapPlot}
 \title{Heatmap Plots}
 \usage{
-heatmapPlot(genesLists, sets, conditions, pValueThreshold = 0.01, dir)
+heatmapPlot(genesLists, sets, conditions, dir, pValueThreshold = 0.01)
 
 genesHeatmapPlot(
   objCOTAN,
@@ -27,10 +27,10 @@ should be used}
 
 \item{conditions}{An array of prefixes indicating the different files}
 
-\item{pValueThreshold}{The p-value threshold. Default is 0.01}
-
 \item{dir}{The directory in which are all \code{COTAN} files (corresponding to the
 previous prefixes)}
+
+\item{pValueThreshold}{The p-value threshold. Default is 0.01}
 
 \item{objCOTAN}{a \code{COTAN} object}
 

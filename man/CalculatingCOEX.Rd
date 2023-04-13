@@ -276,10 +276,10 @@ objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 
 ## mu <- calculateMu(objCOTAN)
-## observedYList <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
+## observedY <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
 obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 
-##expectedNList <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
+## expectedN <- expectedContingencyTablesNN(objCOTAN, asDspMatrices = TRUE)
 exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)

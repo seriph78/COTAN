@@ -923,10 +923,14 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   ts <- textSize
 
   basicTheme <- theme(
-    axis.text.x  = element_text(size = ts, angle = 0L,  hjust = .5, vjust = .5, face = "plain", colour = myDarkBlue),
-    axis.text.y  = element_text(size = ts, angle = 0L,  hjust = .0, vjust = .5, face = "plain", colour = myDarkBlue),
-    axis.title.x = element_text(size = ts, angle = 0L,  hjust = .5, vjust = .0, face = "plain", colour = myDarkBlue),
-    axis.title.y = element_text(size = ts, angle = 90L, hjust = .5, vjust = .5, face = "plain", colour = myDarkBlue))
+    axis.text.x  = element_text(size = ts, angle = 0L,  hjust = .5, vjust = .5,
+                                face = "plain", colour = myDarkBlue),
+    axis.text.y  = element_text(size = ts, angle = 0L,  hjust = .0, vjust = .5,
+                                face = "plain", colour = myDarkBlue),
+    axis.title.x = element_text(size = ts, angle = 0L,  hjust = .5, vjust = .0,
+                                face = "plain", colour = myDarkBlue),
+    axis.title.y = element_text(size = ts, angle = 90L, hjust = .5, vjust = .5,
+                                face = "plain", colour = myDarkBlue))
 
   if (plotKind == "common") {
     return(basicTheme)

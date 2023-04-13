@@ -50,9 +50,10 @@ library(grDevices)
 #library(dendextend)
 library(qpdf)
 ```
+
 ## Introduction
 
-This tutorial contains the same functionalites as the first relase of COTAN tutorial but with the new functions. 
+This tutorial contains the same functionalites as the first relase of COTAN tutorial but with the new functions.
 
 ## Get the dataset
 
@@ -143,7 +144,8 @@ obj <- dropGenesCells(obj,cells = names(getCellsSize(obj)[getCellsSize(obj) > 60
 To drop cells by gene number:
 
 ```{r}
-cellGeneNumber <- sort(colSums(as.data.frame(getRawData(obj) > 0)),decreasing = F)
+cellGeneNumber <- sort(colSums(as.data.frame(getRawData(obj) > 0)),
+                       decreasing = FALSE)
 to.drop <- names(cellGeneNumber[cellGeneNumber > 3000])
 obj <- dropGenesCells(obj,cells = to.drop)
 genesSizePlot(obj)
@@ -201,7 +203,7 @@ pcaCellsPlot
 genesPlot
 ```
 
-We can observe here that the five red cells are reallt enriched in hemoglobin genes so we prefer to remove them.
+We can observe here that the five red cells are really enriched in hemoglobin genes so we prefer to remove them.
 
 Run this when B cells need to be removed.
 
@@ -276,7 +278,9 @@ COEX evaluation and storing
 
 ```{r}
 obj <- calculateCoex(obj)
+```
 
+```{r eval=FALSE, include=TRUE}
 # saving the structure
 saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
 ```
@@ -286,7 +290,7 @@ saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
 It is also possible to run directly a single function if we don't want to clean anything.
 
 ```{r eval=FALSE, include=TRUE}
-obj <- automaticCOTANObjectCreation(
+obj2 <- automaticCOTANObjectCreation(
   raw = sampled.dataset,
   GEO = "test", sequencingMethod = "10X", sampleCondition = "sampled.dataset",
   saveObj = FALSE, outDir = outDir, cores = 10)
@@ -346,11 +350,14 @@ heatmapPlot(genesLists = genes.list, sets = c(1:3), conditions = t, dir = outDir
 We can also plot a general heatmap of coex values based on some markers like the following one.
 
 ```{r}
-genesHeatmapPlot(obj, primaryMarkers = c("Satb2","Bcl11b","Vim","Hes1") , pValue = 0.001, symmetric = TRUE)
+genesHeatmapPlot(obj, primaryMarkers = c("Satb2","Bcl11b","Vim","Hes1"),
+                 pValueThreshold = 0.001, symmetric = TRUE)
 ```
 
 ```{r}
-genesHeatmapPlot(obj, primaryMarkers =  c("Satb2","Bcl11b","Fezf2"), secondaryMarkers = c("Gabra3", "Meg3","Cux1","Neurod6"), symmetric = FALSE, pValue = 0.001)
+genesHeatmapPlot(obj, primaryMarkers = c("Satb2","Bcl11b","Fezf2"),
+                 secondaryMarkers = c("Gabra3", "Meg3","Cux1","Neurod6"),
+                 pValueThreshold = 0.001, symmetric = FALSE)
 ```
 
 ## Get data tables
@@ -390,5 +397,5 @@ if (file.exists(paste0(outDir, t, ".cotan.RDS"))) {
 }
 unlink(paste0(outDir, "cleaning"), recursive = TRUE)
 
-print(sessionInfo())
+sessionInfo()
 ```

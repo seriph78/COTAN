@@ -182,7 +182,7 @@ establishGenesClusters <-
   assert_that(!is.null(names(groupMarkers)),
               msg = "Group markers must have names for each group")
 
-  colVector = getColorsVector(kCuts)
+  colVector <- getColorsVector(kCuts)
 
   # Dropping the genes not present
   filterGenes <- function(markers, genes) {

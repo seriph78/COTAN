@@ -28,6 +28,8 @@
 #'
 #' @importFrom scales squish
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @export
 #'
 #' @examples
@@ -57,79 +59,86 @@
 #'
 #' @rdname HeatmapPlots
 #'
-heatmapPlot <- function(genesLists, sets, conditions,
-                        pValueThreshold = 0.01, dir) {
-  #time <- g2 <- NULL
-  logThis("heatmap plot: START", logLevel = 2)
+heatmapPlot <- function(genesLists, sets, conditions, dir,
+                        pValueThreshold = 0.01) {
+  logThis("heatmap plot: START", logLevel = 2L)
 
-  colGenes <- genesLists[[1]]
+  colGenes <- genesLists[[1L]]
   allGenes <- unique(sort(unlist(genesLists[sets])))
 
-  df.to.print <- data.frame()
+  dfToPrint <- data.frame()
   for (cond in conditions) {
-    logThis(paste0("Loading condition '", cond, "'"), logLevel = 3)
+    logThis(paste0("Loading condition '", cond, "'"), logLevel = 3L)
     obj <- readRDS(file.path(dir, paste0(cond, ".cotan.RDS")))
 
-    stopifnot("primary markers all absent" <- any(colGenes %in% getGenes(obj)))
+    assert_that(any(colGenes %in% getGenes(obj)),
+                msg = "primary markers all absent")
 
-    pValue <- calculatePValue(obj, geneSubsetCol = colGenes, geneSubsetRow = allGenes)
+    pValue <- calculatePValue(obj, geneSubsetCol = colGenes,
+                              geneSubsetRow = allGenes)
     pValue <- as.data.frame(pValue)
 
-    pValue$g2 <- as.vector(rownames(pValue))
-    df.temp.pval <- pivot_longer(pValue, cols = seq_along(colnames(pValue)) - 1,
-                                 names_to = "g1", values_to = "pValue")
+    pValue[["g2"]] <- as.vector(rownames(pValue))
+    dfTempVal <- pivot_longer(pValue, cols = seq_along(colnames(pValue)) - 1L,
+                              names_to = "g1", values_to = "pValue")
 
     #---------------------------------------------------------
     coex <- getGenesCoex(obj)
     coex <- coex[getGenes(obj) %in% allGenes, getGenes(obj) %in% colGenes]
     coex <- as.data.frame(coex)
 
-    coex$g2 <- as.vector(rownames(coex))
-    df.temp.coex <- pivot_longer(coex, cols = seq_along(colnames(pValue)) - 1,
-                                 names_to = "g1", values_to = "coex")
+    coex[["g2"]] <- as.vector(rownames(coex))
+    dfTempCoex <- pivot_longer(coex, cols = seq_along(colnames(pValue)) - 1L,
+                               names_to = "g1", values_to = "coex")
 
-    df.temp <- merge(df.temp.coex, df.temp.pval)
-    df.temp$time <- cond
-    df.temp$type <- NA
-    df.temp$absent <- NA
-    df.temp2 <- data.frame()
+    dfTemp <- merge(dfTempCoex, dfTempVal)
+    dfTemp[["time"]] <- cond
+    dfTemp[["type"]] <- NA
+    dfTemp[["absent"]] <- NA
+    dfTemp2 <- data.frame()
     for (type in names(genesLists)[sets]) {
       for (g1 in colGenes) {
-        tt <- df.temp[df.temp$g2 %in% genesLists[[type]] & df.temp$g1 == g1, ]
+        tt <- dfTemp[dfTemp[["g2"]] %in% genesLists[[type]] &
+                       dfTemp[["g1"]] == g1, ]
         # control if the subset is smaller than the number of wanted genes
-        if (dim(tt)[1] < length(genesLists[[type]])) {
-          n.row <- length(genesLists[[type]]) - dim(tt)[1]
-          t.rows <- as.data.frame(matrix(nrow = n.row, ncol = 7))
-          colnames(t.rows) <- colnames(tt)
-          t.rows[, "g1"] <- g1
-          t.rows[, "time"] <- cond
-          t.rows[, "absent"] <- "yes"
-          t.rows[, "pValue"] <- 1
-          t.rows[, "g2"] <- genesLists[[type]][!genesLists[[type]] %in% tt$g2]
-          tt <- rbind(tt, t.rows)
+        if (dim(tt)[[1L]] < length(genesLists[[type]])) {
+          nRow <- length(genesLists[[type]]) - dim(tt)[[1L]]
+          tRows <- as.data.frame(matrix(nrow = nRow, ncol = 7L))
+          colnames(tRows) <- colnames(tt)
+          tRows[, "g1"] <- g1
+          tRows[, "time"] <- cond
+          tRows[, "absent"] <- "yes"
+          tRows[, "pValue"] <- 1.0
+          tRows[, "g2"] <-
+            genesLists[[type]][!genesLists[[type]] %in% tt[["g2"]]]
+          tt <- rbind(tt, tRows)
         }
-        tt$type <- type
-        df.temp2 <- rbind(df.temp2, tt)
+        tt[["type"]] <- type
+        dfTemp2 <- rbind(dfTemp2, tt)
       }
-      print(type)
+      logThis(paste("Done type ", type), logLevel = 3L)
     }
-    df.temp <- df.temp2
-    df.temp$t_hk <- ifelse((df.temp$g2 %in% getHousekeepingGenes(obj)) |
-                             (df.temp$g1 %in% getHousekeepingGenes(obj)), "hk", "n")
-    df.temp[df.temp$pValue > pValueThreshold, ]$coex <- 0
-    df.to.print <- rbind(df.to.print, df.temp)
+    dfTemp <- dfTemp2
+    dfTemp[["t_hk"]] <- ifelse((dfTemp[["g2"]] %in% getHousekeepingGenes(obj)) |
+                               (dfTemp[["g1"]] %in% getHousekeepingGenes(obj)),
+                               "hk", "n")
+    dfTemp[dfTemp[["pValue"]] > pValueThreshold, "coex"] <- 0L
+    dfToPrint <- rbind(dfToPrint, dfTemp)
   }
-  logThis(paste("min coex:", min(df.to.print$coex, na.rm = TRUE),
-                "max coex",  max(df.to.print$coex, na.rm = TRUE)), logLevel = 2)
+  logThis(paste("min coex:", min(dfToPrint[["coex"]], na.rm = TRUE),
+                "max coex:", max(dfToPrint[["coex"]], na.rm = TRUE)),
+          logLevel = 2L)
 
-  heatmap <- ggplot(data = subset(df.to.print, type %in% names(genesLists)[sets]),
+  heatmap <- ggplot(data = subset(dfToPrint, type %in% names(genesLists)[sets]),
                     aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
              geom_tile(aes(fill = coex), colour = "black", show.legend = TRUE) +
              facet_grid(type ~ g1, scales = "free", space = "free") +
-             scale_fill_gradient2(low = "#E64B35FF", mid = "gray93", high = "#3C5488FF",
-                                  midpoint = 0,na.value = "grey80", space = "Lab",
-                                  guide = "colourbar", aesthetics = "fill", oob = squish) +
-             plotTheme("heatmap", textSize = 9)
+             scale_fill_gradient2(low = "#E64B35FF", mid = "gray93",
+                                  high = "#3C5488FF", midpoint = 0L,
+                                  na.value = "grey80", space = "Lab",
+                                  guide = "colourbar", aesthetics = "fill",
+                                  oob = squish) +
+             plotTheme("heatmap", textSize = 9L)
 
   return(heatmap)
 }
@@ -179,7 +188,8 @@ genesHeatmapPlot <-
   function(objCOTAN, primaryMarkers, secondaryMarkers = c(),
            pValueThreshold = 0.01, symmetric = TRUE) {
     if (isTRUE(symmetric)) {
-      secondaryMarkers <- as.list(c(unlist(primaryMarkers), unlist(secondaryMarkers)))
+      secondaryMarkers <- as.list(c(unlist(primaryMarkers),
+                                    unlist(secondaryMarkers)))
     }
 
     if (is_empty(secondaryMarkers)) {
@@ -192,13 +202,13 @@ genesHeatmapPlot <-
     unexpressedGenes <- allMarkers[!allMarkers %in% getGenes(objCOTAN)]
 
     if (!is_empty(unexpressedGenes)) {
-      warning(paste("The markers", paste(unexpressedGenes, collapse = ", "),
-                    "are not present in the COTAN object!"))
+      warning("The markers ", toString(unexpressedGenes),
+              " are not present in the COTAN object!")
     }
 
     pValue <- calculatePValue(objCOTAN)[, allMarkers]
 
-    pvalFloored <- apply(pValue, 1, FUN = min)
+    pvalFloored <- apply(pValue, 1.0, FUN = min)
     rowGenes <- names(pvalFloored)[pvalFloored < pValueThreshold]
 
     rowGenes <- unique(c(allMarkers, rowGenes))
@@ -206,28 +216,29 @@ genesHeatmapPlot <-
 
     coex <- getGenesCoex(objCOTAN)[getGenes(objCOTAN) %in% rowGenes, ]
     if (symmetric == TRUE) {
-      coex <- coex[ , getGenes(objCOTAN) %in% rowGenes]
+      coex <- coex[, getGenes(objCOTAN) %in% rowGenes]
     }
 
     listRows <- c()
     for (m in unlist(secondaryMarkers)) {
       genes <- rownames(pValue[pValue[, m] < pValueThreshold, ])
-      genes <- genes[genes %in% rownames(coex[coex[, m] > 0, ])]
+      genes <- genes[genes %in% rownames(coex[coex[, m] > 0.0, ])]
       listRows[[m]] <- genes
     }
 
     clGenesRows <- c()
     for (g in names(listRows)) {
-      tmp <- data.frame("genes" = listRows[[g]], "cl" = rep(g, length(listRows[[g]])))
+      tmp <- data.frame("genes" = listRows[[g]],
+                        "cl" = rep(g, length(listRows[[g]])))
       clGenesRows <- rbind(clGenesRows, tmp)
     }
 
-    reorder_idx_row <- match(clGenesRows[["genes"]], rownames(coex))
+    reorderIdxRow <- match(clGenesRows[["genes"]], rownames(coex))
 
     listCols <- c()
     for (m in primaryMarkers) {
       genes <- rownames(pValue[pValue[, m] < pValueThreshold, ])
-      genes <- genes[genes %in% rownames(coex[coex[, m] > 0, ])]
+      genes <- genes[genes %in% rownames(coex[coex[, m] > 0.0, ])]
       listCols[[m]] <- genes
     }
 
@@ -236,26 +247,22 @@ genesHeatmapPlot <-
     } else {
       clGenesCols <- data.frame()
       for (g in names(listCols)) {
-        tmp <- data.frame("genes" = listCols[[g]], "cl" = rep(g, length(listCols[[g]])))
+        tmp <- data.frame("genes" = listCols[[g]],
+                          "cl" = rep(g, length(listCols[[g]])))
         clGenesCols <- rbind(clGenesCols, tmp)
       }
     }
 
     clGenesCols <- clGenesCols[clGenesCols[["genes"]] %in% colnames(coex), ]
 
-    reorder_idx_col <- match(clGenesCols[["genes"]], colnames(coex))
+    reorderIdxCol <- match(clGenesCols[["genes"]], colnames(coex))
 
-    coex <- coex[reorder_idx_row, reorder_idx_col]
+    coex <- coex[reorderIdxRow, reorderIdxCol]
 
-    col_fun <- colorRamp2(
-      c(
-        round(quantile(as.matrix(coex), probs = 0.001),
-          digits = 3
-        ), 0,
-        round(quantile(as.matrix(coex), probs = 0.999),
-          digits = 3
-        )
-      ),
+    colFun <- colorRamp2(
+      c(round(quantile(as.matrix(coex), probs = 0.001), digits = 3L),
+        0.0,
+        round(quantile(as.matrix(coex), probs = 0.999), digits = 3L)),
       c("#E64B35FF", "gray93", "#3C5488FF")
     )
 
@@ -266,21 +273,20 @@ genesHeatmapPlot <-
       cluster_columns = FALSE,
       row_split = clGenesRows[["cl"]],
       column_split = clGenesCols[["cl"]],
-      col = col_fun,
+      col = colFun,
       show_row_names = FALSE,
       show_column_names = FALSE,
       column_title_gp = gpar(
-        fill = "#8491B44C", font = 3,
+        fill = "#8491B44C", font = 3L,
         col = "#3C5488FF"
       ),
-      row_title_gp = gpar(fill = "#8491B44C", font = 3, col = "#3C5488FF")
+      row_title_gp = gpar(fill = "#8491B44C", font = 3L, col = "#3C5488FF")
     )
     lgd <- Legend(
-      col_fun = col_fun, title = "coex", grid_width =
-        unit(0.3, "cm"),
+      col_fun = colFun, title = "coex", grid_width = unit(0.3, "cm"),
       direction = "horizontal", title_position = "topcenter",
-      title_gp = gpar(fontsize = 10, fontface = "bold", col = "#3C5488FF"),
-      labels_gp = gpar(col = "#3C5488FF", font = 3)
+      title_gp = gpar(fontsize = 10L, fontface = "bold", col = "#3C5488FF"),
+      labels_gp = gpar(col = "#3C5488FF", font = 3L)
     )
     draw(part1,
       show_heatmap_legend = FALSE,
@@ -301,6 +307,9 @@ genesHeatmapPlot <-
 #' @export
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang rep_along
+#'
+#' @importFrom assertthat assert_that
 #'
 #' @importFrom ComplexHeatmap Heatmap
 #'
@@ -315,7 +324,7 @@ genesHeatmapPlot <-
 #'
 cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
   coexMat <- as.matrix(getCellsCoex(objCOTAN))
-  stopifnot("cells coex not found in the COTAN" <- !is_empty(coexMat))
+  assert_that(!is_empty(coexMat), msg = "cells coex not found in the COTAN")
 
   # if clustering is needed
   if (!is_empty(clusters)) {
@@ -324,7 +333,7 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
 
     # size of each cluster
     clustersList <- toClustersList(clusters)
-    clustersSize <- sapply(clustersList, length)
+    clustersSize <- vapply(clustersList, length, rep_along(0L, clustersList))
 
     # cell names grouped by the identifier of the cluster to which they belong
     cellNames <- unlist(clustersList)
@@ -348,4 +357,3 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
             cluster_columns = FALSE)
   }
 }
-

@@ -6,11 +6,10 @@
 .Ruserdata
 COTAN.Rproj
 COTAN.rproj
-inst/doc
 *.tar.gz
 *.Rproj
 .rhistory
 .lintr
+/inst/doc
 /doc/
 /Meta/
-COTAN.Rproj

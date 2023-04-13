@@ -260,7 +260,7 @@ objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
 
 ##objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
 
-clusterizations <- getClusterizations(objCOTAN)
+clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 
 groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                      G2 = c("g-000300", "g-000330"),

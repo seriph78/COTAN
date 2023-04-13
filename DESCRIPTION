@@ -37,6 +37,7 @@ Imports:
     ggplot2,
     ggrepel,
     ggthemes,
+    graphics,
     parallel,
     parallelly,
     tibble,
