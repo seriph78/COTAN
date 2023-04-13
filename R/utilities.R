@@ -3,8 +3,8 @@
 #' Logging in the `COTAN` package
 #'
 #' @description Logging is currently supported for all `COTAN` functions. It is
-#'   possible to see the outpus on the terminal and/or on a log file. The level
-#'   of ouput on terminal is controlled by the  `COTAN.LogLevel` option while
+#'   possible to see the output on the terminal and/or on a log file. The level
+#'   of output on terminal is controlled by the  `COTAN.LogLevel` option while
 #'   the logging on file is always at its maximum verbosity
 #'
 #' @details `setLoggingLevel()` sets the `COTAN` logging level. It set the
@@ -1007,7 +1007,7 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
 #'
 #' @param numNeededColors The number of returned colors
 #'
-#' @returns an array fo RGB colors of the wanted size
+#' @returns an array of `RGB` colors of the wanted size
 #'
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom RColorBrewer brewer.pal.info

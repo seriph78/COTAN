@@ -19,6 +19,8 @@
 #'
 #' @importFrom utils write.csv
 #'
+#' @importFrom stats time
+#'
 #' @importFrom grDevices pdf
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices colors

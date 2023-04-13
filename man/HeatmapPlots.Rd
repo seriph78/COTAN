@@ -12,7 +12,7 @@ genesHeatmapPlot(
   objCOTAN,
   primaryMarkers,
   secondaryMarkers = c(),
-  pValue = 0.001,
+  pValueThreshold = 0.01,
   symmetric = TRUE
 )
 
@@ -71,6 +71,7 @@ matrix
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
+objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
@@ -88,13 +89,17 @@ groupMarkers <- list(G1 = primaryMarkers,
                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
 
 hPlot <- heatmapPlot(genesLists = groupMarkers, sets = c(2, 3),
-                     pValueThreshold = 0.05, conditions = c("test"),
+                     pValueThreshold = 0.05, conditions = c("test.dataset"),
                      dir = paste0(data_dir, "/"))
 
 ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,
                            secondaryMarkers = groupMarkers,
-                           pValue = 0.05, symmetric = FALSE)
+                           pValueThreshold = 0.05, symmetric = FALSE)
 
-chPlot <- cellsHeatmapPlot(objCOTAN)
+clusters <- c(rep_len("1", getNumCells(objCOTAN)/2),
+              rep_len("2", getNumCells(objCOTAN)/2))
+names(clusters) <- getCells(objCOTAN)
+
+chPlot <- cellsHeatmapPlot(objCOTAN, clusters = clusters)
 
 }

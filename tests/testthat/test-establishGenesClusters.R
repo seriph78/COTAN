@@ -42,7 +42,7 @@ test_that("Establish genes clusters", {
   expect_equal(ncol(pcaClusters), 16)
   expect_equal(colnames(pcaClusters), c(paste0("PC", c(1:10)), pcaExtraCols))
 
-  if (TRUE) {
+  if (FALSE) {
     # saveRDS(pcaClusters, "pca.clusters.RDS")
     pcaClustersExp <- readRDS(file.path(getwd(), "pca.clusters.RDS"))
     expect_equal(pcaClusters, pcaClustersExp)

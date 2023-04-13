@@ -102,7 +102,7 @@ match the probability of zero.
 
 The estimator methods are named \code{Linear} if they can be calculated as a
 linear statistic of the raw data or \code{Bisection} if they are found via a
-parallel bisectio solver.
+parallel bisection solver.
 }
 \details{
 \code{estimateLambdaLinear()} does a linear estimation of lambda (genes'

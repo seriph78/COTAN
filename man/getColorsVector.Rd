@@ -10,7 +10,7 @@ getColorsVector(numNeededColors)
 \item{numNeededColors}{The number of returned colors}
 }
 \value{
-an array fo RGB colors of the wanted size
+an array of \code{RGB} colors of the wanted size
 }
 \description{
 This function returns a list of colors based on the

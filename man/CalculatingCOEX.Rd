@@ -111,7 +111,7 @@ otherwise for the genes}
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
 
-\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use [\link{Rfast}]
+\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \link{Rfast}
 parallel algorithms that on the flip side use more memory}
 
 \item{g1}{a gene}

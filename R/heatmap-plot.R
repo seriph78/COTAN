@@ -33,6 +33,7 @@
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
+#' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
@@ -50,7 +51,7 @@
 #'                      G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
 #'
 #' hPlot <- heatmapPlot(genesLists = groupMarkers, sets = c(2, 3),
-#'                      pValueThreshold = 0.05, conditions = c("test"),
+#'                      pValueThreshold = 0.05, conditions = c("test.dataset"),
 #'                      dir = paste0(data_dir, "/"))
 #'
 #' @rdname HeatmapPlots
@@ -169,13 +170,13 @@ heatmapPlot <- function(genesLists, sets, conditions,
 #' @examples
 #' ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,
 #'                            secondaryMarkers = groupMarkers,
-#'                            pValue = 0.05, symmetric = FALSE)
+#'                            pValueThreshold = 0.05, symmetric = FALSE)
 #'
 #' @rdname HeatmapPlots
 #'
 genesHeatmapPlot <-
   function(objCOTAN, primaryMarkers, secondaryMarkers = c(),
-           pValue = 0.001, symmetric = TRUE) {
+           pValueThreshold = 0.01, symmetric = TRUE) {
     if (isTRUE(symmetric)) {
       secondaryMarkers <- as.list(c(unlist(primaryMarkers), unlist(secondaryMarkers)))
     }
@@ -194,13 +195,13 @@ genesHeatmapPlot <-
                     "are not present in the COTAN object!"))
     }
 
-    pval <- calculatePValue(objCOTAN)[, allMarkers]
+    pValue <- calculatePValue(objCOTAN)[, allMarkers]
 
-    pvalFloored <- apply(pval, 1, FUN = min)
-    rowGenes <- names(pvalFloored)[pvalFloored < pValue]
+    pvalFloored <- apply(pValue, 1, FUN = min)
+    rowGenes <- names(pvalFloored)[pvalFloored < pValueThreshold]
 
     rowGenes <- unique(c(allMarkers, rowGenes))
-    pval <- as.data.frame(pval)
+    pValue <- as.data.frame(pValue)
 
     coex <- getGenesCoex(objCOTAN)[getGenes(objCOTAN) %in% rowGenes, ]
     if (symmetric == TRUE) {
@@ -209,7 +210,7 @@ genesHeatmapPlot <-
 
     listRows <- c()
     for (m in unlist(secondaryMarkers)) {
-      genes <- rownames(pval[pval[, m] < pValue, ])
+      genes <- rownames(pValue[pValue[, m] < pValueThreshold, ])
       genes <- genes[genes %in% rownames(coex[coex[, m] > 0, ])]
       listRows[[m]] <- genes
     }
@@ -224,7 +225,7 @@ genesHeatmapPlot <-
 
     listCols <- c()
     for (m in primaryMarkers) {
-      genes <- rownames(pval[pval[, m] < pValue, ])
+      genes <- rownames(pValue[pValue[, m] < pValueThreshold, ])
       genes <- genes[genes %in% rownames(coex[coex[, m] > 0, ])]
       listCols[[m]] <- genes
     }
@@ -303,7 +304,11 @@ genesHeatmapPlot <-
 #' @importFrom ComplexHeatmap Heatmap
 #'
 #' @examples
-#' chPlot <- cellsHeatmapPlot(objCOTAN)
+#' clusters <- c(rep_len("1", getNumCells(objCOTAN)/2),
+#'               rep_len("2", getNumCells(objCOTAN)/2))
+#' names(clusters) <- getCells(objCOTAN)
+#'
+#' chPlot <- cellsHeatmapPlot(objCOTAN, clusters = clusters)
 #'
 #' @rdname HeatmapPlots
 #'

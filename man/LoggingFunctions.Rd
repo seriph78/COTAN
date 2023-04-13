@@ -32,8 +32,8 @@ terminal
 }
 \description{
 Logging is currently supported for all \code{COTAN} functions. It is
-possible to see the outpus on the terminal and/or on a log file. The level
-of ouput on terminal is controlled by the  \code{COTAN.LogLevel} option while
+possible to see the output on the terminal and/or on a log file. The level
+of output on terminal is controlled by the  \code{COTAN.LogLevel} option while
 the logging on file is always at its maximum verbosity
 }
 \details{

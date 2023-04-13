@@ -9,7 +9,7 @@
 #'
 #'   The estimator methods are named `Linear` if they can be calculated as a
 #'   linear statistic of the raw data or `Bisection` if they are found via a
-#'   parallel bisectio solver.
+#'   parallel bisection solver.
 #'
 #' @details `estimateLambdaLinear()` does a linear estimation of lambda (genes'
 #'   counts averages)

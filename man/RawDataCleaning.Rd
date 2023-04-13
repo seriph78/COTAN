@@ -129,7 +129,7 @@ proper calibration of the \code{COTAN} model.
 
 We call genes that are expressed in all cells \emph{House Keeping} while cells
 that express all genes in the data are called \emph{Fully Expressed}. In case it
-has been made quite easy to excelude the flagged genes/cells in the user
+has been made quite easy to exclude the flagged genes/cells in the user
 calculations.
 }
 \details{
