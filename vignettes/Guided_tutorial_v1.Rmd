@@ -53,7 +53,7 @@ library(qpdf)
 
 ## Introduction
 
-This tutorial contains the same functionalites as the first relase of COTAN tutorial but with the new functions.
+This tutorial contains the same functionalities as the first release of COTAN tutorial but done using the new and updated functions.
 
 ## Get the dataset
 

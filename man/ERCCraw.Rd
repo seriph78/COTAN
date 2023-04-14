@@ -5,7 +5,7 @@
 \alias{ERCCraw}
 \title{Raw ERCC dataset}
 \format{
-A data frame
+a \code{data.frame}
 }
 \source{
 ERCC
