@@ -13,7 +13,8 @@ test_that("Logging", {
   expect_true(is.null(currentFile[[1]]))
   expect_true(file.exists(logPath))
 
-  expect_no_message(suppressMessages(logThis("This should not appear", logLevel = 0)))
+  expect_no_message(suppressMessages(logThis("This should not appear",
+                                             logLevel = 0)))
 
   expect_message(   logThis("This should appear",     logLevel = 0))
   expect_no_message(logThis("This should not appear", logLevel = 1))
@@ -67,7 +68,8 @@ test_that("Clusterizations manipulations", {
   # cause mismatches between the element names and the clusterization
   elemNames <- append(elemNames, paste0("el_",201:210), after = 20)[1:100]
 
-  expect_setequal(fromClustersList(clustersList, elemNames)[21:30], c("not_clustered"))
+  expect_setequal(fromClustersList(clustersList, elemNames)[21:30],
+                  c("not_clustered"))
 
   expect_equal(groupByClustersList(elemNames, clustersList)[91:100], c(21:30))
 })
@@ -80,7 +82,8 @@ test_that("Adding columns to data.frames", {
   expect_equal(dim(df), as.integer(c(10,1)))
   expect_setequal(df[["constant"]], 1)
 
-  df <- setColumnInDF(df, colToSet = c(1:10), colName = "sequence", rowNames = LETTERS[1:10])
+  df <- setColumnInDF(df, colToSet = c(1:10),
+                      colName = "sequence", rowNames = LETTERS[1:10])
   expect_equal(rownames(df), LETTERS[1:10])
   expect_equal(colnames(df), c("constant", "sequence"))
 
@@ -141,8 +144,10 @@ test_that("dispersionBisection", {
   nu       <- rep(c(0.5, 1.5), 5)
   sumZeros <- c(0, 5)
 
-  d <- c(dispersionBisection(sumZeros = sumZeros[1], lambda = lambda[1], nu = nu),
-         dispersionBisection(sumZeros = sumZeros[2], lambda = lambda[2], nu = nu))
+  d <- c(dispersionBisection(sumZeros = sumZeros[1],
+                             lambda = lambda[1], nu = nu),
+         dispersionBisection(sumZeros = sumZeros[2],
+                             lambda = lambda[2], nu = nu))
 
   expect_equal(d, c(-Inf, 1.98046875))
 })
@@ -169,7 +174,8 @@ test_that("plotTheme", {
 
 
 test_that("Cosine dissimilarity", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
+                nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
@@ -225,7 +231,8 @@ test_that("prcomp_irlba usage", {
 test_that("vec2mat_rfast", {
   mat <- matrix(0,nrow = 10, ncol = 10)
   mat <- Rfast::lower_tri.assign(mat, c(1:55), diag = T)
-  mat <- Rfast::upper_tri.assign(mat, v = Rfast::upper_tri(Rfast::transpose(mat)))
+  mat <- Rfast::upper_tri.assign(mat,
+                                 v = Rfast::upper_tri(Rfast::transpose(mat)))
 
   colnames(mat) <- paste0("row.", c(1:10))
   rownames(mat) <- paste0("row.", c(1:10))

@@ -22,7 +22,8 @@ coexMatrix <- function(obs, exp, n, s) {
 }
 
 test_that("Calculations on genes", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
+                nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
@@ -32,10 +33,14 @@ test_that("Calculations on genes", {
   mu <- calculateMu(obj)
 
   expect_equal(dim(mu), dim(getRawData(obj)))
-  expect_equal(mu[ 1,  1], getLambda(obj)[ 1] * getNu(obj)[ 1], ignore_attr = TRUE)
-  expect_equal(mu[10,  1], getLambda(obj)[10] * getNu(obj)[ 1], ignore_attr = TRUE)
-  expect_equal(mu[ 1, 20], getLambda(obj)[ 1] * getNu(obj)[20], ignore_attr = TRUE)
-  expect_equal(mu[10, 10], getLambda(obj)[10] * getNu(obj)[10], ignore_attr = TRUE)
+  expect_equal(mu[ 1,  1], getLambda(obj)[ 1] * getNu(obj)[ 1],
+               ignore_attr = TRUE)
+  expect_equal(mu[10,  1], getLambda(obj)[10] * getNu(obj)[ 1],
+               ignore_attr = TRUE)
+  expect_equal(mu[ 1, 20], getLambda(obj)[ 1] * getNu(obj)[20],
+               ignore_attr = TRUE)
+  expect_equal(mu[10, 10], getLambda(obj)[10] * getNu(obj)[10],
+               ignore_attr = TRUE)
 
   c(observedYY, observedY) %<-%
     observedContingencyTablesYY(obj, actOnCells = FALSE, asDspMatrices = FALSE)
@@ -46,15 +51,19 @@ test_that("Calculations on genes", {
   expect_equal(length(observedY), getNumGenes(obj))
   expect_equal(observedY, c(20, rep(10 ,9)), ignore_attr = TRUE)
 
-  observed <- observedContingencyTables(obj, actOnCells = FALSE, asDspMatrices = FALSE)
+  observed <- observedContingencyTables(obj, actOnCells = FALSE,
+                                        asDspMatrices = FALSE)
   c(observedNN, observedNY, observedYN, .) %<-% observed
 
-  expect_equal(unlist(lapply(c(observedNN, observedNY, observedYN), dim)), rep(dim(observedYY), 3))
-  expect_equal(diag(as.matrix(observedNN)), c(0, rep(10, 9)), ignore_attr = TRUE)
+  expect_equal(unlist(lapply(c(observedNN, observedNY, observedYN), dim)),
+               rep(dim(observedYY), 3))
+  expect_equal(diag(as.matrix(observedNN)), c(0, rep(10, 9)),
+               ignore_attr = TRUE)
   expect_equal(observedNY, t(observedYN))
   expect_equal(diag(as.matrix(observedNY)), rep(0, 10), ignore_attr = TRUE)
   expect_equal(as.matrix(observedNN + observedNY + observedYN + observedYY),
-               matrix(getNumCells(obj), nrow = getNumGenes(obj), ncol = getNumGenes(obj)),
+               matrix(getNumCells(obj), nrow = getNumGenes(obj),
+                      ncol = getNumGenes(obj)),
                ignore_attr = TRUE)
 
   obj <- estimateDispersionBisection(obj, cores = 4, chunkSize = 4)
@@ -65,19 +74,24 @@ test_that("Calculations on genes", {
   expect_s4_class(expectedNN, "dspMatrix")
   expect_equal(dim(expectedNN), rep(getNumGenes(obj), 2))
   expect_equal(length(expectedN), getNumGenes(obj))
-  expect_equal(expectedN, c(0, rep(10, 9)), ignore_attr = TRUE, tolerance = 1e-4)
+  expect_equal(expectedN, c(0, rep(10, 9)),
+               ignore_attr = TRUE, tolerance = 1e-4)
 
-  expected <- expectedContingencyTables(obj, actOnCells = FALSE, asDspMatrices = TRUE)
+  expected <- expectedContingencyTables(obj, actOnCells = FALSE,
+                                        asDspMatrices = TRUE)
   c(., expectedNY, expectedYN, expectedYY) %<-% expected
 
   expect_equal(substring(names(observed),9), substring(names(expected), 9))
-  expect_equal(unlist(lapply(c(expectedYY, expectedNY, expectedYN), dim)), rep(dim(expectedNN), 3))
+  expect_equal(unlist(lapply(c(expectedYY, expectedNY, expectedYN), dim)),
+               rep(dim(expectedNN), 3))
   expect_equal(as.matrix(expectedNN + expectedNY + expectedYN + expectedYY),
-               matrix(getNumCells(obj), nrow = getNumGenes(obj), ncol = getNumGenes(obj)),
+               matrix(getNumCells(obj), nrow = getNumGenes(obj),
+                      ncol = getNumGenes(obj)),
                ignore_attr = TRUE)
 
-  # take a gene pair ensuring to poll only the upper triangle side of the matrices
-  # as the flag 'asDspMatrices = TRUE' makes them incorrect on the other side
+  # take a gene pair ensuring to poll only the upper triangle side of the
+  # matrices as the flag 'asDspMatrices = TRUE' makes them incorrect on the
+  # other side
   e1 <- sample(10, 1); e2 <- sample(10, 1)
   g1 <- getGenes(obj)[min(e1, e2)]
   g2 <- getGenes(obj)[max(e1, e2)]
@@ -96,16 +110,19 @@ test_that("Calculations on genes", {
                rep(1, 81), tolerance = 0.01)
 
   expect_equal(as.matrix(getGenesCoex(obj, zeroDiagonal = FALSE)),
-               coexMatrix(observed, expected, getNumCells(obj), getNumGenes(obj)),
+               coexMatrix(observed, expected,
+                          getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,7)], ignore_attr = TRUE)
+  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,7)],
+               ignore_attr = TRUE)
   expect_equal(getMetadataElement(obj, datasetTags()[["gbad"]]), paste0(10/55))
 })
 
 
 test_that("Calculations on cells", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
+                nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
@@ -121,14 +138,18 @@ test_that("Calculations on cells", {
   expect_equal(length(observedY), getNumCells(obj))
   expect_equal(observedY, rep(c(7,4), 10), ignore_attr = TRUE)
 
-  observed <- observedContingencyTables(obj, actOnCells = TRUE, asDspMatrices = TRUE)
+  observed <- observedContingencyTables(obj, actOnCells = TRUE,
+                                        asDspMatrices = TRUE)
   c(observedNN, observedNY, observedYN, .) %<-% observed
 
-  expect_equal(unlist(lapply(c(observedNN, observedNY, observedYN), dim)), rep(dim(observedYY), 3))
-  expect_equal(diag(as.matrix(observedNN)), rep(c(3, 6), 10), ignore_attr = TRUE)
+  expect_equal(unlist(lapply(c(observedNN, observedNY, observedYN), dim)),
+               rep(dim(observedYY), 3))
+  expect_equal(diag(as.matrix(observedNN)), rep(c(3, 6), 10),
+               ignore_attr = TRUE)
   expect_equal(diag(as.matrix(observedNY)), rep(0, 20), ignore_attr = TRUE)
   expect_equal(as.matrix(observedNN + observedNY + observedYN + observedYY),
-               matrix(getNumGenes(obj), nrow = getNumCells(obj), ncol = getNumCells(obj)),
+               matrix(getNumGenes(obj), nrow = getNumCells(obj),
+                      ncol = getNumCells(obj)),
                ignore_attr = TRUE)
 
   obj <- estimateDispersionNuBisection(obj, cores = 4, chunkSize = 4,
@@ -140,15 +161,19 @@ test_that("Calculations on cells", {
   expect_s4_class(expectedNN, "dsyMatrix")
   expect_equal(dim(expectedNN), rep(getNumCells(obj), 2))
   expect_equal(length(expectedN), getNumCells(obj))
-  expect_equal(expectedN, rep(c(3, 6), 10), ignore_attr = TRUE, tolerance = 1e-3)
+  expect_equal(expectedN, rep(c(3, 6), 10),
+               ignore_attr = TRUE, tolerance = 1e-3)
 
-  expected <- expectedContingencyTables(obj, actOnCells = TRUE, asDspMatrices = FALSE)
+  expected <- expectedContingencyTables(obj, actOnCells = TRUE,
+                                        asDspMatrices = FALSE)
   c(., expectedNY, expectedYN, expectedYY) %<-% expected
 
-  expect_equal(unlist(lapply(c(expectedYY, expectedNY, expectedYN), dim)), rep(dim(expectedNN), 3))
+  expect_equal(unlist(lapply(c(expectedYY, expectedNY, expectedYN), dim)),
+               rep(dim(expectedNN), 3))
   expect_equal(expectedNY, t(expectedYN))
   expect_equal(as.matrix(expectedNN + expectedNY + expectedYN + expectedYY),
-               matrix(getNumGenes(obj), nrow = getNumCells(obj), ncol = getNumCells(obj)),
+               matrix(getNumGenes(obj), nrow = getNumCells(obj),
+                      ncol = getNumCells(obj)),
                ignore_attr = TRUE)
 
   obj <- calculateCoex(obj, actOnCells = TRUE, optimizeForSpeed = TRUE)
@@ -161,22 +186,29 @@ test_that("Calculations on cells", {
   expect_equal(dim(getCellsCoex(obj)), rep(getNumCells(obj), 2))
 
   # as all cells are repeated altenating
-  expect_true(all(abs(getCellsCoex(obj, zeroDiagonal = FALSE)[,seq_len(getNumCells(obj)) %% 2 == 1] -
-                        getCellsCoex(obj, zeroDiagonal = FALSE)[, 1]) < 1e-12))
-  expect_true(all(abs(getCellsCoex(obj, zeroDiagonal = FALSE)[,seq_len(getNumCells(obj)) %% 2 == 0] -
-                        getCellsCoex(obj, zeroDiagonal = FALSE)[, 2]) < 1e-12))
+  expect_true(
+    all(abs(getCellsCoex(obj, zeroDiagonal = FALSE)[, seq_len(getNumCells(obj))
+                                                        %% 2 == 1] -
+              getCellsCoex(obj, zeroDiagonal = FALSE)[, 1]) < 1e-12))
+  expect_true(
+    all(abs(getCellsCoex(obj, zeroDiagonal = FALSE)[, seq_len(getNumCells(obj))
+                                                        %% 2 == 0] -
+            getCellsCoex(obj, zeroDiagonal = FALSE)[, 2]) < 1e-12))
 
   expect_equal(as.matrix(getCellsCoex(obj, zeroDiagonal = FALSE)),
-               coexMatrix(observed, expected, getNumGenes(obj), getNumCells(obj)),
+               coexMatrix(observed, expected, getNumGenes(obj),
+                          getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,8)], ignore_attr = TRUE)
+  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(5,6,8)],
+               ignore_attr = TRUE)
   expect_equal(getMetadataElement(obj, datasetTags()[["cbad"]]), paste0(0))
 })
 
 
 test_that("Coex", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
+                nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
@@ -199,7 +231,8 @@ test_that("Coex", {
   expect_equal(diag(S), diag(G))
   diag(S) <- 1
   diag(G) <- 1.4
-  expect_equal(S[-1, 1] / G[-1, 1], rep(11, 9), tolerance = 1e-3, ignore_attr = TRUE)
+  expect_equal(S[-1, 1] / G[-1, 1], rep(11, 9), tolerance = 1e-3,
+               ignore_attr = TRUE)
   expect_true(all(((1.4 * S[-1, -1]) / G[-1, -1]) < 1.2))
   expect_true(all((G[-1, -1] / (1.4 * S[-1, -1])) < 1.2))
 
@@ -254,7 +287,8 @@ test_that("Coex vs saved results", {
 
   coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
-  expect_equal(getGenesCoex(obj, genes = genes.names.test, zeroDiagonal = FALSE), coex_test)
+  expect_equal(getGenesCoex(obj, genes = genes.names.test,
+                            zeroDiagonal = FALSE), coex_test)
 
   pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)
 

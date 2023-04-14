@@ -27,6 +27,8 @@
 #' @importFrom grDevices pdf
 #' @importFrom grDevices dev.off
 #'
+#' @importFrom withr local_options
+#'
 #' @export
 #'
 #' @rdname UniformClusters

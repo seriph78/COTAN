@@ -189,12 +189,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
       if (!clusterIsUniform) {
         logThis(paste("Merging clusters", cl1, "and", cl2,
-                      "results in a too high GDI"), logLevel = 3L)
+                      "results in a too high GDI"), logLevel = 1L)
 
         notMergeable <- c(notMergeable, mergedCluster)
       } else {
         logThis(paste("Clusters", cl1, "and", cl2, "can be merged"),
-                logLevel = 3L)
+                logLevel = 1L)
 
         outputClusters[mergedCells] <- mergedCluster
       }

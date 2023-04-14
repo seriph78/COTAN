@@ -24,19 +24,23 @@ test_that("'COTAN' constructor", {
 })
 
 test_that("'scCOTAN' converters",{
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
+                nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
-  tags <- c("GEO:", "scRNAseq method:", "starting n. of cells:", "Condition sample:")
+  tags <- c("GEO:", "scRNAseq method:",
+            "starting n. of cells:", "Condition sample:")
 
   obj <- COTAN(raw = raw)
-  obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
+  obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X",
+                               sampleCondition = "Test")
   obj <- clean(obj)
   obj <- estimateDispersionBisection(obj)
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
-  coexDF <- set_names(as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.5)/pi*2), c(1, 2))
+  coexDF <- set_names(
+    as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.5)/pi*2), c(1, 2))
 
   obj <- addClusterization(obj, clName = "clusters",
                            clusters = rep(colnames(coexDF), 10),

@@ -1,11 +1,13 @@
 
 test_that("metaDataset", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
+                nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
   obj <- COTAN(raw = raw)
-  obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
+  obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X",
+                               sampleCondition = "Test")
 
   genesCoexInSync <- getMetadataElement(obj, datasetTags()[["gsync"]])
   cellsCoexInSync <- getMetadataElement(obj, datasetTags()[["csync"]])
@@ -15,11 +17,13 @@ test_that("metaDataset", {
   meta <- getMetadataDataset(obj)
 
   expect_equal(meta[[1]], datasetTags()[1:6], ignore_attr = TRUE)
-  expect_equal(meta[[2]], c("V", "10X", "Test", "20", genesCoexInSync, cellsCoexInSync))
+  expect_equal(meta[[2]], c("V", "10X", "Test", "20",
+                            genesCoexInSync, cellsCoexInSync))
 
   obj <- addElementToMetaDataset(obj, tag = "Tag_1", value = 1)
   obj <- addElementToMetaDataset(obj, tag = "Tag_2", value = "Test")
-  obj <- addElementToMetaDataset(obj, tag = "Tag_3", value = c("Array", "of", "strings"))
+  obj <- addElementToMetaDataset(obj, tag = "Tag_3",
+                                 value = c("Array", "of", "strings"))
 
   meta <- getMetadataDataset(obj)
 
@@ -31,7 +35,8 @@ test_that("metaDataset", {
 
 
 test_that("Housekeeping Genes and Fully Expressed Cells", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
+                nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
@@ -39,7 +44,8 @@ test_that("Housekeeping Genes and Fully Expressed Cells", {
 
   obj <- findHousekeepingGenes(obj)
 
-  expect_equal(flagNotHousekeepingGenes(obj), c(FALSE, rep(TRUE, getNumGenes(obj) - 1)))
+  expect_equal(flagNotHousekeepingGenes(obj),
+               c(FALSE, rep(TRUE, getNumGenes(obj) - 1)))
   expect_equal(getHousekeepingGenes(obj), c(LETTERS[1]))
 
   obj <- findFullyExpressedCells(obj)
@@ -50,16 +56,20 @@ test_that("Housekeeping Genes and Fully Expressed Cells", {
 
 
 test_that("dropGenesCells", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
+                nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
-  tags <- c("GEO:", "scRNAseq method:", "starting n. of cells:", "Condition sample:")
+  tags <- c("GEO:", "scRNAseq method:",
+            "starting n. of cells:", "Condition sample:")
 
   obj <- COTAN(raw = raw)
-  obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X", sampleCondition = "Test")
+  obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X",
+                               sampleCondition = "Test")
   obj <- clean(obj)
-  obj <- estimateDispersionNuBisection(obj, cores = 4, enforceNuAverageToOne = TRUE)
+  obj <- estimateDispersionNuBisection(obj, cores = 4,
+                                       enforceNuAverageToOne = TRUE)
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
   obj <- calculateCoex(obj, actOnCells = TRUE,  optimizeForSpeed = FALSE)
 
@@ -94,7 +104,8 @@ test_that("dropGenesCells", {
 
 
 test_that("Managed clusterizations", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0), nrow = 10, ncol = 20)
+  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
+                nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
   colnames(raw) = letters[1:20]
 
@@ -114,15 +125,18 @@ test_that("Managed clusterizations", {
 
   expect_equal(colnames(getMetadataCells(obj)), c("CL_Test", "nu"))
 
-  coexDF <- set_names(as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.5)/pi*2), c(1, 2))
+  coexDF <- set_names(
+    as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.5)/pi*2), c(1, 2))
 
   obj <- addClusterizationCoex(obj, clName = "Test", coexDF)
 
-  expect_equal(getClusterizations(obj, dropNoCoex = TRUE, keepPrefix = TRUE), "CL_Test")
+  expect_equal(getClusterizations(obj, dropNoCoex = TRUE, keepPrefix = TRUE),
+               "CL_Test")
   expect_equal(getClusterizationData(obj)[["coex"]], coexDF)
 
   clusters2 = set_names(rep(c("2", "1"), 10), getCells(obj))
-  coexDF2 <- set_names(as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.7)/pi*2), c("1", "2"))
+  coexDF2 <- set_names(
+    as.data.frame(atan(getNormalizedData(obj)[,1:2]-0.7)/pi*2), c("1", "2"))
 
   obj <- addClusterization(obj, clName = "Test2",
                            clusters = clusters2,
@@ -131,15 +145,18 @@ test_that("Managed clusterizations", {
   expect_equal(names(getClustersCoex(obj)), c("CL_Test", "CL_Test2"))
   expect_equal(getClusterizations(obj), c("Test", "Test2"))
   expect_equal(colnames(getMetadataCells(obj)), c("CL_Test", "nu", "CL_Test2"))
-  expect_equal(getClusterizationData(obj), list("clusters" = clusters2, "coex" = coexDF2))
-  expect_equal(getClusterizationData(obj, clName = "Test"), list("clusters" = clusters, "coex" = coexDF))
+  expect_equal(getClusterizationData(obj),
+               list("clusters" = clusters2, "coex" = coexDF2))
+  expect_equal(getClusterizationData(obj, clName = "Test"),
+               list("clusters" = clusters, "coex" = coexDF))
 
   obj <- dropClusterization(obj, "Test")
 
   expect_equal(names(getClustersCoex(obj)), "CL_Test2")
   expect_equal(getClusterizations(obj), "Test2")
   expect_equal(colnames(getMetadataCells(obj)), c("nu", "CL_Test2"))
-  expect_equal(getClusterizationData(obj), list("clusters" = clusters2, "coex" = coexDF2))
+  expect_equal(getClusterizationData(obj),
+               list("clusters" = clusters2, "coex" = coexDF2))
 
   # no such clusterization
   expect_error(getClusterizationData(obj, clName = "Test"))

@@ -40,19 +40,25 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
   pval.test <- calculatePValue(obj, geneSubsetCol = genes.names.test)
   saveRDS(pval.test, file.path(testsDir, "pval.test.RDS"))
 
-  clusters <- cellsUniformClustering(obj, cores = 12, saveObj = FALSE)
+  GDIThreshold <- 1.5
+
+  clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+                                     cores = 12, saveObj = FALSE)
   saveRDS(clusters, file.path(testsDir, "clusters1.RDS"))
 
   c(coexDF, pvalDF) %<-% DEAOnClusters(obj, clusters = clusters)
   obj <- addClusterization(obj, clName = "clusters",
                            clusters = clusters, coexDF = coexDF)
 
-  saveRDS(coexDF[genes.names.test, ], file.path(testsDir, "coex.test.cluster1.RDS"))
-  saveRDS(pvalDF[genes.names.test, ], file.path(testsDir, "pval.test.cluster1.RDS"))
+  saveRDS(coexDF[genes.names.test, ],
+          file.path(testsDir, "coex.test.cluster1.RDS"))
+  saveRDS(pvalDF[genes.names.test, ],
+          file.path(testsDir, "pval.test.cluster1.RDS"))
 
   c(mergedClusters, mCoexDF, mPValueDf) %<-%
     mergeUniformCellsClusters(objCOTAN = obj,
                               clusters = NULL,
+                              GDIThreshold = GDIThreshold,
                               cores = 12,
                               distance = "cosine",
                               hclustMethod = "ward.D2",

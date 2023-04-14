@@ -221,7 +221,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.5,
         cells <- rownames(metaData[metaData[["seurat_clusters"]] == cl, ])
         if (length(cells) < 10L) {
           logThis(paste("cluster", cl, "has too few cells:",
-                        "will be reclustered!"), logLevel = 3L)
+                        "will be reclustered!"), logLevel = 1L)
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
           clusterIsUniform <-
@@ -234,11 +234,11 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.5,
                                    outDir = outDirIter)
           if (!clusterIsUniform) {
             logThis(paste("cluster", cl, "has too high GDI:",
-                          "will be reclustered!"), logLevel = 3L)
+                          "will be reclustered!"), logLevel = 1L)
             numClustersToRecluster <- numClustersToRecluster + 1L
             cellsToRecluster <- c(cellsToRecluster, cells)
           } else {
-            logThis(paste("cluster", cl, "is uniform"), logLevel = 3L)
+            logThis(paste("cluster", cl, "is uniform"), logLevel = 1L)
           }
         }
       }

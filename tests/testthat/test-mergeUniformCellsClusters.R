@@ -31,6 +31,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_equal(coexDF[genes.names.test, ], coexDF_exp)
   expect_equal(pValDF[genes.names.test, ], pValDF_exp)
 
+  GDIThreshold <- 1.5
 
   deltaExpression <- clustersDeltaExpression(obj)
 
@@ -40,7 +41,8 @@ test_that("Merge Uniform Cells Clusters", {
   #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                        G2 = c("g-000300", "g-000330"),
-                       G3 = c("g-000510", "g-000530", "g-000550", "g-000570", "g-000590"))
+                       G3 = c("g-000510", "g-000530", "g-000550",
+                              "g-000570", "g-000590"))
 
   e.df <- geneSetEnrichment(clustersCoex = coexDF, groupMarkers = groupMarkers)
 
@@ -49,9 +51,8 @@ test_that("Merge Uniform Cells Clusters", {
   expect_lte(max(e.df[,1:(ncol(e.df)-2)]), 1)
   expect_gte(min(e.df[,1:(ncol(e.df)-2)]), 0)
   expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0)
-  expect_equal(e.df[["N. total"]], sapply(groupMarkers, length), ignore_attr = TRUE)
-
-  GDIThreshold <- 1.5
+  expect_equal(e.df[["N. total"]], sapply(groupMarkers, length),
+               ignore_attr = TRUE)
 
   c(mergedClusters, mergedCoexDF, mergedPValueDF) %<-%
     mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 12,

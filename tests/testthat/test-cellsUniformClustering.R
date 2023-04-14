@@ -12,6 +12,7 @@ test_that("Cell Uniform Clustering", {
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
   GDIThreshold <- 1.5
+
   clusters <- cellsUniformClustering(obj, cores = 12,
                                      GDIThreshold = GDIThreshold,
                                      saveObj = FALSE, outDir = tm)
@@ -22,7 +23,15 @@ test_that("Cell Uniform Clustering", {
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
-  expect_equal(getClusterizationData(obj)[["clusters"]], clusters, ignore_attr = TRUE)
+  expect_equal(getClusterizationData(obj)[["clusters"]], clusters,
+               ignore_attr = TRUE)
+
+  firstCl <- clusters[[1L]]
+  expect_true(
+    checkClusterUniformity(obj, GDIThreshold = GDIThreshold,
+                           cluster = paste0("Cluster_", firstCl),
+                           cells = names(clusters)[clusters == firstCl],
+                           saveObj = TRUE, outDir = tm))
 
   #clusters_exp <- readRDS(file.path(getwd(),"clusters1.RDS"))
 
@@ -47,6 +56,7 @@ test_that("Cell Uniform Clustering", {
 
     GDI_data <- calculateGDI(temp.obj)
 
-    expect_lt(nrow(GDI_data[GDI_data[["GDI"]] >= GDIThreshold, ]), 0.01 * nrow(GDI_data))
+    expect_lt(nrow(GDI_data[GDI_data[["GDI"]] >= GDIThreshold, ]),
+              0.01 * nrow(GDI_data))
   }
 })
