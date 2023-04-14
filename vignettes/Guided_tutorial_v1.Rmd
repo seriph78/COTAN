@@ -74,14 +74,6 @@ sample.dataset <- read.csv(paste0(dataDir, "/E175_only_cortical_cells.txt.gz"),s
 
 This is just an example of a toy dataset. If the user wants to try on a real dataset, they can be used the previous command to download it and the next commented line to use as input data. There are also available online many other examples at the [link](https://seriph78.github.io/Cotan_paper/index.html).
 
-```{r}
-data("sampled.dataset", package = "COTAN")
-
-#rownames(ERCCraw) = ERCCraw$V1
-#ERCCraw = ERCCraw[,2:ncol(ERCCraw)]
-#ERCCraw[1:5,1:5]
-```
-
 Define a directory where the output will be stored.
 
 ```{r}
@@ -104,9 +96,6 @@ obj = COTAN(raw = sample.dataset)
 obj = initializeMetaDataset(obj, GEO = "GSM2861514",
                             sequencingMethod = "Drop_seq",
                             sampleCondition = "mouse cortex E17.5")
-#obj = initializeMetaDataset(obj, GEO = "test",
- #                           sequencingMethod = "10X",
-#                            sampleCondition = "test_dataset")
 ```
 
 Now we can start the cleaning. Analysis requires and starts from a matrix of raw UMI counts after removing possible cell doublets or multiplets and low quality or dying cells.
@@ -280,7 +269,7 @@ COEX evaluation and storing
 obj <- calculateCoex(obj)
 ```
 
-```{r eval=FALSE, include=TRUE}
+```{r eval=TRUE, include=TRUE}
 # saving the structure
 saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
 ```
@@ -291,8 +280,10 @@ It is also possible to run directly a single function if we don't want to clean 
 
 ```{r eval=FALSE, include=TRUE}
 obj2 <- automaticCOTANObjectCreation(
-  raw = sampled.dataset,
-  GEO = "test", sequencingMethod = "10X", sampleCondition = "sampled.dataset",
+  raw = sample.dataset,
+  GEO = "GSM2861514",
+  sequencingMethod = "Drop_seq",
+  sampleCondition = "mouse cortex E17.5",
   saveObj = FALSE, outDir = outDir, cores = 10)
 ```
 
@@ -303,18 +294,11 @@ obj2 <- automaticCOTANObjectCreation(
 The next function can directly plot the GDI for the dataset with the 1.5 thresholds (in red) and the two higher quantiles (in blue). We can also define some gene sets (in this case three) that we want to specifically label in the GDI plot.
 
 ```{r}
-#AA <- sample(getGenes(obj), size = 5)
-#BB <- sample(getGenes(obj), size = 5)
-#CC <- sample(getGenes(obj), size = 5)
-
-#genes.list <- list("AA" = AA,"BB" = BB,"CC" = CC)
 genes.list <- list(
 "NPGs"=c("Nes","Vim","Sox2","Sox1","Notch1", "Hes1","Hes5","Pax6"),
 "PNGs"=c("Map2","Tubb3","Neurod1","Nefm","Nefl","Dcx","Tbr1"),
 "hk"=c("Calm1","Cox6b1","Ppia","Rpl18","Cox7c","Erh","H3f3a","Taf1","Taf2","Gapdh","Actb","Golph3",  "Zfr", "Sub1", "Tars", "Amacr")
 )
-
-
 
 # needs to be recalculated after the changes in nu/dispersion above
 #obj <- calculateCoex(obj, actOnCells = FALSE)
@@ -337,13 +321,6 @@ The percentage of cells expressing the gene in the third column of this datafram
 For the Gene Pair Analysis, we can plot a heatmap with the coex values between two gene sets. To do so we need to define, in a list, the different gene sets (list.genes). Then in the function parameter sets w,e can decide which sets need to be considered (in the example from 1 to 3). In the condition parameter we should insert an array with each file name prefix to be considered (in the example, the file name is "E17.5_cortex").
 
 ```{r}
-#AA <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
-#BB <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
-#CC <- sample(rownames(quant.p[quant.p$GDI > 2,]),size = 5)
-
-
-#list.genes = list("Ref.col"= BB, "AA"=AA, "Const."=CC )
-
 heatmapPlot(genesLists = genes.list, sets = c(1:3), conditions = t, dir = outDir)
 ```
 

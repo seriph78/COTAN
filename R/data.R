@@ -31,13 +31,3 @@
 "test.dataset.clusters1"
 "test.dataset.clusters2"
 
-#' sampled.dataset
-#'
-#' Data set sampled from the raw one selecting 5000 random cells and 2000 genes:
-#' half randomly and half randomly between the top differentially expressed
-#' genes (GDI score > than 2). This is a dataset sampled from GEO GSE121380
-#' Col1-6 after Seurat cleaning.
-#'
-#' @format A data frame.
-#'
-"sampled.dataset"

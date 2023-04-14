@@ -130,8 +130,9 @@ cleanPlots <- function(objCOTAN) {
   lowD <- D[["n"]] < minN
   genesPlot <-  ggplot(D, aes(x = n, y = means)) +
                 geom_point() +
-                ggtitle(label = "B cell group genes mean expression",
-                        subtitle = " - B group NOT removed -") +
+                ggtitle(label = "B cell group genes mean expression"
+                        #subtitle = " - B group NOT removed -"
+                        ) +
                 geom_label(data = subset(D, lowD),
                       aes(x = n, y = means, label = rownames(D)[lowD]),
                       #nudge_y = 0.05,
