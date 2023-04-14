@@ -767,7 +767,6 @@ setMethod(
 #'   usually without the `CL_` prefix
 #'
 #' @importFrom rlang is_empty
-#' @importFrom rlang rep_along
 #'
 #' @export
 #'
@@ -809,7 +808,7 @@ setMethod(
     clsCoex <- getClustersCoex(objCOTAN)
 
     if (isTRUE(dropNoCoex)) {
-      emptyClsCoex <- vapply(clsCoex, is_empty, rep_along(FALSE, clsCoex))
+      emptyClsCoex <- vapply(clsCoex, is_empty, rep_len(FALSE, length(clsCoex)))
       out <- names(clsCoex[!emptyClsCoex])
     } else {
       out <- names(clsCoex)

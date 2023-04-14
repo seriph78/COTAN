@@ -307,7 +307,6 @@ genesHeatmapPlot <-
 #' @export
 #'
 #' @importFrom rlang is_empty
-#' @importFrom rlang rep_along
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -333,7 +332,8 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
 
     # size of each cluster
     clustersList <- toClustersList(clusters)
-    clustersSize <- vapply(clustersList, length, rep_along(0L, clustersList))
+    clustersSize <- vapply(clustersList, length,
+                           rep_len(0L, length(clustersList)))
 
     # cell names grouped by the identifier of the cluster to which they belong
     cellNames <- unlist(clustersList)
