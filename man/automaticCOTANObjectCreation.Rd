@@ -51,12 +51,12 @@ These functions take (or create) a \code{COTAN} object and run all
 the necessary steps until the genes' \code{COEX} matrix is calculated.
 
 takes a newly created \code{COTAN} object (or the result of a call to
-dropGenesCells()]) and applies all steps until the genes' \code{COEX} matrix is
+\code{\link[=dropGenesCells]{dropGenesCells()}}) and applies all steps until the genes' \code{COEX} matrix is
 stored in the object
 }
 \details{
 \code{proceedToCoex()} takes a newly created \code{COTAN} object (or the
-result of a call to dropGenesCells()]) and runs \code{\link[=calculateCOEX]{calculateCOEX()}}
+result of a call to \code{dropGenesCells()}) and runs \code{\link[=calculateCOEX]{calculateCOEX()}}
 
 \code{automaticCOTANObjectCreation()} takes a raw dataset, creates and
 initializes a \code{COTAN} objects and runs proceedToCoex()

@@ -47,7 +47,7 @@
 #'
 genesCoexSpace <-
   function(objCOTAN, primaryMarkers, numGenesPerMarker = 25L) {
-  # da sistemare: output tanh of reduced coex matrix
+  # TODO: output tanh of reduced coex matrix
   logThis("Calculating gene coexpression space - START", logLevel = 2L)
 
   {

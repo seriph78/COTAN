@@ -5,11 +5,11 @@
 #'   the necessary steps until the genes' `COEX` matrix is calculated.
 #'
 #'   takes a newly created `COTAN` object (or the result of a call to
-#'   dropGenesCells()]) and applies all steps until the genes' `COEX` matrix is
+#'   [dropGenesCells()]) and applies all steps until the genes' `COEX` matrix is
 #'   stored in the object
 #'
 #' @details `proceedToCoex()` takes a newly created `COTAN` object (or the
-#'   result of a call to dropGenesCells()]) and runs [calculateCOEX()]
+#'   result of a call to `dropGenesCells()`) and runs [calculateCOEX()]
 #'
 #' @param objCOTAN a newly created `COTAN` object
 #' @param cores number of cores to be used

@@ -299,8 +299,8 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName the name of an existing clusterization
-#' @param coexDF a `data.frame` where each column indicates the coex for all, or
-#'   just some of, the clusters of the clusterization
+#' @param coexDF a `data.frame` where each column indicates the `COEX` for all,
+#'   or just some of, the clusters of the clusterization
 #'
 #' @returns `addClusterizationCoex()` returns the updated `COTAN` object
 #'

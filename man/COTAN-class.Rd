@@ -21,7 +21,7 @@ number)}
 
 \item{\code{metaCells}}{\code{data.frame}}
 
-\item{\code{clustersCoex}}{a \code{list} of coex \code{data.frames} for each clustering in the
+\item{\code{clustersCoex}}{a \code{list} of \code{COEX} \code{data.frames} for each clustering in the
 metaCells}
 }}
 

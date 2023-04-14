@@ -233,7 +233,7 @@ observedContingencyTables <- function(objCOTAN,
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use [Rfast]
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
 #'   parallel algorithms that on the flip side use more memory
 #'
 #' @returns `expectedContingencyTablesNN()` returns a `list` with the *No/No*
@@ -317,7 +317,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use [Rfast]
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
 #'   parallel algorithms that on the flip side use more memory
 #'
 #' @return `expectedContingencyTables()` returns the expected contingency tables
@@ -500,7 +500,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 
 # --------------- COEX and GDI -----------
 
-#' @details `calculateCoex()` estimates and stores the *coex* matrix in the
+#' @details `calculateCoex()` estimates and stores the `COEX` matrix in the
 #'   `cellCoex` or `genesCoex` field depending on given `actOnCells` flag. It
 #'   also calculates the percentage of *problematic* genes/cells pairs. A pair
 #'   is *problematic* when one or more of the expected counts were significantly
@@ -510,7 +510,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 #' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use [Rfast]
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
 #'   parallel algorithms that on the flip side use more memory
 #'
 #' @returns `calculateCoex()` returns the updated `COTAN` object

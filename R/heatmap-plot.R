@@ -332,8 +332,7 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
 
     # size of each cluster
     clustersList <- toClustersList(clusters)
-    clustersSize <- vapply(clustersList, length,
-                           rep_len(0L, length(clustersList)))
+    clustersSize <- vapply(clustersList, length, integer(1))
 
     # cell names grouped by the identifier of the cluster to which they belong
     cellNames <- unlist(clustersList)

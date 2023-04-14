@@ -808,7 +808,7 @@ setMethod(
     clsCoex <- getClustersCoex(objCOTAN)
 
     if (isTRUE(dropNoCoex)) {
-      emptyClsCoex <- vapply(clsCoex, is_empty, rep_len(FALSE, length(clsCoex)))
+      emptyClsCoex <- vapply(clsCoex, is_empty, logical(1))
       out <- names(clsCoex[!emptyClsCoex])
     } else {
       out <- names(clsCoex)

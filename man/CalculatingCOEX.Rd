@@ -111,7 +111,7 @@ otherwise for the genes}
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
 
-\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \link{Rfast}
+\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \code{Rfast}
 parallel algorithms that on the flip side use more memory}
 
 \item{g1}{a gene}
@@ -236,7 +236,7 @@ algorithms used to calculate the full observed/expected contingency tables,
 but restricted to only the relevant genes and thus much faster and less
 memory intensive
 
-\code{calculateCoex()} estimates and stores the \emph{coex} matrix in the
+\code{calculateCoex()} estimates and stores the \code{COEX} matrix in the
 \code{cellCoex} or \code{genesCoex} field depending on given \code{actOnCells} flag. It
 also calculates the percentage of \emph{problematic} genes/cells pairs. A pair
 is \emph{problematic} when one or more of the expected counts were significantly

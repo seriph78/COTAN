@@ -61,7 +61,7 @@ findClustersMarkers <- function(
                   rownames(pValueDF) == rownames(coexDF) &
                   getGenes(objCOTAN) == rownames(coexDF)),
               msg = paste("Inconsistent data-frames passed in",
-                          "for `coex`, `p-value` or `delta expression`"))
+                          "for 'coex', 'p-value' or 'delta expression'"))
 
   retDF <- as.data.frame(matrix(data = NA, nrow = 0L, ncol = 7L))
   colnames(retDF) <- c("CL", "Gene", "Score", "pVal",

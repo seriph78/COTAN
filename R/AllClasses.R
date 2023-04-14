@@ -37,7 +37,7 @@ emptySymmetricMatrix <- function() {
 #' @slot cellsCoex `dspMatrix` - the correlation of `COTAN` between cells, 𝑚×𝑚
 #' @slot metaDataset `data.frame`
 #' @slot metaCells `data.frame`
-#' @slot clustersCoex a `list` of coex `data.frames` for each clustering in the
+#' @slot clustersCoex a `list` of `COEX` `data.frames` for each clustering in the
 #'   metaCells
 #'
 #' @importFrom rlang is_empty
