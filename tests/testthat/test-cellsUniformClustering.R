@@ -37,6 +37,33 @@ test_that("Cell Uniform Clustering", {
 
   #expect_equal(clusters, clusters)
 
+  clMarkersDF <- findClustersMarkers(obj)
+
+  expect_equal(colnames(clMarkersDF), c("CL", "Gene", "Score", "pVal",
+                                        "adjPVal", "DEA", "IsMarker"))
+  expect_equal(nrow(clMarkersDF), 10L * 2L * length(unique(clusters)))
+  expect_type(clMarkersDF[["Gene"]],     "character")
+  expect_type(clMarkersDF[["IsMarker"]], "integer")
+  expect_equal(sum(clMarkersDF[["IsMarker"]]), 0)
+
+  topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6))
+  highPos <- c(1:80) %in% c(1:10, 31:40, 51:70)
+  expect_gt(min(topGenesNum[ highPos]), 480)
+  expect_lt(max(topGenesNum[!highPos]), 241)
+
+  primaryMarkers <-
+    c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",
+      "g-000510", "g-000530", "g-000550", "g-000570", "g-000590")
+  clMarkersDF2 <- findClustersMarkers(obj, markers = primaryMarkers)
+
+  expect_equal(colnames(clMarkersDF2), colnames(clMarkersDF))
+  expect_equal(clMarkersDF2[, -7], clMarkersDF[, -7])
+  expect_gt(sum(clMarkersDF2[["IsMarker"]]), 0)
+
+  clMarkersDF3 <- findClustersMarkers(obj, clusters = clusters)
+
+  expect_equal(clMarkersDF3, clMarkersDF)
+
   ####################################
 
   # Test the low GDI (homogeneity) for each defined clusters

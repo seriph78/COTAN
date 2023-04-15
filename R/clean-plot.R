@@ -26,6 +26,8 @@
 #' @importFrom Matrix rowMeans
 #' @importFrom Matrix colMeans
 #'
+#' @importFrom irlba prcomp_irlba
+#'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 geom_tile
@@ -54,7 +56,7 @@ cleanPlots <- function(objCOTAN) {
 
   rawNorm <- getNormalizedData(objCOTAN)
 
-  pcaCells <- irlba::prcomp_irlba(t(rawNorm), n = 5L)[["x"]]
+  pcaCells <- prcomp_irlba(t(rawNorm), n = 5L)[["x"]]
   rownames(pcaCells) <- getCells(objCOTAN)
 
   distCells <- stats::dist(scale(pcaCells), method = "euclidean") # mhalanobis

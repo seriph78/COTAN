@@ -8,6 +8,7 @@ data\E17*
 vignettes/.gitignore
 ..Rcheck
 .git
+.lintr
 .Rproj.user/*
 COTAN/.Rproj.user/shared/notebooks/*
 ^data-raw$
