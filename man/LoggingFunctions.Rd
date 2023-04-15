@@ -56,7 +56,7 @@ all \code{\link[=logThis]{logThis()}} commands, independently from the log level
 \code{logThis()} prints the given message string if the current log level
 is greater or equal to the given log level (it always prints its message on
 file if active). It uses \code{\link[=message]{message()}} to actually print the messages on the
-\code{\link[=strerr]{strerr()}} connection, so it is subject to \code{\link[=suppressMessages]{suppressMessages()}}
+\code{\link[=stderr]{stderr()}} connection, so it is subject to \code{\link[=suppressMessages]{suppressMessages()}}
 }
 \examples{
 setLoggingLevel(3) # for debugging purposes only

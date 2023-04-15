@@ -79,7 +79,7 @@ setLoggingFile <- function(logFileName) {
 #' @details `logThis()` prints the given message string if the current log level
 #'   is greater or equal to the given log level (it always prints its message on
 #'   file if active). It uses [message()] to actually print the messages on the
-#'   [strerr()] connection, so it is subject to [suppressMessages()]
+#'   [stderr()] connection, so it is subject to [suppressMessages()]
 #'
 #' @param msg the message to print
 #' @param logLevel the logging level of the current message. It defaults to 2
