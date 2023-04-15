@@ -7,8 +7,8 @@ data\E17*
 .gitignore
 vignettes/.gitignore
 ..Rcheck
-.Rproj.user/*
 .git
+.Rproj.user/*
 COTAN/.Rproj.user/shared/notebooks/*
 ^data-raw$
 COTAN.Rproj

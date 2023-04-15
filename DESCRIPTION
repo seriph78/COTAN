@@ -1,13 +1,17 @@
 Package: COTAN
 Type: Package
 Title: COexpression Tables ANalysis 
-Version: 1.3.0
+Version: 2.0.0
 Authors@R: c(
-  person("Galfrè", "Silvia Giulia",email = "silvia.galfre@uniroma1.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
+  person("Galfrè", "Silvia Giulia",email = "silvia.galfre@di.unipi.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
   person("Morandin","Francesco", email = "francesco.morandin@unipr.it", role = "aut",comment = c(ORCID = "0000-0002-2022-2300")),
+  person("Fantozzi", "Marco", email = "marco.fantozzi@gmail.com", role = "aut", comment = c(ORCID = "0000-0002-0708-5495")),
   person("Pietrosanto","Marco", role = "aut",comment = c(ORCID = "0000-0001-5129-6065")),
+  person("Puttini","Daniel", role = "aut", comment = c(ORCID = "0009-0006-8401-9949")),
+  person("Priami","Corrado", role = "aut", comment = c(ORCID = "0000-0002-3261-6235")),
   person("Cremisi","Federico", role = "aut",comment = c(ORCID = "0000-0003-4925-2703")),
-  person("Helmer-Citterich","Manuela", role = "aut",comment = c(ORCID = "0000-0001-9530-7504")))
+  person("Helmer-Citterich","Manuela", role = "aut",comment = c(ORCID = "0000-0001-9530-7504"))
+  )
 Description: Statistical and computational method to analyze the co-expression of 
     gene pairs at single cell level. It provides the foundation for single-cell gene 
     interactome analysis. The basic idea is studying the zero UMI counts' distribution 
@@ -21,19 +25,24 @@ Description: Statistical and computational method to analyze the co-expression o
     of gene interactions and becoming a new tool to identify cell-identity marker genes.
 URL: https://github.com/seriph78/COTAN
 BugReports: https://github.com/seriph78/COTAN/issues
-Depends: R (>= 4.1)
+Depends: R (>= 4.2)
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
+Roxygen: list(markdown = TRUE)
 Imports:
+    stats,
+    plyr,
     dplyr,
     methods,
     grDevices,
     Matrix,
     ggplot2,
     ggrepel,
-    stats,
+    ggthemes,
+    graphics,
     parallel,
+    parallelly,
     tibble,
     tidyr,
     irlba,
@@ -41,25 +50,34 @@ Imports:
     circlize,
     grid,
     scales,
+    RColorBrewer,
     utils,
     rlang,
-    Rfast
+    Rfast,
+    stringr,
+    Seurat,
+    factoextra,
+    dendextend,
+    zeallot,
+    assertthat,
+    withr
 Suggests: 
     testthat (>= 3.0.0),
+    proto,
     spelling,
     knitr,
     data.table,
+    gsubfn,
     R.utils,
     tidyverse,
     rmarkdown,
     htmlwidgets,
     MASS,
-    factoextra,
     Rtsne,
     plotly,
-    dendextend,
     BiocStyle,
-    cowplot
+    cowplot,
+    qpdf
 Config/testthat/edition: 3
 Language: en-US
 biocViews: 

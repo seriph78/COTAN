@@ -1,0 +1,357 @@
+---
+title: "Guided tutorial as V.1"
+author: 
+- name: "Silvia Giulia Galfrè"
+  affiliation: "Department of Computer Science, University of Pisa"
+
+package: COTAN
+output: 
+    BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Guided tutorial as V.1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8} 
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 5,
+  fig.height = 5
+)
+
+```
+
+```{r message=FALSE, warning=FALSE}
+options(parallelly.fork.enable = TRUE)
+library(COTAN)
+library(data.table)
+library(Matrix)
+library(ggrepel)
+library(factoextra)
+library(Rtsne)
+library(utils)
+library(plotly)
+library(tidyverse)
+library(htmlwidgets)
+library(MASS)
+library(zeallot)
+library(grDevices)
+library(qpdf)
+```
+
+## Introduction
+
+This tutorial contains the same functionalities as the first release of COTAN tutorial but done using the new and updated functions.
+
+## Get the data-set
+
+Download the data-set for mouse cortex E17.5.
+
+```{r eval=TRUE, include=TRUE}
+dataDir = tempdir()
+if (!file.exists(file.path(dataDir, "E175_only_cortical_cells.txt.gz"))) {
+  download.file(paste0("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/",
+                       "GSM2861nnn/GSM2861514/suppl/",
+                       "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"),
+                file.path(dataDir, "/E175_only_cortical_cells.txt.gz"),
+                method = "wget", quiet = FALSE)
+sample.dataset <- read.csv(paste0(dataDir, "/E175_only_cortical_cells.txt.gz"),sep = "\t",row.names = 1)
+
+  }
+```
+
+Define a directory where the output will be stored.
+
+```{r}
+outDir <- tempdir()
+
+# Log-level 2 was chosen to showcase better how the package works
+# In normal usage a level of 0 or 1 is more appropriate 
+setLoggingLevel(2)
+
+setLoggingFile(file.path(outDir, "vignette.log"))
+```
+
+# Analytical pipeline
+
+Initialize the `COTAN` object with the row count table and the metadata for the experiment.
+
+```{r}
+#obj = COTAN(raw = sampled.dataset)
+obj = COTAN(raw = sample.dataset)
+obj = initializeMetaDataset(obj, GEO = "GSM2861514",
+                            sequencingMethod = "Drop_seq",
+                            sampleCondition = "mouse cortex E17.5")
+```
+
+Before we proceed to the analysis, we need to clean the data. The analysis will use a matrix of raw UMI counts as the input. To obtain this matrix, we have to remove any potential cell doublets or multiplets, as well as any low quality or dying cells
+
+## Data cleaning
+
+We can check the library size (UMI number) with an empirical cumulative distribution function
+
+```{r}
+ECDPlot(obj, yCut = 700)
+```
+
+```{r}
+cellSizePlot(obj)
+```
+
+```{r}
+genesSizePlot(obj)
+```
+
+```{r}
+mit <- mitochondrialPercentagePlot(obj,genePrefix = "^Mt")
+mit$plot
+```
+
+During the cleaning, every time we want to remove cells or genes we can use the `dropGenesCells()`function.
+
+To drop cells by cell library size:
+
+```{r}
+obj <- dropGenesCells(obj,cells = names(getCellsSize(obj)[getCellsSize(obj) > 6000]))
+
+```
+
+To drop cells by gene number:
+
+```{r}
+cellGeneNumber <- sort(colSums(as.data.frame(getRawData(obj) > 0)),
+                       decreasing = FALSE)
+to.drop <- names(cellGeneNumber[cellGeneNumber > 3000])
+obj <- dropGenesCells(obj,cells = to.drop)
+genesSizePlot(obj)
+```
+
+To drop cells by mitochondrial percentage:
+
+```{r}
+obj <- dropGenesCells(obj,cells = rownames(mit$sizes[mit$sizes$mit.percentage > 1.5,]))
+mit <- mitochondrialPercentagePlot(obj,genePrefix = "^Mt")
+mit$plot
+```
+
+If we do not want to consider the mitochondrial genes we can remove them before starting the analysis.
+
+```{r}
+genes_to_rem = getGenes(obj)[grep('^Mt', getGenes(obj))] 
+cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
+obj = dropGenesCells(obj, genes_to_rem, cells_to_rem)
+```
+
+We want also to define a prefix to identify the sample.
+
+```{r}
+t = "E17.5_cortex"
+#t = "test"
+
+logThis(paste0("Condition ", t), logLevel = 1)
+#--------------------------------------
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1)
+
+n_it = 1
+```
+
+The `clean()` function estimates all the parameters for the data. Therefore, we have to run it again every time we remove any genes or cells from the data.
+
+```{r}
+obj <- clean(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+
+pcaCellsPlot
+```
+
+```{r}
+genesPlot
+```
+
+We can observe here that the red cells are really enriched in hemoglobin genes so we prefer to remove them. They can be extracted from the `pcaCellsData` object and removed.
+
+```{r eval=TRUE, include=TRUE}
+to.drop <- rownames(pcaCellsData[pcaCellsData$groups == "B",])
+obj <- dropGenesCells(obj,cells = to.drop)
+ 
+obj <- clean(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+
+pcaCellsPlot
+```
+
+To color the PCA based on `nu` (so the cells' efficiency)
+
+```{r}
+UDEPlot
+```
+
+UDE (color) should not correlate with principal components! This is very important.
+
+The next part is used to remove the cells with efficiency too low.
+
+```{r}
+plot(nuPlot)
+```
+
+We can zoom on the smallest values and, if we detect a clear elbow, we can decide to remove the cells.
+
+```{r}
+nuDf = data.frame("nu"= sort(getNu(obj)), "n"=c(1:length(getNu(obj))))
+yset = 0.35#threshold to remove low UDE cells
+plot.ude <- ggplot(nuDf, aes(x = n, y = nu)) + 
+            geom_point(colour = "#8491B4B2", size = 1) + 
+            xlim(0, 400) +
+            ylim(0,   1) + 
+            geom_hline(yintercept = yset, linetype="dashed", color = "darkred") +
+            annotate(geom = "text", x = 200, y = 0.25, 
+                     label = paste("to remove cells with nu < ", yset), 
+                     color = "darkred", size = 4.5)
+
+plot.ude
+```
+
+We also save the defined threshold in the metadata and re-run the estimation
+
+```{r}
+obj <- addElementToMetaDataset(obj, "Threshold low UDE cells:", yset) 
+
+cellsToRemove = rownames(nuDf)[nuDf[["nu"]] < yset]
+obj <- dropGenesCells(obj, genes = c(), cells = cellsToRemove)
+```
+
+Repeat the estimation after the cells are removed
+
+```{r}
+obj <- clean(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+
+pcaCellsPlot
+```
+
+## COTAN analysis
+
+In this part, all the contingency tables are computed and used to get the statistics.
+
+```{r}
+obj = estimateDispersionBisection(obj, cores = 10)
+```
+
+COEX evaluation and storing
+
+```{r}
+obj <- calculateCoex(obj)
+```
+
+```{r eval=TRUE, include=TRUE}
+# saving the structure
+saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
+```
+
+## Automatic run
+
+It is also possible to run directly a single function if we don't want to clean anything.
+
+```{r eval=FALSE, include=TRUE}
+obj2 <- automaticCOTANObjectCreation(
+  raw = sample.dataset,
+  GEO = "GSM2861514",
+  sequencingMethod = "Drop_seq",
+  sampleCondition = "mouse cortex E17.5",
+  saveObj = FALSE, outDir = outDir, cores = 10)
+```
+
+# Analysis of the elaborated data
+
+## GDI
+
+To calculate the GDI we can run:
+
+```{r}
+quant.p = calculateGDI(obj)
+head(quant.p)
+```
+
+The next function can either plot the GDI for the dataset directly or use the precomputed dataframe. It marks a 1.5 threshold (in red) and the two highest quantiles (in blue) by default. We can also specify some gene sets (three in this case) that we want to label explicitly in the GDI plot.
+
+```{r}
+genes.list <- list(
+"NPGs"=c("Nes","Vim","Sox2","Sox1","Notch1", "Hes1","Hes5","Pax6"),
+"PNGs"=c("Map2","Tubb3","Neurod1","Nefm","Nefl","Dcx","Tbr1"),
+"hk"=c("Calm1","Cox6b1","Ppia","Rpl18","Cox7c","Erh","H3f3a","Taf1","Taf2","Gapdh","Actb","Golph3",  "Zfr", "Sub1", "Tars", "Amacr")
+)
+
+# needs to be recalculated after the changes in nu/dispersion above
+#obj <- calculateCoex(obj, actOnCells = FALSE)
+
+GDIPlot(obj, cond = t, genes = genes.list)
+```
+
+The percentage of cells expressing the gene in the third column of this data-frame is reported.
+
+## Heatmaps
+
+To perform the Gene Pair Analysis, we can plot a heatmap of the coex values between two gene sets. We have to define the different gene sets (`list.genes`) in a list. Then we can choose which sets to use in the function parameter sets (for example, from 1 to 3). We also have to provide an array of the file name prefixes for each condition (for example, \"E17.5_cortex\") in fact, this function can plot genes relationships across many different conditions to get a complete overview.
+
+```{r}
+print(t)
+```
+
+```{r}
+heatmapPlot(genesLists = genes.list, sets = c(1:3), conditions = t, dir = outDir)
+```
+
+We can also plot a general heatmap of coex values based on some markers like the following one.
+
+```{r}
+genesHeatmapPlot(obj, primaryMarkers = c("Satb2","Bcl11b","Vim","Hes1"),
+                 pValueThreshold = 0.001, symmetric = TRUE)
+```
+
+```{r}
+genesHeatmapPlot(obj, primaryMarkers = c("Satb2","Bcl11b","Fezf2"),
+                 secondaryMarkers = c("Gabra3", "Meg3","Cux1","Neurod6"),
+                 pValueThreshold = 0.001, symmetric = FALSE)
+```
+
+## Get data tables
+
+Sometimes we can also be interested in the numbers present directly in the contingency tables for two specific genes. To get them we can use two functions:
+
+`contingencyTables()` to produce the observed and expected data
+
+```{r}
+c(observedCT, expectedCT) %<-% contingencyTables(obj, g1 = "Satb2", g2 = "Bcl11b")
+print("Observed CT")
+observedCT
+print("Expected CT")
+expectedCT
+```
+
+Another useful function is `getGenesCoex()`. This can be used to extract the whole or a partial coex matrix from a `COTAN` object.
+
+```{r}
+# For the whole matrix
+coex <- getGenesCoex(obj, zeroDiagonal = FALSE)
+coex[1:5, 1:5]
+```
+
+```{r}
+# For a partial matrix
+coex <- getGenesCoex(obj, genes = c("Satb2","Bcl11b","Fezf2"))
+head(coex)
+```
+
+The next few lines are just to clean.
+
+```{r}
+if (file.exists(paste0(outDir, t, ".cotan.RDS"))) {
+  #Delete file if it exists
+  file.remove(paste0(outDir, t, ".cotan.RDS"))
+}
+unlink(paste0(outDir, "cleaning"), recursive = TRUE)
+
+sessionInfo()
+```

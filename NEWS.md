@@ -9,7 +9,7 @@ Release before the official release of Bioc 3.15. Main changes:
  
 ## COTAN 0.99.13
 
-After official release. PCA function changed to avoid basilisk and Pyhton.
+After official release. PCA function changed to avoid basilisk and Python.
  
  
 
