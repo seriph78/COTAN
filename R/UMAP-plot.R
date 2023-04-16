@@ -46,12 +46,12 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
   colors <- rep_len("none", nrow(df))
 
   # assign a different color to each list of elements
-  for (n in names(elements)) {
-    selec <- rownames(df) %in% elements[[n]]
+  for (nm in names(elements)) {
+    selec <- rownames(df) %in% elements[[nm]]
     if (any(selec)) {
-      colors[selec] <- paste0("NM_", n)
+      colors[selec] <- nm
     } else {
-      logThis(paste("UMAPPlot - none of the elements in group", n,
+      logThis(paste("UMAPPlot - none of the elements in group", nm,
                     "is present: will be ignored"), logLevel = 1L)
     }
   }
@@ -62,7 +62,7 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
   for (cl in unique(clusters)) {
     selec <- !labelled & clusters == cl
     if (any(selec)) {
-      colors[selec] <- paste0("CL_", cl)
+      colors[selec] <- cl
     } else {
       logThis(paste("UMAPPlot - none of the elements of the cluster", cl,
                     "is present: will be ignored"), logLevel = 1L)
@@ -81,8 +81,8 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
   myColours <- set_names(getColorsVector(length(allTypes)), allTypes)
 
   plot <- ggplot(subset(plotDF, (!labelled & !clustered))) +
-    geom_point(aes(x, y),
-               alpha = 0.3, color = "#8491B4B2", size = 1.5) +
+    geom_point(aes(x, y, colour = "#8491B4B2"),
+               size = 1.5, alpha = 0.3) +
     geom_point(data = subset(plotDF, clustered),
                aes(x, y, colour = colors),
                size = 1.5, alpha = 0.5) +
