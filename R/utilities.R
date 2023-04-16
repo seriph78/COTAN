@@ -884,17 +884,9 @@ cosineDissimilarity <- function(m) {
 
 #' plotTheme
 #'
-#' @description This function returns the appropriate theme for the selected
-#'   plot kind
-#'
-#' @details Supported kinds are:
-#' * `common`
-#' * `pca`
-#' * `genes`
-#' * `UDE`
-#' * `heatmap`
-#' * `GDI`
-#' * `size-plot`
+#' @details This function returns the appropriate theme for the selected
+#'   plot kind. Supported kinds are:  `common`, `pca`, `genes`, `UDE`,
+#'   `heatmap`, `GDI`, `UMAP`, `size-plot`.
 #'
 #' @seealso [ggplot2::theme()] and [ggplot2::ggplot()]
 #'
@@ -916,7 +908,7 @@ cosineDissimilarity <- function(m) {
 #' @examples
 #' theme <- plotTheme("pca")
 #'
-#' @rdname plotTheme
+#' @rdname HeatmapPlots
 #'
 plotTheme <- function(plotKind = "common", textSize = 14L) {
   myDarkBlue <- "#3C5488FF"
@@ -988,6 +980,17 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
                  legend.text = element_text(color = myDarkBlue,
                                             face = "italic"),
                  legend.position = "bottom"))
+  }
+
+  if (plotKind == "UMAP") {
+    return(basicTheme +
+             theme(legend.title = element_blank(),
+                   plot.title = element_text(size = ts + 2L,
+                                             face = "bold.italic",
+                                             color = myDarkBlue),
+                   legend.text = element_text(color = myDarkBlue,
+                                              face = "italic"),
+                   legend.position = "right"))
   }
 
   if (plotKind == "size-plot") {

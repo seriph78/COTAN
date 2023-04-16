@@ -67,8 +67,6 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
     GDIDf <- GDIDf[genesToKeep, ]
   }
 
-  qualColPals <- brewer.pal.info[brewer.pal.info[["category"]] == "qual", ]
-
   myColours <- set_names(getColorsVector(length(names(genes))), names(genes))
 
   labelledGenes <- GDIDf[["colors"]] != "none"

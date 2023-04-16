@@ -37,10 +37,10 @@
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12)
+#' objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
+#'
 #' markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
-#' GCS <- genesCoexSpace(objCOTAN,
-#'                       primaryMarkers = markers,
+#' GCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
 #'                       numGenesPerMarker = 15)
 #'
 #' @rdname GenesCoexSpace
