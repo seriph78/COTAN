@@ -6,7 +6,7 @@
 \alias{establishGenesClusters}
 \title{Local Differentiation Index}
 \usage{
-UMAPPlot(df, elements, cond = "")
+UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
 genesCoexSpace(objCOTAN, primaryMarkers, numGenesPerMarker = 25L)
 
@@ -21,9 +21,6 @@ establishGenesClusters(
 }
 \arguments{
 \item{df}{the \code{data.frame} to plot. It must have a row for each gene.}
-
-\item{cond}{a string corresponding to the condition/sample (it is used only
-for the title).}
 
 \item{objCOTAN}{a \code{COTAN} object}
 
@@ -46,6 +43,9 @@ also available)}
 
 \item{genes}{a named \code{list} of genes to label. Each array will have different
 color.}
+
+\item{cond}{a string corresponding to the condition/sample (it is used only
+for the title).}
 }
 \value{
 \code{genesUMAPPlot()} returns a \code{ggplot2} object
@@ -88,10 +88,10 @@ pool of gene markers, using the genes' \code{COEX} space
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-objCOTAN <- proceedToCoex(objCOTAN, cores = 12)
+objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
+
 markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
-GCS <- genesCoexSpace(objCOTAN,
-                      primaryMarkers = markers,
+GCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
                       numGenesPerMarker = 15)
 
 groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
