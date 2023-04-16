@@ -48,7 +48,7 @@ color.}
 for the title).}
 }
 \value{
-\code{genesUMAPPlot()} returns a \code{ggplot2} object
+\code{UMAPPlot()} returns a \code{ggplot2} object
 
 A \code{list} with:
 \itemize{
@@ -76,7 +76,7 @@ denote it as \emph{Local Differentiation Index} (LDI) relative to the selected
 subset.
 }
 \details{
-\code{genesUMAPPlot()} plots the given \code{data.frame} containing genes
+\code{UMAPPlot()} plots the given \code{data.frame} containing genes
 information related to cleusters after applying the UMAP transformation.
 
 \code{genesCoexSpace()} calculates genes groups based on the primary

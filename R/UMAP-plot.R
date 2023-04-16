@@ -1,4 +1,4 @@
-#' @details `genesUMAPPlot()` plots the given `data.frame` containing genes
+#' @details `UMAPPlot()` plots the given `data.frame` containing genes
 #'   information related to cleusters after applying the UMAP transformation.
 #'
 #' @param objCOTAN a `COTAN` object
@@ -8,7 +8,7 @@
 #' @param cond a string corresponding to the condition/sample (it is used only
 #'   for the title).
 #'
-#' @returns `genesUMAPPlot()` returns a `ggplot2` object
+#' @returns `UMAPPlot()` returns a `ggplot2` object
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
