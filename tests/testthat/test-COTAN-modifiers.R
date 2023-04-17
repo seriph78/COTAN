@@ -161,6 +161,9 @@ test_that("Managed clusterizations", {
   # no such clusterization
   expect_error(getClusterizationData(obj, clName = "Test"))
 
+  # empyt name clusterization
+  expect_error(addClusterization(obj, clName = "", clusters = rep(0, 20)))
+
   # already existing clusterization
   expect_error(addClusterization(obj, clName = "Test2", clusters = rep(0, 20)))
 

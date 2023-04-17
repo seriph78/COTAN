@@ -149,8 +149,15 @@ setGeneric(
 )
 
 setGeneric(
+  "getClusterizationName",
+  function(objCOTAN, clName = "", keepPrefix = FALSE) {
+    standardGeneric("getClusterizationName")
+  }
+)
+
+setGeneric(
   "getClusterizationData",
-  function(objCOTAN, clName = NULL) standardGeneric("getClusterizationData")
+  function(objCOTAN, clName = "") standardGeneric("getClusterizationData")
 )
 
 setGeneric(

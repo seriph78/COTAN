@@ -57,20 +57,6 @@
 #'
 clustersSummaryPlot <- function(objCOTAN, condition = NULL,
                                 clName = "", plotTitle = "") {
-  allClustNames <- getClusterizations(objCOTAN, keepPrefix = TRUE)
-
-  emptyName <- !(length(clName) && any(nzchar(clName)))
-  if (emptyName) {
-    # pick last clusterization
-    internalName <- allClustNames[length(allClustNames)]
-  } else {
-    internalName <- clName
-    if (!startsWith(internalName, "CL_")) {
-      internalName <- paste0("CL_", clName)
-    }
-    assert_that(internalName %in% allClustNames,
-                msg = "Given cluster name is not among stored clusterizations")
-  }
 
   metaCells <- getMetadataCells(objCOTAN)
 
@@ -83,6 +69,10 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
     emptyCond <- TRUE
     condition <- NULL
   }
+
+  # pick last available if none given
+  internalName <- getClusterizationName(objCOTAN, clName = clName,
+                                        keepPrefix = TRUE)
 
   df <- as.data.frame(table(metaCells[, c(internalName, condition),
                                       drop = FALSE]))
@@ -194,17 +184,11 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 #' @rdname HandlingClusterizations
 #'
 clustersTreePlot <- function(objCOTAN, kCuts,
-                             clName = NULL,
+                             clName = "",
                              distance = "cosine",
                              hclustMethod = "ward.D2") {
-
-  emptyName <- !(length(clName) && any(nzchar(clName)))
-  if (emptyName) {
-    clNames <- getClusterizations(objCOTAN)
-    clName <- clNames[length(clNames)]
-    rm(clNames)
-  }
-
+  # pick last if no name was given
+  clName <- getClusterizationName(objCOTAN, clName = clName)
   c(clusters, coexDF) %<-% getClusterizationData(objCOTAN, clName = clName)
 
   if (kCuts > length(unique(clusters))) {

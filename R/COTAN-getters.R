@@ -827,6 +827,55 @@ setMethod(
   }
 )
 
+#' @details `getClusterizationName()` normalizes the given *clusterization* name
+#'   or, if none were given, returns the name of last available *clusterization*
+#'   in the `COTAN` object. It can return the *clusterization* **internal name**
+#'   if needed
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param clName The name of the clusterization. If not given the last available
+#'   clusterization will be returned, as it is probably the most significant!
+#' @param keepPrefix When `TRUE` returns the internal name of the
+#'   clusterization: the one with the `CL_` prefix.
+#'
+#' @returns `getClusterizationName()` returns the normalised *clusterization*
+#'   name or `NULL` if no *clusterizations* are present
+#'
+#' @export
+#'
+#' @examples
+#' clName <- getClusterizationName(objCOTAN)
+#'
+#' @rdname HandlingClusterizations
+#'
+setMethod(
+  "getClusterizationName",
+  "COTAN",
+  function(objCOTAN, clName = "", keepPrefix = FALSE) {
+    allClustNames <- getClusterizations(objCOTAN, keepPrefix = TRUE)
+
+    emptyName <- !(length(clName) && any(nzchar(clName)))
+    if (emptyName) {
+      # pick last clusterization
+      outName <- allClustNames[length(allClustNames)]
+    } else {
+      outName <- clName
+      if (!startsWith(clName, "CL_")) {
+        outName <- paste0("CL_", clName)
+      }
+      assert_that(outName %in% allClustNames,
+                  msg = paste0("Given cluster name '", clName,
+                               "' is not among the stored clusterizations"))
+    }
+
+    # drop the internal 'CL_' prefix
+    if (isFALSE(keepPrefix)) {
+      outName <- substring(outName, 4L)
+    }
+
+    return(outName)
+  }
+)
 
 #' @details `getClusterizationData()` extracts the asked *clusterization* and
 #'   its associated `COEX` `data.frame` from the `COTAN` object
@@ -846,31 +895,21 @@ setMethod(
 #' @importFrom rlang set_names
 #'
 #' @examples
-#' clusterDataList <- getClusterizationData(objCOTAN,
-#'                                          clName = "first_clusterization")
+#' clusterDataList <- getClusterizationData(objCOTAN, clName = clName)
 #'
 #' @rdname HandlingClusterizations
 #'
 setMethod(
   "getClusterizationData",
   "COTAN",
-  function(objCOTAN, clName = NULL) {
-    if (is_empty(clName)) {
-      clName <-
-        getClusterizations(objCOTAN)[length(getClusterizations(objCOTAN))]
-    }
-    if (is_empty(clName)) {
-      stop("No clusterizations are present in the 'COTAN' object")
-    }
-    # clName can still be empty if no clusterization was store in the objCOTAN
-    internalName <- clName
-    if (!startsWith(internalName, "CL_")) {
-      internalName <- paste0("CL_", clName)
-    }
+  function(objCOTAN, clName = "") {
+    internalName <- getClusterizationName(objCOTAN, clName = clName,
+                                          keepPrefix = TRUE)
 
-    if (!internalName %in% getClusterizations(objCOTAN, keepPrefix = TRUE)) {
-      stop("Asked clusterization", clName, "not present in the 'COTAN' object")
-    }
+    # clName can still be empty if no clusterization was store in the objCOTAN
+    emptyName <- !(length(internalName) && any(nzchar(internalName)))
+    assert_that(!emptyName,
+                msg = "No clusterizations are present in the 'COTAN' object")
 
     clusters <- set_names(getMetadataCells(objCOTAN)[[internalName]],
                           getCells(objCOTAN))

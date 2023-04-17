@@ -4,6 +4,7 @@
 %   R/clustersSummaryPlot.R, R/findClustersMarkers.R, R/geneSetEnrichment.R
 \name{getClusterizations,COTAN-method}
 \alias{getClusterizations,COTAN-method}
+\alias{getClusterizationName,COTAN-method}
 \alias{getClusterizationData,COTAN-method}
 \alias{getClustersCoex,COTAN-method}
 \alias{addClusterization,COTAN-method}
@@ -20,7 +21,9 @@
 \usage{
 \S4method{getClusterizations}{COTAN}(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE)
 
-\S4method{getClusterizationData}{COTAN}(objCOTAN, clName = NULL)
+\S4method{getClusterizationName}{COTAN}(objCOTAN, clName = "", keepPrefix = FALSE)
+
+\S4method{getClusterizationData}{COTAN}(objCOTAN, clName = "")
 
 \S4method{getClustersCoex}{COTAN}(objCOTAN)
 
@@ -40,14 +43,14 @@ DEAOnClusters(objCOTAN, clusters = NULL)
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
-clustersDeltaExpression(objCOTAN, clusters = NULL)
+clustersDeltaExpression(objCOTAN, clusters = NULL, clName = "")
 
 clustersSummaryPlot(objCOTAN, condition = NULL, clName = "", plotTitle = "")
 
 clustersTreePlot(
   objCOTAN,
   kCuts,
-  clName = NULL,
+  clName = "",
   distance = "cosine",
   hclustMethod = "ward.D2"
 )
@@ -131,6 +134,9 @@ for the title).}
 \code{getClusterizations()} returns a vector of \emph{clusterization} names,
 usually without the \code{CL_} prefix
 
+\code{getClusterizationName()} returns the normalised \emph{clusterization}
+name or \code{NULL} if no \emph{clusterizations} are present
+
 \code{getClusterizationData()} returns a \code{list} with 2 elements:
 \itemize{
 \item "clusters" the named cluster labels array
@@ -200,6 +206,11 @@ The formulae for this \emph{In/Out} \code{COEX} are similar to those used in the
 \details{
 \code{getClusterizations()} extracts the list of the \emph{clusterizations}
 defined in the \code{COTAN} object.
+
+\code{getClusterizationName()} normalizes the given \emph{clusterization} name
+or, if none were given, returns the name of last available \emph{clusterization}
+in the \code{COTAN} object. It can return the \emph{clusterization} \strong{internal name}
+if needed
 
 \code{getClusterizationData()} extracts the asked \emph{clusterization} and
 its associated \code{COEX} \code{data.frame} from the \code{COTAN} object
@@ -293,8 +304,9 @@ enrichment <- geneSetEnrichment(clustersCoex = coexDF,
                                 groupMarkers = groupMarkers)
 
 
-clusterDataList <- getClusterizationData(objCOTAN,
-                                         clName = "first_clusterization")
+clName <- getClusterizationName(objCOTAN)
+
+clusterDataList <- getClusterizationData(objCOTAN, clName = clName)
 
 allClustersCoexDF <- getClustersCoex(objCOTAN)
 

@@ -266,6 +266,10 @@ setMethod(
       internalName <- paste0("CL_", clName)
     }
 
+    if (nchar(internalName) < 4L) {
+      stop("Given an empty name for the new clusterization.")
+    }
+
     if (!override && (internalName %in% colnames(getMetadataCells(objCOTAN)))) {
       stop("A clusterization with name '", clName, "' already exists.")
     }
@@ -318,14 +322,8 @@ setMethod(
            clName, "'.")
     }
 
-    internalName <- clName
-    if (!startsWith(internalName, "CL_")) {
-      internalName <- paste0("CL_", clName)
-    }
-
-    if (!internalName %in% names(getClustersCoex(objCOTAN))) {
-      stop("A clusterization with name '", clName, "' does not exists.")
-    }
+    internalName <- getClusterizationName(objCOTAN, clName = clName,
+                                          keepPrefix = TRUE)
 
     # this should not add any new elements to the list!
     objCOTAN@clustersCoex[[internalName]] <- coexDF
