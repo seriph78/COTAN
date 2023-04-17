@@ -1,12 +1,16 @@
+
 #' @details `UMAPPlot()` plots the given `data.frame` containing genes
 #'   information related to cleusters after applying the UMAP transformation.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param genes a named `list` of genes to label. Each array will have different
-#'   color.
-#' @param df the `data.frame` to plot. It must have a row for each gene.
-#' @param cond a string corresponding to the condition/sample (it is used only
-#'   for the title).
+#' @param df the `data.frame` to plot. It must have a row names containing the
+#'   given elements
+#' @param clusters The *clusterization* array. Must be aligned to the rows in
+#'   the `data.frame`.
+#' @param elements a named `list` of elements to label. Each array in the list
+#'   will have different color.
+#' @param title a string giving the plot title. Will default to UMAP Plot if not
+#'   specified
 #'
 #' @returns `UMAPPlot()` returns a `ggplot2` object
 #'

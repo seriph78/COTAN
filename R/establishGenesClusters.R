@@ -17,11 +17,12 @@
 #' @param numGenesPerMarker The number of genes correlated with the primary
 #'   markers that we want to consider. By default this is set to 25.
 #'
-#' @returns A `list` with:
-#'  * the `COEX` `data.frame`
-#'  * a named `list` that for each secondary marker, gives the `list` of primary
-#'    markers that selected for it
-#'  * a `data.frame` with the rank of each gene according to its *p-value*
+#' @returns `genesCoexSpace()` returns a `list` with:
+#'  * "SecondaryMarkers" a named `list` that for each secondary marker,
+#'    gives the `list` of primary markers that selected for it
+#'  * "GCS" the `COEX` `data.frame`
+#'  * "rankGenes" a `data.frame` with the rank of each gene according to its
+#'    *p-value*
 #'
 #' @export
 #'

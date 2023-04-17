@@ -90,7 +90,14 @@ to [\code{\link[=DEAOnCluster]{DEAOnCluster()}}]}
 \emph{clusterization} name. Otherwise the default behavior will avoid potential
 data losses}
 
-\item{df}{the \code{data.frame} to plot. It must have a row for each gene.}
+\item{df}{the \code{data.frame} to plot. It must have a row names containing the
+given elements}
+
+\item{elements}{a named \code{list} of elements to label. Each array in the list
+will have different color.}
+
+\item{title}{a string giving the plot title. Will default to UMAP Plot if not
+specified}
 
 \item{condition}{the name of a column in the \code{metaCells} \code{data.frame}
 containing the \emph{condition}. This allows to further separate the cells in
@@ -123,12 +130,6 @@ E.G. the result of a call to [\code{\link[=clustersDeltaExpression]{clustersDelt
 \item{clustersCoex}{the \code{COEX} \code{data.frame}}
 
 \item{groupMarkers}{a named \code{list} of arrays of genes}
-
-\item{genes}{a named \code{list} of genes to label. Each array will have different
-color.}
-
-\item{cond}{a string corresponding to the condition/sample (it is used only
-for the title).}
 }
 \value{
 \code{getClusterizations()} returns a vector of \emph{clusterization} names,

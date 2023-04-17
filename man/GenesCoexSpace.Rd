@@ -39,10 +39,11 @@ also available)}
 \value{
 A \code{list} with:
 \itemize{
-\item the \code{COEX} \code{data.frame}
-\item a named \code{list} that for each secondary marker, gives the \code{list} of primary
-markers that selected for it
-\item a \code{data.frame} with the rank of each gene according to its \emph{p-value}
+\item "SecondaryMarkers" a named \code{list} that for each secondary marker,
+gives the \code{list} of primary markers that selected for it
+\item "GCS" the \code{COEX} \code{data.frame}
+\item "rankGenes" a \code{data.frame} with the rank of each gene according to its
+\emph{p-value}
 }
 
 \code{establishGenesClusters()} a \code{list} of:
