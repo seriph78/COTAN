@@ -37,7 +37,7 @@ also available)}
 \code{\link[stats:hclust]{stats::hclust()}} function}
 }
 \value{
-A \code{list} with:
+\code{genesCoexSpace()} returns a \code{list} with:
 \itemize{
 \item "SecondaryMarkers" a named \code{list} that for each secondary marker,
 gives the \code{list} of primary markers that selected for it

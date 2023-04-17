@@ -666,7 +666,11 @@ setMethod(
   "getGenesCoex",
   "COTAN",
   function(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
-    if (!is_empty(objCOTAN@genesCoex) && isFALSE(ignoreSync) &&
+    if (is_empty(objCOTAN@genesCoex)) {
+      stop("Cannot return genes' coex as the matrix was never calculated")
+    }
+
+    if (isFALSE(ignoreSync) &&
         isFALSE(as.logical(getMetadataElement(objCOTAN,
                                               datasetTags()[["gsync"]])))) {
       stop("Cannot return genes' coex as the matrix is",
@@ -711,7 +715,11 @@ setMethod(
   "getCellsCoex",
   "COTAN",
   function(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
-    if (!is_empty(objCOTAN@cellsCoex) && isFALSE(ignoreSync) &&
+    if (is_empty(objCOTAN@cellsCoex)) {
+      stop("Cannot return cells' coex as the matrix was never calculated")
+    }
+
+    if (isFALSE(ignoreSync) &&
         isFALSE(as.logical(getMetadataElement(objCOTAN,
                                               datasetTags()[["csync"]])))) {
       stop("Cannot return cells' coex as the matrix is",

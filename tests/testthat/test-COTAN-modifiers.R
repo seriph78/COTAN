@@ -75,12 +75,12 @@ test_that("dropGenesCells", {
 
   obj <- dropGenesCoex(obj)
 
-  expect_true(is_empty(getGenesCoex(obj)))
+  expect_error(getGenesCoex(obj))
   expect_false(is_empty(getCellsCoex(obj)))
 
   obj <- dropCellsCoex(obj)
 
-  expect_true(is_empty(getCellsCoex(obj)))
+  expect_error(getCellsCoex(obj))
 
   obj <- dropGenesCells(obj, genes = LETTERS[8:9])
 
