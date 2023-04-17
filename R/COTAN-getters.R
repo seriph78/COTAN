@@ -634,9 +634,11 @@ setMethod(
 #' ## pValue <- calculatePValue(objCOTAN)
 #' GDI <- calculateGDI(objCOTAN)
 #'
-#' genes <- c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",
-#'            "g-000510", "g-000530", "g-000550", "g-000570", "g-000590")
-#' gdiPlot <- GDIPlot(objCOTAN, genes = genes, cond = "test")
+#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+#'                      G2 = c("g-000300", "g-000330"),
+#'                      G3 = c("g-000510", "g-000530", "g-000550",
+#'                             "g-000570", "g-000590"))
+#' gdiPlot <- GDIPlot(objCOTAN, genes = groupMarkers, cond = "test")
 #'
 #' ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
 #' ## matrix and derivatives, so it can be dropped it from the `COTAN` object
@@ -781,17 +783,19 @@ setMethod(
 #'
 #' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
 #'
+#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+#'                      G2 = c("g-000300", "g-000330"),
+#'                      G3 = c("g-000510", "g-000530", "g-000550",
+#'                             "g-000570", "g-000590"))
+#'
+#' umapPlot <- UMAPPlot(coexDF, clusters = NULL, elements = groupMarkers)
+#'
 #' objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
 #'                               clusters = clusters, coexDF = coexDF)
 #'
 #' ##objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
 #'
 #' clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
-#'
-#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-#'                      G2 = c("g-000300", "g-000330"),
-#'                      G3 = c("g-000510", "g-000530", "g-000550",
-#'                             "g-000570", "g-000590"))
 #'
 #' enrichment <- geneSetEnrichment(clustersCoex = coexDF,
 #'                                 groupMarkers = groupMarkers)

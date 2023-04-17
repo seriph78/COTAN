@@ -156,10 +156,9 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 
 
 
-#'
-#'
 #' @details `clustersTreePlot()` returns the `dendogram` plot where the given
-#'   *clusters* are placed on the base of their relative distance
+#'   *clusters* are placed on the base of their relative distance. Also if
+#'   needed calculates and stores the `DEA` of the relevant *clusterization*.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param kCuts the number of estimated *cluster* (this defines the high for the
@@ -172,8 +171,9 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
 #'
-#' @returns `clustersTreePlot()` returns a `ggplot2` object representing the
-#'   `dendrogram` plot
+#' @returns `clustersTreePlot()` returns a list with 2 objects:
+#'  * "dend" a `ggplot2` object representing the `dendrogram` plot
+#'  * "objCOTAN" the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
@@ -241,5 +241,5 @@ clustersTreePlot <- function(objCOTAN, kCuts,
   dend <- color_labels(dend, k = kCuts)
   dend <- set(dend = dend, "branches_lwd", 4L)
 
-  return(dend)
+  return(list("dend" = dend, "objCOTAN" = objCOTAN))
 }
