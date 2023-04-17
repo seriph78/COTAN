@@ -135,7 +135,7 @@ E.G. the result of a call to [\code{\link[=clustersDeltaExpression]{clustersDelt
 \code{getClusterizations()} returns a vector of \emph{clusterization} names,
 usually without the \code{CL_} prefix
 
-\code{getClusterizationName()} returns the normalised \emph{clusterization}
+\code{getClusterizationName()} returns the normalized \emph{clusterization}
 name or \code{NULL} if no \emph{clusterizations} are present
 
 \code{getClusterizationData()} returns a \code{list} with 2 elements:
@@ -237,7 +237,7 @@ analysis using the \code{COTAN} contingency tables on each \emph{cluster} in the
 given \emph{clusterization}
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
-information related to cleusters after applying the UMAP transformation.
+information related to clusters after applying the UMAP transformation.
 
 \code{clustersDeltaExpression()} estimates the change in genes'
 expression inside the \emph{cluster} compared to the average situation in the

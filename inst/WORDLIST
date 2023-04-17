@@ -10,6 +10,7 @@ ECD
 ECDPlot
 ERCC
 ExpGenes
+GCS
 GDI
 GDIPlot
 GSE
@@ -20,7 +21,9 @@ MeanUDE
 MedianUDE
 MetadataCells
 RNAseq
+SecondaryMarkers
 UDE
+UMAP
 UMI
 addClusterization
 addClusterizationCoex
@@ -50,6 +53,7 @@ coexpression
 contingencyTables
 cosineDissimilarity
 datasetTags
+dend
 dendogram
 devtools
 df
@@ -127,6 +131,7 @@ mitochondrialPercentagePlot
 mtRNA
 multiplets
 numerosity
+objCOTAN
 observedContingencyTables
 observedContingencyTablesYY
 observedNN
@@ -139,7 +144,9 @@ pca
 pcaCells
 pcaCellsData
 plotTheme
+pre
 proceedToCoex
+rankGenes
 sc
 scCOTAN
 scatterPlot

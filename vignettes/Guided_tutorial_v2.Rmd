@@ -1,0 +1,191 @@
+---
+title: "Guided tutorial as V.1"
+author: 
+- name: "Silvia Giulia Galfrè"
+  affiliation: "Department of Computer Science, University of Pisa"
+- name: "Marco Fantozzi"
+  
+package: COTAN
+output: 
+    BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Guided tutorial as V.2}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8} 
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 5,
+  fig.height = 5
+)
+```
+
+```{r message=FALSE, warning=FALSE}
+options(parallelly.fork.enable = TRUE)
+library(COTAN)
+library(data.table)
+library(Matrix)
+library(ggrepel)
+library(factoextra)
+library(Rtsne)
+library(utils)
+library(plotly)
+library(tidyverse)
+library(htmlwidgets)
+library(MASS)
+library(zeallot)
+library(grDevices)
+library(qpdf)
+```
+
+## Introduction
+
+This tutorial contains the same functionalities as the first release of COTAN
+tutorial but done using the new and updated functions.
+
+## Get the data-set
+
+Download the data-set for mouse cortex E17.5.
+
+```{r eval=TRUE, include=TRUE}
+dataDir <- tempdir()
+
+dataSetFile <- file.path(dataDir, "E175_only_cortical_cells.txt.gz")
+if (!file.exists(dataSetFile)) {
+  download.file(paste0("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/",
+                       "GSM2861nnn/GSM2861514/suppl/",
+                       "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"),
+                dataSetFile, method = "wget", quiet = FALSE)
+  sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
+}
+```
+
+Define a directory where the output will be stored.
+
+```{r}
+outDir <- tempdir()
+
+# Log-level 2 was chosen to better showcase how the package works
+# In normal usage a level of 0 or 1 is more appropriate 
+setLoggingLevel(2)
+
+# This file will contain all the logs produced by the package
+# as if at the highest logging level
+setLoggingFile(file.path(outDir, "vignette_v2.log"))
+```
+
+# Analytical pipeline
+
+Initialize the `COTAN` object with the row count table and
+the metadata for the experiment.
+
+```{r}
+#obj = COTAN(raw = sampled.dataset)
+obj = COTAN(raw = sample.dataset)
+obj = initializeMetaDataset(obj, GEO = "GSM2861514",
+                            sequencingMethod = "Drop_seq",
+                            sampleCondition = "mouse cortex E17.5")
+```
+
+Before we proceed to the analysis, we need to clean the data.
+The analysis will follow the steps outlined in the `Guided_tutorial_v1`,
+here are just the final steps to prepare the data-set.
+
+## Data cleaning
+
+```{r}
+cells_to_rem <- getCells(obj)[getCellsSize(obj) > 6000]
+obj <- dropGenesCells(obj, cells = cells_to_rem)
+
+cellGeneNumber <- sort(colSums(as.data.frame(getRawData(obj) > 0)),
+                       decreasing = FALSE)
+cells_to_rem <- names(cellGeneNumber)[cellGeneNumber > 3000]
+obj <- dropGenesCells(obj, cells = cells_to_rem)
+
+mit <- mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
+to_rem <- mit[["sizes"]][["mit.percentage"]] > 1.5
+cells_to_rem <- rownames(mit[["sizes"]])[to_rem]
+obj <- dropGenesCells(obj, cells = cells_to_rem)
+
+genes_to_rem = getGenes(obj)[grep('^Mt', getGenes(obj))] 
+cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
+obj = dropGenesCells(obj, genes_to_rem, cells_to_rem)
+
+obj <- clean(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+
+cells_to_rem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
+obj <- dropGenesCells(obj, cells = cells_to_rem)
+ 
+obj <- clean(obj)
+
+nuDf = data.frame("nu" = sort(getNu(obj)), "n" = seq_along(getNu(obj)))
+yset = 0.35 # the threshold to remove low UDE cells
+cells_to_rem = rownames(nuDf)[nuDf[["nu"]] < yset]
+obj <- dropGenesCells(obj, cells = cells_to_rem)
+
+obj <- clean(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+
+pcaCellsPlot
+```
+
+We want also to define a prefix to identify the sample.
+
+```{r}
+t = "E17.5_cortex"
+
+logThis(paste0("Condition ", t), logLevel = 1)
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1)
+```
+
+## COTAN analysis
+
+In this part, all the contingency tables are computed and used to get the statistics.
+
+```{r}
+obj = estimateDispersionBisection(obj, cores = 10)
+```
+
+COEX evaluation and storing
+
+```{r}
+obj <- calculateCoex(obj)
+```
+
+```{r eval=TRUE, include=TRUE}
+# saving the structure
+saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
+```
+
+
+```{r}
+genesList <- list(
+"NPGs"=c("Nes","Vim","Sox2","Sox1","Notch1", "Hes1","Hes5","Pax6"),
+"PNGs"=c("Map2","Tubb3","Neurod1","Nefm","Nefl","Dcx","Tbr1"),
+"hk"=c("Calm1","Cox6b1","Ppia","Rpl18","Cox7c","Erh","H3f3a","Taf1","Taf2",
+       "Gapdh","Actb","Golph3",  "Zfr", "Sub1", "Tars", "Amacr")
+)
+
+tmpList <- establishGenesClusters(obj, groupMarkers = genesList,
+                                  numGenesPerMarker = 25, kCuts = 12)
+
+# tmpList contains "g.space", "plot.eig", "pca_clusters", "tree_plot"
+plot(tmpList[["plot.eig"]])
+```
+
+```{r}
+plot(tmpList[["tree_plot"]])
+```
+
+```{r}
+pcaClustersDF <- tmpList[["pca_clusters"]]
+UMAPPlot(pcaClustersDF[, 1:10], 
+         clusters = pcaClustersDF[["hclust"]],
+         elements = genesList,
+         title = "Genes' clusters UMAP Plot")
+```
+

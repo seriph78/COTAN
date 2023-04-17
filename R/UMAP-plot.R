@@ -1,6 +1,6 @@
 
 #' @details `UMAPPlot()` plots the given `data.frame` containing genes
-#'   information related to cleusters after applying the UMAP transformation.
+#'   information related to clusters after applying the UMAP transformation.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param df the `data.frame` to plot. It must have a row names containing the

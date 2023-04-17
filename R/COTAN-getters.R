@@ -846,7 +846,7 @@ setMethod(
 #' @param keepPrefix When `TRUE` returns the internal name of the
 #'   clusterization: the one with the `CL_` prefix.
 #'
-#' @returns `getClusterizationName()` returns the normalised *clusterization*
+#' @returns `getClusterizationName()` returns the normalized *clusterization*
 #'   name or `NULL` if no *clusterizations* are present
 #'
 #' @export
