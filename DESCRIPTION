@@ -78,7 +78,8 @@ Suggests:
     plotly,
     BiocStyle,
     cowplot,
-    qpdf
+    qpdf,
+    GEOquery
 Config/testthat/edition: 3
 Language: en-US
 biocViews: 

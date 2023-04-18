@@ -39,12 +39,13 @@ library(MASS)
 library(zeallot)
 library(grDevices)
 library(qpdf)
+library(GEOquery)
 ```
 
 ## Introduction
 
-This tutorial contains the same functionalities as the first release of COTAN
-tutorial but done using the new and updated functions.
+This tutorial contains the new functionalities introduced in the second release
+of the COTAN package.
 
 ## Get the data-set
 
@@ -53,12 +54,12 @@ Download the data-set for mouse cortex E17.5.
 ```{r eval=TRUE, include=TRUE}
 dataDir <- tempdir()
 
-dataSetFile <- file.path(dataDir, "E175_only_cortical_cells.txt.gz")
+dataSetFile <- file.path(dataDir, "GSM2861514/GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
+
 if (!file.exists(dataSetFile)) {
-  download.file(paste0("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/",
-                       "GSM2861nnn/GSM2861514/suppl/",
-                       "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"),
-                dataSetFile, method = "wget", quiet = FALSE)
+  getGEOSuppFiles("GSM2861514", makeDirectory = TRUE,
+                  baseDir = dataDir, fetch_files = TRUE,
+                  filter_regex = "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
   sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 }
 ```
@@ -193,8 +194,8 @@ UMAPPlot(pcaClustersDF[, 1:10],
 
 It is possible to obtain a cell clusterization based on the concept of 
 uniformity of expression of the genes across the cells. That is the cluster
-satisfies the null hypothesys of the `COTAN` model:
-the genes expression is not depdendent on the cell in consideration.
+satisfies the null hypothesis of the `COTAN` model:
+the genes expression is not dependent on the cell in consideration.
 
 ```{r}
 fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.4, cores = 10,
@@ -236,3 +237,17 @@ mergedUMAPPlot <- UMAPPlot(mergedList[["coexDF"]],
 plot(mergedUMAPPlot)
 ```
 
+
+The next few lines are just to clean.
+
+```{r}
+if (file.exists(file.path(outDir, paste0(t, ".cotan.RDS")))) {
+  #Delete file if it exists
+  file.remove(file.path(outDir, paste0(t, ".cotan.RDS")))
+}
+unlink(file.path(outDir, getMetadataElement(obj, tag = datasetTags()[["cond"]])),
+       recursive = TRUE)
+file.remove(dataSetFile)
+
+sessionInfo()
+```

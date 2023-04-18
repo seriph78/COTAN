@@ -44,7 +44,8 @@ library(GEOquery)
 
 ## Introduction
 
-This tutorial contains the same functionalities as the first release of COTAN tutorial but done using the new and updated functions.
+This tutorial contains the same functionalities as the first release of the
+COTAN tutorial but done using the new and updated functions.
 
 ## Get the data-set
 
@@ -56,8 +57,9 @@ dataDir <- tempdir()
 dataSetFile <- file.path(dataDir, "GSM2861514/GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
 
 if (!file.exists(dataSetFile)) {
-getGEOSuppFiles("GSM2861514", makeDirectory = TRUE, baseDir = dataDir,
-  fetch_files = TRUE, filter_regex = "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
+  getGEOSuppFiles("GSM2861514", makeDirectory = TRUE,
+                  baseDir = dataDir, fetch_files = TRUE,
+                  filter_regex = "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
   sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 }
 ```
@@ -378,11 +380,12 @@ head(coex)
 The next few lines are just to clean.
 
 ```{r}
-if (file.exists(paste0(outDir, t, ".cotan.RDS"))) {
+if (file.exists(file.path(outDir, paste0(t, ".cotan.RDS")))) {
   #Delete file if it exists
-  file.remove(paste0(outDir, t, ".cotan.RDS"))
+  file.remove(file.path(outDir, paste0(t, ".cotan.RDS")))
 }
-unlink(paste0(outDir, "cleaning"), recursive = TRUE)
+unlink(file.path(outDir, "cleaning"), recursive = TRUE)
+file.remove(dataSetFile)
 
 sessionInfo()
 ```
