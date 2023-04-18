@@ -119,23 +119,23 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #'
 #' @description This group of functions takes in input a `COTAN` object and
 #'   handle the task of dividing the dataset into **Uniform Clusters**, that is
-#'   clusters that have an homogeneous genes' expression.
+#'   *clusters* that have an homogeneous genes' expression. This condition is
+#'   checked by calculating the `GDI` of the *cluster* and verifying that no
+#'   more than a small fraction of the genes have their `GDI` level above the
+#'   given `GDIThreshold`
 #'
-#' @description `cellsUniformClustering` finds a **Uniform** clusterizations by
-#'   means of the `GDI`
-#'
-#' @details In `cellsUniformClustering`, once a preliminary *clusterization* is
-#'   obtained from the `Seurat` package methods, each cluster is checked for
-#'   **uniformity** via the function [checkClusterUniformity()]. Once all
-#'   clusters are checked, all cells from the **non-uniform** clusters are
-#'   pooled together for another iteration of the entire process, until all
-#'   clusters are deemed **uniform**. In the case only a few cells are left out
-#'   (\eqn{\leq 50}), those are flagged as `"not_clustered"` and the process is
-#'   stopped.
+#' @details `cellsUniformClustering()` finds a **Uniform** *clusterizations* by
+#'   means of the `GDI`. Once a preliminary *clusterization* is obtained from
+#'   the `Seurat` package methods, each *cluster* is checked for **uniformity**
+#'   via the function [checkClusterUniformity()]. Once all *clusters* are
+#'   checked, all cells from the **non-uniform** clusters are pooled together
+#'   for another iteration of the entire process, until all *clusters* are
+#'   deemed **uniform**. In the case only a few cells are left out (\eqn{\leq
+#'   50}), those are flagged as `"not_clustered"` and the process is stopped.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param GDIThreshold the threshold level that discriminates uniform clusters.
-#'   It defaults to \eqn{1.5}
+#' @param GDIThreshold the threshold level that discriminates uniform
+#'   *clusters*. It defaults to \eqn{1.4}
 #' @param cores number of cores used
 #' @param maxIterations Max number of re-clustering iterations. It defaults to
 #'   \eqn{25}.
@@ -144,7 +144,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #'
-#' @returns `cellsUniformClustering` returns the newly found clusterization
+#' @returns `cellsUniformClustering()` returns the newly found *clusterization*
 #'
 #' @export
 #'
@@ -158,7 +158,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #' @rdname UniformClusters
 #'
 
-cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.5,
+cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                                    cores = 1L, maxIterations = 25L,
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)

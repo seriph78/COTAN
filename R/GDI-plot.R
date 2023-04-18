@@ -1,4 +1,6 @@
-#' @details `GDIPlot()` directly evaluates and plots the GDI for a sample.
+# --------------------- Uniform Clusters ----------------------
+
+#' @details `GDIPlot()` directly evaluates and plots the `GDI` for a sample.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param genes a named `list` of genes to label. Each array will have different
@@ -8,8 +10,8 @@
 #' @param statType type of statistic to be used. Default is "S": Pearson's
 #'   chi-squared test statistics. "G" is G-test statistics
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
-#'   It defaults to \eqn{1.5}
-#' @param GDIIn when the GDI data frame was already calculated, it can be put
+#'   It defaults to \eqn{1.4}
+#' @param GDIIn when the `GDI` data frame was already calculated, it can be put
 #'   here to speed up the process (default is `NULL`)
 #'
 #' @returns `GDIPlot()` returns a `ggplot2` object
@@ -35,10 +37,10 @@
 #'
 #' @export
 #'
-#' @rdname CalculatingCOEX
+#' @rdname UniformClusters
 #'
 GDIPlot <- function(objCOTAN, genes, cond = "",
-                    statType = "S", GDIThreshold = 1.5,
+                    statType = "S", GDIThreshold = 1.4,
                     GDIIn = NULL) {
   logThis("GDI plot", logLevel = 2L)
 

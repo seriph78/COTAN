@@ -1,18 +1,15 @@
-# --------------------- Uniform Clusters ----------------------
 
-#' @description `checkClusterUniformity` takes a `COTAN` object and a cells'
-#'   cluster and checks whether the latter is **uniform** by GDI.
-#'
-#' @details `checkClusterUniformity` runs `COTAN` to check whether the GDI is
-#'   lower than the given `GDIThreshold` for the \eqn{99\%} of the genes. If the
-#'   GDI results to be too high for too many genes, the cluster is deemed
-#'   **non-uniform**.
+#' @details `checkClusterUniformity()` takes a `COTAN` object and a cells'
+#'   *cluster* and checks whether the latter is **uniform** by `GDI`. The
+#'   function runs `COTAN` to check whether the `GDI` is lower than the given
+#'   `GDIThreshold` for the \eqn{99\%} of the genes. If the `GDI` results to be
+#'   too high for too many genes, the cluster is deemed **non-uniform**.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param cluster the tag of the cluster
 #' @param cells the cells in the cluster
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
-#'   It defaults to \eqn{1.5}
+#'   It defaults to \eqn{1.4}
 #' @param cores number of cores used
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file(s)
@@ -35,7 +32,7 @@
 #'
 
 checkClusterUniformity <- function(objCOTAN, cluster, cells,
-                                   GDIThreshold = 1.5, cores = 1L,
+                                   GDIThreshold = 1.4, cores = 1L,
                                    saveObj = TRUE, outDir = ".") {
 
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]

@@ -1,21 +1,19 @@
 
 # --------------------- Uniform Clusters ----------------------
 
-#' @description `mergeUniformCellsClusters` takes in a **uniform**
-#'   clusterization and iteratively checks whether merging two *near* clusters
-#'   would form a **uniform** cluster still.
-#'
-#' @details `mergeUniformCellsClusters` uses the *cosine distance* and the
-#'   [stats::hclust()] function to establish *near clusters pairs*. It will use
-#'   the [checkClusterUniformity()] function to check whether the merged
-#'   clusters are **uniform**. The function will stop once no *near pairs* of
-#'   clusters are mergeable.
+#' @details `mergeUniformCellsClusters()` takes in a **uniform**
+#'   *clusterization* and iteratively checks whether merging two *near clusters*
+#'   would form a **uniform** *cluster* still. This function uses the *cosine
+#'   distance* and the [stats::hclust()] function to establish *near clusters
+#'   pairs*. It will use the [checkClusterUniformity()] function to check
+#'   whether the merged *clusters* are **uniform**. The function will stop once no
+#'   *near pairs* of clusters are mergeable.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clusters The clusterization to merge. If not given the last available
 #'   clusterization will be used, as it is probably the most significant!
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
-#'   It defaults to \eqn{1.5}
+#'   It defaults to \eqn{1.4}
 #' @param cores number cores used
 #' @param distance type of distance to use. It defaults to `"cosine"`, but
 #'   `"euclidean"` is also available)
@@ -54,6 +52,12 @@
 #'                                          cores = 12,
 #'                                          saveObj = FALSE)
 #'
+#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+#'                      G2 = c("g-000300", "g-000330"),
+#'                      G3 = c("g-000510", "g-000530", "g-000550",
+#'                             "g-000570", "g-000590"))
+#' gdiPlot <- GDIPlot(objCOTAN, genes = groupMarkers, cond = "test")
+#'
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
 #'                                    saveObj = FALSE)
 #'
@@ -82,7 +86,7 @@
 
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
-                                      GDIThreshold = 1.5,
+                                      GDIThreshold = 1.4,
                                       cores = 1L,
                                       distance = "cosine",
                                       hclustMethod = "ward.D2",

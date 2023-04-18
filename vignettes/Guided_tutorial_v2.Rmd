@@ -26,18 +26,10 @@ knitr::opts_chunk$set(
 ```{r message=FALSE, warning=FALSE}
 options(parallelly.fork.enable = TRUE)
 library(COTAN)
+library(zeallot)
 library(data.table)
-library(Matrix)
-library(ggrepel)
 library(factoextra)
 library(Rtsne)
-library(utils)
-library(plotly)
-library(tidyverse)
-library(htmlwidgets)
-library(MASS)
-library(zeallot)
-library(grDevices)
 library(qpdf)
 library(GEOquery)
 ```
@@ -171,19 +163,19 @@ genesList <- list(
        "Gapdh","Actb","Golph3",  "Zfr", "Sub1", "Tars", "Amacr")
 )
 
-tmpList <- establishGenesClusters(obj, groupMarkers = genesList,
-                                  numGenesPerMarker = 25, kCuts = 12)
+c(gSpace, eigPlot, pcaClustersDF, treePlot) %<-%
+  establishGenesClusters(obj, groupMarkers = genesList,
+                         numGenesPerMarker = 25, kCuts = 12)
 
 # tmpList contains "g.space", "plot.eig", "pca_clusters", "tree_plot"
-plot(tmpList[["plot.eig"]])
+plot(eigPlot)
 ```
 
 ```{r}
-plot(tmpList[["tree_plot"]])
+plot(treePlot)
 ```
 
 ```{r}
-pcaClustersDF <- tmpList[["pca_clusters"]]
 UMAPPlot(pcaClustersDF[, 1:10], 
          clusters = pcaClustersDF[["hclust"]],
          elements = genesList,
@@ -206,33 +198,32 @@ obj <- addClusterization(obj, clName = "FineClusters", clusters = fineClusters)
 
 
 ```{r}
-deaDfs <- DEAOnClusters(obj, clusters = fineClusters)
+c(coexDF, pValueDF) %<-% DEAOnClusters(obj, clusters = fineClusters)
 
 obj <- addClusterizationCoex(obj, clName = "FineClusters",
-                             coexDF = deaDfs[["coex"]])
+                             coexDF = coexDF)
 ```
 
 
 ```{r}
-fineUMAPPlot <- UMAPPlot(deaDfs[["coex"]], title = "Fine Cluster UMAP Plot")
+fineUMAPPlot <- UMAPPlot(coexDF, title = "Fine Cluster UMAP Plot")
 
 plot(fineUMAPPlot)
 ```
 
 
 ```{r}
-mergedList <- mergeUniformCellsClusters(obj, GDIThreshold = 1.4, cores = 10,
-                                        saveObj = TRUE, outDir = outDir)
+c(mergedClusters, coexDF, pValueDF) %<-%
+  mergeUniformCellsClusters(obj, GDIThreshold = 1.4, cores = 10,
+                            saveObj = TRUE, outDir = outDir)
 
 obj <- addClusterization(obj, clName = "MergedClusters",
-                         clusters = mergedList[["clusters"]],
-                         coexDF = mergedList[["coexDF"]])
+                         clusters = mergedClusters, coexDF = coexDF)
 ```
 
 
 ```{r}
-mergedUMAPPlot <- UMAPPlot(mergedList[["coexDF"]],
-                           title = "Fine Cluster UMAP Plot")
+mergedUMAPPlot <- UMAPPlot(coexDF, title = "Fine Cluster UMAP Plot")
 
 plot(mergedUMAPPlot)
 ```
