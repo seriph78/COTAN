@@ -39,6 +39,7 @@ library(MASS)
 library(zeallot)
 library(grDevices)
 library(qpdf)
+library(GEOquery)
 ```
 
 ## Introduction
@@ -52,12 +53,11 @@ Download the data-set for mouse cortex E17.5.
 ```{r eval=TRUE, include=TRUE}
 dataDir <- tempdir()
 
-dataSetFile <- file.path(dataDir, "E175_only_cortical_cells.txt.gz")
+dataSetFile <- file.path(dataDir, "GSM2861514/GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
+
 if (!file.exists(dataSetFile)) {
-  download.file(paste0("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/",
-                       "GSM2861nnn/GSM2861514/suppl/",
-                       "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"),
-                dataSetFile, method = "wget", quiet = FALSE)
+getGEOSuppFiles("GSM2861514", makeDirectory = TRUE, baseDir = dataDir,
+  fetch_files = TRUE, filter_regex = "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
   sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 }
 ```
