@@ -426,8 +426,8 @@ groupByClusters <- function(clusters) {
 #'   \eqn{\mu = \infty}{`mu = Inf`}.
 #'   It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
 #'
-#' @param disp the estimated dispersion (can be a 𝑛-sized vector)
-#' @param mu the lambda times nu value  (can be a 𝑛×𝑚 matrix)
+#' @param disp the estimated dispersion (can be a \eqn{n}-sized vector)
+#' @param mu the lambda times nu value  (can be a \eqn{n \times m} matrix)
 #'
 #' @returns the probability (matrix) that a count is identically zero
 #'

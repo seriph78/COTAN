@@ -31,14 +31,16 @@ emptySymmetricMatrix <- function() {
 
 #' Definition of the `COTAN` class
 #'
-#' @slot raw `dgCMatrix` - the raw UMI count matrix 𝑛×𝑚 (gene number × cell
-#'   number)
-#' @slot genesCoex `dspMatrix` - the correlation of `COTAN` between genes, 𝑛×𝑛
-#' @slot cellsCoex `dspMatrix` - the correlation of `COTAN` between cells, 𝑚×𝑚
+#' @slot raw `dgCMatrix` - the raw UMI count matrix \eqn{n \times m} (gene
+#'   number × cell number)
+#' @slot genesCoex `dspMatrix` - the correlation of `COTAN` between genes,
+#'   \eqn{n \times n}
+#' @slot cellsCoex `dspMatrix` - the correlation of `COTAN` between cells,
+#'   \eqn{m \times m}
 #' @slot metaDataset `data.frame`
 #' @slot metaCells `data.frame`
-#' @slot clustersCoex a `list` of `COEX` `data.frames` for each clustering in the
-#'   metaCells
+#' @slot clustersCoex a `list` of `COEX` `data.frames` for each clustering in
+#'   the metaCells
 #'
 #' @importFrom rlang is_empty
 #'

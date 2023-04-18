@@ -10,18 +10,20 @@ Definition of the \code{COTAN} class
 \section{Slots}{
 
 \describe{
-\item{\code{raw}}{\code{dgCMatrix} - the raw UMI count matrix 𝑛×𝑚 (gene number × cell
-number)}
+\item{\code{raw}}{\code{dgCMatrix} - the raw UMI count matrix \eqn{n \times m} (gene
+number × cell number)}
 
-\item{\code{genesCoex}}{\code{dspMatrix} - the correlation of \code{COTAN} between genes, 𝑛×𝑛}
+\item{\code{genesCoex}}{\code{dspMatrix} - the correlation of \code{COTAN} between genes,
+\eqn{n \times n}}
 
-\item{\code{cellsCoex}}{\code{dspMatrix} - the correlation of \code{COTAN} between cells, 𝑚×𝑚}
+\item{\code{cellsCoex}}{\code{dspMatrix} - the correlation of \code{COTAN} between cells,
+\eqn{m \times m}}
 
 \item{\code{metaDataset}}{\code{data.frame}}
 
 \item{\code{metaCells}}{\code{data.frame}}
 
-\item{\code{clustersCoex}}{a \code{list} of \code{COEX} \code{data.frames} for each clustering in the
-metaCells}
+\item{\code{clustersCoex}}{a \code{list} of \code{COEX} \code{data.frames} for each clustering in
+the metaCells}
 }}
 

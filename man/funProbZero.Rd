@@ -7,9 +7,9 @@
 funProbZero(disp, mu)
 }
 \arguments{
-\item{disp}{the estimated dispersion (can be a 𝑛-sized vector)}
+\item{disp}{the estimated dispersion (can be a \eqn{n}-sized vector)}
 
-\item{mu}{the lambda times nu value  (can be a 𝑛×𝑚 matrix)}
+\item{mu}{the lambda times nu value  (can be a \eqn{n \times m} matrix)}
 }
 \value{
 the probability (matrix) that a count is identically zero

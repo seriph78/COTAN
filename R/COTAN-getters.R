@@ -30,11 +30,11 @@ setMethod(
 )
 
 
-#' @details `getNumCells()` extracts the number of cells in the sample (𝑚)
+#' @details `getNumCells()` extracts the number of cells in the sample (\eqn{m})
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getNumCells()` returns the number of cells in the sample (𝑚).
+#' @returns `getNumCells()` returns the number of cells in the sample (\eqn{m})
 #'
 #' @export
 #'
@@ -51,11 +51,11 @@ setMethod(
   }
 )
 
-#' @details `getNumGenes()` extracts the number of genes in the sample (𝑛)
+#' @details `getNumGenes()` extracts the number of genes in the sample (\eqn{n})
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getNumGenes()` returns the number of genes in the sample (𝑛).
+#' @returns `getNumGenes()` returns the number of genes in the sample (\eqn{n})
 #'
 #' @export
 #'

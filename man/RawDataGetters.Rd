@@ -33,9 +33,9 @@
 \value{
 \code{getRawData()} returns the raw count sparse matrix
 
-\code{getNumCells()} returns the number of cells in the sample (𝑚).
+\code{getNumCells()} returns the number of cells in the sample (\eqn{m})
 
-\code{getNumGenes()} returns the number of genes in the sample (𝑛).
+\code{getNumGenes()} returns the number of genes in the sample (\eqn{n})
 
 \code{getCells()} returns a character array with the cells' names
 
@@ -55,9 +55,9 @@ object. The accessors have \strong{read-only} access to the object.
 \details{
 \code{getRawData()} extracts the raw count table.
 
-\code{getNumCells()} extracts the number of cells in the sample (𝑚)
+\code{getNumCells()} extracts the number of cells in the sample (\eqn{m})
 
-\code{getNumGenes()} extracts the number of genes in the sample (𝑛)
+\code{getNumGenes()} extracts the number of genes in the sample (\eqn{n})
 
 \code{getCells()} extract all cells in the dataset.
 
