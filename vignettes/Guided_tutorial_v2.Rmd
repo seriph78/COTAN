@@ -156,7 +156,7 @@ COEX evaluation and storing
 obj <- calculateCoex(obj)
 ```
 
-```{r eval=TRUE, include=TRUE}
+```{r eval=FALSE, include=TRUE}
 # saving the structure
 saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
 ```
@@ -187,5 +187,52 @@ UMAPPlot(pcaClustersDF[, 1:10],
          clusters = pcaClustersDF[["hclust"]],
          elements = genesList,
          title = "Genes' clusters UMAP Plot")
+```
+
+### Uniform Clustering
+
+It is possible to obtain a cell clusterization based on the concept of 
+uniformity of expression of the genes across the cells. That is the cluster
+satisfies the null hypothesys of the `COTAN` model:
+the genes expression is not depdendent on the cell in consideration.
+
+```{r}
+fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.4, cores = 10,
+                                       saveObj = TRUE, outDir = outDir)
+
+obj <- addClusterization(obj, clName = "FineClusters", clusters = fineClusters)
+```
+
+
+```{r}
+deaDfs <- DEAOnClusters(obj, clusters = fineClusters)
+
+obj <- addClusterizationCoex(obj, clName = "FineClusters",
+                             coexDF = deaDfs[["coex"]])
+```
+
+
+```{r}
+fineUMAPPlot <- UMAPPlot(deaDfs[["coex"]], title = "Fine Cluster UMAP Plot")
+
+plot(fineUMAPPlot)
+```
+
+
+```{r}
+mergedList <- mergeUniformCellsClusters(obj, GDIThreshold = 1.4, cores = 10,
+                                        saveObj = TRUE, outDir = outDir)
+
+obj <- addClusterization(obj, clName = "MergedClusters",
+                         clusters = mergedList[["clusters"]],
+                         coexDF = mergedList[["coexDF"]])
+```
+
+
+```{r}
+mergedUMAPPlot <- UMAPPlot(mergedList[["coexDF"]],
+                           title = "Fine Cluster UMAP Plot")
+
+plot(mergedUMAPPlot)
 ```
 

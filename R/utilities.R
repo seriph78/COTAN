@@ -1019,6 +1019,8 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom RColorBrewer brewer.pal.info
 #'
+#' @importFrom utils head
+#'
 #' @export
 #'
 #' @examples
@@ -1042,7 +1044,9 @@ getColorsVector <- function(numNeededColors) {
               msg = paste("Needed more colors than the number",
                           "of possible supported colors:", length(colVector)))
 
-  return(colVector[1L:numNeededColors])
+
+
+  return(head(colVector, numNeededColors))
 }
 
 #----------------- legacy functions --------------------

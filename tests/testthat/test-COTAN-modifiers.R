@@ -16,7 +16,7 @@ test_that("metaDataset", {
 
   meta <- getMetadataDataset(obj)
 
-  expect_equal(meta[[1]], datasetTags()[1:6], ignore_attr = TRUE)
+  expect_equal(meta[[1]], head(datasetTags(), 6), ignore_attr = TRUE)
   expect_equal(meta[[2]], c("V", "10X", "Test", "20",
                             genesCoexInSync, cellsCoexInSync))
 
@@ -173,7 +173,7 @@ test_that("Managed clusterizations", {
   # wrong coex data.frame size
   expect_error(addClusterization(obj, clName = "Test",
                                  clusters = clusters,
-                                 coexDF = coexDF[1:8,]))
+                                 coexDF = coexDF[1:8, ]))
 
   # wrong coex data.frame column names
   expect_error(addClusterization(obj, clName = "Test",
