@@ -295,9 +295,15 @@ establishGenesClusters <-
   dend <- color_branches(dend, k = kCuts,
                          col         = colBranches[uniquePos],
                          groupLabels = groupLabels [uniquePos])
-
+  
   dend <- color_labels(dend, labels = rownames(pca1), col = colors)
-
+  
+  
+  dend <- dend %>%
+    dendextend::set("labels", 
+                    ifelse(labels(dend) %in% rownames(pca1)[rownames(pca1) %in% colnames(GCS)] ,
+                           labels(dend),""))
+  
   logThis("Establishing gene clusters - DONE", logLevel = 2L)
 
   return(list("g.space" = GCS, "plot.eig" = plotEigen,

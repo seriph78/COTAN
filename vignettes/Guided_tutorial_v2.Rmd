@@ -163,9 +163,12 @@ genesList <- list(
        "Gapdh","Actb","Golph3",  "Zfr", "Sub1", "Tars", "Amacr")
 )
 
+layersGenes = list("L1"=c("Reln","Lhx5"), "L2/3"=c("Satb2","Cux1"), "L4"=c("Rorb","Sox5") , "L5/6"=c("Bcl11b","Fezf2") , "Prog"=c("Vim","Hes1"))
+
+
 c(gSpace, eigPlot, pcaClustersDF, treePlot) %<-%
-  establishGenesClusters(obj, groupMarkers = genesList,
-                         numGenesPerMarker = 25, kCuts = 12)
+  establishGenesClusters(obj, groupMarkers = layersGenes,
+                         numGenesPerMarker = 25, kCuts = 6)
 
 # tmpList contains "g.space", "plot.eig", "pca_clusters", "tree_plot"
 plot(eigPlot)
@@ -178,7 +181,7 @@ plot(treePlot)
 ```{r}
 UMAPPlot(pcaClustersDF[, 1:10], 
          clusters = pcaClustersDF[["hclust"]],
-         elements = genesList,
+         elements = layersGenes,
          title = "Genes' clusters UMAP Plot")
 ```
 
