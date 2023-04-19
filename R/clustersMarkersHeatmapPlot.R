@@ -1,10 +1,11 @@
-#' @details `clustersMarkersHeatmapPlot()` returns the heatmap plot of the level
-#'   of expression of the genes in the given *clusterization*. It also returns
-#'   the numerosity and levels average `UDE` of each *cluster* on the right and
+#' @details `clustersMarkersHeatmapPlot()` returns the heatmap plot of a summary
+#'   score for each *cluster* and each gene marker list in the given 
+#'   *clusterization*. It also returns
+#'   the numerosity and percentage of each *cluster* on the right and
 #'   a gene clusterization dendogram on the left (as returned by the function
-#'   [geneSetEnrichment()]) that allows to estimate which genes are more or less
-#'   expressed in each *cluster* so it is easier to derive the *clusters*' cell
-#'   types.
+#'   [geneSetEnrichment()]) that allows to estimate which markers groups are 
+#'   more or less expressed in each *cluster* so it is easier to derive the 
+#'   *clusters*' cell types.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName The name of the clusterization. If not given the last available
