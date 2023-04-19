@@ -60,7 +60,7 @@ genes}
 
 \code{cellsHeatmapPlot()} returns the cells' \code{COEX} \emph{heatmap} plot
 
-a \code{ggplot2} theme object
+\code{plotTheme()} returns a \code{ggplot2::theme} object
 }
 \description{
 These functions create heatmap \code{COEX} plots.
@@ -77,9 +77,9 @@ Markers list will be plotted as columns.
 \code{cellsHeatmapPlot()} creates the heatmap plot of the cells' \code{COEX}
 matrix
 
-This function returns the appropriate theme for the selected
-plot kind. Supported kinds are:  \code{common}, \code{pca}, \code{genes}, \code{UDE},
-\code{heatmap}, \code{GDI}, \code{UMAP}, \code{size-plot}.
+\code{plotTheme()} returns the appropriate theme for the selected plot
+kind. Supported kinds are:  \code{"common"}, \code{"pca"}, \code{"genes"}, \code{"UDE"},
+\code{"heatmap"}, \code{"GDI"}, \code{"UMAP"}, \code{"size-plot"}
 }
 \examples{
 data("test.dataset")

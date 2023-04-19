@@ -1,122 +1,171 @@
-#' clustersMarkersHeatmapPlot
+#' @details `clustersMarkersHeatmapPlot()` returns the heatmap plot of the level
+#'   of expression of the genes in the given *clusterization*. It also returns
+#'   the numerosity and levels average `UDE` of each *cluster* on the right and
+#'   a gene clusterization dendogram on the left (as returned by the function
+#'   [geneSetEnrichment()]) that allows to estimate which genes are more or less
+#'   expressed in each *cluster* so it is easier to derive the *clusters*' cell
+#'   types.
 #'
-#' @param objCOTAN 
-#' @param clName 
-#' @param markers a list of gene markers
-#' @param k number of clusters/color for the dendrogram (just for coloring)
-#' @param conditionsList a list of dataframes coming from the 
-#' clustersSummaryPlot() function 
+#' @param objCOTAN a `COTAN` object
+#' @param clName The name of the clusterization. If not given the last available
+#'   clusterization will be used, as it is probably the most significant!
+#' @param groupMarkers a named `list` with an element for each group of one or
+#'   more marker genes for each group.
+#' @param kCuts the number of estimated *cluster* (this defines the height for
+#'   the tree cut and the associated colors)
+#' @param conditionsList a list of `data.frames` coming from the
+#'   [clustersSummaryPlot()] function
 #'
-#' @import dendextend
-#' @import ComplexHeatmap
-#' @return
+#' @returns `clustersMarkersHeatmapPlot()` returns a list with:
+#'  * "heatmapPlot" the complete heatmap plot
+#'  * "dataScore" the `data.frame` with the score values
+#'
+#' @importFrom rlang is_empty
+#' @importFrom rlang set_names
+#'
+#' @importFrom dendextend set
+#'
+#' @importFrom tidyr pivot_wider
+#' @importFrom tidyr `%>%`
+#'
+#' @importFrom grid unit
+#' @importFrom grid gpar
+#' @importFrom grid grid.text
+#'
+#' @importFrom ComplexHeatmap rowAnnotation
+#' @importFrom ComplexHeatmap anno_barplot
+#' @importFrom ComplexHeatmap anno_numeric
+#' @importFrom ComplexHeatmap anno_text
+#' @importFrom ComplexHeatmap Legend
+#' @importFrom ComplexHeatmap Heatmap
+#'
+#' @importFrom circlize colorRamp2
+#'
 #' @export
 #'
-#' @examples
-clustersMarkersHeatmapPlot <- function(objCOTAN,clName = NULL, markers,k=3,
-                               conditionsList = NULL){
-  
-  if (!is.null(conditionsList)) {
-    cond1 <- conditionsList[1] # a data frame coming from clustersSummaryPlot()
-    
-    if (is.numeric(cond1$Cluster)) {
-      cond1$Cluster <- sprintf("%02d",cond1$Cluster)
+#' @rdname HandlingClusterizations
+#'
+clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers, clName = NULL,
+                                       kCuts = 3, conditionsList = NULL) {
+  clName <- getClusterizationName(objCOTAN, clName = clName)
+
+  expressionCl <- clustersDeltaExpression(objCOTAN, clName = clName)
+  scoreDF <- geneSetEnrichment(groupMarkers = groupMarkers,
+                               clustersCoex = expressionCl)
+
+  scoreDFT <- t(scoreDF[, 1L:(ncol(scoreDF) - 2L)])
+  dend <- clustersTreePlot(objCOTAN, kCuts = kCuts)[["dend"]]
+
+  dend <- set(dend = dend, "branches_lwd", 2)
+
+  {
+    numDigits <- floor(log10(nrow(scoreDFT))) + 1L
+    rownames(scoreDFT) <- formatC(as.numeric(rownames(scoreDFT)),
+                                  width = numDigits, flag = "0")
+  }
+
+  if (!is_empty(conditionsList)) {
+    # a data frame coming from clustersSummaryPlot()
+    cond1 <- conditionsList[[1L]]
+
+    if (is.numeric(cond1[["Cluster"]])) {
+      numDigits <- floor(log10(length(cond1[["Cluster"]]))) + 1L
+      cond1[["Cluster"]] <-
+        formatC(cond1[["Cluster"]], width = numDigits, flag = "0")
     }
-    
-    cond1 <- cond1[,c("Cluster","cond1","CellNumber")] %>%
+
+    cond1 <- cond1[, c("Cluster", "cond1" ,"CellNumber")] %>%
       pivot_wider(names_from = cond1, values_from = CellNumber)
-    
-    cond1[,2:3] <- cond1[,2:3]/rowSums(cond1[,2:3])
+
+    cond1[, 2L:3L] <- cond1[, 2L:3L] / rowSums(cond1[, 2L:3L])
     cond1 <- as.data.frame(cond1)
-    rownames(cond1) <- cond1$Cluster
-    cond1 <- cond1[rownames(df.t),]
+    rownames(cond1) <- cond1[["Cluster"]]
+    cond1 <- cond1[rownames(scoreDFT), ]
     cond1[is.na(cond1)] <- 0
-    
-    
-    cond1_col <- c("F"="deeppink1","M"= "darkturquoise") # qui invece di F ed M ci vogliono le due o più condizioni possibili
-    hb = rowAnnotation(cond1 = anno_barplot(cond1[,2:3],width = unit(3, "cm"), 
-                                      gp = gpar(fill = cond1_col, col = "black"),
-                                            align_to = "right",
-                                      labels_gp = gpar(fontsize = 12)),
-                       annotation_name_rot = 0)
-    
+
+    # TODO: here instead of F and M we need a flexible number of conditions
+    cond1Col <- c("F" = "deeppink1", "M" = "darkturquoise")
+    hb <- rowAnnotation(
+      cond1 = anno_barplot(cond1[, 2L:3L],
+                           width = unit(3.0, "cm"),
+                           gp = gpar(fill = cond1Col, col = "black"),
+                           align_to = "right",
+                           labels_gp = gpar(fontsize = 12L)),
+      annotation_name_rot = 0L)
+  } else {
+    hb <- NULL
   }
-  
-  
-  if(is.null(clName)){
-    clName <- getClusterizationName(objCOTAN)
+
+  clsInfo <- clustersSummaryPlot(objCOTAN, clName = clName)[["data"]]
+  {
+    numDigits <- floor(log10(nrow(clsInfo))) + 1L
+    clsInfo[["Cluster"]] <-
+      formatC(clsInfo[["Cluster"]], width = numDigits, flag = "0")
   }
-  expression.cl <- clustersDeltaExpression(objCOTAN,clName = clName)
-  score.df <- geneSetEnrichment(groupMarkers = markers,
-                                clustersCoex = expression.cl)
-  
-  df.t <- t(score.df[,1:(ncol(score.df)-2)])
-  dend <- clustersTreePlot(objCOTAN, k=k)
-  dend <- dend$dend
-  
-  dend = set(dend = dend, "branches_lwd", 2)
-  
-  rownames(df.t) <- sprintf("%02d",as.numeric(rownames(df.t)))
-  
-  cls.info <- clustersSummaryPlot(objCOTAN,clName = "merge_round")
-  cls.info$data$Cluster <- sprintf("%02d",cls.info$data$Cluster)
-  
-  rownames(cls.info$data) <- cls.info$data$Cluster
-  cls.info$data <- cls.info$data[rownames(df.t),]
-  Freq <- cls.info$data$CellNumber
-  names(Freq) <- cls.info$data$Cluster
-  
-  Freq2 <- paste0(round(cls.info$data$CellPercentage,digits = 1),"%")
-  names(Freq2) <- cls.info$data$Cluster
-  
-  
-  ha = rowAnnotation(cell.number = anno_numeric(Freq,
-                                                bg_gp = gpar(fill = "orange", 
-                                                             col = "black"),
+
+  rownames(clsInfo) <- clsInfo[["Cluster"]]
+  clsInfo <- clsInfo[rownames(scoreDFT), ]
+
+  freq <- set_names(clsInfo[["CellNumber"]], rownames(clsInfo))
+
+  freq2 <- set_names(paste0(clsInfo[["CellPercentage"]], "%"),
+                     rownames(clsInfo))
+
+  ha <- rowAnnotation(cell.number = anno_numeric(freq,
+                                                 bg_gp = gpar(fill = "orange",
+                                                              col = "black")
                                                 #labels_gp = gpar(fontsize = 10)
-  ), annotation_name_rot = 0)
-  
-  ha2 = rowAnnotation(cell.number = anno_text(Freq2,
-                                              gp = gpar(fontsize = 10)), 
+                                                 ),
                       annotation_name_rot = 0)
-  
- 
-  #condition_col <- c("F"="red4","R"="sienna3","H"="seagreen")
-  #hc = rowAnnotation(condition = anno_barplot(condition[,2:3],width =unit(3, "cm"), gp = gpar(fill = condition_col, col = "black"),align_to = "right",labels_gp = gpar(fontsize = 12)),annotation_name_rot = 0)
-  
-  
-  lgd_list = list(
-    Legend(labels = c("Female", "Male"), title = "cond1", 
-          legend_gp = gpar(fill = cond1_col))#,
-  #  Legend(labels = c("Flare", "Remission","Healthy"), title = "Condition", 
-  #        legend_gp = gpar(fill = condition_col))
-  )
-  
-  col_fun = colorRamp2(c(0, 1), c( "lightblue", "red"))
-  
 
-  final.heatmap <- Heatmap(df.t, rect_gp = gpar(col = "white", lwd = 1),
-                           cluster_rows = dend,
-                           cluster_columns = FALSE,
-                           col = col_fun,
-                           width =  unit(28, "cm"),
-                           row_dend_width = unit(8, "cm"),
-                           #height = unit(6, "cm"),
-                           column_names_gp = gpar(fontsize = 11),
-                           row_names_gp = gpar(fontsize = 11),
-                           cell_fun = function(j, i, x, y, width, height, fill) {
-                             grid.text(sprintf("%.1f", df.t[i, j]), x, y, 
-                                       gp = gpar(fontsize = 9))},
-                           right_annotation = c(ha,ha2)
-                                                   left_annotation = c(hb,hc)#,
-                           #                       column_title = 
-                                                   #paste0("Gene marker set expression in ", sample)
-  )
-  
-  
-  final.heatmap <- draw(final.heatmap, annotation_legend_list = lgd_list)
-  
-  return(list("heatmapPlot"=final.heatmap,"dataScore"= score.df))
-  
+  ha2 <- rowAnnotation(cell.number = anno_text(freq2,
+                                               gp = gpar(fontsize = 10)),
+                       annotation_name_rot = 0)
+
+
+  #conditionCol <- c("F"="red4", "R"="sienna3", "H"="seagreen")
+  #hc = rowAnnotation(condition = anno_barplot(condition[, 2L:3L],
+  #                                            width = unit(3.0, "cm"),
+  #                                            gp = gpar(fill = conditionCol,
+  #                                                      col = "black"),
+  #                                            align_to = "right",
+  #                                            labels_gp = gpar(fontsize = 12)),
+  #                   annotation_name_rot = 0)
+
+  if (!is_empty(conditionsList)) {
+    lgdList <- list(
+    Legend(labels = c("Female", "Male"), title = "cond1",
+           legend_gp = gpar(fill = cond1Col))#,
+    # Legend(labels = c("Flare", "Remission", "Healthy"), title = "Condition",
+    #        legend_gp = gpar(fill = condition_col))
+    )
+  } else {
+    lgdList <- list()
   }
 
+
+  colorFunc <- colorRamp2(c(0, 1), c("lightblue", "red"))
+  cellFunc <- function(j, i, x, y, width, height, fill) {
+    grid.text(formatC(scoreDFT[i, j], digits = 1L, format = "f"),
+              x, y, gp = gpar(fontsize = 9L))
+  }
+
+  finalHeatmap <- Heatmap(scoreDFT, rect_gp = gpar(col = "white", lwd = 1L),
+                          cluster_rows = dend,
+                          cluster_columns = FALSE,
+                          col = colorFunc,
+                          width = unit(28.0, "cm"),
+                          row_dend_width = unit(8.0, "cm"),
+                          #height = unit(6.0, "cm"),
+                          column_names_gp = gpar(fontsize = 11L),
+                          row_names_gp = gpar(fontsize = 11L),
+                          cell_fun = cellFunc,
+                          right_annotation = c(ha, ha2),
+                          left_annotation = c(hb)
+             #, column_title = paste0("Gene marker set expression in ", sample)
+                         )
+
+  finalHeatmap <- draw(finalHeatmap, annotation_legend_list = lgdList)
+
+  return(list("heatmapPlot" = finalHeatmap, "dataScore" = scoreDF))
+}

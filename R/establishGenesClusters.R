@@ -130,8 +130,8 @@ genesCoexSpace <-
 #'   more marker genes for each group.
 #' @param numGenesPerMarker the number of correlated genes to keep as other
 #'   markers (default 25)
-#' @param kCuts the number of estimated cluster (this defines the high for the
-#'   tree cut)
+#' @param kCuts the number of estimated *cluster* (this defines the height for
+#'   the tree cut)
 #' @param distance type of distance to use (default is `cosine`, `euclidean` is
 #'   also available)
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
@@ -295,15 +295,15 @@ establishGenesClusters <-
   dend <- color_branches(dend, k = kCuts,
                          col         = colBranches[uniquePos],
                          groupLabels = groupLabels [uniquePos])
-  
+
   dend <- color_labels(dend, labels = rownames(pca1), col = colors)
-  
-  
+
+
   dend <- dend %>%
-    dendextend::set("labels", 
+    dendextend::set("labels",
                     ifelse(labels(dend) %in% rownames(pca1)[rownames(pca1) %in% colnames(GCS)] ,
                            labels(dend),""))
-  
+
   logThis("Establishing gene clusters - DONE", logLevel = 2L)
 
   return(list("g.space" = GCS, "plot.eig" = plotEigen,

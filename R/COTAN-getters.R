@@ -802,6 +802,7 @@ setMethod(
 #' enrichment <- geneSetEnrichment(clustersCoex = coexDF,
 #'                                 groupMarkers = groupMarkers)
 #'
+#' ##clHeatmapPlot <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
 #'
 #' @rdname HandlingClusterizations
 #'

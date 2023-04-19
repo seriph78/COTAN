@@ -21,7 +21,6 @@
 #'   containing the *condition*. This allows to further separate the cells in
 #'   more sub-groups. When not given condition is assumed to be the same for all
 #'   cells.
-#'
 #' @param clName The name of the clusterization. If not given the last available
 #'   clusterization will be used, as it is probably the most significant!
 #' @param plotTitle The title to use for the returned plot
@@ -120,7 +119,7 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
   }
 
   cellsPerc <- round(df[["CellNumber"]] / getNumCells(objCOTAN) * 100.0,
-                     digits = 2L)
+                     digits = 1L)
 
   df <- setColumnInDF(df, colToSet = cellsPerc, colName = "CellPercentage")
 
@@ -151,8 +150,8 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 #'   needed calculates and stores the `DEA` of the relevant *clusterization*.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param kCuts the number of estimated *cluster* (this defines the high for the
-#'   tree cut)
+#' @param kCuts the number of estimated *cluster* (this defines the height for
+#'   the tree cut)
 #' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be returned, as it is probably the most
 #'   significant!

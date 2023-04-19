@@ -882,18 +882,16 @@ cosineDissimilarity <- function(m) {
 
 #----------------- plot utilities --------------------
 
-#' plotTheme
-#'
-#' @details This function returns the appropriate theme for the selected
-#'   plot kind. Supported kinds are:  `common`, `pca`, `genes`, `UDE`,
-#'   `heatmap`, `GDI`, `UMAP`, `size-plot`.
+#' @details `plotTheme()` returns the appropriate theme for the selected plot
+#'   kind. Supported kinds are:  `"common"`, `"pca"`, `"genes"`, `"UDE"`,
+#'   `"heatmap"`, `"GDI"`, `"UMAP"`, `"size-plot"`
 #'
 #' @seealso [ggplot2::theme()] and [ggplot2::ggplot()]
 #'
 #' @param plotKind a string indicating the plot kind
 #' @param textSize axes and strip text size (default=14)
 #'
-#' @returns a `ggplot2` theme object
+#' @returns `plotTheme()` returns a `ggplot2::theme` object
 #
 #' @importFrom ggplot2 theme
 #' @importFrom ggplot2 element_text
