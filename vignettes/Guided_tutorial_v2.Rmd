@@ -157,13 +157,20 @@ saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
 
 ```{r}
 genesList <- list(
-"NPGs"=c("Nes","Vim","Sox2","Sox1","Notch1", "Hes1","Hes5","Pax6"),
-"PNGs"=c("Map2","Tubb3","Neurod1","Nefm","Nefl","Dcx","Tbr1"),
-"hk"=c("Calm1","Cox6b1","Ppia","Rpl18","Cox7c","Erh","H3f3a","Taf1","Taf2",
-       "Gapdh","Actb","Golph3",  "Zfr", "Sub1", "Tars", "Amacr")
+  "NPGs" = c("Nes", "Vim", "Sox2", "Sox1", "Notch1", "Hes1", "Hes5", "Pax6"),
+  "PNGs" = c("Map2", "Tubb3", "Neurod1", "Nefm", "Nefl", "Dcx", "Tbr1"),
+  "hk"   = c("Calm1", "Cox6b1", "Ppia", "Rpl18", "Cox7c", "Erh", "H3f3a",
+             "Taf1","Taf2", "Gapdh", "Actb", "Golph3", "Zfr", "Sub1",
+             "Tars", "Amacr")
 )
 
-layersGenes = list("L1"=c("Reln","Lhx5"), "L2/3"=c("Satb2","Cux1"), "L4"=c("Rorb","Sox5") , "L5/6"=c("Bcl11b","Fezf2") , "Prog"=c("Vim","Hes1"))
+layersGenes = list(
+  "L1"   = c("Reln", "Lhx5"),
+  "L2/3" = c("Satb2", "Cux1"),
+  "L4"   = c("Rorb", "Sox5"),
+  "L5/6" = c("Bcl11b", "Fezf2"),
+  "Prog" = c("Vim", "Hes1")
+)
 
 
 c(gSpace, eigPlot, pcaClustersDF, treePlot) %<-%
