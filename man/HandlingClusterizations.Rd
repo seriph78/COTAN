@@ -264,12 +264,11 @@ data set.
 
 \code{clustersMarkersHeatmapPlot()} returns the heatmap plot of a summary
 score for each \emph{cluster} and each gene marker list in the given
-\emph{clusterization}. It also returns
-the numerosity and percentage of each \emph{cluster} on the right and
-a gene clusterization dendogram on the left (as returned by the function
-\code{\link[=geneSetEnrichment]{geneSetEnrichment()}}) that allows to estimate which markers groups are
-more or less expressed in each \emph{cluster} so it is easier to derive the
-\emph{clusters}' cell types.
+\emph{clusterization}. It also returns the numerosity and percentage of each
+\emph{cluster} on the right and a gene clusterization dendogram on the left (as
+returned by the function \code{\link[=geneSetEnrichment]{geneSetEnrichment()}}) that allows to estimate
+which markers groups are more or less expressed in each \emph{cluster} so it is
+easier to derive the \emph{clusters}' cell types.
 
 \code{clustersSummaryPlot()} calculates various statistics about each
 cluster (with an optional further \code{condition} to separate the cells) and

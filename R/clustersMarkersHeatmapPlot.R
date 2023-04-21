@@ -1,11 +1,11 @@
+
 #' @details `clustersMarkersHeatmapPlot()` returns the heatmap plot of a summary
-#'   score for each *cluster* and each gene marker list in the given 
-#'   *clusterization*. It also returns
-#'   the numerosity and percentage of each *cluster* on the right and
-#'   a gene clusterization dendogram on the left (as returned by the function
-#'   [geneSetEnrichment()]) that allows to estimate which markers groups are 
-#'   more or less expressed in each *cluster* so it is easier to derive the 
-#'   *clusters*' cell types.
+#'   score for each *cluster* and each gene marker list in the given
+#'   *clusterization*. It also returns the numerosity and percentage of each
+#'   *cluster* on the right and a gene clusterization dendogram on the left (as
+#'   returned by the function [geneSetEnrichment()]) that allows to estimate
+#'   which markers groups are more or less expressed in each *cluster* so it is
+#'   easier to derive the *clusters*' cell types.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName The name of the clusterization. If not given the last available
@@ -66,35 +66,53 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers, clName = NULL,
   }
 
   if (!is_empty(conditionsList)) {
-    # a data frame coming from clustersSummaryPlot()
-    cond1 <- conditionsList[[1L]]
-
-    if (is.numeric(cond1[["Cluster"]])) {
-      numDigits <- floor(log10(length(cond1[["Cluster"]]))) + 1L
-      cond1[["Cluster"]] <-
-        formatC(cond1[["Cluster"]], width = numDigits, flag = "0")
-    }
-
-    cond1 <- cond1[, c("Cluster", "cond1" ,"CellNumber")] %>%
-      pivot_wider(names_from = cond1, values_from = CellNumber)
-
-    cond1[, 2L:3L] <- cond1[, 2L:3L] / rowSums(cond1[, 2L:3L])
-    cond1 <- as.data.frame(cond1)
-    rownames(cond1) <- cond1[["Cluster"]]
-    cond1 <- cond1[rownames(scoreDFT), ]
-    cond1[is.na(cond1)] <- 0
-
-    # TODO: here instead of F and M we need a flexible number of conditions
-    cond1Col <- c("F" = "deeppink1", "M" = "darkturquoise")
-    hb <- rowAnnotation(
-      cond1 = anno_barplot(cond1[, 2L:3L],
-                           width = unit(3.0, "cm"),
-                           gp = gpar(fill = cond1Col, col = "black"),
-                           align_to = "right",
-                           labels_gp = gpar(fontsize = 12L)),
-      annotation_name_rot = 0L)
+    stop("Uasge of condition list is not supported yet")
+    # # a data frame coming from clustersSummaryPlot()
+    # cond1 <- conditionsList[[1L]]
+    #
+    # if (is.numeric(cond1[["Cluster"]])) {
+    #   numDigits <- floor(log10(length(cond1[["Cluster"]]))) + 1L
+    #   cond1[["Cluster"]] <-
+    #     formatC(cond1[["Cluster"]], width = numDigits, flag = "0")
+    # }
+    #
+    # cond1 <- cond1[, c("Cluster", "cond1" ,"CellNumber")] %>%
+    #   pivot_wider(names_from = cond1, values_from = CellNumber)
+    #
+    # cond1[, 2L:3L] <- cond1[, 2L:3L] / rowSums(cond1[, 2L:3L])
+    # cond1 <- as.data.frame(cond1)
+    # rownames(cond1) <- cond1[["Cluster"]]
+    # cond1 <- cond1[rownames(scoreDFT), ]
+    # cond1[is.na(cond1)] <- 0
+    #
+    # # TODO: here instead of F and M we need a flexible number of conditions
+    # cond1Col <- c("F" = "deeppink1", "M" = "darkturquoise")
+    # cond2Col <- c("F"="red4", "R"="sienna3", "H"="seagreen")
+    # hb <- list(
+    #   hb1 = rowAnnotation(
+    #     cond1 = anno_barplot(cond1[, 2L:3L],
+    #                          width = unit(3.0, "cm"),
+    #                          gp = gpar(fill = cond1Col, col = "black"),
+    #                          align_to = "right",
+    #                          labels_gp = gpar(fontsize = 12L)),
+    #     annotation_name_rot = 0L),
+    #   hb2 = rowAnnotation(condition = anno_barplot(cond2[, 2L:3L],
+    #                                     width = unit(3.0, "cm"),
+    #                                     gp = gpar(fill = cond2Col,
+    #                                               col = "black"),
+    #                                     align_to = "right",
+    #                                     labels_gp = gpar(fontsize = 12L)),
+    #                       annotation_name_rot = 0L)
+    # )
+    # lgdList <- list(
+    #   lb1 = Legend(labels = c("Female", "Male"), title = "cond1",
+    #                legend_gp = gpar(fill = cond1Col))#,
+    #   lb2 = Legend(labels = c("Flare", "Remission", "Healthy"), title = "cond2",
+    #                legend_gp = gpar(fill = cond2col))
+    # )
   } else {
-    hb <- NULL
+    hb <- c()
+    lgdList <- list()
   }
 
   clsInfo <- clustersSummaryPlot(objCOTAN, clName = clName)[["data"]]
@@ -112,38 +130,18 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers, clName = NULL,
   freq2 <- set_names(paste0(clsInfo[["CellPercentage"]], "%"),
                      rownames(clsInfo))
 
-  ha <- rowAnnotation(cell.number = anno_numeric(freq,
-                                                 bg_gp = gpar(fill = "orange",
-                                                              col = "black")
+  ha <- c(
+    ha1 = rowAnnotation(cell.number = anno_numeric(freq,
+                                                   bg_gp = gpar(fill = "orange",
+                                                                col = "black")
                                                 #labels_gp = gpar(fontsize = 10)
-                                                 ),
-                      annotation_name_rot = 0)
+                                                  ),
+                        annotation_name_rot = 0),
 
-  ha2 <- rowAnnotation(cell.number = anno_text(freq2,
-                                               gp = gpar(fontsize = 10)),
-                       annotation_name_rot = 0)
-
-
-  #conditionCol <- c("F"="red4", "R"="sienna3", "H"="seagreen")
-  #hc = rowAnnotation(condition = anno_barplot(condition[, 2L:3L],
-  #                                            width = unit(3.0, "cm"),
-  #                                            gp = gpar(fill = conditionCol,
-  #                                                      col = "black"),
-  #                                            align_to = "right",
-  #                                            labels_gp = gpar(fontsize = 12)),
-  #                   annotation_name_rot = 0)
-
-  if (!is_empty(conditionsList)) {
-    lgdList <- list(
-    Legend(labels = c("Female", "Male"), title = "cond1",
-           legend_gp = gpar(fill = cond1Col))#,
-    # Legend(labels = c("Flare", "Remission", "Healthy"), title = "Condition",
-    #        legend_gp = gpar(fill = condition_col))
-    )
-  } else {
-    lgdList <- list()
-  }
-
+    ha2 = rowAnnotation(cell.perc = anno_text(freq2,
+                                              gp = gpar(fontsize = 10)),
+                        annotation_name_rot = 0)
+  )
 
   colorFunc <- colorRamp2(c(0, 1), c("lightblue", "red"))
   cellFunc <- function(j, i, x, y, width, height, fill) {
@@ -161,8 +159,8 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers, clName = NULL,
                           column_names_gp = gpar(fontsize = 11L),
                           row_names_gp = gpar(fontsize = 11L),
                           cell_fun = cellFunc,
-                          right_annotation = c(ha, ha2),
-                          left_annotation = c(hb)
+                          right_annotation = ha,
+                          left_annotation = hb
              #, column_title = paste0("Gene marker set expression in ", sample)
                          )
 
