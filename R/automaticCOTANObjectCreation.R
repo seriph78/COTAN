@@ -64,7 +64,12 @@ setMethod(
         dir.create(file.path(outDir))
       }
 
-      outDirCleaning <- file.path(outDir, "cleaning")
+      outDirCond <- file.path(outDir, cond)
+      if (!file.exists(outDirCond)) {
+        dir.create(outDirCond)
+      }
+
+      outDirCleaning <- file.path(outDirCond, "cleaning")
       if (!file.exists(outDirCleaning)) {
         dir.create(outDirCleaning)
       }

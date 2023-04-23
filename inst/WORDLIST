@@ -45,6 +45,7 @@ clusterCoex
 clusterization
 clusterizations
 clustersDeltaExpression
+clustersMarkersHeatmapPlot
 clustersSummaryPlot
 clustersTreePlot
 coex
@@ -119,6 +120,7 @@ handleMultiCore
 heatmapPlot
 initializeMetaDataset
 interactome
+invariants
 iteratively
 logThis
 mRNA

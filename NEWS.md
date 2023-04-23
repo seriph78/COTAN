@@ -1,15 +1,56 @@
-## COTAN 0.99.10
+---
+editor_options: 
+  markdown: 
+    wrap: 80
+---
 
-Initial Bioconductor release
+## COTAN 1.99.3
 
-## COTAN 0.99.12
+Updated the vignette, `README.md` and `NEWS.md`
 
-Release before the official release of Bioc 3.15. Main changes:
- - The way in which the COEX matrix is estimated and stored is changed to occupy less space and run faster.
- 
+## COTAN 1.99.2
+
+Dropped second vignette: will be merged in the other one...
+
+## COTAN 1.99.1
+
+Minor bug fixes and new function clustersMarkersHeatmapPlot()
+
+## COTAN 1.99.0
+
+Included new functionalities for Bioc 2.17 release:
+
+* created a new `COTAN` class to replace the old `scCOTAN`: this class provides
+  internal invariants along a wide host of accessors that allows users to avoid
+  peeking inside the class
+  
+* made a new multi-core implementation of the model parameters estimations and
+  `COEX` calculations that achieves much higher speeds.
+  
+* added new functionality about **gene clusters** starting from given markers
+  lists
+
+* added new functionality about **uniform cell clustering** based on the maximum
+  *GDI* level in the *cluster*
+  
+* added function to get a *differential expression* estimation for each cluster
+  against background
+  
+* added function to get an *enrichment score* for each cluster given a list of
+  markers specific for the cells' population
+  
+* added plots to asses data-set information at cleaning stage
+
 ## COTAN 0.99.13
 
 After official release. PCA function changed to avoid basilisk and Python.
  
- 
+## COTAN 0.99.12
 
+Release before the official release of Bioc 3.15. Main changes:
+ - The way in which the COEX matrix is estimated and stored is changed to occupy
+   less space and run faster.
+ 
+## COTAN 0.99.10
+
+Initial Bioconductor release

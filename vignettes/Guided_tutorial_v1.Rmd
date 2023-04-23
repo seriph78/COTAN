@@ -41,7 +41,7 @@ COTAN tutorial but done using the new and updated functions.
 
 ## Get the data-set
 
-Download the data-set for mouse cortex E17.5.
+Download the data-set for `"mouse cortex E17.5"`.
 
 ```{r eval=TRUE, include=TRUE}
 dataDir <- tempdir()
@@ -76,11 +76,18 @@ Initialize the `COTAN` object with the row count table and
 the metadata for the experiment.
 
 ```{r}
+cond = "mouse_cortex_E17.5"
+#cond = "test"
+
 #obj = COTAN(raw = sampled.dataset)
 obj = COTAN(raw = sample.dataset)
-obj = initializeMetaDataset(obj, GEO = "GSM2861514",
+obj = initializeMetaDataset(obj,
+                            GEO = "GSM2861514",
                             sequencingMethod = "Drop_seq",
-                            sampleCondition = "mouse cortex E17.5")
+                            sampleCondition = cond)
+
+logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
+        logLevel = 1)
 ```
 
 Before we proceed to the analysis, we need to clean the data.
@@ -127,6 +134,7 @@ cellGeneNumber <- sort(colSums(as.data.frame(getRawData(obj) > 0)),
                        decreasing = FALSE)
 cells_to_rem <- names(cellGeneNumber)[cellGeneNumber > 3000]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
+
 genesSizePlot(obj)
 ```
 
@@ -136,6 +144,7 @@ To drop cells by mitochondrial percentage:
 to_rem <- mit[["sizes"]][["mit.percentage"]] > 1.5
 cells_to_rem <- rownames(mit[["sizes"]])[to_rem]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
+
 mit <- mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
 mit[["plot"]]
 ```
@@ -149,22 +158,17 @@ cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
 obj = dropGenesCells(obj, genes_to_rem, cells_to_rem)
 ```
 
-We want also to define a prefix to identify the sample.
+We want also to log the current status.
 
 ```{r}
-t = "E17.5_cortex"
-#t = "test"
-
-logThis(paste0("Condition ", t), logLevel = 1)
-#--------------------------------------
 logThis(paste("n cells", getNumCells(obj)), logLevel = 1)
-
-n_it = 1
 ```
 
 The `clean()` function estimates all the parameters for the data. Therefore, we have to run it again every time we remove any genes or cells from the data.
 
 ```{r}
+n_it <- 1
+
 obj <- clean(obj)
 c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
 
@@ -181,6 +185,8 @@ We can observe here that the red cells are really enriched in hemoglobin genes s
 cells_to_rem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
  
+n_it <- 2
+
 obj <- clean(obj)
 c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
 
@@ -231,10 +237,16 @@ obj <- dropGenesCells(obj, cells = cells_to_rem)
 Repeat the estimation after the cells are removed
 
 ```{r}
+n_it <- 3
+
 obj <- clean(obj)
 c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
 
 pcaCellsPlot
+```
+
+```{r}
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1)
 ```
 
 ## COTAN analysis
@@ -245,7 +257,7 @@ In this part, all the contingency tables are computed and used to get the statis
 obj = estimateDispersionBisection(obj, cores = 10)
 ```
 
-COEX evaluation and storing
+`COEX` evaluation and storing
 
 ```{r}
 obj <- calculateCoex(obj)
@@ -253,7 +265,7 @@ obj <- calculateCoex(obj)
 
 ```{r eval=TRUE, include=TRUE}
 # saving the structure
-saveRDS(obj, file = file.path(outDir, paste0(t, ".cotan.RDS")))
+saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
 ```
 
 ## Automatic run
@@ -266,40 +278,41 @@ obj2 <- automaticCOTANObjectCreation(
   raw = sample.dataset,
   GEO = "GSM2861514",
   sequencingMethod = "Drop_seq",
-  sampleCondition = "mouse cortex E17.5",
-  saveObj = FALSE, outDir = outDir, cores = 10)
+  sampleCondition = cond,
+  saveObj = TRUE, outDir = outDir, cores = 10)
 ```
 
 # Analysis of the elaborated data
 
 ## GDI
 
-To calculate the GDI we can run:
+To calculate the `GDI` we can run:
 
 ```{r}
 quant.p = calculateGDI(obj)
 head(quant.p)
 ```
 
-The next function can either plot the GDI for the dataset directly or
+The next function can either plot the `GDI` for the dataset directly or
 use the pre-computed dataframe.
-It marks a 1.5 threshold (in red) and
+It marks a `1.5` threshold (in red) and
 the two highest quantiles (in blue) by default.
 We can also specify some gene sets (three in this case) that
-we want to label explicitly in the GDI plot.
+we want to label explicitly in the `GDI` plot.
 
 ```{r}
 genesList <- list(
-"NPGs"=c("Nes","Vim","Sox2","Sox1","Notch1", "Hes1","Hes5","Pax6"),
-"PNGs"=c("Map2","Tubb3","Neurod1","Nefm","Nefl","Dcx","Tbr1"),
-"hk"=c("Calm1","Cox6b1","Ppia","Rpl18","Cox7c","Erh","H3f3a","Taf1","Taf2",
-       "Gapdh","Actb","Golph3",  "Zfr", "Sub1", "Tars", "Amacr")
+  "NPGs" = c("Nes", "Vim", "Sox2", "Sox1", "Notch1", "Hes1", "Hes5", "Pax6"),
+  "PNGs" = c("Map2", "Tubb3", "Neurod1", "Nefm", "Nefl", "Dcx", "Tbr1"),
+  "hk"   = c("Calm1", "Cox6b1", "Ppia", "Rpl18", "Cox7c", "Erh", "H3f3a",
+             "Taf1", "Taf2", "Gapdh", "Actb", "Golph3", "Zfr", "Sub1",
+             "Tars", "Amacr")
 )
 
 # needs to be recalculated after the changes in nu/dispersion above
 #obj <- calculateCoex(obj, actOnCells = FALSE)
 
-GDIPlot(obj, cond = t, genes = genesList)
+GDIPlot(obj, cond = cond, genes = genesList)
 ```
 
 The percentage of cells expressing the gene in the third column of this
@@ -307,35 +320,36 @@ data-frame is reported.
 
 ## Heatmaps
 
-To perform the Gene Pair Analysis, we can plot a heatmap of the coex values
+To perform the Gene Pair Analysis, we can plot a heatmap of the `COEX` values
 between two gene sets.
 We have to define the different gene sets (`list.genes`) in a list.
 Then we can choose which sets to use in the function parameter sets
 (for example, from 1 to 3).
 We also have to provide an array of the file name prefixes for each condition
-(for example, "E17.5_cortex").
+(for example, "mouse_cortex_E17.5").
 In fact, this function can plot genes relationships across many different
 conditions to get a complete overview.
 
 ```{r}
-print(t)
+print(cond)
 ```
 
 ```{r}
-heatmapPlot(genesLists = genesList, sets = c(1:3), conditions = t, dir = outDir)
+heatmapPlot(genesLists = genesList, sets = c(1:3),
+            conditions = c(cond), dir = outDir)
 ```
 
-We can also plot a general heatmap of coex values based on some markers like
+We can also plot a general heatmap of `COEX` values based on some markers like
 the following one.
 
 ```{r}
-genesHeatmapPlot(obj, primaryMarkers = c("Satb2","Bcl11b","Vim","Hes1"),
+genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Vim", "Hes1"),
                  pValueThreshold = 0.001, symmetric = TRUE)
 ```
 
 ```{r}
-genesHeatmapPlot(obj, primaryMarkers = c("Satb2","Bcl11b","Fezf2"),
-                 secondaryMarkers = c("Gabra3", "Meg3","Cux1","Neurod6"),
+genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
+                 secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
                  pValueThreshold = 0.001, symmetric = FALSE)
 ```
 
@@ -347,7 +361,8 @@ contingency tables for two specific genes. To get them we can use two functions:
 `contingencyTables()` to produce the observed and expected data
 
 ```{r}
-c(observedCT, expectedCT) %<-% contingencyTables(obj, g1 = "Satb2", g2 = "Bcl11b")
+c(observedCT, expectedCT) %<-% contingencyTables(obj, g1 = "Satb2",
+                                                      g2 = "Bcl11b")
 print("Observed CT")
 observedCT
 print("Expected CT")
@@ -355,7 +370,7 @@ expectedCT
 ```
 
 Another useful function is `getGenesCoex()`. This can be used to extract
-the whole or a partial coex matrix from a `COTAN` object.
+the whole or a partial `COEX` matrix from a `COTAN` object.
 
 ```{r}
 # For the whole matrix
@@ -369,15 +384,88 @@ coex <- getGenesCoex(obj, genes = c("Satb2","Bcl11b","Fezf2"))
 head(coex)
 ```
 
+## Establishing genes' clusters
+
+`COTAN` provides a way to establish genes' clusters given some lists of markers
+
+```{r}
+layersGenes = list(
+  "L1"   = c("Reln",   "Lhx5"),
+  "L2/3" = c("Satb2",  "Cux1"),
+  "L4"   = c("Rorb",   "Sox5"),
+  "L5/6" = c("Bcl11b", "Fezf2"),
+  "Prog" = c("Vim",    "Hes1")
+)
+c(gSpace, eigPlot, pcaClustersDF, treePlot) %<-%
+  establishGenesClusters(obj, groupMarkers = layersGenes,
+                         numGenesPerMarker = 25, kCuts = 6)
+
+plot(eigPlot)
+```
+
+```{r}
+plot(treePlot)
+```
+
+```{r}
+UMAPPlot(pcaClustersDF[, 1:10], 
+         clusters = pcaClustersDF[["hclust"]],
+         elements = layersGenes,
+         title = "Genes' clusters UMAP Plot")
+```
+
+## Uniform Clustering
+
+It is possible to obtain a cell clusterization based on the concept of 
+uniformity of expression of the genes across the cells. That is the cluster
+satisfies the null hypothesis of the `COTAN` model:
+the genes expression is not dependent on the cell in consideration.
+
+```{r eval=FALSE, include=TRUE}
+fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.4, cores = 10,
+                                       saveObj = TRUE, outDir = outDir)
+obj <- addClusterization(obj, clName = "FineClusters", clusters = fineClusters)
+```
+
+
+```{r eval=FALSE, include=TRUE}
+c(coexDF, pValueDF) %<-% DEAOnClusters(obj, clusters = fineClusters)
+obj <- addClusterizationCoex(obj, clName = "FineClusters",
+                             coexDF = coexDF)
+```
+
+```{r eval=FALSE, include=TRUE}
+c(mergedClusters, coexDF, pValueDF) %<-%
+  mergeUniformCellsClusters(obj, GDIThreshold = 1.4, cores = 10,
+                            saveObj = TRUE, outDir = outDir)
+obj <- addClusterization(obj, clName = "MergedClusters",
+                         clusters = mergedClusters, coexDF = coexDF)
+```
+
+
+```{r eval=FALSE, include=TRUE}
+mergedUMAPPlot <- UMAPPlot(coexDF, elements = layersGenes,
+                           title = "Fine Cluster UMAP Plot")
+plot(mergedUMAPPlot)
+```
+
+## Vignette clean-up stage
+
 The next few lines are just to clean.
 
 ```{r}
-if (file.exists(file.path(outDir, paste0(t, ".cotan.RDS")))) {
+if (file.exists(file.path(outDir, paste0(cond, ".cotan.RDS")))) {
   #Delete file if it exists
-  file.remove(file.path(outDir, paste0(t, ".cotan.RDS")))
+  file.remove(file.path(outDir, paste0(cond, ".cotan.RDS")))
 }
-unlink(file.path(outDir, "cleaning"), recursive = TRUE)
+unlink(file.path(outDir, cond), recursive = TRUE)
 file.remove(dataSetFile)
+
+# stop logging to file
+setLoggingFile("")
+file.remove(file.path(outDir, "vignette_v1.log"))
+
+options(parallelly.fork.enable = FALSE)
 
 sessionInfo()
 ```
