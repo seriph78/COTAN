@@ -1,52 +1,74 @@
-#' Raw sample dataset
+#' @title Data-sets
 #'
-#' A subsample of a real sc-RNAseq dataset
+#' @description Simple data-sets included in the package
 #'
-#' @format A data frame with 2000 genes and 815 cells:
+#' @name Datasets
+#'
+NULL
+
+# Raw sample dataset
+
+#' @details `raw.dataset` is a sub-sample of a real *sc-RNAseq* data-set
+#'
+#' @format `raw.dataset` is a data frame with \eqn{2000} genes and \eqn{815}
+#'   cells
+#'
+#' @usage data(raw.dataset)
 #'
 #' @source GEO GSM2861514
 #'
+#' @rdname Datasets
+#'
 "raw.dataset"
 
-#' Raw ERCC dataset
+# Raw ERCC dataset
+
+#' @details `ERCCRaw` dataset
 #'
-#' ERCC dataset
+#' @format `ERCCRaw` is a `data.frame`
 #'
-#' @format a `data.frame`
+#' @usage data(ERCCraw)
 #'
 #' @source ERCC
 #'
+#' @rdname Datasets
+#'
 "ERCCraw"
 
-#' test.dataset
+#' @details `test.dataset` is an artificial data set obtained by sampling target
+#'   negative binomial distributions on a set of \eqn{600} genes on \eqn{2} two
+#'   cells *clusters* of \eqn{600} cells each. Each *clusters* has its own set
+#'   of parameters for the distributions even, but a fraction of the genes has
+#'   the same expression in both *clusters*.
 #'
-#' @description `test.dataset` is an artificial data set obtained by sampling
-#'   target negative binomial distributions on a set of `600` genes on `2` two
-#'   cells *clusters* of `600` cells each. Each *clusters* has its own set of
-#'   parameters for the distributions even, but a fraction of the genes has the
-#'   same expression in both *clusters*.
+#' @format `test.dataset` is a `data.frame` with \eqn{600} genes and \eqn{1200}
+#'   cells
 #'
-#' @format a `data.frame`
+#' @usage data(test.dataset)
 #'
-#' @rdname test.dataset
+#' @rdname Datasets
 #'
 "test.dataset"
 
-#' @details `test.dataset.clusters1` is the clusterization obtained running
+#' @details `test.dataset.clusters1` is the *clusterization* obtained running
 #'   `cellsUniformClustering()` on the `test.dataset`
 #'
-#' @format a `character array`
+#' @format `test.dataset.clusters1` is a `character array`
 #'
-#' @rdname test.dataset
+#' @usage data(test.dataset.clusters1)
+#'
+#' @rdname Datasets
 #'
 "test.dataset.clusters1"
 
-#' @details `test.dataset.clusters2` is the clusterization obtained running
-#'   `mergeUniformCellsClusters()` on the `test.dataset` using the
-#'   `test.dataset.clusters1`
+#' @details `test.dataset.clusters2` is the *clusterization* obtained running
+#'   `mergeUniformCellsClusters()` on the `test.dataset` using the previous
+#'   *clusterization*
 #'
-#' @format a `character array`
+#' @format `test.dataset.clusters2` is a `character array`
 #'
-#' @rdname test.dataset
+#' @usage data(test.dataset.clusters2)
+#'
+#' @rdname Datasets
 #'
 "test.dataset.clusters2"

@@ -3,14 +3,22 @@
 %   R/DEAOnClusters.R, R/UMAP-plot.R, R/clustersDeltaExpression.R,
 %   R/clustersMarkersHeatmapPlot.R, R/clustersSummaryPlot.R,
 %   R/findClustersMarkers.R, R/geneSetEnrichment.R
-\name{getClusterizations,COTAN-method}
+\name{HandlingClusterizations}
+\alias{HandlingClusterizations}
 \alias{getClusterizations,COTAN-method}
+\alias{getClusterizations}
 \alias{getClusterizationName,COTAN-method}
+\alias{getClusterizationName}
 \alias{getClusterizationData,COTAN-method}
+\alias{getClusterizationData}
 \alias{getClustersCoex,COTAN-method}
+\alias{getClustersCoex}
 \alias{addClusterization,COTAN-method}
+\alias{addClusterization}
 \alias{addClusterizationCoex,COTAN-method}
+\alias{addClusterizationCoex}
 \alias{dropClusterization,COTAN-method}
+\alias{dropClusterization}
 \alias{DEAOnClusters}
 \alias{UMAPPlot}
 \alias{clustersDeltaExpression}
@@ -94,7 +102,7 @@ significant!}
 \item{clusters}{a \emph{clusterization}}
 
 \item{coexDF}{a \code{data.frame} with \emph{In/Out} \code{COEX}. E.G. the result of a call
-to [\code{\link[=DEAOnCluster]{DEAOnCluster()}}]}
+to \code{\link[=DEAOnClusters]{DEAOnClusters()}}}
 
 \item{override}{When \code{TRUE} silently allows overriding data for an existing
 \emph{clusterization} name. Otherwise the default behavior will avoid potential
@@ -135,10 +143,10 @@ also available)}
 \item{markers}{a \code{list} of marker genes}
 
 \item{pValueDF}{a \code{data.frame} with \emph{In/Out} \emph{p-value} based on the \code{COEX}.
-E.G. the result of a call to [\code{\link[=DEAOnCluster]{DEAOnCluster()}}]}
+E.G. the result of a call to \code{DEAOnClusters()}}
 
 \item{deltaExp}{a \code{data.frame} with the \emph{delta-expression} in a \emph{cluster}.
-E.G. the result of a call to [\code{\link[=clustersDeltaExpression]{clustersDeltaExpression()}}]}
+E.G. the result of a call to \code{\link[=clustersDeltaExpression]{clustersDeltaExpression()}}}
 
 \item{method}{\emph{p-value} adjustment method. Defaults to \code{"bonferroni"}}
 

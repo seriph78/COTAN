@@ -3,6 +3,9 @@
 #'
 #' @description These functions create heatmap `COEX` plots.
 #'
+#' @name HeatmapPlots
+NULL
+
 #' @details `heatmapPlot()` creates the `heatmap` of one or more `COTAN` objects
 #'
 #' @param genesLists A `list` of genes' `array`s. The first `array` defines the

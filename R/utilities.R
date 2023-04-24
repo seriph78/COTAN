@@ -7,6 +7,9 @@
 #'   of output on terminal is controlled by the  `COTAN.LogLevel` option while
 #'   the logging on file is always at its maximum verbosity
 #'
+#' @name LoggingFunctions
+NULL
+
 #' @details `setLoggingLevel()` sets the `COTAN` logging level. It set the
 #'   `COTAN.LogLevel` options to one of the following values:
 #'    * 0 - Always on log messages
@@ -240,25 +243,30 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 
 #------------------- clusters utilities ----------
 
-#' Handle clusterization <-> clusters list conversions and clusters grouping
+#' *Clusters* utilities
 #'
-#' @description `toClustersList` given a clusterization, creates a `list` of
-#'   clusters (i.e. for each cluster, which elements compose the cluster).
+#' @description Handle *clusterization* <-> *clusters* `list` conversions and
+#'   *clusters* grouping
 #'
-#'   `fromClustersList` given a `list` of clusters returns a clusterization (i.e
-#'   a named `vector` that for each element indicates to which cluster it
-#'   belongs).
+#' @name ClustersList
+NULL
+
+#' @details `toClustersList()` given a *clusterization*, creates a `list` of
+#'   *clusters* (i.e. for each *cluster*, which elements compose the *cluster*).
 #'
-#'   `groupByClusters` given a clusterization returns a permutation, such that
-#'   using the permutation on the input the clusters are grouped together.
+#'   `fromClustersList()` given a `list` of *clusters* returns a
+#'   *clusterization* (i.e. a named `vector` that for each element indicates to
+#'   which cluster it belongs).
 #'
-#'   `groupByClustersList` given the elements' names and a `list` of clusters
-#'   returns a permutation, such that using the permutation on the given names
-#'   the clusters are grouped together.
+#'   `groupByClusters()` given a *clusterization* returns a permutation, such
+#'   that using the permutation on the input the *clusters* are grouped
+#'   together.
 #'
-#' @usage toClustersList(clusters)
+#'   `groupByClustersList()` given the elements' names and a `list` of
+#'   *clusters* returns a permutation, such that using the permutation on the
+#'   given names the *clusters* are grouped together.
 #'
-#' @param clusters A named `vector` or `factor` that defines the clusters.
+#' @param clusters A named `vector` or `factor` that defines the *clusters*.
 #' @param clustersList A named `list` whose elements define the various
 #'   clusters.
 #' @param elemNames A `list` of names to which associate a cluster.
@@ -269,13 +277,13 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #'   element belongs, while `groupByClustersList` will return a vector of
 #'   positions that is longer than the given `elemNames`.
 #'
-#' @returns `toClustersList` returns a `list` of clusters.
+#' @returns `toClustersList()` returns a `list` of clusters.
 #'
-#'   `fromClustersList` returns a clusterization. If the given `elemNames`
+#'   `fromClustersList()` returns a clusterization. If the given `elemNames`
 #'   contain values not present in the `clustersList`, those will be marked as
 #'   `"not_clustered"`
 #'
-#'   `groupByClusters` and `groupByClustersList` return a permutation that
+#'   `groupByClusters()` and `groupByClustersList()` return a permutation that
 #'   groups the clusters together. For each cluster the positions are guaranteed
 #'   to be in increasing order. In case, all elements not corresponding to any
 #'   cluster are grouped together as the last group.
@@ -306,7 +314,6 @@ setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
 #' perm2 <- groupByClustersList(selectedNames, toClustersList(clusters))
 #' all.equal(perm2[91:100], c(91:100))
 #'
-
 #' @export
 #'
 #' @importFrom rlang is_empty
@@ -1005,9 +1012,9 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
 #' getColorsVector
 #'
 #' @description This function returns a list of colors based on the
-#'   [[brewer.pal()]] function
+#'   [brewer.pal()] function
 #'
-#' @details The colors are taken from the [[brewer.pal.info()]] sets with
+#' @details The colors are taken from the [brewer.pal.info()] sets with
 #'   `Set1`, `Set2`, `Set3` placed first.
 #'
 #' @param numNeededColors The number of returned colors
@@ -1054,6 +1061,9 @@ getColorsVector <- function(numNeededColors) {
 #' @description Converts a symmetric matrix into a compacted symmetric matrix
 #'   and vice-versa.
 #'
+#' @name LegacyFastSymmMatrix
+NULL
+
 #' @details This is a legacy function related to old `scCOTAN` objects. Use the
 #'   more appropriate `Matrix::dspMatrix` type for similar functionality.
 #'

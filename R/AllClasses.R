@@ -193,7 +193,8 @@ setClass(
 #' data("test.dataset")
 #' obj <- COTAN(raw = test.dataset)
 #'
-#' @rdname COTAN
+#' @name COTAN
+#'
 COTAN <- function(raw = "ANY") {
   raw <- as(as(raw, "Matrix"), "sparseMatrix")
 

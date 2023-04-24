@@ -58,6 +58,8 @@ updateMetaInfo <- function(meta, tag, value) {
 }
 
 
+#' @aliases initializeMetaDataset
+#'
 #' @details `initializeMetaDataset()` initializes meta-data data-set
 #'
 #' @param objCOTAN the `COTAN` object
@@ -97,7 +99,8 @@ setMethod(
   }
 )
 
-
+#' @aliases addElementToMetaDataset
+#'
 #' @details `addElementToMetaDataset()` is used to add a line of information to
 #'   the meta-data `data.frame`. If the tag was already used it will update the
 #'   associated value(s) instead
@@ -125,6 +128,8 @@ setMethod(
 
 # ------------ Raw data cleaning --------------
 
+#' @aliases findHousekeepingGenes
+#'
 #' @details `findHousekeepingGenes()` determines the housekeeping genes inside
 #'   the raw data
 #'
@@ -156,6 +161,8 @@ setMethod(
 )
 
 
+#' @aliases findFullyExpressedCells
+#'
 #' @details `findFullyExpressedCells()` determines the fully expressed cells
 #'   inside the raw data
 #'
@@ -187,6 +194,8 @@ setMethod(
 )
 
 
+#' @aliases dropGenesCells
+#'
 #' @details `dropGenesCells()` removes an array of genes and/or cells from the
 #'   current `COTAN` object.
 #'
@@ -233,6 +242,8 @@ setMethod(
 
 # -------------- Clusterization handling ---------------
 
+#' @aliases addClusterization
+#'
 #' @details `addClusterization()` adds a *clusterization* to the current `COTAN`
 #'   object, by adding a new column in the `metaCells` `data.frame` and adding a
 #'   new element in the `clustersCoex` `list` using the passed in `COEX`
@@ -297,6 +308,8 @@ setMethod(
   }
 )
 
+#' @aliases addClusterizationCoex
+#'
 #' @details `addClusterizationCoex()` adds a *clusterization* `COEX`
 #'   `data.frame` to the current `COTAN` object. It requires the named
 #'   *clusterization* to be already present.
@@ -332,7 +345,8 @@ setMethod(
   }
 )
 
-
+#' @aliases dropClusterization
+#'
 #' @details `dropClusterization()` drops a *clusterization* from the current
 #'   `COTAN` object, by removing the corresponding column in the `metaCells`
 #'   `data.frame` and the corresponding `COEX` `data.frame` from the
@@ -373,6 +387,8 @@ setMethod(
 
 # ------------ COEX erasers ---------------
 
+#' @aliases dropGenesCoex
+#'
 #' @details `dropGenesCoex()` drops the `genesCoex` member from the given
 #'   `COTAN` object
 #'
@@ -399,6 +415,8 @@ setMethod(
 )
 
 
+#' @aliases dropCellsCoex
+#'
 #' @details `dropCellsCoex()` drops the `cellsCoex` member from the given
 #'   `COTAN` object
 #'

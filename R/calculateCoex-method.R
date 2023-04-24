@@ -1,7 +1,5 @@
 # ----------- Contingency tables --------------
 
-#' Calculating the COEX matrix for genes and cells
-#'
 #' @description These are the functions and methods used to calculate the
 #'   **COEX** matrices according to the `COTAN` model. From there it is possible
 #'   to calculate the associated *pValue* and the *GDI* (*Global Differential
@@ -32,6 +30,13 @@
 #'   of the observed ones.
 #'
 #' @seealso [ParametersEstimations] for more details.
+#'
+#' @name CalculatingCOEX
+#'
+#' @rdname CalculatingCOEX
+NULL
+
+#' @aliases calculateMu
 #'
 #' @note The sum of the matrices returned by the function
 #'   `observedContingencyTables()` and `expectedContingencyTables()` will have
@@ -500,6 +505,8 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 
 # --------------- COEX and GDI -----------
 
+#' @aliases calculateCoex
+#'
 #' @details `calculateCoex()` estimates and stores the `COEX` matrix in the
 #'   `cellCoex` or `genesCoex` field depending on given `actOnCells` flag. It
 #'   also calculates the percentage of *problematic* genes/cells pairs. A pair

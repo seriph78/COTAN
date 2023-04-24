@@ -14,10 +14,10 @@ an array of \code{RGB} colors of the wanted size
 }
 \description{
 This function returns a list of colors based on the
-[\code{\link[=brewer.pal]{brewer.pal()}}] function
+\code{\link[=brewer.pal]{brewer.pal()}} function
 }
 \details{
-The colors are taken from the [\code{\link[=brewer.pal.info]{brewer.pal.info()}}] sets with
+The colors are taken from the \code{\link[=brewer.pal.info]{brewer.pal.info()}} sets with
 \code{Set1}, \code{Set2}, \code{Set3} placed first.
 }
 \examples{

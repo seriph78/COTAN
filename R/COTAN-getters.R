@@ -5,6 +5,11 @@
 #' @description These methods extract information out of a just created `COTAN`
 #'   object. The accessors have **read-only** access to the object.
 #'
+#' @name RawDataGetters
+NULL
+
+#' @aliases getRawData
+#'
 #' @details `getRawData()` extracts the raw count table.
 #'
 #' @param objCOTAN a `COTAN` object
@@ -30,6 +35,8 @@ setMethod(
 )
 
 
+#' @aliases getNumCells
+#'
 #' @details `getNumCells()` extracts the number of cells in the sample (\eqn{m})
 #'
 #' @param objCOTAN a `COTAN` object
@@ -51,6 +58,9 @@ setMethod(
   }
 )
 
+
+#' @aliases getNumGenes
+#'
 #' @details `getNumGenes()` extracts the number of genes in the sample (\eqn{n})
 #'
 #' @param objCOTAN a `COTAN` object
@@ -73,6 +83,8 @@ setMethod(
 )
 
 
+#' @aliases getCells
+#'
 #' @details `getCells()` extract all cells in the dataset.
 #'
 #' @param objCOTAN a `COTAN` object
@@ -95,6 +107,8 @@ setMethod(
 )
 
 
+#' @aliases getGenes
+#'
 #' @details `getGenes()` extract all genes in the dataset.
 #'
 #' @param objCOTAN a `COTAN` object
@@ -117,6 +131,8 @@ setMethod(
 )
 
 
+#' @aliases getZeroOneProj
+#'
 #' @details `getZeroOneProj()` extracts the raw count table where any
 #'   positive number has been replaced with `1`
 #'
@@ -141,6 +157,8 @@ setMethod(
 )
 
 
+#' @aliases getCellsSize
+#'
 #' @details `getCellsSize()` extracts the cell raw library size.
 #'
 #' @param objCOTAN a `COTAN` object
@@ -163,6 +181,8 @@ setMethod(
 )
 
 
+#' @aliases getGenesSize
+#'
 #' @details `getGenesSize()` extracts the genes raw library size.
 #'
 #' @param objCOTAN a `COTAN` object
@@ -197,6 +217,11 @@ setMethod(
 #'   * "metaCells" - contains cells' related information along the `nu` vector,
 #'     the fully expressed flag and the clusterizations
 #'
+#' @name HandleMetaData
+NULL
+
+#' @aliases getMetadataDataset
+#'
 #' @details `getMetadataDataset()` extracts the meta-data stored for the
 #'   current data-set.
 #'
@@ -230,6 +255,8 @@ setMethod(
 )
 
 
+#' @aliases getMetadataElement
+#'
 #' @details `getMetadataElement()` extracts the value associated with the
 #'   given tag if present or an empty string otherwise.
 #'
@@ -265,6 +292,8 @@ setMethod(
 )
 
 
+#' @aliases getMetadataGenes
+#'
 #' @details `getMetadataGenes()` extracts the meta-data stored for the genes
 #'
 #' @param objCOTAN a `COTAN` object
@@ -287,6 +316,8 @@ setMethod(
 )
 
 
+#' @aliases getMetadataCells
+#'
 #' @details `getMetadataCells()` extracts the meta-data stored for the cells
 #'
 #' @param objCOTAN a `COTAN` object
@@ -309,6 +340,8 @@ setMethod(
 )
 
 
+#' @aliases getDims
+#'
 #' @details `getDims()` extracts the sizes of all slots of the `COTAN` object
 #'
 #' @param objCOTAN a `COTAN` object
@@ -339,6 +372,8 @@ setMethod(
 
 # ------- `COTAN` estimated data accessors ------
 
+#' @aliases getNormalizedData
+#'
 #' @details `getNormalizedData()` extracts the *normalized* count table (i.e.
 #'   divided by `nu`)
 #'
@@ -368,6 +403,8 @@ setMethod(
 )
 
 
+#' @aliases getNu
+#'
 #' @details `getNu()` extracts the nu array (normalized cells' counts averages)
 #'
 #' @param objCOTAN a `COTAN` object
@@ -397,6 +434,8 @@ setMethod(
 )
 
 
+#' @aliases getLambda
+#'
 #' @details `getLambda()` extracts the lambda array (mean expression for each
 #'   gene)
 #'
@@ -427,6 +466,8 @@ setMethod(
 )
 
 
+#' @aliases getDispersion
+#'
 #' @details `getDispersion()` extracts the dispersion array (a)
 #'
 #' @param objCOTAN a `COTAN` object
@@ -469,6 +510,11 @@ setMethod(
 #'   has been made quite easy to exclude the flagged genes/cells in the user
 #'   calculations.
 #'
+#' @name RawDataCleaning
+NULL
+
+#' @aliases flagNotHousekeepingGenes
+#'
 #' @details `flagNotHousekeepingGenes()` returns a Boolean array with TRUE for
 #'   those genes that are not housekeeping.
 #'
@@ -510,6 +556,8 @@ setMethod(
 )
 
 
+#' @aliases flagNotFullyExpressedCells
+#'
 #' @details `flagNotFullyExpressedCells()`returns a Boolean vector with TRUE for
 #'   those cells that are not fully expressed
 #'
@@ -542,6 +590,8 @@ setMethod(
 )
 
 
+#' @aliases getHousekeepingGenes
+#'
 #' @details `getHousekeepingGenes()` returns the genes expressed in all cells of
 #'   the dataset
 #'
@@ -566,6 +616,8 @@ setMethod(
 )
 
 
+#' @aliases getFullyExpressedCells
+#'
 #' @details `getFullyExpressedCells()` returns the cells that did express
 #'   all genes of the dataset
 #'
@@ -591,6 +643,13 @@ setMethod(
 
 # ------- `COTAN` coex data accessors ------
 
+#' Calculating the COEX matrix for genes and cells
+#'
+#' @name CalculatingCOEX
+NULL
+
+#' @aliases getGenesCoex
+#'
 #' @details `getGenesCoex()` extracts a complete (or a partial after genes
 #'   dropping) genes' `COEX` matrix from the `COTAN` object.
 #'
@@ -687,6 +746,8 @@ setMethod(
 )
 
 
+#' @aliases getCellsCoex
+#'
 #' @details `getCellsCoex()` extracts a complete (or a partial after cells
 #'   dropping) cells' `COEX` matrix from the `COTAN` object.
 #'
@@ -757,6 +818,10 @@ setMethod(
 #'   [calculateCoex()] method, with the **role** of the second gene taken by the
 #'   *In/Out* status of the cells with respect to each *cluster*.
 #'
+#' @name HandlingClusterizations
+NULL
+
+#' @aliases getClusterizations
 #'
 #' @details `getClusterizations()` extracts the list of the *clusterizations*
 #'   defined in the `COTAN` object.
@@ -830,6 +895,8 @@ setMethod(
   }
 )
 
+#' @aliases getClusterizationName
+#'
 #' @details `getClusterizationName()` normalizes the given *clusterization* name
 #'   or, if none were given, returns the name of last available *clusterization*
 #'   in the `COTAN` object. It can return the *clusterization* **internal name**
@@ -880,6 +947,8 @@ setMethod(
   }
 )
 
+#' @aliases getClusterizationData
+#'
 #' @details `getClusterizationData()` extracts the asked *clusterization* and
 #'   its associated `COEX` `data.frame` from the `COTAN` object
 #'
@@ -923,6 +992,8 @@ setMethod(
 )
 
 
+#' @aliases getClustersCoex
+#'
 #' @details `getClustersCoex()` extracts the full `clusterCoex` member `list`
 #'
 #' @param objCOTAN a `COTAN` object

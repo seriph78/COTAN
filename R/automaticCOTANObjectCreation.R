@@ -8,8 +8,13 @@
 #'   [dropGenesCells()]) and applies all steps until the genes' `COEX` matrix is
 #'   stored in the object
 #'
+#' @name COTANObjectCreation
+NULL
+
+#' @aliases proceedToCoex
+#'
 #' @details `proceedToCoex()` takes a newly created `COTAN` object (or the
-#'   result of a call to `dropGenesCells()`) and runs [calculateCOEX()]
+#'   result of a call to `dropGenesCells()`) and runs [calculateCoex()]
 #'
 #' @param objCOTAN a newly created `COTAN` object
 #' @param cores number of cores to be used
@@ -47,7 +52,7 @@
 #' ##                                   sampleCondition = "test dataset")
 #' ## objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
 #'
-#' @rdname automaticCOTANObjectCreation
+#' @rdname COTANObjectCreation
 #'
 setMethod(
   "proceedToCoex",
@@ -189,7 +194,7 @@ setMethod(
 #'   outDir = tempdir(),
 #'   cores = 12)
 #'
-#' @rdname automaticCOTANObjectCreation
+#' @rdname COTANObjectCreation
 
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,

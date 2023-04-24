@@ -124,6 +124,9 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 #'   more than a small fraction of the genes have their `GDI` level above the
 #'   given `GDIThreshold`
 #'
+#' @name UniformClusters
+NULL
+
 #' @details `cellsUniformClustering()` finds a **Uniform** *clusterizations* by
 #'   means of the `GDI`. Once a preliminary *clusterization* is obtained from
 #'   the `Seurat` package methods, each *cluster* is checked for **uniformity**

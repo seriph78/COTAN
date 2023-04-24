@@ -11,6 +11,11 @@
 #'   linear statistic of the raw data or `Bisection` if they are found via a
 #'   parallel bisection solver.
 #'
+#' @name ParametersEstimations
+NULL
+
+#' @aliases estimateLambdaLinear
+#'
 #' @details `estimateLambdaLinear()` does a linear estimation of lambda (genes'
 #'   counts averages)
 #'
@@ -57,6 +62,8 @@ setMethod(
 )
 
 
+#' @aliases estimateNuLinear
+#'
 #' @details `estimateNuLinear()` does a linear estimation of nu (normalized
 #'   cells' counts averages)
 #'
@@ -101,6 +108,8 @@ setMethod(
 )
 
 
+#' @aliases estimateDispersionBisection
+#'
 #' @details `estimateDispersionBisection()` estimates the negative binomial
 #'   dispersion factor for each gene (a). Determines the `dispersion` such that,
 #'   for each gene, the probability of zero count matches the number of observed
@@ -363,6 +372,8 @@ setMethod(
 )
 
 
+#' @aliases estimateDispersionNuBisection
+#'
 #' @details `estimateDispersionNuBisection()` estimates the `dispersion` and
 #'   `nu` field of a `COTAN` object by running sequentially a bisection for each
 #'   parameter.
@@ -478,7 +489,7 @@ setMethod(
 
 #' @details `estimateDispersionNuNlminb()` estimates the `nu` and
 #'   `dispersion` parameters to minimize the discrepancy between the observed
-#'   and expected probability of zero. It uses the [[stats::nlminb()]] solver,
+#'   and expected probability of zero. It uses the [stats::nlminb()] solver,
 #'   but since the joint parameters have too high dimensionality, it converges
 #'   too slowly to be actually useful in real cases.
 #'

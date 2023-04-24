@@ -1,5 +1,7 @@
 # --------------------- Uniform Clusters ----------------------
 
+#' @name UniformClusters
+#'
 #' @details `GDIPlot()` directly evaluates and plots the `GDI` for a sample.
 #'
 #' @param objCOTAN a `COTAN` object

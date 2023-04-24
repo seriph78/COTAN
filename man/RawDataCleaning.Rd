@@ -2,16 +2,25 @@
 % Please edit documentation in R/COTAN-getters.R, R/COTAN-modifiers.R,
 %   R/ECD-plot.R, R/clean-method.R, R/clean-plot.R, R/librarySize-plot.R,
 %   R/mitochondrialPercentage-plot.R, R/scatter-plot.R
-\name{flagNotHousekeepingGenes,COTAN-method}
+\name{RawDataCleaning}
+\alias{RawDataCleaning}
 \alias{flagNotHousekeepingGenes,COTAN-method}
+\alias{flagNotHousekeepingGenes}
 \alias{flagNotFullyExpressedCells,COTAN-method}
+\alias{flagNotFullyExpressedCells}
 \alias{getHousekeepingGenes,COTAN-method}
+\alias{getHousekeepingGenes}
 \alias{getFullyExpressedCells,COTAN-method}
+\alias{getFullyExpressedCells}
 \alias{findHousekeepingGenes,COTAN-method}
+\alias{findHousekeepingGenes}
 \alias{findFullyExpressedCells,COTAN-method}
+\alias{findFullyExpressedCells}
 \alias{dropGenesCells,COTAN-method}
+\alias{dropGenesCells}
 \alias{ECDPlot}
 \alias{clean,COTAN-method}
+\alias{clean}
 \alias{cleanPlots}
 \alias{cellSizePlot}
 \alias{genesSizePlot}

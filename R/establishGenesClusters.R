@@ -9,6 +9,9 @@
 #'   denote it as *Local Differentiation Index* (LDI) relative to the selected
 #'   subset.
 #'
+#' @name GenesCoexSpace
+NULL
+
 #' @details `genesCoexSpace()` calculates genes groups based on the primary
 #'   markers and uses them to prepare the genes' `COEX` space `data.frame`.
 #'
