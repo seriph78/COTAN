@@ -6,16 +6,16 @@
 \alias{RawDataCleaning}
 \alias{flagNotHousekeepingGenes,COTAN-method}
 \alias{flagNotHousekeepingGenes}
-\alias{flagNotFullyExpressedCells,COTAN-method}
-\alias{flagNotFullyExpressedCells}
+\alias{flagNotFullyExpressingCells,COTAN-method}
+\alias{flagNotFullyExpressingCells}
 \alias{getHousekeepingGenes,COTAN-method}
 \alias{getHousekeepingGenes}
-\alias{getFullyExpressedCells,COTAN-method}
-\alias{getFullyExpressedCells}
+\alias{getFullyExpressingCells,COTAN-method}
+\alias{getFullyExpressingCells}
 \alias{findHousekeepingGenes,COTAN-method}
 \alias{findHousekeepingGenes}
-\alias{findFullyExpressedCells,COTAN-method}
-\alias{findFullyExpressedCells}
+\alias{findFullyExpressingCells,COTAN-method}
+\alias{findFullyExpressingCells}
 \alias{dropGenesCells,COTAN-method}
 \alias{dropGenesCells}
 \alias{ECDPlot}
@@ -30,15 +30,15 @@
 \usage{
 \S4method{flagNotHousekeepingGenes}{COTAN}(objCOTAN)
 
-\S4method{flagNotFullyExpressedCells}{COTAN}(objCOTAN)
+\S4method{flagNotFullyExpressingCells}{COTAN}(objCOTAN)
 
 \S4method{getHousekeepingGenes}{COTAN}(objCOTAN)
 
-\S4method{getFullyExpressedCells}{COTAN}(objCOTAN)
+\S4method{getFullyExpressingCells}{COTAN}(objCOTAN)
 
 \S4method{findHousekeepingGenes}{COTAN}(objCOTAN)
 
-\S4method{findFullyExpressedCells}{COTAN}(objCOTAN)
+\S4method{findFullyExpressingCells}{COTAN}(objCOTAN)
 
 \S4method{dropGenesCells}{COTAN}(objCOTAN, genes = c(), cells = c())
 
@@ -86,20 +86,20 @@ Human, mouse "^mt-")}
 \code{flagNotHousekeepingGenes()} returns a Booleans array with TRUE for
 genes that are not housekeeping
 
-\code{flagNotFullyExpressedCells()} returns an array of Booleans with
-TRUE for cells that are not fully expressed
+\code{flagNotFullyExpressingCells()} returns an array of Booleans with
+TRUE for cells that are not expressing all genes
 
 \code{getHousekeepingGenes()} returns an array containing all genes
 that are expressed in all cells
 
-\code{getFullyExpressedCells()} returns an array containing all cells
+\code{getFullyExpressingCells()} returns an array containing all cells
 that express all genes
 
 \code{findHousekeepingGenes()} returns the given \code{COTAN} object with
 updated housekeeping genes' information
 
-\code{findFullyExpressedCells()} returns the given \code{COTAN} object with
-updated fully expressed cells' information
+\code{findFullyExpressingCells()} returns the given \code{COTAN} object with
+updated flags about the cells with positive UMI count for all genes
 
 \code{dropGenesCells()} returns a completely new \code{COTAN} object with the
 new raw data obtained after the indicated genes/cells were expunged. Only
@@ -145,20 +145,20 @@ calculations.
 \code{flagNotHousekeepingGenes()} returns a Boolean array with TRUE for
 those genes that are not housekeeping.
 
-\code{flagNotFullyExpressedCells()}returns a Boolean vector with TRUE for
-those cells that are not fully expressed
+\code{flagNotFullyExpressingCells()}returns a Boolean vector with TRUE
+for those cells that are not expressing all genes
 
 \code{getHousekeepingGenes()} returns the genes expressed in all cells of
 the dataset
 
-\code{getFullyExpressedCells()} returns the cells that did express
+\code{getFullyExpressingCells()} returns the cells that did express
 all genes of the dataset
 
 \code{findHousekeepingGenes()} determines the housekeeping genes inside
 the raw data
 
-\code{findFullyExpressedCells()} determines the fully expressed cells
-inside the raw data
+\code{findFullyExpressingCells()} determines the cells that are
+expressing all genes in the dataset
 
 \code{dropGenesCells()} removes an array of genes and/or cells from the
 current \code{COTAN} object.
@@ -200,12 +200,12 @@ objCOTAN <- clean(objCOTAN)
 objCOTAN <- findHousekeepingGenes(objCOTAN)
 goodPos <- flagNotHousekeepingGenes(objCOTAN)
 
-objCOTAN <- findFullyExpressedCells(objCOTAN)
-goodPos <- flagNotFullyExpressedCells(objCOTAN)
+objCOTAN <- findFullyExpressingCells(objCOTAN)
+goodPos <- flagNotFullyExpressingCells(objCOTAN)
 
 hkGenes <- getHousekeepingGenes(objCOTAN)
 
-feCells <- getFullyExpressedCells(objCOTAN)
+feCells <- getFullyExpressingCells(objCOTAN)
 
 ## These plots might help to identify genes/cells that need to be dropped
 plot <- ECDPlot(objCOTAN, yCut = 100)

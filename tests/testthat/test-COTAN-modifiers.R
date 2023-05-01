@@ -48,10 +48,10 @@ test_that("Housekeeping Genes and Fully Expressed Cells", {
                c(FALSE, rep(TRUE, getNumGenes(obj) - 1)))
   expect_equal(getHousekeepingGenes(obj), c(LETTERS[1]))
 
-  obj <- findFullyExpressedCells(obj)
+  obj <- findFullyExpressingCells(obj)
 
-  expect_equal(flagNotFullyExpressedCells(obj), rep(TRUE, getNumCells(obj)))
-  expect_equal(getFullyExpressedCells(obj), vector(mode = "character"))
+  expect_equal(flagNotFullyExpressingCells(obj), rep(TRUE, getNumCells(obj)))
+  expect_equal(getFullyExpressingCells(obj), vector(mode = "character"))
 })
 
 

@@ -74,7 +74,7 @@ test_that("'scCOTAN' converters",{
     #drop the hk column as it won't appear in the obj2 in this case!
     obj@metaGenes[["hkGenes"]] <- NULL
   }
-  if (all(flagNotFullyExpressedCells(obj))) {
+  if (all(flagNotFullyExpressingCells(obj))) {
     #drop the fe column as it won't appear in the obj2 anyway!
     obj@metaCells[["feCells"]] <- NULL
   }

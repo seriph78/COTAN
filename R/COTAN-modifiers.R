@@ -161,15 +161,15 @@ setMethod(
 )
 
 
-#' @aliases findFullyExpressedCells
+#' @aliases findFullyExpressingCells
 #'
-#' @details `findFullyExpressedCells()` determines the fully expressed cells
-#'   inside the raw data
+#' @details `findFullyExpressingCells()` determines the cells that are
+#'   expressing all genes in the dataset
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `findFullyExpressedCells()` returns the given `COTAN` object with
-#'   updated fully expressed cells' information
+#' @returns `findFullyExpressingCells()` returns the given `COTAN` object with
+#'   updated flags about the cells with positive UMI count for all genes
 #'
 #' @importFrom Matrix colSums
 #'
@@ -178,7 +178,7 @@ setMethod(
 #' @rdname RawDataCleaning
 #'
 setMethod(
-  "findFullyExpressedCells",
+  "findFullyExpressingCells",
   "COTAN",
   function(objCOTAN) {
     zeroOne <- getZeroOneProj(objCOTAN)
