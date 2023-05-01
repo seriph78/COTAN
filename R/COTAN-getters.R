@@ -556,15 +556,15 @@ setMethod(
 )
 
 
-#' @aliases flagNotFullyExpressedCells
+#' @aliases flagNotFullyExpressingCells
 #'
-#' @details `flagNotFullyExpressedCells()`returns a Boolean vector with TRUE for
-#'   those cells that are not fully expressed
+#' @details `flagNotFullyExpressingCells()`returns a Boolean vector with TRUE
+#'   for those cells that are not expressing all genes
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `flagNotFullyExpressedCells()` returns an array of Booleans with
-#'   TRUE for cells that are not fully expressed
+#' @returns `flagNotFullyExpressingCells()` returns an array of Booleans with
+#'   TRUE for cells that are not expressing all genes
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
@@ -572,13 +572,13 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' objCOTAN <- findFullyExpressedCells(objCOTAN)
-#' goodPos <- flagNotFullyExpressedCells(objCOTAN)
+#' objCOTAN <- findFullyExpressingCells(objCOTAN)
+#' goodPos <- flagNotFullyExpressingCells(objCOTAN)
 #'
 #' @rdname RawDataCleaning
 #'
 setMethod(
-  "flagNotFullyExpressedCells",
+  "flagNotFullyExpressingCells",
   "COTAN",
   function(objCOTAN) {
     if (is_empty(getMetadataCells(objCOTAN)[["feCells"]])) {
@@ -616,28 +616,28 @@ setMethod(
 )
 
 
-#' @aliases getFullyExpressedCells
+#' @aliases getFullyExpressingCells
 #'
-#' @details `getFullyExpressedCells()` returns the cells that did express
+#' @details `getFullyExpressingCells()` returns the cells that did express
 #'   all genes of the dataset
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getFullyExpressedCells()` returns an array containing all cells
+#' @returns `getFullyExpressingCells()` returns an array containing all cells
 #'   that express all genes
 #'
 #' @export
 #'
 #' @examples
-#' feCells <- getFullyExpressedCells(objCOTAN)
+#' feCells <- getFullyExpressingCells(objCOTAN)
 #'
 #' @rdname RawDataCleaning
 #'
 setMethod(
-  "getFullyExpressedCells",
+  "getFullyExpressingCells",
   "COTAN",
   function(objCOTAN) {
-    return(getCells(objCOTAN)[!flagNotFullyExpressedCells(objCOTAN)])
+    return(getCells(objCOTAN)[!flagNotFullyExpressingCells(objCOTAN)])
   }
 )
 
