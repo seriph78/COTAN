@@ -58,8 +58,18 @@ setGeneric(
 )
 
 setGeneric(
+  "getNumExpressedGenes",
+  function(objCOTAN) standardGeneric("getNumExpressedGenes")
+)
+
+setGeneric(
   "getGenesSize",
   function(objCOTAN) standardGeneric("getGenesSize")
+)
+
+setGeneric(
+  "getNumOfExpressingCells",
+  function(objCOTAN) standardGeneric("getNumOfExpressingCells")
 )
 
 setGeneric(

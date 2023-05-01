@@ -181,6 +181,34 @@ setMethod(
 )
 
 
+#' @aliases getNumExpressedGenes
+#'
+#' @details `getNumExpressedGenes()` extracts the number of genes expressed for
+#'   each cell. Exploits a feature of [Matrix::CsparseMatrix-class]
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @return `getNumExpressedGenes()` returns an array with the library sizes
+#'
+#' @export
+#'
+#' @examples
+#' numExpGenes <- getNumExpressedGenes(objCOTAN)
+#'
+#' @rdname RawDataGetters
+#'
+setMethod(
+  "getNumExpressedGenes",
+  "COTAN",
+  function(objCOTAN) {
+    # We expliot CsparseMatrix feature
+    ret <- diff(objCOTAN@raw@p)
+    names(ret) <- getCells(objCOTAN)
+    return(ret)
+  }
+)
+
+
 #' @aliases getGenesSize
 #'
 #' @details `getGenesSize()` extracts the genes raw library size.
@@ -201,6 +229,35 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     return(rowSums(objCOTAN@raw))
+  }
+)
+
+
+#' @aliases getNumOfExpressingCells
+#'
+#' @details `getNumOfExpressingCells()` extracts, for each gene, the number of
+#'   cells that are expressing it. Exploits a feature of
+#'   [Matrix::CsparseMatrix-class]
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @return `getNumOfExpressingCells()` returns an array with the library sizes
+#'
+#' @export
+#'
+#' @examples
+#' numExpCells <- getNumOfExpressingCells(objCOTAN)
+#'
+#' @rdname RawDataGetters
+#'
+setMethod(
+  "getNumOfExpressingCells",
+  "COTAN",
+  function(objCOTAN) {
+    # We exploit CsparseMatrix feature
+    ret <- diff(t(objCOTAN@raw)@p)
+    names(ret) <- getGenes(objCOTAN)
+    return(ret)
   }
 )
 
