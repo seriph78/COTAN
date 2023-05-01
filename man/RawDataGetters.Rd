@@ -16,8 +16,12 @@
 \alias{getZeroOneProj}
 \alias{getCellsSize,COTAN-method}
 \alias{getCellsSize}
+\alias{getNumExpressedGenes,COTAN-method}
+\alias{getNumExpressedGenes}
 \alias{getGenesSize,COTAN-method}
 \alias{getGenesSize}
+\alias{getNumOfExpressingCells,COTAN-method}
+\alias{getNumOfExpressingCells}
 \title{Raw data \code{COTAN} accessors}
 \usage{
 \S4method{getRawData}{COTAN}(objCOTAN)
@@ -34,7 +38,11 @@
 
 \S4method{getCellsSize}{COTAN}(objCOTAN)
 
+\S4method{getNumExpressedGenes}{COTAN}(objCOTAN)
+
 \S4method{getGenesSize}{COTAN}(objCOTAN)
+
+\S4method{getNumOfExpressingCells}{COTAN}(objCOTAN)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
@@ -55,7 +63,11 @@
 
 \code{getCellsSize()} returns an array with the library sizes
 
+\code{getNumExpressedGenes()} returns an array with the library sizes
+
 \code{getGenesSize()} returns an array with the library sizes
+
+\code{getNumOfExpressingCells()} returns an array with the library sizes
 }
 \description{
 These methods extract information out of a just created \code{COTAN}
@@ -77,7 +89,14 @@ positive number has been replaced with \code{1}
 
 \code{getCellsSize()} extracts the cell raw library size.
 
+\code{getNumExpressedGenes()} extracts the number of genes expressed for
+each cell. Exploits a feature of \link[Matrix:CsparseMatrix-class]{Matrix::CsparseMatrix}
+
 \code{getGenesSize()} extracts the genes raw library size.
+
+\code{getNumOfExpressingCells()} extracts, for each gene, the number of
+cells that are expressing it. Exploits a feature of
+\link[Matrix:CsparseMatrix-class]{Matrix::CsparseMatrix}
 }
 \examples{
 data("test.dataset")
@@ -97,6 +116,10 @@ zeroOne <- getZeroOneProj(objCOTAN)
 
 cellsSize <- getCellsSize(objCOTAN)
 
+numExpGenes <- getNumExpressedGenes(objCOTAN)
+
 genesSize <- getGenesSize(objCOTAN)
+
+numExpCells <- getNumOfExpressingCells(objCOTAN)
 
 }

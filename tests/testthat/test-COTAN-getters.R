@@ -27,6 +27,9 @@ test_that("COTAN getters", {
   expect_equal(getCells(obj), head(letters, getNumCells(obj)))
   expect_equal(getZeroOneProj(obj), sign(getRawData(obj)))
   expect_equal(getCellsSize(obj), colSums(getRawData(obj)))
+  expect_equal(getNumExpressedGenes(obj), colSums(getRawData(obj) != 0))
+  expect_equal(getGenesSize(obj), rowSums(getRawData(obj)))
+  expect_equal(getNumOfExpressingCells(obj), rowSums(getRawData(obj) != 0))
   expect_equal(getNormalizedData(obj), t(t(getRawData(obj)) * (1/getNu(obj))))
   expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[c(1:8)],
                ignore_attr = TRUE)
