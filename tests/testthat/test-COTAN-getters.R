@@ -50,8 +50,8 @@ test_that("COTAN getters", {
   expect_equal(flagNotHousekeepingGenes(obj),
                c(FALSE, rep(TRUE, getNumGenes(obj) - 1)))
   expect_equal(getHousekeepingGenes(obj), c(LETTERS[1]))
-  expect_equal(flagNotFullyExpressedCells(obj), rep(TRUE, getNumCells(obj)))
-  expect_equal(getFullyExpressedCells(obj), vector(mode = "character"))
+  expect_equal(flagNotFullyExpressingCells(obj), rep(TRUE, getNumCells(obj)))
+  expect_equal(getFullyExpressingCells(obj), vector(mode = "character"))
   expect_equal(dim(getGenesCoex(obj)),
                as.integer(c(getNumGenes(obj), getNumGenes(obj))))
   expect_equal(dim(getCellsCoex(obj)),
