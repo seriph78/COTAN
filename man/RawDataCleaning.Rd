@@ -148,8 +148,8 @@ those genes that are not fully-expressed.
 \code{flagNotFullyExpressingCells()}returns a Boolean vector with TRUE
 for those cells that are not expressing all genes
 
-\code{getFullyExpressedGenes()} returns the genes expressed in all cells of
-the dataset
+\code{getFullyExpressedGenes()} returns the genes expressed in all cells
+of the dataset
 
 \code{getFullyExpressingCells()} returns the cells that did express
 all genes of the dataset
@@ -203,7 +203,7 @@ goodPos <- flagNotFullyExpressedGenes(objCOTAN)
 objCOTAN <- findFullyExpressingCells(objCOTAN)
 goodPos <- flagNotFullyExpressingCells(objCOTAN)
 
-hkGenes <- getFullyExpressedGenes(objCOTAN)
+feGenes <- getFullyExpressedGenes(objCOTAN)
 
 feCells <- getFullyExpressingCells(objCOTAN)
 

@@ -592,8 +592,8 @@ setMethod(
 
 #' @aliases getFullyExpressedGenes
 #'
-#' @details `getFullyExpressedGenes()` returns the genes expressed in all cells of
-#'   the dataset
+#' @details `getFullyExpressedGenes()` returns the genes expressed in all cells
+#'   of the dataset
 #'
 #' @param objCOTAN a `COTAN` object
 #'
@@ -603,7 +603,7 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' hkGenes <- getFullyExpressedGenes(objCOTAN)
+#' feGenes <- getFullyExpressedGenes(objCOTAN)
 #'
 #' @rdname RawDataCleaning
 #'
