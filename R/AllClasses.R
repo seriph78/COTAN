@@ -380,7 +380,7 @@ getCOTANSlots <- function(from) {
     if (!is_empty(clusterData) &&
         !all(rownames(from@raw) %in% union(rownames(clusterData), from@hk))) {
       warning("scCOTAN as COTAN: 'cluster_data' has no information",
-              " on some genes that are not housekeeping",
+              " on some genes that are not fully-expressed",
               " - clusters' coex will be discarded!", call. = FALSE)
       clusterData <- data.frame()
     }
@@ -388,7 +388,7 @@ getCOTANSlots <- function(from) {
     if (!is_empty(clusterData)) {
       missingGenes <- setdiff(rownames(from@raw), rownames(clusterData))
       if (!is_empty(missingGenes)) {
-        # missing genes are housekeeping thus have all zero coex!
+        # missing genes are fully-expressed thus have all zero coex!
         missingData <- matrix(0.0, nrow = length(missingGenes),
                               ncol = ncol(clusterData),
                               dimnames = c(missingGenes, colnames(clusterData)))

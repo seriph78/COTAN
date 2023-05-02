@@ -128,15 +128,15 @@ setMethod(
 
 # ------------ Raw data cleaning --------------
 
-#' @aliases findHousekeepingGenes
+#' @aliases findFullyExpressedGenes
 #'
-#' @details `findHousekeepingGenes()` determines the housekeeping genes inside
-#'   the raw data
+#' @details `findFullyExpressedGenes()` determines the fully-expressed genes
+#'   inside the raw data
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `findHousekeepingGenes()` returns the given `COTAN` object with
-#'   updated housekeeping genes' information
+#' @returns `findFullyExpressedGenes()` returns the given `COTAN` object with
+#'   updated fully-expressed genes' information
 #'
 #' @importFrom Matrix rowSums
 #'
@@ -145,7 +145,7 @@ setMethod(
 #' @rdname RawDataCleaning
 #'
 setMethod(
-  "findHousekeepingGenes",
+  "findFullyExpressedGenes",
   "COTAN",
   function(objCOTAN) {
     zeroOne <- getZeroOneProj(objCOTAN)

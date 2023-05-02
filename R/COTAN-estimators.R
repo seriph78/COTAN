@@ -282,7 +282,6 @@ setMethod(
       stop("dispersion must not be empty, estimate it")
     }
 
-    # only genes not in housekeeping are used (to align to dispersion vector)
     cells <- getCells(objCOTAN)
     zeroOneMatrix <- getZeroOneProj(objCOTAN)
     sumZeros <- set_names(getNumGenes(objCOTAN) -
