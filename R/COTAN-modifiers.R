@@ -154,7 +154,7 @@ setMethod(
     objCOTAN@metaGenes <-
       setColumnInDF(objCOTAN@metaGenes,
                     rowSums(zeroOne) == getNumCells(objCOTAN),
-                    "hkGenes", getGenes(objCOTAN))
+                    "feGenes", getGenes(objCOTAN))
 
     return(objCOTAN)
   }

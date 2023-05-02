@@ -321,7 +321,7 @@ getCOTANSlots <- function(from) {
 
   if (!is_empty(from@hk)) {
     metaGenes <- setColumnInDF(metaGenes, rownames(from@raw) %in% from@hk,
-                               "hkGenes", rownames(from@raw))
+                               "feGenes", rownames(from@raw))
   }
 
   if (!is_empty(from@a)) {
@@ -489,8 +489,8 @@ getScCOTANSlots <- function(from) {
   }
 
   hk <- vector(mode = "character")
-  if (!is_empty(from@metaGenes[["hkGenes"]])) {
-    hk <- rownames(from@raw)[from@metaGenes[["hkGenes"]]]
+  if (!is_empty(from@metaGenes[["feGenes"]])) {
+    hk <- rownames(from@raw)[from@metaGenes[["feGenes"]]]
   }
 
   rawNorm <- emptySparseMatrix()

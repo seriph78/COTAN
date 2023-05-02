@@ -122,10 +122,10 @@ heatmapPlot <- function(genesLists, sets, conditions, dir,
       logThis(paste("Done type ", type), logLevel = 3L)
     }
     dfTemp <- dfTemp2
-    dfTemp[["t_hk"]] <-
+    dfTemp[["t_fe"]] <-
       ifelse((dfTemp[["g2"]] %in% getFullyExpressedGenes(obj)) |
              (dfTemp[["g1"]] %in% getFullyExpressedGenes(obj)),
-             "hk", "n")
+             "fe", "n")
     dfTemp[dfTemp[["pValue"]] > pValueThreshold, "coex"] <- 0L
     dfToPrint <- rbind(dfToPrint, dfTemp)
   }

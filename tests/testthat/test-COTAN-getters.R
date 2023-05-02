@@ -32,7 +32,7 @@ test_that("COTAN getters", {
                ignore_attr = TRUE)
   expect_equal(getMetadataDataset(obj)[[2]], metaInfo)
   expect_setequal(colnames(getMetadataGenes(obj)),
-                  c("lambda", "hkGenes", "dispersion"))
+                  c("lambda", "feGenes", "dispersion"))
   expect_equal(rownames(getMetadataGenes(obj)), getGenes(obj))
   expect_setequal(colnames(getMetadataCells(obj)),
                   c("nu", "feCells", names(getClustersCoex(obj))))

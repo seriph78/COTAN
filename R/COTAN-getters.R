@@ -547,10 +547,10 @@ setMethod(
   "flagNotFullyExpressedGenes",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(getMetadataGenes(objCOTAN)[["hkGenes"]])) {
+    if (is_empty(getMetadataGenes(objCOTAN)[["feGenes"]])) {
       return(set_names(rep(TRUE, getNumGenes(objCOTAN)), getGenes(objCOTAN)))
     } else {
-      return(!getMetadataGenes(objCOTAN)[["hkGenes"]])
+      return(!getMetadataGenes(objCOTAN)[["feGenes"]])
     }
   }
 )

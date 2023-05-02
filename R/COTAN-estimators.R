@@ -533,7 +533,8 @@ setMethod(
     gc()
 
     assert_that(all(zeroGenes != 0L), all(zeroCells != 0L),
-                msg = "Method cannot handle HK genes or FE cells yet")
+                msg = paste("Method cannot handle fully-expressed genes",
+                            "or fully-expressing cells yet"))
 
 
     errorFunction <- function(params, lambda, zeroGenes,
