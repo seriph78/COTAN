@@ -135,7 +135,8 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param cellsThreshold any gene that is expressed in more cells than threshold
-#'   times the total number of cells will be marked as **fully-expressed**
+#'   times the total number of cells will be marked as **fully-expressed**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
 #'
 #' @returns `findFullyExpressedGenes()` returns the given `COTAN` object with
 #'   updated **fully-expressed** genes' information
@@ -170,7 +171,8 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param genesThreshold any cell that is expressing more genes than threshold
-#'   times the total number of genes will be marked as **fully-expressing**
+#'   times the total number of genes will be marked as **fully-expressing**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
 #'
 #' @returns `findFullyExpressingCells()` returns the given `COTAN` object  with
 #'   updated **fully-expressing** cells' information

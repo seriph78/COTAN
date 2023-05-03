@@ -7,13 +7,17 @@
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
-#'   expressed in less cells than threshold times the total number of cells
+#'   expressed in less cells than threshold times the total number of cells.
+#'   Default cutoff is \eqn{0.003 \; (0.3\%)}
 #' @param genesCutoff `clean()` will delete from the `raw` data any cell that is
-#'   expressing less genes than threshold times the total number of genes
+#'   expressing less genes than threshold times the total number of genes.
+#'   Default cutoff is \eqn{0.002 \; (0.2\%)}
 #' @param cellsThreshold any gene that is expressed in more cells than threshold
-#'   times the total number of cells will be marked as **fully-expressed**
+#'   times the total number of cells will be marked as **fully-expressed**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
 #' @param genesThreshold any cell that is expressing more genes than threshold
-#'   times the total number of genes will be marked as **fully-expressing**
+#'   times the total number of genes will be marked as **fully-expressing**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
 #'
 #' @returns `clean()` returns the updated `COTAN` object
 #'
