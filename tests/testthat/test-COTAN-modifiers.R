@@ -34,7 +34,7 @@ test_that("metaDataset", {
 })
 
 
-test_that("Housekeeping Genes and Fully Expressed Cells", {
+test_that("Fully-expressed Genes and Fully-expressing Cells", {
   raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
                 nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
@@ -42,11 +42,11 @@ test_that("Housekeeping Genes and Fully Expressed Cells", {
 
   obj <- COTAN(raw = raw)
 
-  obj <- findHousekeepingGenes(obj)
+  obj <- findFullyExpressedGenes(obj)
 
-  expect_equal(flagNotHousekeepingGenes(obj),
+  expect_equal(flagNotFullyExpressedGenes(obj),
                c(FALSE, rep(TRUE, getNumGenes(obj) - 1)))
-  expect_equal(getHousekeepingGenes(obj), c(LETTERS[1]))
+  expect_equal(getFullyExpressedGenes(obj), c(LETTERS[1]))
 
   obj <- findFullyExpressingCells(obj)
 
