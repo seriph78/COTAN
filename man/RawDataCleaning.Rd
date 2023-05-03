@@ -36,15 +36,21 @@
 
 \S4method{getFullyExpressingCells}{COTAN}(objCOTAN)
 
-\S4method{findFullyExpressedGenes}{COTAN}(objCOTAN)
+\S4method{findFullyExpressedGenes}{COTAN}(objCOTAN, cellsThreshold = 0.99)
 
-\S4method{findFullyExpressingCells}{COTAN}(objCOTAN)
+\S4method{findFullyExpressingCells}{COTAN}(objCOTAN, genesThreshold = 0.99)
 
 \S4method{dropGenesCells}{COTAN}(objCOTAN, genes = c(), cells = c())
 
 ECDPlot(objCOTAN, yCut)
 
-\S4method{clean}{COTAN}(objCOTAN)
+\S4method{clean}{COTAN}(
+  objCOTAN,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99
+)
 
 cleanPlots(objCOTAN)
 
@@ -64,11 +70,23 @@ scatterPlot(objCOTAN, splitPattern = " ", numCol = 2L, splitSamples = FALSE)
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
+\item{cellsThreshold}{any gene that is expressed in more cells than threshold
+times the total number of cells will be marked as \strong{fully-expressed}}
+
+\item{genesThreshold}{any cell that is expressing more genes than threshold
+times the total number of genes will be marked as \strong{fully-expressing}}
+
 \item{genes}{an array of gene names}
 
 \item{cells}{an array of cell names}
 
 \item{yCut}{y threshold of library size to drop}
+
+\item{cellsCutoff}{\code{clean()} will delete from the \code{raw} data any gene that is
+expressed in less cells than threshold times the total number of cells}
+
+\item{genesCutoff}{\code{clean()} will delete from the \code{raw} data any cell that is
+expressing less genes than threshold times the total number of genes}
 
 \item{splitPattern}{Pattern used to extract, from the column names, the
 sample field (default " ")}
@@ -96,10 +114,10 @@ that are expressed in all cells
 that express all genes
 
 \code{findFullyExpressedGenes()} returns the given \code{COTAN} object with
-updated fully-expressed genes' information
+updated \strong{fully-expressed} genes' information
 
-\code{findFullyExpressingCells()} returns the given \code{COTAN} object with
-updated flags about the cells with positive UMI count for all genes
+\code{findFullyExpressingCells()} returns the given \code{COTAN} object  with
+updated \strong{fully-expressing} cells' information
 
 \code{dropGenesCells()} returns a completely new \code{COTAN} object with the
 new raw data obtained after the indicated genes/cells were expunged. Only

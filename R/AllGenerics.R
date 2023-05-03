@@ -191,12 +191,16 @@ setGeneric(
 
 setGeneric(
   "findFullyExpressedGenes",
-  function(objCOTAN) standardGeneric("findFullyExpressedGenes")
+  function(objCOTAN, cellsThreshold = 0.99) {
+    standardGeneric("findFullyExpressedGenes")
+  }
 )
 
 setGeneric(
   "findFullyExpressingCells",
-  function(objCOTAN) standardGeneric("findFullyExpressingCells")
+  function(objCOTAN, genesThreshold = 0.99) {
+    standardGeneric("findFullyExpressingCells")
+  }
 )
 
 setGeneric(
@@ -207,8 +211,8 @@ setGeneric(
 setGeneric(
   "clean",
   function(objCOTAN,
-           genesLowThreshold = 0.003, cellsLowThreshold = 0.002,
-           genesHighThreshold = 0.99, cellsHighThreshold = 0.99) {
+           cellsCutoff = 0.003, genesCutoff = 0.002,
+           cellsThreshold = 0.99, genesThreshold = 0.99) {
     standardGeneric("clean")
   }
 )

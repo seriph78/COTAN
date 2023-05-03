@@ -6,6 +6,14 @@
 #'   also produces and stores the estimators for nu and lambda
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
+#'   expressed in less cells than threshold times the total number of cells
+#' @param genesCutoff `clean()` will delete from the `raw` data any cell that is
+#'   expressing less genes than threshold times the total number of genes
+#' @param cellsThreshold any gene that is expressed in more cells than threshold
+#'   times the total number of cells will be marked as **fully-expressed**
+#' @param genesThreshold any cell that is expressing more genes than threshold
+#'   times the total number of genes will be marked as **fully-expressing**
 #'
 #' @returns `clean()` returns the updated `COTAN` object
 #'
@@ -19,24 +27,24 @@ setMethod(
   "clean",
   "COTAN",
   function(objCOTAN,
-           genesLowThreshold = 0.003, cellsLowThreshold = 0.002,
-           genesHighThreshold = 0.99, cellsHighThreshold = 0.99) {
+           cellsCutoff = 0.003, genesCutoff = 0.002,
+           cellsThreshold = 0.99, genesThreshold = 0.99) {
 
-    # We want to discard genes having less than given threshold
+    # We want to discard genes having less than given cutoff
     # default: less than 3 non-zero counts per 1000 cells
-    threshold <- round(getNumCells(objCOTAN) * genesThreshold, digits = 0L)
+    cutoff <- round(getNumCells(objCOTAN) * cellsCutoff, digits = 0L)
     genesToDrop <-
-      getGenes(objCOTAN)[rowSums(getZeroOneProj(objCOTAN)) <= threshold]
+      getGenes(objCOTAN)[rowSums(getZeroOneProj(objCOTAN)) <= cutoff]
 
     if (!is_empty(genesToDrop)) {
       objCOTAN <- dropGenesCells(objCOTAN, genes = genesToDrop)
     }
 
-    # We want to discard cells having less than given threshold
+    # We want to discard cells having less than given cutoff
     # default: less than 2 non-zero counts per 1000 genes
-    threshold <- round(getNumGenes(objCOTAN) * cellsThreshold, digits = 0L)
+    cutoff <- round(getNumGenes(objCOTAN) * genesCutoff, digits = 0L)
     cellsToDrop <-
-      getCells(objCOTAN)[colSums(getZeroOneProj(objCOTAN)) <= threshold]
+      getCells(objCOTAN)[colSums(getZeroOneProj(objCOTAN)) <= cutoff]
 
     if (!is_empty(cellsToDrop)) {
       objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
@@ -51,10 +59,13 @@ setMethod(
                    " genes and [", getNumCells(objCOTAN), "] cells"),
             logLevel = 2L)
 
+    objCOTAN <- findFullyExpressedGenes(objCOTAN,
+                                        threshold = genesHighThreshold)
+    objCOTAN <- findFullyExpressingCells(objCOTAN,
+                                         threshold = cellsHighThreshold)
+
     objCOTAN <- estimateLambdaLinear(objCOTAN)
     objCOTAN <- estimateNuLinear(objCOTAN)
-    objCOTAN <- findFullyExpressedGenes(objCOTAN)
-    objCOTAN <- findFullyExpressingCells(objCOTAN)
 
     gc()
 
