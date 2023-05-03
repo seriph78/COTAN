@@ -134,9 +134,12 @@ setMethod(
 #'   inside the raw data
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param cellsThreshold any gene that is expressed in more cells than threshold
+#'   times the total number of cells will be marked as **fully-expressed**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
 #'
 #' @returns `findFullyExpressedGenes()` returns the given `COTAN` object with
-#'   updated fully-expressed genes' information
+#'   updated **fully-expressed** genes' information
 #'
 #' @importFrom Matrix rowSums
 #'
@@ -147,13 +150,13 @@ setMethod(
 setMethod(
   "findFullyExpressedGenes",
   "COTAN",
-  function(objCOTAN) {
-    zeroOne <- getZeroOneProj(objCOTAN)
+  function(objCOTAN, cellsThreshold = 0.99) {
+    cellsCounts <- rowSums(getZeroOneProj(objCOTAN))
 
     # flag the genes with positive UMI count in every cell
     objCOTAN@metaGenes <-
       setColumnInDF(objCOTAN@metaGenes,
-                    rowSums(zeroOne) == getNumCells(objCOTAN),
+                    cellsCounts >= cellsThreshold * getNumCells(objCOTAN),
                     "feGenes", getGenes(objCOTAN))
 
     return(objCOTAN)
@@ -167,9 +170,12 @@ setMethod(
 #'   expressing all genes in the dataset
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param genesThreshold any cell that is expressing more genes than threshold
+#'   times the total number of genes will be marked as **fully-expressing**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
 #'
-#' @returns `findFullyExpressingCells()` returns the given `COTAN` object with
-#'   updated flags about the cells with positive UMI count for all genes
+#' @returns `findFullyExpressingCells()` returns the given `COTAN` object  with
+#'   updated **fully-expressing** cells' information
 #'
 #' @importFrom Matrix colSums
 #'
@@ -180,13 +186,13 @@ setMethod(
 setMethod(
   "findFullyExpressingCells",
   "COTAN",
-  function(objCOTAN) {
-    zeroOne <- getZeroOneProj(objCOTAN)
+  function(objCOTAN, genesThreshold = 0.99) {
+    genesCounts <- colSums(getZeroOneProj(objCOTAN))
 
     # flag the cells with positive UMI count in every gene
     objCOTAN@metaCells <-
       setColumnInDF(objCOTAN@metaCells,
-                    colSums(zeroOne) == getNumGenes(objCOTAN),
+                    genesCounts >= genesThreshold * getNumGenes(objCOTAN),
                     "feCells", getCells(objCOTAN))
 
     return(objCOTAN)
