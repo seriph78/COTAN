@@ -108,8 +108,8 @@ setGeneric(
 )
 
 setGeneric(
-  "flagNotHousekeepingGenes",
-  function(objCOTAN) standardGeneric("flagNotHousekeepingGenes")
+  "flagNotFullyExpressedGenes",
+  function(objCOTAN) standardGeneric("flagNotFullyExpressedGenes")
 )
 
 setGeneric(
@@ -118,8 +118,8 @@ setGeneric(
 )
 
 setGeneric(
-  "getHousekeepingGenes",
-  function(objCOTAN) standardGeneric("getHousekeepingGenes")
+  "getFullyExpressedGenes",
+  function(objCOTAN) standardGeneric("getFullyExpressedGenes")
 )
 
 setGeneric(
@@ -180,8 +180,8 @@ setGeneric(
 )
 
 setGeneric(
-  "findHousekeepingGenes",
-  function(objCOTAN) standardGeneric("findHousekeepingGenes")
+  "findFullyExpressedGenes",
+  function(objCOTAN) standardGeneric("findFullyExpressedGenes")
 )
 
 setGeneric(

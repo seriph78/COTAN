@@ -213,9 +213,9 @@ setMethod(
 #'   compacted into three `data.frame`s:
 #'   * "metaDataset" - contains all general information about the data-set
 #'   * "metaGenes" - contains genes' related information along the `lambda` and
-#'     `dispersion` vectors and the housekeeping flag
+#'     `dispersion` vectors and the fully-expressed flag
 #'   * "metaCells" - contains cells' related information along the `nu` vector,
-#'     the fully expressed flag and the clusterizations
+#'     the fully-expressing flag and the clusterizations
 #'
 #' @name HandleMetaData
 NULL
@@ -505,23 +505,23 @@ setMethod(
 #'   any number of genes/cells that are too sparse or too present to allow
 #'   proper calibration of the `COTAN` model.
 #'
-#'   We call genes that are expressed in all cells *House Keeping* while cells
-#'   that express all genes in the data are called *Fully Expressed*. In case it
-#'   has been made quite easy to exclude the flagged genes/cells in the user
+#'   We call genes that are expressed in all cells *Fully-Expressed* while cells
+#'   that express all genes in the data are called *Fully-Expressing*. In case
+#'   it has been made quite easy to exclude the flagged genes/cells in the user
 #'   calculations.
 #'
 #' @name RawDataCleaning
 NULL
 
-#' @aliases flagNotHousekeepingGenes
+#' @aliases flagNotFullyExpressedGenes
 #'
-#' @details `flagNotHousekeepingGenes()` returns a Boolean array with TRUE for
-#'   those genes that are not housekeeping.
+#' @details `flagNotFullyExpressedGenes()` returns a Boolean array with TRUE for
+#'   those genes that are not fully-expressed.
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `flagNotHousekeepingGenes()` returns a Booleans array with TRUE for
-#'   genes that are not housekeeping
+#' @returns `flagNotFullyExpressedGenes()` returns a Booleans array with TRUE
+#'   for genes that are not fully-expressed
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
@@ -538,19 +538,19 @@ NULL
 #'
 #' objCOTAN <- clean(objCOTAN)
 #'
-#' objCOTAN <- findHousekeepingGenes(objCOTAN)
-#' goodPos <- flagNotHousekeepingGenes(objCOTAN)
+#' objCOTAN <- findFullyExpressedGenes(objCOTAN)
+#' goodPos <- flagNotFullyExpressedGenes(objCOTAN)
 #'
 #' @rdname RawDataCleaning
 #'
 setMethod(
-  "flagNotHousekeepingGenes",
+  "flagNotFullyExpressedGenes",
   "COTAN",
   function(objCOTAN) {
-    if (is_empty(getMetadataGenes(objCOTAN)[["hkGenes"]])) {
+    if (is_empty(getMetadataGenes(objCOTAN)[["feGenes"]])) {
       return(set_names(rep(TRUE, getNumGenes(objCOTAN)), getGenes(objCOTAN)))
     } else {
-      return(!getMetadataGenes(objCOTAN)[["hkGenes"]])
+      return(!getMetadataGenes(objCOTAN)[["feGenes"]])
     }
   }
 )
@@ -590,28 +590,28 @@ setMethod(
 )
 
 
-#' @aliases getHousekeepingGenes
+#' @aliases getFullyExpressedGenes
 #'
-#' @details `getHousekeepingGenes()` returns the genes expressed in all cells of
-#'   the dataset
+#' @details `getFullyExpressedGenes()` returns the genes expressed in all cells
+#'   of the dataset
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getHousekeepingGenes()` returns an array containing all genes
+#' @returns `getFullyExpressedGenes()` returns an array containing all genes
 #'   that are expressed in all cells
 #'
 #' @export
 #'
 #' @examples
-#' hkGenes <- getHousekeepingGenes(objCOTAN)
+#' feGenes <- getFullyExpressedGenes(objCOTAN)
 #'
 #' @rdname RawDataCleaning
 #'
 setMethod(
-  "getHousekeepingGenes",
+  "getFullyExpressedGenes",
   "COTAN",
   function(objCOTAN) {
-    return(getGenes(objCOTAN)[!flagNotHousekeepingGenes(objCOTAN)])
+    return(getGenes(objCOTAN)[!flagNotFullyExpressedGenes(objCOTAN)])
   }
 )
 

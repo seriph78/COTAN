@@ -80,10 +80,10 @@ expectedYN
 expectedYY
 factoextra
 findClustersMarkers
+findFullyExpressedGenes
 findFullyExpressingCells
-findHousekeepingGenes
+flagNotFullyExpressedGenes
 flagNotFullyExpressingCells
-flagNotHousekeepingGenes
 funProbZero
 geneSetEnrichment
 genesCoexSpace
@@ -98,11 +98,11 @@ getClustersCoex
 getColorsVector
 getDims
 getDispersion
+getFullyExpressedGenes
 getFullyExpressingCells
 getGenes
 getGenesCoex
 getGenesSize
-getHousekeepingGenes
 getLambda
 getMetadataCells
 getMetadataDataset

@@ -63,11 +63,11 @@ GDIPlot <- function(objCOTAN, genes, cond = "",
     }
   }
 
-  # drop housekeeping genes i.e. those that has GDI <= -5
+  # drop fully-expressed genes i.e. those that have GDI <= -5.0
   {
     genesToKeep <- (GDIDf[["GDI"]] > -5.0)
     logThis(paste("Removed", sum(!genesToKeep), "low GDI genes",
-                  "(such as the housekeeping) in GDI plot"), logLevel = 1L)
+                  "(such as the fully-expressed) in GDI plot"), logLevel = 1L)
     GDIDf <- GDIDf[genesToKeep, ]
   }
 

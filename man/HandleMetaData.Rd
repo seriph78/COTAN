@@ -91,9 +91,9 @@ compacted into three \code{data.frame}s:
 \itemize{
 \item "metaDataset" - contains all general information about the data-set
 \item "metaGenes" - contains genes' related information along the \code{lambda} and
-\code{dispersion} vectors and the housekeeping flag
+\code{dispersion} vectors and the fully-expressed flag
 \item "metaCells" - contains cells' related information along the \code{nu} vector,
-the fully expressed flag and the clusterizations
+the fully-expressing flag and the clusterizations
 }
 }
 \details{

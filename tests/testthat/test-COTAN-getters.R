@@ -32,7 +32,7 @@ test_that("COTAN getters", {
                ignore_attr = TRUE)
   expect_equal(getMetadataDataset(obj)[[2]], metaInfo)
   expect_setequal(colnames(getMetadataGenes(obj)),
-                  c("lambda", "hkGenes", "dispersion"))
+                  c("lambda", "feGenes", "dispersion"))
   expect_equal(rownames(getMetadataGenes(obj)), getGenes(obj))
   expect_setequal(colnames(getMetadataCells(obj)),
                   c("nu", "feCells", names(getClustersCoex(obj))))
@@ -47,9 +47,9 @@ test_that("COTAN getters", {
                ignore_attr = TRUE)
   expect_equal(getDispersion(obj), getMetadataGenes(obj)[["dispersion"]],
                ignore_attr = TRUE)
-  expect_equal(flagNotHousekeepingGenes(obj),
+  expect_equal(flagNotFullyExpressedGenes(obj),
                c(FALSE, rep(TRUE, getNumGenes(obj) - 1)))
-  expect_equal(getHousekeepingGenes(obj), c(LETTERS[1]))
+  expect_equal(getFullyExpressedGenes(obj), c(LETTERS[1]))
   expect_equal(flagNotFullyExpressingCells(obj), rep(TRUE, getNumCells(obj)))
   expect_equal(getFullyExpressingCells(obj), vector(mode = "character"))
   expect_equal(dim(getGenesCoex(obj)),

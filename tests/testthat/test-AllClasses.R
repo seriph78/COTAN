@@ -56,7 +56,7 @@ test_that("'scCOTAN' converters",{
   expect_equal(obj_sc@lambda,   getLambda(obj))
   expect_equal(obj_sc@nu,       getNu(obj))
   expect_equal(obj_sc@a,        getDispersion(obj))
-  expect_equal(obj_sc@hk,       getHousekeepingGenes(obj))
+  expect_equal(obj_sc@hk,       getFullyExpressedGenes(obj))
   expect_equal(obj_sc@meta,     obj@metaDataset)
   expect_null(obj_sc@yes_yes)
   expect_length(obj_sc@clusters, ncol(obj_sc@raw))
@@ -70,9 +70,9 @@ test_that("'scCOTAN' converters",{
   # coerce 'scCOTAN' -> 'COTAN'
   obj2 <- as(obj_sc, "COTAN")
 
-  if (all(flagNotHousekeepingGenes(obj))) {
-    #drop the hk column as it won't appear in the obj2 in this case!
-    obj@metaGenes[["hkGenes"]] <- NULL
+  if (all(flagNotFullyExpressedGenes(obj))) {
+    #drop the fe column as it won't appear in the obj2 in this case!
+    obj@metaGenes[["feGenes"]] <- NULL
   }
   if (all(flagNotFullyExpressingCells(obj))) {
     #drop the fe column as it won't appear in the obj2 anyway!
