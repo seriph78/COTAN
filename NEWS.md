@@ -5,6 +5,9 @@ Updated `README.md` and `NEWS.md`
 Renamed methods dealing with housekeeping genes and fully-expressed cells to use
 the more proper names fully-expressed genes and fully-expressing cells
 
+Added possibility to users to set the cutoff and thresholds used by the `clean`
+and related methods
+
 ## COTAN 2.1.0
 
 First release in Bioconductor 3.18
