@@ -138,8 +138,6 @@ setMethod(
 #' @returns `findFullyExpressedGenes()` returns the given `COTAN` object with
 #'   updated fully-expressed genes' information
 #'
-#' @importFrom Matrix rowSums
-#'
 #' @export
 #'
 #' @rdname RawDataCleaning
@@ -170,8 +168,6 @@ setMethod(
 #'
 #' @returns `findFullyExpressingCells()` returns the given `COTAN` object with
 #'   updated flags about the cells with positive UMI count for all genes
-#'
-#' @importFrom Matrix colSums
 #'
 #' @export
 #'

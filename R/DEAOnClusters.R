@@ -18,6 +18,8 @@
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom Matrix rowSums
+#'
 #' @importFrom stats pchisq
 #'
 #' @importFrom assertthat assert_that

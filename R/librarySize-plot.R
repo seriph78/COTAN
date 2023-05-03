@@ -183,8 +183,6 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #'
 #' @importFrom stringr str_split
 #'
-#' @importFrom Matrix colSums
-#'
 #' @export
 #'
 #' @examples

@@ -94,6 +94,8 @@ setMethod(
 #' @importFrom Matrix t
 #' @importFrom Matrix crossprod
 #' @importFrom Matrix tcrossprod
+#' @importFrom Matrix colSums
+#' @importFrom Matrix rowSums
 #'
 #' @importClassesFrom Matrix dgeMatrix
 #' @importClassesFrom Matrix dsyMatrix
@@ -245,6 +247,7 @@ observedContingencyTables <- function(objCOTAN,
 #'   expected contingency table as `matrix` and the *No* expected `vector`
 #'
 #' @importFrom Matrix t
+#' @importFrom Matrix colSums
 #'
 #' @importClassesFrom Matrix dgeMatrix
 #' @importClassesFrom Matrix dsyMatrix
@@ -335,6 +338,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #' @importFrom Rfast colsums
 #'
 #' @importFrom Matrix t
+#'
 #' @importClassesFrom Matrix symmetricMatrix
 #'
 #' @importFrom assertthat assert_that
@@ -439,6 +443,8 @@ expectedContingencyTables <- function(objCOTAN,
 #'
 #' @return `contingencyTables()` returns a list containing the observed and
 #'   expected contingency tables
+#'
+#' @importFrom Matrix rowSums
 #'
 #' @importFrom assertthat assert_that
 #'

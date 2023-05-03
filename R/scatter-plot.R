@@ -26,8 +26,6 @@
 #' @importFrom scales math_format
 #' @importFrom scales trans_format
 #'
-#' @importFrom Matrix colSums
-#'
 #' @importFrom stringr str_split
 #'
 #' @export

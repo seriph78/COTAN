@@ -167,6 +167,8 @@ setMethod(
 #'
 #' @export
 #'
+#' @importFrom Matrix colSums
+#'
 #' @examples
 #' cellsSize <- getCellsSize(objCOTAN)
 #'
@@ -218,6 +220,8 @@ setMethod(
 #' @return `getGenesSize()` returns an array with the library sizes
 #'
 #' @export
+#'
+#' @importFrom Matrix rowSums
 #'
 #' @examples
 #' genesSize <- getGenesSize(objCOTAN)
