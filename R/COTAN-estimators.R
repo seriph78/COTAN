@@ -150,10 +150,8 @@ setMethod(
     cores <- handleMultiCore(cores)
 
     genes <- getGenes(objCOTAN)
-    sumZeros <- set_names(getNumCells(objCOTAN) -
-                            rowSums(getZeroOneProj(objCOTAN)[genes, ,
-                                                             drop = FALSE]),
-                          genes)
+    sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)[genes]
+
     lambda <- getLambda(objCOTAN)
     nu <- getNu(objCOTAN)
 
@@ -283,10 +281,8 @@ setMethod(
     }
 
     cells <- getCells(objCOTAN)
-    zeroOneMatrix <- getZeroOneProj(objCOTAN)
-    sumZeros <- set_names(getNumGenes(objCOTAN) -
-                            colSums(zeroOneMatrix[, cells, drop = FALSE]),
-                          cells)
+    sumZeros <- getNumGenes(objCOTAN) - getNumExpressedGenes(objCOTAN)
+
     lambda <- getLambda(objCOTAN)
     dispersion <- getDispersion(objCOTAN)
     initialGuess <- getNu(objCOTAN)
@@ -415,7 +411,7 @@ setMethod(
       objCOTAN <- estimateNuLinear(objCOTAN)
     }
 
-    sumZeros <- getNumCells(objCOTAN) - rowSums(getZeroOneProj(objCOTAN))
+    sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)
 
     iter <- 1L
     repeat {
@@ -525,12 +521,8 @@ setMethod(
 
     lambda <- getLambda(objCOTAN)
 
-    zeroOne <- getZeroOneProj(objCOTAN)
-    zeroGenes <- rowSums(zeroOne == 0L)
-    zeroCells <- colSums(zeroOne == 0L)
-
-    rm(zeroOne)
-    gc()
+    zeroGenes <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)
+    zeroCells <- getNumGenes(objCOTAN) - getNumExpressedGenes(objCOTAN)
 
     assert_that(all(zeroGenes != 0L), all(zeroCells != 0L),
                 msg = paste("Method cannot handle fully-expressed genes",

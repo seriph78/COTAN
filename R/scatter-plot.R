@@ -26,8 +26,6 @@
 #' @importFrom scales math_format
 #' @importFrom scales trans_format
 #'
-#' @importFrom Matrix colSums
-#'
 #' @importFrom stringr str_split
 #'
 #' @export
@@ -40,7 +38,7 @@
 scatterPlot <- function(objCOTAN, splitPattern = " ",
                         numCol = 2L, splitSamples = FALSE) {
   cellsSize <- getCellsSize(objCOTAN)
-  genesSize <- Matrix::colSums(getZeroOneProj(objCOTAN))
+  genesSize <- getNumExpressedGenes(objCOTAN)
 
   toPlot <- cbind(cellsSize, genesSize)
   toPlot <- as.data.frame(toPlot)

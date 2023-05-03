@@ -38,7 +38,7 @@ setMethod(
     # default: less than 3 non-zero counts per 1000 cells
     cutoff <- round(getNumCells(objCOTAN) * cellsCutoff, digits = 0L)
     genesToDrop <-
-      getGenes(objCOTAN)[rowSums(getZeroOneProj(objCOTAN)) <= cutoff]
+      getGenes(objCOTAN)[getNumOfExpressingCells(objCOTAN) <= cutoff]
 
     if (!is_empty(genesToDrop)) {
       objCOTAN <- dropGenesCells(objCOTAN, genes = genesToDrop)
@@ -48,7 +48,7 @@ setMethod(
     # default: less than 2 non-zero counts per 1000 genes
     cutoff <- round(getNumGenes(objCOTAN) * genesCutoff, digits = 0L)
     cellsToDrop <-
-      getCells(objCOTAN)[colSums(getZeroOneProj(objCOTAN)) <= cutoff]
+      getCells(objCOTAN)[getNumExpressedGenes(objCOTAN) <= cutoff]
 
     if (!is_empty(cellsToDrop)) {
       objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)

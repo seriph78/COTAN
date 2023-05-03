@@ -15,6 +15,8 @@
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom Matrix rowSums
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @examples

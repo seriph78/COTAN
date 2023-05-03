@@ -141,8 +141,6 @@ setMethod(
 #' @returns `findFullyExpressedGenes()` returns the given `COTAN` object with
 #'   updated **fully-expressed** genes' information
 #'
-#' @importFrom Matrix rowSums
-#'
 #' @export
 #'
 #' @rdname RawDataCleaning
@@ -151,13 +149,12 @@ setMethod(
   "findFullyExpressedGenes",
   "COTAN",
   function(objCOTAN, cellsThreshold = 0.99) {
-    cellsCounts <- rowSums(getZeroOneProj(objCOTAN))
 
-    # flag the genes with positive UMI count in every cell
+    threshold <- cellsThreshold * getNumCells(objCOTAN)
+    feGenes <- getNumOfExpressingCells(objCOTAN) >= threshold
+
     objCOTAN@metaGenes <-
-      setColumnInDF(objCOTAN@metaGenes,
-                    cellsCounts >= cellsThreshold * getNumCells(objCOTAN),
-                    "feGenes", getGenes(objCOTAN))
+      setColumnInDF(objCOTAN@metaGenes, feGenes, "feGenes", getGenes(objCOTAN))
 
     return(objCOTAN)
   }
@@ -177,8 +174,6 @@ setMethod(
 #' @returns `findFullyExpressingCells()` returns the given `COTAN` object  with
 #'   updated **fully-expressing** cells' information
 #'
-#' @importFrom Matrix colSums
-#'
 #' @export
 #'
 #' @rdname RawDataCleaning
@@ -187,13 +182,12 @@ setMethod(
   "findFullyExpressingCells",
   "COTAN",
   function(objCOTAN, genesThreshold = 0.99) {
-    genesCounts <- colSums(getZeroOneProj(objCOTAN))
 
-    # flag the cells with positive UMI count in every gene
+    threshold <- genesThreshold * getNumGenes(objCOTAN)
+    feCells <- getNumExpressedGenes(objCOTAN) >= threshold
+
     objCOTAN@metaCells <-
-      setColumnInDF(objCOTAN@metaCells,
-                    genesCounts >= genesThreshold * getNumGenes(objCOTAN),
-                    "feCells", getCells(objCOTAN))
+      setColumnInDF(objCOTAN@metaCells, feCells, "feCells", getCells(objCOTAN))
 
     return(objCOTAN)
   }

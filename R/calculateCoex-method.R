@@ -94,6 +94,8 @@ setMethod(
 #' @importFrom Matrix t
 #' @importFrom Matrix crossprod
 #' @importFrom Matrix tcrossprod
+#' @importFrom Matrix colSums
+#' @importFrom Matrix rowSums
 #'
 #' @importClassesFrom Matrix dgeMatrix
 #' @importClassesFrom Matrix dsyMatrix
@@ -245,6 +247,7 @@ observedContingencyTables <- function(objCOTAN,
 #'   expected contingency table as `matrix` and the *No* expected `vector`
 #'
 #' @importFrom Matrix t
+#' @importFrom Matrix colSums
 #'
 #' @importClassesFrom Matrix dgeMatrix
 #' @importClassesFrom Matrix dsyMatrix
@@ -335,6 +338,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #' @importFrom Rfast colsums
 #'
 #' @importFrom Matrix t
+#'
 #' @importClassesFrom Matrix symmetricMatrix
 #'
 #' @importFrom assertthat assert_that
@@ -439,6 +443,8 @@ expectedContingencyTables <- function(objCOTAN,
 #'
 #' @return `contingencyTables()` returns a list containing the observed and
 #'   expected contingency tables
+#'
+#' @importFrom Matrix rowSums
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -794,7 +800,7 @@ calculateGDI <- function(objCOTAN, statType = "S") {
   rm(sumRawNorm)
   gc()
 
-  expCells <- rowSums(getZeroOneProj(objCOTAN)) / getNumCells(objCOTAN) * 100.0
+  expCells <- getNumOfExpressingCells(objCOTAN) / getNumCells(objCOTAN) * 100.0
   GDI <- merge(GDI, as.data.frame(list(expCells), col.names = "exp.cells"),
                by = "row.names", all.x = TRUE)
   GDI <- column_to_rownames(GDI, var = "Row.names")
