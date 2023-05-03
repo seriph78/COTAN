@@ -314,14 +314,14 @@ getCOTANSlots <- function(from) {
 
   metaGenes <- data.frame()
 
-  if (!is_empty(from@lambda)) {
-    metaGenes <- setColumnInDF(metaGenes, from@lambda,
-                               "lambda", rownames(from@raw))
-  }
-
   if (!is_empty(from@hk)) {
     metaGenes <- setColumnInDF(metaGenes, rownames(from@raw) %in% from@hk,
                                "feGenes", rownames(from@raw))
+  }
+
+  if (!is_empty(from@lambda)) {
+    metaGenes <- setColumnInDF(metaGenes, from@lambda,
+                               "lambda", rownames(from@raw))
   }
 
   if (!is_empty(from@a)) {

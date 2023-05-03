@@ -190,7 +190,7 @@ setMethod(
     # flag the cells with positive UMI count in every gene
     objCOTAN@metaCells <-
       setColumnInDF(objCOTAN@metaCells,
-                    genesCounts >= cellsThreshold * getNumGenes(objCOTAN),
+                    genesCounts >= genesThreshold * getNumGenes(objCOTAN),
                     "feCells", getCells(objCOTAN))
 
     return(objCOTAN)

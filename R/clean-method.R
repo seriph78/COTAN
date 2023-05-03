@@ -60,9 +60,9 @@ setMethod(
             logLevel = 2L)
 
     objCOTAN <- findFullyExpressedGenes(objCOTAN,
-                                        threshold = genesHighThreshold)
+                                        cellsThreshold = cellsThreshold)
     objCOTAN <- findFullyExpressingCells(objCOTAN,
-                                         threshold = cellsHighThreshold)
+                                         genesThreshold = genesThreshold)
 
     objCOTAN <- estimateLambdaLinear(objCOTAN)
     objCOTAN <- estimateNuLinear(objCOTAN)
