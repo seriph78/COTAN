@@ -206,7 +206,11 @@ setGeneric(
 
 setGeneric(
   "clean",
-  function(objCOTAN) standardGeneric("clean")
+  function(objCOTAN,
+           genesLowThreshold = 0.003, cellsLowThreshold = 0.002,
+           genesHighThreshold = 0.99, cellsHighThreshold = 0.99) {
+    standardGeneric("clean")
+  }
 )
 
 setGeneric(

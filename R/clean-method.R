@@ -18,10 +18,13 @@
 setMethod(
   "clean",
   "COTAN",
-  function(objCOTAN) {
+  function(objCOTAN,
+           genesLowThreshold = 0.003, cellsLowThreshold = 0.002,
+           genesHighThreshold = 0.99, cellsHighThreshold = 0.99) {
 
-    # We want to discard genes having less than 3 non-zero counts per 1000 cells
-    threshold <- round(getNumCells(objCOTAN) * 3.0 / 1000.0, digits = 0L)
+    # We want to discard genes having less than given threshold
+    # default: less than 3 non-zero counts per 1000 cells
+    threshold <- round(getNumCells(objCOTAN) * genesThreshold, digits = 0L)
     genesToDrop <-
       getGenes(objCOTAN)[rowSums(getZeroOneProj(objCOTAN)) <= threshold]
 
@@ -29,8 +32,9 @@ setMethod(
       objCOTAN <- dropGenesCells(objCOTAN, genes = genesToDrop)
     }
 
-    # We want to discard cells having less than 2 non-zero counts per 1000 genes
-    threshold <- round(getNumGenes(objCOTAN) * 2.0 / 1000.0, digits = 0L)
+    # We want to discard cells having less than given threshold
+    # default: less than 2 non-zero counts per 1000 genes
+    threshold <- round(getNumGenes(objCOTAN) * cellsThreshold, digits = 0L)
     cellsToDrop <-
       getCells(objCOTAN)[colSums(getZeroOneProj(objCOTAN)) <= threshold]
 
