@@ -127,12 +127,11 @@ cells_to_rem <- getCells(obj)[getCellsSize(obj) > 6000]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 ```
 
-To drop cells by gene number:
+To drop cells by gene number: high genes count might indicate doublets...
 
 ```{r}
-cellGeneNumber <- sort(colSums(as.data.frame(getRawData(obj) > 0)),
-                       decreasing = FALSE)
-cells_to_rem <- names(cellGeneNumber)[cellGeneNumber > 3000]
+numExprGenes <- sort(getNumExpressedGenes(obj), decreasing = FALSE)
+cells_to_rem <- names(numExprGenes)[numExprGenes > 3000]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
 genesSizePlot(obj)

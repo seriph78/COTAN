@@ -23,7 +23,7 @@ setMethod(
     # We want to discard genes having less than 3 non-zero counts per 1000 cells
     threshold <- round(getNumCells(objCOTAN) * 3.0 / 1000.0, digits = 0L)
     genesToDrop <-
-      getGenes(objCOTAN)[rowSums(getZeroOneProj(objCOTAN)) <= threshold]
+      getGenes(objCOTAN)[getNumOfExpressingCells(objCOTAN) <= threshold]
 
     if (!is_empty(genesToDrop)) {
       objCOTAN <- dropGenesCells(objCOTAN, genes = genesToDrop)

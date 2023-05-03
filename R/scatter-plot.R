@@ -40,7 +40,7 @@
 scatterPlot <- function(objCOTAN, splitPattern = " ",
                         numCol = 2L, splitSamples = FALSE) {
   cellsSize <- getCellsSize(objCOTAN)
-  genesSize <- Matrix::colSums(getZeroOneProj(objCOTAN))
+  genesSize <- getNumExpressedGenes(objCOTAN)
 
   toPlot <- cbind(cellsSize, genesSize)
   toPlot <- as.data.frame(toPlot)

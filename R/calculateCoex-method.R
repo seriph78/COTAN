@@ -794,7 +794,7 @@ calculateGDI <- function(objCOTAN, statType = "S") {
   rm(sumRawNorm)
   gc()
 
-  expCells <- rowSums(getZeroOneProj(objCOTAN)) / getNumCells(objCOTAN) * 100.0
+  expCells <- getNumOfExpressingCells(objCOTAN) / getNumCells(objCOTAN) * 100.0
   GDI <- merge(GDI, as.data.frame(list(expCells), col.names = "exp.cells"),
                by = "row.names", all.x = TRUE)
   GDI <- column_to_rownames(GDI, var = "Row.names")

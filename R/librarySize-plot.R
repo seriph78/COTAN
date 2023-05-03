@@ -193,7 +193,7 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #' @rdname RawDataCleaning
 #'
 genesSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
-  sizes <- sort(colSums(getZeroOneProj(objCOTAN)))
+  sizes <- sort(getNumExpressedGenes(objCOTAN))
   sizes <- as.data.frame(sizes)
   sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
   {
