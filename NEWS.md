@@ -1,8 +1,17 @@
----
-editor_options: 
-  markdown: 
-    wrap: 80
----
+## COTAN 2.0.1
+
+Updated `README.md` and `NEWS.md`
+
+Renamed methods dealing with housekeeping genes and fully-expressed cells to use
+the more proper names fully-expressed genes and fully-expressing cells
+
+## COTAN 2.0.0
+
+Final release in Bioconductor 3.17
+
+## COTAN 1.99.4
+
+Solved remaining documentation warnings
 
 ## COTAN 1.99.3
 

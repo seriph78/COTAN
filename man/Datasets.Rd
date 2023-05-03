@@ -42,7 +42,7 @@ data(test.dataset.clusters2)
 Simple data-sets included in the package
 }
 \details{
-\code{raw.dataset} is a sub-sample of a real \emph{sc-RNAseq} data-set
+\code{raw.dataset} is a sub-sample of a real \emph{scRNA-seq} data-set
 
 \code{ERCCRaw} dataset
 
