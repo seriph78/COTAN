@@ -8,7 +8,7 @@ NULL
 
 # Raw sample dataset
 
-#' @details `raw.dataset` is a sub-sample of a real *sc-RNAseq* data-set
+#' @details `raw.dataset` is a sub-sample of a real *scRNA-seq* data-set
 #'
 #' @format `raw.dataset` is a data frame with \eqn{2000} genes and \eqn{815}
 #'   cells
