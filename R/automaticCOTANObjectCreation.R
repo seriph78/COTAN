@@ -69,6 +69,8 @@ setMethod(
         dir.create(file.path(outDir))
       }
 
+      cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
+
       outDirCond <- file.path(outDir, cond)
       if (!file.exists(outDirCond)) {
         dir.create(outDirCond)
@@ -81,12 +83,11 @@ setMethod(
 
       plots <- cleanPlots(objCOTAN)
 
-      sampleCondition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
       {
         numIter <- 1L
         pdf(file.path(outDirCleaning,
-                      paste0(sampleCondition, "_",
-                             numIter, "_plots_without_cleaning.pdf")))
+                      paste0(cond, "_", numIter,
+                             "_plots_without_cleaning.pdf")))
         plot(plots[["pcaCells"]])
         plot(plots[["genes"]])
         dev.off()
@@ -94,16 +95,14 @@ setMethod(
 
       {
         pdf(file.path(outDirCleaning,
-                      paste0(sampleCondition,
-                             "_plots_PCA_efficiency_colored.pdf")))
+                      paste0(cond, "_plots_PCA_efficiency_colored.pdf")))
         plot(plots[["UDE"]])
         dev.off()
       }
 
       {
         pdf(file.path(outDirCleaning,
-                      paste0(sampleCondition,
-                             "_plots_efficiency.pdf")))
+                      paste0(cond, "_plots_efficiency.pdf")))
         plot(plots[["nu"]] +
                annotate(geom = "text", x = 50L, y = 0.25,
                         label = "nothing to remove ", color = "darkred"))
@@ -148,14 +147,12 @@ setMethod(
                                               as.numeric(genesCoexTime)),
                                   "n.cells" = getNumCells(objCOTAN),
                                   "n.genes" = getNumGenes(objCOTAN)),
-                       file = file.path(outDir, paste0(sampleCondition,
-                                                       "_times.csv")))
+                       file = file.path(outDir, paste0(cond, "_times.csv")))
 
       logThis(paste0("Saving elaborated data locally at: ",
-                     file.path(outDir, paste0(sampleCondition, ".cotan.RDS"))),
+                     file.path(outDir, paste0(cond, ".cotan.RDS"))),
               logLevel = 1L)
-      saveRDS(objCOTAN, file = file.path(outDir, paste0(sampleCondition,
-                                                        ".cotan.RDS")))
+      saveRDS(objCOTAN, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
     }
 
     return(objCOTAN)
