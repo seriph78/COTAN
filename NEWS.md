@@ -1,3 +1,7 @@
+## COTAN 2.0.2
+
+Fixed bug in `proceedToCoex()` in cases when `saveObj == TRUE`
+
 ## COTAN 2.0.1
 
 Updated `README.md` and `NEWS.md`
