@@ -46,8 +46,7 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
                           "the number of rows in the data.frame"))
 
   # empty title
-  emptyTitle <- !(length(title) && any(nzchar(title)))
-  if (emptyTitle) {
+  if (isEmptyName(title)) {
     title <- "UMAP Plot"
   }
 

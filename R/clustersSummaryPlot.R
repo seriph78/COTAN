@@ -59,7 +59,7 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 
   metaCells <- getMetadataCells(objCOTAN)
 
-  emptyCond <- !(length(condition) && any(nzchar(condition)))
+  emptyCond <- isEmptyName(condition)
   if (emptyCond || !(condition %in% colnames(metaCells))) {
     if (!emptyCond) {
       warning("Provided condition", condition,

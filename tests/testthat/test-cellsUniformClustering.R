@@ -13,9 +13,11 @@ test_that("Cell Uniform Clustering", {
 
   GDIThreshold <- 1.5
 
-  clusters <- cellsUniformClustering(obj, cores = 12,
-                                     GDIThreshold = GDIThreshold,
-                                     saveObj = TRUE, outDir = tm)
+  suppressWarnings({
+    clusters <- cellsUniformClustering(obj, cores = 12,
+                                       GDIThreshold = GDIThreshold,
+                                       saveObj = TRUE, outDir = tm)
+  })
 
   gc()
 

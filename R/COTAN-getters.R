@@ -985,8 +985,7 @@ setMethod(
   function(objCOTAN, clName = "", keepPrefix = FALSE) {
     allClustNames <- getClusterizations(objCOTAN, keepPrefix = TRUE)
 
-    emptyName <- !(length(clName) && any(nzchar(clName)))
-    if (emptyName) {
+    if (isEmptyName(clName)) {
       # pick last clusterization
       outName <- allClustNames[length(allClustNames)]
     } else {
@@ -1040,8 +1039,7 @@ setMethod(
                                           keepPrefix = TRUE)
 
     # clName can still be empty if no clusterization was store in the objCOTAN
-    emptyName <- !(length(internalName) && any(nzchar(internalName)))
-    assert_that(!emptyName,
+    assert_that(!isEmptyName(internalName),
                 msg = "No clusterizations are present in the 'COTAN' object")
 
     clusters <- set_names(getMetadataCells(objCOTAN)[[internalName]],
