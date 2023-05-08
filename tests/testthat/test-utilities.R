@@ -40,7 +40,7 @@ test_that("Logging", {
 
 test_that("Clusterizations manipulations", {
   set.seed(1675787192)
-  clusters <- factor(paste0("",as.roman(sample(7, 100, replace = TRUE))))
+  clusters <- paste0("",as.roman(sample(7, 100, replace = TRUE)))
 
   elemNames <- paste0("el_",1:100)
   clusters <- set_names(clusters, elemNames)
@@ -53,7 +53,7 @@ test_that("Clusterizations manipulations", {
 
   clusters2 <- fromClustersList(clustersList, elemNames)
 
-  expect_equal(clusters2, as.vector(clusters), ignore_attr = TRUE)
+  expect_equal(clusters2, factor(clusters))
 
   clusters3 <- fromClustersList(clustersList, elemNames = c())
   expect_equal(table(clusters2), table(clusters3), ignore_attr = TRUE)
@@ -72,6 +72,20 @@ test_that("Clusterizations manipulations", {
                   c("not_clustered"))
 
   expect_equal(groupByClustersList(elemNames, clustersList)[91:100], c(21:30))
+
+  clusterM1 <- mergeClusters(clusters, names = as.roman(c(5, 1)),
+                             mergedName = "I'V")
+
+  expect_true("I'V" %in% levels(clusterM1)[[1L]])
+  expect_equal(table(clusterM1)[[1L]], sum(table(clusters)[c(1, 5)]))
+
+  clusterM2 <-
+    multiMergeClusters(clusters3, namesList = list(as.roman(c(1,5)),
+                                                   as.roman(c(6, 2, 4))))
+
+  expect_setequal(levels(clusterM2),
+                  c("I_V-merge", "II_IV_VI-merge", "III", "VII"))
+  expect_equal(sum(clusterM2 == "I_V-merge"), sum(clusterM1 == "I'V"))
 })
 
 

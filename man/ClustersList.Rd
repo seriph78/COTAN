@@ -6,6 +6,8 @@
 \alias{fromClustersList}
 \alias{groupByClustersList}
 \alias{groupByClusters}
+\alias{mergeClusters}
+\alias{multiMergeClusters}
 \title{\emph{Clusters} utilities}
 \usage{
 toClustersList(clusters)
@@ -19,53 +21,79 @@ fromClustersList(
 groupByClustersList(elemNames, clustersList, throwOnOverlappingClusters = TRUE)
 
 groupByClusters(clusters)
+
+mergeClusters(clusters, names, mergedName = "")
+
+multiMergeClusters(clusters, namesList, mergedNames = NULL)
 }
 \arguments{
-\item{clusters}{A named \code{vector} or \code{factor} that defines the \emph{clusters}.}
+\item{clusters}{A named \code{vector} or \code{factor} that defines the \emph{clusters}}
 
-\item{clustersList}{A named \code{list} whose elements define the various
-clusters.}
+\item{clustersList}{A named \code{list} whose elements define the various clusters}
 
-\item{elemNames}{A \code{list} of names to which associate a cluster.}
+\item{elemNames}{A \code{list} of names to which associate a cluster}
 
 \item{throwOnOverlappingClusters}{When \code{TRUE}, in case of overlapping
 clusters, the function \code{fromClustersList} and \code{groupByClustersList} will
 throw. This is the default. When FALSE, instead, in case of overlapping
 clusters, \code{fromClustersList} will return the last cluster to which each
 element belongs, while \code{groupByClustersList} will return a vector of
-positions that is longer than the given \code{elemNames}.}
+positions that is longer than the given \code{elemNames}}
+
+\item{names}{A list of \emph{clusters} names to be merged}
+
+\item{mergedName}{The name of the new merged clusters}
+
+\item{namesList}{A \code{list} of \code{list}s of \emph{clusters} names to be respectively
+merged}
+
+\item{mergedNames}{The names of the new merged \emph{clusters}}
 }
 \value{
-\code{toClustersList()} returns a \code{list} of clusters.
+\code{toClustersList()} returns a \code{list} of clusters
 
-\code{fromClustersList()} returns a clusterization. If the given \code{elemNames}
-contain values not present in the \code{clustersList}, those will be marked as
-\code{"not_clustered"}
+\code{fromClustersList()} returns a clusterization. If the given
+\code{elemNames} contain values not present in the \code{clustersList}, those will be
+marked as \code{"not_clustered"}
 
-\code{groupByClusters()} and \code{groupByClustersList()} return a permutation that
-groups the clusters together. For each cluster the positions are guaranteed
-to be in increasing order. In case, all elements not corresponding to any
-cluster are grouped together as the last group.
+\code{groupByClusters()} and \code{groupByClustersList()} return a permutation
+that groups the clusters together. For each cluster the positions are
+guaranteed to be in increasing order. In case, all elements not
+corresponding to any cluster are grouped together as the last group
+
+\code{mergeClusters()} returns a new \emph{clusterization} with the wanted
+\emph{clusters} being merged. If less than 2 \emph{cluster} names were passed the
+function will emit a warning and return the initial \emph{clusterization}
+
+\code{multiMergeClusters()} returns a new \emph{clusterization} with the
+wanted \emph{clusters} being merged by consecutive iterations of
+\code{\link[=mergeClusters]{mergeClusters()}} on the given \code{namesList}
 }
 \description{
-Handle \emph{clusterization} <-> \emph{clusters} \code{list} conversions and
-\emph{clusters} grouping
+Handle \emph{clusterization} <-> \emph{clusters} \code{list} conversions,
+\emph{clusters} grouping and merge
 }
 \details{
 \code{toClustersList()} given a \emph{clusterization}, creates a \code{list} of
-\emph{clusters} (i.e. for each \emph{cluster}, which elements compose the \emph{cluster}).
+\emph{clusters} (i.e. for each \emph{cluster}, which elements compose the \emph{cluster})
 
 \code{fromClustersList()} given a \code{list} of \emph{clusters} returns a
 \emph{clusterization} (i.e. a named \code{vector} that for each element indicates to
-which cluster it belongs).
+which cluster it belongs)
 
-\code{groupByClusters()} given a \emph{clusterization} returns a permutation, such
-that using the permutation on the input the \emph{clusters} are grouped
-together.
+\code{groupByClusters()} given a \emph{clusterization} returns a permutation,
+such that using the permutation on the input the \emph{clusters} are grouped
+together
 
 \code{groupByClustersList()} given the elements' names and a \code{list} of
 \emph{clusters} returns a permutation, such that using the permutation on the
 given names the \emph{clusters} are grouped together.
+
+\code{mergeClusters()} given a \emph{clusterization}, creates a new one where
+the given \emph{clusters} are merged.
+
+\code{multiMergeClusters()} given a \emph{clusterization}, creates a new one
+where the given sets of \emph{clusters} are merged.
 }
 \examples{
 ## create a clusterization
@@ -78,13 +106,13 @@ head(clustersList, 1)
 
 ## recreate the clusterization from the cluster list
 clusters2 <- fromClustersList(clustersList, names(clusters))
-all.equal(clusters, clusters2)
+all.equal(factor(clusters), clusters2)
 
 cl1Size <- length(clustersList[["1"]])
 
 ## establish the permutation that groups clusters together
 perm <- groupByClusters(clusters)
-is.unsorted(head(names(clusters)[perm],cl1Size))
+!is.unsorted(head(names(clusters)[perm],cl1Size))
 head(clusters[perm], cl1Size)
 
 ## it is possible to have the list of the element names different
@@ -92,5 +120,18 @@ head(clusters[perm], cl1Size)
 selectedNames <- paste0("E_",formatC(11:110,  width = 3, flag = "0"))
 perm2 <- groupByClustersList(selectedNames, toClustersList(clusters))
 all.equal(perm2[91:100], c(91:100))
+
+## is is possible to merge a few clusters together
+clustersMerged <- mergeClusters(clusters, names = c("7", "2"),
+                                mergedName = "7__2")
+sum(table(clusters)[c(2, 7)]) == table(clustersMerged)[["7__2"]]
+
+## it is also possible to do multiple merges at once!
+## Note the default new clusters' names
+clustersMerged2 <-
+  multiMergeClusters(clusters2, namesList = list(c("2", "7"),
+                                                 c("1", "3", "5")))
+table(clustersMerged2)
+
 
 }
