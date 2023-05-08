@@ -9,14 +9,14 @@ test_that("Cell Uniform Clustering", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
+  obj <- proceedToCoex(obj, cores = 12, saveObj = TRUE, outDir = tm)
 
   GDIThreshold <- 1.5
 
   suppressWarnings({
     clusters <- cellsUniformClustering(obj, cores = 12,
                                        GDIThreshold = GDIThreshold,
-                                       saveObj = FALSE, outDir = tm)
+                                       saveObj = TRUE, outDir = tm)
   })
 
   gc()

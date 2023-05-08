@@ -1,3 +1,5 @@
+tm = tempdir()
+stopifnot(file.exists(tm))
 
 test_that("Merge Uniform Cells Clusters", {
 
@@ -58,7 +60,7 @@ test_that("Merge Uniform Cells Clusters", {
     mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 12,
                               GDIThreshold = GDIThreshold,
                               distance = "cosine", hclustMethod = "ward.D2",
-                              saveObj = FALSE)
+                              saveObj = TRUE, outDir = tm)
 
   expect_lt(length(unique(mergedClusters)), length(unique(clusters)))
   expect_setequal(mergedClusters, colnames(mergedCoexDF))
