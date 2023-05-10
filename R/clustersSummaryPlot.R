@@ -51,6 +51,7 @@
 #'
 #' @examples
 #' dataAndPlot <- clustersSummaryPlot(objCOTAN)
+#' plot(dataAndPlot[["plot"]])
 #'
 #' @rdname HandlingClusterizations
 #'
@@ -75,6 +76,8 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 
   df <- as.data.frame(table(metaCells[, c(internalName, condition),
                                       drop = FALSE]))
+  assert_that(ncol(df) == (if (emptyCond) 2 else 3),
+              msg = "Internal error creating frequency table")
 
   if (emptyCond) {
     colnames(df) <- c("Cluster", "CellNumber")
@@ -178,7 +181,9 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
 #' @export
 #'
 #' @examples
-#' treePlot <- clustersTreePlot(objCOTAN, 2)
+#' treePlotAndObj <- clustersTreePlot(objCOTAN, 2)
+#' objCOTAN <- treePlotAndObj[["objCOTAN"]]
+#' plot(treePlotAndObj[["dend"]])
 #'
 #' @rdname HandlingClusterizations
 #'

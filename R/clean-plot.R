@@ -46,7 +46,9 @@
 #' @importFrom graphics title
 #'
 #' @examples
-#' plots <- cleanPlots(objCOTAN)
+#' cPlots <- cleanPlots(objCOTAN)
+#' plot(cPlots[["pcaCells"]])
+#' plot(cPlots[["UDE"]])
 #'
 #' @rdname RawDataCleaning
 #'

@@ -119,6 +119,7 @@ geom_flat_violin <- function(
 #'
 #' @examples
 #' lsPlot <- cellSizePlot(objCOTAN)
+#' plot(lsPlot)
 #'
 #' @rdname RawDataCleaning
 #'
@@ -187,6 +188,7 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #'
 #' @examples
 #' gsPlot <- genesSizePlot(objCOTAN)
+#' plot(gsPlot)
 #'
 #' @rdname RawDataCleaning
 #'

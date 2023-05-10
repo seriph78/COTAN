@@ -328,6 +328,7 @@ groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                             "g-000570", "g-000590"))
 
 umapPlot <- UMAPPlot(coexDF, clusters = NULL, elements = groupMarkers)
+plot(umapPlot)
 
 objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
                               clusters = clusters, coexDF = coexDF)
@@ -340,6 +341,7 @@ enrichment <- geneSetEnrichment(clustersCoex = coexDF,
                                 groupMarkers = groupMarkers)
 
 ##clHeatmapPlot <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
+##plot(clHeatmapPlot)
 
 clName <- getClusterizationName(objCOTAN)
 
@@ -351,8 +353,11 @@ allClustersCoexDF <- getClustersCoex(objCOTAN)
 deltaExpression <- clustersDeltaExpression(objCOTAN, clusters)
 
 dataAndPlot <- clustersSummaryPlot(objCOTAN)
+plot(dataAndPlot[["plot"]])
 
-treePlot <- clustersTreePlot(objCOTAN, 2)
+treePlotAndObj <- clustersTreePlot(objCOTAN, 2)
+objCOTAN <- treePlotAndObj[["objCOTAN"]]
+plot(treePlotAndObj[["dend"]])
 
 clMarkers <- findClustersMarkers(objCOTAN, clusters = clusters)
 

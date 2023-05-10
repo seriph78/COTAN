@@ -106,16 +106,19 @@ groupMarkers <- list(G1 = primaryMarkers,
 hPlot <- heatmapPlot(genesLists = groupMarkers, sets = c(2, 3),
                      pValueThreshold = 0.05, conditions = c("test.dataset"),
                      dir = paste0(data_dir, "/"))
+plot(hPlot)
 
 ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,
                            secondaryMarkers = groupMarkers,
                            pValueThreshold = 0.05, symmetric = FALSE)
+plot(ghPlot)
 
 clusters <- c(rep_len("1", getNumCells(objCOTAN)/2),
               rep_len("2", getNumCells(objCOTAN)/2))
 names(clusters) <- getCells(objCOTAN)
 
 chPlot <- cellsHeatmapPlot(objCOTAN, clusters = clusters)
+plot(chPlot)
 
 theme <- plotTheme("pca")
 

@@ -297,7 +297,7 @@ establishGenesClusters <-
   uniquePos <- !duplicated(hClust)
   dend <- color_branches(dend, k = kCuts,
                          col         = colBranches[uniquePos],
-                         groupLabels = groupLabels [uniquePos])
+                         groupLabels = groupLabels[uniquePos])
 
   dend <- color_labels(dend, labels = rownames(pca1), col = colors)
 

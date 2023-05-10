@@ -152,7 +152,7 @@ setClass(
                " a subset of the tags in the clusterization.",
                " The data.frame for clusterization '", name, "' does not",
                " satisfy this condition with the names [",
-               paste(badClustersNames, collapse = ","), "] vs cluster tags [",
+               paste(badClustersTags, collapse = ","), "] vs cluster tags [",
                paste(unique(object@metaCells[[name]]), collapse = ","), "].")
         }
       }

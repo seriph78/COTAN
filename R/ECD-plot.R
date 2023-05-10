@@ -17,7 +17,8 @@
 #'
 #' @examples
 #' ## These plots might help to identify genes/cells that need to be dropped
-#' plot <- ECDPlot(objCOTAN, yCut = 100)
+#' ecdPlot <- ECDPlot(objCOTAN, yCut = 100)
+#' plot(ecdPlot)
 #'
 #' @rdname RawDataCleaning
 #'

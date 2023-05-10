@@ -59,6 +59,7 @@ NULL
 #' hPlot <- heatmapPlot(genesLists = groupMarkers, sets = c(2, 3),
 #'                      pValueThreshold = 0.05, conditions = c("test.dataset"),
 #'                      dir = paste0(data_dir, "/"))
+#' plot(hPlot)
 #'
 #' @rdname HeatmapPlots
 #'
@@ -185,6 +186,7 @@ heatmapPlot <- function(genesLists, sets, conditions, dir,
 #' ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,
 #'                            secondaryMarkers = groupMarkers,
 #'                            pValueThreshold = 0.05, symmetric = FALSE)
+#' plot(ghPlot)
 #'
 #' @rdname HeatmapPlots
 #'
@@ -322,6 +324,7 @@ genesHeatmapPlot <-
 #' names(clusters) <- getCells(objCOTAN)
 #'
 #' chPlot <- cellsHeatmapPlot(objCOTAN, clusters = clusters)
+#' plot(chPlot)
 #'
 #' @rdname HeatmapPlots
 #'

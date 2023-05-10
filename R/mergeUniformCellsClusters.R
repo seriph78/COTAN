@@ -57,6 +57,7 @@
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
 #'                             "g-000570", "g-000590"))
 #' gdiPlot <- GDIPlot(objCOTAN, genes = groupMarkers, cond = "test")
+#' plot(gdiPlot)
 #'
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
 #'                                    saveObj = FALSE)

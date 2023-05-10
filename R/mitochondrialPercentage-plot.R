@@ -31,6 +31,7 @@
 #'
 #' @examples
 #' mitPercPlot <- mitochondrialPercentagePlot(objCOTAN)[["plot"]]
+#' plot(plot)
 #'
 #' @rdname RawDataCleaning
 #'

@@ -12,7 +12,7 @@
 GDIPlot(
   objCOTAN,
   genes,
-  cond = "",
+  condition = "",
   statType = "S",
   GDIThreshold = 1.4,
   GDIIn = NULL
@@ -54,9 +54,6 @@ mergeUniformCellsClusters(
 \item{genes}{a named \code{list} of genes to label. Each array will have different
 color.}
 
-\item{cond}{a string corresponding to the condition/sample (it is used only
-for the title).}
-
 \item{statType}{type of statistic to be used. Default is "S": Pearson's
 chi-squared test statistics. "G" is G-test statistics}
 
@@ -89,6 +86,9 @@ clusterization will be used, as it is probably the most significant!}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
+
+\item{cond}{a string corresponding to the condition/sample (it is used only
+for the title).}
 }
 \value{
 \code{GDIPlot()} returns a \code{ggplot2} object
@@ -149,6 +149,7 @@ groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
 gdiPlot <- GDIPlot(objCOTAN, genes = groupMarkers, cond = "test")
+plot(gdiPlot)
 
 clusters <- cellsUniformClustering(objCOTAN, cores = 12,
                                    saveObj = FALSE)

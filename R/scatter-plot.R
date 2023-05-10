@@ -32,6 +32,7 @@
 #'
 #' @examples
 #' scPlot <- scatterPlot(objCOTAN)
+#' plot(scPlot)
 #'
 #' @rdname RawDataCleaning
 #'

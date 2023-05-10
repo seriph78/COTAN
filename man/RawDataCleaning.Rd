@@ -230,16 +230,23 @@ feGenes <- getFullyExpressedGenes(objCOTAN)
 feCells <- getFullyExpressingCells(objCOTAN)
 
 ## These plots might help to identify genes/cells that need to be dropped
-plot <- ECDPlot(objCOTAN, yCut = 100)
+ecdPlot <- ECDPlot(objCOTAN, yCut = 100)
+plot(ecdPlot)
 
-plots <- cleanPlots(objCOTAN)
+cPlots <- cleanPlots(objCOTAN)
+plot(cPlots[["pcaCells"]])
+plot(cPlots[["UDE"]])
 
 lsPlot <- cellSizePlot(objCOTAN)
+plot(lsPlot)
 
 gsPlot <- genesSizePlot(objCOTAN)
+plot(gsPlot)
 
 mitPercPlot <- mitochondrialPercentagePlot(objCOTAN)[["plot"]]
+plot(plot)
 
 scPlot <- scatterPlot(objCOTAN)
+plot(scPlot)
 
 }

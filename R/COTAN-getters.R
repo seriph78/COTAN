@@ -917,6 +917,7 @@ NULL
 #'                             "g-000570", "g-000590"))
 #'
 #' umapPlot <- UMAPPlot(coexDF, clusters = NULL, elements = groupMarkers)
+#' plot(umapPlot)
 #'
 #' objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
 #'                               clusters = clusters, coexDF = coexDF)
@@ -929,6 +930,7 @@ NULL
 #'                                 groupMarkers = groupMarkers)
 #'
 #' ##clHeatmapPlot <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
+#' ##plot(clHeatmapPlot)
 #'
 #' @rdname HandlingClusterizations
 #'

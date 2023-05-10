@@ -50,8 +50,8 @@ test_that("Merge Uniform Cells Clusters", {
 
   expect_equal(nrow(e.df), length(groupMarkers))
   expect_equal(ncol(e.df), ncol(coexDF) + 2)
-  expect_lte(max(e.df[,1:(ncol(e.df)-2)]), 1)
-  expect_gte(min(e.df[,1:(ncol(e.df)-2)]), 0)
+  expect_lte(max(e.df[, 1:(ncol(e.df) - 2)]), 1)
+  expect_gte(min(e.df[, 1:(ncol(e.df) - 2)]), 0)
   expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0)
   expect_equal(e.df[["N. total"]], sapply(groupMarkers, length),
                ignore_attr = TRUE)

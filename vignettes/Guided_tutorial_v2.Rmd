@@ -1,5 +1,5 @@
 ---
-title: "Guided tutorial as V.1"
+title: "Guided tutorial to COTAN V.2"
 author: 
 - name: "Silvia Giulia Galfrè"
   affiliation: "Department of Computer Science, University of Pisa"
@@ -8,7 +8,7 @@ package: COTAN
 output: 
     BiocStyle::html_document
 vignette: >
-  %\VignetteIndexEntry{Guided tutorial as V.1}
+  %\VignetteIndexEntry{Guided tutorial to COTAN V.2}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8} 
 ---
