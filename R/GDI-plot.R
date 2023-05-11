@@ -7,8 +7,8 @@
 #' @param objCOTAN a `COTAN` object
 #' @param genes a named `list` of genes to label. Each array will have different
 #'   color.
-#' @param cond a string corresponding to the condition/sample (it is used only
-#'   for the title).
+#' @param condition a string corresponding to the condition/sample (it is used
+#'   only for the title).
 #' @param statType type of statistic to be used. Default is "S": Pearson's
 #'   chi-squared test statistics. "G" is G-test statistics
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.

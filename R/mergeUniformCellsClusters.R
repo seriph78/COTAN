@@ -101,6 +101,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
     outputClusters <- getClusterizationData(objCOTAN)[["clusters"]]
   }
 
+  outputClusters <- factorToVector(outputClusters)
+
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
   outDirCond <- file.path(outDir, cond)
@@ -139,7 +141,6 @@ mergeUniformCellsClusters <- function(objCOTAN,
     }
 
     hcNorm <- hclust(coexDist, method = hclustMethod)
-    #plot(hcNorm)
 
     dend <- as.dendrogram(hcNorm)
 
@@ -231,6 +232,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
     colnames(coexDF)   <- clTagsMap[colnames(coexDF)]
     colnames(pValueDF) <- clTagsMap[colnames(pValueDF)]
   }
+
+  outputClusters <- factor(outputClusters)
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 

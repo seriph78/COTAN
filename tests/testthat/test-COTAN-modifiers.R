@@ -111,7 +111,7 @@ test_that("Managed clusterizations", {
 
   obj <- COTAN(raw = raw)
 
-  clusters <- set_names(rep(c(1, 2), 10), getCells(obj))
+  clusters <- factor(set_names(rep(c(1, 2), 10), getCells(obj)))
   obj <- addClusterization(obj, clName = "Test",
                            clusters = clusters)
 
@@ -134,7 +134,7 @@ test_that("Managed clusterizations", {
                "CL_Test")
   expect_equal(getClusterizationData(obj)[["coex"]], coexDF)
 
-  clusters2 = set_names(rep(c("2", "1"), 10), getCells(obj))
+  clusters2 = factor(set_names(rep(c("2", "1"), 10), getCells(obj)))
   coexDF2 <- set_names(
     as.data.frame(atan(getNormalizedData(obj)[, 1:2] - 0.7) / pi * 2),
     c("1", "2"))

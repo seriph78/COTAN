@@ -127,7 +127,7 @@ setClass(
     }
 
     for (name in names(object@clustersCoex)) {
-      if (substring(name, 1L, 3L) != "CL_") {
+      if (!startsWith(name, "CL_")) {
         stop("The clusterization name '", name, "' does not start",
              " with 'CL_' as per conventions")
       }
@@ -159,8 +159,13 @@ setClass(
     }
 
     for (name in colnames(object@metaCells)) {
-      if (substring(name, 1L, 3L) != "CL_") {
-        next # not a clusterization name
+      if (!startsWith(name, "CL_")) {
+        # not a clusterization name
+        next
+      }
+      if (!inherits(object@metaCells[[name]], "factor")) {
+        # ensure the clusters are factors
+        object@metaCells[[name]] <- factor(object@metaCells[[name]])
       }
       if (!name %in% names(object@clustersCoex)) {
         stop("The clusterization name '", name, "' does not have",
@@ -340,7 +345,7 @@ getCOTANSlots <- function(from) {
 
   hasClusters <- !is_empty(from@clusters) && !all(is.na(from@clusters))
   if (hasClusters) {
-    metaCells <- setColumnInDF(metaCells, from@clusters,
+    metaCells <- setColumnInDF(metaCells, factor(from@clusters),
                                "CL_clusters", colnames(from@raw))
   }
 
@@ -511,7 +516,8 @@ getScCOTANSlots <- function(from) {
   }
 
   if (!is_empty(from@metaCells[[clName]])) {
-    clusters <- set_names(from@metaCells[[clName]], rownames(from@metaCells))
+    clusters <- from@metaCells[[clName]]
+    clusters <- set_names(levels(clusters)[clusters], rownames(from@metaCells))
   } else {
     # ensure non-empty vector
     clusters <- set_names(rep(NA, ncol(from@raw)), colnames(from@raw))

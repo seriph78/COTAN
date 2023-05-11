@@ -124,8 +124,6 @@ setMethod(
 #'
 #' @returns `estimateDispersionBisection()` returns the updated `COTAN` object
 #'
-#' @importFrom rlang set_names
-#'
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
 #'
@@ -250,7 +248,6 @@ setMethod(
 #' @returns `estimateNuBisection()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
-#' @importFrom rlang set_names
 #'
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices

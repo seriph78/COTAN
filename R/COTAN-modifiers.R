@@ -296,7 +296,7 @@ setMethod(
            clName, "'.")
     }
 
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, clusters,
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, factor(clusters),
                                         internalName, getCells(objCOTAN))
 
     # this add a new entry in the list for the new name!
