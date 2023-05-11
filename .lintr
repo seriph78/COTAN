@@ -1,0 +1,8 @@
+linters: linters_with_defaults(
+  defaults = linters_with_tags(tags = NULL,
+                               packages = "lintr"),
+  object_name_linter(styles = c("camelCase", "symbols", "UPPERCASE")),
+  cyclocomp_linter(complexity_limit = 20L)
+  ) # see vignette("lintr")
+encoding: "UTF-8"
+exclusions: list("renv", "packrat")  # see ?lintr::exclude

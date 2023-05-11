@@ -105,7 +105,7 @@ clustersSummaryPlot <- function(objCOTAN, condition = NULL,
       condPosInMeta <- rep_len(TRUE, length.out = getNumCells(objCOTAN))
     }
 
-    for (cl in levels(df[["Cluster"]])) {
+    for (cl in levels(factor(df[["Cluster"]]))) {
       posInDF   <- (df[["Cluster"]] == cl) & condPosInDF
       posInMeta <- (metaCells[[internalName]] == cl) & condPosInMeta
 

@@ -24,6 +24,11 @@
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
 #'
+#' @importFrom utils head
+#' @importFrom utils tail
+#'
+#' @importFrom assertthat assert_that
+#'
 #' @importFrom dendextend set
 #'
 #' @importFrom tidyr pivot_wider
@@ -66,50 +71,62 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers, clName = NULL,
   }
 
   if (!is_empty(conditionsList)) {
-    stop("Uasge of condition list is not supported yet")
-    # # a data frame coming from clustersSummaryPlot()
-    # cond1 <- conditionsList[[1L]]
-    #
-    # if (is.numeric(cond1[["Cluster"]])) {
-    #   numDigits <- floor(log10(length(cond1[["Cluster"]]))) + 1L
-    #   cond1[["Cluster"]] <-
-    #     formatC(cond1[["Cluster"]], width = numDigits, flag = "0")
-    # }
-    #
-    # cond1 <- cond1[, c("Cluster", "cond1" ,"CellNumber")] %>%
-    #   pivot_wider(names_from = cond1, values_from = CellNumber)
-    #
-    # cond1[, 2L:3L] <- cond1[, 2L:3L] / rowSums(cond1[, 2L:3L])
-    # cond1 <- as.data.frame(cond1)
-    # rownames(cond1) <- cond1[["Cluster"]]
-    # cond1 <- cond1[rownames(scoreDFT), ]
-    # cond1[is.na(cond1)] <- 0
-    #
-    # # TODO: here instead of F and M we need a flexible number of conditions
-    # cond1Col <- c("F" = "deeppink1", "M" = "darkturquoise")
-    # cond2Col <- c("F"="red4", "R"="sienna3", "H"="seagreen")
-    # hb <- list(
-    #   hb1 = rowAnnotation(
-    #     cond1 = anno_barplot(cond1[, 2L:3L],
-    #                          width = unit(3.0, "cm"),
-    #                          gp = gpar(fill = cond1Col, col = "black"),
-    #                          align_to = "right",
-    #                          labels_gp = gpar(fontsize = 12L)),
-    #     annotation_name_rot = 0L),
-    #   hb2 = rowAnnotation(condition = anno_barplot(cond2[, 2L:3L],
-    #                                     width = unit(3.0, "cm"),
-    #                                     gp = gpar(fill = cond2Col,
-    #                                               col = "black"),
-    #                                     align_to = "right",
-    #                                     labels_gp = gpar(fontsize = 12L)),
-    #                       annotation_name_rot = 0L)
-    # )
-    # lgdList <- list(
-    #   lb1 = Legend(labels = c("Female", "Male"), title = "cond1",
-    #                legend_gp = gpar(fill = cond1Col))#,
-    #   lb2 = Legend(labels = c("Flare", "Remission", "Healthy"), title = "cond2",
-    #                legend_gp = gpar(fill = cond2col))
-    # )
+    hbList <- list()
+    lgdList <- list()
+    allColors <- getColorsVector()
+
+    for (condDF in conditionsList) {
+      # a data frame coming from clustersSummaryPlot()
+      assert_that(ncol(condDF) >= 3 &&
+                    colnames(condDF)[[1L]] == "Cluster" &&
+                    colnames(condDF)[[3L]] == "CellNumber",
+                  msg = "Passed condition data.frame must have 3 columns")
+
+      assert_that(all.equal(levels(ordered(condDF[[1L]])),
+                            levels(ordered(clusters))),
+                  msg = "Passed conditions do not agree with given clusters")
+
+      condName <- colnames(condDF)[[2L]]
+      cNames <- c("Cluster", condName, "CellNumber")
+
+      if (is.numeric(condDF[[1L]])) {
+        numDigits <- floor(log10(nrows(condDF))) + 1L
+        condDF[[1L]] <-
+          factor(formatC(condDF[[1L]], width = numDigits, flag = "0"))
+      }
+
+      condDF <- condDF[, cNames] %>%
+        pivot_wider(names_from = condName,
+                    values_from = cNames[[3L]])
+
+      # Here we have a column per condition alternative plus 1
+      nCols <- ncol(condDF)
+      assert_that(nCols > 1L, msg = "Internal error: provided empty conditions")
+      condDF[, 2:nCols] <- condDF[, 2:nCols] / rowSums(condDF[, 2:nCols])
+
+      condDF <- as.data.frame(condDF)
+      rownames(condDF) <- condDF[["Cluster"]]
+      condDF <- condDF[rownames(scoreDFT), ]
+      condDF[is.na(condDF)] <- 0L
+
+      conds <- colnames(condDF)[2:nCols]
+
+      colrs <- set_names(head(allColors, nCols - 1L), conds)
+      allColors <- tail(allColors, length(allColors) - nCols + 1L)
+
+      hb <- rowAnnotation(
+        condName = anno_barplot(condDF[, 2:nCols],
+                                width = unit(3.0, "cm"),
+                                gp = gpar(fill = colrs, col = "black"),
+                                align_to = "right",
+                                labels_gp = gpar(fontsize = 12L)),
+        annotation_name_rot = 0L)
+      hbList <- append(hbList, hb)
+
+      lgd <-  Legend(labels = conds, title = condName,
+                     legend_gp = gpar(fill = colrs))
+      lgdList <- append(lgdList, lgd)
+    }
   } else {
     hb <- c()
     lgdList <- list()
@@ -125,22 +142,22 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers, clName = NULL,
   rownames(clsInfo) <- clsInfo[["Cluster"]]
   clsInfo <- clsInfo[rownames(scoreDFT), ]
 
-  freq <- set_names(clsInfo[["CellNumber"]], rownames(clsInfo))
+  freq1 <- set_names(clsInfo[["CellNumber"]], rownames(clsInfo))
 
   freq2 <- set_names(paste0(clsInfo[["CellPercentage"]], "%"),
                      rownames(clsInfo))
 
   ha <- c(
-    ha1 = rowAnnotation(cell.number = anno_numeric(freq,
-                                                   bg_gp = gpar(fill = "orange",
-                                                                col = "black")
-                                                #labels_gp = gpar(fontsize = 10)
-                                                  ),
-                        annotation_name_rot = 0),
+    ha1 = rowAnnotation(
+      cell.number = anno_numeric(freq1,
+                                 bg_gp = gpar(fill = "orange", col = "black"),
+                                 labels_gp = gpar(fontsize = 10)),
+      annotation_name_rot = 0),
 
-    ha2 = rowAnnotation(cell.perc = anno_text(freq2,
-                                              gp = gpar(fontsize = 10)),
-                        annotation_name_rot = 0)
+    ha2 = rowAnnotation(
+      cell.perc = anno_text(freq2,
+                            gp = gpar(fontsize = 10)),
+      annotation_name_rot = 0)
   )
 
   colorFunc <- colorRamp2(c(0, 1), c("lightblue", "red"))

@@ -666,7 +666,8 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
 #' @details The colors are taken from the [brewer.pal.info()] sets with
 #'   `Set1`, `Set2`, `Set3` placed first.
 #'
-#' @param numNeededColors The number of returned colors
+#' @param numNeededColors The number of returned colors. If omitted it returns
+#'   all available colors
 #'
 #' @returns an array of `RGB` colors of the wanted size
 #'
@@ -682,7 +683,7 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
 #'
 #' @rdname getColorsVector
 #'
-getColorsVector <- function(numNeededColors) {
+getColorsVector <- function(numNeededColors = 0) {
   qualColPalets <- brewer.pal.info[brewer.pal.info[["category"]] == "qual", ]
   numColPalets <- nrow(qualColPalets)
 
@@ -698,8 +699,9 @@ getColorsVector <- function(numNeededColors) {
               msg = paste("Needed more colors than the number",
                           "of possible supported colors:", length(colVector)))
 
-
-
+  if (numNeededColors == 0) {
+    return(colVector)
+  }
   return(head(colVector, numNeededColors))
 }
 

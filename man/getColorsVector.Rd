@@ -4,10 +4,11 @@
 \alias{getColorsVector}
 \title{getColorsVector}
 \usage{
-getColorsVector(numNeededColors)
+getColorsVector(numNeededColors = 0)
 }
 \arguments{
-\item{numNeededColors}{The number of returned colors}
+\item{numNeededColors}{The number of returned colors. If omitted it returns
+all available colors}
 }
 \value{
 an array of \code{RGB} colors of the wanted size
