@@ -11,9 +11,9 @@
 #'   * "MeanUDE" the average "UDE" in the group of cells
 #'   * "MedianUDE" the median "UDE" in the group of cells
 #'   * "ExpGenes25" the number of genes expressed in at the least 25% of the
-#'     cells in the group
+#'   cells in the group
 #'   * "ExpGenes" the number of genes expressed at the least once in any of the
-#'     cells in the group
+#'   cells in the group
 #'   * "CellPercentage" fraction of the cells with respect to the total cells
 #'
 #' @param objCOTAN a `COTAN` object
@@ -21,8 +21,9 @@
 #'   containing the *condition*. This allows to further separate the cells in
 #'   more sub-groups. When not given condition is assumed to be the same for all
 #'   cells.
-#' @param clName The name of the clusterization. If not given the last available
-#'   clusterization will be used, as it is probably the most significant!
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
 #' @param plotTitle The title to use for the returned plot
 #'
 #' @returns `clustersSummaryPlot()` returns a `list` with a `data.frame` and a

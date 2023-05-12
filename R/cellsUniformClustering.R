@@ -10,9 +10,9 @@
 #' @param rawData The raw counts
 #' @param cond The sample condition
 #' @param iter The current iteration
-#' @param minNumClusters The minimum number of clusters expected from this
-#'   clusterization. In cases it is not reached, it will increase the resolution
-#'   of the clusterization.
+#' @param minNumClusters The minimum number of *clusters* expected from this
+#'   *clusterization*. In cases it is not reached, it will increase the
+#'   resolution of the *clusterization*.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.

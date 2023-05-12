@@ -17,6 +17,11 @@ test_that("COTAN getters", {
   obj <- addClusterization(obj, clName = "Test2",
                            clusters = rep(c(2, 1), 10))
 
+  obj <- addCondition(obj, condName = "Test",
+                      conditions = rep(c("F", "M"), 10))
+  obj <- addCondition(obj, condName = "Test", override = TRUE,
+                      conditions = c(rep(c("F", "M"), 9), "M", "F"))
+
   metaInfo <- c("V", "10X", "Test", "20", "TRUE", "TRUE",
                 paste0(10/55), paste0(0))
 
@@ -38,7 +43,8 @@ test_that("COTAN getters", {
                   c("lambda", "feGenes", "dispersion"))
   expect_equal(rownames(getMetadataGenes(obj)), getGenes(obj))
   expect_setequal(colnames(getMetadataCells(obj)),
-                  c("nu", "feCells", names(getClustersCoex(obj))))
+                  c("nu", "feCells", names(getClustersCoex(obj)),
+                    getAllConditions(obj, keepPrefix = TRUE)))
   expect_equal(rownames(getMetadataCells(obj)), getCells(obj))
   expect_equal(length(getClustersCoex(obj)), 2)
   expect_equal(names(getClustersCoex(obj)),
@@ -67,6 +73,14 @@ test_that("COTAN getters", {
   expect_equal(getClusterizationData(obj)[["clusters"]],
                getMetadataCells(obj)[["CL_Test2"]], ignore_attr = TRUE)
   expect_equal(getClusterizationData(obj)[["coex"]], data.frame())
+  expect_equal(getAllConditions(obj), c("Test"))
+  expect_equal(getConditionName(obj), "Test")
+  expect_equal(getConditionName(obj, condName = "Test", keepPrefix = TRUE),
+               "COND_Test")
+  expect_equal(getCondition(obj),
+               getMetadataCells(obj)[["COND_Test"]], ignore_attr = TRUE)
+  expect_equal(factorToVector(getCondition(obj, condName = "Test"))[19:20],
+               set_names(c("M", "F"), letters[19:20]))
   expect_equal(length(getDims(obj)), 7)
   expect_equal(getDims(obj)[["raw"]], dim(getRawData(obj)))
   expect_equal(getDims(obj)[["metaCells"]], ncol(getMetadataCells(obj)))
