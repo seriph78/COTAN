@@ -93,7 +93,7 @@ compacted into three \code{data.frame}s:
 \item "metaGenes" - contains genes' related information along the \code{lambda} and
 \code{dispersion} vectors and the fully-expressed flag
 \item "metaCells" - contains cells' related information along the \code{nu} vector,
-the fully-expressing flag and the clusterizations
+the fully-expressing flag, the \emph{clusterizations} and the \emph{conditions}
 }
 }
 \details{

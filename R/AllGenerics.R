@@ -171,11 +171,28 @@ setGeneric(
 )
 
 setGeneric(
+  "getAllConditions",
+  function(objCOTAN, keepPrefix = FALSE) standardGeneric("getAllConditions")
+)
+
+setGeneric(
+  "getConditionName",
+  function(objCOTAN, condName = "", keepPrefix = FALSE) {
+    standardGeneric("getConditionName")
+  }
+)
+
+setGeneric(
+  "getCondition",
+  function(objCOTAN, condName = "") standardGeneric("getCondition")
+)
+
+setGeneric(
   "getDims",
   function(objCOTAN) standardGeneric("getDims")
 )
 
-#-------------------------------------- modifiers
+#-------------------- modifiers ------------------
 
 setGeneric(
   "initializeMetaDataset",
@@ -233,6 +250,23 @@ setGeneric(
 )
 
 setGeneric(
+  "dropClusterization",
+  function(objCOTAN, clName) standardGeneric("dropClusterization")
+)
+
+setGeneric(
+  "addCondition",
+  function(objCOTAN, condName, conditions, override = FALSE) {
+    standardGeneric("addCondition")
+  }
+)
+
+setGeneric(
+  "dropCondition",
+  function(objCOTAN, condName) standardGeneric("dropCondition")
+)
+
+setGeneric(
   "dropGenesCoex",
   function(objCOTAN) standardGeneric("dropGenesCoex")
 )
@@ -240,11 +274,6 @@ setGeneric(
 setGeneric(
   "dropCellsCoex",
   function(objCOTAN) standardGeneric("dropCellsCoex")
-)
-
-setGeneric(
-  "dropClusterization",
-  function(objCOTAN, clName) standardGeneric("dropClusterization")
 )
 
 #-------------------------------------- estimators

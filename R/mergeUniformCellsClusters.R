@@ -6,12 +6,13 @@
 #'   would form a **uniform** *cluster* still. This function uses the *cosine
 #'   distance* and the [stats::hclust()] function to establish *near clusters
 #'   pairs*. It will use the [checkClusterUniformity()] function to check
-#'   whether the merged *clusters* are **uniform**. The function will stop once no
-#'   *near pairs* of clusters are mergeable.
+#'   whether the merged *clusters* are **uniform**. The function will stop once
+#'   no *near pairs* of clusters are mergeable.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clusters The clusterization to merge. If not given the last available
-#'   clusterization will be used, as it is probably the most significant!
+#' @param clusters The *clusterization* to merge. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
 #'   It defaults to \eqn{1.4}
 #' @param cores number cores used
