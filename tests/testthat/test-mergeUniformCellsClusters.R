@@ -12,7 +12,7 @@ test_that("Merge Uniform Cells Clusters", {
 
   obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
 
-  clusters <- readRDS(file.path(getwd(), "clusters1.RDS"))
+  clusters <- factor(readRDS(file.path(getwd(), "clusters1.RDS")))
   genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
@@ -21,10 +21,10 @@ test_that("Merge Uniform Cells Clusters", {
 
   obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = coexDF)
 
-  expect_equal(colnames(coexDF), sort(unique(clusters)))
+  expect_setequal(colnames(coexDF), levels(clusters))
   expect_equal(rownames(coexDF), getGenes(obj))
 
-  expect_equal(colnames(pValDF), sort(unique(clusters)))
+  expect_setequal(colnames(pValDF), levels(clusters))
   expect_equal(rownames(pValDF), getGenes(obj))
 
   coexDF_exp <- readRDS(file.path(getwd(), "coex.test.cluster1.RDS"))
@@ -38,7 +38,7 @@ test_that("Merge Uniform Cells Clusters", {
   deltaExpression <- clustersDeltaExpression(obj)
 
   expect_equal(rownames(deltaExpression), getGenes(obj))
-  expect_equal(colnames(deltaExpression), sort(unique(clusters)))
+  expect_setequal(colnames(deltaExpression), levels(clusters))
 
   #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
@@ -62,14 +62,14 @@ test_that("Merge Uniform Cells Clusters", {
                               distance = "cosine", hclustMethod = "ward.D2",
                               saveObj = TRUE, outDir = tm)
 
-  expect_lt(length(unique(mergedClusters)), length(unique(clusters)))
+  expect_lt(nlevels(mergedClusters), nlevels(clusters))
   expect_setequal(mergedClusters, colnames(mergedCoexDF))
   expect_setequal(colnames(mergedCoexDF), colnames(mergedPValueDF))
 
   #cluster_data <- readRDS(file.path(getwd(), "cluster_data_merged.RDS"))
   #expect_equal(mergedClusters[genes.names.test], cluster_data)
 
-  for (cl in unique(mergedClusters)) {
+  for (cl in levels(mergedClusters)) {
     cellsToDrop <- names(clusters)[mergedClusters != cl]
 
     clObj <- dropGenesCells(obj, cells = cellsToDrop)

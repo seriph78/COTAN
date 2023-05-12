@@ -62,7 +62,8 @@ test_that("'scCOTAN' converters",{
   expect_null(obj_sc@yes_yes)
   expect_length(obj_sc@clusters, ncol(obj_sc@raw))
   if (!all(is.na(obj_sc@clusters))) {
-    expect_equal(obj_sc@clusters, getClusterizationData(obj)[["clusters"]])
+    expect_equal(obj_sc@clusters,
+                 factorToVector(getClusterizationData(obj)[["clusters"]]))
     expect_equal(obj_sc@cluster_data, getClusterizationData(obj)[["coex"]])
   } else {
     expect_length(obj_sc@cluster_data, 0)

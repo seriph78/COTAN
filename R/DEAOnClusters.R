@@ -30,6 +30,8 @@ DEAOnClusters <- function(objCOTAN, clusters = NULL) {
   if (is_empty(clusters)) {
     # pick the last clusterization
     clusters <- getClusterizationData(objCOTAN)[["clusters"]]
+  } else if (!inherits(clusters, "factor")) {
+    clusters <- factor(clusters)
   }
 
   assert_that(length(clusters) == getNumCells(objCOTAN),

@@ -194,11 +194,13 @@ clustersTreePlot <- function(objCOTAN, kCuts,
   # pick last if no name was given
   clName <- getClusterizationName(objCOTAN, clName = clName)
   c(clusters, coexDF) %<-% getClusterizationData(objCOTAN, clName = clName)
+  assert_that(inherits(clusters, "factor"),
+              msg = "Internal error - clusters must be factors")
 
-  if (kCuts > length(unique(clusters))) {
+  if (kCuts > nlevels(clusters)) {
     logThis("The number of cuts must be not more than the number of clusters",
             logLevel = 1L)
-    kCuts <- length(unique(clusters))
+    kCuts <- nlevels(clusters)
   }
 
   colVector <- getColorsVector(kCuts)

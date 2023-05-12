@@ -68,7 +68,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
     # the number of residual cells decrease and to stop clustering
     # if the algorithm gives too many singletons.
     if ((minNumClusters <
-           length(levels(factor(srat[["seurat_clusters", drop = TRUE]])))) ||
+           nlevels(factor(srat[["seurat_clusters", drop = TRUE]]))) ||
         (resolution > initialResolution + 1.5)) {
       break
     }
@@ -303,6 +303,8 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     outputClusters[unclusteredCells] <- "not_clustered"
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
+
+  outputClusters <- factor(outputClusters)
 
   if (saveObj) {
     clusterizationName <-

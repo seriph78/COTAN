@@ -76,7 +76,7 @@ test_that("Clusterizations manipulations", {
   clusterM1 <- mergeClusters(clusters, names = as.roman(c(5, 1)),
                              mergedName = "I'V")
 
-  expect_true("I'V" %in% levels(clusterM1)[[1L]])
+  expect_equal(levels(clusterM1)[[1L]], "I'V")
   expect_equal(table(clusterM1)[[1L]], sum(table(clusters)[c(1, 5)]))
 
   clusterM2 <-
