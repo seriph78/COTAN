@@ -10,9 +10,9 @@
 #' @param rawData The raw counts
 #' @param cond The sample condition
 #' @param iter The current iteration
-#' @param minNumClusters The minimum number of clusters expected from this
-#'   clusterization. In cases it is not reached, it will increase the resolution
-#'   of the clusterization.
+#' @param minNumClusters The minimum number of *clusters* expected from this
+#'   *clusterization*. In cases it is not reached, it will increase the
+#'   resolution of the *clusterization*.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.
@@ -68,7 +68,7 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
     # the number of residual cells decrease and to stop clustering
     # if the algorithm gives too many singletons.
     if ((minNumClusters <
-           length(levels(factor(srat[["seurat_clusters", drop = TRUE]])))) ||
+           nlevels(factor(srat[["seurat_clusters", drop = TRUE]]))) ||
         (resolution > initialResolution + 1.5)) {
       break
     }
@@ -303,6 +303,8 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     outputClusters[unclusteredCells] <- "not_clustered"
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
+
+  outputClusters <- factor(outputClusters)
 
   if (saveObj) {
     clusterizationName <-

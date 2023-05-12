@@ -82,7 +82,7 @@ heatmapPlot <- function(genesLists, sets, conditions, dir,
                               geneSubsetRow = allGenes)
     pValue <- as.data.frame(pValue)
 
-    pValue[["g2"]] <- as.vector(rownames(pValue))
+    pValue[["g2"]] <- rownames(pValue)
     dfTempVal <- pivot_longer(pValue, cols = seq_along(colnames(pValue)) - 1L,
                               names_to = "g1", values_to = "pValue")
 
@@ -91,7 +91,7 @@ heatmapPlot <- function(genesLists, sets, conditions, dir,
     coex <- coex[getGenes(obj) %in% allGenes, getGenes(obj) %in% colGenes]
     coex <- as.data.frame(coex)
 
-    coex[["g2"]] <- as.vector(rownames(coex))
+    coex[["g2"]] <- rownames(coex)
     dfTempCoex <- pivot_longer(coex, cols = seq_along(colnames(pValue)) - 1L,
                                names_to = "g1", values_to = "coex")
 
@@ -335,7 +335,7 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
   # if clustering is needed
   if (!is_empty(clusters)) {
     # identifier for each cluster
-    clustersTags <- unique(clusters)
+    clustersTags <- levels(factor(clusters))
 
     # size of each cluster
     clustersList <- toClustersList(clusters)

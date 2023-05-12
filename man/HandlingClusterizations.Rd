@@ -89,11 +89,11 @@ geneSetEnrichment(clustersCoex, groupMarkers)
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{dropNoCoex}{When \code{TRUE} drops the names from the clusterizations with
+\item{dropNoCoex}{When \code{TRUE} drops the names from the \emph{clusterizations} with
 empty associated coex \code{data.frame}}
 
 \item{keepPrefix}{When \code{TRUE} returns the internal name of the
-clusterization: the one with the \code{CL_} prefix.}
+\emph{clusterization}: the one with the \code{CL_} prefix.}
 
 \item{clName}{The name of the \emph{clusterization}. If not given the last
 available \emph{clusterization} will be returned, as it is probably the most
@@ -221,7 +221,7 @@ A \emph{clusterization} is any partition of the cells where to each cell it is
 assigned a \strong{label}; a group of cells with the same label is called
 \emph{cluster}.
 
-For each cluster is also possible to define a \code{COEX} value for each gene,
+For each \emph{cluster} is also possible to define a \code{COEX} value for each gene,
 indicating its increased or decreased expression in the \emph{cluster} compared
 to the whole background. A \code{data.frame} with these values listed in a
 column for each \emph{cluster} is stored separately for each \emph{clusterization} in

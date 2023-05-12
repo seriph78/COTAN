@@ -54,6 +54,9 @@ mergeUniformCellsClusters(
 \item{genes}{a named \code{list} of genes to label. Each array will have different
 color.}
 
+\item{condition}{a string corresponding to the condition/sample (it is used
+only for the title).}
+
 \item{statType}{type of statistic to be used. Default is "S": Pearson's
 chi-squared test statistics. "G" is G-test statistics}
 
@@ -78,17 +81,15 @@ output will be paced in a sub-folder.}
 
 \item{cells}{the cells in the cluster}
 
-\item{clusters}{The clusterization to merge. If not given the last available
-clusterization will be used, as it is probably the most significant!}
+\item{clusters}{The \emph{clusterization} to merge. If not given the last
+available \emph{clusterization} will be used, as it is probably the most
+significant!}
 
 \item{distance}{type of distance to use. It defaults to \code{"cosine"}, but
 \code{"euclidean"} is also available)}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
-
-\item{cond}{a string corresponding to the condition/sample (it is used only
-for the title).}
 }
 \value{
 \code{GDIPlot()} returns a \code{ggplot2} object
@@ -131,8 +132,8 @@ too high for too many genes, the cluster is deemed \strong{non-uniform}.
 would form a \strong{uniform} \emph{cluster} still. This function uses the \emph{cosine
 distance} and the \code{\link[stats:hclust]{stats::hclust()}} function to establish \emph{near clusters
 pairs}. It will use the \code{\link[=checkClusterUniformity]{checkClusterUniformity()}} function to check
-whether the merged \emph{clusters} are \strong{uniform}. The function will stop once no
-\emph{near pairs} of clusters are mergeable.
+whether the merged \emph{clusters} are \strong{uniform}. The function will stop once
+no \emph{near pairs} of clusters are mergeable.
 }
 \examples{
 data("test.dataset")

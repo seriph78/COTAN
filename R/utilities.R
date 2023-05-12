@@ -182,6 +182,7 @@ handleMultiCore <- function(cores) {
 #'   names' list
 #'
 #' @importFrom rlang is_empty
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @noRd
@@ -214,6 +215,26 @@ handleNamesSubsets <- function(names, subset = c()) {
 #'
 isEmptyName <- function(name) {
   return(!(length(name) && any(nzchar(name))))
+}
+
+
+#' Internal function to convert a named factor to a character vector
+#'
+#' @description Returns the factor cast to a vector along its names
+#'
+#' @param a `factor` object
+#'
+#' @returns a character vector that is preserving the names of the input
+#'
+#' @importFrom rlang set_names
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @noRd
+#'
+factorToVector <- function(v) {
+  assert_that(inherits(v, "factor"), msg = "Passed object is not a factor")
+  return(set_names(levels(v)[v], names(v)))
 }
 
 
@@ -332,7 +353,7 @@ toClustersList <- function(clusters) {
   clustersNames <- levels(factor(clusters))
 
   getCl <- function(cl, clusters) {
-    names(clusters[clusters %in% cl])
+    names(clusters)[clusters %in% cl]
   }
 
   clustersList <- set_names(lapply(clustersNames, getCl, clusters),
@@ -475,7 +496,11 @@ groupByClusters <- function(clusters) {
 #' @rdname ClustersList
 #'
 mergeClusters <- function(clusters, names, mergedName = "") {
-  effNames <- names[names %in% clusters]
+  if (!inherits(clusters, "factor")) {
+    clusters <- factor(clusters)
+  }
+
+  effNames <- names[names %in% levels(clusters)]
   if (is_empty(effNames) || length(effNames) < 2) {
     warning("Passed a list of clusters to merge with less than 2 elements",
             " actually present in the clusterization")
@@ -488,8 +513,8 @@ mergeClusters <- function(clusters, names, mergedName = "") {
     mergedName <- paste0(paste(effNames, collapse = "_"), "-merge")
   }
 
-  # cannot assign new leves into a factor
-  cclusters <- as.vector(clusters)
+  # cannot assign new levels into a factor
+  cclusters <- factorToVector(clusters)
   cclusters[clusters %in% effNames] <- mergedName
 
   return(factor(cclusters))

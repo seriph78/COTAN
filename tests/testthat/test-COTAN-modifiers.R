@@ -103,7 +103,7 @@ test_that("dropGenesCells", {
 })
 
 
-test_that("Managed clusterizations", {
+test_that("Managed clusterizations and conditions", {
   raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
                 nrow = 10, ncol = 20)
   rownames(raw) = LETTERS[1:10]
@@ -111,7 +111,7 @@ test_that("Managed clusterizations", {
 
   obj <- COTAN(raw = raw)
 
-  clusters <- set_names(rep(c(1, 2), 10), getCells(obj))
+  clusters <- factor(set_names(rep(c(1, 2), 10), getCells(obj)))
   obj <- addClusterization(obj, clName = "Test",
                            clusters = clusters)
 
@@ -134,7 +134,7 @@ test_that("Managed clusterizations", {
                "CL_Test")
   expect_equal(getClusterizationData(obj)[["coex"]], coexDF)
 
-  clusters2 = set_names(rep(c("2", "1"), 10), getCells(obj))
+  clusters2 = factor(set_names(rep(c("2", "1"), 10), getCells(obj)))
   coexDF2 <- set_names(
     as.data.frame(atan(getNormalizedData(obj)[, 1:2] - 0.7) / pi * 2),
     c("1", "2"))
@@ -159,17 +159,35 @@ test_that("Managed clusterizations", {
   expect_equal(getClusterizationData(obj),
                list("clusters" = clusters2, "coex" = coexDF2))
 
-  # no such clusterization
-  expect_error(getClusterizationData(obj, clName = "Test"))
+  genre = factor(set_names(rep(c("F", "M"), 10), getCells(obj)))
 
-  # empyt name clusterization
+  obj <- addCondition(obj, condName = "Test", conditions = genre)
+
+  expect_equal(getAllConditions(obj), c("Test"))
+  expect_equal(colnames(getMetadataCells(obj)),
+               c("nu", "CL_Test2", "COND_Test"))
+  expect_equal(getCondition(obj), genre)
+  expect_equal(getCondition(obj, condName = "Test"), genre)
+
+  obj <- dropCondition(obj, condName = "Test")
+
+  expect_equal(getAllConditions(obj), vector(mode = "character"))
+  expect_equal(colnames(getMetadataCells(obj)), c("nu", "CL_Test2"))
+
+  # no such clusterization/condition
+  expect_error(getClusterizationData(obj, clName = "Test"))
+  expect_error(getCondition(obj, condName = "Test"))
+
+  # empyt name clusterization/consition
   expect_error(addClusterization(obj, clName = "", clusters = rep(0, 20)))
+  expect_error(addCondition(obj, condName = "", conditions = rep(0, 20)))
 
   # already existing clusterization
   expect_error(addClusterization(obj, clName = "Test2", clusters = rep(0, 20)))
 
-  # wrong clusters size
+  # wrong clusters/conditions size
   expect_error(addClusterization(obj, clName = "Test", clusters = rep(0, 17)))
+  expect_error(addCondition(obj, condName = "Test", conditions = rep("A", 17)))
 
   # wrong coex data.frame size
   expect_error(addClusterization(obj, clName = "Test",

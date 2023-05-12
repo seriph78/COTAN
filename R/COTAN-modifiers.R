@@ -296,7 +296,7 @@ setMethod(
            clName, "'.")
     }
 
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, clusters,
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, factor(clusters),
                                         internalName, getCells(objCOTAN))
 
     # this add a new entry in the list for the new name!
@@ -315,9 +315,9 @@ setMethod(
 #'   *clusterization* to be already present.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clName the name of an existing clusterization
+#' @param clName the name of an existing *clusterization*
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for all,
-#'   or just some of, the clusters of the clusterization
+#'   or just some of, the clusters of the *clusterization*
 #'
 #' @returns `addClusterizationCoex()` returns the updated `COTAN` object
 #'
@@ -379,6 +379,98 @@ setMethod(
 
     # assign NULL to drop elements from list
     objCOTAN@clustersCoex[[internalName]] <- NULL
+
+    return(objCOTAN)
+  }
+)
+
+
+# -------------- Conditions handling ---------------
+
+#' @aliases addCondition
+#'
+#' @details `addCcondition()` adds a *condition* to the current `COTAN` object,
+#'   by adding a new column in the `metaCells` `data.frame`
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param condName the name of the *condition* to be added. It cannot match an
+#'   existing name unless `override = TRUE` is used
+#' @param conditions a (factors) array of *condition* **labels**
+#' @param override When `TRUE` silently allows overriding data for an existing
+#'   *condition* name. Otherwise the default behavior will avoid potential
+#'   data losses
+#'
+#' @returns `addCondition()` returns the updated `COTAN` object
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @rdname HandlingConditions
+#'
+setMethod(
+  "addCondition",
+  "COTAN",
+  function(objCOTAN, condName, conditions, override = FALSE) {
+    internalName <- condName
+    if (!startsWith(internalName, "COND_")) {
+      internalName <- paste0("COND_", condName)
+    }
+
+    if (nchar(internalName) < 6L) {
+      stop("Given an empty name for the new condition")
+    }
+
+    if (!override && (internalName %in% colnames(getMetadataCells(objCOTAN)))) {
+      stop("A condition with name '", condName, "' already exists.")
+    }
+
+    if (length(conditions) != getNumCells(objCOTAN)) {
+      stop("The passed condition has the wrong number of elements [",
+           length(conditions), "] instead of the expected number of cells [",
+           getNumCells(objCOTAN), "].")
+    }
+
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, factor(conditions),
+                                        internalName, getCells(objCOTAN))
+
+    validObject(objCOTAN)
+
+    return(objCOTAN)
+  }
+)
+
+
+#' @aliases dropCondition
+#'
+#' @details `dropCondition()` drops a *condition* from the current `COTAN`
+#'   object, by removing the corresponding column in the `metaCells`
+#'   `data.frame`
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param condName the name of an existing *condition*.
+#'
+#' @returns `dropCondition()` returns the updated `COTAN` object
+#'
+#' @export
+#'
+#' @rdname HandlingConditions
+#'
+setMethod(
+  "dropCondition",
+  "COTAN",
+  function(objCOTAN, condName) {
+    internalName <- condName
+    if (!startsWith(internalName, "COND_")) {
+      internalName <- paste0("COND_", condName)
+    }
+
+    if (!internalName %in% colnames(getMetadataCells(objCOTAN))) {
+      stop("A condition with name '", condName, "' does not exists.")
+    }
+
+    keptCols <- !colnames(objCOTAN@metaCells) %in% internalName
+    objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols, drop = FALSE]
 
     return(objCOTAN)
   }

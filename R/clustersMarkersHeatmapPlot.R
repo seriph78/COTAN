@@ -8,8 +8,9 @@
 #'   easier to derive the *clusters*' cell types.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clName The name of the clusterization. If not given the last available
-#'   clusterization will be used, as it is probably the most significant!
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
 #' @param groupMarkers a named `list` with an element for each group of one or
 #'   more marker genes for each group.
 #' @param kCuts the number of estimated *cluster* (this defines the height for
