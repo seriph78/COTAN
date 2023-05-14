@@ -104,11 +104,11 @@ setClass(
     }
 
     if (!is_empty(object@cellsCoex)) {
-      if (!isa(object@genesCoex, "dspMatrix")) {
-        stop("'genesCoex' must be of type 'dspMatrix.")
+      if (!isa(object@cellsCoex, "dspMatrix")) {
+        stop("'cellsCoex' must be of type 'dspMatrix.")
       }
-      if (nrow(object@genesCoex) != numGenes) {
-        stop("'genesCoex' sizes should match the number of genes.")
+      if (nrow(object@cellsCoex) != numCells) {
+        stop("'cellsCoex' sizes should match the number of cells.")
       }
     }
 
