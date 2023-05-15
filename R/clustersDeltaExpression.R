@@ -38,6 +38,9 @@ clustersDeltaExpression <- function(objCOTAN, clusters = NULL, clName = "") {
                 msg = "No names attached to the given clusterization")
     assert_that(setequal(names(clusters), getCells(objCOTAN)),
                 msg = "Non compatible clusterization")
+    if (isEmptyName(clName)) {
+      clName <- "clusters"
+    }
   }
 
   clustersList <- toClustersList(clusters)

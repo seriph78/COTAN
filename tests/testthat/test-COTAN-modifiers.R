@@ -166,7 +166,7 @@ test_that("Managed clusterizations and conditions", {
   expect_equal(getAllConditions(obj), c("Test"))
   expect_equal(colnames(getMetadataCells(obj)),
                c("nu", "CL_Test2", "COND_Test"))
-  expect_equal(getCondition(obj), genre)
+  expect_equal(levels(getCondition(obj)), c("NoCond"))
   expect_equal(getCondition(obj, condName = "Test"), genre)
 
   obj <- dropCondition(obj, condName = "Test")

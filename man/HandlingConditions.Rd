@@ -8,6 +8,7 @@
 \alias{getConditionName}
 \alias{getCondition,COTAN-method}
 \alias{getCondition}
+\alias{normalizeNameAndLabels}
 \alias{addCondition,COTAN-method}
 \alias{addCondition}
 \alias{dropCondition,COTAN-method}
@@ -20,6 +21,8 @@
 
 \S4method{getCondition}{COTAN}(objCOTAN, condName = "")
 
+normalizeNameAndLabels(objCOTAN, name = "", labels = NULL, isCond = FALSE)
+
 \S4method{addCondition}{COTAN}(objCOTAN, condName, conditions, override = FALSE)
 
 \S4method{dropCondition}{COTAN}(objCOTAN, condName)
@@ -31,6 +34,15 @@
 \emph{condition}: the one with the \code{COND_} prefix.}
 
 \item{condName}{the name of an existing \emph{condition}.}
+
+\item{name}{the name of the \emph{clusterization}/\emph{condition}. If not given the
+last available \emph{clusterization} will be used, or no \emph{conditions}}
+
+\item{labels}{a \emph{clusterization}/\emph{condition} to use. If given it will take
+precedence on the one indicated by \code{name}}
+
+\item{isCond}{a Boolean to indicate whether the function is dealing with
+\emph{clusterizations} \code{\link{FALSE}} or \emph{conditions} \code{\link{TRUE}}}
 
 \item{conditions}{a (factors) array of \emph{condition} \strong{labels}}
 
@@ -45,7 +57,13 @@ usually without the \code{COND_} prefix
 \code{getConditionName()} returns the normalized \emph{condition} name or
 \code{NULL} if no \emph{conditions} are present
 
-\code{getCondition()} returns a named \code{factor} with the condition
+\code{getCondition()} returns a named \code{factor} with the \emph{condition}
+
+\code{normalizeNameAndLabels()} returns a \code{list} with:
+\itemize{
+\item "name" the relevant name
+\item "labels" the relevant \emph{clusterization}/\emph{condition}
+}
 
 \code{addCondition()} returns the updated \code{COTAN} object
 
@@ -69,6 +87,9 @@ none were given, returns the name of last available \emph{condition} in the
 \code{getCondition()} extracts the asked \emph{condition} from the \code{COTAN}
 object
 
+\code{normalizeNameAndLabels()} takes a pair of name/lables and
+normalize them based on the available information in the \code{COTAN} object
+
 \code{addCcondition()} adds a \emph{condition} to the current \code{COTAN} object,
 by adding a new column in the \code{metaCells} \code{data.frame}
 
@@ -91,5 +112,9 @@ condName <- getConditionName(objCOTAN)
 
 condition <- getCondition(objCOTAN, condName = condName)
 isa(condition, "factor")
+
+nameAndCond <- normalizeNameAndLabels(objCOTAN, name = condName,
+                                      isCond = TRUE)
+isa(nameAndCond[["labels"]], "factor")
 
 }
