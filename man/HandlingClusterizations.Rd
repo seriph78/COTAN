@@ -223,7 +223,7 @@ model expectations
 statistics: The calculated statistics are:
 \itemize{
 \item \code{clName} the \emph{cluster} \strong{labels}
-\item \code{condName} the relevant codition (to further sub-divide the \emph{clusters})
+\item \code{condName} the relevant condition (to further sub-divide the \emph{clusters})
 \item "CellNumber" the number of cells in the group
 \item "MeanUDE" the average "UDE" in the group of cells
 \item "MedianUDE" the median "UDE" in the group of cells
@@ -374,8 +374,8 @@ clHeatmapPlotAndData <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
 ##plot(clHeatmapPlotAndData[["heatmapPlot"]])
 
 conditions <- as.integer(substring(getCells(objCOTAN), 3L))
-conditions <- set_names(ifelse(conditions <= 600, "L", "H"),
-                        getCells(objCOTAN))
+conditions <- factor(ifelse(conditions <= 600, "L", "H"))
+names(conditions) <- getCells(objCOTAN)
 
 clHeatmapPlotAndData2 <-
   clustersMarkersHeatmapPlot(objCOTAN, groupMarkers, kCuts = 2,

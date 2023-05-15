@@ -19,7 +19,7 @@
 #' @returns `clustersSummaryData()` returns a `data.frame`  with the following
 #'   statistics: The calculated statistics are:
 #'   * `clName` the *cluster* **labels**
-#'   * `condName` the relevant codition (to further sub-divide the *clusters*)
+#'   * `condName` the relevant condition (to further sub-divide the *clusters*)
 #'   * "CellNumber" the number of cells in the group
 #'   * "MeanUDE" the average "UDE" in the group of cells
 #'   * "MedianUDE" the median "UDE" in the group of cells

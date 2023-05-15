@@ -935,8 +935,8 @@ NULL
 #' ##plot(clHeatmapPlotAndData[["heatmapPlot"]])
 #'
 #' conditions <- as.integer(substring(getCells(objCOTAN), 3L))
-#' conditions <- set_names(ifelse(conditions <= 600, "L", "H"),
-#'                         getCells(objCOTAN))
+#' conditions <- factor(ifelse(conditions <= 600, "L", "H"))
+#' names(conditions) <- getCells(objCOTAN)
 #'
 #' clHeatmapPlotAndData2 <-
 #'   clustersMarkersHeatmapPlot(objCOTAN, groupMarkers, kCuts = 2,
@@ -1245,7 +1245,7 @@ setMethod(
 )
 
 
-#' @details `normalizeNameAndLabels()` takes a pair of name/lables and
+#' @details `normalizeNameAndLabels()` takes a pair of name/labels and
 #'   normalize them based on the available information in the `COTAN` object
 #'
 #' @param objCOTAN a `COTAN` object

@@ -87,7 +87,7 @@ none were given, returns the name of last available \emph{condition} in the
 \code{getCondition()} extracts the asked \emph{condition} from the \code{COTAN}
 object
 
-\code{normalizeNameAndLabels()} takes a pair of name/lables and
+\code{normalizeNameAndLabels()} takes a pair of name/labels and
 normalize them based on the available information in the \code{COTAN} object
 
 \code{addCcondition()} adds a \emph{condition} to the current \code{COTAN} object,
