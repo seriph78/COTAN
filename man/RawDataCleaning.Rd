@@ -210,6 +210,8 @@ cell and sample.
 library size and the number of genes detected.
 }
 \examples{
+library(zeallot)
+
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
 
@@ -233,9 +235,12 @@ feCells <- getFullyExpressingCells(objCOTAN)
 ecdPlot <- ECDPlot(objCOTAN, yCut = 100)
 plot(ecdPlot)
 
-cPlots <- cleanPlots(objCOTAN)
-plot(cPlots[["pcaCells"]])
-plot(cPlots[["UDE"]])
+# This creates many infomative plots useful to determine whether
+# there is still something to drop...
+# Here we use the tuple-like assignment feature of the `zeallot` package
+c(pcaCellsPlot, ., genesPlot, UDEPlot, nuPlot ) \%<-\% cleanPlots(objCOTAN)
+plot(pcaCellsPlot)
+plot(UDEPlot)
 
 lsPlot <- cellSizePlot(objCOTAN)
 plot(lsPlot)
@@ -243,8 +248,9 @@ plot(lsPlot)
 gsPlot <- genesSizePlot(objCOTAN)
 plot(gsPlot)
 
-mitPercPlot <- mitochondrialPercentagePlot(objCOTAN)[["plot"]]
-plot(plot)
+mitPercPlot <-
+  mitochondrialPercentagePlot(objCOTAN, genePrefix = "g-0000")[["plot"]]
+plot(mitPercPlot)
 
 scPlot <- scatterPlot(objCOTAN)
 plot(scPlot)

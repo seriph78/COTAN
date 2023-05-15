@@ -54,8 +54,9 @@ usually without the \code{COND_} prefix
 \description{
 These functions manage the \emph{conditions}.
 
-A \emph{condition} is any partition of the cells where to each cell it is
-assigned a \emph{condition} \strong{label}.
+A \emph{condition} is a set of \strong{labels} that can be assigned to cells:
+one \strong{label} per cell. This is especially useful in cases when the
+\code{data-set} is the result of merging multiple experiments' raw data
 }
 \details{
 \code{getAllConditions()} extracts the list of the \emph{conditions} defined
@@ -78,38 +79,17 @@ object, by removing the corresponding column in the \code{metaCells}
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-##objCOTAN <- clean(objCOTAN)
-##objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
-##
-##data("test.dataset.clusters1")
-##clusters <- test.dataset.clusters1
-##
-##coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
-##
-##groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-##                     G2 = c("g-000300", "g-000330"),
-##                     G3 = c("g-000510", "g-000530", "g-000550",
-##                            "g-000570", "g-000590"))
-##
-##umapPlot <- UMAPPlot(coexDF, clusters = NULL, elements = groupMarkers)
-##plot(umapPlot)
-##
 
-genre <- rep(C("F", "M"), getNumCells(objCOTAN) / 2)
+genre <- rep(c("F", "M"), getNumCells(objCOTAN) / 2)
 objCOTAN <- addCondition(objCOTAN, condName = "Genre", conditions = genre)
 
 ##objCOTAN <- dropCondition(objCOTAN, "Genre")
 
 conditionsNames <- getAllConditions(objCOTAN)
 
-##enrichment <- geneSetEnrichment(clustersCoex = coexDF,
-##                                groupMarkers = groupMarkers)
-
-##clHeatmapPlot <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
-##plot(clHeatmapPlot)
-
 condName <- getConditionName(objCOTAN)
 
 condition <- getCondition(objCOTAN, condName = condName)
+isa(condition, "factor")
 
 }

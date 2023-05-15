@@ -152,10 +152,16 @@ groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
 gdiPlot <- GDIPlot(objCOTAN, genes = groupMarkers, cond = "test")
 plot(gdiPlot)
 
+## Here we override the default GDI threshold as a way to speed-up
+## calculations as higher threshold implies less stringent uniformity
+## It real applications it might be appropriate to change the threshold
+## in cases of relatively low genes/cells number, or in cases when an
+## rough clusterization is needed in the early satges of the analysis
+##
 clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-                                   saveObj = FALSE)
+                                   GDIThreshold = 1.5, saveObj = FALSE)
 
-checkClusterUniformity(objCOTAN,
+checkClusterUniformity(objCOTAN, GDIThreshold = 1.5,
                        cluster = clusters[1],
                        cells = getCells(objCOTAN)[clusters \%in\% clusters[1]],
                        cores = 12,
@@ -164,7 +170,7 @@ checkClusterUniformity(objCOTAN,
 objCOTAN <- addClusterization(objCOTAN, clName = "uniformClusters",
                               clusters = clusters)
 
-mergedList <- mergeUniformCellsClusters(objCOTAN,
+mergedList <- mergeUniformCellsClusters(objCOTAN, GDIThreshold = 1.5,
                                         clusters = clusters,
                                         cores = 12,
                                         distance = "cosine",

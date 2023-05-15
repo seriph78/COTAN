@@ -590,6 +590,8 @@ NULL
 #' @export
 #'
 #' @examples
+#' library(zeallot)
+#'
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
@@ -1114,7 +1116,7 @@ NULL
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
-#' genre <- rep(C("F", "M"), getNumCells(objCOTAN) / 2)
+#' genre <- rep(c("F", "M"), getNumCells(objCOTAN) / 2)
 #' objCOTAN <- addCondition(objCOTAN, condName = "Genre", conditions = genre)
 #'
 #' ##objCOTAN <- dropCondition(objCOTAN, "Genre")
