@@ -590,6 +590,8 @@ NULL
 #' @export
 #'
 #' @examples
+#' library(zeallot)
+#'
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
@@ -929,8 +931,18 @@ NULL
 #' enrichment <- geneSetEnrichment(clustersCoex = coexDF,
 #'                                 groupMarkers = groupMarkers)
 #'
-#' ##clHeatmapPlot <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
-#' ##plot(clHeatmapPlot)
+#' clHeatmapPlotAndData <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
+#' ##plot(clHeatmapPlotAndData[["heatmapPlot"]])
+#'
+#' conditions <- as.integer(substring(getCells(objCOTAN), 3L))
+#' conditions <- factor(ifelse(conditions <= 600, "L", "H"))
+#' names(conditions) <- getCells(objCOTAN)
+#'
+#' clHeatmapPlotAndData2 <-
+#'   clustersMarkersHeatmapPlot(objCOTAN, groupMarkers, kCuts = 2,
+#'                              condNameList = list("High/Low"),
+#'                              conditionsList = list(conditions))
+#' ##plot(clHeatmapPlotAndData2[["heatmapPlot"]])
 #'
 #' @rdname HandlingClusterizations
 #'
@@ -1114,7 +1126,7 @@ NULL
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
-#' genre <- rep(C("F", "M"), getNumCells(objCOTAN) / 2)
+#' genre <- rep(c("F", "M"), getNumCells(objCOTAN) / 2)
 #' objCOTAN <- addCondition(objCOTAN, condName = "Genre", conditions = genre)
 #'
 #' ##objCOTAN <- dropCondition(objCOTAN, "Genre")
@@ -1149,8 +1161,8 @@ setMethod(
 #'   `COTAN` object. It can return the *condition* **internal name** if needed
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param condName The name of the *condition*. If not given the last available
-#'   *condition* will be returned, as it is probably the most significant!
+#' @param condName The name of the *condition*. If not given an empty string
+#'   will be returned!
 #' @param keepPrefix When `TRUE` returns the internal name of the
 #'   *condition*: the one with the `COND_` prefix.
 #'
@@ -1171,8 +1183,8 @@ setMethod(
     allCondNames <- getAllConditions(objCOTAN, keepPrefix = TRUE)
 
     if (isEmptyName(condName)) {
-      # pick last condition
-      outName <- allCondNames[length(allCondNames)]
+      # return a default name
+      outName <- "COND_"
     } else {
       outName <- condName
       if (!startsWith(condName, "COND_")) {
@@ -1198,10 +1210,10 @@ setMethod(
 #'   object
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param condName The name of the *condition*. If not given the last available
-#'   *condition* will be returned, as it is probably the most significant!
+#' @param condName The name of the *condition*. If not given a dummy constant
+#'   **label** *condition* will be returned.
 #'
-#' @returns `getCondition()` returns a named `factor` with the condition
+#' @returns `getCondition()` returns a named `factor` with the *condition*
 #'
 #' @export
 #'
@@ -1221,11 +1233,75 @@ setMethod(
     internalName <- getConditionName(objCOTAN, condName = condName,
                                      keepPrefix = TRUE)
 
-    # condName can still be empty if no condition was stored in the objCOTAN
-    assert_that(!isEmptyName(internalName),
-                msg = "No conditions are present in the 'COTAN' object")
+    if (internalName == "COND_") {
+      # no corresponding condition
+      conditions = factor(rep_len("NoCond", getNumCells(objCOTAN)))
+    } else {
+      conditions = getMetadataCells(objCOTAN)[[internalName]]
+    }
 
-    return(set_names(getMetadataCells(objCOTAN)[[internalName]],
-                     getCells(objCOTAN)))
+    return(set_names(conditions, getCells(objCOTAN)))
   }
 )
+
+
+#' @details `normalizeNameAndLabels()` takes a pair of name/labels and
+#'   normalize them based on the available information in the `COTAN` object
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param name the name of the *clusterization*/*condition*. If not given the
+#'   last available *clusterization* will be used, or no *conditions*
+#' @param labels a *clusterization*/*condition* to use. If given it will take
+#'   precedence on the one indicated by `name`
+#' @param isCond a Boolean to indicate whether the function is dealing with
+#'   *clusterizations* [`FALSE`] or *conditions* [`TRUE`]
+#'
+#' @returns `normalizeNameAndLabels()` returns a `list` with:
+#'   * "name" the relevant name
+#'   * "labels" the relevant *clusterization*/*condition*
+#'
+#' @export
+#'
+#' @importFrom rlang is_empty
+#' @importFrom rlang set_names
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @examples
+#' nameAndCond <- normalizeNameAndLabels(objCOTAN, name = condName,
+#'                                       isCond = TRUE)
+#' isa(nameAndCond[["labels"]], "factor")
+#'
+#' @rdname HandlingConditions
+#'
+normalizeNameAndLabels <- function(objCOTAN, name = "",
+                                   labels = NULL, isCond = FALSE) {
+  if (is_empty(labels)) {
+    if (isFALSE(isCond)) {
+      name <- getClusterizationName(objCOTAN, clName = name)
+      labels <- getClusterizationData(objCOTAN, clName = name)[["clusters"]]
+    } else {
+      name <- getConditionName(objCOTAN, condName = name)
+      labels <- getCondition(objCOTAN, condName = name)
+    }
+  } else {
+    if (isFALSE(isCond) || !is_empty(labels)) {
+      assert_that(!is_empty(labels),
+                  msg = "No clusterization/condition given")
+      assert_that(!is_empty(names(labels)),
+                  msg = "No names attached to the given labels")
+      assert_that(setequal(names(labels), getCells(objCOTAN)),
+                  msg = "Non compatible labels")
+    } else {
+      labels <- set_names(rep_len("NoCond", getNumCells(objCOTAN)),
+                          getCells(objCOTAN))
+    }
+    if (isEmptyName(name)) {
+      name <- if (isFALSE(isCond)) "clusters" else "conditions"
+    }
+    if (!inherits(labels, "factor")) {
+      labels <- factor(labels)
+    }
+  }
+  return(list("name" = name, "labels" = labels))
+}

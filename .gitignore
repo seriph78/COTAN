@@ -9,7 +9,8 @@ COTAN.rproj
 *.tar.gz
 *.Rproj
 .rhistory
-.lintr
 /inst/doc
+/inst/docs
 /doc/
+/docs/
 /Meta/

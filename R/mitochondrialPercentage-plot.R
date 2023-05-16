@@ -20,6 +20,8 @@
 #'
 #' @importFrom Matrix rowSums
 #'
+#' @importFrom rlang is_empty
+#'
 #' @importFrom stringr str_split
 #' @importFrom stringr str_detect
 #'
@@ -30,8 +32,9 @@
 #' @export
 #'
 #' @examples
-#' mitPercPlot <- mitochondrialPercentagePlot(objCOTAN)[["plot"]]
-#' plot(plot)
+#' mitPercPlot <-
+#'   mitochondrialPercentagePlot(objCOTAN, genePrefix = "g-0000")[["plot"]]
+#' plot(mitPercPlot)
 #'
 #' @rdname RawDataCleaning
 #'
@@ -54,6 +57,10 @@ mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
 
   mitGenes <- getGenes(objCOTAN)[str_detect(getGenes(objCOTAN),
                                             pattern = genePrefix)]
+  if (is_empty(mitGenes)) {
+    stop("gene prefix resulted in no matches")
+  }
+
   mitGenesData <- getRawData(objCOTAN)[getGenes(objCOTAN) %in% mitGenes, ]
   if (!identical(colnames(mitGenesData), rownames(sizes))) {
     warning("Problem with cells' order!")
@@ -79,7 +86,7 @@ mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
          y = "% (mit. reads / tot reads * 100)",
          x = "") +
     scale_y_continuous(expand = c(0.0, 0.0)) +
-    #ylim(0,max(sizes$sizes)) +
+    #ylim(0, max(sizes[["sizes"]])) +
     plotTheme("size-plot")
 
   return(list("plot" = plot, "sizes" = sizes))

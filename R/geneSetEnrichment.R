@@ -34,7 +34,7 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers) {
   rownames(df) <- names(groupMarkers)
 
   # TODO: add comment on this constant in the @details above!
-  teta <- -1.0 / 0.1 * log(0.25)
+  theta <- -1.0 / 0.1 * log(0.25)
 
   # not_assigned_clusters <- NA
   for (groupName in names(groupMarkers)) {
@@ -48,7 +48,7 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers) {
 
     # drop reductions
     ex[ex < 0.0 & !is.na(ex)] <- 0.0
-    ex <- 1.0 - exp(-teta * ex)
+    ex <- 1.0 - exp(-theta * ex)
 
     for (cl in clustersTags) {
       df[groupName, cl] <-

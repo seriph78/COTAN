@@ -1,12 +1,25 @@
-# Conditions is a named list containing the condition name and in each arrays,
-# the cell regarding that condition
-# default null: just one condition
 
-#' @details `clustersSummaryPlot()` calculates various statistics about each
-#'   cluster (with an optional further `condition` to separate the cells) and
-#'   puts them together into a plot. The calculated statistics are:
-#'   * "Cluster" the *cluster* **label**
-#'   * "Condition" the further element to sub-divide the clusters
+#' @details `clustersSummaryData()` calculates various statistics about each
+#'   cluster (with an optional further `condition` to separate the cells).
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName` that will only indicate the relevant
+#'   column name in the returned `data.frame`
+#' @param condName The name of a condition in the `COTAN` object to further
+#'   separate the cells in more sub-groups. When no condition is given it is
+#'   assumed to be the same for all cells (no further sub-divisions)
+#' @param conditions The *conditions* to use. If given it will take precedence
+#'   on the one indicated by `condName` that will only indicate the relevant
+#'   column name in the returned `data.frame`
+#'
+#' @returns `clustersSummaryData()` returns a `data.frame`  with the following
+#'   statistics: The calculated statistics are:
+#'   * `clName` the *cluster* **labels**
+#'   * `condName` the relevant condition (to further sub-divide the *clusters*)
 #'   * "CellNumber" the number of cells in the group
 #'   * "MeanUDE" the average "UDE" in the group of cells
 #'   * "MedianUDE" the median "UDE" in the group of cells
@@ -16,14 +29,87 @@
 #'   cells in the group
 #'   * "CellPercentage" fraction of the cells with respect to the total cells
 #'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' summaryData <- clustersSummaryData(objCOTAN)
+#'
+#' @rdname HandlingClusterizations
+#'
+clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
+                                condName = "", conditions = NULL) {
+
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName, labels = clusters)
+
+  c(condName, conditions) %<-%
+    normalizeNameAndLabels(objCOTAN, name = condName,
+                           labels = conditions, isCond = TRUE)
+
+  if (isEmptyName(condName)) {
+    condName <- "Cond"
+  }
+
+  df <- as.data.frame(cbind(factorToVector(clusters),
+                            factorToVector(conditions)))
+  df <- as.data.frame(table(df))
+  assert_that(ncol(df) == 3L, msg = "Internal error creating frequency table")
+
+  colnames(df) <- c(clName, condName, "CellNumber")
+
+  cellsPerc <- round(df[["CellNumber"]] / getNumCells(objCOTAN) * 100.0,
+                     digits = 1L)
+
+  df <- setColumnInDF(df, colToSet = cellsPerc, colName = "CellPercentage")
+
+  df <- setColumnInDF(df, NA, colName = "MeanUDE")
+  df <- setColumnInDF(df, NA, colName = "MedianUDE")
+  df <- setColumnInDF(df, NA, colName = "ExpGenes25")
+  df <- setColumnInDF(df, NA, colName = "ExpGenes")
+
+  for (cond in levels(factor(df[[condName]]))) {
+    condPosInDF <- df[[condName]] == cond
+    condPosInMeta <- conditions == cond
+
+    for (cl in levels(factor(df[[clName]]))) {
+      posInDF   <- (df[[clName]] == cl) & condPosInDF
+      posInMeta <- (clusters == cl) & condPosInMeta
+
+      nu <- getNu(objCOTAN)[posInMeta]
+      df[posInDF, "MeanUDE"]   <- round(mean(nu),   digits = 2L)
+      df[posInDF, "MedianUDE"] <- round(median(nu), digits = 2L)
+
+      numTimesGeneIsExpr <- rowSums(getZeroOneProj(objCOTAN)[, posInMeta,
+                                                             drop = FALSE])
+
+      df[posInDF, "ExpGenes25"] <- sum(numTimesGeneIsExpr > length(nu) * 0.25)
+      df[posInDF, "ExpGenes"]   <- sum(numTimesGeneIsExpr > 0L)
+    }
+  }
+
+  return(df)
+}
+
+#' @details `clustersSummaryPlot()` calculates various statistics about each
+#'   cluster via [clustersSummaryData()] and puts them together into a plot.
+#'
 #' @param objCOTAN a `COTAN` object
-#' @param condition the name of a column in the `metaCells` `data.frame`
-#'   containing the *condition*. This allows to further separate the cells in
-#'   more sub-groups. When not given condition is assumed to be the same for all
-#'   cells.
 #' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName` that will only indicate the relevant
+#'   column name in the returned `data.frame`
+#' @param condName The name of a condition in the `COTAN` object to further
+#'   separate the cells in more sub-groups. When no condition is given it is
+#'   assumed to be the same for all cells (no further sub-divisions)
+#' @param conditions The *conditions* to use. If given it will take precedence
+#'   on the one indicated by `condName` that will only indicate the relevant
+#'   column name in the returned `data.frame`
 #' @param plotTitle The title to use for the returned plot
 #'
 #' @returns `clustersSummaryPlot()` returns a `list` with a `data.frame` and a
@@ -56,83 +142,22 @@
 #'
 #' @rdname HandlingClusterizations
 #'
-clustersSummaryPlot <- function(objCOTAN, condition = NULL,
-                                clName = "", plotTitle = "") {
+clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
+                                condName = "", conditions = NULL,
+                                plotTitle = "") {
 
-  metaCells <- getMetadataCells(objCOTAN)
-
-  emptyCond <- isEmptyName(condition)
-  if (emptyCond || !(condition %in% colnames(metaCells))) {
-    if (!emptyCond) {
-      warning("Provided condition", condition,
-              "is not available: will be ignored")
-    }
-    emptyCond <- TRUE
-    condition <- NULL
-  }
-
-  # pick last available if none given
-  internalName <- getClusterizationName(objCOTAN, clName = clName,
-                                        keepPrefix = TRUE)
-
-  df <- as.data.frame(table(metaCells[, c(internalName, condition),
-                                      drop = FALSE]))
-  assert_that(ncol(df) == (if (emptyCond) 2 else 3),
-              msg = "Internal error creating frequency table")
-
-  if (emptyCond) {
-    colnames(df) <- c("Cluster", "CellNumber")
-    condition <- "Cond"
-    df <- setColumnInDF(df, "NoCond", colName = condition)
-    df <- df[, c("Cluster", condition, "CellNumber")]
-  } else {
-    colnames(df) <- c("Cluster", condition, "CellNumber")
-  }
-
-  assert_that(all(colnames(df) == c("Cluster", condition, "CellNumber")),
-              msg = "Internal issue")
-
-  df <- setColumnInDF(df, NA, colName = "MeanUDE")
-  df <- setColumnInDF(df, NA, colName = "MedianUDE")
-  df <- setColumnInDF(df, NA, colName = "ExpGenes25")
-  df <- setColumnInDF(df, NA, colName = "ExpGenes")
-
-  for (cond in unique(df[, condition])) {
-    if (!emptyCond) {
-      condPosInDF <- df[, condition] == cond
-      condPosInMeta <- metaCells[[condition]] == cond
-    } else {
-      condPosInDF   <- rep_len(TRUE, length.out = nrow(df))
-      condPosInMeta <- rep_len(TRUE, length.out = getNumCells(objCOTAN))
-    }
-
-    for (cl in levels(df[["Cluster"]])) {
-      posInDF   <- (df[["Cluster"]] == cl) & condPosInDF
-      posInMeta <- (metaCells[[internalName]] == cl) & condPosInMeta
-
-      nu <- metaCells[["nu"]][posInMeta]
-      df[posInDF, "MeanUDE"]   <- round(mean(nu),   digits = 2L)
-      df[posInDF, "MedianUDE"] <- round(median(nu), digits = 2L)
-
-      numTimesGeneIsExpr <- rowSums(getZeroOneProj(objCOTAN)[, posInMeta,
-                                                             drop = FALSE])
-
-      df[posInDF, "ExpGenes25"] <- sum(numTimesGeneIsExpr > length(nu) * 0.25)
-      df[posInDF, "ExpGenes"]   <- sum(numTimesGeneIsExpr > 0L)
-    }
-  }
-
-  cellsPerc <- round(df[["CellNumber"]] / getNumCells(objCOTAN) * 100.0,
-                     digits = 1L)
-
-  df <- setColumnInDF(df, colToSet = cellsPerc, colName = "CellPercentage")
+  df <- clustersSummaryData(objCOTAN, clName = clName, clusters = clusters,
+                            condName = condName, conditions = conditions)
 
   plotDF <- df %>%
-    gather(keys, values, CellNumber, MeanUDE:CellPercentage)
+    gather(keys, values, CellNumber:ExpGenes)
 
-  plotDF[["cond"]] <- plotDF[[condition]]
+  # normalize col names
+  cNames <- colnames(df)
+  plotDF[["Cluster"]] <- plotDF[[cNames[[1L]]]]
+  plotDF[["Condition"]] <- plotDF[[cNames[[2L]]]]
 
-  plot <- ggplot(plotDF, aes(Cluster, values, fill = cond)) +
+  plot <- ggplot(plotDF, aes(Cluster, values, fill = Condition)) +
     geom_bar(position = "dodge", stat = "identity", color = "black") +
     geom_text(aes(x = Cluster, y = values, label = values,
                   vjust = 0.5, hjust = -0.1),

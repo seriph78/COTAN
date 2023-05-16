@@ -74,11 +74,10 @@ test_that("COTAN getters", {
                getMetadataCells(obj)[["CL_Test2"]], ignore_attr = TRUE)
   expect_equal(getClusterizationData(obj)[["coex"]], data.frame())
   expect_equal(getAllConditions(obj), c("Test"))
-  expect_equal(getConditionName(obj), "Test")
+  expect_equal(getConditionName(obj), "")
   expect_equal(getConditionName(obj, condName = "Test", keepPrefix = TRUE),
                "COND_Test")
-  expect_equal(getCondition(obj),
-               getMetadataCells(obj)[["COND_Test"]], ignore_attr = TRUE)
+  expect_equal(levels(getCondition(obj)), c("NoCond"))
   expect_equal(factorToVector(getCondition(obj, condName = "Test"))[19:20],
                set_names(c("M", "F"), letters[19:20]))
   expect_equal(length(getDims(obj)), 7)
