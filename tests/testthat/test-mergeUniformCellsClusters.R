@@ -1,4 +1,4 @@
-tm = tempdir()
+tm <- tempdir()
 stopifnot(file.exists(tm))
 
 test_that("Merge Uniform Cells Clusters", {
@@ -10,7 +10,7 @@ test_that("Merge Uniform Cells Clusters", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
+  obj <- proceedToCoex(obj, cores = 12L, saveObj = FALSE)
 
   clusters <- factor(readRDS(file.path(getwd(), "clusters1.RDS")))
   genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
@@ -22,22 +22,22 @@ test_that("Merge Uniform Cells Clusters", {
   obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = coexDF)
 
   expect_setequal(colnames(coexDF), levels(clusters))
-  expect_equal(rownames(coexDF), getGenes(obj))
+  expect_identical(rownames(coexDF), getGenes(obj))
 
   expect_setequal(colnames(pValDF), levels(clusters))
-  expect_equal(rownames(pValDF), getGenes(obj))
+  expect_identical(rownames(pValDF), getGenes(obj))
 
   coexDF_exp <- readRDS(file.path(getwd(), "coex.test.cluster1.RDS"))
   pValDF_exp <- readRDS(file.path(getwd(), "pval.test.cluster1.RDS"))
 
-  expect_equal(coexDF[genes.names.test, ], coexDF_exp)
-  expect_equal(pValDF[genes.names.test, ], pValDF_exp)
+  expect_identical(coexDF[genes.names.test, ], coexDF_exp)
+  expect_identical(pValDF[genes.names.test, ], pValDF_exp)
 
   GDIThreshold <- 1.5
 
   deltaExpression <- clustersDeltaExpression(obj)
 
-  expect_equal(rownames(deltaExpression), getGenes(obj))
+  expect_identical(rownames(deltaExpression), getGenes(obj))
   expect_setequal(colnames(deltaExpression), levels(clusters))
 
   #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
@@ -48,16 +48,16 @@ test_that("Merge Uniform Cells Clusters", {
 
   e.df <- geneSetEnrichment(clustersCoex = coexDF, groupMarkers = groupMarkers)
 
-  expect_equal(nrow(e.df), length(groupMarkers))
-  expect_equal(ncol(e.df), ncol(coexDF) + 2)
-  expect_lte(max(e.df[, 1:(ncol(e.df) - 2)]), 1)
-  expect_gte(min(e.df[, 1:(ncol(e.df) - 2)]), 0)
-  expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0)
-  expect_equal(e.df[["N. total"]], sapply(groupMarkers, length),
+  expect_identical(nrow(e.df), length(groupMarkers))
+  expect_identical(ncol(e.df), ncol(coexDF) + 2L)
+  expect_lte(max(e.df[, 1L:(ncol(e.df) - 2L)]), 1L)
+  expect_gte(min(e.df[, 1L:(ncol(e.df) - 2L)]), 0L)
+  expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0L)
+  expect_equal(e.df[["N. total"]], vapply(groupMarkers, length, integer(1L)),
                ignore_attr = TRUE)
 
   c(mergedClusters, mergedCoexDF, mergedPValueDF) %<-%
-    mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 12,
+    mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 12L,
                               GDIThreshold = GDIThreshold,
                               distance = "cosine", hclustMethod = "ward.D2",
                               saveObj = TRUE, outDir = tm)
@@ -67,14 +67,14 @@ test_that("Merge Uniform Cells Clusters", {
   expect_setequal(colnames(mergedCoexDF), colnames(mergedPValueDF))
 
   #cluster_data <- readRDS(file.path(getwd(), "cluster_data_merged.RDS"))
-  #expect_equal(mergedClusters[genes.names.test], cluster_data)
+  #expect_identical(mergedClusters[genes.names.test], cluster_data)
 
   for (cl in levels(mergedClusters)) {
     cellsToDrop <- names(clusters)[mergedClusters != cl]
 
     clObj <- dropGenesCells(obj, cells = cellsToDrop)
 
-    clObj <- proceedToCoex(clObj, cores = 12, saveObj = FALSE)
+    clObj <- proceedToCoex(clObj, cores = 12L, saveObj = FALSE)
 
     GDIData <- calculateGDI(clObj)
 

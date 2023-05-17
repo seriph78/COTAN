@@ -64,7 +64,7 @@ Define a directory where the output will be stored.
 outDir <- tempdir()
 
 # Log-level 2 was chosen to showcase better how the package works
-# In normal usage a level of 0 or 1 is more appropriate 
+# In normal usage a level of 0 or 1 is more appropriate
 setLoggingLevel(2L)
 
 # This file will contain all the logs produced by the package
@@ -154,7 +154,7 @@ If we do not want to consider the mitochondrial genes we can remove them
 before starting the analysis.
 
 ```{r}
-genes_to_rem <- getGenes(obj)[grep("^Mt", getGenes(obj))] 
+genes_to_rem <- getGenes(obj)[grep("^Mt", getGenes(obj))]
 cells_to_rem <- getCells(obj)[which(getCellsSize(obj) == 0L)]
 obj <- dropGenesCells(obj, genes_to_rem, cells_to_rem)
 ```
@@ -185,7 +185,7 @@ We can observe here that the red cells are really enriched in hemoglobin genes s
 ```{r eval=TRUE, include=TRUE}
 cells_to_rem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
- 
+
 n_it <- 2L
 
 obj <- clean(obj)
@@ -219,8 +219,8 @@ plot.ude <- ggplot(nuDf, aes(x = n, y = nu)) +
             ylim(0.0, 1.0) +
             geom_hline(yintercept = yset, linetype = "dashed",
                        color = "darkred") +
-            annotate(geom = "text", x = 200L, y = 0.25, 
-                     label = paste0("to remove cells with nu < ", yset), 
+            annotate(geom = "text", x = 200L, y = 0.25,
+                     label = paste0("to remove cells with nu < ", yset),
                      color = "darkred", size = 4.5)
 
 plot.ude
@@ -229,7 +229,7 @@ plot.ude
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
-obj <- addElementToMetaDataset(obj, "Threshold low UDE cells:", yset) 
+obj <- addElementToMetaDataset(obj, "Threshold low UDE cells:", yset)
 
 cells_to_rem <- rownames(nuDf)[nuDf[["nu"]] < yset]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
@@ -409,7 +409,7 @@ plot(treePlot)
 ```
 
 ```{r}
-UMAPPlot(pcaClustersDF[, 1L:10L], 
+UMAPPlot(pcaClustersDF[, 1L:10L],
          clusters = pcaClustersDF[["hclust"]],
          elements = layersGenes,
          title = "Genes' clusters UMAP Plot")

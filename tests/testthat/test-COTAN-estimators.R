@@ -1,48 +1,50 @@
 
 test_that("Linear estimates", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
-                nrow = 10, ncol = 20)
-  rownames(raw) = LETTERS[1:10]
-  colnames(raw) = letters[1:20]
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
 
   obj <- COTAN(raw = raw)
 
   obj <- estimateLambdaLinear(obj)
 
-  expect_equal(getLambda(obj), rowMeans(getRawData(obj), dims = 1))
-  expect_equal(getMetadataDataset(obj)[[1]], datasetTags()[5:6],
+  expect_identical(getLambda(obj), rowMeans(getRawData(obj), dims = 1L))
+  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[5L:6L],
                ignore_attr = TRUE)
-  expect_equal(getMetadataDataset(obj)[[2]], c("FALSE", "FALSE"))
+  expect_identical(getMetadataDataset(obj)[[2L]], c("FALSE", "FALSE"))
 
   obj <- estimateNuLinear(obj)
 
-  expect_equal(getNu(obj), colMeans(getRawData(obj), dims = 1)
-                             / mean(colMeans(getRawData(obj), dims = 1)))
+  expect_identical(getNu(obj), colMeans(getRawData(obj), dims = 1L)
+                                 / mean(colMeans(getRawData(obj), dims = 1L)))
 })
 
 
 test_that("Bisection estimates", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
-                nrow = 10, ncol = 20)
-  rownames(raw) = LETTERS[1:10]
-  colnames(raw) = letters[1:20]
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
 
   obj <- COTAN(raw = raw)
   obj <- clean(obj)
 
-  obj <- estimateDispersionBisection(obj, cores = 3, chunkSize = 2)
+  obj <- estimateDispersionBisection(obj, cores = 3L, chunkSize = 2L)
 
-  expect_equal(length(getDispersion(obj)), getNumGenes(obj))
-  expect_equal(getDispersion(obj)[1], -Inf, ignore_attr = TRUE)
+  expect_length(getDispersion(obj), getNumGenes(obj))
+  expect_equal(getDispersion(obj)[[1L]], -Inf, ignore_attr = TRUE)
 
   expect_equal(rowSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj),
                                                          calculateMu(obj))),
               rep(getNumCells(obj), getNumGenes(obj)),
               tolerance = 0.001, ignore_attr = TRUE)
 
-  obj <- estimateNuBisection(obj, cores = 6, chunkSize = 3)
+  obj <- estimateNuBisection(obj, cores = 6L, chunkSize = 3L)
 
-  expect_equal(length(getNu(obj)), getNumCells(obj))
+  expect_length(getNu(obj), getNumCells(obj))
 
   expect_equal(colSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj),
                                                          calculateMu(obj))),
@@ -51,10 +53,10 @@ test_that("Bisection estimates", {
 
   obj <- estimateDispersionNuBisection(obj, enforceNuAverageToOne = TRUE)
 
-  expect_equal(length(getDispersion(obj)), getNumGenes(obj))
-  expect_equal(getDispersion(obj)[1], -Inf, ignore_attr = TRUE)
-  expect_equal(length(getNu(obj)), getNumCells(obj))
-  expect_equal(mean(getNu(obj)), 1.0)
+  expect_length(getDispersion(obj), getNumGenes(obj))
+  expect_equal(getDispersion(obj)[[1L]], -Inf, ignore_attr = TRUE)
+  expect_length(getNu(obj), getNumCells(obj))
+  expect_equal(mean(getNu(obj)), 1.0, tolerance = 1.0e-14)
 
   expect_equal(rowSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj),
                                                          calculateMu(obj))),

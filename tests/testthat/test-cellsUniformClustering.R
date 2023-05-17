@@ -1,4 +1,4 @@
-tm = tempdir()
+tm <- tempdir()
 stopifnot(file.exists(tm))
 
 test_that("Cell Uniform Clustering", {
@@ -9,19 +9,19 @@ test_that("Cell Uniform Clustering", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, cores = 12, saveObj = TRUE, outDir = tm)
+  obj <- proceedToCoex(obj, cores = 12L, saveObj = TRUE, outDir = tm)
 
   GDIThreshold <- 1.5
 
   suppressWarnings({
-    clusters <- cellsUniformClustering(obj, cores = 12,
+    clusters <- cellsUniformClustering(obj, cores = 12L,
                                        GDIThreshold = GDIThreshold,
                                        saveObj = TRUE, outDir = tm)
   })
 
   gc()
 
-  expect_equal(nlevels(clusters), 4)
+  expect_identical(nlevels(clusters), 4L)
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
@@ -35,36 +35,36 @@ test_that("Cell Uniform Clustering", {
                            cells = names(clusters)[clusters == firstCl],
                            saveObj = TRUE, outDir = tm))
 
-  #clusters_exp <- readRDS(file.path(getwd(),"clusters1.RDS"))
+  #clusters_exp <- readRDS(file.path(getwd(), "clusters1.RDS"))
 
-  #expect_equal(clusters, clusters)
+  #expect_identical(clusters, clusters_exp)
 
   clMarkersDF <- findClustersMarkers(obj)
 
-  expect_equal(colnames(clMarkersDF), c("CL", "Gene", "Score", "pVal",
-                                        "adjPVal", "DEA", "IsMarker"))
-  expect_equal(nrow(clMarkersDF), 10L * 2L * length(unique(clusters)))
+  expect_identical(colnames(clMarkersDF), c("CL", "Gene", "Score", "pVal",
+                                            "adjPVal", "DEA", "IsMarker"))
+  expect_identical(nrow(clMarkersDF), 10L * 2L * length(unique(clusters)))
   expect_type(clMarkersDF[["Gene"]],     "character")
   expect_type(clMarkersDF[["IsMarker"]], "integer")
-  expect_equal(sum(clMarkersDF[["IsMarker"]]), 0)
+  expect_identical(sum(clMarkersDF[["IsMarker"]]), 0L)
 
-  topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6))
-  highPos <- c(1:80) %in% c(1:10, 31:40, 51:70)
-  expect_gt(min(topGenesNum[ highPos]), 480)
-  expect_lt(max(topGenesNum[!highPos]), 241)
+  topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
+  highPos <- (1L:80L) %in% c(1L:10L, 31L:40L, 51L:70L)
+  expect_gt(min(topGenesNum[ highPos]), 480L)
+  expect_lt(max(topGenesNum[!highPos]), 241L)
 
   primaryMarkers <-
     c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",
       "g-000510", "g-000530", "g-000550", "g-000570", "g-000590")
   clMarkersDF2 <- findClustersMarkers(obj, markers = primaryMarkers)
 
-  expect_equal(colnames(clMarkersDF2), colnames(clMarkersDF))
-  expect_equal(clMarkersDF2[, -7], clMarkersDF[, -7])
-  expect_gt(sum(clMarkersDF2[["IsMarker"]]), 0)
+  expect_identical(colnames(clMarkersDF2), colnames(clMarkersDF))
+  expect_identical(clMarkersDF2[, -7L], clMarkersDF[, -7L])
+  expect_gt(sum(clMarkersDF2[["IsMarker"]]), 0L)
 
   clMarkersDF3 <- findClustersMarkers(obj, clusters = clusters)
 
-  expect_equal(clMarkersDF3, clMarkersDF)
+  expect_identical(clMarkersDF3, clMarkersDF)
 
   ####################################
 
@@ -72,7 +72,7 @@ test_that("Cell Uniform Clustering", {
 
   ####################################
 
-  for (cl in sample(unique(clusters[!is.na(clusters)]), size = 2)) {
+  for (cl in sample(unique(clusters[!is.na(clusters)]), size = 2L)) {
     print(cl)
 
     cellsToDrop <- which(clusters != cl)
@@ -80,7 +80,7 @@ test_that("Cell Uniform Clustering", {
     temp.obj <- dropGenesCells(objCOTAN = obj,
                                cells = getCells(obj)[cellsToDrop])
 
-    temp.obj <- proceedToCoex(temp.obj, cores = 12, saveObj = FALSE)
+    temp.obj <- proceedToCoex(temp.obj, cores = 12L, saveObj = FALSE)
     gc()
 
     GDI_data <- calculateGDI(temp.obj)

@@ -1,9 +1,10 @@
 
 test_that("metaDataset", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
-                nrow = 10, ncol = 20)
-  rownames(raw) = LETTERS[1:10]
-  colnames(raw) = letters[1:20]
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
 
   obj <- COTAN(raw = raw)
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X",
@@ -12,54 +13,57 @@ test_that("metaDataset", {
   genesCoexInSync <- getMetadataElement(obj, datasetTags()[["gsync"]])
   cellsCoexInSync <- getMetadataElement(obj, datasetTags()[["csync"]])
 
-  expect_equal(c(genesCoexInSync, genesCoexInSync), c("FALSE", "FALSE"))
+  expect_identical(c(genesCoexInSync, genesCoexInSync), c("FALSE", "FALSE"))
 
   meta <- getMetadataDataset(obj)
 
-  expect_equal(meta[[1]], head(datasetTags(), 6), ignore_attr = TRUE)
-  expect_equal(meta[[2]], c("V", "10X", "Test", "20",
-                            genesCoexInSync, cellsCoexInSync))
+  expect_equal(meta[[1L]], head(datasetTags(), 6L), ignore_attr = TRUE)
+  expect_identical(meta[[2L]], c("V", "10X", "Test", "20",
+                                 genesCoexInSync, cellsCoexInSync))
 
-  obj <- addElementToMetaDataset(obj, tag = "Tag_1", value = 1)
+  obj <- addElementToMetaDataset(obj, tag = "Tag_1", value = 1L)
   obj <- addElementToMetaDataset(obj, tag = "Tag_2", value = "Test")
   obj <- addElementToMetaDataset(obj, tag = "Tag_3",
                                  value = c("Array", "of", "strings"))
 
   meta <- getMetadataDataset(obj)
 
-  expect_equal(meta[nrow(meta) - 2, 2], as.character(1))
-  expect_equal(meta[nrow(meta) - 1, 2], "Test")
+  expect_identical(meta[nrow(meta) - 2L, 2L], "1")
+  expect_identical(meta[nrow(meta) - 1L, 2L], "Test")
   expect_equal(getMetadataElement(obj, "Tag_3"),
                list("Array", "of", "strings"), ignore_attr = TRUE)
 })
 
 
 test_that("Fully-expressed Genes and Fully-expressing Cells", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
-                nrow = 10, ncol = 20)
-  rownames(raw) = LETTERS[1:10]
-  colnames(raw) = letters[1:20]
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
 
   obj <- COTAN(raw = raw)
 
   obj <- findFullyExpressedGenes(obj)
 
-  expect_equal(flagNotFullyExpressedGenes(obj),
-               c(FALSE, rep(TRUE, getNumGenes(obj) - 1)))
-  expect_equal(getFullyExpressedGenes(obj), c(LETTERS[1]))
+  expect_identical(flagNotFullyExpressedGenes(obj),
+                   c(FALSE, rep(TRUE, getNumGenes(obj) - 1L)))
+  expect_identical(getFullyExpressedGenes(obj), LETTERS[[1L]])
 
   obj <- findFullyExpressingCells(obj)
 
-  expect_equal(flagNotFullyExpressingCells(obj), rep(TRUE, getNumCells(obj)))
-  expect_equal(getFullyExpressingCells(obj), vector(mode = "character"))
+  expect_identical(flagNotFullyExpressingCells(obj),
+                   rep(TRUE, getNumCells(obj)))
+  expect_identical(getFullyExpressingCells(obj), vector(mode = "character"))
 })
 
 
 test_that("dropGenesCells", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
-                nrow = 10, ncol = 20)
-  rownames(raw) = LETTERS[1:10]
-  colnames(raw) = letters[1:20]
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
 
   tags <- c("GEO:", "scRNAseq method:",
             "starting n. of cells:", "Condition sample:")
@@ -68,7 +72,7 @@ test_that("dropGenesCells", {
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X",
                                sampleCondition = "Test")
   obj <- clean(obj)
-  obj <- estimateDispersionNuBisection(obj, cores = 4,
+  obj <- estimateDispersionNuBisection(obj, cores = 4L,
                                        enforceNuAverageToOne = TRUE)
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
   obj <- calculateCoex(obj, actOnCells = TRUE,  optimizeForSpeed = FALSE)
@@ -82,120 +86,124 @@ test_that("dropGenesCells", {
 
   expect_error(getCellsCoex(obj))
 
-  obj <- dropGenesCells(obj, genes = LETTERS[8:9])
+  obj <- dropGenesCells(obj, genes = LETTERS[8L:9L])
 
-  expect_equal(getNumGenes(obj), 8)
-  expect_true(all(!getGenes(obj) %in% LETTERS[8:9]))
-  expect_equal(getCells(obj), letters[1:20])
+  expect_identical(getNumGenes(obj), 8L)
+  expect_false(any(getGenes(obj) %in% LETTERS[8L:9L]))
+  expect_identical(getCells(obj), letters[1L:20L])
 
-  obj <- dropGenesCells(obj, cells = c(letters[8:9], letters[18:19]))
+  obj <- dropGenesCells(obj, cells = c(letters[8L:9L], letters[18L:19L]))
 
-  expect_equal(getNumCells(obj), 16)
-  expect_true(all(!getCells(obj) %in% c(letters[8:9], letters[18:19])))
-  expect_true(all(!getGenes(obj) %in% LETTERS[8:9]))
+  expect_identical(getNumCells(obj), 16L)
+  expect_false(any(getCells(obj) %in% c(letters[8L:9L], letters[18L:19L])))
+  expect_false(any(getGenes(obj) %in% LETTERS[8L:9L]))
 
-  obj <- dropGenesCells(obj, genes = LETTERS[6:7], cells = letters[6:7])
+  obj <- dropGenesCells(obj, genes = LETTERS[6L:7L], cells = letters[6L:7L])
 
-  expect_equal(getNumGenes(obj), 6)
-  expect_true(all(!getGenes(obj) %in% LETTERS[6:9]))
-  expect_equal(getNumCells(obj), 14)
-  expect_true(all(!getCells(obj) %in% c(letters[6:9], letters[18:19])))
+  expect_identical(getNumGenes(obj), 6L)
+  expect_false(any(getGenes(obj) %in% LETTERS[6L:9L]))
+  expect_identical(getNumCells(obj), 14L)
+  expect_false(any(getCells(obj) %in% c(letters[6L:9L], letters[18L:19L])))
 })
 
 
 test_that("Managed clusterizations and conditions", {
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
-                nrow = 10, ncol = 20)
-  rownames(raw) = LETTERS[1:10]
-  colnames(raw) = letters[1:20]
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
 
   obj <- COTAN(raw = raw)
 
-  clusters <- factor(set_names(rep(c(1, 2), 10), getCells(obj)))
+  clusters <- factor(set_names(rep(1L:2L, 10L), getCells(obj)))
   obj <- addClusterization(obj, clName = "Test",
                            clusters = clusters)
 
-  expect_equal(getClusterizations(obj), "Test")
-  expect_length(getClusterizations(obj, dropNoCoex = TRUE), 0)
-  expect_equal(colnames(getMetadataCells(obj)), "CL_Test")
-  expect_equal(rownames(getMetadataCells(obj)), getCells(obj))
-  expect_equal(getClusterizationData(obj)[["clusters"]], clusters)
+  expect_identical(getClusterizations(obj), "Test")
+  expect_length(getClusterizations(obj, dropNoCoex = TRUE), 0L)
+  expect_identical(colnames(getMetadataCells(obj)), "CL_Test")
+  expect_identical(rownames(getMetadataCells(obj)), getCells(obj))
+  expect_identical(getClusterizationData(obj)[["clusters"]], clusters)
 
   obj <- estimateNuLinear(obj)
 
-  expect_equal(colnames(getMetadataCells(obj)), c("CL_Test", "nu"))
+  expect_identical(colnames(getMetadataCells(obj)), c("CL_Test", "nu"))
 
   coexDF <- set_names(
-    as.data.frame(atan(getNormalizedData(obj)[, 1:2] - 0.5) / pi * 2), c(1, 2))
+    as.data.frame(atan(getNormalizedData(obj)[, 1L:2L] - 0.5) / pi * 2.0),
+    (1L:2L))
 
   obj <- addClusterizationCoex(obj, clName = "Test", coexDF)
 
-  expect_equal(getClusterizations(obj, dropNoCoex = TRUE, keepPrefix = TRUE),
-               "CL_Test")
-  expect_equal(getClusterizationData(obj)[["coex"]], coexDF)
+  expect_identical(getClusterizations(obj, dropNoCoex = TRUE,
+                                      keepPrefix = TRUE), "CL_Test")
+  expect_identical(getClusterizationData(obj)[["coex"]], coexDF)
 
-  clusters2 = factor(set_names(rep(c("2", "1"), 10), getCells(obj)))
+  clusters2 <- factor(set_names(rep(c("2", "1"), 10L), getCells(obj)))
   coexDF2 <- set_names(
-    as.data.frame(atan(getNormalizedData(obj)[, 1:2] - 0.7) / pi * 2),
+    as.data.frame(atan(getNormalizedData(obj)[, 1L:2L] - 0.7) / pi * 2.0),
     c("1", "2"))
 
   obj <- addClusterization(obj, clName = "Test2",
                            clusters = clusters2,
                            coexDF = coexDF2)
 
-  expect_equal(names(getClustersCoex(obj)), c("CL_Test", "CL_Test2"))
-  expect_equal(getClusterizations(obj), c("Test", "Test2"))
-  expect_equal(colnames(getMetadataCells(obj)), c("CL_Test", "nu", "CL_Test2"))
-  expect_equal(getClusterizationData(obj),
-               list("clusters" = clusters2, "coex" = coexDF2))
-  expect_equal(getClusterizationData(obj, clName = "Test"),
-               list("clusters" = clusters, "coex" = coexDF))
+  expect_named(getClustersCoex(obj), c("CL_Test", "CL_Test2"))
+  expect_identical(getClusterizations(obj), c("Test", "Test2"))
+  expect_identical(colnames(getMetadataCells(obj)),
+                   c("CL_Test", "nu", "CL_Test2"))
+  expect_identical(getClusterizationData(obj),
+                   list("clusters" = clusters2, "coex" = coexDF2))
+  expect_identical(getClusterizationData(obj, clName = "Test"),
+                   list("clusters" = clusters, "coex" = coexDF))
 
   obj <- dropClusterization(obj, "Test")
 
-  expect_equal(names(getClustersCoex(obj)), "CL_Test2")
-  expect_equal(getClusterizations(obj), "Test2")
-  expect_equal(colnames(getMetadataCells(obj)), c("nu", "CL_Test2"))
-  expect_equal(getClusterizationData(obj),
-               list("clusters" = clusters2, "coex" = coexDF2))
+  expect_named(getClustersCoex(obj), "CL_Test2")
+  expect_identical(getClusterizations(obj), "Test2")
+  expect_identical(colnames(getMetadataCells(obj)), c("nu", "CL_Test2"))
+  expect_identical(getClusterizationData(obj),
+                   list("clusters" = clusters2, "coex" = coexDF2))
 
-  genre = factor(set_names(rep(c("F", "M"), 10), getCells(obj)))
+  genre <- factor(set_names(rep(c("F", "M"), 10L), getCells(obj)))
 
   obj <- addCondition(obj, condName = "Test", conditions = genre)
 
-  expect_equal(getAllConditions(obj), c("Test"))
-  expect_equal(colnames(getMetadataCells(obj)),
-               c("nu", "CL_Test2", "COND_Test"))
-  expect_equal(levels(getCondition(obj)), c("NoCond"))
-  expect_equal(getCondition(obj, condName = "Test"), genre)
+  expect_identical(getAllConditions(obj), "Test")
+  expect_identical(colnames(getMetadataCells(obj)),
+                   c("nu", "CL_Test2", "COND_Test"))
+  expect_identical(levels(getCondition(obj)), "NoCond")
+  expect_identical(getCondition(obj, condName = "Test"), genre)
 
   obj <- dropCondition(obj, condName = "Test")
 
-  expect_equal(getAllConditions(obj), vector(mode = "character"))
-  expect_equal(colnames(getMetadataCells(obj)), c("nu", "CL_Test2"))
+  expect_identical(getAllConditions(obj), vector(mode = "character"))
+  expect_identical(colnames(getMetadataCells(obj)), c("nu", "CL_Test2"))
 
   # no such clusterization/condition
   expect_error(getClusterizationData(obj, clName = "Test"))
   expect_error(getCondition(obj, condName = "Test"))
 
   # empyt name clusterization/consition
-  expect_error(addClusterization(obj, clName = "", clusters = rep(0, 20)))
-  expect_error(addCondition(obj, condName = "", conditions = rep(0, 20)))
+  expect_error(addClusterization(obj, clName = "", clusters = rep(0L, 20L)))
+  expect_error(addCondition(obj, condName = "", conditions = rep(0L, 20L)))
 
   # already existing clusterization
-  expect_error(addClusterization(obj, clName = "Test2", clusters = rep(0, 20)))
+  expect_error(addClusterization(obj, clName = "Test2",
+                                 clusters = rep(0L, 20L)))
 
   # wrong clusters/conditions size
-  expect_error(addClusterization(obj, clName = "Test", clusters = rep(0, 17)))
-  expect_error(addCondition(obj, condName = "Test", conditions = rep("A", 17)))
+  expect_error(addClusterization(obj, clName = "Test", clusters = rep(0L, 17L)))
+  expect_error(addCondition(obj, condName = "Test", conditions = rep("A", 17L)))
 
   # wrong coex data.frame size
   expect_error(addClusterization(obj, clName = "Test",
                                  clusters = clusters,
-                                 coexDF = coexDF[1:8, ]))
+                                 coexDF = coexDF[1L:8L, ]))
 
   # wrong coex data.frame column names
   expect_error(addClusterization(obj, clName = "Test",
-                                 clusters = rep(c("3", "4"), 20),
+                                 clusters = rep(c("3", "4"), 20L),
                                  coexDF = coexDF))
 })
