@@ -80,11 +80,11 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
 
   umap <- umap(df)
 
-  plotDF <- data.frame(x = umap[["layout"]][,1],
-                       y = umap[["layout"]][,2],
+  plotDF <- data.frame(x = umap[["layout"]][, 1L],
+                       y = umap[["layout"]][, 2L],
                        colors = colors)
 
-  allTypes <- setdiff(unique(colors), c("none"))
+  allTypes <- setdiff(unique(colors), "none")
   myColours <- set_names(getColorsVector(length(allTypes)), allTypes)
 
   plot <- ggplot(subset(plotDF, (!labelled & !clustered))) +

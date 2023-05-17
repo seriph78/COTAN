@@ -1,21 +1,25 @@
-tm = tempdir()
+tm <- tempdir()
 stopifnot(file.exists(tm))
 
 library(zeallot)
 
 coexPoint <- function(o, e, n) {
-  num <- ( ((o[1] - e[1]) / max(1, e[1])) - ((o[2] - e[2]) / max(1, e[2]))
-         - ((o[3] - e[3]) / max(1, e[3])) + ((o[4] - e[4]) / max(1, e[4])) )
-  den <- sqrt(n * ( (1 / max(1, e[1])) + (1 / max(1, e[2]))
-                  + (1 / max(1, e[3])) + (1 / max(1, e[4])) ))
+  num <- ( ((o[[1L]] - e[[1L]]) / max(1.0, e[[1L]])) -
+           ((o[[2L]] - e[[2L]]) / max(1.0, e[[2L]])) -
+           ((o[[3L]] - e[[3L]]) / max(1.0, e[[3L]])) +
+           ((o[[4L]] - e[[4L]]) / max(1.0, e[[4L]])) )
+  den <- sqrt(n * ( (1.0 / max(1.0, e[[1L]])) +
+                    (1.0 / max(1.0, e[[2L]])) +
+                    (1.0 / max(1.0, e[[3L]])) +
+                    (1.0 / max(1.0, e[[4L]])) ))
   return(num/den)
 }
 
 coexMatrix <- function(obs, exp, n, s) {
   coex <- matrix(NA, s, s)
-  for (i in c(1:s)) for (j in c(i:s)) {
-    o <- c(obs[[1]][i,j], obs[[2]][i,j], obs[[3]][i,j], obs[[4]][i,j])
-    e <- c(exp[[1]][i,j], exp[[2]][i,j], exp[[3]][i,j], exp[[4]][i,j])
+  for (i in (1:s)) for (j in (i:s)) {
+    o <- c(obs[[1L]][i,j], obs[[2L]][i,j], obs[[3L]][i,j], obs[[4L]][i,j])
+    e <- c(exp[[1L]][i,j], exp[[2L]][i,j], exp[[3L]][i,j], exp[[4L]][i,j])
     coex[i,j] <- coexPoint(o, e, n)
   }
   return(as.matrix(forceSymmetric(coex)))

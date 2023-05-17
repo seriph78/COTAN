@@ -27,7 +27,7 @@ funProbZero <- function(disp, mu) {
   neg <- (disp <= 0.0)
   ad <- abs(disp)
   return(( neg) * (exp(-(1.0 + ad) * mu)) +
-           (!neg) * (1.0 + ad * mu)^(-1.0 / ad))
+         (!neg) * (1.0 + ad * mu)^(-1.0 / ad))
 }
 
 
@@ -93,7 +93,7 @@ dispersionBisection <-
       disp2 <- 2.0 * disp2 # we double at each step
     }
 
-    # once we have found the two bounds to the dispersion value, we use bisection
+    # once we have found the two bounds to the dispersion value we use bisection
     iter <- 1L
     repeat {
       disp <- (disp1 + disp2) / 2.0
@@ -201,7 +201,7 @@ parallelDispersionBisection <-
       disps2[runPos] <- 2.0 * disps2[runPos] # we double at each step
     }
 
-    # once we have found the two bounds to the dispersion value, we use bisection
+    # once we have found the two bounds to the dispersion value we use bisection
     runNum <- length(diffs1)
     runPos <- rep(TRUE, runNum)
     disps <- disps1
@@ -299,7 +299,7 @@ nuBisection <-
       nu2 <- nu2 * factor # we double/half at each step
     }
 
-    # once we have found the two bounds to the dispersion value, we use bisection
+    # once we have found the two bounds to the dispersion value we use bisection
     iter <- 1L
     repeat {
       nu <- (nu1 + nu2) / 2.0
@@ -406,12 +406,15 @@ parallelNuBisection <-
       }
       iter <- iter + 1L
 
-      nus1[runPos] <- nus2[runPos] # nus2 are closer to producing 0
 
-      nus2[runPos] <- nus2[runPos] * factors[runPos] # we double/half at each step
+      # nus2 are closer to producing 0
+      nus1[runPos] <- nus2[runPos]
+
+      # we double (or half) at each step
+      nus2[runPos] <- nus2[runPos] * factors[runPos]
     }
 
-    # once we have found the two bounds to the dispersion value, we use bisection
+    # once we have found the two bounds to the dispersion value we use bisection
     runNum <- length(diffs1)
     runPos <- rep(TRUE, runNum)
     nus <- nus1
@@ -420,7 +423,8 @@ parallelNuBisection <-
     repeat {
       nus[runPos] <- (nus1[runPos] + nus2[runPos]) / 2.0
 
-      diffs[runPos] <- (colSums(funProbZero(dispersion, lambda %o% nus[runPos])) -
+      diffs[runPos] <- (colSums(funProbZero(dispersion,
+                                            lambda %o% nus[runPos])) -
                           sumZeros[runPos])
 
       runPos <- (abs(diffs) > threshold)
@@ -571,7 +575,7 @@ vec2mat_rfast <- function(x, genes = "all") {
         startReadingPos <- startReadingPos + 1L
 
         endReadingPos <- 0L
-        for (i in c(0L:(posGene - 1L))) {
+        for (i in (0L:(posGene - 1L))) {
           endReadingPos <- endReadingPos + (numGenes - i)
         }
 

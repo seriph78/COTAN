@@ -163,7 +163,7 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
                   vjust = 0.5, hjust = -0.1),
               position = position_dodge(width = 1.0)) +
     facet_wrap(~ keys, ncol = 6L, scales = "free") +
-    scale_y_continuous(expand = expansion(mult = c(.05, .4))) +
+    scale_y_continuous(expand = expansion(mult = c(0.05, 0.4))) +
     coord_flip() +
     theme_classic() +
     ggtitle(plotTitle) +

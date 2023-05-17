@@ -26,9 +26,19 @@
 \alias{calculatePValue}
 \title{Calculating the COEX matrix for genes and cells}
 \usage{
-\S4method{getGenesCoex}{COTAN}(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
+\S4method{getGenesCoex}{COTAN}(
+  objCOTAN,
+  genes = vector(mode = "character"),
+  zeroDiagonal = TRUE,
+  ignoreSync = FALSE
+)
 
-\S4method{getCellsCoex}{COTAN}(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE)
+\S4method{getCellsCoex}{COTAN}(
+  objCOTAN,
+  cells = vector(mode = "character"),
+  zeroDiagonal = TRUE,
+  ignoreSync = FALSE
+)
 
 \S4method{dropGenesCoex}{COTAN}(objCOTAN)
 
@@ -62,17 +72,25 @@ contingencyTables(objCOTAN, g1, g2)
 
 \S4method{calculateCoex}{COTAN}(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
 
-calculateS(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
+calculateS(
+  objCOTAN,
+  geneSubsetCol = vector(mode = "character"),
+  geneSubsetRow = vector(mode = "character")
+)
 
-calculateG(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c())
+calculateG(
+  objCOTAN,
+  geneSubsetCol = vector(mode = "character"),
+  geneSubsetRow = vector(mode = "character")
+)
 
 calculateGDI(objCOTAN, statType = "S")
 
 calculatePValue(
   objCOTAN,
   statType = "S",
-  geneSubsetCol = c(),
-  geneSubsetRow = c()
+  geneSubsetCol = vector(mode = "character"),
+  geneSubsetRow = vector(mode = "character")
 )
 }
 \arguments{

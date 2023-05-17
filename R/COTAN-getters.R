@@ -781,7 +781,8 @@ NULL
 setMethod(
   "getGenesCoex",
   "COTAN",
-  function(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
+  function(objCOTAN, genes = vector(mode = "character"),
+           zeroDiagonal = TRUE, ignoreSync = FALSE) {
     if (is_empty(objCOTAN@genesCoex)) {
       stop("Cannot return genes' coex as the matrix was never calculated")
     }
@@ -832,7 +833,8 @@ setMethod(
 setMethod(
   "getCellsCoex",
   "COTAN",
-  function(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
+  function(objCOTAN, cells = vector(mode = "character"),
+           zeroDiagonal = TRUE, ignoreSync = FALSE) {
     if (is_empty(objCOTAN@cellsCoex)) {
       stop("Cannot return cells' coex as the matrix was never calculated")
     }
@@ -955,7 +957,7 @@ setMethod(
     clsCoex <- getClustersCoex(objCOTAN)
 
     if (isTRUE(dropNoCoex)) {
-      emptyClsCoex <- vapply(clsCoex, is_empty, logical(1))
+      emptyClsCoex <- vapply(clsCoex, is_empty, logical(1L))
       out <- names(clsCoex[!emptyClsCoex])
     } else {
       out <- names(clsCoex)
@@ -1142,7 +1144,7 @@ setMethod(
     validObject(objCOTAN)
 
     cNames <- colnames(getMetadataCells(objCOTAN))
-    areCondNames <- vapply(cNames, startsWith, logical(1), "COND_")
+    areCondNames <- vapply(cNames, startsWith, logical(1L), "COND_")
     out <- cNames[areCondNames]
 
     # drop the internal 'COND_' prefix
@@ -1235,9 +1237,9 @@ setMethod(
 
     if (internalName == "COND_") {
       # no corresponding condition
-      conditions = factor(rep_len("NoCond", getNumCells(objCOTAN)))
+      conditions <- factor(rep_len("NoCond", getNumCells(objCOTAN)))
     } else {
-      conditions = getMetadataCells(objCOTAN)[[internalName]]
+      conditions <- getMetadataCells(objCOTAN)[[internalName]]
     }
 
     return(set_names(conditions, getCells(objCOTAN)))

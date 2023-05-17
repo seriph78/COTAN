@@ -1,15 +1,15 @@
 library(Matrix)
 
-setLoggingLevel(3)
+setLoggingLevel(3L)
 
-tm = tempdir()
+tm <- tempdir()
 stopifnot(file.exists(tm))
 
 test_that("Empty matrices", {
-  expect_equal(dim(emptySparseMatrix()), c(0,0))
+  expect_identical(dim(emptySparseMatrix()), c(0L, 0L))
   expect_s4_class(emptySparseMatrix(), "dgCMatrix")
 
-  expect_equal(dim(emptySymmetricMatrix()), c(0,0))
+  expect_identical(dim(emptySymmetricMatrix()), c(0L, 0L))
   expect_s4_class(emptySymmetricMatrix(), "dspMatrix")
 })
 
@@ -20,14 +20,15 @@ test_that("'COTAN' constructor", {
 
   expect_s4_class(obj, "COTAN")
 
-  expect_equal(obj@raw, as(as.matrix(test.dataset), "sparseMatrix"))
+  expect_identical(obj@raw, as(as.matrix(test.dataset), "sparseMatrix"))
 })
 
-test_that("'scCOTAN' converters",{
-  raw <- matrix(c(1,0,4,2,11,0,6,7,0,9,10,8,0,0,0,3,0,0,2,0),
-                nrow = 10, ncol = 20)
-  rownames(raw) = LETTERS[1:10]
-  colnames(raw) = letters[1:20]
+test_that("'scCOTAN' converters", {
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L, 0L,  3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
 
   tags <- c("GEO:", "scRNAseq method:",
             "starting n. of cells:", "Condition sample:")
@@ -40,33 +41,33 @@ test_that("'scCOTAN' converters",{
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
   coexDF <- set_names(
-    as.data.frame(atan(getNormalizedData(obj)[, 1:2] - 0.5) / pi * 2.0),
-    c(1, 2))
+    as.data.frame(atan(getNormalizedData(obj)[, 1L:2L] - 0.5) / pi * 2.0),
+    c(1L, 2L))
 
   obj <- addClusterization(obj, clName = "clusters",
-                           clusters = rep(colnames(coexDF), 10),
+                           clusters = rep(colnames(coexDF), 10L),
                            coexDF = coexDF)
 
   # coerce 'COTAN' -> 'scCOTAN'
   obj_sc <- as(obj, "scCOTAN")
 
-  expect_equal(obj_sc@raw,      obj@raw)
-  expect_equal(obj_sc@raw.norm, getNormalizedData(obj))
-  expect_equal(obj_sc@coex,     obj@genesCoex)
-  expect_equal(obj_sc@nu,       getNu(obj))
-  expect_equal(obj_sc@lambda,   getLambda(obj))
-  expect_equal(obj_sc@nu,       getNu(obj))
-  expect_equal(obj_sc@a,        getDispersion(obj))
-  expect_equal(obj_sc@hk,       getFullyExpressedGenes(obj))
-  expect_equal(obj_sc@meta,     obj@metaDataset)
+  expect_identical(obj_sc@raw,      obj@raw)
+  expect_identical(obj_sc@raw.norm, getNormalizedData(obj))
+  expect_identical(obj_sc@coex,     obj@genesCoex)
+  expect_identical(obj_sc@nu,       getNu(obj))
+  expect_identical(obj_sc@lambda,   getLambda(obj))
+  expect_identical(obj_sc@nu,       getNu(obj))
+  expect_identical(obj_sc@a,        getDispersion(obj))
+  expect_identical(obj_sc@hk,       getFullyExpressedGenes(obj))
+  expect_identical(obj_sc@meta,     obj@metaDataset)
   expect_null(obj_sc@yes_yes)
   expect_length(obj_sc@clusters, ncol(obj_sc@raw))
   if (!all(is.na(obj_sc@clusters))) {
-    expect_equal(obj_sc@clusters,
-                 factorToVector(getClusterizationData(obj)[["clusters"]]))
-    expect_equal(obj_sc@cluster_data, getClusterizationData(obj)[["coex"]])
+    expect_identical(obj_sc@clusters,
+                     factorToVector(getClusterizationData(obj)[["clusters"]]))
+    expect_identical(obj_sc@cluster_data, getClusterizationData(obj)[["coex"]])
   } else {
-    expect_length(obj_sc@cluster_data, 0)
+    expect_length(obj_sc@cluster_data, 0L)
   }
 
   # coerce 'scCOTAN' -> 'COTAN'
@@ -81,7 +82,7 @@ test_that("'scCOTAN' converters",{
     obj@metaCells[["feCells"]] <- NULL
   }
 
-  expect_equal(obj2, obj)
+  expect_identical(obj2, obj)
 })
 
 gc()

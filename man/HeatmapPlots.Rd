@@ -13,7 +13,7 @@ heatmapPlot(genesLists, sets, conditions, dir, pValueThreshold = 0.01)
 genesHeatmapPlot(
   objCOTAN,
   primaryMarkers,
-  secondaryMarkers = c(),
+  secondaryMarkers = vector(mode = "character"),
   pValueThreshold = 0.01,
   symmetric = TRUE
 )

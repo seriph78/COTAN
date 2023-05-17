@@ -112,7 +112,7 @@ cleanPlots <- function(objCOTAN) {
   rm(B)
 
   D <- D[order(D[["means"]], decreasing = TRUE), ]
-  rownames(D) <- c()
+  rownames(D) <- NULL
   D <- column_to_rownames(D)
 
   D <- D[D[["means"]] > 0.0, ]

@@ -14,7 +14,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
+knitr::opts_chunk[["set"]](
   collapse = TRUE,
   comment = "#>",
   fig.width = 5L,
@@ -46,12 +46,14 @@ Download the data-set for `"mouse cortex E17.5"`.
 ```{r eval=TRUE, include=TRUE}
 dataDir <- tempdir()
 
-dataSetFile <- file.path(dataDir, "GSM2861514/GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
+GEO <- "GSM2861514"
+fName <- "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"
+dataSetFile <- file.path(dataDir, GEO, fName)
 
 if (!file.exists(dataSetFile)) {
-  getGEOSuppFiles("GSM2861514", makeDirectory = TRUE,
+  getGEOSuppFiles(GEO, makeDirectory = TRUE,
                   baseDir = dataDir, fetch_files = TRUE,
-                  filter_regex = "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
+                  filter_regex = fName)
   sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 }
 ```
@@ -63,7 +65,7 @@ outDir <- tempdir()
 
 # Log-level 2 was chosen to showcase better how the package works
 # In normal usage a level of 0 or 1 is more appropriate 
-setLoggingLevel(2)
+setLoggingLevel(2L)
 
 # This file will contain all the logs produced by the package
 # as if at the highest logging level
@@ -76,18 +78,18 @@ Initialize the `COTAN` object with the row count table and
 the metadata for the experiment.
 
 ```{r}
-cond = "mouse_cortex_E17.5"
-#cond = "test"
+cond <- "mouse_cortex_E17.5"
+#cond <- "test"
 
 #obj = COTAN(raw = sampled.dataset)
-obj = COTAN(raw = sample.dataset)
-obj = initializeMetaDataset(obj,
-                            GEO = "GSM2861514",
-                            sequencingMethod = "Drop_seq",
-                            sampleCondition = cond)
+obj <- COTAN(raw = sample.dataset)
+obj <- initializeMetaDataset(obj,
+                             GEO = GEO,
+                             sequencingMethod = "Drop_seq",
+                             sampleCondition = cond)
 
 logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
-        logLevel = 1)
+        logLevel = 1L)
 ```
 
 Before we proceed to the analysis, we need to clean the data.
@@ -101,7 +103,7 @@ We can check the library size (UMI number) with an empirical cumulative
 distribution function
 
 ```{r}
-ECDPlot(obj, yCut = 700)
+ECDPlot(obj, yCut = 700L)
 ```
 
 ```{r}
@@ -123,7 +125,7 @@ we can use the `dropGenesCells()`function.
 To drop cells by cell library size:
 
 ```{r}
-cells_to_rem <- getCells(obj)[getCellsSize(obj) > 6000]
+cells_to_rem <- getCells(obj)[getCellsSize(obj) > 6000L]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 ```
 
@@ -131,7 +133,7 @@ To drop cells by gene number: high genes count might indicate doublets...
 
 ```{r}
 numExprGenes <- sort(getNumExpressedGenes(obj), decreasing = FALSE)
-cells_to_rem <- names(numExprGenes)[numExprGenes > 3000]
+cells_to_rem <- names(numExprGenes)[numExprGenes > 3000L]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
 genesSizePlot(obj)
@@ -152,21 +154,21 @@ If we do not want to consider the mitochondrial genes we can remove them
 before starting the analysis.
 
 ```{r}
-genes_to_rem = getGenes(obj)[grep('^Mt', getGenes(obj))] 
-cells_to_rem = getCells(obj)[which(getCellsSize(obj) == 0)]
-obj = dropGenesCells(obj, genes_to_rem, cells_to_rem)
+genes_to_rem <- getGenes(obj)[grep("^Mt", getGenes(obj))] 
+cells_to_rem <- getCells(obj)[which(getCellsSize(obj) == 0L)]
+obj <- dropGenesCells(obj, genes_to_rem, cells_to_rem)
 ```
 
 We want also to log the current status.
 
 ```{r}
-logThis(paste("n cells", getNumCells(obj)), logLevel = 1)
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
 ```
 
 The `clean()` function estimates all the parameters for the data. Therefore, we have to run it again every time we remove any genes or cells from the data.
 
 ```{r}
-n_it <- 1
+n_it <- 1L
 
 obj <- clean(obj)
 c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
@@ -184,7 +186,7 @@ We can observe here that the red cells are really enriched in hemoglobin genes s
 cells_to_rem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
  
-n_it <- 2
+n_it <- 2L
 
 obj <- clean(obj)
 c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
@@ -209,15 +211,15 @@ plot(nuPlot)
 We can zoom on the smallest values and, if we detect a clear elbow, we can decide to remove the cells.
 
 ```{r}
-nuDf = data.frame("nu" = sort(getNu(obj)), "n" = seq_along(getNu(obj)))
-yset = 0.35 # the threshold to remove low UDE cells
+nuDf <- data.frame("nu" = sort(getNu(obj)), "n" = seq_along(getNu(obj)))
+yset <- 0.35 # the threshold to remove low UDE cells
 plot.ude <- ggplot(nuDf, aes(x = n, y = nu)) +
-            geom_point(colour = "#8491B4B2", size = 1) +
-            xlim(0, 400) +
-            ylim(0,   1) +
+            geom_point(colour = "#8491B4B2", size = 1.0) +
+            xlim(0L, 400L) +
+            ylim(0.0, 1.0) +
             geom_hline(yintercept = yset, linetype = "dashed",
                        color = "darkred") +
-            annotate(geom = "text", x = 200, y = 0.25, 
+            annotate(geom = "text", x = 200L, y = 0.25, 
                      label = paste0("to remove cells with nu < ", yset), 
                      color = "darkred", size = 4.5)
 
@@ -229,14 +231,14 @@ We also save the defined threshold in the metadata and re-run the estimation
 ```{r}
 obj <- addElementToMetaDataset(obj, "Threshold low UDE cells:", yset) 
 
-cells_to_rem = rownames(nuDf)[nuDf[["nu"]] < yset]
+cells_to_rem <- rownames(nuDf)[nuDf[["nu"]] < yset]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 ```
 
 Repeat the estimation after the cells are removed
 
 ```{r}
-n_it <- 3
+n_it <- 3L
 
 obj <- clean(obj)
 c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
@@ -245,7 +247,7 @@ pcaCellsPlot
 ```
 
 ```{r}
-logThis(paste("n cells", getNumCells(obj)), logLevel = 1)
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
 ```
 
 ## COTAN analysis
@@ -253,7 +255,7 @@ logThis(paste("n cells", getNumCells(obj)), logLevel = 1)
 In this part, all the contingency tables are computed and used to get the statistics.
 
 ```{r}
-obj = estimateDispersionBisection(obj, cores = 10)
+obj <- estimateDispersionBisection(obj, cores = 10L)
 ```
 
 `COEX` evaluation and storing
@@ -275,10 +277,10 @@ if we don't want to clean anything.
 ```{r eval=FALSE, include=TRUE}
 obj2 <- automaticCOTANObjectCreation(
   raw = sample.dataset,
-  GEO = "GSM2861514",
+  GEO = GEO,
   sequencingMethod = "Drop_seq",
   sampleCondition = cond,
-  saveObj = TRUE, outDir = outDir, cores = 10)
+  saveObj = TRUE, outDir = outDir, cores = 10L)
 ```
 
 # Analysis of the elaborated data
@@ -288,8 +290,8 @@ obj2 <- automaticCOTANObjectCreation(
 To calculate the `GDI` we can run:
 
 ```{r}
-quant.p = calculateGDI(obj)
-head(quant.p)
+quantP <- calculateGDI(obj)
+head(quantP)
 ```
 
 The next function can either plot the `GDI` for the dataset directly or
@@ -334,7 +336,7 @@ print(cond)
 ```
 
 ```{r}
-heatmapPlot(genesLists = genesList, sets = c(1:3),
+heatmapPlot(genesLists = genesList, sets = (1L:3L),
             conditions = c(cond), dir = outDir)
 ```
 
@@ -374,12 +376,12 @@ the whole or a partial `COEX` matrix from a `COTAN` object.
 ```{r}
 # For the whole matrix
 coex <- getGenesCoex(obj, zeroDiagonal = FALSE)
-coex[1:5, 1:5]
+coex[1L:5L, 1L:5L]
 ```
 
 ```{r}
 # For a partial matrix
-coex <- getGenesCoex(obj, genes = c("Satb2","Bcl11b","Fezf2"))
+coex <- getGenesCoex(obj, genes = c("Satb2", "Bcl11b", "Fezf2"))
 head(coex)
 ```
 
@@ -388,7 +390,7 @@ head(coex)
 `COTAN` provides a way to establish genes' clusters given some lists of markers
 
 ```{r}
-layersGenes = list(
+layersGenes <- list(
   "L1"   = c("Reln",   "Lhx5"),
   "L2/3" = c("Satb2",  "Cux1"),
   "L4"   = c("Rorb",   "Sox5"),
@@ -397,7 +399,7 @@ layersGenes = list(
 )
 c(gSpace, eigPlot, pcaClustersDF, treePlot) %<-%
   establishGenesClusters(obj, groupMarkers = layersGenes,
-                         numGenesPerMarker = 25, kCuts = 6)
+                         numGenesPerMarker = 25L, kCuts = 6L)
 
 plot(eigPlot)
 ```
@@ -407,7 +409,7 @@ plot(treePlot)
 ```
 
 ```{r}
-UMAPPlot(pcaClustersDF[, 1:10], 
+UMAPPlot(pcaClustersDF[, 1L:10L], 
          clusters = pcaClustersDF[["hclust"]],
          elements = layersGenes,
          title = "Genes' clusters UMAP Plot")
@@ -421,7 +423,7 @@ satisfies the null hypothesis of the `COTAN` model:
 the genes expression is not dependent on the cell in consideration.
 
 ```{r eval=FALSE, include=TRUE}
-fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.4, cores = 10,
+fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.4, cores = 10L,
                                        saveObj = TRUE, outDir = outDir)
 obj <- addClusterization(obj, clName = "FineClusters", clusters = fineClusters)
 ```
@@ -435,7 +437,7 @@ obj <- addClusterizationCoex(obj, clName = "FineClusters",
 
 ```{r eval=FALSE, include=TRUE}
 c(mergedClusters, coexDF, pValueDF) %<-%
-  mergeUniformCellsClusters(obj, GDIThreshold = 1.4, cores = 10,
+  mergeUniformCellsClusters(obj, GDIThreshold = 1.4, cores = 10L,
                             saveObj = TRUE, outDir = outDir)
 obj <- addClusterization(obj, clName = "MergedClusters",
                          clusters = mergedClusters, coexDF = coexDF)

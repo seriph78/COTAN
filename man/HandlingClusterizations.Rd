@@ -61,7 +61,7 @@ clustersMarkersHeatmapPlot(
   groupMarkers,
   clName = "",
   clusters = NULL,
-  kCuts = 3,
+  kCuts = 3L,
   condNameList = NULL,
   conditionsList = NULL
 )

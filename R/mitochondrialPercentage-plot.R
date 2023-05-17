@@ -75,18 +75,18 @@ mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
     sizes %>%
     ggplot(aes(x = sample, y = mit.percentage, fill = sample)) +
     #geom_point(size = 0.5) +
-    geom_flat_violin(position = position_nudge(x = .15, y = 0.0),
+    geom_flat_violin(position = position_nudge(x = 0.15, y = 0.0),
                      adjust = 2.0, alpha = 0.5) +
-    geom_point(position = position_jitter(width = .1),
-               size = .4, color = "black", alpha = 0.5) +
+    geom_point(position = position_jitter(width = 0.1),
+               size = 0.4, color = "black", alpha = 0.5) +
     geom_boxplot(aes(x = sample, y = mit.percentage, fill = sample),
-                 outlier.shape = NA, alpha = .8,
-                 width = .15, colour = "gray65", size = 0.6) +
+                 outlier.shape = NA, alpha = 0.8,
+                 width = 0.15, colour = "gray65", size = 0.6) +
     labs(title = "Mitochondrial percentage of reads",
          y = "% (mit. reads / tot reads * 100)",
          x = "") +
     scale_y_continuous(expand = c(0.0, 0.0)) +
-    #ylim(0, max(sizes[["sizes"]])) +
+    #ylim(0L, max(sizes[["sizes"]])) +
     plotTheme("size-plot")
 
   return(list("plot" = plot, "sizes" = sizes))

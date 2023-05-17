@@ -191,7 +191,8 @@ heatmapPlot <- function(genesLists, sets, conditions, dir,
 #' @rdname HeatmapPlots
 #'
 genesHeatmapPlot <-
-  function(objCOTAN, primaryMarkers, secondaryMarkers = c(),
+  function(objCOTAN, primaryMarkers,
+           secondaryMarkers = vector(mode = "character"),
            pValueThreshold = 0.01, symmetric = TRUE) {
     if (isTRUE(symmetric)) {
       secondaryMarkers <- as.list(c(unlist(primaryMarkers),
@@ -225,14 +226,14 @@ genesHeatmapPlot <-
       coex <- coex[, getGenes(objCOTAN) %in% rowGenes]
     }
 
-    listRows <- c()
+    listRows <- list()
     for (m in unlist(secondaryMarkers)) {
       genes <- rownames(pValue[pValue[, m] < pValueThreshold, ])
       genes <- genes[genes %in% rownames(coex[coex[, m] > 0.0, ])]
       listRows[[m]] <- genes
     }
 
-    clGenesRows <- c()
+    clGenesRows <- data.frame()
     for (g in names(listRows)) {
       tmp <- data.frame("genes" = listRows[[g]],
                         "cl" = rep(g, length(listRows[[g]])))
@@ -241,7 +242,7 @@ genesHeatmapPlot <-
 
     reorderIdxRow <- match(clGenesRows[["genes"]], rownames(coex))
 
-    listCols <- c()
+    listCols <- list()
     for (m in primaryMarkers) {
       genes <- rownames(pValue[pValue[, m] < pValueThreshold, ])
       genes <- genes[genes %in% rownames(coex[coex[, m] > 0.0, ])]
@@ -339,7 +340,7 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
 
     # size of each cluster
     clustersList <- toClustersList(clusters)
-    clustersSize <- vapply(clustersList, length, integer(1))
+    clustersSize <- vapply(clustersList, length, integer(1L))
 
     # cell names grouped by the identifier of the cluster to which they belong
     cellNames <- unlist(clustersList)

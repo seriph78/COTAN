@@ -139,14 +139,16 @@ setGeneric(
 
 setGeneric(
   "getGenesCoex",
-  function(objCOTAN, genes = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
+  function(objCOTAN, genes = vector(mode = "character"),
+           zeroDiagonal = TRUE, ignoreSync = FALSE) {
     standardGeneric("getGenesCoex")
   }
 )
 
 setGeneric(
   "getCellsCoex",
-  function(objCOTAN, cells = c(), zeroDiagonal = TRUE, ignoreSync = FALSE) {
+  function(objCOTAN, cells = vector(mode = "character"),
+           zeroDiagonal = TRUE, ignoreSync = FALSE) {
     standardGeneric("getCellsCoex")
   }
 )
@@ -222,7 +224,8 @@ setGeneric(
 
 setGeneric(
   "dropGenesCells",
-  function(objCOTAN, genes = c(), cells = c()) standardGeneric("dropGenesCells")
+  function(objCOTAN, genes = vector(mode = "character"),
+           cells = vector(mode = "character")) standardGeneric("dropGenesCells")
 )
 
 setGeneric(

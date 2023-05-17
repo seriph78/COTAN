@@ -4,7 +4,7 @@
 \alias{getColorsVector}
 \title{getColorsVector}
 \usage{
-getColorsVector(numNeededColors = 0)
+getColorsVector(numNeededColors = 0L)
 }
 \arguments{
 \item{numNeededColors}{The number of returned colors. If omitted it returns
