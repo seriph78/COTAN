@@ -77,9 +77,9 @@ plots to file}
 \item{outDir}{an existing directory for the analysis output. The effective
 output will be paced in a sub-folder.}
 
-\item{cluster}{the tag of the cluster}
+\item{cluster}{the tag of the \emph{cluster}}
 
-\item{cells}{the cells in the cluster}
+\item{cells}{the cells belonging to the \emph{cluster}}
 
 \item{clusters}{The \emph{clusterization} to merge. If not given the last
 available \emph{clusterization} will be used, as it is probably the most
@@ -96,8 +96,8 @@ defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
 
 \code{cellsUniformClustering()} returns the newly found \emph{clusterization}
 
-\code{checkClusterUniformity} returns \code{TRUE} when the cluster is uniform,
-\code{FALSE} otherwise.
+\code{checkClusterUniformity} returns \code{TRUE} when the \emph{cluster} is
+\strong{uniform}, \code{FALSE} otherwise.
 
 a \code{list} with "clusters", "coexDF" and "pValueDF"
 }
@@ -125,7 +125,7 @@ deemed \strong{uniform}. In the case only a few cells are left out (\eqn{\leq
 \emph{cluster} and checks whether the latter is \strong{uniform} by \code{GDI}. The
 function runs \code{COTAN} to check whether the \code{GDI} is lower than the given
 \code{GDIThreshold} for the \eqn{99\%} of the genes. If the \code{GDI} results to be
-too high for too many genes, the cluster is deemed \strong{non-uniform}.
+too high for too many genes, the \emph{cluster} is deemed \strong{non-uniform}.
 
 \code{mergeUniformCellsClusters()} takes in a \strong{uniform}
 \emph{clusterization} and iteratively checks whether merging two \emph{near clusters}

@@ -1,3 +1,17 @@
+## COTAN 2.1.3
+
+Completed function clustersMarkersHeatmapPlot()
+
+Added new utility function normalizeNameAndLabels()
+
+Added mergeClusters() and multiMergeClusters() functions
+
+Added support to `conditions` in cells' meta-data
+
+Now clusterizations are stored as `factors`
+
+Fixed COTAN::validity method in AllClasses.R
+
 ## COTAN 2.1.2
 
 Fixed bug in `proceedToCoex()` in cases when `saveObj == TRUE`
