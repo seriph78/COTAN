@@ -2,7 +2,7 @@
 test_that("Establish genes clusters", {
   data("test.dataset")
   objCOTAN <- COTAN(raw = test.dataset)
-  objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
+  objCOTAN <- proceedToCoex(objCOTAN, cores = 12L, saveObj = FALSE)
 
   #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
@@ -13,26 +13,26 @@ test_that("Establish genes clusters", {
   c(secondaryMarkers, GCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN = objCOTAN,
                    primaryMarkers = unlist(groupMarkers),
-                   numGenesPerMarker = 11)
+                   numGenesPerMarker = 11L)
 
   expect_gt(length(secondaryMarkers), length(unlist(groupMarkers)))
   expect_equal(colnames(rankGenes), unlist(groupMarkers), ignore_attr = TRUE)
-  expect_equal(rownames(rankGenes), secondaryMarkers)
+  expect_identical(rownames(rankGenes), secondaryMarkers)
 
-  expect_equal(colnames(GCS), secondaryMarkers)
-  expect_lte(max(abs(GCS)), 1)
+  expect_identical(colnames(GCS), secondaryMarkers)
+  expect_lte(max(abs(GCS)), 1L)
 
   if (TRUE) {
     # saveRDS(GCS, file = "genes.coex.space.RDS")
     GCS_old <- readRDS(file.path(getwd(), "genes.coex.space.RDS"))
-    expect_equal(GCS, GCS_old)
+    expect_identical(GCS, GCS_old)
   }
 
   c(gSpace, plotEigen, pcaClusters, treePlot) %<-%
     establishGenesClusters(objCOTAN = objCOTAN,
                            groupMarkers = groupMarkers,
-                           numGenesPerMarker = 11,
-                           kCuts = 6,
+                           numGenesPerMarker = 11L,
+                           kCuts = 6L,
                            distance = "cosine",
                            hclustMethod = "ward.D2")
 
@@ -40,20 +40,21 @@ test_that("Establish genes clusters", {
                      "colors", "col_branches", "groupLabels")
 
   expect_s3_class(pcaClusters, "data.frame")
-  expect_equal(ncol(pcaClusters), 16)
-  expect_equal(colnames(pcaClusters), c(paste0("PC", c(1:10)), pcaExtraCols))
+  expect_identical(ncol(pcaClusters), 16L)
+  expect_identical(colnames(pcaClusters),
+                   c(paste0("PC", (1L:10L)), pcaExtraCols))
 
   if (FALSE) {
     # saveRDS(pcaClusters, "pca.clusters.RDS")
     pcaClustersExp <- readRDS(file.path(getwd(), "pca.clusters.RDS"))
-    expect_equal(pcaClusters, pcaClustersExp)
+    expect_identical(pcaClusters, pcaClustersExp)
   }
 
-  expect_equal(nrow(gSpace), nrow(pcaClusters))
-  expect_equal(GCS, gSpace)
+  expect_identical(nrow(gSpace), nrow(pcaClusters))
+  expect_identical(GCS, gSpace)
 
   expect_s3_class(plotEigen, "ggplot")
-  expect_equal(dim(plotEigen[["data"]]), c(10, 2))
+  expect_identical(dim(plotEigen[["data"]]), c(10L, 2L))
 
   expect_s3_class(treePlot, "dendrogram")
 })

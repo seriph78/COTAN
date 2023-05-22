@@ -187,7 +187,7 @@ handleMultiCore <- function(cores) {
 #'
 #' @noRd
 #'
-handleNamesSubsets <- function(names, subset = c()) {
+handleNamesSubsets <- function(names, subset = vector(mode = "character")) {
   if (is_empty(subset)) {
     subset <- names
   } else {
@@ -260,7 +260,8 @@ factorToVector <- function(v) {
 #'
 #' @rdname HandleMetaData
 #'
-setColumnInDF <- function(df, colToSet, colName, rowNames = c()) {
+setColumnInDF <- function(df, colToSet, colName,
+                          rowNames = vector(mode = "character")) {
   if (is_empty(df)) {
     df <- set_names(data.frame(colToSet), colName)
   } else {
@@ -389,7 +390,8 @@ toClustersList <- function(clusters) {
 #'
 #' @rdname ClustersList
 #'
-fromClustersList <- function(clustersList, elemNames = c(),
+fromClustersList <- function(clustersList,
+                             elemNames = vector(mode = "character"),
                              throwOnOverlappingClusters = TRUE) {
   clustersNames <- names(clustersList)
 
@@ -445,7 +447,7 @@ groupByClustersList <- function(elemNames, clustersList,
   assert_that(!is_empty(elemNames), msg = "passed no elemNames")
   assert_that(!is_empty(clustersList), msg = "passed no clustersList")
 
-  positions <- c()
+  positions <- vector(mode = "integer")
 
   for (cluster in clustersList) {
     clPos <- which(elemNames %in% cluster)
@@ -501,7 +503,7 @@ mergeClusters <- function(clusters, names, mergedName = "") {
   }
 
   effNames <- names[names %in% levels(clusters)]
-  if (is_empty(effNames) || length(effNames) < 2) {
+  if (is_empty(effNames) || length(effNames) < 2L) {
     warning("Passed a list of clusters to merge with less than 2 elements",
             " actually present in the clusterization")
     # nothing to do...
@@ -594,13 +596,13 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   ts <- textSize
 
   basicTheme <- theme(
-    axis.text.x  = element_text(size = ts, angle = 0L,  hjust = .5, vjust = .5,
+    axis.text.x  = element_text(size = ts, angle = 0L, hjust = 0.5, vjust = 0.5,
                                 face = "plain", colour = myDarkBlue),
-    axis.text.y  = element_text(size = ts, angle = 0L,  hjust = .0, vjust = .5,
+    axis.text.y  = element_text(size = ts, angle = 0L, hjust = 0.0, vjust = 0.5,
                                 face = "plain", colour = myDarkBlue),
-    axis.title.x = element_text(size = ts, angle = 0L,  hjust = .5, vjust = .0,
+    axis.title.x = element_text(size = ts, angle = 0L, hjust = 0.5, vjust = 0.0,
                                 face = "plain", colour = myDarkBlue),
-    axis.title.y = element_text(size = ts, angle = 90L, hjust = .5, vjust = .5,
+    axis.title.y = element_text(size = ts, angle =90L, hjust = 0.5, vjust = 0.5,
                                 face = "plain", colour = myDarkBlue))
 
   if (plotKind == "common") {
@@ -708,15 +710,15 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
 #'
 #' @rdname getColorsVector
 #'
-getColorsVector <- function(numNeededColors = 0) {
+getColorsVector <- function(numNeededColors = 0L) {
   qualColPalets <- brewer.pal.info[brewer.pal.info[["category"]] == "qual", ]
   numColPalets <- nrow(qualColPalets)
 
   qualColPalets <- rbind(qualColPalets[(numColPalets - 2L):numColPalets, ],
                          qualColPalets[1L:(numColPalets - 3L), ])
 
-  colVector <- unlist(mapply(brewer.pal, qualColPalets[["maxcolors"]],
-                             rownames(qualColPalets)))
+  colVector <- unlist(Map(brewer.pal, qualColPalets[["maxcolors"]],
+                          rownames(qualColPalets)))
 
   rm(qualColPalets, numColPalets)
 
@@ -724,9 +726,8 @@ getColorsVector <- function(numNeededColors = 0) {
               msg = paste("Needed more colors than the number",
                           "of possible supported colors:", length(colVector)))
 
-  if (numNeededColors == 0) {
+  if (numNeededColors == 0L) {
     return(colVector)
   }
   return(head(colVector, numNeededColors))
 }
-

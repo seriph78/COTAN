@@ -37,7 +37,7 @@ datasetTags()
 
 \S4method{addElementToMetaDataset}{COTAN}(objCOTAN, tag, value)
 
-setColumnInDF(df, colToSet, colName, rowNames = c())
+setColumnInDF(df, colToSet, colName, rowNames = vector(mode = "character"))
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}

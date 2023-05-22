@@ -1,7 +1,7 @@
 
 # Creates the files to be reloaded by the tests for comparisons
 
-outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
+outputTestDatasetCreation <- function(testsDir = "tests/testthat") {
   utils::data("test.dataset", package = "COTAN")
   options(parallelly.fork.enable = TRUE)
 
@@ -10,11 +10,11 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, cores = 12, saveObj = FALSE)
+  obj <- proceedToCoex(obj, cores = 12L, saveObj = FALSE)
   #saveRDS(obj, file = file.path(testsDir,"temp.RDS"))
 
-  cell.names.test  <- getCells(obj)[c(1:10,591:610,991:1000)]
-  genes.names.test <- getGenes(obj)[c(1:10,291:310,591:600)]
+  cell.names.test  <- getCells(obj)[c(1L:10L, 591L:610L, 991L:1000L)]
+  genes.names.test <- getGenes(obj)[c(1L:10L, 291L:310L, 591L: 600L)]
   saveRDS(cell.names.test, file.path(testsDir, "cell.names.test.RDS"))
   saveRDS(genes.names.test, file.path(testsDir, "genes.names.test.RDS"))
 
@@ -43,7 +43,7 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
   GDIThreshold <- 1.5
 
   clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
-                                     cores = 12, saveObj = FALSE)
+                                     cores = 12L, saveObj = FALSE)
   saveRDS(clusters, file.path(testsDir, "clusters1.RDS"))
 
   c(coexDF, pvalDF) %<-% DEAOnClusters(obj, clusters = clusters)
@@ -59,7 +59,7 @@ outputTestDatasetCreation <- function(testsDir = "tests/testthat"){
     mergeUniformCellsClusters(objCOTAN = obj,
                               clusters = NULL,
                               GDIThreshold = GDIThreshold,
-                              cores = 12,
+                              cores = 12L,
                               distance = "cosine",
                               hclustMethod = "ward.D2",
                               saveObj = FALSE)

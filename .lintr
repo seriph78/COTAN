@@ -2,7 +2,9 @@ linters: linters_with_defaults(
   defaults = linters_with_tags(tags = NULL,
                                packages = "lintr"),
   object_name_linter(styles = c("camelCase", "symbols", "UPPERCASE")),
-  cyclocomp_linter(complexity_limit = 20L)
+  cyclocomp_linter(complexity_limit = 20L),
+  assignment_linter(allow_cascading_assign = FALSE),
+  strings_as_factors_linter = NULL
   ) # see vignette("lintr")
 encoding: "UTF-8"
 exclusions: list("renv", "packrat")  # see ?lintr::exclude

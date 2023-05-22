@@ -122,7 +122,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     dir.create(mergeOutDir)
   }
 
-  notMergeable <- c()
+  notMergeable <- vector(mode = "character")
   iter <- 0L
   repeat {
     iter <- iter + 1L
@@ -154,7 +154,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     # This checks if any little two pair of leaf clusters of the dendogram
     # could be merged
 
-    id <- c()
+    id <- NULL
     {
       members <- get_nodes_attr(dend, "members")
       for (i in seq_along(members)) {
@@ -175,24 +175,24 @@ mergeUniformCellsClusters <- function(objCOTAN,
       cl1 <- get_nodes_attr(dend, "label", id = id[p + 0L])
       cl2 <- get_nodes_attr(dend, "label", id = id[p + 1L])
 
-      mergedCluster <- paste0(min(cl1, cl2), "_", max(cl1, cl2), "-merge")
+      mergedClName <- paste0(min(cl1, cl2), "_", max(cl1, cl2), "-merge")
 
-      logThis(mergedCluster, logLevel = 3L)
+      logThis(mergedClName, logLevel = 3L)
 
       p  <- p + 2L
 
-      if (mergedCluster %in% notMergeable) {
+      if (mergedClName %in% notMergeable) {
         logThis(paste0("Clusters ", cl1, " and ", cl2,
                        " already analyzed and not mergeable: skip."),
                 logLevel = 3L)
         next
       }
 
-      mergedCells <- names(outputClusters)[outputClusters %in% c(cl1, cl2)]
+      mergedCluster <- names(outputClusters)[outputClusters %in% c(cl1, cl2)]
 
       clusterIsUniform <- checkClusterUniformity(objCOTAN,
-                                                 cluster = mergedCluster,
-                                                 cells = mergedCells,
+                                                 cluster = mergedClName,
+                                                 cells = mergedCluster,
                                                  GDIThreshold = GDIThreshold,
                                                  cores = cores,
                                                  saveObj = saveObj,
@@ -204,12 +204,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
         logThis(paste("Merging clusters", cl1, "and", cl2,
                       "results in a too high GDI"), logLevel = 1L)
 
-        notMergeable <- c(notMergeable, mergedCluster)
+        notMergeable <- c(notMergeable, mergedClName)
       } else {
         logThis(paste("Clusters", cl1, "and", cl2, "can be merged"),
                 logLevel = 1L)
 
-        outputClusters[mergedCells] <- mergedCluster
+        outputClusters[mergedCluster] <- mergedClName
       }
     }
 

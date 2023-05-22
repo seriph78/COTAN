@@ -301,11 +301,11 @@ establishGenesClusters <-
 
   dend <- color_labels(dend, labels = rownames(pca1), col = colors)
 
-
+  relPos <- rownames(pca1) %in% colnames(GCS)
   dend <- dend %>%
     dendextend::set("labels",
-                    ifelse(labels(dend) %in% rownames(pca1)[rownames(pca1) %in% colnames(GCS)] ,
-                           labels(dend),""))
+                    ifelse(labels(dend) %in% rownames(pca1)[relPos],
+                           labels(dend), ""))
 
   logThis("Establishing gene clusters - DONE", logLevel = 2L)
 

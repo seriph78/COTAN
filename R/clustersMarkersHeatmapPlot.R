@@ -61,7 +61,7 @@
 #'
 clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
                                        clName = "", clusters = NULL,
-                                       kCuts = 3,
+                                       kCuts = 3L,
                                        condNameList = NULL,
                                        conditionsList = NULL) {
   assert_that(is_empty(conditionsList) ||
@@ -78,7 +78,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
   scoreDFT <- t(scoreDF[, 1L:(ncol(scoreDF) - 2L)])
   dend <- clustersTreePlot(objCOTAN, kCuts = kCuts)[["dend"]]
 
-  dend <- set(dend = dend, "branches_lwd", 2)
+  dend <- set(dend = dend, "branches_lwd", 2L)
 
   {
     numDigits <- floor(log10(nrow(scoreDFT))) + 1L
@@ -86,7 +86,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
                                   width = numDigits, flag = "0")
   }
 
-  hbList <- c()
+  hbList <- NULL
   lgdList <- list()
   if (!is_empty(condNameList)) {
     allColors <- getColorsVector()
@@ -104,7 +104,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
       cNames <- c(clName, condName, "CellNumber")
 
       if (is.numeric(condDF[[1L]])) {
-        numDigits <- floor(log10(nrows(condDF))) + 1L
+        numDigits <- floor(log10(nrow(condDF))) + 1L
         condDF[[1L]] <-
           factor(formatC(condDF[[1L]], width = numDigits, flag = "0"))
       }
@@ -162,20 +162,20 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
   haList <- c(
     ha1 = rowAnnotation(
       cellNumber = anno_numeric(freq1,
-                                rg = c(0, max(freq1)),
+                                rg = c(0L, max(freq1)),
                                 bg_gp = gpar(fill = "orange", col = "black"),
-                                labels_gp = gpar(fontsize = 10)),
+                                labels_gp = gpar(fontsize = 10.0)),
       annotation_label = "CellNumber",
-      annotation_name_rot = 0),
+      annotation_name_rot = 0.0),
 
     ha2 = rowAnnotation(
       cellPerc = anno_text(freq2,
-                           gp = gpar(fontsize = 10)),
+                           gp = gpar(fontsize = 10.0)),
       annotation_label = "CellPerc",
-      annotation_name_rot = 0)
+      annotation_name_rot = 0.0)
   )
 
-  colorFunc <- colorRamp2(c(0, 1), c("lightblue", "red"))
+  colorFunc <- colorRamp2(c(0.0, 1.0), c("lightblue", "red"))
   cellFunc <- function(j, i, x, y, width, height, fill) {
     grid.text(formatC(scoreDFT[i, j], digits = 1L, format = "f"),
               x, y, gp = gpar(fontsize = 9L))

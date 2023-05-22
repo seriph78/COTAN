@@ -14,7 +14,7 @@ toClustersList(clusters)
 
 fromClustersList(
   clustersList,
-  elemNames = c(),
+  elemNames = vector(mode = "character"),
   throwOnOverlappingClusters = TRUE
 )
 

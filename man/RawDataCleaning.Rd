@@ -40,7 +40,11 @@
 
 \S4method{findFullyExpressingCells}{COTAN}(objCOTAN, genesThreshold = 0.99)
 
-\S4method{dropGenesCells}{COTAN}(objCOTAN, genes = c(), cells = c())
+\S4method{dropGenesCells}{COTAN}(
+  objCOTAN,
+  genes = vector(mode = "character"),
+  cells = vector(mode = "character")
+)
 
 ECDPlot(objCOTAN, yCut)
 

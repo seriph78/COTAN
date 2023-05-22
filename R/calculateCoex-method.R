@@ -654,7 +654,8 @@ setMethod(
 #'
 #' @rdname CalculatingCOEX
 #'
-calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
+calculateS <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
+                       geneSubsetRow = vector(mode = "character")) {
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
   geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
@@ -692,7 +693,8 @@ calculateS <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
 #'
 #' @rdname CalculatingCOEX
 #'
-calculateG <- function(objCOTAN, geneSubsetCol = c(), geneSubsetRow = c()) {
+calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
+                       geneSubsetRow = vector(mode = "character")) {
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
   geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
@@ -784,7 +786,7 @@ calculateGDI <- function(objCOTAN, statType = "S") {
   top5pcRows <- as.integer(max(1L:round(getNumGenes(objCOTAN) / 20.0,
                                         digits = 0L)))
 
-  pValueSorted <- apply(S, c(2L), sort, decreasing = TRUE)
+  pValueSorted <- apply(S, 2L, sort, decreasing = TRUE)
   pValueSorted <- pValueSorted[1L:top5pcRows, , drop = FALSE]
   pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1L, lower.tail = FALSE)
 
@@ -841,7 +843,8 @@ calculateGDI <- function(objCOTAN, statType = "S") {
 #' @rdname CalculatingCOEX
 #'
 calculatePValue <- function(objCOTAN, statType = "S",
-                            geneSubsetCol = c(), geneSubsetRow = c()) {
+                            geneSubsetCol = vector(mode = "character"),
+                            geneSubsetRow = vector(mode = "character")) {
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
   geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
