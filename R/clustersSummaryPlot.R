@@ -199,10 +199,11 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @importFrom dendextend color_labels
 #' @importFrom dendextend branches_color
 #'
-#' @importFrom stats dist
 #' @importFrom stats hclust
 #' @importFrom stats cutree
 #' @importFrom stats as.dendrogram
+#'
+#' @importFrom parallelDist parDist
 #'
 #' @export
 #'
@@ -240,15 +241,8 @@ clustersTreePlot <- function(objCOTAN, kCuts,
   }
   rm(clusters)
 
-  #merge small cluster based on distances
-  if (distance == "cosine") {
-    # This is the best: cosine dissimilarity
-    coexDist <- cosineDissimilarity(as.matrix(coexDF))
-  } else if (distance == "euclidean") {
-    coexDist <- dist(t(as.matrix(coexDF)))
-  } else {
-    stop("only 'cosine' and 'euclidean' distances are supported")
-  }
+  # merge small cluster based on distances
+  coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
 
   hcNorm <- hclust(coexDist, method = hclustMethod)
 

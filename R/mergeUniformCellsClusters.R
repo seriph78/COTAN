@@ -138,14 +138,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
     ## TODO: To be fixed! Where it come from?
     coexDF <- coexDF[, colSums(coexDF != 0.0) > 0L]
 
-    #merge small cluster based on distances
-    if (distance == "cosine") {
-      coexDist <- cosineDissimilarity(as.matrix(coexDF))
-    } else if (distance == "euclidean") {
-      coexDist <- dist(t(as.matrix(coexDF)))
-    } else {
-      stop("only 'cosine' and 'euclidean' distances are supported")
-    }
+    # merge small cluster based on distances
+    coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
 
     hcNorm <- hclust(coexDist, method = hclustMethod)
 

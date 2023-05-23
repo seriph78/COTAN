@@ -450,36 +450,6 @@ parallelNuBisection <-
   }
 
 
-#------------------ distances ------------
-
-#' cosineDissimilarity
-#'
-#' @param m a matrix
-#'
-#' @returns The dissimilarity matrix between columns' data
-#'
-#' @export
-#'
-#' @importFrom Matrix t
-#'
-#' @importFrom stats as.dist
-#'
-#' @examples
-#' mat <- matrix(c(1:25), nrow = 5, ncol = 5,
-#'               dimnames = list(paste0("row.", c(1:5)),
-#'                               paste0("col.", c(1:5))))
-#' dist <- cosineDissimilarity(mat)
-#'
-#' @rdname cosineDissimilarity
-#'
-cosineDissimilarity <- function(m) {
-  m <- as.matrix(t(m))
-  sim <- m / sqrt(rowSums(m^2.0))
-  sim <- tcrossprod(sim)
-  return(as.dist(1.0 - sim))
-}
-
-
 #----------------- legacy functions --------------------
 
 #' Handle symmetric matrix <-> vector conversions

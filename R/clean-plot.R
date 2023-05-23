@@ -20,6 +20,8 @@
 #' @importFrom stats hclust
 #' @importFrom stats cutree
 #'
+#' @importFrom parallelDist parDist
+#'
 #' @importFrom utils head
 #'
 #' @importFrom Matrix t
@@ -64,7 +66,7 @@ cleanPlots <- function(objCOTAN) {
   pcaCells <- prcomp_irlba(t(rawNorm), n = 5L)[["x"]]
   rownames(pcaCells) <- getCells(objCOTAN)
 
-  distCells <- stats::dist(scale(pcaCells), method = "euclidean") # mhalanobis
+  distCells <- parDist(scale(pcaCells), method = "euclidean") # mhalanobis
 
   pcaCells <- as.data.frame(pcaCells)
 

@@ -190,19 +190,6 @@ test_that("plotTheme", {
 })
 
 
-test_that("Cosine dissimilarity", {
-  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
-                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
-                nrow = 10L, ncol = 20L)
-  rownames(raw) <- LETTERS[1L:10L]
-  colnames(raw) <- letters[1L:20L]
-
-  cd <- as.matrix(cosineDissimilarity(raw))
-
-  expect_identical(cd[(row(cd) + col(cd)) %% 2L == 1L], rep(cd[2L, 1L], 200L))
-  expect_identical(cd[(row(cd) + col(cd)) %% 2L == 0L], rep(cd[3L, 1L], 200L))
-})
-
 test_that("Raw data normalization", {
   utils::data("test.dataset", package = "COTAN")
   genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
@@ -214,6 +201,22 @@ test_that("Raw data normalization", {
   raw.norm <- as.matrix(readRDS(file.path(getwd(), "raw.norm.test.RDS")))
 
   expect_identical(t(t(raw) * (1.0 / nu)), raw.norm)
+})
+
+
+test_that("parallelDist - cosine dissimilarity", {
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
+
+  cd <- as.matrix(parallelDist::parDist(t(raw), method = "cosine"))
+
+  expect_equal(cd[(row(cd) + col(cd)) %% 2L == 1L], rep(cd[2L, 1L], 200L),
+               tolerance = 1.0e-15)
+  expect_equal(cd[(row(cd) + col(cd)) %% 2L == 0L], rep(cd[3L, 1L], 200L),
+               tolerance = 1.0e-15)
 })
 
 

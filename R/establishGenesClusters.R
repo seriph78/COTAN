@@ -156,12 +156,14 @@ genesCoexSpace <-
 #' @importFrom dendextend color_labels
 #' @importFrom dendextend color_branches
 #'
-#' @importFrom stats dist
 #' @importFrom stats hclust
 #' @importFrom stats cutree
-#' @importFrom stats prcomp
 #' @importFrom stats as.dendrogram
 #' @importFrom stats order.dendrogram
+#'
+#' @importFrom parallelDist parDist
+#'
+#' @importFrom irlba prcomp_irlba
 #'
 #' @importFrom stringr str_split
 #'
@@ -202,8 +204,8 @@ establishGenesClusters <-
                    numGenesPerMarker = numGenesPerMarker,
                    primaryMarkers = primaryMarkers)
 
-
-  GCSPca <- prcomp(GCS, center = TRUE, scale. = FALSE)
+  GCSPca <- prcomp_irlba(GCS, n = 10, center = TRUE, scale. = FALSE)
+  rownames(GCSPca[["x"]]) <- rownames(GCS)
 
   SMRelevance <- matrix(nrow = length(secondaryMarkers),
                         ncol = length(groupMarkers),
@@ -236,13 +238,8 @@ establishGenesClusters <-
 
   plotEigen <- fviz_eig(GCSPca, addlabels = TRUE, ncp = 10L)
 
-  if (distance == "cosine") {
-    coexDist <- cosineDissimilarity(t(GCS))
-  } else if (distance == "euclidean") {
-    coexDist <- dist(GCS)
-  } else {
-    stop("only 'cosine' and 'euclidean' distances are supported")
-  }
+  coexDist <- parDist(as.matrix(GCS), method = distance)
+
   hcNorm <- hclust(coexDist, method = hclustMethod)
 
   dend <- as.dendrogram(hcNorm)
