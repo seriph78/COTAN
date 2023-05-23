@@ -46,6 +46,7 @@ Imports:
     tibble,
     tidyr,
     irlba,
+    parallelDist,
     ComplexHeatmap,
     circlize,
     grid,
