@@ -157,8 +157,8 @@ column name in the returned \code{data.frame}}
 
 \item{plotTitle}{The title to use for the returned plot}
 
-\item{distance}{type of distance to use (default is \code{cosine}, \code{euclidean} is
-also available)}
+\item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
+and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
 
 \item{hclustMethod}{default is "ward.D2" but can be any method defined by
 \code{\link[stats:hclust]{stats::hclust()}} function}

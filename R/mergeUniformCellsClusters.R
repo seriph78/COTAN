@@ -16,8 +16,8 @@
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
 #'   It defaults to \eqn{1.4}
 #' @param cores number cores used
-#' @param distance type of distance to use. It defaults to `"cosine"`, but
-#'   `"euclidean"` is also available)
+#' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
+#'   and the others from [parallelDist::parDist()] are also available)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
