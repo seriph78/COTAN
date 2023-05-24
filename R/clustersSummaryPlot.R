@@ -184,8 +184,8 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be returned, as it is probably the most
 #'   significant!
-#' @param distance type of distance to use (default is `cosine`, `euclidean` is
-#'   also available)
+#' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
+#'   and the others from [parallelDist::parDist()] are also available)
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
 #'
@@ -199,10 +199,11 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @importFrom dendextend color_labels
 #' @importFrom dendextend branches_color
 #'
-#' @importFrom stats dist
 #' @importFrom stats hclust
 #' @importFrom stats cutree
 #' @importFrom stats as.dendrogram
+#'
+#' @importFrom parallelDist parDist
 #'
 #' @export
 #'
@@ -240,15 +241,8 @@ clustersTreePlot <- function(objCOTAN, kCuts,
   }
   rm(clusters)
 
-  #merge small cluster based on distances
-  if (distance == "cosine") {
-    # This is the best: cosine dissimilarity
-    coexDist <- cosineDissimilarity(as.matrix(coexDF))
-  } else if (distance == "euclidean") {
-    coexDist <- dist(t(as.matrix(coexDF)))
-  } else {
-    stop("only 'cosine' and 'euclidean' distances are supported")
-  }
+  # merge small cluster based on distances
+  coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
 
   hcNorm <- hclust(coexDist, method = hclustMethod)
 

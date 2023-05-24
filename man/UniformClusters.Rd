@@ -85,8 +85,8 @@ output will be paced in a sub-folder.}
 available \emph{clusterization} will be used, as it is probably the most
 significant!}
 
-\item{distance}{type of distance to use. It defaults to \code{"cosine"}, but
-\code{"euclidean"} is also available)}
+\item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
+and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}

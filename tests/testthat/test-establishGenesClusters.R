@@ -44,10 +44,21 @@ test_that("Establish genes clusters", {
   expect_identical(colnames(pcaClusters),
                    c(paste0("PC", (1L:10L)), pcaExtraCols))
 
-  if (FALSE) {
+  if (TRUE) {
     # saveRDS(pcaClusters, "pca.clusters.RDS")
     pcaClustersExp <- readRDS(file.path(getwd(), "pca.clusters.RDS"))
-    expect_identical(pcaClusters, pcaClustersExp)
+    expect_identical(dim(pcaClusters), dim(pcaClustersExp))
+    expect_identical(colnames(pcaClusters), colnames(pcaClustersExp))
+    expect_identical(rownames(pcaClusters), rownames(pcaClustersExp))
+    expect_identical(ncol(pcaClusters), 16L)
+    expect_equal(abs(pcaClusters[, 1L:5L]),
+                 abs(pcaClustersExp[, 1L:5L]), tolerance = 1.0e-9)
+    expect_equal(abs(pcaClusters[, 6L:9L]),
+                 abs(pcaClustersExp[, 6L:9L]), tolerance = 1.0e-6)
+    expect_equal(abs(pcaClusters[, 10L]),
+                 abs(pcaClustersExp[, 10L]),   tolerance = 1.0e-4)
+    expect_identical(pcaClusters[, 11L:13L], pcaClustersExp[, 11L:13L])
+    expect_identical(pcaClusters[, 16L],     pcaClustersExp[, 16L])
   }
 
   expect_identical(nrow(gSpace), nrow(pcaClusters))
