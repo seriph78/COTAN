@@ -299,18 +299,19 @@ test_that("Coex vs saved results", {
 
   coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
-  expect_identical(getGenesCoex(obj, genes = genes.names.test,
-                                zeroDiagonal = FALSE), coex_test)
+  expect_equal(getGenesCoex(obj, genes = genes.names.test,
+                            zeroDiagonal = FALSE),
+               coex_test, tolerance = 1.0e-14)
 
   pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)
 
   pval_exp <- readRDS(file.path(getwd(), "pval.test.RDS"))
   diag(pval_exp[genes.names.test, ]) <- 1L
-  expect_identical(pval, pval_exp)
+  expect_equal(pval, pval_exp, tolerance = 1.0e-14)
 
   GDI <- calculateGDI(obj)[genes.names.test, ]
 
   GDI_exp <- readRDS(file.path(getwd(), "GDI.test.RDS"))
 
-  expect_identical(GDI, GDI_exp)
+  expect_equal(GDI, GDI_exp, tolerance = 1.0e-14)
 })

@@ -1,3 +1,10 @@
+## COTAN 2.1.4
+
+Speed-up by use of parallelDist::parDist() to calculate distances instead of
+stats::dist()
+
+Fixed regression tests failing on non-Linux architectures
+
 ## COTAN 2.1.3
 
 Completed function clustersMarkersHeatmapPlot()
