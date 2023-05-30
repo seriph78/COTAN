@@ -224,8 +224,21 @@ mergeUniformCellsClusters <- function(objCOTAN,
     c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
 
     if (length(unique(outputClusters)) == oldNumClusters) {
-      # no merges happened: stop!
-      break
+      # no merges happened: retry all neighbooring pairs!
+
+      allLabels <- labels(dend)
+      pList <- rbind(allLabels[-length(allLabels)], allLabels[-1])
+      pList <- as.list(as.data.frame(pList))
+
+      logThis(paste0("Created pairs ID for merging: ",
+                     paste(pList, collapse = " ")), logLevel = 2L)
+
+      c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
+
+      if (length(unique(outputClusters)) == oldNumClusters) {
+        # no merges happened again: stop!
+        break;
+      }
     }
   }
 
