@@ -238,7 +238,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
     }
 
     if (newNumClusters == oldNumClusters) {
-      # no merges happened: retry all neighbooring pairs!
+      logThis(msg = paste("No clusters leaf-pairs could be merged.",
+                          "Retrying with all neightbooring pairs"),
+              logLevel = 3L)
 
       allLabels <- labels(dend)
       pList <- rbind(allLabels[-length(allLabels)], allLabels[-1])
