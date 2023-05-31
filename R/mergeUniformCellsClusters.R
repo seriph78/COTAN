@@ -37,11 +37,15 @@
 #' @importFrom stats dist
 #' @importFrom stats hclust
 #' @importFrom stats as.dendrogram
+#' @importFrom stats cophenetic
 #'
 #' @importFrom stringr str_split
 #' @importFrom stringr fixed
 #'
 #' @importFrom dendextend get_nodes_attr
+#'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
 #'
 #' @examples
 #' data("test.dataset")
@@ -123,57 +127,26 @@ mergeUniformCellsClusters <- function(objCOTAN,
   }
 
   notMergeable <- vector(mode = "character")
-  iter <- 0L
-  repeat {
-    iter <- iter + 1L
-    logThis(paste0("Start merging smallest clusters: iteration ", iter),
-            logLevel = 3L)
 
-    oldNumClusters <- length(unique(outputClusters))
+  testPairListMerge <- function(pList) {
+    logThis(paste0("Clusters pairs for merging: ",
+                   paste(pList, collapse = " ")), logLevel = 2L)
 
-    c(coexDF, pValueDF) %<-% DEAOnClusters(objCOTAN, clusters = outputClusters)
-    gc()
-
-    ## To drop the cells with only zeros
-    ## TODO: To be fixed! Where it come from?
-    coexDF <- coexDF[, colSums(coexDF != 0.0) > 0L]
-
-    # merge small cluster based on distances
-    coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
-
-    hcNorm <- hclust(coexDist, method = hclustMethod)
-
-    dend <- as.dendrogram(hcNorm)
-
-    # This checks if any little two pair of leaf clusters of the dendogram
-    # could be merged
-
-    id <- NULL
-    {
-      members <- get_nodes_attr(dend, "members")
-      for (i in seq_along(members)) {
-        if (members[i] == 2L) {
-          id <- c(id, i + 1L, i + 2L)
-        }
-      }
-    }
-
-    logThis(paste0("Created leafs ID for merging: ",
-                   paste(get_nodes_attr(dend, "label", id = id),
-                         collapse = " ")), logLevel = 2L)
-
-    p <- 1L
-    while (p < length(id)) {
+    for (p in pList) {
       logThis("*", logLevel = 1L, appendLF = FALSE)
 
-      cl1 <- get_nodes_attr(dend, "label", id = id[p + 0L])
-      cl2 <- get_nodes_attr(dend, "label", id = id[p + 1L])
+      c(cl1, cl2) %<-% p
+
+      if (all(outputClusters != cl1) || all(outputClusters != cl2)) {
+        logThis(paste0("Clusters ", cl1, " or ", cl2,
+                       " is now missing due to previous merges: skip."),
+                logLevel = 3L)
+        next
+      }
 
       mergedClName <- paste0(min(cl1, cl2), "_", max(cl1, cl2), "-merge")
 
       logThis(mergedClName, logLevel = 3L)
-
-      p  <- p + 2L
 
       if (mergedClName %in% notMergeable) {
         logThis(paste0("Clusters ", cl1, " and ", cl2,
@@ -207,14 +180,88 @@ mergeUniformCellsClusters <- function(objCOTAN,
       }
     }
 
-    if (length(unique(outputClusters)) == oldNumClusters) {
-      # no merges happened: stop!
+    return(list("oc" = outputClusters, "nm" = notMergeable))
+  }
+
+  iter <- 0L
+  repeat {
+    iter <- iter + 1L
+    logThis(paste0("Start merging smallest clusters: iteration ", iter),
+            logLevel = 3L)
+
+    oldNumClusters <- length(unique(outputClusters))
+
+    c(coexDF, pValueDF) %<-% DEAOnClusters(objCOTAN, clusters = outputClusters)
+    gc()
+
+    ## To drop the cells with only zeros
+    ## TODO: To be fixed! Where it come from?
+    coexDF <- coexDF[, colSums(coexDF != 0.0) > 0L]
+
+    # merge small cluster based on distances
+    coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
+
+    hcNorm <- hclust(coexDist, method = hclustMethod)
+
+    dend <- as.dendrogram(hcNorm)
+
+    if (saveObj) {
+      pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_plot.pdf")))
+
+      plot(dend)
+
+      dev.off()
+    }
+
+    # This checks if any little two pair of leaf clusters of the dendogram
+    # could be merged
+
+    pList <- vector(mode = "list")
+    {
+      members <- get_nodes_attr(dend, "members")
+      for (i in seq_along(members)) {
+        if (members[i] == 2L) {
+          cl1 <- get_nodes_attr(dend, "label", id = i + 1L)
+          cl2 <- get_nodes_attr(dend, "label", id = i + 2L)
+
+          pList[[length(pList)+1]] <- c(cl1, cl2)
+        }
+      }
+    }
+
+    c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
+
+    newNumClusters <- length(unique(outputClusters))
+    if (newNumClusters == 1) {
+      # nothing left to do: stop!
       break
+    }
+
+    if (newNumClusters == oldNumClusters) {
+      logThis(msg = paste("No clusters leaf-pairs could be merged.",
+                          "Retrying with all neightbooring pairs"),
+              logLevel = 3L)
+
+      allLabels <- labels(dend)
+      pList <- rbind(allLabels[-length(allLabels)], allLabels[-1])
+      pList <- as.list(as.data.frame(pList))
+
+      # reorder the list so that pairs with lower distance are checked first
+      allDist <- diag(as.matrix(cophenetic(dend))[, -1, drop = FALSE])
+      pList <- pList[order(allDist, decreasing = FALSE)]
+
+      c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
+
+      newNumClusters <- length(unique(outputClusters))
+      if (newNumClusters == 1 || newNumClusters == oldNumClusters) {
+        # nothing left to do or no merges happened again: stop!
+        break
+      }
     }
   }
 
-  logThis(paste("The final merged clusterization contains [",
-                length(unique(outputClusters)), "] different clusters:",
+  logThis(paste0("The final merged clusterization contains [",
+                length(unique(outputClusters)), "] different clusters: ",
                 toString(unique(sort(outputClusters)))), logLevel = 3L)
 
   # replace the clusters' tags

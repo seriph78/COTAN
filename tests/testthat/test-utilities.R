@@ -68,8 +68,7 @@ test_that("Clusterizations manipulations", {
   # cause mismatches between the element names and the clusterization
   elemNames <- append(elemNames, paste0("el_", 201L:210L), after = 20L)[1L:100L]
 
-  expect_setequal(fromClustersList(clustersList, elemNames)[21L:30L],
-                  "not_clustered")
+  expect_setequal(fromClustersList(clustersList, elemNames)[21L:30L], "-1")
 
   expect_identical(groupByClustersList(elemNames, clustersList)[91L:100L],
                    (21L:30L))

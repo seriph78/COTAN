@@ -134,7 +134,7 @@ NULL
 #'   checked, all cells from the **non-uniform** clusters are pooled together
 #'   for another iteration of the entire process, until all *clusters* are
 #'   deemed **uniform**. In the case only a few cells are left out (\eqn{\leq
-#'   50}), those are flagged as `"not_clustered"` and the process is stopped.
+#'   50}), those are flagged as `"-1"` and the process is stopped.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param GDIThreshold the threshold level that discriminates uniform
@@ -300,7 +300,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     unclusteredCells <- is.na(outputClusters)
     outputClusters[!unclusteredCells] <-
       clTagsMap[outputClusters[!unclusteredCells]]
-    outputClusters[unclusteredCells] <- "not_clustered"
+    outputClusters[unclusteredCells] <- "-1"
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
 
