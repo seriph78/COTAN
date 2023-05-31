@@ -40,7 +40,7 @@ positions that is longer than the given \code{elemNames}.}
 
 \code{fromClustersList()} returns a clusterization. If the given \code{elemNames}
 contain values not present in the \code{clustersList}, those will be marked as
-\code{"not_clustered"}
+\code{"-1"}
 
 \code{groupByClusters()} and \code{groupByClustersList()} return a permutation that
 groups the clusters together. For each cluster the positions are guaranteed

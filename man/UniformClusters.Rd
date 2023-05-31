@@ -118,7 +118,7 @@ via the function \code{\link[=checkClusterUniformity]{checkClusterUniformity()}}
 checked, all cells from the \strong{non-uniform} clusters are pooled together
 for another iteration of the entire process, until all \emph{clusters} are
 deemed \strong{uniform}. In the case only a few cells are left out (\eqn{\leq
-  50}), those are flagged as \code{"not_clustered"} and the process is stopped.
+  50}), those are flagged as \code{"-1"} and the process is stopped.
 
 \code{checkClusterUniformity()} takes a \code{COTAN} object and a cells'
 \emph{cluster} and checks whether the latter is \strong{uniform} by \code{GDI}. The

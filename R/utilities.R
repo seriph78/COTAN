@@ -281,7 +281,7 @@ NULL
 #'
 #'   `fromClustersList()` returns a clusterization. If the given `elemNames`
 #'   contain values not present in the `clustersList`, those will be marked as
-#'   `"not_clustered"`
+#'   `"-1"`
 #'
 #'   `groupByClusters()` and `groupByClustersList()` return a permutation that
 #'   groups the clusters together. For each cluster the positions are guaranteed
@@ -360,13 +360,13 @@ fromClustersList <- function(clustersList, elemNames = c(),
     elemNames <- unlist(clustersList, use.names = FALSE)
   }
 
-  clusters <- set_names(rep.int("not_clustered", length(elemNames)), elemNames)
+  clusters <- set_names(rep.int("-1", length(elemNames)), elemNames)
 
   for (clName in clustersNames) {
     cluster <- clustersList[[clName]]
     cluster <- cluster[cluster %in% elemNames]
     assert_that((!throwOnOverlappingClusters ||
-                   all(clusters[cluster] == "not_clustered")),
+                   all(clusters[cluster] == "-1")),
                 msg = "Found overlapping clusters")
     clusters[cluster] <- clName
   }
