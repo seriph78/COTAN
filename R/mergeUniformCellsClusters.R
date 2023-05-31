@@ -144,6 +144,13 @@ mergeUniformCellsClusters <- function(objCOTAN,
         next
       }
 
+      if (all(outputClusters != cl1) || all(outputClusters != cl2)) {
+        logThis(paste0("Clusters ", cl1, " or ", cl2,
+                       " is now missing due to previous merges: skip."),
+                logLevel = 3L)
+        next
+      }
+
       mergedCluster <- names(outputClusters)[outputClusters %in% c(cl1, cl2)]
 
       clusterIsUniform <- checkClusterUniformity(objCOTAN,
