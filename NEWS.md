@@ -1,3 +1,8 @@
+## COTAN 2.1.5
+
+Improved mergeUniformCellsClusters(): now it attempts to merge more
+clusters pairs
+
 ## COTAN 2.1.4
 
 Speed-up by use of parallelDist::parDist() to calculate distances instead of
