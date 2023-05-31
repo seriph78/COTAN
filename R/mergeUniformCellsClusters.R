@@ -133,6 +133,13 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
       c(cl1, cl2) %<-% p
 
+      if (all(outputClusters != cl1) || all(outputClusters != cl2)) {
+        logThis(paste0("Clusters ", cl1, " or ", cl2,
+                       " is now missing due to previous merges: skip."),
+                logLevel = 3L)
+        next
+      }
+
       mergedClName <- paste0(min(cl1, cl2), "_", max(cl1, cl2), "-merge")
 
       logThis(mergedClName, logLevel = 3L)
@@ -140,13 +147,6 @@ mergeUniformCellsClusters <- function(objCOTAN,
       if (mergedClName %in% notMergeable) {
         logThis(paste0("Clusters ", cl1, " and ", cl2,
                        " already analyzed and not mergeable: skip."),
-                logLevel = 3L)
-        next
-      }
-
-      if (all(outputClusters != cl1) || all(outputClusters != cl2)) {
-        logThis(paste0("Clusters ", cl1, " or ", cl2,
-                       " is now missing due to previous merges: skip."),
                 logLevel = 3L)
         next
       }
@@ -230,21 +230,32 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
 
-    if (length(unique(outputClusters)) == oldNumClusters) {
+    newNumClusters <- length(unique(outputClusters))
+    if (newNumClusters == 1) {
+      # nothing left to do: stop!
+      break
+    }
+
+    if (newNumClusters == oldNumClusters) {
       # no merges happened: retry all neighbooring pairs!
 
       allLabels <- labels(dend)
       pList <- rbind(allLabels[-length(allLabels)], allLabels[-1])
       pList <- as.list(as.data.frame(pList))
 
+      # reorder the list so that pairs with lower distance are checked first
+      allDist <- diag(as.matrix(cophenetic(dend))[, -1, drop = FALSE])
+      pList <- pList[order(allDist, decreasing = FALSE)]
+
       logThis(paste0("Created pairs ID for merging: ",
                      paste(pList, collapse = " ")), logLevel = 2L)
 
       c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
 
-      if (length(unique(outputClusters)) == oldNumClusters) {
-        # no merges happened again: stop!
-        break;
+      newNumClusters <- length(unique(outputClusters))
+      if (newNumClusters == 1 || newNumClusters == oldNumClusters) {
+        # nothing left to do or no merges happened again: stop!
+        break
       }
     }
   }
