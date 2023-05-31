@@ -128,6 +128,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
   notMergeable <- vector(mode = "character")
 
   testPairListMerge <- function(pList) {
+    logThis(paste0("Clusters pairs for merging: ",
+                   paste(pList, collapse = " ")), logLevel = 2L)
+
     for (p in pList) {
       logThis("*", logLevel = 1L, appendLF = FALSE)
 
@@ -225,9 +228,6 @@ mergeUniformCellsClusters <- function(objCOTAN,
       }
     }
 
-    logThis(paste0("Created leafs ID for merging: ",
-                   paste(pList, collapse = " ")), logLevel = 2L)
-
     c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
 
     newNumClusters <- length(unique(outputClusters))
@@ -247,9 +247,6 @@ mergeUniformCellsClusters <- function(objCOTAN,
       allDist <- diag(as.matrix(cophenetic(dend))[, -1, drop = FALSE])
       pList <- pList[order(allDist, decreasing = FALSE)]
 
-      logThis(paste0("Created pairs ID for merging: ",
-                     paste(pList, collapse = " ")), logLevel = 2L)
-
       c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
 
       newNumClusters <- length(unique(outputClusters))
@@ -260,8 +257,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
     }
   }
 
-  logThis(paste("The final merged clusterization contains [",
-                length(unique(outputClusters)), "] different clusters:",
+  logThis(paste0("The final merged clusterization contains [",
+                length(unique(outputClusters)), "] different clusters: ",
                 toString(unique(sort(outputClusters)))), logLevel = 3L)
 
   # replace the clusters' tags
