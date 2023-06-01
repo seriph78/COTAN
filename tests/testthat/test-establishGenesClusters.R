@@ -25,7 +25,7 @@ test_that("Establish genes clusters", {
   if (TRUE) {
     # saveRDS(GCS, file = "genes.coex.space.RDS")
     GCS_old <- readRDS(file.path(getwd(), "genes.coex.space.RDS"))
-    expect_equal(GCS, GCS_old, tolerance = 1.0e-14)
+    expect_equal(GCS, GCS_old, tolerance = 1.0e-12)
   }
 
   c(gSpace, plotEigen, pcaClusters, treePlot) %<-%

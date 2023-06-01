@@ -1,28 +1,30 @@
 ## COTAN 2.1.5
 
-Improved mergeUniformCellsClusters(): now it attempts to merge more
+Improved `mergeUniformCellsClusters()`: now it attempts to merge more
 clusters pairs
+
+Relaxed tolerance on tests comparing against saved data
 
 ## COTAN 2.1.4
 
-Speed-up by use of parallelDist::parDist() to calculate distances instead of
-stats::dist()
+Speed-up by use of `parallelDist::parDist()` to calculate distances instead of
+`stats::dist()`
 
 Fixed regression tests failing on non-Linux architectures
 
 ## COTAN 2.1.3
 
-Completed function clustersMarkersHeatmapPlot()
+Completed function `clustersMarkersHeatmapPlot()`
 
-Added new utility function normalizeNameAndLabels()
+Added new utility function `normalizeNameAndLabels()`
 
-Added mergeClusters() and multiMergeClusters() functions
+Added `mergeClusters()` and `multiMergeClusters()` functions
 
 Added support to `conditions` in cells' meta-data
 
-Now clusterizations are stored as `factors`
+Now *clusterizations* are stored as `factors`
 
-Fixed COTAN::validity method in AllClasses.R
+Fixed `COTAN::validity` method in `AllClasses.R`
 
 ## COTAN 2.1.2
 
@@ -56,7 +58,7 @@ Dropped second vignette: will be merged in the other one...
 
 ## COTAN 1.99.1
 
-Minor bug fixes and new function clustersMarkersHeatmapPlot()
+Minor bug fixes and new function `clustersMarkersHeatmapPlot()`
 
 ## COTAN 1.99.0
 

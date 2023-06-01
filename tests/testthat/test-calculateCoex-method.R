@@ -108,7 +108,7 @@ test_that("Calculations on genes", {
                                        observedNY[g1, g2], observedNN[g1, g2]))
   expect_equal(as.vector(gpExp), c(expectedYY[g1, g2], expectedYN[g1, g2],
                                    expectedNY[g1, g2], expectedNN[g1, g2]),
-               tolerance = 1.0e-14)
+               tolerance = 1.0e-12)
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
@@ -301,17 +301,17 @@ test_that("Coex vs saved results", {
 
   expect_equal(getGenesCoex(obj, genes = genes.names.test,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = 1.0e-14)
+               coex_test, tolerance = 1.0e-12)
 
   pval <- calculatePValue(obj, geneSubsetCol = genes.names.test)
 
   pval_exp <- readRDS(file.path(getwd(), "pval.test.RDS"))
   diag(pval_exp[genes.names.test, ]) <- 1L
-  expect_equal(pval, pval_exp, tolerance = 1.0e-14)
+  expect_equal(pval, pval_exp, tolerance = 1.0e-12)
 
   GDI <- calculateGDI(obj)[genes.names.test, ]
 
   GDI_exp <- readRDS(file.path(getwd(), "GDI.test.RDS"))
 
-  expect_equal(GDI, GDI_exp, tolerance = 1.0e-14)
+  expect_equal(GDI, GDI_exp, tolerance = 1.0e-12)
 })

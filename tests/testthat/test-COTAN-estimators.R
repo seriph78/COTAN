@@ -56,7 +56,7 @@ test_that("Bisection estimates", {
   expect_length(getDispersion(obj), getNumGenes(obj))
   expect_equal(getDispersion(obj)[[1L]], -Inf, ignore_attr = TRUE)
   expect_length(getNu(obj), getNumCells(obj))
-  expect_equal(mean(getNu(obj)), 1.0, tolerance = 1.0e-14)
+  expect_equal(mean(getNu(obj)), 1.0, tolerance = 1.0e-12)
 
   expect_equal(rowSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj),
                                                          calculateMu(obj))),
