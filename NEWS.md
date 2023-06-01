@@ -1,3 +1,12 @@
+## COTAN 2.0.4
+
+Improved `mergeUniformCellsClusters()`: now it attempts to merge more
+clusters pairs
+
+## COTAN 2.0.3
+
+Fixed Validity Function in `AllClasses.R`
+
 ## COTAN 2.0.2
 
 Fixed bug in `proceedToCoex()` in cases when `saveObj == TRUE`
