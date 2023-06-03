@@ -163,6 +163,7 @@ NULL
 #' @export
 #'
 #' @importFrom rlang set_names
+#' @importFrom rlang is_null
 #'
 #' @importFrom stringr str_detect
 #' @importFrom stringr str_pad
