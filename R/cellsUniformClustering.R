@@ -42,75 +42,86 @@
 #'
 seuratClustering <- function(rawData, cond, iter, minNumClusters,
                              saveObj, outDir) {
-  logThis("Creating Seurat object: START", logLevel = 2L)
+  ret <- tryCatch({
+    logThis("Creating Seurat object: START", logLevel = 2L)
 
-  srat <- CreateSeuratObject(counts = as.data.frame(rawData),
-                             project = paste0(cond, "_reclustering_", iter),
-                             min.cells = if (iter == 0L) 3L else 1L,
-                             min.features = if (iter == 0L) 4L else 2L)
-  srat <- NormalizeData(srat)
-  srat <- FindVariableFeatures(srat, selection.method = "vst",
-                               nfeatures = 2000L)
-  srat <- ScaleData(srat, features = rownames(srat))
+    srat <- CreateSeuratObject(counts = as.data.frame(rawData),
+                               project = paste0(cond, "_reclustering_", iter),
+                               min.cells = if (iter == 0L) 3L else 1L,
+                               min.features = if (iter == 0L) 4L else 2L)
+    srat <- NormalizeData(srat)
+    srat <- FindVariableFeatures(srat, selection.method = "vst",
+                                 nfeatures = 2000L)
+    srat <- ScaleData(srat, features = rownames(srat))
 
-  maxRows <- nrow(srat@meta.data) - 1L
-  srat <- RunPCA(srat, features = VariableFeatures(object = srat),
-                 npcs = min(50L, maxRows))
+    maxRows <- nrow(srat@meta.data) - 1L
+    srat <- RunPCA(srat, features = VariableFeatures(object = srat),
+                   npcs = min(50L, maxRows))
 
-  srat <- FindNeighbors(srat, dims = 1L:min(25L, maxRows))
+    srat <- FindNeighbors(srat, dims = 1L:min(25L, maxRows))
 
-  initialResolution <- 0.5
-  resolution <- initialResolution
-  repeat {
-    srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
+    initialResolution <- 0.5
+    resolution <- initialResolution
+    repeat {
+      srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
 
-    # The next lines are necessary to make cluster smaller while
-    # the number of residual cells decrease and to stop clustering
-    # if the algorithm gives too many singletons.
-    if ((minNumClusters <
-           nlevels(factor(srat[["seurat_clusters", drop = TRUE]]))) ||
-        (resolution > initialResolution + 1.5)) {
-      break
+      # The next lines are necessary to make cluster smaller while
+      # the number of residual cells decrease and to stop clustering
+      # if the algorithm gives too many singletons.
+      if ((minNumClusters <
+             nlevels(factor(srat[["seurat_clusters", drop = TRUE]]))) ||
+          (resolution > initialResolution + 1.5)) {
+        break
+      }
+
+      logThis(paste("Number of clusters is too small.",
+                    "Reclustering at higher resolution:", resolution),
+              logLevel = 3L)
+
+      resolution <- resolution + 0.5
     }
 
-    logThis(paste("Number of clusters is too small.",
-                  "Reclustering at higher resolution:", resolution),
-            logLevel = 3L)
+    logThis(paste("Used resolution for Seurat clusterization is:", resolution),
+            logLevel = 2L)
 
-    resolution <- resolution + 0.5
-  }
+    # disable annoying warning about Seurat::RunUMAP()
+    srat <- with_options(list(Seurat.warn.umap.uwot = FALSE),
+                         RunUMAP(srat, umap.method = "uwot", metric = "cosine",
+                                 dims = 1L:min(c(50L, maxRows))))
 
-  logThis(paste("Used resolution for Seurat clusterization is:", resolution),
-          logLevel = 2L)
+    if (isTRUE(saveObj)) {
+      logThis(paste0("Creating PDF UMAP in file:",
+                     file.path(outDir, "pdf_umap.pdf")), logLevel = 2L)
+      pdf(file.path(outDir, "pdf_umap.pdf"))
 
-  # disable annoying warning about Seurat::RunUMAP()
-  srat <- with_options(list(Seurat.warn.umap.uwot = FALSE),
-                       RunUMAP(srat, umap.method = "uwot", metric = "cosine",
-                               dims = 1L:min(c(50L, maxRows))))
+      if (iter == 0L) {
+        plot(DimPlot(srat, reduction = "umap", label = FALSE,
+                     group.by = "orig.ident"))
+      }
 
-  if (isTRUE(saveObj)) {
-    logThis(paste0("Creating PDF UMAP in file:",
-                   file.path(outDir, "pdf_umap.pdf")), logLevel = 2L)
-    pdf(file.path(outDir, "pdf_umap.pdf"))
+      plot(DimPlot(srat, reduction = "umap", label = TRUE) +
+           annotate(geom = "text", x = 0.0, y = 30.0, color = "black",
+                    label = paste0("Cells number: ", ncol(rawData), "\n",
+                                   "Cl. resolution: ", resolution)))
 
-    if (iter == 0L) {
-      plot(DimPlot(srat, reduction = "umap", label = FALSE,
-                   group.by = "orig.ident"))
+      dev.off()
+      gc()
     }
 
-    plot(DimPlot(srat, reduction = "umap", label = TRUE) +
-         annotate(geom = "text", x = 0.0, y = 30.0, color = "black",
-                  label = paste0("Cells number: ", ncol(rawData), "\n",
-                                 "Cl. resolution: ", resolution)))
+    logThis("Creating Seurat object: DONE", logLevel = 2L)
 
-    dev.off()
-    gc()
-  }
+    # returned objects
+    list("SeuratObj" = srat,
+         "UsedMaxResolution" = resolution > initialResolution + 1.5)
+  },
+  error = function(e) {
+    logThis(msg = paste("Seurat clusterization failed with", ncol(rawData),
+                        "cells with the following error:"), logLevel = 1)
+    logThis(msg = conditionMessage(e), logLevel = 1)
+    return(list("SeuratObj" = NULL, "UsedMaxResolution" = FALSE))
+  })
 
-  logThis("Creating Seurat object: DONE", logLevel = 2L)
-
-  return(list("SeuratObj" = srat,
-              "UsedMaxResolution" = resolution > initialResolution + 1.5))
+  return(ret)
 }
 
 # --------------------- Uniform Clusters ----------------------
@@ -197,6 +208,13 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                        cond = cond, iter = iter,
                        minNumClusters = numClustersToRecluster + 1L,
                        saveObj = saveObj, outDir = outDirIter)
+
+    if (is_null(objSeurat)) {
+      logThis(paste("NO new possible uniform clusters!",
+                    "Unclustered cell left:", sum(is.na(outputClusters))),
+              logLevel = 1L)
+      break
+    }
 
     if (saveObj && iter == 0L) {
       # save the Seurat object on the global raw data
