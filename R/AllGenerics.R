@@ -1,7 +1,8 @@
 
 setGeneric(
   "proceedToCoex",
-  function(objCOTAN, cores, saveObj = TRUE, outDir = ".") {
+  function(objCOTAN, calcCoex = TRUE,
+           cores = 1L, saveObj = TRUE, outDir = ".") {
     standardGeneric("proceedToCoex")
   }
 )

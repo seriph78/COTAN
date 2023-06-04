@@ -17,6 +17,8 @@ NULL
 #'   result of a call to `dropGenesCells()`) and runs [calculateCoex()]
 #'
 #' @param objCOTAN a newly created `COTAN` object
+#' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
+#'   or stop just before at the [estimateDispersionBisection()] step
 #' @param cores number of cores to be used
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
@@ -50,14 +52,18 @@ NULL
 #' ##                                   GEO = "test",
 #' ##                                   sequencingMethod = "artificial",
 #' ##                                   sampleCondition = "test dataset")
-#' ## objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
+#' ## # in case the genes' `COEX` is not needed it can be skipped
+#' ## # (e.g. for [cellsUniformClustering()])
+#' ## objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
+#' ##                           cores = 12, saveObj = FALSE)
 #'
 #' @rdname COTANObjectCreation
 #'
 setMethod(
   "proceedToCoex",
   "COTAN",
-  function(objCOTAN, cores = 1L, saveObj = TRUE, outDir = ".") {
+  function(objCOTAN, calcCoex = TRUE,
+           cores = 1L, saveObj = TRUE, outDir = ".") {
     startTimeAll <- Sys.time()
 
     logThis("Cotan analysis functions started", logLevel = 1L)
@@ -119,24 +125,34 @@ setMethod(
 
     gc()
 
-    genesCoexTime <- Sys.time()
-    analysisTime <- difftime(genesCoexTime, analysisTime, units = "mins")
+    if (isTRUE(calcCoex)) {
+      genesCoexTime <- Sys.time()
+      analysisTime <- difftime(genesCoexTime, analysisTime, units = "mins")
 
-    logThis(paste0("Only analysis time ", analysisTime), logLevel = 3L)
+      logThis(paste0("Only analysis time ", analysisTime), logLevel = 3L)
 
-    logThis("Cotan genes' coex estimation started", logLevel = 1L)
-    objCOTAN <- calculateCoex(objCOTAN)
+      logThis("Cotan genes' coex estimation started", logLevel = 1L)
+      objCOTAN <- calculateCoex(objCOTAN)
 
-    gc()
+      gc()
 
-    endTime <- Sys.time()
+      endTime <- Sys.time()
+
+      genesCoexTime <- difftime(endTime, genesCoexTime, units = "mins")
+
+      logThis(paste0("Only genes' coex time ", genesCoexTime), logLevel = 3L)
+    } else {
+      logThis("Cotan genes' coex estimation not requested", logLevel = 2L)
+
+      genesCoexTime <- 0.0
+
+      gc()
+
+      endTime <- Sys.time()
+    }
 
     allTime <- difftime(endTime, startTimeAll, units = "mins")
     logThis(paste0("Total time ", allTime), logLevel = 3L)
-
-    genesCoexTime <- difftime(endTime, genesCoexTime, units = "mins")
-
-    logThis(paste0("Only genes' coex time ", genesCoexTime), logLevel = 3L)
 
     if (saveObj) {
       utils::write.csv(data.frame("type"  = c("tot_time",
@@ -168,6 +184,8 @@ setMethod(
 #' @param sequencingMethod a string reporting the method used for the sequencing
 #' @param sampleCondition a string reporting the specific sample condition or
 #'   time point.
+#' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
+#'   or stop just before at the [estimateDispersionBisection()] step
 #' @param cores number of cores to be used
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
@@ -186,7 +204,8 @@ setMethod(
 #'   raw = test.dataset,
 #'   GEO = "code",
 #'   sequencingMethod = "10X",
-#'   sampleCondition = "mouse dataset",
+#'   sampleCondition = "mouse_dataset",
+#'   calcCoex = TRUE,
 #'   saveObj = FALSE,
 #'   outDir = tempdir(),
 #'   cores = 12)
@@ -195,18 +214,12 @@ setMethod(
 
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,
-           cores = 1L, saveObj = TRUE, outDir = ".") {
+           calcCoex = TRUE, cores = 1L, saveObj = TRUE, outDir = ".") {
 
   objCOTAN <- COTAN(raw = raw)
   objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
-                               sequencingMethod = sequencingMethod,
-                               sampleCondition = sampleCondition)
-
-  #if (isFALSE(mt)) {
-  #  genes_to_rem <- getGenes(objCOTAN)[grep(mt_prefix, getGenes(objCOTAN)),])
-  #  cells_to_rem <- getCells(objCOTAN)[which(getCellsSize(objCOTAN) == 0L)])
-  #  dropGenesCells(objCOTAN, genes_to_rem, cells_to_rem)
-  #}
+                                    sequencingMethod = sequencingMethod,
+                                    sampleCondition = sampleCondition)
 
   logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
   logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)

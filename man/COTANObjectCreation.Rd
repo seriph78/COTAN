@@ -7,13 +7,20 @@
 \alias{automaticCOTANObjectCreation}
 \title{Automatic \code{COTAN} shortcuts}
 \usage{
-\S4method{proceedToCoex}{COTAN}(objCOTAN, cores = 1L, saveObj = TRUE, outDir = ".")
+\S4method{proceedToCoex}{COTAN}(
+  objCOTAN,
+  calcCoex = TRUE,
+  cores = 1L,
+  saveObj = TRUE,
+  outDir = "."
+)
 
 automaticCOTANObjectCreation(
   raw,
   GEO,
   sequencingMethod,
   sampleCondition,
+  calcCoex = TRUE,
   cores = 1L,
   saveObj = TRUE,
   outDir = "."
@@ -21,6 +28,9 @@ automaticCOTANObjectCreation(
 }
 \arguments{
 \item{objCOTAN}{a newly created \code{COTAN} object}
+
+\item{calcCoex}{a Boolean to determine whether to calculate the genes' \code{COEX}
+or stop just before at the \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} step}
 
 \item{cores}{number of cores to be used}
 
@@ -74,7 +84,10 @@ data("test.dataset")
 ##                                   GEO = "test",
 ##                                   sequencingMethod = "artificial",
 ##                                   sampleCondition = "test dataset")
-## objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
+## # in case the genes' `COEX` is not needed it can be skipped
+## # (e.g. for [cellsUniformClustering()])
+## objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
+##                           cores = 12, saveObj = FALSE)
 
 
 ## Otherwise it is possible to run all at once.
@@ -82,7 +95,8 @@ objCOTAN <- automaticCOTANObjectCreation(
   raw = test.dataset,
   GEO = "code",
   sequencingMethod = "10X",
-  sampleCondition = "mouse dataset",
+  sampleCondition = "mouse_dataset",
+  calcCoex = TRUE,
   saveObj = FALSE,
   outDir = tempdir(),
   cores = 12)
