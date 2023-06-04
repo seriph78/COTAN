@@ -86,6 +86,17 @@ test_that("Clusterizations manipulations", {
   expect_setequal(levels(clusterM2),
                   c("I_V-merge", "II_IV_VI-merge", "III", "VII"))
   expect_identical(sum(clusterM2 == "I_V-merge"), sum(clusterM1 == "I'V"))
+
+  niceClusters <- niceFactorLevels(clusters)
+  expect_identical(max(nchar(factorToVector(niceClusters))), 3L)
+  expect_identical(min(nchar(factorToVector(niceClusters))), 3L)
+  expect_true(all(endsWith(factorToVector(niceClusters), clusters)))
+
+  levels(niceClusters) <- c(1:3, 11:13, 100)
+  niceClusters <- niceFactorLevels(niceClusters)
+  expect_identical(max(nchar(factorToVector(niceClusters))), 3L)
+  expect_identical(min(nchar(factorToVector(niceClusters))), 3L)
+  expect_setequal(as.integer(levels(niceClusters)), c(1:3, 11:13, 100))
 })
 
 

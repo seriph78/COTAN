@@ -224,6 +224,6 @@ automaticCOTANObjectCreation <-
   logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
   logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)
 
-  return(proceedToCoex(objCOTAN, cores = cores,
+  return(proceedToCoex(objCOTAN, calcCoex = calcCoex, cores = cores,
                        saveObj = saveObj, outDir = outDir))
 }

@@ -238,6 +238,39 @@ factorToVector <- function(v) {
 }
 
 
+#' Internal function to have nicer factor labels that have all the same number
+#' of characters
+#'
+#' @description Returns the factor with the new labels
+#'
+#' @param an `array` or `factor` object
+#'
+#' @returns a character vector that is preserving the names of the input
+#'
+#' @importFrom rlang set_names
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @noRd
+#'
+niceFactorLevels <- function(v) {
+  names <- names(v)
+  if (inherits(v, "factor")) {
+    v <- factorToVector(v)
+  }
+  nv <- suppressWarnings(as.numeric(v))
+  if (!anyNA(nv) && all(as.integer(nv) == nv)) {
+    numDigits <- floor(log10(max(nv))) + 1L
+    v <- formatC(nv, width = numDigits, flag = "0")
+  } else if (is.character(v)) {
+    numChars <- max(nchar(v))
+    v <- str_pad(v, width = numChars, side = "left", pad = "_")
+  }
+  names(v) <- names
+  return(factor(v))
+}
+
+
 #' @details `setColumnInDF()` is a function to append, if missing, or resets, if
 #'   present, a column into a `data.frame`, whether the `data.frame` is empty or
 #'   not. The given `rowNames` are used only in the case the `data.frame` has
