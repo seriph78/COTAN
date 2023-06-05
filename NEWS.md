@@ -3,6 +3,21 @@
 Improved `mergeUniformCellsClusters()`: now it attempts to merge more
 clusters pairs
 
+Now errors in the `seuratClustering()` function are interpreted as remaining
+cells not-clustered "-1". This applies mostly to cases when `Seurat` finds only
+*singlets*
+
+Added flag `calcCoex` to `proceedToCoex()` and `automaticCOTANObjectCreation()`
+functions to allow user not to spend time calculating the *genes' COEX* when not
+needed
+
+Solved potential issue in the `clustersMarkersHeatmapPlot()` regarding clusters'
+labels
+
+Added new internal function `niceFactorLevels()` that ensures all the factors'
+levels will have labels with the same length, via padding  the integers values
+with '0' and string values with '_'
+
 Relaxed tolerance on tests comparing against saved data
 
 ## COTAN 2.1.4
