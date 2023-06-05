@@ -80,12 +80,6 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
 
   dend <- set(dend = dend, "branches_lwd", 2L)
 
-  {
-    numDigits <- floor(log10(nrow(scoreDFT))) + 1L
-    rownames(scoreDFT) <- formatC(as.numeric(rownames(scoreDFT)),
-                                  width = numDigits, flag = "0")
-  }
-
   hbList <- NULL
   lgdList <- list()
   if (!is_empty(condNameList)) {
@@ -103,15 +97,8 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
 
       cNames <- c(clName, condName, "CellNumber")
 
-      if (is.numeric(condDF[[1L]])) {
-        numDigits <- floor(log10(nrow(condDF))) + 1L
-        condDF[[1L]] <-
-          factor(formatC(condDF[[1L]], width = numDigits, flag = "0"))
-      }
-
-      condDF <- condDF[, cNames] %>%
-        pivot_wider(names_from = condName,
-                    values_from = cNames[[3L]])
+      condDF <- condDF[, cNames] %>% pivot_wider(names_from = condName,
+                                                 values_from = cNames[[3L]])
 
       # Here we have a column per condition alternative plus 1
       nCols <- ncol(condDF)
@@ -146,11 +133,6 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
   }
 
   clustDF <- clustersSummaryData(objCOTAN, clName = clName, clusters = clusters)
-  {
-    numDigits <- floor(log10(nrow(clustDF))) + 1L
-    clustDF[[1L]] <- formatC(clustDF[[1L]], width = numDigits, flag = "0")
-  }
-
   rownames(clustDF) <- clustDF[[1L]]
   clustDF <- clustDF[rownames(scoreDFT), ]
 
