@@ -59,22 +59,10 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers, clName = NULL,
 
   dend <- set(dend = dend, "branches_lwd", 2)
 
-  {
-    numDigits <- floor(log10(nrow(scoreDFT))) + 1L
-    rownames(scoreDFT) <- formatC(as.numeric(rownames(scoreDFT)),
-                                  width = numDigits, flag = "0")
-  }
-
   if (!is_empty(conditionsList)) {
     stop("Uasge of condition list is not supported yet")
     # # a data frame coming from clustersSummaryPlot()
     # cond1 <- conditionsList[[1L]]
-    #
-    # if (is.numeric(cond1[["Cluster"]])) {
-    #   numDigits <- floor(log10(length(cond1[["Cluster"]]))) + 1L
-    #   cond1[["Cluster"]] <-
-    #     formatC(cond1[["Cluster"]], width = numDigits, flag = "0")
-    # }
     #
     # cond1 <- cond1[, c("Cluster", "cond1" ,"CellNumber")] %>%
     #   pivot_wider(names_from = cond1, values_from = CellNumber)
@@ -116,11 +104,6 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers, clName = NULL,
   }
 
   clsInfo <- clustersSummaryPlot(objCOTAN, clName = clName)[["data"]]
-  {
-    numDigits <- floor(log10(nrow(clsInfo))) + 1L
-    clsInfo[["Cluster"]] <-
-      formatC(clsInfo[["Cluster"]], width = numDigits, flag = "0")
-  }
 
   rownames(clsInfo) <- clsInfo[["Cluster"]]
   clsInfo <- clsInfo[rownames(scoreDFT), ]

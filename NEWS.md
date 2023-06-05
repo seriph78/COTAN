@@ -3,6 +3,9 @@
 Improved `mergeUniformCellsClusters()`: now it attempts to merge more
 clusters pairs
 
+Now errors in the seuratClustering() function are interpreted as remaining cells
+not-clustered "-1". This applies mostly to cases when Seurat finds only singlets
+
 ## COTAN 2.0.3
 
 Fixed Validity Function in `AllClasses.R`
