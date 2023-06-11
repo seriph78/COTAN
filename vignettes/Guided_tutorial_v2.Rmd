@@ -24,7 +24,6 @@ knitr::opts_chunk[["set"]](
 ```
 
 ```{r message=FALSE, warning=FALSE}
-options(parallelly.fork.enable = TRUE)
 library(COTAN)
 library(zeallot)
 library(data.table)
@@ -32,6 +31,8 @@ library(factoextra)
 library(Rtsne)
 library(qpdf)
 library(GEOquery)
+
+options(parallelly.fork.enable = TRUE)
 ```
 
 ## Introduction
@@ -69,7 +70,7 @@ setLoggingLevel(2L)
 
 # This file will contain all the logs produced by the package
 # as if at the highest logging level
-setLoggingFile(file.path(outDir, "vignette_v1.log"))
+setLoggingFile(file.path(outDir, "vignette_v2.log"))
 ```
 
 # Analytical pipeline
@@ -132,8 +133,7 @@ obj <- dropGenesCells(obj, cells = cells_to_rem)
 To drop cells by gene number: high genes count might indicate doublets...
 
 ```{r}
-numExprGenes <- sort(getNumExpressedGenes(obj), decreasing = FALSE)
-cells_to_rem <- names(numExprGenes)[numExprGenes > 3000L]
+cells_to_rem <- getCells(obj)[getNumExpressedGenes(obj) > 3000L]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
 genesSizePlot(obj)
@@ -171,7 +171,8 @@ The `clean()` function estimates all the parameters for the data. Therefore, we 
 n_it <- 1L
 
 obj <- clean(obj)
-c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
+  cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -189,7 +190,8 @@ obj <- dropGenesCells(obj, cells = cells_to_rem)
 n_it <- 2L
 
 obj <- clean(obj)
-c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
+  cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -208,30 +210,20 @@ The next part is used to remove the cells with efficiency too low.
 plot(nuPlot)
 ```
 
-We can zoom on the smallest values and, if we detect a clear elbow, we can decide to remove the cells.
+We can zoom on the smallest values and, if COTAN detects a clear elbow,
+we can decide to remove the cells.
 
 ```{r}
-nuDf <- data.frame("nu" = sort(getNu(obj)), "n" = seq_along(getNu(obj)))
-yset <- 0.35 # the threshold to remove low UDE cells
-plot.ude <- ggplot(nuDf, aes(x = n, y = nu)) +
-            geom_point(colour = "#8491B4B2", size = 1.0) +
-            xlim(0L, 400L) +
-            ylim(0.0, 1.0) +
-            geom_hline(yintercept = yset, linetype = "dashed",
-                       color = "darkred") +
-            annotate(geom = "text", x = 200L, y = 0.25,
-                     label = paste0("to remove cells with nu < ", yset),
-                     color = "darkred", size = 4.5)
-
-plot.ude
+plot(zoomedNuPlot)
 ```
 
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
+yset <- 0.28
 obj <- addElementToMetaDataset(obj, "Threshold low UDE cells:", yset)
 
-cells_to_rem <- rownames(nuDf)[nuDf[["nu"]] < yset]
+cells_to_rem <- getCells(obj)[getNu(obj) < yset]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 ```
 
@@ -241,7 +233,8 @@ Repeat the estimation after the cells are removed
 n_it <- 3L
 
 obj <- clean(obj)
-c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot) %<-% cleanPlots(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
+  cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -252,16 +245,12 @@ logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
 
 ## COTAN analysis
 
-In this part, all the contingency tables are computed and used to get the statistics.
+In this part, all the contingency tables are computed
+and used to get the statistics necessary to `COEX` evaluation and storing
 
 ```{r}
-obj <- estimateDispersionBisection(obj, cores = 10L)
-```
-
-`COEX` evaluation and storing
-
-```{r}
-obj <- calculateCoex(obj)
+obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 10L,
+                     saveObj = TRUE, outDir = outDir)
 ```
 
 ```{r eval=TRUE, include=TRUE}
@@ -280,7 +269,7 @@ obj2 <- automaticCOTANObjectCreation(
   GEO = GEO,
   sequencingMethod = "Drop_seq",
   sampleCondition = cond,
-  saveObj = TRUE, outDir = outDir, cores = 10L)
+  calcCoex = TRUE, saveObj = TRUE, outDir = outDir, cores = 10L)
 ```
 
 # Analysis of the elaborated data
@@ -313,7 +302,7 @@ genesList <- list(
 # needs to be recalculated after the changes in nu/dispersion above
 #obj <- calculateCoex(obj, actOnCells = FALSE)
 
-GDIPlot(obj, cond = cond, genes = genesList)
+GDIPlot(obj, GDIIn = quantP, cond = cond, genes = genesList)
 ```
 
 The percentage of cells expressing the gene in the third column of this
@@ -446,7 +435,7 @@ obj <- addClusterization(obj, clName = "MergedClusters",
 
 ```{r eval=FALSE, include=TRUE}
 mergedUMAPPlot <- UMAPPlot(coexDF, elements = layersGenes,
-                           title = "Fine Cluster UMAP Plot")
+                           title = "Merged Clusters UMAP Plot")
 plot(mergedUMAPPlot)
 ```
 
