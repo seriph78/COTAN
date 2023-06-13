@@ -30,11 +30,14 @@ test_that("Cell Uniform Clustering", {
                ignore_attr = TRUE)
 
   firstCl <- clusters[[1L]]
-  expect_true(
+  c(isUniform, fracAbove, quant) %<-%
     checkClusterUniformity(obj, GDIThreshold = GDIThreshold,
                            cluster = paste0("Cluster_", firstCl),
                            cells = names(clusters)[clusters == firstCl],
-                           saveObj = TRUE, outDir = tm))
+                           saveObj = TRUE, outDir = tm)
+  expect_true(isUniform)
+  expect_lte(fracAbove, 0.01)
+  expect_lte(quant, GDIThreshold)
 
   #clusters_exp <- readRDS(file.path(getwd(), "clusters1.RDS"))
 

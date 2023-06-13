@@ -157,13 +157,14 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
       mergedCluster <- names(outputClusters)[outputClusters %in% c(cl1, cl2)]
 
-      clusterIsUniform <- checkClusterUniformity(objCOTAN,
-                                                 cluster = mergedClName,
-                                                 cells = mergedCluster,
-                                                 GDIThreshold = GDIThreshold,
-                                                 cores = cores,
-                                                 saveObj = saveObj,
-                                                 outDir = mergeOutDir)
+      clusterIsUniform <-
+        checkClusterUniformity(objCOTAN,
+                               cluster = mergedClName,
+                               cells = mergedCluster,
+                               GDIThreshold = GDIThreshold,
+                               cores = cores,
+                               saveObj = saveObj,
+                               outDir = mergeOutDir)[["isUniform"]]
 
       gc()
 

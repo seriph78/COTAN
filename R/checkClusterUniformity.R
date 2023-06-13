@@ -16,8 +16,10 @@
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #'
-#' @returns `checkClusterUniformity` returns `TRUE` when the *cluster* is
-#'   **uniform**, `FALSE` otherwise.
+#' @returns `checkClusterUniformity` returns a list with:
+#'   * `"isUniform"`: a flag indicating whether the *cluster* is **uniform**
+#'   * `"fractionAbove"`: the percentage of genes with `GDI` above the threshold
+#'   * `"1stPercentile"`: the quantile associated to the highest percentile
 #'
 #' @importFrom utils head
 #'
@@ -75,8 +77,18 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
 
   # A cluster is deemed uniform if the number of genes
   # with [GDI > GDIThreshold] is not more than 1%
-  clusterIsUniform <- (nrow(GDIData[GDIData[["GDI"]] >= GDIThreshold, ]) <=
-                         0.01 * nrow(GDIData))
+  gdi <- GDIData[["GDI"]]
+
+  quantAboveThr <- quantile(gdi, prob = 0.99)
+  percAboveThr <- sum(gdi >= GDIThreshold) / length(gdi)
+
+  clusterIsUniform <- percAboveThr <= 0.01
+
+  logThis(paste0("Cluster ", cluster, " is ",
+                 (if(clusterIsUniform) {"not"} else {""}), " uniform\n",
+                 round(percAboveThr * 100.0, digits = 2L),
+                 "% of genens are above GDI threshold\n",
+                 "GDI 99% quantile is at ", quantAboveThr), logLevel = 3L)
 
   if (!clusterIsUniform && saveObj) {
     outFile <- file.path(outDir,
@@ -84,5 +96,7 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
     write.csv(cells, file = outFile)
   }
 
-  return(invisible(clusterIsUniform))
+  return(list("isUniform" = clusterIsUniform,
+              "fractionAbove" = percAboveThr,
+              "1stPercentile" = quantAboveThr))
 }
