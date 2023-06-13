@@ -204,11 +204,17 @@ setMethod(
 #' @param cells an array of cell names
 #'
 #' @returns `dropGenesCells()` returns a completely new `COTAN` object with the
-#'   new raw data obtained after the indicated genes/cells were expunged. Only
-#'   the meta-data for the data-set are kept, while the rest is dropped as no
-#'   more relevant with the restricted matrix
+#'   new raw data obtained after the indicated genes/cells were expunged. All
+#'   remaining data is dropped too as no more relevant with the restricted
+#'   matrix. Exceptions are:
+#'   * the meta-data for the data-set that gets kept unchanged
+#'   * the meta-data of genes/cells that gets restricted to the remaining
+#'     elements. The columns calculated via `estimate` and `find` methods are
+#'     dropped too
 #'
 #' @export
+#'
+#' @importFrom assertthat assert_that
 #'
 #' @rdname RawDataCleaning
 #'
@@ -216,24 +222,52 @@ setMethod(
   "dropGenesCells",
   "COTAN",
   function(objCOTAN, genes, cells) {
-    if (!all(genes %in% getGenes(objCOTAN)) ||
-        !all(cells %in% getCells(objCOTAN))) {
-      stop("Asked to drop genes and/or cells",
-           " that were not present in the 'COTAN' object")
+    assert_that((all(genes %in% getGenes(objCOTAN)) &&
+                 all(cells %in% getCells(objCOTAN))),
+                msg = paste0("Asked to drop genes and/or cells",
+                             " that were not present in the 'COTAN' object"))
+
+    if (length(genes) == 0 && length(cells) == 0) {
+      logThis("Asked to drop no genes or cells", logLevel = 2L)
+    } else {
+      logThis(paste("Asked to drop", length(genes), "genes and",
+                    length(cells), "cells"), logLevel = 3)
     }
 
     genesPosToKeep <- which(!(getGenes(objCOTAN) %in% genes))
     cellsPosToKeep <- which(!(getCells(objCOTAN) %in% cells))
 
-    if (length(genesPosToKeep) == getNumGenes((objCOTAN)) &&
-        length(cellsPosToKeep) == getNumCells((objCOTAN))) {
-      logThis("No genes/cells where dropped", logLevel = 2L)
+    assert_that((length(genesPosToKeep) != 0 && length(cellsPosToKeep) != 0),
+                msg = "Asked to drop all genes and/or cells")
+
+    # As all estimates would be wrong, a completely new object is created
+    output <- COTAN(objCOTAN@raw[genesPosToKeep, cellsPosToKeep, drop = FALSE])
+
+    # Copy the meta data for the data-set
+    output@metaDataset <- getMetadataDataset(objCOTAN)
+
+    # Filter the meta data for genes keeping those not related to estimates
+    colsToKeep <- !(names(getMetadataGenes(objCOTAN)) %in%
+                     c("feGenes", "lambda", "dispersion"))
+    if (any(colsToKeep)) {
+      output@metaGenes <-
+        getMetadataGenes(objCOTAN)[genesPosToKeep, colsToKeep, drop = FALSE]
     }
 
-    # as all estimates would be wrong, a completely new object is created
-    # with the same meta data for the data-set as the original
-    output <- COTAN(objCOTAN@raw[genesPosToKeep, cellsPosToKeep])
-    output@metaDataset <- getMetadataDataset(objCOTAN)
+    # Filter the meta data for cells keeping those not related to estimates
+    colsToKeep <- !(names(getMetadataCells(objCOTAN)) %in%
+                      c("feCells", "nu"))
+    if (any(colsToKeep)) {
+      output@metaCells <-
+        getMetadataCells(objCOTAN)[cellsPosToKeep, colsToKeep, drop = FALSE]
+    }
+
+    # Drop all clusterizations' data.frames, but ensure object validity
+    for (internalName in names(getClustersCoex(objCOTAN))) {
+      output@clustersCoex[[internalName]] <- data.frame()
+    }
+
+    validObject(output)
 
     return(output)
   }
