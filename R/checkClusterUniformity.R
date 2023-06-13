@@ -89,7 +89,7 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
                  round(percAboveThr * 100.0, digits = 2L),
                  "% of the genes is above the given GDI threshold ",
                  GDIThreshold, "\n", "GDI 99% quantile is at ",
-                 round(quantAboveThr, digits = 4L), logLevel = 3L)
+                 round(quantAboveThr, digits = 4L)), logLevel = 3L)
 
   if (!clusterIsUniform && saveObj) {
     outFile <- file.path(outDir,
