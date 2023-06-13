@@ -10,7 +10,7 @@ test_that("Merge Uniform Cells Clusters", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, cores = 12L, saveObj = FALSE)
+  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 12L, saveObj = FALSE)
 
   clusters <- factor(readRDS(file.path(getwd(), "clusters1.RDS")))
   genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
