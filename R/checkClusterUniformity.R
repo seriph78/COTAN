@@ -85,7 +85,7 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
   clusterIsUniform <- percAboveThr <= 0.01
 
   logThis(paste0("Cluster ", cluster, " is ",
-                 (if(clusterIsUniform) {""} else {"not"}), " uniform\n",
+                 (if(clusterIsUniform) {""} else {"not "}), "uniform\n",
                  round(percAboveThr * 100.0, digits = 2L),
                  "% of the genes is above the given GDI threshold ",
                  GDIThreshold, "\n", "GDI 99% quantile is at ",
