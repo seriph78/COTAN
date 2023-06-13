@@ -128,9 +128,15 @@ updated \strong{fully-expressed} genes' information
 updated \strong{fully-expressing} cells' information
 
 \code{dropGenesCells()} returns a completely new \code{COTAN} object with the
-new raw data obtained after the indicated genes/cells were expunged. Only
-the meta-data for the data-set are kept, while the rest is dropped as no
-more relevant with the restricted matrix
+new raw data obtained after the indicated genes/cells were expunged. All
+remaining data is dropped too as no more relevant with the restricted
+matrix. Exceptions are:
+\itemize{
+\item the meta-data for the data-set that gets kept unchanged
+\item the meta-data of genes/cells that gets restricted to the remaining
+elements. The columns calculated via \code{estimate} and \code{find} methods are
+dropped too
+}
 
 \code{ECDPlot()} returns an ECD plot
 
