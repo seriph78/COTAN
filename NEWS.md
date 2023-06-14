@@ -1,3 +1,18 @@
+## COTAN 2.1.6
+
+Now `checkClusterUniformity()` returns more GDI stats like the percentage of
+genes above threshold or the last percentile of the GDI values
+
+Revamped `mergeUniformCellsClusters()` to select in order all the the most
+likely candidates pairs of clusters to merge. Provided new user parameter to
+balance the merging of most possible candidates versus the time spent doing so
+
+Improved `dropGenesCells()` method: it now retains all meta-data information
+that is not related to the results of the other methods
+
+Added zoomed UDE plot to `cleanPlots()` return. It suggests a possible
+cut level for low UDE cells
+
 ## COTAN 2.1.5
 
 Improved `mergeUniformCellsClusters()`: now it attempts to merge more

@@ -1,7 +1,7 @@
 Package: COTAN
 Type: Package
 Title: COexpression Tables ANalysis 
-Version: 2.1.5
+Version: 2.1.6
 Authors@R: c(
   person("Galfrè", "Silvia Giulia",email = "silvia.galfre@di.unipi.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
   person("Morandin","Francesco", email = "francesco.morandin@unipr.it", role = "aut",comment = c(ORCID = "0000-0002-2022-2300")),
