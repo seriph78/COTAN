@@ -4,10 +4,10 @@
 #' @details `mergeUniformCellsClusters()` takes in a **uniform**
 #'   *clusterization* and iteratively checks whether merging two *near clusters*
 #'   would form a **uniform** *cluster* still. This function uses the *cosine
-#'   distance* and the [stats::hclust()] function to establish *near clusters
-#'   pairs*. It will use the [checkClusterUniformity()] function to check
-#'   whether the merged *clusters* are **uniform**. The function will stop once
-#'   no *near pairs* of clusters are mergeable.
+#'   distance* to establish the *nearest clusters pairs*. It will use the
+#'   [checkClusterUniformity()] function to check whether the merged *clusters*
+#'   are **uniform**. The function will stop once no *near pairs* of clusters
+#'   are mergeable in a single batch
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clusters The *clusterization* to merge. If not given the last
@@ -15,6 +15,8 @@
 #'   significant!
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
 #'   It defaults to \eqn{1.4}
+#' @param batchSize Number pairs to test in a single round. If none of them
+#'   succeeds the merge stops
 #' @param cores number cores used
 #' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
 #'   and the others from [parallelDist::parDist()] are also available)
@@ -54,7 +56,7 @@
 #'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
-#'                                          cores = 12,
+#'                                          cores = 12L,
 #'                                          saveObj = FALSE)
 #'
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
@@ -73,23 +75,29 @@
 #' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
 #'                                    GDIThreshold = 1.5, saveObj = FALSE)
 #'
-#' checkClusterUniformity(objCOTAN, GDIThreshold = 1.5,
-#'                        cluster = clusters[1],
-#'                        cells = getCells(objCOTAN)[clusters %in% clusters[1]],
-#'                        cores = 12,
+#' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
+#' checkClusterUniformity(objCOTAN,
+#'                        GDIThreshold = 1.5,
+#'                        cluster = clusters[[1L]],
+#'                        cells = firstCluster,
+#'                        cores = 12L,
 #'                        saveObj = FALSE)
 #'
-#' objCOTAN <- addClusterization(objCOTAN, clName = "uniformClusters",
+#' objCOTAN <- addClusterization(objCOTAN,
+#'                               clName = "split",
 #'                               clusters = clusters)
 #'
-#' mergedList <- mergeUniformCellsClusters(objCOTAN, GDIThreshold = 1.5,
+#' mergedList <- mergeUniformCellsClusters(objCOTAN,
+#'                                         GDIThreshold = 1.5,
+#'                                         batchSize = 5L,
 #'                                         clusters = clusters,
-#'                                         cores = 12,
+#'                                         cores = 12L,
 #'                                         distance = "cosine",
 #'                                         hclustMethod = "ward.D2",
 #'                                         saveObj = FALSE)
 #'
-#' objCOTAN <- addClusterization(objCOTAN, clName = "mergedUniformClusters",
+#' objCOTAN <- addClusterization(objCOTAN,
+#'                               clName = "merged",
 #'                               clusters = mergedList[["clusters"]],
 #'                               coexDF = mergedList[["coexDF"]])
 #'
@@ -99,6 +107,7 @@
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
                                       GDIThreshold = 1.4,
+                                      batchSize = 10L,
                                       cores = 1L,
                                       distance = "cosine",
                                       hclustMethod = "ward.D2",
@@ -128,9 +137,13 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   notMergeable <- vector(mode = "character")
 
+  mergedName <- function(cl1, cl2) {
+    return(paste0(min(cl1, cl2), "_", max(cl1, cl2), "-merge"))
+  }
+
   testPairListMerge <- function(pList) {
-    logThis(paste0("Clusters pairs for merging: ",
-                   paste(pList, collapse = " ")), logLevel = 2L)
+    logThis(paste0("Clusters pairs for merging:\n",
+                   paste(pList, collapse = " ")), logLevel = 1L)
 
     for (p in pList) {
       logThis("*", logLevel = 1L, appendLF = FALSE)
@@ -144,7 +157,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
         next
       }
 
-      mergedClName <- paste0(min(cl1, cl2), "_", max(cl1, cl2), "-merge")
+      mergedClName <- mergedName(cl1, cl2)
 
       logThis(mergedClName, logLevel = 3L)
 
@@ -186,7 +199,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   iter <- 0L
   repeat {
     iter <- iter + 1L
-    logThis(paste0("Start merging smallest clusters: iteration ", iter),
+    logThis(paste0("Start merging nearest clusters: iteration ", iter),
             logLevel = 3L)
 
     oldNumClusters <- length(unique(outputClusters))
@@ -198,71 +211,68 @@ mergeUniformCellsClusters <- function(objCOTAN,
     ## TODO: To be fixed! Where it come from?
     coexDF <- coexDF[, colSums(coexDF != 0.0) > 0L]
 
-    # merge small cluster based on distances
+    # merge small cluster based on their DEA based distances
     coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
-
-    hcNorm <- hclust(coexDist, method = hclustMethod)
-
-    dend <- as.dendrogram(hcNorm)
 
     if (saveObj) {
       pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_plot.pdf")))
 
-      plot(dend)
+      hcNorm <- hclust(coexDist, method = hclustMethod)
+      plot(as.dendrogram(hcNorm))
 
       dev.off()
     }
 
-    # This checks if any little two pair of leaf clusters of the dendogram
-    # could be merged
+    # We will check whether it is possible to merge a list of cluster pairs.
+    # These pairs correspond to N lowest distances as calculated before
+    # If none of them can be merges, the loop stops
 
-    pList <- vector(mode = "list")
-    {
-      members <- get_nodes_attr(dend, "members")
-      for (i in seq_along(members)) {
-        if (members[i] == 2L) {
-          cl1 <- get_nodes_attr(dend, "label", id = i + 1L)
-          cl2 <- get_nodes_attr(dend, "label", id = i + 2L)
+    allLabels <- colnames(coexDF)
 
-          pList[[length(pList)+1]] <- c(cl1, cl2)
-        }
-      }
-    }
+    # create all pairings with different clusters
+    pList <- rbind(rep((1L:oldNumClusters), each  = oldNumClusters),
+                   rep((1L:oldNumClusters), times = oldNumClusters))
+    pList <- pList[, pList[1L, ] < pList[2L, ], drop = FALSE]
+    pList <- matrix(allLabels[pList], nrow = 2L)
+
+    # reorder the pairings using the distance and pick only those necessary
+    pList <- as.list(as.data.frame(pList))
+
+    # reorder based on distance
+    pList <- pList[order(coexDist)]
+
+    # drop the already tested pairs
+    pNamesList <- lapply(pList, function(p) mergedName(p[[1L]], p[[2L]]))
+    pList <- pList[!pNamesList %in% notMergeable]
+
+    # take the first N remaining
+    numPairsToTest <- min(batchSize, length(pList))
+    pList <- pList[1L:numPairsToTest]
 
     c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
 
     newNumClusters <- length(unique(outputClusters))
-    if (newNumClusters == 1) {
+    if (newNumClusters == 1L) {
       # nothing left to do: stop!
       break
     }
 
     if (newNumClusters == oldNumClusters) {
-      logThis(msg = paste("No clusters leaf-pairs could be merged.",
-                          "Retrying with all neightbooring pairs"),
+      logThis(msg = paste("None of the", numPairsToTest,
+                          "nearest cluster pairs could be merged"),
               logLevel = 3L)
 
-      allLabels <- labels(dend)
-      pList <- rbind(allLabels[-length(allLabels)], allLabels[-1])
-      pList <- as.list(as.data.frame(pList))
-
-      # reorder the list so that pairs with lower distance are checked first
-      allDist <- diag(as.matrix(cophenetic(dend))[, -1, drop = FALSE])
-      pList <- pList[order(allDist, decreasing = FALSE)]
-
-      c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
-
-      newNumClusters <- length(unique(outputClusters))
-      if (newNumClusters == 1 || newNumClusters == oldNumClusters) {
-        # nothing left to do or no merges happened again: stop!
-        break
-      }
+      # No merges happened -> too low probability of new merges...
+      break
+    } else {
+      logThis(paste0("Executed ", (oldNumClusters - newNumClusters),
+                     " merges out of ", numPairsToTest), logLevel = 3L)
     }
   }
 
   logThis(paste0("The final merged clusterization contains [",
-                length(unique(outputClusters)), "] different clusters: ",
-                toString(unique(sort(outputClusters)))), logLevel = 3L)
+                 length(unique(outputClusters)), "] different clusters: ",
+                 toString(unique(sort(outputClusters)))), logLevel = 2L)
 
   # replace the clusters' tags
   # non merged clusters keep their tag, while merged one use the lesser one!
