@@ -55,10 +55,15 @@ There it is illustrated the preparatory cleaning steps, various analysis results
 and plots done on the data-set "Mouse Cortex E17.5, GEO:GSM2861514"
 
 Further more it is possible to look at some other examples on real data-sets
-at <https://seriph78.github.io/Cotan_paper/index.html>.
-However this last document has not been updated to the version 2.0.0, so, while
-it is possible to reproduce all the steps there described, they need to be
-manually adapted to the new interface to be executed.
+at <https://seriph78.github.io/Cotan_paper/index.html> and
+<https://seriph78.github.io/COTAN_Datasets_analysis/>.
+
+The first link shows how to handle the genes' clustering while the second shows
+how to use the new cells' clustering functions to obtain
+**uniform clusterizations**
+[Please note: the first link has not been upgraded to the version 2.0.x,
+so, while it is possible to reproduce all the steps there described,
+they need to be manually adapted to the new interface to be executed]
 
 ## Installation
 
