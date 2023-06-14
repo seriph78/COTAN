@@ -253,10 +253,11 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                                    cores = cores,
                                    GDIThreshold = GDIThreshold,
                                    saveObj = saveObj,
-                                   outDir = outDirIter)
+                                   outDir = outDirIter)[["isUniform"]]
           if (!clusterIsUniform) {
             logThis(paste("cluster", cl, "has too high GDI:",
                           "will be reclustered!"), logLevel = 1L)
+
             numClustersToRecluster <- numClustersToRecluster + 1L
             cellsToRecluster <- c(cellsToRecluster, cells)
           } else {
