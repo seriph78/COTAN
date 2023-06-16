@@ -1,6 +1,8 @@
 tm <- tempdir()
 stopifnot(file.exists(tm))
 
+library(zeallot)
+
 test_that("Merge Uniform Cells Clusters", {
 
   utils::data("test.dataset", package = "COTAN")

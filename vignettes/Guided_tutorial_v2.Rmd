@@ -412,8 +412,9 @@ satisfies the null hypothesis of the `COTAN` model:
 the genes expression is not dependent on the cell in consideration.
 
 ```{r eval=FALSE, include=TRUE}
-fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.4, cores = 10L,
-                                       saveObj = TRUE, outDir = outDir)
+fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.4,
+                                       cores = 10L, saveObj = TRUE,
+                                       outDir = outDir)[["clusters"]]
 obj <- addClusterization(obj, clName = "FineClusters", clusters = fineClusters)
 ```
 

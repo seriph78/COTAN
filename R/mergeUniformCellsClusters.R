@@ -36,7 +36,8 @@
 #'
 #' @importFrom Matrix t
 #'
-#' @importFrom stats dist
+#' @importFrom parallelDist parDist
+#'
 #' @importFrom stats hclust
 #' @importFrom stats as.dendrogram
 #' @importFrom stats cophenetic
@@ -72,8 +73,11 @@
 #' ## in cases of relatively low genes/cells number, or in cases when an
 #' ## rough clusterization is needed in the early satges of the analysis
 #' ##
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    GDIThreshold = 1.5, saveObj = FALSE)
+#'
+#' splitList <- cellsUniformClustering(objCOTAN, cores = 12,
+#'                                     GDIThreshold = 1.5, saveObj = FALSE)
+#'
+#' clusters <- splitList[["clusters"]]
 #'
 #' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
 #' checkClusterUniformity(objCOTAN,
@@ -86,6 +90,12 @@
 #' objCOTAN <- addClusterization(objCOTAN,
 #'                               clName = "split",
 #'                               clusters = clusters)
+#'
+#' objCOTAN <- addClusterizationCoex(objCOTAN,
+#'                                   clName = "split",
+#'                                   coexDF = splitList[["coexDF"]])
+#'
+#' expect_identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 #'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
 #'                                         GDIThreshold = 1.5,

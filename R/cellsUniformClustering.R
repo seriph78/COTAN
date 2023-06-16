@@ -158,7 +158,9 @@ NULL
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #'
-#' @returns `cellsUniformClustering()` returns the newly found *clusterization*
+#' @returns `cellsUniformClustering()` returns a `list` with 2 elements:
+#'   * "clusters" the newly found cluster labels array
+#'   * "coex" the associated `COEX` `data.frame`
 #'
 #' @export
 #'
@@ -169,6 +171,9 @@ NULL
 #' @importFrom stringr str_pad
 #'
 #' @importFrom utils as.roman
+#'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
 #'
 #' @rdname UniformClusters
 #'
@@ -324,7 +329,8 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
 
-  outputClusters <- factor(outputClusters)
+  c(outputClusters, outputCoexDF) %<-%
+    reorderClusterization(objCOTAN, clusters = outputClusters)
 
   if (saveObj) {
     clusterizationName <-
@@ -360,5 +366,5 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
 
   logThis("Creating cells' uniform clustering: DONE", logLevel = 2L)
 
-  return(outputClusters)
+  return(list("clusters" = factor(outputClusters), "coex" = outputCoexDF))
 }

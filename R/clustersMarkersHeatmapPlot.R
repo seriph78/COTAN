@@ -55,6 +55,9 @@
 #'
 #' @importFrom circlize colorRamp2
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @export
 #'
 #' @rdname HandlingClusterizations

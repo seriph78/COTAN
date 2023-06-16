@@ -33,6 +33,9 @@
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @export
 #'
 #' @examples
@@ -205,6 +208,9 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @importFrom parallelDist parDist
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @export
 #'
 #' @examples
@@ -214,7 +220,8 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @rdname HandlingClusterizations
 #'
-clustersTreePlot <- function(objCOTAN, kCuts,
+clustersTreePlot <- function(objCOTAN,
+                             kCuts,
                              clName = "",
                              distance = "cosine",
                              hclustMethod = "ward.D2") {

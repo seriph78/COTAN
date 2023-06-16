@@ -51,6 +51,9 @@
 #' @importFrom graphics par
 #' @importFrom graphics title
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @examples
 #' # This creates many infomative plots useful to determine whether
 #' # there is still something to drop...
