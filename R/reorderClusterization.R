@@ -9,6 +9,7 @@
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*. If not available it will be
 #'   recalculated
+#' @param reverse a flag to the output order
 #' @param keepMinuOne a flag to decide whether to keep the cluster `"-1"`
 #'   (representing the non-clustered cells) untouched
 #' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
@@ -35,6 +36,7 @@
 reorderClusterization <- function(objCOTAN,
                                   clusters = NULL,
                                   coexDF = NULL,
+                                  reverse = FALSE,
                                   keepMinusOne = TRUE,
                                   distance = "cosine",
                                   hclustMethod = "ward.D2") {
@@ -62,6 +64,11 @@ reorderClusterization <- function(objCOTAN,
 
   # we exploit the rank(x) == order(order(x))
   perm <- order(hc[["order"]])
+
+  if (isTRUE(reverse)) {
+    perm <- (length(perm) + 1) - perm
+  }
+
   clNames <- hc[["labels"]]
   clMap <- set_names(clNames[perm], clNames)
   clMap["-1"] <- "-1"

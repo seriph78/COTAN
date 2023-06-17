@@ -55,6 +55,7 @@ reorderClusterization(
   objCOTAN,
   clusters = NULL,
   coexDF = NULL,
+  reverse = FALSE,
   keepMinusOne = TRUE,
   distance = "cosine",
   hclustMethod = "ward.D2"
@@ -109,6 +110,8 @@ defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
 \item{coexDF}{a \code{data.frame} where each column indicates the \code{COEX} for each
 of the \emph{clusters} of the \emph{clusterization}. If not available it will be
 recalculated}
+
+\item{reverse}{a flag to the output order}
 
 \item{keepMinuOne}{a flag to decide whether to keep the cluster \code{"-1"}
 (representing the non-clustered cells) untouched}
