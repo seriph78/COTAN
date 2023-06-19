@@ -11,6 +11,7 @@
 \alias{getClusterizationName}
 \alias{getClusterizationData,COTAN-method}
 \alias{getClusterizationData}
+\alias{getClusters}
 \alias{getClustersCoex,COTAN-method}
 \alias{getClustersCoex}
 \alias{addClusterization,COTAN-method}
@@ -36,6 +37,8 @@
 \S4method{getClusterizationName}{COTAN}(objCOTAN, clName = "", keepPrefix = FALSE)
 
 \S4method{getClusterizationData}{COTAN}(objCOTAN, clName = "")
+
+getClusters(objCOTAN, clName = "")
 
 \S4method{getClustersCoex}{COTAN}(objCOTAN)
 
@@ -196,6 +199,8 @@ name or \code{NULL} if no \emph{clusterizations} are present
 defined
 }
 
+\code{getClusters()} returns the named cluster labels array
+
 \code{getClustersCoex()} returns the list with a \code{COEX} \code{data.frame} for
 each \emph{clusterization}. When not empty, each \code{data.frame} contains a \code{COEX}
 column for each \emph{cluster}.
@@ -287,6 +292,9 @@ if needed
 
 \code{getClusterizationData()} extracts the asked \emph{clusterization} and
 its associated \code{COEX} \code{data.frame} from the \code{COTAN} object
+
+\code{getClusters()} extracts the asked \emph{clusterization} from the \code{COTAN}
+object
 
 \code{getClustersCoex()} extracts the full \code{clusterCoex} member \code{list}
 
@@ -395,6 +403,8 @@ clHeatmapPlotAndData2 <-
 clName <- getClusterizationName(objCOTAN)
 
 clusterDataList <- getClusterizationData(objCOTAN, clName = clName)
+
+clusters <- getClusters(objCOTAN, clName = clName)
 
 allClustersCoexDF <- getClustersCoex(objCOTAN)
 

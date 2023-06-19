@@ -26,7 +26,7 @@
 DEAOnClusters <- function(objCOTAN, clusters = NULL) {
   if (is_empty(clusters)) {
     # pick the last clusterization
-    clusters <- getClusterizationData(objCOTAN)[["clusters"]]
+    clusters <- getClusters(objCOTAN)
   } else if (!inherits(clusters, "factor")) {
     clusters <- factor(clusters)
   }

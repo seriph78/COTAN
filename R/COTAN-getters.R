@@ -1068,7 +1068,27 @@ setMethod(
   }
 )
 
-
+#'
+#' @details `getClusters()` extracts the asked *clusterization* from the `COTAN`
+#'   object
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be returned, as it is probably the most
+#'   significant!
+#'
+#' @returns `getClusters()` returns the named cluster labels array
+#'
+#' @export
+#'
+#' @examples
+#' clusters <- getClusters(objCOTAN, clName = clName)
+#'
+#' @rdname HandlingClusterizations
+#'
+getClusters <- function(objCOTAN, clName = "") {
+  return(getClusterizationData(objCOTAN, clName = clName)[["clusters"]])
+}
 
 #' @aliases getClustersCoex
 #'
@@ -1282,7 +1302,7 @@ normalizeNameAndLabels <- function(objCOTAN, name = "",
   if (is_empty(labels)) {
     if (isFALSE(isCond)) {
       name <- getClusterizationName(objCOTAN, clName = name)
-      labels <- getClusterizationData(objCOTAN, clName = name)[["clusters"]]
+      labels <- getClusters(objCOTAN, clName = name)
     } else {
       name <- getConditionName(objCOTAN, condName = name)
       labels <- getCondition(objCOTAN, condName = name)

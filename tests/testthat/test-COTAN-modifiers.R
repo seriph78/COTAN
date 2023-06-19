@@ -124,7 +124,7 @@ test_that("Managed clusterizations and conditions", {
   expect_length(getClusterizations(obj, dropNoCoex = TRUE), 0L)
   expect_identical(colnames(getMetadataCells(obj)), "CL_Test")
   expect_identical(rownames(getMetadataCells(obj)), getCells(obj))
-  expect_identical(getClusterizationData(obj)[["clusters"]], clusters)
+  expect_identical(getClusters(obj), clusters)
 
   obj <- estimateNuLinear(obj)
 
@@ -183,6 +183,7 @@ test_that("Managed clusterizations and conditions", {
 
   # no such clusterization/condition
   expect_error(getClusterizationData(obj, clName = "Test"))
+  expect_error(getClusters(obj, clName = "Test"))
   expect_error(getCondition(obj, condName = "Test"))
 
   # empyt name clusterization/consition

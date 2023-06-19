@@ -374,9 +374,8 @@ setMethod(
     internalName <- getClusterizationName(objCOTAN, clName = clName,
                                           keepPrefix = TRUE)
 
-    clusters <- getClusterizationData(objCOTAN,
-                                      clName = internalName)[["clusters"]]
-    assert_that(setequal(colnames(coexDF), clusters),
+    assert_that(setequal(colnames(coexDF),
+                         getClusters(objCOTAN, clName = internalName)),
                 msg = paste0("The column names of passed data.frame does not
                              match the expected list of clusters"))
 
