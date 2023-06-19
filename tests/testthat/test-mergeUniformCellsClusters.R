@@ -19,7 +19,7 @@ test_that("Merge Uniform Cells Clusters", {
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
-  coexDF %<-% DEAOnClusters(obj)
+  coexDF <- DEAOnClusters(obj)
 
   obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = coexDF)
 

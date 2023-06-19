@@ -153,14 +153,18 @@ NULL
 #' @param cores number of cores used
 #' @param maxIterations Max number of re-clustering iterations. It defaults to
 #'   \eqn{25}.
+#' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
+#'   and the others from [parallelDist::parDist()] are also available)
+#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
+#'   defined by the [stats::hclust()] function.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #'
 #' @returns `cellsUniformClustering()` returns a `list` with 2 elements:
-#'   * "clusters" the newly found cluster labels array
-#'   * "coex" the associated `COEX` `data.frame`
+#'   * `"clusters"` the newly found cluster labels array
+#'   * `"coex"` the associated `COEX` `data.frame`
 #'
 #' @export
 #'
@@ -180,6 +184,8 @@ NULL
 
 cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                                    cores = 1L, maxIterations = 25L,
+                                   distance = "cosine",
+                                   hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
 

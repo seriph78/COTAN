@@ -28,8 +28,8 @@
 #'   output will be paced in a sub-folder.
 #'
 #' @returns a `list` with:
-#'   * `"clusters"` the merged clusterization
-#'   * `"coexDF"` the corresponding differential expression `data.frame`
+#'   * `"clusters"` the merged cluster labels array
+#'   * `"coex"` the associated `COEX` `data.frame`
 #'
 #' @export
 #'
@@ -95,7 +95,7 @@
 #'
 #' objCOTAN <- addClusterizationCoex(objCOTAN,
 #'                                   clName = "split",
-#'                                   coexDF = splitList[["coexDF"]])
+#'                                   coexDF = splitList[["coex"]])
 #'
 #' expect_identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 #'
@@ -111,7 +111,7 @@
 #' objCOTAN <- addClusterization(objCOTAN,
 #'                               clName = "merged",
 #'                               clusters = mergedList[["clusters"]],
-#'                               coexDF = mergedList[["coexDF"]])
+#'                               coexDF = mergedList[["coex"]])
 #'
 #' @rdname UniformClusters
 #'
@@ -217,7 +217,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     oldNumClusters <- length(unique(outputClusters))
 
-    coexDF %<-% DEAOnClusters(objCOTAN, clusters = outputClusters)
+    coexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
     gc()
 
     ## To drop the cells with only zeros
@@ -285,16 +285,15 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   logThis(paste0("The final merged clusterization contains [",
                  length(unique(outputClusters)), "] different clusters: ",
-                 toString(unique(sort(outputClusters)))), logLevel = 2L)
+                 toString(unique(sort(outputClusters)))), logLevel = 1L)
 
-  # replace the clusters' tags
-  # non merged clusters keep their tag, while merged one use the lesser one!
-  # there might be holes in the enumeration!
+  # replace the clusters' tags with completely new ones
   {
-    clTags <- levels(factor(outputClusters))
+    clTags <- unique(outputClusters)
     # here we use the fact that the merged clusters have
     # the 'smaller' cluster as the first in the pair
-    clTagsMap <- str_split(clTags, pattern = fixed("_"), simplify = TRUE)[, 1L]
+    clTagsMap <- paste0(seq_len(length(clTags)))
+    clTagsMap <- factorToVector(niceFactorLevels(clTagsMap))
     clTagsMap <- set_names(clTagsMap, clTags)
 
     outputClusters <- clTagsMap[outputClusters]
@@ -303,9 +302,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
     colnames(coexDF)   <- clTagsMap[colnames(coexDF)]
   }
 
-  outputClusters <- factor(outputClusters)
+  outputClusters <-
+    reorderClusterization(objCOTAN, clusters = outputClusters, coexDF = coexDF,
+                          reverse = FALSE, keepMinusOne = FALSE,
+                          distance = distance, hclustMethod = hclustMethod)
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 
-  return(list("clusters" = outputClusters, "coexDF" = coexDF))
+  return(list("clusters" = outputClusters, "coex" = coexDF))
 }

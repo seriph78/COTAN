@@ -1035,9 +1035,9 @@ setMethod(
 #'   significant!
 #'
 #' @returns `getClusterizationData()` returns a `list` with 2 elements:
-#'   * "clusters" the named cluster labels array
-#'   * "coex" the associated `COEX` `data.frame`; it will be **empty** if not
-#'   defined
+#'   * `"clusters"` the named cluster labels array
+#'   * `"coex"` the associated `COEX` `data.frame`; it will be **empty** if not
+#'     defined
 #'
 #' @export
 #'
@@ -1067,6 +1067,7 @@ setMethod(
                 "coex" = getClustersCoex(objCOTAN)[[internalName]]))
   }
 )
+
 
 
 #' @aliases getClustersCoex

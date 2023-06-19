@@ -122,14 +122,14 @@ significant!}
 
 \item{clusters}{a \emph{clusterization}}
 
-\item{coexDF}{a \code{data.frame} with \emph{In/Out} \code{COEX}. E.G. the result of a call
-to \code{\link[=DEAOnClusters]{DEAOnClusters()}}}
+\item{coexDF}{a \code{data.frame} where each column indicates the \code{COEX} for each
+of the \emph{clusters} of the \emph{clusterization}}
 
 \item{override}{When \code{TRUE} silently allows overriding data for an existing
 \emph{clusterization} name. Otherwise the default behavior will avoid potential
 data losses}
 
-\item{numCells}{the number of cells in all \emph{clusters}}
+\item{numCells}{the number of overall cells in all \emph{clusters}}
 
 \item{df}{the \code{data.frame} to plot. It must have a row names containing the
 given elements}
@@ -191,8 +191,8 @@ name or \code{NULL} if no \emph{clusterizations} are present
 
 \code{getClusterizationData()} returns a \code{list} with 2 elements:
 \itemize{
-\item "clusters" the named cluster labels array
-\item "coex" the associated \code{COEX} \code{data.frame}; it will be \strong{empty} if not
+\item \code{"clusters"} the named cluster labels array
+\item \code{"coex"} the associated \code{COEX} \code{data.frame}; it will be \strong{empty} if not
 defined
 }
 

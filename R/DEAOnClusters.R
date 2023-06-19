@@ -100,8 +100,9 @@ DEAOnClusters <- function(objCOTAN, clusters = NULL) {
 #'   Expression analysis using the `COTAN` contingency tables on each *cluster*
 #'   in the given *clusterization*
 #'
-#' @param coexDF the co-expression `data.frame` for the genes in each *cluster*
-#' @param numCells the number of cells in all *clusters*
+#' @param coexDF a `data.frame` where each column indicates the `COEX` for each
+#'   of the *clusters* of the *clusterization*
+#' @param numCells the number of overall cells in all *clusters*
 #'
 #' @return `pValueFromDEA()` returns a `data.frame` with the *p-values*
 #'   corresponding to the given *coex*

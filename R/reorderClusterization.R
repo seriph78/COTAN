@@ -7,8 +7,7 @@
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
-#'   of the *clusters* of the *clusterization*. If not available it will be
-#'   recalculated
+#'   of the *clusters* of the *clusterization*
 #' @param reverse a flag to the output order
 #' @param keepMinuOne a flag to decide whether to keep the cluster `"-1"`
 #'   (representing the non-clustered cells) untouched
@@ -42,7 +41,7 @@ reorderClusterization <- function(objCOTAN,
                                   hclustMethod = "ward.D2") {
   if (is_empty(clusters)) {
     # pick the last clusterization
-    c(clusters, coedDF) <- getClusterizationData(objCOTAN)
+    c(clusters, coexDF) %<-% getClusterizationData(objCOTAN)
   }
 
   if (is_empty(coexDF)) {

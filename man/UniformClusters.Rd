@@ -25,6 +25,8 @@ cellsUniformClustering(
   GDIThreshold = 1.4,
   cores = 1L,
   maxIterations = 25L,
+  distance = "cosine",
+  hclustMethod = "ward.D2",
   saveObj = TRUE,
   outDir = "."
 )
@@ -84,6 +86,12 @@ here to speed up the process (default is \code{NULL})}
 \item{maxIterations}{Max number of re-clustering iterations. It defaults to
 \eqn{25}.}
 
+\item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
+and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
+
+\item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
+defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
+
 \item{saveObj}{Boolean flag; when \code{TRUE} saves intermediate analyses and
 plots to file}
 
@@ -101,15 +109,8 @@ significant!}
 \item{batchSize}{Number pairs to test in a single round. If none of them
 succeeds the merge stops}
 
-\item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
-and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
-
-\item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
-defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
-
 \item{coexDF}{a \code{data.frame} where each column indicates the \code{COEX} for each
-of the \emph{clusters} of the \emph{clusterization}. If not available it will be
-recalculated}
+of the \emph{clusters} of the \emph{clusterization}}
 
 \item{reverse}{a flag to the output order}
 
@@ -121,8 +122,8 @@ recalculated}
 
 \code{cellsUniformClustering()} returns a \code{list} with 2 elements:
 \itemize{
-\item "clusters" the newly found cluster labels array
-\item "coex" the associated \code{COEX} \code{data.frame}
+\item \code{"clusters"} the newly found cluster labels array
+\item \code{"coex"} the associated \code{COEX} \code{data.frame}
 }
 
 \code{checkClusterUniformity} returns a list with:
@@ -134,8 +135,8 @@ recalculated}
 
 a \code{list} with:
 \itemize{
-\item \code{"clusters"} the merged clusterization
-\item \code{"coexDF"} the corresponding differential expression \code{data.frame}
+\item \code{"clusters"} the merged cluster labels array
+\item \code{"coex"} the associated \code{COEX} \code{data.frame}
 }
 
 \code{reorderClusterization()} returns a \code{list} with 2 elements:
@@ -225,7 +226,7 @@ objCOTAN <- addClusterization(objCOTAN,
 
 objCOTAN <- addClusterizationCoex(objCOTAN,
                                   clName = "split",
-                                  coexDF = splitList[["coexDF"]])
+                                  coexDF = splitList[["coex"]])
 
 expect_identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 
@@ -241,6 +242,6 @@ mergedList <- mergeUniformCellsClusters(objCOTAN,
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "merged",
                               clusters = mergedList[["clusters"]],
-                              coexDF = mergedList[["coexDF"]])
+                              coexDF = mergedList[["coex"]])
 
 }

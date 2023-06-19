@@ -10,8 +10,8 @@
 #' @param n the number of extreme `COEX` values to return
 #' @param clusters a *clusterization*
 #' @param markers a `list` of marker genes
-#' @param coexDF a `data.frame` with *In/Out* `COEX`. E.G. the result of a call
-#'   to [DEAOnClusters()]
+#' @param coexDF a `data.frame` where each column indicates the `COEX` for each
+#'   of the *clusters* of the *clusterization*
 #' @param pValueDF a `data.frame` with *In/Out* *p-value* based on the `COEX`.
 #'   E.G. the result of a call to [pValueFromDEA()]
 #' @param deltaExp a `data.frame` with the *delta-expression* in a *cluster*.
