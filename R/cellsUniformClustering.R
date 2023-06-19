@@ -324,8 +324,9 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
   # replace the clusters' tags
   {
     clTags <- unique(sort(outputClusters))
-    numDigits <- floor(log10(length(clTags))) + 1L
-    clTagsMap <- formatC(seq_along(clTags), width = numDigits, flag = "0")
+
+    clTagsMap <- paste0(seq_along(clTags))
+    clTagsMap <- factorToVector(niceFactorLevels(clTagsMap))
     clTagsMap <- set_names(clTagsMap, clTags)
 
     unclusteredCells <- is.na(outputClusters)
@@ -336,7 +337,9 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
   }
 
   c(outputClusters, outputCoexDF) %<-%
-    reorderClusterization(objCOTAN, clusters = outputClusters)
+    reorderClusterization(objCOTAN, clusters = outputClusters,
+                          coexDF = NULL, keepMinusOne = TRUE,
+                          distance = distance, hclustMethod = hclustMethod)
 
   if (saveObj) {
     clusterizationName <-

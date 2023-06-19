@@ -54,7 +54,7 @@ test_that("Cell Uniform Clustering", {
   expect_identical(sum(clMarkersDF[["IsMarker"]]), 0L)
 
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
-  highPos <- (1L:80L) %in% c(1L:10L, 21L:30L, 51L:60L, 71L:80L)
+  highPos <- (1L:80L) %in% c(1L:10L, 31L:40L, 51L:60L, 61L:70L)
   expect_gt(min(topGenesNum[ highPos]), 480L)
   expect_lt(max(topGenesNum[!highPos]), 241L)
 

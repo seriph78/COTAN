@@ -491,7 +491,7 @@ groupByClustersList <- function(elemNames, clustersList,
   }
 
   # add all non-clustered elements as tail group!
-  positions <- append(positions, setdiff(seq_len(length(elemNames)), positions))
+  positions <- append(positions, setdiff(seq_along(elemNames), positions))
 
   return(positions)
 }

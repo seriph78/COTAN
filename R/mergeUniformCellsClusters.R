@@ -285,14 +285,13 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   logThis(paste0("The final merged clusterization contains [",
                  length(unique(outputClusters)), "] different clusters: ",
-                 toString(unique(sort(outputClusters)))), logLevel = 1L)
+                 toString(sort(unique(outputClusters)))), logLevel = 1L)
 
   # replace the clusters' tags with completely new ones
   {
-    clTags <- unique(outputClusters)
-    # here we use the fact that the merged clusters have
-    # the 'smaller' cluster as the first in the pair
-    clTagsMap <- paste0(seq_len(length(clTags)))
+    clTags <- sort(unique(outputClusters))
+
+    clTagsMap <- paste0(seq_along(clTags))
     clTagsMap <- factorToVector(niceFactorLevels(clTagsMap))
     clTagsMap <- set_names(clTagsMap, clTags)
 
@@ -302,7 +301,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     colnames(coexDF)   <- clTagsMap[colnames(coexDF)]
   }
 
-  outputClusters <-
+  c(outputClusters, coexDF) %<-%
     reorderClusterization(objCOTAN, clusters = outputClusters, coexDF = coexDF,
                           reverse = FALSE, keepMinusOne = FALSE,
                           distance = distance, hclustMethod = hclustMethod)

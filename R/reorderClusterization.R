@@ -70,16 +70,19 @@ reorderClusterization <- function(objCOTAN,
 
   clNames <- hc[["labels"]]
   clMap <- set_names(clNames[perm], clNames)
-  clMap["-1"] <- "-1"
 
-  outputClusters <- vector(mode = "character", length = length(clusters))
-  names(outputClusters) <- names(clusters)
-
-  for (cl in clNames) {
-    outputClusters[clusters == cl] = clMap[cl]
+  if (keepMinusOne && !is_empty(minusOneClCoex)) {
+    clMap["-1"] <- "-1"
   }
 
-  colnames(coexDF) <- colnames(coexDF)[perm]
+  logThis("Applied reordering to clusterization is:", logLevel = 1L)
+  logThis(paste(paste0(names(clMap)), " -> ", paste0(clMap), collapse = ", "),
+          logLevel = 1L)
+
+  outputClusters <- factor(clusters)
+
+  levels(outputClusters) <- clMap[levels(outputClusters)]
+  colnames(coexDF) <- clMap[colnames(coexDF)]
 
   # restore cluster "-1"
   if (keepMinusOne && !is_empty(minusOneClCoex)) {

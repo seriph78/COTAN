@@ -88,8 +88,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
   if (!is_empty(condNameList)) {
     allColors <- getColorsVector()
 
-    rng <- seq_len(length(condNameList))
-    for (i in rng) {
+    for (i in seq_along(condNameList)) {
       c(condName, conditions) %<-%
         normalizeNameAndLabels(objCOTAN, name = condNameList[[i]],
                                labels = conditionsList[[i]])
