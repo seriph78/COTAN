@@ -242,7 +242,7 @@ clustersTreePlot <- function(objCOTAN,
   if (is_empty(coexDF)) {
     logThis("Coex dataframe is missing: will be calculated and stored",
             logLevel = 1L)
-    coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+    coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
     objCOTAN <- addClusterizationCoex(objCOTAN, clName = clName,
                                       coexDF = coexDF)
   }

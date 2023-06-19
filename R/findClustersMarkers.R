@@ -13,7 +13,7 @@
 #' @param coexDF a `data.frame` with *In/Out* `COEX`. E.G. the result of a call
 #'   to [DEAOnClusters()]
 #' @param pValueDF a `data.frame` with *In/Out* *p-value* based on the `COEX`.
-#'   E.G. the result of a call to `DEAOnClusters()`
+#'   E.G. the result of a call to [pValueFromDEA()]
 #' @param deltaExp a `data.frame` with the *delta-expression* in a *cluster*.
 #'   E.G. the result of a call to [clustersDeltaExpression()]
 #' @param method *p-value* adjustment method. Defaults to `"bonferroni"`
@@ -45,11 +45,13 @@ findClustersMarkers <- function(
   assert_that(is_empty(marks) || any(marks %in% getGenes(objCOTAN)),
               msg = "None of the given markers is present in the data")
 
-  if (is.null(coexDF) || is.null(pValueDF)) {
+  if (is.null(coexDF)) {
     # picks up the last clusterization if none was given
-    DEA <- DEAOnClusters(objCOTAN, clusters = clusters)
-    coexDF <- DEA[["coex"]]
-    pValueDF <- DEA[["p-value"]]
+    coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+  }
+
+  if (is.null(pValueDF)) {
+    pValueDF <- pValueFromDEA(coexDF, getNumCells(objCOTAN))
   }
 
   if (is.null(deltaExp)) {

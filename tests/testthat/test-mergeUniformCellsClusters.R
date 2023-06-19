@@ -19,12 +19,14 @@ test_that("Merge Uniform Cells Clusters", {
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
-  c(coexDF, pValDF) %<-% DEAOnClusters(obj)
+  coexDF %<-% DEAOnClusters(obj)
 
   obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = coexDF)
 
   expect_setequal(colnames(coexDF), levels(clusters))
   expect_identical(rownames(coexDF), getGenes(obj))
+
+  pValDF <- pValueFromDEA(coexDF, getNumCells(obj))
 
   expect_setequal(colnames(pValDF), levels(clusters))
   expect_identical(rownames(pValDF), getGenes(obj))
@@ -58,7 +60,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_equal(e.df[["N. total"]], vapply(groupMarkers, length, integer(1L)),
                ignore_attr = TRUE)
 
-  c(mergedClusters, mergedCoexDF, mergedPValueDF) %<-%
+  c(mergedClusters, mergedCoexDF) %<-%
     mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 12L,
                               GDIThreshold = GDIThreshold,
                               distance = "cosine", hclustMethod = "ward.D2",
@@ -66,7 +68,6 @@ test_that("Merge Uniform Cells Clusters", {
 
   expect_lt(nlevels(mergedClusters), nlevels(clusters))
   expect_setequal(mergedClusters, colnames(mergedCoexDF))
-  expect_setequal(colnames(mergedCoexDF), colnames(mergedPValueDF))
 
   #cluster_data <- readRDS(file.path(getwd(), "cluster_data_merged.RDS"))
   #expect_identical(mergedClusters[genes.names.test], cluster_data)

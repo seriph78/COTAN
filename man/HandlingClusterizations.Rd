@@ -20,6 +20,7 @@
 \alias{dropClusterization,COTAN-method}
 \alias{dropClusterization}
 \alias{DEAOnClusters}
+\alias{pValueFromDEA}
 \alias{UMAPPlot}
 \alias{clustersDeltaExpression}
 \alias{clustersMarkersHeatmapPlot}
@@ -51,6 +52,8 @@
 \S4method{dropClusterization}{COTAN}(objCOTAN, clName)
 
 DEAOnClusters(objCOTAN, clusters = NULL)
+
+pValueFromDEA(coexDF, numCells)
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
@@ -126,6 +129,8 @@ to \code{\link[=DEAOnClusters]{DEAOnClusters()}}}
 \emph{clusterization} name. Otherwise the default behavior will avoid potential
 data losses}
 
+\item{numCells}{the number of cells in all \emph{clusters}}
+
 \item{df}{the \code{data.frame} to plot. It must have a row names containing the
 given elements}
 
@@ -168,7 +173,7 @@ and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} 
 \item{markers}{a \code{list} of marker genes}
 
 \item{pValueDF}{a \code{data.frame} with \emph{In/Out} \emph{p-value} based on the \code{COEX}.
-E.G. the result of a call to \code{DEAOnClusters()}}
+E.G. the result of a call to \code{\link[=pValueFromDEA]{pValueFromDEA()}}}
 
 \item{deltaExp}{a \code{data.frame} with the \emph{delta-expression} in a \emph{cluster}.
 E.G. the result of a call to \code{\link[=clustersDeltaExpression]{clustersDeltaExpression()}}}
@@ -201,11 +206,11 @@ column for each \emph{cluster}.
 
 \code{dropClusterization()} returns the updated \code{COTAN} object
 
-\code{DEAOnClusters()} returns a \code{list} with two objects:
-\itemize{
-\item "coex"    - the coexpression \code{data.frame} for the genes in each \emph{cluster}
-\item "p-value" - the corresponding p-values \code{data.frame}
-}
+\code{DEAOnClusters()} returns the coexpression \code{data.frame} for the genes
+in each \emph{cluster}
+
+\code{pValueFromDEA()} returns a \code{data.frame} with the \emph{p-values}
+corresponding to the given \emph{coex}
 
 \code{UMAPPlot()} returns a \code{ggplot2} object
 
@@ -303,6 +308,10 @@ new element in the \code{clustersCoex} \code{list} using the passed in \code{COE
 analysis using the \code{COTAN} contingency tables on each \emph{cluster} in the
 given \emph{clusterization}
 
+\code{pValueFromDEA()} is used to convert to \emph{p-value} the Differential
+Expression analysis using the \code{COTAN} contingency tables on each \emph{cluster}
+in the given \emph{clusterization}
+
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
 information related to clusters after applying the UMAP transformation.
 
@@ -350,7 +359,7 @@ objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 data("test.dataset.clusters1")
 clusters <- test.dataset.clusters1
 
-coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
 
 groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                      G2 = c("g-000300", "g-000330"),

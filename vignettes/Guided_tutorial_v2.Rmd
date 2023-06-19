@@ -420,13 +420,13 @@ obj <- addClusterization(obj, clName = "FineClusters", clusters = fineClusters)
 
 
 ```{r eval=FALSE, include=TRUE}
-c(coexDF, pValueDF) %<-% DEAOnClusters(obj, clusters = fineClusters)
+coexDF %<-% DEAOnClusters(obj, clusters = fineClusters)
 obj <- addClusterizationCoex(obj, clName = "FineClusters",
                              coexDF = coexDF)
 ```
 
 ```{r eval=FALSE, include=TRUE}
-c(mergedClusters, coexDF, pValueDF) %<-%
+c(mergedClusters, coexDF) %<-%
   mergeUniformCellsClusters(obj, GDIThreshold = 1.4, cores = 10L,
                             saveObj = TRUE, outDir = outDir)
 obj <- addClusterization(obj, clName = "MergedClusters",

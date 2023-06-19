@@ -46,7 +46,7 @@ reorderClusterization <- function(objCOTAN,
   }
 
   if (is_empty(coexDF)) {
-    coexDF <- DEAOnClusters(objCOTAN, clusters)[["coex"]]
+    coexDF <- DEAOnClusters(objCOTAN, clusters)
   }
 
   # exclude cluster "-1"

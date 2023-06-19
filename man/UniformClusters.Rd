@@ -132,7 +132,11 @@ recalculated}
 \item \code{"1stPercentile"}: the quantile associated to the highest percentile
 }
 
-a \code{list} with "clusters", "coexDF" and "pValueDF"
+a \code{list} with:
+\itemize{
+\item \code{"clusters"} the merged clusterization
+\item \code{"coexDF"} the corresponding differential expression \code{data.frame}
+}
 
 \code{reorderClusterization()} returns a \code{list} with 2 elements:
 \itemize{

@@ -27,7 +27,9 @@
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #'
-#' @returns a `list` with "clusters", "coexDF" and "pValueDF"
+#' @returns a `list` with:
+#'   * `"clusters"` the merged clusterization
+#'   * `"coexDF"` the corresponding differential expression `data.frame`
 #'
 #' @export
 #'
@@ -215,7 +217,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     oldNumClusters <- length(unique(outputClusters))
 
-    c(coexDF, pValueDF) %<-% DEAOnClusters(objCOTAN, clusters = outputClusters)
+    coexDF %<-% DEAOnClusters(objCOTAN, clusters = outputClusters)
     gc()
 
     ## To drop the cells with only zeros
@@ -299,13 +301,11 @@ mergeUniformCellsClusters <- function(objCOTAN,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
     colnames(coexDF)   <- clTagsMap[colnames(coexDF)]
-    colnames(pValueDF) <- clTagsMap[colnames(pValueDF)]
   }
 
   outputClusters <- factor(outputClusters)
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 
-  return(list("clusters" = outputClusters,
-              "coexDF" = coexDF, "pValueDF" = pValueDF))
+  return(list("clusters" = outputClusters, "coexDF" = coexDF))
 }
