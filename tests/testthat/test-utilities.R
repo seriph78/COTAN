@@ -14,7 +14,7 @@ test_that("Logging", {
   expect_true(file.exists(logPath))
 
   expect_no_message(suppressMessages(logThis("This should not appear",
-                                             logLevel = 0L)))
+                                             logLevel = 0L, appendLF = FALSE)))
 
   expect_message(   logThis("This should appear",     logLevel = 0L))
   expect_no_message(logThis("This should not appear", logLevel = 1L))
@@ -33,7 +33,7 @@ test_that("Logging", {
   suppressMessages(setLoggingLevel(currentLevel))
   suppressMessages(setLoggingFile(""))
 
-  expect_equal(R.utils::countLines(logPath), 6L, ignore_attr = TRUE)
+  expect_equal(R.utils::countLines(logPath), 5L, ignore_attr = TRUE)
   file.remove(logPath)
 })
 
