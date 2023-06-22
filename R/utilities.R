@@ -105,7 +105,8 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
   currentFile <- getOption("COTAN.LogFile")
   if (!is.null(currentFile)) {
     tryCatch({
-      writeLines(msg, currentFile)
+      if (isTRUE(appendLF)) { sep <- "\n" } else { sep <- "" }
+      writeLines(msg, currentFile, sep = sep)
       flush(currentFile)
     }, error = function(e) {
       setLoggingFile("")
