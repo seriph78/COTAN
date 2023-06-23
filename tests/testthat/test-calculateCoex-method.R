@@ -6,7 +6,7 @@ library(rlang)
 
 crossEntrVector <- function(zeroOne, probZero) {
   crossEntr <- rep_len(0.0, nrow(zeroOne))
-  for (r in 1L:nrow(zeroOne))
+  for (r in 1L:nrow(zeroOne)){
     for (c in 1L:ncol(zeroOne)) {
       if (probZero[r, c] != 0) {
         crossEntr[r] = crossEntr[r] -
@@ -14,6 +14,8 @@ crossEntrVector <- function(zeroOne, probZero) {
           zeroOne[r, c] * log(1.0 - probZero[r, c])
       }
     }
+    crossEntr[r] = crossEntr[r] / ncol(zeroOne)
+  }
 
   return(crossEntr)
 }

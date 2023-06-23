@@ -38,7 +38,7 @@ calculateGenesCE <- function(objCOTAN) {
   minusEntrM[!feg, ] <- (zeroOne[!feg, ] * log(1.0 - probZero[!feg, ])) +
                         ((1.0 - zeroOne[!feg, ]) * log(probZero[!feg, ]))
 
-  return(set_names(-rowsums(minusEntrM), getGenes(objCOTAN)))
+  return(set_names(-rowMeans(minusEntrM), getGenes(objCOTAN)))
 }
 
 
