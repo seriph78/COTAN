@@ -2,6 +2,23 @@ tm <- tempdir()
 stopifnot(file.exists(tm))
 
 library(zeallot)
+library(rlang)
+
+crossEntrVector <- function(zeroOne, probZero) {
+  crossEntr <- rep_len(0.0, nrow(zeroOne))
+  for (r in 1L:nrow(zeroOne)){
+    for (c in 1L:ncol(zeroOne)) {
+      if (probZero[r, c] != 0) {
+        crossEntr[r] = crossEntr[r] -
+          (1.0 - zeroOne[r, c]) * log(probZero[r, c]) -
+          zeroOne[r, c] * log(1.0 - probZero[r, c])
+      }
+    }
+    crossEntr[r] = crossEntr[r] / ncol(zeroOne)
+  }
+
+  return(crossEntr)
+}
 
 coexPoint <- function(o, e, n) {
   num <- ( ((o[[1L]] - e[[1L]]) / max(1.0, e[[1L]])) -
@@ -109,6 +126,14 @@ test_that("Calculations on genes", {
   expect_equal(as.vector(gpExp), c(expectedYY[g1, g2], expectedYN[g1, g2],
                                    expectedNY[g1, g2], expectedNN[g1, g2]),
                tolerance = 1.0e-12)
+
+  gce <- calculateGenesCE(obj)
+
+  expect_identical(names(gce), getGenes(obj))
+  expect_identical(gce[[1L]], 0.0)
+  expect_equal(gce, crossEntrVector(getZeroOneProj(obj),
+                                    funProbZero(getDispersion(obj), mu)),
+               ignore_attr = TRUE)
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 

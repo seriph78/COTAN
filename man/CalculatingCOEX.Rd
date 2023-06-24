@@ -22,8 +22,6 @@
 \alias{calculateCoex}
 \alias{calculateS}
 \alias{calculateG}
-\alias{calculateGDI}
-\alias{calculatePValue}
 \title{Calculating the COEX matrix for genes and cells}
 \usage{
 \S4method{getGenesCoex}{COTAN}(
@@ -83,15 +81,6 @@ calculateG(
   geneSubsetCol = vector(mode = "character"),
   geneSubsetRow = vector(mode = "character")
 )
-
-calculateGDI(objCOTAN, statType = "S")
-
-calculatePValue(
-  objCOTAN,
-  statType = "S",
-  geneSubsetCol = vector(mode = "character"),
-  geneSubsetRow = vector(mode = "character")
-)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
@@ -125,10 +114,6 @@ empty the function will do it genome-wide.}
 
 \item{geneSubsetRow}{an array of genes. It will be put in rows. If left empty
 the function will do it genome-wide.}
-
-\item{statType}{Which statistics to use to compute the p-values. By default
-it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
-(G-test)}
 }
 \value{
 \code{getGenesCoex()} returns the genes' \code{COEX} values
@@ -163,10 +148,6 @@ expected contingency tables
 \code{calculateS()} returns the \code{S} matrix
 
 \code{calculateG()} returns the G matrix
-
-\code{calculateGDI()} returns a \code{data.frame} with the \emph{GDI} data
-
-\code{calculatePValue()} returns a \emph{p-value} \code{matrix} as \code{dspMatrix}
 }
 \description{
 These are the functions and methods used to calculate the
@@ -251,13 +232,6 @@ tables. It always has the diagonal set to zero.
 \code{calculateG()} calculates the statistics \emph{G-test} for genes
 contingency tables. It always has the diagonal set to zero. It is
 proportional to the genes' presence mutual information.
-
-\code{calculateGDI()} produces a\code{data.frame} with the \emph{GDI} for each gene
-
-\code{calculatePValue()} computes the p-values for genes in the \code{COTAN}
-object. It can be used genome-wide or by setting some specific genes of
-interest. By default it computes the \emph{p-values} using the \code{S} statistics
-(\eqn{\chi^{2}})
 }
 \note{
 The sum of the matrices returned by the function
