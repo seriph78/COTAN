@@ -1,6 +1,8 @@
 tm <- tempdir()
 stopifnot(file.exists(tm))
 
+library(zeallot)
+
 test_that("Cell Uniform Clustering", {
   utils::data("test.dataset", package = "COTAN")
 
@@ -15,9 +17,9 @@ test_that("Cell Uniform Clustering", {
   GDIThreshold <- 1.5
 
   suppressWarnings({
-    clusters <- cellsUniformClustering(obj, cores = 12L,
-                                       GDIThreshold = GDIThreshold,
-                                       saveObj = TRUE, outDir = tm)
+    clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+                                       cores = 12L, saveObj = TRUE,
+                                       outDir = tm)[["clusters"]]
   })
 
   gc()
@@ -26,18 +28,17 @@ test_that("Cell Uniform Clustering", {
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
-  expect_equal(getClusterizationData(obj)[["clusters"]], clusters,
-               ignore_attr = TRUE)
+  expect_equal(getClusters(obj), clusters, ignore_attr = TRUE)
 
   firstCl <- clusters[[1L]]
-  c(isUniform, fracAbove, quant) %<-%
+  c(isUniform, fracAbove, lastPerc) %<-%
     checkClusterUniformity(obj, GDIThreshold = GDIThreshold,
                            cluster = paste0("Cluster_", firstCl),
                            cells = names(clusters)[clusters == firstCl],
                            saveObj = TRUE, outDir = tm)
   expect_true(isUniform)
   expect_lte(fracAbove, 0.01)
-  expect_lte(quant, GDIThreshold)
+  expect_lte(lastPerc, GDIThreshold)
 
   #clusters_exp <- readRDS(file.path(getwd(), "clusters1.RDS"))
 
@@ -53,7 +54,7 @@ test_that("Cell Uniform Clustering", {
   expect_identical(sum(clMarkersDF[["IsMarker"]]), 0L)
 
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
-  highPos <- (1L:80L) %in% c(1L:10L, 31L:40L, 51L:70L)
+  highPos <- (1L:80L) %in% c(1L:10L, 31L:40L, 51L:60L, 61L:70L)
   expect_gt(min(topGenesNum[ highPos]), 480L)
   expect_lt(max(topGenesNum[!highPos]), 241L)
 

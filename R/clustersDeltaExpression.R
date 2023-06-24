@@ -30,7 +30,7 @@ clustersDeltaExpression <- function(objCOTAN, clusters = NULL, clName = "") {
 
   if (is_empty(clusters)) {
     clName <- getClusterizationName(objCOTAN, clName = clName)
-    clusters <- getClusterizationData(objCOTAN, clName = clName)[["clusters"]]
+    clusters <- getClusters(objCOTAN, clName = clName)
   } else {
     assert_that(!is_empty(clusters),
                 msg = "No clusterization given or present in the COTAN object")

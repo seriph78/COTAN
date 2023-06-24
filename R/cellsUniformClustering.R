@@ -153,12 +153,18 @@ NULL
 #' @param cores number of cores used
 #' @param maxIterations Max number of re-clustering iterations. It defaults to
 #'   \eqn{25}.
+#' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
+#'   and the others from [parallelDist::parDist()] are also available)
+#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
+#'   defined by the [stats::hclust()] function.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #'
-#' @returns `cellsUniformClustering()` returns the newly found *clusterization*
+#' @returns `cellsUniformClustering()` returns a `list` with 2 elements:
+#'   * `"clusters"` the newly found cluster labels array
+#'   * `"coex"` the associated `COEX` `data.frame`
 #'
 #' @export
 #'
@@ -170,11 +176,16 @@ NULL
 #'
 #' @importFrom utils as.roman
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @rdname UniformClusters
 #'
 
 cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                                    cores = 1L, maxIterations = 25L,
+                                   distance = "cosine",
+                                   hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
 
@@ -313,8 +324,9 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
   # replace the clusters' tags
   {
     clTags <- unique(sort(outputClusters))
-    numDigits <- floor(log10(length(clTags))) + 1L
-    clTagsMap <- formatC(seq_along(clTags), width = numDigits, flag = "0")
+
+    clTagsMap <- paste0(seq_along(clTags))
+    clTagsMap <- factorToVector(niceFactorLevels(clTagsMap))
     clTagsMap <- set_names(clTagsMap, clTags)
 
     unclusteredCells <- is.na(outputClusters)
@@ -324,7 +336,10 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
 
-  outputClusters <- factor(outputClusters)
+  c(outputClusters, outputCoexDF) %<-%
+    reorderClusterization(objCOTAN, clusters = outputClusters,
+                          coexDF = NULL, keepMinusOne = TRUE,
+                          distance = distance, hclustMethod = hclustMethod)
 
   if (saveObj) {
     clusterizationName <-
@@ -360,5 +375,5 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
 
   logThis("Creating cells' uniform clustering: DONE", logLevel = 2L)
 
-  return(outputClusters)
+  return(list("clusters" = factor(outputClusters), "coex" = outputCoexDF))
 }

@@ -350,12 +350,14 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName the name of an existing *clusterization*
-#' @param coexDF a `data.frame` where each column indicates the `COEX` for all,
-#'   or just some of, the clusters of the *clusterization*
+#' @param coexDF a `data.frame` where each column indicates the `COEX` for each
+#'   of the *clusters* of the *clusterization*
 #'
 #' @returns `addClusterizationCoex()` returns the updated `COTAN` object
 #'
 #' @export
+#'
+#' @importFrom assertthat assert_that
 #'
 #' @rdname HandlingClusterizations
 #'
@@ -363,14 +365,19 @@ setMethod(
   "addClusterizationCoex",
   "COTAN",
   function(objCOTAN, clName, coexDF) {
-    if (!isa(coexDF, "data.frame")) {
-      stop("'clusterCoex' is supposedly composed of data.frames.",
-           " A '", class(coexDF), "' was given instead for clusterization '",
-           clName, "'.")
-    }
+    assert_that(isa(coexDF, "data.frame"),
+                msg = paste0("'clusterCoex' is supposedly composed ",
+                             "of data.frames. A '", class(coexDF),
+                             "' was given instead for clusterization '",
+                             clName, "'"))
 
     internalName <- getClusterizationName(objCOTAN, clName = clName,
                                           keepPrefix = TRUE)
+
+    assert_that(setequal(colnames(coexDF),
+                         getClusters(objCOTAN, clName = internalName)),
+                msg = paste0("The column names of passed data.frame does not
+                             match the expected list of clusters"))
 
     # this should not add any new elements to the list!
     objCOTAN@clustersCoex[[internalName]] <- coexDF

@@ -1,3 +1,4 @@
+library(zeallot)
 
 test_that("Establish genes clusters", {
   data("test.dataset")

@@ -33,6 +33,9 @@
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @export
 #'
 #' @examples
@@ -205,6 +208,9 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @importFrom parallelDist parDist
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @export
 #'
 #' @examples
@@ -214,7 +220,8 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @rdname HandlingClusterizations
 #'
-clustersTreePlot <- function(objCOTAN, kCuts,
+clustersTreePlot <- function(objCOTAN,
+                             kCuts,
                              clName = "",
                              distance = "cosine",
                              hclustMethod = "ward.D2") {
@@ -235,7 +242,7 @@ clustersTreePlot <- function(objCOTAN, kCuts,
   if (is_empty(coexDF)) {
     logThis("Coex dataframe is missing: will be calculated and stored",
             logLevel = 1L)
-    coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+    coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
     objCOTAN <- addClusterizationCoex(objCOTAN, clName = clName,
                                       coexDF = coexDF)
   }

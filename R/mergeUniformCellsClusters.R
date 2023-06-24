@@ -27,7 +27,9 @@
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #'
-#' @returns a `list` with "clusters", "coexDF" and "pValueDF"
+#' @returns a `list` with:
+#'   * `"clusters"` the merged cluster labels array
+#'   * `"coex"` the associated `COEX` `data.frame`
 #'
 #' @export
 #'
@@ -36,7 +38,8 @@
 #'
 #' @importFrom Matrix t
 #'
-#' @importFrom stats dist
+#' @importFrom parallelDist parDist
+#'
 #' @importFrom stats hclust
 #' @importFrom stats as.dendrogram
 #' @importFrom stats cophenetic
@@ -72,8 +75,11 @@
 #' ## in cases of relatively low genes/cells number, or in cases when an
 #' ## rough clusterization is needed in the early satges of the analysis
 #' ##
-#' clusters <- cellsUniformClustering(objCOTAN, cores = 12,
-#'                                    GDIThreshold = 1.5, saveObj = FALSE)
+#'
+#' splitList <- cellsUniformClustering(objCOTAN, cores = 12,
+#'                                     GDIThreshold = 1.5, saveObj = FALSE)
+#'
+#' clusters <- splitList[["clusters"]]
 #'
 #' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
 #' checkClusterUniformity(objCOTAN,
@@ -87,6 +93,12 @@
 #'                               clName = "split",
 #'                               clusters = clusters)
 #'
+#' objCOTAN <- addClusterizationCoex(objCOTAN,
+#'                                   clName = "split",
+#'                                   coexDF = splitList[["coex"]])
+#'
+#' expect_identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
+#'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
 #'                                         GDIThreshold = 1.5,
 #'                                         batchSize = 5L,
@@ -99,7 +111,7 @@
 #' objCOTAN <- addClusterization(objCOTAN,
 #'                               clName = "merged",
 #'                               clusters = mergedList[["clusters"]],
-#'                               coexDF = mergedList[["coexDF"]])
+#'                               coexDF = mergedList[["coex"]])
 #'
 #' @rdname UniformClusters
 #'
@@ -118,7 +130,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   outputClusters <- clusters
   if (is_empty(outputClusters)) {
     # pick the last clusterization
-    outputClusters <- getClusterizationData(objCOTAN)[["clusters"]]
+    outputClusters <- getClusters(objCOTAN)
   }
 
   outputClusters <- factorToVector(outputClusters)
@@ -205,7 +217,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     oldNumClusters <- length(unique(outputClusters))
 
-    c(coexDF, pValueDF) %<-% DEAOnClusters(objCOTAN, clusters = outputClusters)
+    coexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
     gc()
 
     ## To drop the cells with only zeros
@@ -273,29 +285,28 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   logThis(paste0("The final merged clusterization contains [",
                  length(unique(outputClusters)), "] different clusters: ",
-                 toString(unique(sort(outputClusters)))), logLevel = 2L)
+                 toString(sort(unique(outputClusters)))), logLevel = 1L)
 
-  # replace the clusters' tags
-  # non merged clusters keep their tag, while merged one use the lesser one!
-  # there might be holes in the enumeration!
+  # replace the clusters' tags with completely new ones
   {
-    clTags <- levels(factor(outputClusters))
-    # here we use the fact that the merged clusters have
-    # the 'smaller' cluster as the first in the pair
-    clTagsMap <- str_split(clTags, pattern = fixed("_"), simplify = TRUE)[, 1L]
+    clTags <- sort(unique(outputClusters))
+
+    clTagsMap <- paste0(seq_along(clTags))
+    clTagsMap <- factorToVector(niceFactorLevels(clTagsMap))
     clTagsMap <- set_names(clTagsMap, clTags)
 
     outputClusters <- clTagsMap[outputClusters]
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
     colnames(coexDF)   <- clTagsMap[colnames(coexDF)]
-    colnames(pValueDF) <- clTagsMap[colnames(pValueDF)]
   }
 
-  outputClusters <- factor(outputClusters)
+  c(outputClusters, coexDF) %<-%
+    reorderClusterization(objCOTAN, clusters = outputClusters, coexDF = coexDF,
+                          reverse = FALSE, keepMinusOne = FALSE,
+                          distance = distance, hclustMethod = hclustMethod)
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 
-  return(list("clusters" = outputClusters,
-              "coexDF" = coexDF, "pValueDF" = pValueDF))
+  return(list("clusters" = outputClusters, "coex" = coexDF))
 }

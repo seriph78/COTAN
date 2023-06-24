@@ -152,6 +152,9 @@ observedContingencyTablesYY <- function(objCOTAN,
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix symmetricMatrix
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @export
 #'
 #' @rdname CalculatingCOEX
@@ -340,6 +343,9 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @export
 #'
 #' @rdname CalculatingCOEX
@@ -519,6 +525,9 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @export
 #'
 #' @rdname CalculatingCOEX
@@ -677,6 +686,9 @@ calculateS <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 #'   the function will do it genome-wide.
 #'
 #' @returns `calculateG()` returns the G matrix
+#'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
 #'
 #' @export
 #'

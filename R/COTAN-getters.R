@@ -913,7 +913,7 @@ NULL
 #' data("test.dataset.clusters1")
 #' clusters <- test.dataset.clusters1
 #'
-#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)[["coex"]]
+#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
 #'
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
 #'                      G2 = c("g-000300", "g-000330"),
@@ -1035,9 +1035,9 @@ setMethod(
 #'   significant!
 #'
 #' @returns `getClusterizationData()` returns a `list` with 2 elements:
-#'   * "clusters" the named cluster labels array
-#'   * "coex" the associated `COEX` `data.frame`; it will be **empty** if not
-#'   defined
+#'   * `"clusters"` the named cluster labels array
+#'   * `"coex"` the associated `COEX` `data.frame`; it will be **empty** if not
+#'     defined
 #'
 #' @export
 #'
@@ -1068,6 +1068,27 @@ setMethod(
   }
 )
 
+#'
+#' @details `getClusters()` extracts the asked *clusterization* from the `COTAN`
+#'   object
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be returned, as it is probably the most
+#'   significant!
+#'
+#' @returns `getClusters()` returns the named cluster labels array
+#'
+#' @export
+#'
+#' @examples
+#' clusters <- getClusters(objCOTAN, clName = clName)
+#'
+#' @rdname HandlingClusterizations
+#'
+getClusters <- function(objCOTAN, clName = "") {
+  return(getClusterizationData(objCOTAN, clName = clName)[["clusters"]])
+}
 
 #' @aliases getClustersCoex
 #'
@@ -1281,7 +1302,7 @@ normalizeNameAndLabels <- function(objCOTAN, name = "",
   if (is_empty(labels)) {
     if (isFALSE(isCond)) {
       name <- getClusterizationName(objCOTAN, clName = name)
-      labels <- getClusterizationData(objCOTAN, clName = name)[["clusters"]]
+      labels <- getClusters(objCOTAN, clName = name)
     } else {
       name <- getConditionName(objCOTAN, condName = name)
       labels <- getCondition(objCOTAN, condName = name)

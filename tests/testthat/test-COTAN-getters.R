@@ -75,6 +75,7 @@ test_that("COTAN getters", {
   expect_setequal(names(getClusterizationData(obj)), c("coex", "clusters"))
   expect_equal(getClusterizationData(obj)[["clusters"]],
                getMetadataCells(obj)[["CL_Test2"]], ignore_attr = TRUE)
+  expect_identical(getClusters(obj), getClusterizationData(obj)[["clusters"]])
   expect_identical(getClusterizationData(obj)[["coex"]], data.frame())
   expect_identical(getAllConditions(obj), "Test")
   expect_identical(getConditionName(obj), "")
