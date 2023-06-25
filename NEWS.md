@@ -1,5 +1,24 @@
 ## COTAN 2.1.6
 
+Added function `reorderClusterization()`: it reorders the given *clusterization*
+so that *near clusters* have also *near labels*
+
+The functions `cellsUniformClustering()` and `mergeUniformCellsClusters()` now
+return the result of this new function
+
+Separated p-value calculations from `DEAOnClusters()` into the new function
+`pValueFromDEA()`. Those `data.frames` are no longer part of the list returned
+by the functions `DEAOnClusters()` and `mergeUniformCellsClusters()`
+
+Added function `getClusters()` to retrieve the wanted clusterization from the
+cells' meta-dataset
+
+Added function `calculateGenesCE()`: it returns the cross-entropy between
+the expected absence of ritzs reading against the observed state
+
+Fixed minor issue with `logThis()` to file: it was always appending a new line
+even when `appendLF` was set to `FALSE`
+
 Now `checkClusterUniformity()` returns more GDI stats like the percentage of
 genes above threshold or the last percentile of the GDI values
 
