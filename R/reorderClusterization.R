@@ -9,7 +9,7 @@
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
 #' @param reverse a flag to the output order
-#' @param keepMinuOne a flag to decide whether to keep the cluster `"-1"`
+#' @param keepMinusOne a flag to decide whether to keep the cluster `"-1"`
 #'   (representing the non-clustered cells) untouched
 #' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
 #'   and the others from [parallelDist::parDist()] are also available)
@@ -79,11 +79,12 @@ reorderClusterization <- function(objCOTAN,
   logThis(paste(paste0(names(clMap)), " -> ", paste0(clMap), collapse = ", "),
           logLevel = 1L)
 
-  outputClusters <- factor(clusters)
+  outputClusters <- factorToVector(factor(clusters))
   outputCoexDF <- coexDF
 
-  levels(outputClusters) <- clMap[levels(outputClusters)]
+  outputClusters <- set_names(clMap[outputClusters], names(outputClusters))
   colnames(outputCoexDF) <- clMap[colnames(coexDF)]
+
   # Reorder the columns to match wanted hc[["order"]]
   outputCoexDF <- outputCoexDF[, hc[["order"]]]
 
@@ -92,5 +93,5 @@ reorderClusterization <- function(objCOTAN,
     outputCoexDF[["-1"]] <- minusOneClCoex
   }
 
-  return(list("clusters" = outputClusters, "coex" = outputCoexDF))
+  return(list("clusters" = factor(outputClusters), "coex" = outputCoexDF))
 }
