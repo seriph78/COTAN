@@ -51,7 +51,7 @@ reorderClusterization <- function(objCOTAN,
   # exclude cluster "-1"
   minusOneClCoex <- NULL
   if (keepMinusOne && any(clusters == "-1")) {
-    col = which(colnames(coexDF) == "-1")
+    col <- which(colnames(coexDF) == "-1")
     minusOneClCoex <- coexDF[["-1"]]
     coexDF <- coexDF[, -col]
   }
@@ -65,14 +65,14 @@ reorderClusterization <- function(objCOTAN,
   perm <- order(hc[["order"]])
 
   if (isTRUE(reverse)) {
-    perm <- (length(perm) + 1) - perm
+    perm <- (length(perm) + 1L) - perm
   }
 
   clNames <- hc[["labels"]]
   clMap <- set_names(clNames[perm], clNames)
 
   if (keepMinusOne && !is_empty(minusOneClCoex)) {
-    clMap["-1"] <- "-1"
+    clMap[["-1"]] <- "-1"
   }
 
   logThis("Applied reordering to clusterization is:", logLevel = 1L)

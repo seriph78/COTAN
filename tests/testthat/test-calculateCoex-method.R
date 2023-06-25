@@ -6,15 +6,15 @@ library(rlang)
 
 crossEntrVector <- function(zeroOne, probZero) {
   crossEntr <- rep_len(0.0, nrow(zeroOne))
-  for (r in 1L:nrow(zeroOne)){
-    for (c in 1L:ncol(zeroOne)) {
-      if (probZero[r, c] != 0) {
-        crossEntr[r] = crossEntr[r] -
+  for (r in seq_len(nrow(zeroOne))) {
+    for (c in seq_len(ncol(zeroOne))) {
+      if (probZero[r, c] != 0.0) {
+        crossEntr[r] <- crossEntr[r] -
           (1.0 - zeroOne[r, c]) * log(probZero[r, c]) -
           zeroOne[r, c] * log(1.0 - probZero[r, c])
       }
     }
-    crossEntr[r] = crossEntr[r] / ncol(zeroOne)
+    crossEntr[r] <- crossEntr[r] / ncol(zeroOne)
   }
 
   return(crossEntr)
@@ -139,7 +139,8 @@ test_that("Calculations on genes", {
 
   expect_identical(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2L))
   expect_identical(getGenesCoex(obj)[1L, 1L], 0.0)
-  expect_equal(abs(as.vector(getGenesCoex(obj, zeroDiagonal = FALSE)[-1L,-1L])),
+  expect_equal(abs(as.vector(getGenesCoex(obj,
+                                          zeroDiagonal = FALSE)[-1L, -1L])),
                rep(1.0, 81L), tolerance = 0.01)
 
   expect_equal(as.matrix(getGenesCoex(obj, zeroDiagonal = FALSE)),

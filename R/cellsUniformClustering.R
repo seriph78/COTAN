@@ -116,8 +116,8 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
   },
   error = function(e) {
     logThis(msg = paste("Seurat clusterization failed with", ncol(rawData),
-                        "cells with the following error:"), logLevel = 1)
-    logThis(msg = conditionMessage(e), logLevel = 1)
+                        "cells with the following error:"), logLevel = 1L)
+    logThis(msg = conditionMessage(e), logLevel = 1L)
     return(list("SeuratObj" = NULL, "UsedMaxResolution" = FALSE))
   })
 

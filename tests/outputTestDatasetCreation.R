@@ -2,7 +2,8 @@
 # Creates the files to be reloaded by the tests for comparisons
 library(zeallot)
 
-outputTestDatasetCreation <- function(testsDir = "tests/testthat") {
+outputTestDatasetCreation <- function(testsDir = file.path("tests",
+                                                           "testthat")) {
   utils::data("test.dataset", package = "COTAN")
   options(parallelly.fork.enable = TRUE)
 

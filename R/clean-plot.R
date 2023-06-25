@@ -180,15 +180,16 @@ cleanPlots <- function(objCOTAN) {
             geom_point(colour = "#8491B4B2", size = 1L) +
             plotTheme("common")
 
-  nuDf <- nuDf[1:(min(400L, nrow(nuDf))), ]
+  nuDf <- nuDf[seq_len(min(400L, nrow(nuDf))), ]
   zNuPlot <- ggplot(nuDf, aes(x = n, y = nu)) +
              geom_point(colour = "#8491B4B2", size = 1L) +
              plotTheme("common") +
-             xlim(0, nrow(nuDf)) +
+             xlim(0L, nrow(nuDf)) +
              ylim(0.0, round(max(nuDf[["nu"]]) + 0.05, digits = 2L))
 
   # estimate the elbow point if any...
-  secondDer <- diff(nuDf[1:min(100L, nrow(nuDf)), "nu"], differences = 2)
+  secondDer <- diff(nuDf[seq_len(min(100L, nrow(nuDf))), "nu"],
+                    differences = 2L)
   if (min(secondDer) < -0.01) {
     lowUDEThr <- nuDf[(max(which(secondDer < -0.01)) + 1), "nu"] - 0.005
     zNuPlot <- zNuPlot +

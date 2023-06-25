@@ -92,11 +92,11 @@ test_that("Clusterizations manipulations", {
   expect_identical(min(nchar(factorToVector(niceClusters))), 3L)
   expect_true(all(endsWith(factorToVector(niceClusters), clusters)))
 
-  levels(niceClusters) <- c(1:3, 11:13, 100)
+  levels(niceClusters) <- c(1L:3L, 11L:13L, 100L)
   niceClusters <- niceFactorLevels(niceClusters)
   expect_identical(max(nchar(factorToVector(niceClusters))), 3L)
   expect_identical(min(nchar(factorToVector(niceClusters))), 3L)
-  expect_setequal(as.integer(levels(niceClusters)), c(1:3, 11:13, 100))
+  expect_setequal(as.integer(levels(niceClusters)), c(1L:3L, 11L:13L, 100L))
 })
 
 

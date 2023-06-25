@@ -226,7 +226,9 @@ setGeneric(
 setGeneric(
   "dropGenesCells",
   function(objCOTAN, genes = vector(mode = "character"),
-           cells = vector(mode = "character")) standardGeneric("dropGenesCells")
+           cells = vector(mode = "character")) {
+    standardGeneric("dropGenesCells")
+  }
 )
 
 setGeneric(

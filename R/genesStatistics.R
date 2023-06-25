@@ -31,7 +31,7 @@ calculateGenesCE <- function(objCOTAN) {
 
   zeroOne <- as.matrix(getZeroOneProj(objCOTAN))
 
-  feg <- rowsums(zeroOne) == getNumCells(objCOTAN)
+  feg <- getNumOfExpressingCells(objCOTAN) == getNumCells(objCOTAN)
 
   minusEntrM <- matrix(0.0, nrow = getNumGenes(objCOTAN),
                        ncol = getNumCells(objCOTAN))

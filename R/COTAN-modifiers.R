@@ -227,17 +227,17 @@ setMethod(
                 msg = paste0("Asked to drop genes and/or cells",
                              " that were not present in the 'COTAN' object"))
 
-    if (length(genes) == 0 && length(cells) == 0) {
+    if (length(genes) == 0L && length(cells) == 0L) {
       logThis("Asked to drop no genes or cells", logLevel = 2L)
     } else {
       logThis(paste("Asked to drop", length(genes), "genes and",
-                    length(cells), "cells"), logLevel = 3)
+                    length(cells), "cells"), logLevel = 3L)
     }
 
     genesPosToKeep <- which(!(getGenes(objCOTAN) %in% genes))
     cellsPosToKeep <- which(!(getCells(objCOTAN) %in% cells))
 
-    assert_that((length(genesPosToKeep) != 0 && length(cellsPosToKeep) != 0),
+    assert_that((length(genesPosToKeep) != 0L && length(cellsPosToKeep) != 0L),
                 msg = "Asked to drop all genes and/or cells")
 
     # As all estimates would be wrong, a completely new object is created
