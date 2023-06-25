@@ -80,14 +80,17 @@ reorderClusterization <- function(objCOTAN,
           logLevel = 1L)
 
   outputClusters <- factor(clusters)
+  outputCoexDF <- coexDF
 
   levels(outputClusters) <- clMap[levels(outputClusters)]
-  colnames(coexDF) <- clMap[colnames(coexDF)]
+  colnames(outputCoexDF) <- clMap[colnames(coexDF)]
+  # Reorder the columns to match wanted hc[["order"]]
+  outputCoexDF <- outputCoexDF[, hc[["order"]]]
 
   # restore cluster "-1"
   if (keepMinusOne && !is_empty(minusOneClCoex)) {
-    coexDF[["-1"]] <- minusOneClCoex
+    outputCoexDF[["-1"]] <- minusOneClCoex
   }
 
-  return(list("clusters" = factor(outputClusters), "coex" = coexDF))
+  return(list("clusters" = outputClusters, "coex" = outputCoexDF))
 }

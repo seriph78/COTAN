@@ -69,6 +69,12 @@ test_that("Merge Uniform Cells Clusters", {
   expect_lt(nlevels(mergedClusters), nlevels(clusters))
   expect_setequal(mergedClusters, colnames(mergedCoexDF))
 
+  obj <- addClusterization(obj, clName = "merge", clusters = mergedClusters,
+                           coexDF = mergedCoexDF, override = FALSE)
+
+  expect_identical(reorderClusterization(obj),
+                   list("clusters" = mergedClusters, "coex" = mergedCoexDF))
+
   #cluster_data <- readRDS(file.path(getwd(), "cluster_data_merged.RDS"))
   #expect_identical(mergedClusters[genes.names.test], cluster_data)
 

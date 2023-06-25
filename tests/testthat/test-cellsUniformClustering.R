@@ -29,6 +29,7 @@ test_that("Cell Uniform Clustering", {
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
   expect_equal(getClusters(obj), clusters, ignore_attr = TRUE)
+  expect_identical(reorderClusterization(obj)[["clusters"]], clusters)
 
   firstCl <- clusters[[1L]]
   c(isUniform, fracAbove, lastPerc) %<-%

@@ -113,6 +113,8 @@
 #'                               clusters = mergedList[["clusters"]],
 #'                               coexDF = mergedList[["coex"]])
 #'
+#' expect_identical(reorderClusterization(objCOTAN), mergedList)
+#'
 #' @rdname UniformClusters
 #'
 
