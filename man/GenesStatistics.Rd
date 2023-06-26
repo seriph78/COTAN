@@ -47,10 +47,11 @@ of each gene
 
 \code{calculatePValue()} returns a \emph{p-value} \code{matrix} as \code{dspMatrix}
 
-\code{calculatePDI()} returns a \emph{PDI} \code{matrix} as \code{dspMatrix}
+\code{calculatePDI()} returns a \emph{Pair Differential Index} \code{matrix} as
+\code{dspMatrix}
 }
 \description{
-A collectino fo functions returning various statistics
+A collection of functions returning various statistics
 associated to the genes. In particular the \emph{discrepancy} between the
 expected probabilities of zero and their actual occurrences, both at single
 gene level or looking at genes' pairs

@@ -211,8 +211,8 @@ column for each \emph{cluster}.
 
 \code{dropClusterization()} returns the updated \code{COTAN} object
 
-\code{DEAOnClusters()} returns the coexpression \code{data.frame} for the genes
-in each \emph{cluster}
+\code{DEAOnClusters()} returns the co-expression \code{data.frame} for the
+genes in each \emph{cluster}
 
 \code{pValueFromDEA()} returns a \code{data.frame} with the \emph{p-values}
 corresponding to the given \emph{coex}

@@ -10,8 +10,8 @@
 #'   analyzed. If empty, the function will use the last *clusterization* stored
 #'   in the `COTAN` object
 #'
-#' @return `DEAOnClusters()` returns the coexpression `data.frame` for the genes
-#'   in each *cluster*
+#' @return `DEAOnClusters()` returns the co-expression `data.frame` for the
+#'   genes in each *cluster*
 #'
 #' @export
 #'

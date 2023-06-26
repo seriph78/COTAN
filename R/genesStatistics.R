@@ -1,7 +1,7 @@
 
 #' Calculations of genes statistics
 #'
-#' @description A collectino fo functions returning various statistics
+#' @description A collection of functions returning various statistics
 #'   associated to the genes. In particular the *discrepancy* between the
 #'   expected probabilities of zero and their actual occurrences, both at single
 #'   gene level or looking at genes' pairs
@@ -193,7 +193,8 @@ calculatePValue <- function(objCOTAN, statType = "S",
 #' @param geneSubsetRow an array of genes. It will be put in rows. If left empty
 #'   the function will do it genome-wide.
 #'
-#' @return `calculatePDI()` returns a *PDI* `matrix` as `dspMatrix`
+#' @return `calculatePDI()` returns a *Pair Differential Index* `matrix` as
+#'   `dspMatrix`
 #'
 #' @export
 #'

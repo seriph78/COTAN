@@ -52,7 +52,7 @@ NULL
 genesCoexSpace <-
   function(objCOTAN, primaryMarkers, numGenesPerMarker = 25L) {
   # TODO: output tanh of reduced coex matrix
-  logThis("Calculating gene coexpression space - START", logLevel = 2L)
+  logThis("Calculating gene co-expression space - START", logLevel = 2L)
 
   {
     genesBelong <- primaryMarkers %in% getGenes(objCOTAN)
@@ -118,7 +118,7 @@ genesCoexSpace <-
                  dim(GCS)[[2L]]), logLevel = 3L)
   logThis(paste0("Number of rows (U set): ", dim(GCS)[[1L]]), logLevel = 3L)
 
-  logThis("Calculating gene coexpression space - DONE", logLevel = 2L)
+  logThis("Calculating gene co-expression space - DONE", logLevel = 2L)
 
   return(list("SecondaryMarkers" = secondaryMarkers, "GCS" = GCS,
               "rankGenes" = rankGenes))

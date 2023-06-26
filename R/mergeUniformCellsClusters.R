@@ -97,7 +97,7 @@
 #'                                   clName = "split",
 #'                                   coexDF = splitList[["coex"]])
 #'
-#' expect_identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
+#' identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 #'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
 #'                                         GDIThreshold = 1.5,
@@ -113,7 +113,7 @@
 #'                               clusters = mergedList[["clusters"]],
 #'                               coexDF = mergedList[["coex"]])
 #'
-#' expect_identical(reorderClusterization(objCOTAN), mergedList)
+#' identical(reorderClusterization(objCOTAN), mergedList)
 #'
 #' @rdname UniformClusters
 #'

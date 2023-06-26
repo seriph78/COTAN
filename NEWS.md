@@ -14,7 +14,7 @@ Added function `getClusters()` to retrieve the wanted clusterization from the
 cells' meta-dataset
 
 Added function `calculateGenesCE()`: it returns the cross-entropy between
-the expected absence of ritzs reading against the observed state
+the expected absence of a gene reading against the observed state
 
 Fixed minor issue with `logThis()` to file: it was always appending a new line
 even when `appendLF` was set to `FALSE`

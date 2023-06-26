@@ -50,7 +50,6 @@ clustersSummaryPlot
 clustersTreePlot
 coex
 coexDF
-coexpression
 contingencyTables
 cosineDissimilarity
 dataScore

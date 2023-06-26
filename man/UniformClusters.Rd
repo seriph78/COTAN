@@ -114,7 +114,7 @@ of the \emph{clusters} of the \emph{clusterization}}
 
 \item{reverse}{a flag to the output order}
 
-\item{keepMinuOne}{a flag to decide whether to keep the cluster \code{"-1"}
+\item{keepMinusOne}{a flag to decide whether to keep the cluster \code{"-1"}
 (representing the non-clustered cells) untouched}
 }
 \value{
@@ -228,7 +228,7 @@ objCOTAN <- addClusterizationCoex(objCOTAN,
                                   clName = "split",
                                   coexDF = splitList[["coex"]])
 
-expect_identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
+identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 
 mergedList <- mergeUniformCellsClusters(objCOTAN,
                                         GDIThreshold = 1.5,
@@ -244,6 +244,6 @@ objCOTAN <- addClusterization(objCOTAN,
                               clusters = mergedList[["clusters"]],
                               coexDF = mergedList[["coex"]])
 
-expect_identical(reorderClusterization(objCOTAN), mergedList)
+identical(reorderClusterization(objCOTAN), mergedList)
 
 }
