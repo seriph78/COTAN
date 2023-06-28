@@ -139,10 +139,6 @@ clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @export
 #'
-#' @examples
-#' dataAndPlot <- clustersSummaryPlot(objCOTAN)
-#' plot(dataAndPlot[["plot"]])
-#'
 #' @rdname HandlingClusterizations
 #'
 clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,

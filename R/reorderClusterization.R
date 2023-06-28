@@ -29,7 +29,7 @@
 #'
 #' @importFrom stats hclust
 #'
-#' @rdname UniformClusters
+#' @rdname HandlingClusterizations
 #'
 
 reorderClusterization <- function(objCOTAN,
