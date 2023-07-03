@@ -294,6 +294,13 @@ setGeneric(
 )
 
 setGeneric(
+  "estimateNuLinearByCluster",
+  function(objCOTAN, clusters = NULL) {
+    standardGeneric("estimateNuLinearByCluster")
+  }
+)
+
+setGeneric(
   "estimateDispersionBisection",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 50L, chunkSize = 1024L) {

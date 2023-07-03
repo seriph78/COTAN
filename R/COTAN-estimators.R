@@ -90,7 +90,66 @@ setMethod(
     nu <- nu / mean(nu)
 
     {
-      oldNu <-  getMetadataCells(objCOTAN)[["nu"]]
+      oldNu <- getMetadataCells(objCOTAN)[["nu"]]
+      if (!identical(nu, oldNu)) {
+        # flag the coex slots are out of sync (if any)!
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["gsync"]], FALSE)
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["csync"]], FALSE)
+      }
+    }
+
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
+                                        "nu", getCells(objCOTAN))
+
+    return(objCOTAN)
+  }
+)
+
+
+#' @aliases estimateNuLinearByCluster
+#'
+#' @details `estimateNuLinearByCluster()` does a linear estimation of nu:
+#'   cells' counts averages normalised *cluster* by *cluster*
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param clusters The *clusterization* to use. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
+#'
+#' @returns `estimateNuLinearByCluster()` returns the updated `COTAN` object
+#'
+#' @importFrom rlang is_empty
+#' @importFrom rlang set_names
+#'
+#' @importFrom Matrix colMeans
+#'
+#' @export
+#'
+#' @rdname HandlingClusterizations
+#'
+setMethod(
+  "estimateNuLinearByCluster",
+  "COTAN",
+  function(objCOTAN, clusters = NULL) {
+    if (is_empty(clusters)) {
+      # pick the last clusterization
+      clusters <- getClusters(objCOTAN)
+    }
+    clusters = factor(clusters)
+
+    # raw column averages
+    nu <- colMeans(getRawData(objCOTAN), dims = 1L)
+
+    # Normalize by cluster
+    for (cl in levels(clusters)) {
+      c <- clusters == cl
+      nu[c] <- nu[c] / mean(nu[c])
+    }
+
+    {
+      oldNu <- getMetadataCells(objCOTAN)[["nu"]]
       if (!identical(nu, oldNu)) {
         # flag the coex slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
