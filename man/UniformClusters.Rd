@@ -23,6 +23,7 @@ cellsUniformClustering(
   GDIThreshold = 1.4,
   cores = 1L,
   maxIterations = 25L,
+  initialResolution = 0.8,
   distance = "cosine",
   hclustMethod = "ward.D2",
   saveObj = TRUE,
@@ -71,8 +72,12 @@ here to speed up the process (default is \code{NULL})}
 
 \item{cores}{number cores used}
 
-\item{maxIterations}{Max number of re-clustering iterations. It defaults to
-\eqn{25}.}
+\item{maxIterations}{max number of re-clustering iterations. It defaults to
+\eqn{25}}
+
+\item{initialResolution}{a number indicating how refined are the clusters
+before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as
+\code{\link[Seurat:FindClusters]{Seurat::FindClusters()}}}
 
 \item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
 and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
@@ -132,7 +137,7 @@ given \code{GDIThreshold}
 
 \code{cellsUniformClustering()} finds a \strong{Uniform} \emph{clusterizations} by
 means of the \code{GDI}. Once a preliminary \emph{clusterization} is obtained from
-the \code{Seurat} package methods, each \emph{cluster} is checked for \strong{uniformity}
+the \code{Seurat-package} methods, each \emph{cluster} is checked for \strong{uniformity}
 via the function \code{\link[=checkClusterUniformity]{checkClusterUniformity()}}. Once all \emph{clusters} are
 checked, all cells from the \strong{non-uniform} clusters are pooled together
 for another iteration of the entire process, until all \emph{clusters} are
@@ -178,6 +183,7 @@ plot(gdiPlot)
 ##
 
 splitList <- cellsUniformClustering(objCOTAN, cores = 12,
+                                    initialResolution = 0.8,
                                     GDIThreshold = 1.5, saveObj = FALSE)
 
 clusters <- splitList[["clusters"]]

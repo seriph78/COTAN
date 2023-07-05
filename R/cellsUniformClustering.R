@@ -10,6 +10,8 @@
 #' @param rawData The raw counts
 #' @param cond The sample condition
 #' @param iter The current iteration
+#' @param initialResolution The resolution to use at first in the
+#'   *clusterization* algorithm
 #' @param minNumClusters The minimum number of *clusters* expected from this
 #'   *clusterization*. In cases it is not reached, it will increase the
 #'   resolution of the *clusterization*.
@@ -40,8 +42,8 @@
 #'
 #' @noRd
 #'
-seuratClustering <- function(rawData, cond, iter, minNumClusters,
-                             saveObj, outDir) {
+seuratClustering <- function(rawData, cond, iter, initialResolution,
+                             minNumClusters, saveObj, outDir) {
   ret <- tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
@@ -60,7 +62,6 @@ seuratClustering <- function(rawData, cond, iter, minNumClusters,
 
     srat <- FindNeighbors(srat, dims = 1L:min(25L, maxRows))
 
-    initialResolution <- 0.5
     resolution <- initialResolution
     repeat {
       srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
@@ -140,7 +141,7 @@ NULL
 
 #' @details `cellsUniformClustering()` finds a **Uniform** *clusterizations* by
 #'   means of the `GDI`. Once a preliminary *clusterization* is obtained from
-#'   the `Seurat` package methods, each *cluster* is checked for **uniformity**
+#'   the `Seurat-package` methods, each *cluster* is checked for **uniformity**
 #'   via the function [checkClusterUniformity()]. Once all *clusters* are
 #'   checked, all cells from the **non-uniform** clusters are pooled together
 #'   for another iteration of the entire process, until all *clusters* are
@@ -151,8 +152,11 @@ NULL
 #' @param GDIThreshold the threshold level that discriminates uniform
 #'   *clusters*. It defaults to \eqn{1.4}
 #' @param cores number of cores used
-#' @param maxIterations Max number of re-clustering iterations. It defaults to
-#'   \eqn{25}.
+#' @param initialResolution a number indicating how refined are the clusters
+#'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
+#'   [Seurat::FindClusters()]
+#' @param maxIterations max number of re-clustering iterations. It defaults to
+#'   \eqn{25}
 #' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
 #'   and the others from [parallelDist::parDist()] are also available)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
@@ -183,7 +187,9 @@ NULL
 #'
 
 cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
-                                   cores = 1L, maxIterations = 25L,
+                                   cores = 1L,
+                                   maxIterations = 25L,
+                                   initialResolution = 0.8,
                                    distance = "cosine",
                                    hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
@@ -218,6 +224,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     c(objSeurat, usedMaxResolution) %<-%
       seuratClustering(rawData = getRawData(objCOTAN)[, is.na(outputClusters)],
                        cond = cond, iter = iter,
+                       initialResolution = initialResolution,
                        minNumClusters = numClustersToRecluster + 1L,
                        saveObj = saveObj, outDir = outDirIter)
 

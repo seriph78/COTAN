@@ -15,9 +15,10 @@ test_that("Cell Uniform Clustering", {
                        cores = 12L, saveObj = TRUE, outDir = tm)
 
   GDIThreshold <- 1.5
-
+  initialResolution <- 0.8
   suppressWarnings({
     clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+                                       initialResolution = initialResolution,
                                        cores = 12L, saveObj = TRUE,
                                        outDir = tm)[["clusters"]]
   })
@@ -55,7 +56,7 @@ test_that("Cell Uniform Clustering", {
   expect_identical(sum(clMarkersDF[["IsMarker"]]), 0L)
 
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
-  highPos <- (1L:80L) %in% c(1L:10L, 21L:30L, 51L:60L, 71L:80L)
+  highPos <- (1L:80L) %in% c(11L:20L, 31L:40L, 41L:50L, 61L:70L)
   expect_gt(min(topGenesNum[ highPos]), 480L)
   expect_lt(max(topGenesNum[!highPos]), 241L)
 
