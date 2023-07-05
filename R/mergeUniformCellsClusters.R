@@ -77,6 +77,7 @@
 #' ##
 #'
 #' splitList <- cellsUniformClustering(objCOTAN, cores = 12,
+#'                                     initialResolution = 0.8,
 #'                                     GDIThreshold = 1.5, saveObj = FALSE)
 #'
 #' clusters <- splitList[["clusters"]]

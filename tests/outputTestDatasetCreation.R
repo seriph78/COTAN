@@ -43,8 +43,10 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
   saveRDS(pval.test, file.path(testsDir, "pval.test.RDS"))
 
   GDIThreshold <- 1.5
+  initialResolution <- 0.8
 
   clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+                                     initialResolution =   initialResolution,
                                      cores = 12L, saveObj = FALSE)[["clusters"]]
   saveRDS(clusters, file.path(testsDir, "clusters1.RDS"))
 
