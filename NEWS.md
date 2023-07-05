@@ -1,3 +1,12 @@
+## COTAN 2.1.7
+
+Added `initialResolution` parameter to `cellsUniformClustering()`: it allows
+users to specify the initial resolution used in the calls to
+`Seurat::FindClusters()` method. It now uses the same default as Seurat
+
+Added new method `estimateNuLinearByCluster()` that calculates `nu` ensuring
+that its average is 1.0 in each given cluster
+
 ## COTAN 2.1.6
 
 Added function `reorderClusterization()`: it reorders the given *clusterization*
