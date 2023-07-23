@@ -61,6 +61,9 @@ dispersionBisection <-
     if (sumZeros == 0L) {
       # cannot match exactly zero prob of zeros with finite values
       return(-Inf)
+    } else if (sumZeros == length(nu)) {
+      # in case of zero lambda dispersion is irrelevant. We return 1.0
+      return(1.0)
     }
     mu <- lambda * nu
 
@@ -150,11 +153,15 @@ parallelDispersionBisection <-
     sumZeros <- sumZeros[genes]
     lambda <- lambda[genes]
 
-    goodPos <- sumZeros != 0L
-
     # cannot match exactly zero prob of zeros with finite values
     # so we ignore the rows with no zeros from the solver and return -Inf
     output <- rep(-Inf, length(sumZeros))
+
+    # in case of zero lambda dispersion is irrelevant. We return 1.0
+    goodPos <- sumZeros != length(nu)
+    output[!goodPos] <- 1.0
+
+    goodPos <- goodPos & sumZeros != 0L
 
     if (sum(goodPos) == 0L) {
       return(output)
