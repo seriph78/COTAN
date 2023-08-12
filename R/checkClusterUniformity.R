@@ -54,13 +54,7 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
 
     pdf(file.path(outDir, paste0("cluster_", cluster, "_plots.pdf")))
 
-    plots <- cleanPlots(objCOTAN)
-
-    plot(plots[["pcaCells"]])
-    plot(plots[["genes"]])
-    plot(plots[["UDE"]])
-    plot(plots[["nu"]])
-    rm(plots)
+    plot(cleanPlots(objCOTAN, includePCA = FALSE)[["nu"]])
 
     genesToLabel <- head(rownames(GDIData[order(GDIData[["GDI"]],
                                                 decreasing = TRUE), ]), n = 10L)

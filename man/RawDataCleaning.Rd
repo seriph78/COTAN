@@ -46,7 +46,7 @@ ECDPlot(objCOTAN, yCut)
 
 \S4method{clean}{COTAN}(objCOTAN)
 
-cleanPlots(objCOTAN)
+cleanPlots(objCOTAN, includePCA = TRUE)
 
 cellSizePlot(objCOTAN, splitPattern = " ", numCol = 2L)
 
@@ -69,6 +69,10 @@ scatterPlot(objCOTAN, splitPattern = " ", numCol = 2L, splitSamples = FALSE)
 \item{cells}{an array of cell names}
 
 \item{yCut}{y threshold of library size to drop}
+
+\item{includePCA}{a \code{Boolean} flag to determin whether to calculate the \emph{PCA}
+associated with the normalized matrix. When \code{TRUE} the first four elements
+of the returned list will be \code{NULL}}
 
 \item{splitPattern}{Pattern used to extract, from the column names, the
 sample field (default " ")}
@@ -112,11 +116,11 @@ more relevant with the restricted matrix
 
 \code{cleanPlots()} returns a \code{list} of \code{ggplot2} plots:
 \itemize{
-\item "pcaCells" is for pca cells,
-\item "pcaCellsData" is the data of the pca cells,
-\item "genes" is for cluster2 cells' group genes,
-\item "UDE" is for cell UDE,
-\item "nu" is for cell nu.
+\item \code{"pcaCells"} is for pca cells
+\item \code{"pcaCellsData"} is the data of the pca cells (can be plotted)
+\item \code{"genes"} is for \code{B} group cells' genes
+\item \code{"UDE"} is for cells' UDE against their pca
+\item \code{"nu"} is for cell \emph{nu}
 }
 
 \code{cellSizePlot()} returns the \code{violin-boxplot} plot

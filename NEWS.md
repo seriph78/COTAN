@@ -1,3 +1,9 @@
+# COTAN 2.0.5
+
+Added new flag to the function `cleanPlots()` to suppress evaluation of the
+*PCA* on the normalised data. In particular, this allows to reduce significantly
+time spent within the function `checkClusterUniformity()`
+
 ## COTAN 2.0.4
 
 Improved `mergeUniformCellsClusters()`: now it attempts to merge more
