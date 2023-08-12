@@ -111,7 +111,7 @@ setMethod(
 #' @aliases estimateNuLinearByCluster
 #'
 #' @details `estimateNuLinearByCluster()` does a linear estimation of nu:
-#'   cells' counts averages normalised *cluster* by *cluster*
+#'   cells' counts averages normalized *cluster* by *cluster*
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clusters The *clusterization* to use. If not given the last

@@ -2,9 +2,9 @@
 #'   [clean()] method.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param includePCA a `Boolean` flag to determin whether to calculate the *PCA*
-#'   associated with the normalized matrix. When `TRUE` the first four elements
-#'   of the returned list will be `NULL`
+#' @param includePCA a `Boolean` flag to determine whether to calculate the
+#'   *PCA* associated with the normalized matrix. When `TRUE` the first four
+#'   elements of the returned list will be `NULL`
 #'
 #' @returns `cleanPlots()` returns a `list` of `ggplot2` plots:
 #'   * `"pcaCells"` is for pca cells

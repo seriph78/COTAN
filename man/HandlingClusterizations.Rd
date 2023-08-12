@@ -314,7 +314,7 @@ The formulae for this \emph{In/Out} \code{COEX} are similar to those used in the
 }
 \details{
 \code{estimateNuLinearByCluster()} does a linear estimation of nu:
-cells' counts averages normalised \emph{cluster} by \emph{cluster}
+cells' counts averages normalized \emph{cluster} by \emph{cluster}
 
 \code{getClusterizations()} extracts the list of the \emph{clusterizations}
 defined in the \code{COTAN} object.

@@ -1,7 +1,7 @@
 ## COTAN 2.1.7
 
 Added new flag to the function `cleanPlots()` to suppress evaluation of the
-*PCA* on the normalised data. In particular, this allows to reduce significantly
+*PCA* on the normalized data. In particular, this allows to reduce significantly
 time spent within the function `checkClusterUniformity()`
 
 Added `initialResolution` parameter to `cellsUniformClustering()`: it allows
