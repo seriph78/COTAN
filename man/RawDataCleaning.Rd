@@ -56,7 +56,7 @@ ECDPlot(objCOTAN, yCut)
   genesThreshold = 0.99
 )
 
-cleanPlots(objCOTAN)
+cleanPlots(objCOTAN, includePCA = TRUE)
 
 cellSizePlot(objCOTAN, splitPattern = " ", numCol = 2L)
 
@@ -95,6 +95,10 @@ Default cutoff is \eqn{0.003 \; (0.3\%)}}
 \item{genesCutoff}{\code{clean()} will delete from the \code{raw} data any cell that is
 expressing less genes than threshold times the total number of genes.
 Default cutoff is \eqn{0.002 \; (0.2\%)}}
+
+\item{includePCA}{a \code{Boolean} flag to determin whether to calculate the \emph{PCA}
+associated with the normalized matrix. When \code{TRUE} the first four elements
+of the returned list will be \code{NULL}}
 
 \item{splitPattern}{Pattern used to extract, from the column names, the
 sample field (default " ")}

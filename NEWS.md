@@ -1,5 +1,9 @@
 ## COTAN 2.1.7
 
+Added new flag to the function `cleanPlots()` to suppress evaluation of the
+*PCA* on the normalised data. In particular, this allows to reduce significantly
+time spent within the function `checkClusterUniformity()`
+
 Added `initialResolution` parameter to `cellsUniformClustering()`: it allows
 users to specify the initial resolution used in the calls to
 `Seurat::FindClusters()` method. It now uses the same default as Seurat
