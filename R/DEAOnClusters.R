@@ -64,10 +64,10 @@ DEAOnClusters <- function(objCOTAN, clusters = NULL) {
       warning("Cluster '", cl, "' has no cells assigned to it!")
     }
 
-    observedYI <- rowSums(zeroOne[, cellsIn])
+    observedYI <- rowSums(zeroOne[, cellsIn, drop = FALSE])
 
-    expectedNI <- rowSums(probZero[,  cellsIn])
-    expectedNO <- rowSums(probZero[, !cellsIn])
+    expectedNI <- rowSums(probZero[,  cellsIn, drop = FALSE])
+    expectedNO <- rowSums(probZero[, !cellsIn, drop = FALSE])
     expectedYI <- numCellsIn  - expectedNI
     expectedYO <- numCellsOut - expectedNO
 
