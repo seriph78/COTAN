@@ -71,7 +71,7 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
       # if the algorithm gives too many singletons.
       if ((minNumClusters <
              nlevels(factor(srat[["seurat_clusters", drop = TRUE]]))) ||
-          (resolution > initialResolution + 1.5)) {
+          (resolution > initialResolution + 5.0)) {
         break
       }
 
