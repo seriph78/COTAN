@@ -80,7 +80,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
                                clustersCoex = expressionCl)
 
   scoreDFT <- t(scoreDF[, 1L:(ncol(scoreDF) - 2L)])
-  dend <- clustersTreePlot(objCOTAN, kCuts = kCuts)[["dend"]]
+  dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
 
   dend <- set(dend = dend, "branches_lwd", 2L)
 
