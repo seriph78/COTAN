@@ -61,8 +61,8 @@ usually without the \code{COND_} prefix
 
 \code{normalizeNameAndLabels()} returns a \code{list} with:
 \itemize{
-\item "name" the relevant name
-\item "labels" the relevant \emph{clusterization}/\emph{condition}
+\item \code{"name"} the relevant name
+\item \code{"labels"} the relevant \emph{clusterization}/\emph{condition}
 }
 
 \code{addCondition()} returns the updated \code{COTAN} object

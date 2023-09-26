@@ -25,8 +25,8 @@ establishGenesClusters(
 \item{numGenesPerMarker}{the number of correlated genes to keep as other
 markers (default 25)}
 
-\item{groupMarkers}{a named \code{list} with an element for each group of one or
-more marker genes for each group.}
+\item{groupMarkers}{a named \code{list} with an element for each group comprised
+of one or more marker genes}
 
 \item{kCuts}{the number of estimated \emph{cluster} (this defines the height for
 the tree cut)}
@@ -40,19 +40,19 @@ and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} 
 \value{
 \code{genesCoexSpace()} returns a \code{list} with:
 \itemize{
-\item "SecondaryMarkers" a named \code{list} that for each secondary marker,
+\item \code{"SecondaryMarkers"} a named \code{list} that for each secondary marker,
 gives the \code{list} of primary markers that selected for it
-\item "GCS" the \code{COEX} \code{data.frame}
-\item "rankGenes" a \code{data.frame} with the rank of each gene according to its
+\item \code{"GCS"} the \code{COEX} \code{data.frame}
+\item \code{"rankGenes"} a \code{data.frame} with the rank of each gene according to its
 \emph{p-value}
 }
 
 \code{establishGenesClusters()} a \code{list} of:
 \itemize{
-\item "g.space" the genes' \code{COEX} space \code{data.frame}
-\item "plot.eig" the eigenvalues plot
-\item "pca_clusters" the \emph{pca} components \code{data.frame}
-\item "tree_plot" the tree plot for the genes' \code{COEX} space
+\item \code{"g.space"} the genes' \code{COEX} space \code{data.frame}
+\item \code{"plot.eig"} the eigenvalues plot
+\item \code{"pca_clusters"} the \emph{pca} components \code{data.frame}
+\item \code{"tree_plot"} the tree plot for the genes' \code{COEX} space
 }
 }
 \description{

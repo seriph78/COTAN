@@ -163,8 +163,8 @@ for the low \emph{nu} threshold that defines problematic cells
 
 \code{mitochondrialPercentagePlot()} returns a \code{list} with:
 \itemize{
-\item "plot" a \code{violin-boxplot} object
-\item "sizes" a sizes \code{data.frame}
+\item \code{"plot"} a \code{violin-boxplot} object
+\item \code{"sizes"} a sizes \code{data.frame}
 }
 
 \code{scatterPlot()} returns the scatter plot

@@ -28,20 +28,9 @@
 clustersDeltaExpression <- function(objCOTAN, clusters = NULL, clName = "") {
   logThis("clustersDeltaExpression - START", logLevel = 2L)
 
-  if (is_empty(clusters)) {
-    clName <- getClusterizationName(objCOTAN, clName = clName)
-    clusters <- getClusters(objCOTAN, clName = clName)
-  } else {
-    assert_that(!is_empty(clusters),
-                msg = "No clusterization given or present in the COTAN object")
-    assert_that(!is_empty(names(clusters)),
-                msg = "No names attached to the given clusterization")
-    assert_that(setequal(names(clusters), getCells(objCOTAN)),
-                msg = "Non compatible clusterization")
-    if (isEmptyName(clName)) {
-      clName <- "clusters"
-    }
-  }
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
 
   clustersList <- toClustersList(clusters)
 

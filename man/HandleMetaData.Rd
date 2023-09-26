@@ -89,11 +89,12 @@ updated \code{metaDataset}
 Much of the information stored in the \code{COTAN} object is
 compacted into three \code{data.frame}s:
 \itemize{
-\item "metaDataset" - contains all general information about the data-set
-\item "metaGenes" - contains genes' related information along the \code{lambda} and
-\code{dispersion} vectors and the fully-expressed flag
-\item "metaCells" - contains cells' related information along the \code{nu} vector,
-the fully-expressing flag, the \emph{clusterizations} and the \emph{conditions}
+\item \code{"metaDataset"} - contains all general information about the data-set
+\item \code{"metaGenes"} - contains genes' related information along the \code{lambda}
+and \code{dispersion} vectors and the fully-expressed flag
+\item \code{"metaCells"} - contains cells' related information along the \code{nu}
+vector, the fully-expressing flag, the \emph{clusterizations} and the
+\emph{conditions}
 }
 }
 \details{

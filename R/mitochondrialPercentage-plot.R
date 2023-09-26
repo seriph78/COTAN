@@ -26,8 +26,8 @@
 #' @importFrom stringr str_detect
 #'
 #' @returns `mitochondrialPercentagePlot()` returns a `list` with:
-#'   * "plot" a `violin-boxplot` object
-#'   * "sizes" a sizes `data.frame`
+#'   * `"plot"` a `violin-boxplot` object
+#'   * `"sizes"` a sizes `data.frame`
 #'
 #' @export
 #'
