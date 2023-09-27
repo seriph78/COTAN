@@ -1,3 +1,17 @@
+## COTAN 2.1.8
+
+Made passing *clusterizations* to `COTAN` functions more easy:
+now all functions that take a `COTAN` object and a *clusterization* as input
+parameters can also take a *clusterization* name 
+
+Added time-stamps to log entries when written on a log file
+
+Fixed bug in the `clustersMarkersHeatmapPlot` function when given a
+*clusterization* not matching the latest added to the `COTAN` object
+
+Fixed issue with the highest possible resolution in `seuratClustering()`
+function, needed when large datasets must be split in many clusters
+
 ## COTAN 2.1.7
 
 Added new flag to the function `cleanPlots()` to suppress evaluation of the
