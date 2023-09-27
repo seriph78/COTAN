@@ -6,9 +6,11 @@
 #'   given *clusterization*
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clusters a `vector` or `factor` with the cell *clusterization* to be
-#'   analyzed. If empty, the function will use the last *clusterization* stored
-#'   in the `COTAN` object
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName`
 #'
 #' @return `DEAOnClusters()` returns the co-expression `data.frame` for the
 #'   genes in each *cluster*
@@ -23,22 +25,13 @@
 #'
 #' @rdname HandlingClusterizations
 #'
-DEAOnClusters <- function(objCOTAN, clusters = NULL) {
-  if (is_empty(clusters)) {
-    # pick the last clusterization
-    clusters <- getClusters(objCOTAN)
-  } else if (!inherits(clusters, "factor")) {
-    clusters <- factor(clusters)
-  }
-
-  assert_that(length(clusters) == getNumCells(objCOTAN),
-              msg = "Passed/retrieved clusterization has the wrong size")
-
-  assert_that(all(names(clusters) %in% getCells(objCOTAN)),
-              msg = paste("Some cells in the clusterization",
-                          "are not part of the 'COTAN' object"))
-
+DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
   logThis("Differential Expression Analysis - START", logLevel = 2L)
+
+  # picks up the last clusterization if none was given
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
 
   clustersList <- toClustersList(clusters)
 

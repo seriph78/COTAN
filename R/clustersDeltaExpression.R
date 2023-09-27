@@ -4,8 +4,11 @@
 #'   data set.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clusters The *clusterization*. If none is given the last available
-#'   *clusterization* will be used, as it is probably the most significant!
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName`
 #'
 #' @returns `clustersDeltaExpression()` returns a `data.frame` with the weighted
 #'   discrepancy of the expression of each gene within the *cluster* against
@@ -25,9 +28,10 @@
 #'
 #' @rdname HandlingClusterizations
 #'
-clustersDeltaExpression <- function(objCOTAN, clusters = NULL, clName = "") {
+clustersDeltaExpression <- function(objCOTAN, clName = "", clusters = NULL) {
   logThis("clustersDeltaExpression - START", logLevel = 2L)
 
+  # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)

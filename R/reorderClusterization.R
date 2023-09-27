@@ -3,9 +3,11 @@
 #'   according to a `DEA` based distance
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clusters The *clusterization* to merge. If not given the last
+#' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName`
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
 #' @param reverse a flag to the output order
@@ -33,19 +35,22 @@
 #'
 
 reorderClusterization <- function(objCOTAN,
-                                  clusters = NULL,
-                                  coexDF = NULL,
-                                  reverse = FALSE,
-                                  keepMinusOne = TRUE,
+                                  clName = "", clusters = NULL, coexDF = NULL,
+                                  reverse = FALSE, keepMinusOne = TRUE,
                                   distance = "cosine",
                                   hclustMethod = "ward.D2") {
-  if (is_empty(clusters)) {
-    # pick the last clusterization
-    c(clusters, coexDF) %<-% getClusterizationData(objCOTAN)
-  }
+  # picks up the last clusterization if none was given
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
 
-  if (is_empty(coexDF)) {
-    coexDF <- DEAOnClusters(objCOTAN, clusters)
+  if (is.null(coexDF)) {
+    if (clName %in% getClusterizations(objCOTAN)) {
+      coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
+    }
+    if (is.null(coexDF)) {
+      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+    }
   }
 
   # exclude cluster "-1"

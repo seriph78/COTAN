@@ -402,8 +402,7 @@ toClustersList <- function(clusters) {
 #'   *clusterization* (i.e. a named `vector` that for each element indicates to
 #'   which cluster it belongs)
 #'
-#' @param clustersList A named `list` whose elements define the various
-#'   clusters
+#' @param clustersList A named `list` whose elements define the various clusters
 #' @param elemNames A `list` of names to which associate a cluster
 #' @param throwOnOverlappingClusters When `TRUE`, in case of overlapping
 #'   clusters, the function `fromClustersList` and `groupByClustersList` will

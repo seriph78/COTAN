@@ -295,7 +295,7 @@ setGeneric(
 
 setGeneric(
   "estimateNuLinearByCluster",
-  function(objCOTAN, clusters = NULL) {
+  function(objCOTAN, clName = "", clusters = NULL) {
     standardGeneric("estimateNuLinearByCluster")
   }
 )
