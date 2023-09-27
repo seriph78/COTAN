@@ -272,11 +272,12 @@ setMethod(
 #'
 #' @description Much of the information stored in the `COTAN` object is
 #'   compacted into three `data.frame`s:
-#'   * "metaDataset" - contains all general information about the data-set
-#'   * "metaGenes" - contains genes' related information along the `lambda` and
-#'     `dispersion` vectors and the fully-expressed flag
-#'   * "metaCells" - contains cells' related information along the `nu` vector,
-#'     the fully-expressing flag, the *clusterizations* and the *conditions*
+#'   * `"metaDataset"` - contains all general information about the data-set
+#'   * `"metaGenes"` - contains genes' related information along the `lambda`
+#'     and `dispersion` vectors and the fully-expressed flag
+#'   * `"metaCells"` - contains cells' related information along the `nu`
+#'     vector, the fully-expressing flag, the *clusterizations* and the
+#'     *conditions*
 #'
 #' @name HandleMetaData
 NULL
@@ -1287,8 +1288,8 @@ setMethod(
 #'   *clusterizations* [`FALSE`] or *conditions* [`TRUE`]
 #'
 #' @returns `normalizeNameAndLabels()` returns a `list` with:
-#'   * "name" the relevant name
-#'   * "labels" the relevant *clusterization*/*condition*
+#'   * `"name"` the relevant name
+#'   * `"labels"` the relevant *clusterization*/*condition*
 #'
 #' @export
 #'
@@ -1315,20 +1316,15 @@ normalizeNameAndLabels <- function(objCOTAN, name = "",
       labels <- getCondition(objCOTAN, condName = name)
     }
   } else {
-    if (isFALSE(isCond) || !is_empty(labels)) {
-      assert_that(!is_empty(labels),
-                  msg = "No clusterization/condition given")
-      assert_that(!is_empty(names(labels)),
-                  msg = "No names attached to the given labels")
-      assert_that(setequal(names(labels), getCells(objCOTAN)),
-                  msg = "Non compatible labels")
-    } else {
-      labels <- set_names(rep_len("NoCond", getNumCells(objCOTAN)),
-                          getCells(objCOTAN))
-    }
+    assert_that(!is_empty(names(labels)),
+                msg = "No names attached to the given labels")
+    assert_that(setequal(names(labels), getCells(objCOTAN)),
+                msg = "Non compatible labels")
+
     if (isEmptyName(name)) {
       name <- if (isFALSE(isCond)) "clusters" else "conditions"
     }
+
     if (!inherits(labels, "factor")) {
       labels <- factor(labels)
     }

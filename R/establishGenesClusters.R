@@ -21,10 +21,10 @@ NULL
 #'   markers that we want to consider. By default this is set to 25.
 #'
 #' @returns `genesCoexSpace()` returns a `list` with:
-#'  * "SecondaryMarkers" a named `list` that for each secondary marker,
+#'  * `"SecondaryMarkers"` a named `list` that for each secondary marker,
 #'    gives the `list` of primary markers that selected for it
-#'  * "GCS" the `COEX` `data.frame`
-#'  * "rankGenes" a `data.frame` with the rank of each gene according to its
+#'  * `"GCS"` the `COEX` `data.frame`
+#'  * `"rankGenes"` a `data.frame` with the rank of each gene according to its
 #'    *p-value*
 #'
 #' @export
@@ -129,8 +129,8 @@ genesCoexSpace <-
 #'   pool of gene markers, using the genes' `COEX` space
 
 #' @param objCOTAN a `COTAN` object
-#' @param groupMarkers a named `list` with an element for each group of one or
-#'   more marker genes for each group.
+#' @param groupMarkers a named `list` with an element for each group comprised
+#'   of one or more marker genes
 #' @param numGenesPerMarker the number of correlated genes to keep as other
 #'   markers (default 25)
 #' @param kCuts the number of estimated *cluster* (this defines the height for
@@ -141,10 +141,10 @@ genesCoexSpace <-
 #'   [stats::hclust()] function
 #'
 #' @returns `establishGenesClusters()` a `list` of:
-#'   * "g.space" the genes' `COEX` space `data.frame`
-#'   * "plot.eig" the eigenvalues plot
-#'   * "pca_clusters" the *pca* components `data.frame`
-#'   * "tree_plot" the tree plot for the genes' `COEX` space
+#'   * `"g.space"` the genes' `COEX` space `data.frame`
+#'   * `"plot.eig"` the eigenvalues plot
+#'   * `"pca_clusters"` the *pca* components `data.frame`
+#'   * `"tree_plot"` the tree plot for the genes' `COEX` space
 #'
 #' @export
 #'

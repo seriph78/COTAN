@@ -6,7 +6,8 @@
 #'   \ln(0.25)}
 #'
 #' @param clustersCoex the `COEX` `data.frame`
-#' @param groupMarkers a named `list` of arrays of genes
+#' @param groupMarkers a named `list` with an element for each group comprised
+#'   of one or more marker genes
 #'
 #' @returns `geneSetEnrichment()` returns a `data.frame` with the cumulative
 #'   score

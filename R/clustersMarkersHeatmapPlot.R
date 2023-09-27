@@ -8,25 +8,25 @@
 #'   easier to derive the *clusters*' cell types.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param groupMarkers a named `list` with an element for each group of one or
-#'   more marker genes for each group.
+#' @param groupMarkers a named `list` with an element for each group comprised
+#'   of one or more marker genes
 #' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
 #' @param clusters A *clusterization* to use. If given it will take precedence
-#'   on the one indicated by `clName` that will only indicate the relevant
-#'   column name in the returned `data.frame`
+#'   on the one indicated by `clName` that, in such a case, will only indicate
+#'   the relevant column name in the returned `data.frame`
 #' @param kCuts the number of estimated *cluster* (this defines the height for
 #'   the tree cut and the associated colors)
 #' @param condNameList a `list` of *conditions*' names to be used for additional
-#'   columns in the final plot When none are given no new columns will be added
+#'   columns in the final plot. When none are given no new columns will be added
 #'   using data extracted via the function [clustersSummaryData()]
 #' @param conditionsList a `list` of *conditions* to use. If given they will
 #'   take precedence on the ones indicated by `condNameList`
 #'
 #' @returns `clustersMarkersHeatmapPlot()` returns a list with:
-#'  * "heatmapPlot" the complete heatmap plot
-#'  * "dataScore" the `data.frame` with the score values
+#'  * `"heatmapPlot"` the complete heatmap plot
+#'  * `"dataScore"` the `data.frame` with the score values
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
@@ -69,17 +69,18 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
                                        conditionsList = NULL) {
   assert_that(is_empty(conditionsList) ||
                 length(conditionsList) == length(condNameList),
-              msg = "Explicitly given conditions must ahve corresponding names")
+              msg = "Explicitly given conditions must have corresponding names")
 
   c(clName, clusters) %<-% normalizeNameAndLabels(objCOTAN, name = clName,
                                                   labels = clusters)
 
-  expressionCl <- clustersDeltaExpression(objCOTAN, clusters = clusters)
+  expressionCl <- clustersDeltaExpression(objCOTAN, clusters = clusters,
+                                          clName = clName)
   scoreDF <- geneSetEnrichment(groupMarkers = groupMarkers,
                                clustersCoex = expressionCl)
 
   scoreDFT <- t(scoreDF[, 1L:(ncol(scoreDF) - 2L)])
-  dend <- clustersTreePlot(objCOTAN, kCuts = kCuts)[["dend"]]
+  dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
 
   dend <- set(dend = dend, "branches_lwd", 2L)
 

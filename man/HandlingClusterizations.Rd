@@ -161,13 +161,14 @@ will have different color.}
 \item{title}{a string giving the plot title. Will default to UMAP Plot if not
 specified}
 
-\item{groupMarkers}{a named \code{list} of arrays of genes}
+\item{groupMarkers}{a named \code{list} with an element for each group comprised
+of one or more marker genes}
 
 \item{kCuts}{the number of estimated \emph{cluster} (this defines the height for
 the tree cut)}
 
 \item{condNameList}{a \code{list} of \emph{conditions}' names to be used for additional
-columns in the final plot When none are given no new columns will be added
+columns in the final plot. When none are given no new columns will be added
 using data extracted via the function \code{\link[=clustersSummaryData]{clustersSummaryData()}}}
 
 \item{conditionsList}{a \code{list} of \emph{conditions} to use. If given they will
@@ -250,36 +251,36 @@ model expectations
 
 \code{clustersMarkersHeatmapPlot()} returns a list with:
 \itemize{
-\item "heatmapPlot" the complete heatmap plot
-\item "dataScore" the \code{data.frame} with the score values
+\item \code{"heatmapPlot"} the complete heatmap plot
+\item \code{"dataScore"} the \code{data.frame} with the score values
 }
 
 \code{clustersSummaryData()} returns a \code{data.frame}  with the following
 statistics: The calculated statistics are:
 \itemize{
-\item \code{clName} the \emph{cluster} \strong{labels}
-\item \code{condName} the relevant condition (to further sub-divide the \emph{clusters})
-\item "CellNumber" the number of cells in the group
-\item "MeanUDE" the average "UDE" in the group of cells
-\item "MedianUDE" the median "UDE" in the group of cells
-\item "ExpGenes25" the number of genes expressed in at the least 25\% of the
+\item \code{"clName"} the \emph{cluster} \strong{labels}
+\item \code{"condName"} the relevant condition (that sub-divides the \emph{clusters})
+\item \code{"CellNumber"} the number of cells in the group
+\item \code{"MeanUDE"} the average "UDE" in the group of cells
+\item \code{"MedianUDE"} the median "UDE" in the group of cells
+\item \code{"ExpGenes25"} the number of genes expressed in at the least 25\% of the
 cells in the group
-\item "ExpGenes" the number of genes expressed at the least once in any of the
-cells in the group
-\item "CellPercentage" fraction of the cells with respect to the total cells
+\item \code{"ExpGenes"} the number of genes expressed at the least once in any of
+the cells in the group
+\item \code{"CellPercentage"} fraction of the cells with respect to the total cells
 }
 
 \code{clustersSummaryPlot()} returns a \code{list} with a \code{data.frame} and a
 \code{ggplot} objects
 \itemize{
-\item "data" contains the data,
-\item "plot" is the returned plot
+\item \code{"data"} contains the data,
+\item \code{"plot"} is the returned plot
 }
 
 \code{clustersTreePlot()} returns a list with 2 objects:
 \itemize{
-\item "dend" a \code{ggplot2} object representing the \code{dendrogram} plot
-\item "objCOTAN" the updated \code{COTAN} object
+\item \code{"dend"} a \code{ggplot2} object representing the \code{dendrogram} plot
+\item \code{"objCOTAN"} the updated \code{COTAN} object
 }
 
 \code{findClustersMarkers()} returns a \code{data.frame} containing \code{n}
@@ -290,8 +291,8 @@ score
 
 \code{reorderClusterization()} returns a \code{list} with 2 elements:
 \itemize{
-\item "clusters" the newly reordered cluster labels array
-\item "coex" the associated \code{COEX} \code{data.frame}
+\item \code{"clusters"} the newly reordered cluster labels array
+\item \code{"coex"} the associated \code{COEX} \code{data.frame}
 }
 }
 \description{

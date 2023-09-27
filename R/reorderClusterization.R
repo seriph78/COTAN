@@ -17,8 +17,8 @@
 #'   defined by the [stats::hclust()] function.
 #'
 #' @returns `reorderClusterization()` returns a `list` with 2 elements:
-#'   * "clusters" the newly reordered cluster labels array
-#'   * "coex" the associated `COEX` `data.frame`
+#'   * `"clusters"` the newly reordered cluster labels array
+#'   * `"coex"` the associated `COEX` `data.frame`
 #'
 #' @export
 #'

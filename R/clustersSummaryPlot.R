@@ -18,16 +18,16 @@
 #'
 #' @returns `clustersSummaryData()` returns a `data.frame`  with the following
 #'   statistics: The calculated statistics are:
-#'   * `clName` the *cluster* **labels**
-#'   * `condName` the relevant condition (to further sub-divide the *clusters*)
-#'   * "CellNumber" the number of cells in the group
-#'   * "MeanUDE" the average "UDE" in the group of cells
-#'   * "MedianUDE" the median "UDE" in the group of cells
-#'   * "ExpGenes25" the number of genes expressed in at the least 25% of the
-#'   cells in the group
-#'   * "ExpGenes" the number of genes expressed at the least once in any of the
-#'   cells in the group
-#'   * "CellPercentage" fraction of the cells with respect to the total cells
+#'   * `"clName"` the *cluster* **labels**
+#'   * `"condName"` the relevant condition (that sub-divides the *clusters*)
+#'   * `"CellNumber"` the number of cells in the group
+#'   * `"MeanUDE"` the average "UDE" in the group of cells
+#'   * `"MedianUDE"` the median "UDE" in the group of cells
+#'   * `"ExpGenes25"` the number of genes expressed in at the least 25% of the
+#'     cells in the group
+#'   * `"ExpGenes"` the number of genes expressed at the least once in any of
+#'     the cells in the group
+#'   * `"CellPercentage"` fraction of the cells with respect to the total cells
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -53,8 +53,12 @@ clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
     normalizeNameAndLabels(objCOTAN, name = condName,
                            labels = conditions, isCond = TRUE)
 
+  assert_that(!is_empty(clusters) && !is_empty(conditions),
+              msg = "Could not retrieve proper clusters or conditions")
+
   if (isEmptyName(condName)) {
-    condName <- "Cond"
+    assert_that(levels(conditions) == c("NoCond"))
+    condName = "NoCond"
   }
 
   df <- as.data.frame(cbind(factorToVector(clusters),
@@ -117,8 +121,8 @@ clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @returns `clustersSummaryPlot()` returns a `list` with a `data.frame` and a
 #'   `ggplot` objects
-#'   * "data" contains the data,
-#'   * "plot" is the returned plot
+#'   * `"data"` contains the data,
+#'   * `"plot"` is the returned plot
 #'
 #' @importFrom tidyr gather
 #'
@@ -189,8 +193,8 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #'   [stats::hclust()] function
 #'
 #' @returns `clustersTreePlot()` returns a list with 2 objects:
-#'  * "dend" a `ggplot2` object representing the `dendrogram` plot
-#'  * "objCOTAN" the updated `COTAN` object
+#'  * `"dend"` a `ggplot2` object representing the `dendrogram` plot
+#'  * `"objCOTAN"` the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
 #'
