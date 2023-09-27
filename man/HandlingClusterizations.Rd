@@ -456,7 +456,7 @@ clusters <- getClusters(objCOTAN, clName = clName)
 allClustersCoexDF <- getClustersCoex(objCOTAN)
 
 
-deltaExpression <- clustersDeltaExpression(objCOTAN, clusters)
+deltaExpression <- clustersDeltaExpression(objCOTAN, clusters = clusters)
 
 summaryData <- clustersSummaryData(objCOTAN)
 

@@ -24,7 +24,7 @@
 #'
 #' @examples
 #'
-#' deltaExpression <- clustersDeltaExpression(objCOTAN, clusters)
+#' deltaExpression <- clustersDeltaExpression(objCOTAN, clusters = clusters)
 #'
 #' @rdname HandlingClusterizations
 #'

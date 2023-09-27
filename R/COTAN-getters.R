@@ -1322,7 +1322,7 @@ normalizeNameAndLabels <- function(objCOTAN, name = "",
                 msg = "Non compatible labels")
 
     if (isEmptyName(name)) {
-      name <- if (isFALSE(isCond)) "clusters" else "conditions"
+      name <- "!_dummy_!"
     }
 
     if (!inherits(labels, "factor")) {

@@ -80,7 +80,8 @@ Suggests:
     BiocStyle,
     cowplot,
     qpdf,
-    GEOquery
+    GEOquery,
+    sf
 Config/testthat/edition: 3
 Language: en-US
 biocViews: 
