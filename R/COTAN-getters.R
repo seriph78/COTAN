@@ -1044,8 +1044,8 @@ setMethod(
 #'
 #' @returns `getClusterizationData()` returns a `list` with 2 elements:
 #'   * `"clusters"` the named cluster labels array
-#'   * `"coex"` the associated `COEX` `data.frame`; it will be **empty** if not
-#'     defined
+#'   * `"coex"` the associated `COEX` `data.frame`. This will be an **empty**
+#'     `data.frame` when not specified for the relevant *clusterization*
 #'
 #' @export
 #'

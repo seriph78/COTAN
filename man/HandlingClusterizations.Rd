@@ -222,8 +222,8 @@ name or \code{NULL} if no \emph{clusterizations} are present
 \code{getClusterizationData()} returns a \code{list} with 2 elements:
 \itemize{
 \item \code{"clusters"} the named cluster labels array
-\item \code{"coex"} the associated \code{COEX} \code{data.frame}; it will be \strong{empty} if not
-defined
+\item \code{"coex"} the associated \code{COEX} \code{data.frame}. This will be an \strong{empty}
+\code{data.frame} when not specified for the relevant \emph{clusterization}
 }
 
 \code{getClusters()} returns the named cluster labels array

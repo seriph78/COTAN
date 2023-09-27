@@ -194,7 +194,7 @@ handleNamesSubsets <- function(names, subset = vector(mode = "character")) {
     subset <- names
   } else {
     assert_that(all(subset %in% names),
-                msg = "Passed genes are not a subset of the full list")
+                msg = "Passed names are not a subset of the full list")
 
     subset <- names[names %in% subset]
   }

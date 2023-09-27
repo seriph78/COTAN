@@ -44,11 +44,11 @@ reorderClusterization <- function(objCOTAN,
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)
 
-  if (is.null(coexDF)) {
+  if (is_empty(coexDF)) {
     if (clName %in% getClusterizations(objCOTAN)) {
       coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
     }
-    if (is.null(coexDF)) {
+    if (is_empty(coexDF)) {
       coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
     }
   }
