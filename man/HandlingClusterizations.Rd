@@ -36,7 +36,7 @@
 \alias{reorderClusterization}
 \title{Handling cells' \emph{clusterization} and related functions}
 \usage{
-\S4method{estimateNuLinearByCluster}{COTAN}(objCOTAN, clusters = NULL)
+\S4method{estimateNuLinearByCluster}{COTAN}(objCOTAN, clName = "", clusters = NULL)
 
 \S4method{getClusterizations}{COTAN}(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE)
 
@@ -60,13 +60,13 @@ getClusters(objCOTAN, clName = "")
 
 \S4method{dropClusterization}{COTAN}(objCOTAN, clName)
 
-DEAOnClusters(objCOTAN, clusters = NULL)
+DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 pValueFromDEA(coexDF, numCells)
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
-clustersDeltaExpression(objCOTAN, clusters = NULL, clName = "")
+clustersDeltaExpression(objCOTAN, clName = "", clusters = NULL)
 
 clustersMarkersHeatmapPlot(
   objCOTAN,
@@ -106,8 +106,9 @@ clustersTreePlot(
 findClustersMarkers(
   objCOTAN,
   n = 10L,
-  clusters = NULL,
   markers = NULL,
+  clName = "",
+  clusters = NULL,
   coexDF = NULL,
   pValueDF = NULL,
   deltaExp = NULL,
@@ -118,6 +119,7 @@ geneSetEnrichment(clustersCoex, groupMarkers)
 
 reorderClusterization(
   objCOTAN,
+  clName = "",
   clusters = NULL,
   coexDF = NULL,
   reverse = FALSE,
@@ -129,19 +131,18 @@ reorderClusterization(
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{clusters}{The \emph{clusterization} to merge. If not given the last
+\item{clName}{The name of the \emph{clusterization}. If not given the last
 available \emph{clusterization} will be used, as it is probably the most
 significant!}
+
+\item{clusters}{A \emph{clusterization} to use. If given it will take precedence
+on the one indicated by \code{clName}}
 
 \item{dropNoCoex}{When \code{TRUE} drops the names from the \emph{clusterizations} with
 empty associated coex \code{data.frame}}
 
 \item{keepPrefix}{When \code{TRUE} returns the internal name of the
 \emph{clusterization}: the one with the \code{CL_} prefix.}
-
-\item{clName}{The name of the \emph{clusterization}. If not given the last
-available \emph{clusterization} will be returned, as it is probably the most
-significant!}
 
 \item{coexDF}{a \code{data.frame} where each column indicates the \code{COEX} for each
 of the \emph{clusters} of the \emph{clusterization}}
@@ -156,7 +157,7 @@ data losses}
 given elements}
 
 \item{elements}{a named \code{list} of elements to label. Each array in the list
-will have different color.}
+will have different color}
 
 \item{title}{a string giving the plot title. Will default to UMAP Plot if not
 specified}
@@ -221,8 +222,8 @@ name or \code{NULL} if no \emph{clusterizations} are present
 \code{getClusterizationData()} returns a \code{list} with 2 elements:
 \itemize{
 \item \code{"clusters"} the named cluster labels array
-\item \code{"coex"} the associated \code{COEX} \code{data.frame}; it will be \strong{empty} if not
-defined
+\item \code{"coex"} the associated \code{COEX} \code{data.frame}. This will be an \strong{empty}
+\code{data.frame} when not specified for the relevant \emph{clusterization}
 }
 
 \code{getClusters()} returns the named cluster labels array
@@ -455,7 +456,7 @@ clusters <- getClusters(objCOTAN, clName = clName)
 allClustersCoexDF <- getClustersCoex(objCOTAN)
 
 
-deltaExpression <- clustersDeltaExpression(objCOTAN, clusters)
+deltaExpression <- clustersDeltaExpression(objCOTAN, clusters = clusters)
 
 summaryData <- clustersSummaryData(objCOTAN)
 

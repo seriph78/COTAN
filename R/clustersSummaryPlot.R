@@ -45,10 +45,12 @@
 #'
 clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
                                 condName = "", conditions = NULL) {
-
+  # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
-    normalizeNameAndLabels(objCOTAN, name = clName, labels = clusters)
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
 
+  # gets a dummy condition if none was given
   c(condName, conditions) %<-%
     normalizeNameAndLabels(objCOTAN, name = condName,
                            labels = conditions, isCond = TRUE)

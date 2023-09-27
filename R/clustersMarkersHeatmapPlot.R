@@ -71,8 +71,10 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
                 length(conditionsList) == length(condNameList),
               msg = "Explicitly given conditions must have corresponding names")
 
-  c(clName, clusters) %<-% normalizeNameAndLabels(objCOTAN, name = clName,
-                                                  labels = clusters)
+  # picks up the last clusterization if none was given
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
 
   expressionCl <- clustersDeltaExpression(objCOTAN, clusters = clusters,
                                           clName = clName)
@@ -90,9 +92,10 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
     allColors <- getColorsVector()
 
     for (i in seq_along(condNameList)) {
+      # gets a dummy condition if none was given
       c(condName, conditions) %<-%
         normalizeNameAndLabels(objCOTAN, name = condNameList[[i]],
-                               labels = conditionsList[[i]])
+                               labels = conditionsList[[i]], isCond = TRUE)
       condDF <- clustersSummaryData(objCOTAN, clName = clName,
                                     clusters = clusters,
                                     condName = condName,

@@ -114,9 +114,11 @@ setMethod(
 #'   cells' counts averages normalized *cluster* by *cluster*
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clusters The *clusterization* to use. If not given the last
+#' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName`
 #'
 #' @returns `estimateNuLinearByCluster()` returns the updated `COTAN` object
 #'
@@ -132,12 +134,10 @@ setMethod(
 setMethod(
   "estimateNuLinearByCluster",
   "COTAN",
-  function(objCOTAN, clusters = NULL) {
-    if (is_empty(clusters)) {
-      # pick the last clusterization
-      clusters <- getClusters(objCOTAN)
-    }
-    clusters = factor(clusters)
+  function(objCOTAN, clName = "", clusters = NULL) {
+    c(clName, clusters) %<-%
+      normalizeNameAndLabels(objCOTAN, name = clName,
+                             labels = clusters, isCond = FALSE)
 
     # raw column averages
     nu <- colMeans(getRawData(objCOTAN), dims = 1L)

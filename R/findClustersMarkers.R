@@ -8,8 +8,12 @@
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param n the number of extreme `COEX` values to return
-#' @param clusters a *clusterization*
 #' @param markers a `list` of marker genes
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName`
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
 #' @param pValueDF a `data.frame` with *In/Out* *p-value* based on the `COEX`.
@@ -35,9 +39,9 @@
 #' @rdname HandlingClusterizations
 #'
 findClustersMarkers <- function(
-    objCOTAN, n = 10L, clusters = NULL, markers = NULL,
-    coexDF = NULL, pValueDF = NULL, deltaExp = NULL,
-    method = "bonferroni") {
+    objCOTAN, n = 10L, markers = NULL,
+    clName = "", clusters = NULL, coexDF = NULL, pValueDF = NULL,
+    deltaExp = NULL, method = "bonferroni") {
   logThis("findClustersMarkers - START", logLevel = 2L)
 
   marks <- unlist(markers)
@@ -45,18 +49,27 @@ findClustersMarkers <- function(
   assert_that(is_empty(marks) || any(marks %in% getGenes(objCOTAN)),
               msg = "None of the given markers is present in the data")
 
-  if (is.null(coexDF)) {
-    # picks up the last clusterization if none was given
-    coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+  # picks up the last clusterization if none was given
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
+
+  if (is_empty(coexDF)) {
+    if (clName %in% getClusterizations(objCOTAN)) {
+      coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
+    }
+    if (is_empty(coexDF)) {
+      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+    }
   }
 
-  if (is.null(pValueDF)) {
+  if (is_empty(pValueDF)) {
     pValueDF <- pValueFromDEA(coexDF, getNumCells(objCOTAN))
   }
 
-  if (is.null(deltaExp)) {
-    # picks up the last clusterization if none was given
-    deltaExp <- clustersDeltaExpression(objCOTAN, clusters = clusters)
+  if (is_empty(deltaExp)) {
+    deltaExp <- clustersDeltaExpression(objCOTAN, clName = clName,
+                                        clusters = clusters)
   }
 
   assert_that(all(rownames(deltaExp) == rownames(coexDF) &
