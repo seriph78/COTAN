@@ -42,6 +42,57 @@ calculateGenesCE <- function(objCOTAN) {
 }
 
 
+#' @details `calculateGDIGivenS()` produces a `vector` with the *GDI* for each
+#'   column based on the `S` matrix (*Pearson's *\eqn{\chi^{2}}* test*)
+#'
+#' @param S a `matrix` object
+#'
+#' @returns `calculateGDIGivenS()` returns a `vector` with the *GDI* data for
+#'   each column of the input
+#'
+#' @importFrom rlang set_names
+#'
+#' @importFrom stats pchisq
+#'
+#' @importFrom Matrix colMeans
+#'
+#' @noRd
+#'
+
+calculateGDIGivenS <- function(S) {
+  top5pcRows <- as.integer(max(1L:round(nrow(S) / 20.0,
+                                        digits = 0L)))
+
+  pValue <- apply(as.matrix(S), 2L, sort, decreasing = TRUE)
+  pValue <- pValue[1L:top5pcRows, , drop = FALSE]
+  pValue <- pchisq(as.matrix(pValue), df = 1L, lower.tail = FALSE)
+
+  GDI <- set_names(log(-log(colMeans(pValue))), colnames(S))
+
+  return(GDI)
+}
+
+#' @details `calculateGDIGivenCorr()` produces a `vector` with the *GDI* for
+#'   each column based on the given correlation matrix, uinsg the *Pearson's
+#'   *\eqn{\chi^{2}}* test*
+#'
+#' @param corr a `matrix` object, possibly a subset of the columns of the full
+#'   symmetric matrix
+#' @param numDegreesOfFreedom a `int` that determines the number of degree of
+#'   freedom to use in the \eqn{\chi^{2}} test
+#'
+#' @returns `calculateGDIGivenCorr()` returns a `vector` with the *GDI* data for
+#'   each column of the input
+#'
+#' @export
+#'
+#' @rdname GenesStatistics
+#'
+
+calculateGDIGivenCorr <- function(corr, numDegreesOfFreedom) {
+  return(calculateGDIGivenS(corr^2L * numDegreesOfFreedom))
+}
+
 
 #' @details `calculateGDI()` produces a `data.frame` with the *GDI* for each
 #'   gene based on the `COEX` matrix
@@ -51,21 +102,25 @@ calculateGenesCE <- function(objCOTAN) {
 #'   it will use the `S` (*Pearson's *\eqn{\chi^{2}}* test*) otherwise the `G`
 #'   (*G-test*)
 #'
-#' @returns `calculateGDI()` returns a `data.frame` with the *GDI* data
+#' @returns `calculateGDI()` returns a `data.frame` with:
+#'  * `"sum.raw.norm"` the sum of the normalized data rows
+#'  * `"GDI"` the *GDI* data
+#'  * `"exp.cells"` the percentage of cells expressing the gene
 #'
 #' @export
 #'
 #' @importFrom rlang set_names
 #'
-#' @importFrom stats pchisq
-#'
 #' @importFrom Matrix rowSums
-#' @importFrom Matrix colMeans
-#' @importFrom Matrix forceSymmetric
+#'
+#' @importFrom tibble column_to_rownames
 #'
 #' @rdname GenesStatistics
 #'
+
 calculateGDI <- function(objCOTAN, statType = "S") {
+  logThis("Calculate GDI dataframe: START", logLevel = 2L)
+
   if (statType == "S") {
     logThis("Using S", logLevel = 3L)
     S <- calculateS(objCOTAN)
@@ -76,18 +131,8 @@ calculateGDI <- function(objCOTAN, statType = "S") {
     stop("Unrecognised stat type: must be either 'S' or 'G'")
   }
 
-  logThis("Calculate GDI dataframe: START", logLevel = 2L)
-
-  top5pcRows <- as.integer(max(1L:round(getNumGenes(objCOTAN) / 20.0,
-                                        digits = 0L)))
-
-  pValueSorted <- apply(S, 2L, sort, decreasing = TRUE)
-  pValueSorted <- pValueSorted[1L:top5pcRows, , drop = FALSE]
-  pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1L, lower.tail = FALSE)
-
-  GDI <- log(-log(colMeans(pValueSorted)))
+  GDI <- calculateGDIGivenS(S)
   GDI <- set_names(as.data.frame(GDI), "GDI")
-  rm(pValueSorted)
   gc()
 
   sumRawNorm <- log(rowSums(getNormalizedData(objCOTAN)))
