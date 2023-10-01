@@ -3,12 +3,15 @@
 \name{GenesStatistics}
 \alias{GenesStatistics}
 \alias{calculateGenesCE}
+\alias{calculateGDIGivenCorr}
 \alias{calculateGDI}
 \alias{calculatePValue}
 \alias{calculatePDI}
 \title{Calculations of genes statistics}
 \usage{
 calculateGenesCE(objCOTAN)
+
+calculateGDIGivenCorr(corr, numDegreesOfFreedom)
 
 calculateGDI(objCOTAN, statType = "S")
 
@@ -29,6 +32,12 @@ calculatePDI(
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
+\item{corr}{a \code{matrix} object, possibly a subset of the columns of the full
+symmetric matrix}
+
+\item{numDegreesOfFreedom}{a \code{int} that determines the number of degree of
+freedom to use in the \eqn{\chi^{2}} test}
+
 \item{statType}{Which statistics to use to compute the p-values. By default
 it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 (G-test)}
@@ -43,7 +52,15 @@ the function will do it genome-wide.}
 \code{calculateGenesCE()} returns a named \code{array} with the \emph{cross-entropy}
 of each gene
 
-\code{calculateGDI()} returns a \code{data.frame} with the \emph{GDI} data
+\code{calculateGDIGivenCorr()} returns a \code{vector} with the \emph{GDI} data for
+each column of the input
+
+\code{calculateGDI()} returns a \code{data.frame} with:
+\itemize{
+\item \code{"sum.raw.norm"} the sum of the normalized data rows
+\item \code{"GDI"} the \emph{GDI} data
+\item \code{"exp.cells"} the percentage of cells expressing the gene
+}
 
 \code{calculatePValue()} returns a \emph{p-value} \code{matrix} as \code{dspMatrix}
 
@@ -62,6 +79,10 @@ the expected probability of zero and the observed zeros across all cells
 for each gene as \emph{cross-entropy}: \eqn{-\sum_{c}{\mathbb{1}_{X_c == 0}
    \log(p_c) - \mathbb{1}_{X_c != 0} \log(1 - p_c)}} where \eqn{X_c} is the
 observed count and \eqn{p_c} the probability of zero
+
+\code{calculateGDIGivenCorr()} produces a \code{vector} with the \emph{GDI} for
+each column based on the given correlation matrix, uinsg the \emph{Pearson's
+\emph{\eqn{\chi^{2}}} test}
 
 \code{calculateGDI()} produces a \code{data.frame} with the \emph{GDI} for each
 gene based on the \code{COEX} matrix

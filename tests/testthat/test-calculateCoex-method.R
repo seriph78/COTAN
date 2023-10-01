@@ -294,6 +294,13 @@ test_that("Coex", {
   expect_identical(GDI_S[[3L]], GDI_G[[3L]])
   expect_equal(GDI_S[[3L]],
                c(100L, rep(50L, getNumGenes(obj) - 1L)), ignore_attr = TRUE)
+
+  GDI_S_2 <- calculateGDIGivenS(calculateS(obj))
+  GDI_S_3 <- calculateGDIGivenCorr(getGenesCoex(obj),
+                                   numDegreesOfFreedom = getNumCells(obj))
+
+  expect_equal(GDI_S[["GDI"]], GDI_S_2, ignore_attr = TRUE)
+  expect_identical(GDI_S_2, GDI_S_3)
 })
 
 
