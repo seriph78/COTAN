@@ -20,6 +20,7 @@
 \alias{contingencyTables}
 \alias{calculateCoex,COTAN-method}
 \alias{calculateCoex}
+\alias{calculatePartialCoex}
 \alias{calculateS}
 \alias{calculateG}
 \title{Calculating the COEX matrix for genes and cells}
@@ -70,6 +71,13 @@ contingencyTables(objCOTAN, g1, g2)
 
 \S4method{calculateCoex}{COTAN}(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
 
+calculatePartialCoex(
+  objCOTAN,
+  columnsSubset,
+  actOnCells = FALSE,
+  optimizeForSpeed = TRUE
+)
+
 calculateS(
   objCOTAN,
   geneSubsetCol = vector(mode = "character"),
@@ -109,6 +117,9 @@ parallel algorithms that on the flip side use more memory}
 
 \item{g2}{another gene}
 
+\item{columnsSubset}{a sub-set of the columns of the \code{COEX} matrix that will
+be returned}
+
 \item{geneSubsetCol}{an array of genes. It will be put in columns. If left
 empty the function will do it genome-wide.}
 
@@ -144,6 +155,9 @@ as named \code{list} with elements: "expectedNN", "expectedNY", "expectedYN",
 expected contingency tables
 
 \code{calculateCoex()} returns the updated \code{COTAN} object
+
+\code{calculatePartialCoex()} returns the asked section of the \code{COEX}
+matrix
 
 \code{calculateS()} returns the \code{S} matrix
 
@@ -225,6 +239,13 @@ also calculates the percentage of \emph{problematic} genes/cells pairs. A pair
 is \emph{problematic} when one or more of the expected counts were significantly
 smaller than 1 (\eqn{< 0.5}). These small expected values signal that scant
 information is present for such a pair.
+
+\code{calculatePartialCoex()} estimates a sub-section of the \code{COEX}
+matrix in the \code{cellCoex} or \code{genesCoex} field depending on given
+\code{actOnCells} flag. It also calculates the percentage of \emph{problematic}
+genes/cells pairs. A pair is \emph{problematic} when one or more of the expected
+counts were significantly smaller than 1 (\eqn{< 0.5}). These small
+expected values signal that scant information is present for such a pair.
 
 \code{calculateS()} calculates the statistics \strong{S} for genes contingency
 tables. It always has the diagonal set to zero.

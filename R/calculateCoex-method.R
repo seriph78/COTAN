@@ -599,7 +599,7 @@ setMethod(
     coex <- coex * (observedYY@x - expectedYY@x)
 
     assert_that(2L * length(coex) == length(allNames) * (length(allNames) + 1L),
-                msg = "Matrix@x has the wrong size")
+                msg = "Output coex@x has the wrong size")
 
     coex <- new("dspMatrix", Dim = dim(expectedYY), x = coex)
     rownames(coex) <- colnames(coex) <- allNames
@@ -631,6 +631,123 @@ setMethod(
     return(objCOTAN)
   }
 )
+
+
+#' @details `calculatePartialCoex()` estimates a sub-section of the `COEX`
+#'   matrix in the `cellCoex` or `genesCoex` field depending on given
+#'   `actOnCells` flag. It also calculates the percentage of *problematic*
+#'   genes/cells pairs. A pair is *problematic* when one or more of the expected
+#'   counts were significantly smaller than 1 (\eqn{< 0.5}). These small
+#'   expected values signal that scant information is present for such a pair.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param columnsSubset a sub-set of the columns of the `COEX` matrix that will
+#'   be returned
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
+#'   parallel algorithms that on the flip side use more memory
+#'
+#' @returns `calculatePartialCoex()` returns the asked section of the `COEX`
+#'   matrix
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+calculatePartialCoex <- function(objCOTAN, columnsSubset,
+                                 actOnCells = FALSE, optimizeForSpeed = TRUE) {
+    if (isTRUE(actOnCells)) {
+      kind <- "cells'"
+    } else {
+      kind <- "genes'"
+    }
+    logThis(paste("Calculate", kind, "partial coex: START"), logLevel = 1L)
+
+    logThis(paste("Retrieving expected", kind, "partial contingency table"),
+            logLevel = 3L)
+
+    # TODO: pass on the subset
+    # four estimators:
+    c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
+      expectedContingencyTables(objCOTAN,
+                                actOnCells = actOnCells,
+                                asDspMatrices = FALSE,
+                                optimizeForSpeed = optimizeForSpeed)
+
+    expectedNN = expectedNN[, columnsSubset]
+    expectedNY = expectedNY[, columnsSubset]
+    expectedYN = expectedYN[, columnsSubset]
+    expectedYY = expectedYY[, columnsSubset]
+
+    gc()
+
+    logThis(paste("Calculating", kind, "partial coex normalization factor"),
+            logLevel = 3L)
+
+    if (isTRUE(actOnCells)) {
+      rowNames <- getCells(objCOTAN)
+      colNames <- getCells(objCOTAN)[columnsSubset]
+      normFact <- 1.0 / sqrt(getNumGenes(objCOTAN)) # divided by sqrt(n)
+    } else {
+      rowNames <- getGenes(objCOTAN)
+      colNames <- getGenes(objCOTAN)[columnsSubset]
+      normFact <- 1.0 / sqrt(getNumCells(objCOTAN)) # divided by sqrt(m)
+    }
+
+    problematicPairsFraction <-
+      sum(pmin(expectedYY, expectedYN,
+               expectedNY, expectedNN) < 0.5) / length(expectedYY@x)
+
+    logThis(paste0("Fraction of genes with very low",
+                   " expected contingency tables: ",
+                   problematicPairsFraction), logLevel = 3L)
+
+    coex <- normFact * sqrt(1.0 / pmax(1.0, expectedYY) +
+                            1.0 / pmax(1.0, expectedYN) +
+                            1.0 / pmax(1.0, expectedNY) +
+                            1.0 / pmax(1.0, expectedNN))
+
+    rm(expectedYN, expectedNY, expectedNN)
+    gc()
+
+    logThis(paste("Retrieving observed", kind,
+                  "yes/yes partial contingency table"),
+            logLevel = 3L)
+
+    c(observedYY, .) %<-%
+      observedContingencyTablesYY(objCOTAN,
+                                  actOnCells = actOnCells,
+                                  asDspMatrices = FALSE)
+
+    observedYY = observedYY[, columnsSubset]
+
+    gc()
+
+    # coex estimation
+    logThis(paste("Estimating", kind, "partial coex"), logLevel = 3L)
+
+    coex <- coex * (observedYY - expectedYY)
+
+    assert_that(identical(dim(coex),
+                          c(length(allNames), length(columnsSubset))),
+                msg = "Output coex has the wrong size")
+
+    rownames(coex) <- rowNames
+    colnames(coex) <- colNames
+
+    rm(observedYY, expectedYY)
+    gc()
+
+    logThis(paste("Calculate", kind, "partial coex: DONE"), logLevel = 1L)
+
+    return(coex)
+  }
 
 
 #' @details `calculateS()` calculates the statistics **S** for genes contingency
