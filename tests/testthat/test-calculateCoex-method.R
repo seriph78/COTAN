@@ -115,8 +115,8 @@ test_that("Calculations on genes", {
   # take a gene pair ensuring to poll only the upper triangle side of the
   # matrices as the flag 'asDspMatrices = TRUE' makes them incorrect on the
   # other side
-  e1 <- sample(10L, 1L)
-  e2 <- sample(10L, 1L)
+  e1 <- sample(getNumGenes(obj), 1L)
+  e2 <- sample(getNumGenes(obj), 1L)
   g1 <- getGenes(obj)[[min(e1, e2)]]
   g2 <- getGenes(obj)[[max(e1, e2)]]
   c(gpObs, gpExp) %<-% contingencyTables(obj, g1, g2)
@@ -152,6 +152,19 @@ test_that("Calculations on genes", {
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
                    paste0(10.0 / 55.0))
+
+  genesSample1 <- sample(getNumGenes(obj), 3L)
+  partialCoex1 <- calculatePartialCoex(obj, genesSample1)
+
+  expect_equal(partialCoex1,
+               getGenesCoex(obj, zeroDiagonal = FALSE)[, sort(genesSample1)])
+
+  genesSample2 <- getGenes(obj)[sample(getNumGenes(obj), 3L)]
+  partialCoex2 <- calculatePartialCoex(obj, genesSample2,
+                                       optimizeForSpeed = FALSE)
+
+  expect_equal(partialCoex2,
+               getGenesCoex(obj, genesSample2, zeroDiagonal = FALSE))
 })
 
 
@@ -239,6 +252,20 @@ test_that("Calculations on cells", {
   expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 8L)],
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["cbad"]]), paste0(0L))
+
+  cellsSample1 <- sample(getNumCells(obj), 3L)
+  partialCoex1 <- calculatePartialCoex(obj, cellsSample1,
+                                       actOnCells = TRUE)
+
+  expect_equal(partialCoex1,
+               getCellsCoex(obj, zeroDiagonal = FALSE)[, sort(cellsSample1)])
+
+  cellsSample2 <- getCells(obj)[sample(getNumCells(obj), 3L)]
+  partialCoex2 <- calculatePartialCoex(obj, cellsSample2, actOnCells = TRUE,
+                                       optimizeForSpeed = FALSE)
+
+  expect_equal(partialCoex2,
+               getCellsCoex(obj, cellsSample2, zeroDiagonal = FALSE))
 })
 
 

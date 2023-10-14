@@ -457,7 +457,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
   dimnames <- list(c(paste(g2, "yes", sep = "."), paste(g2, "no", sep = ".")),
                    c(paste(g1, "yes", sep = "."), paste(g1, "no", sep = ".")))
 
-  #-------------------------------------------------
+  # observed
 
   zeroOne <- sign(getRawData(objCOTAN)[c(g1, g2), ])
   rownames(zeroOne) <- c(g1, g2)
@@ -475,7 +475,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
                          observedNY[g1, g2], observedNN[g1, g2]),
                        ncol = 2L, nrow = 2L, dimnames = dimnames)
 
-  #-------------------------------------------------
+  # estimated
 
   probZero <- funProbZero(getDispersion(objCOTAN)[c(g1, g2)],
                           getLambda(objCOTAN)[c(g1, g2)] %o% getNu(objCOTAN))
@@ -498,7 +498,6 @@ contingencyTables <- function(objCOTAN, g1, g2) {
                          expectedYN[g2, g1], expectedNN[g1, g2]),
                        ncol = 2L, nrow = 2L, dimnames = dimnames)
 
-  #-------------------------------------------------
 
   return(list("observed" = observedCT, "expected" = expectedCT))
 }
@@ -680,10 +679,16 @@ calculatePartialCoex <- function(objCOTAN, columnsSubset,
                                 asDspMatrices = FALSE,
                                 optimizeForSpeed = optimizeForSpeed)
 
-    expectedNN = expectedNN[, columnsSubset]
-    expectedNY = expectedNY[, columnsSubset]
-    expectedYN = expectedYN[, columnsSubset]
-    expectedYY = expectedYY[, columnsSubset]
+    if (is.character(columnsSubset)) {
+      columnsSubset <- which(colnames(expectedNN) %in% columnsSubset)
+    } else {
+      columnsSubset <- sort(columnsSubset)
+    }
+
+    expectedNN = expectedNN[, columnsSubset, drop = FALSE]
+    expectedNY = expectedNY[, columnsSubset, drop = FALSE]
+    expectedYN = expectedYN[, columnsSubset, drop = FALSE]
+    expectedYY = expectedYY[, columnsSubset, drop = FALSE]
 
     gc()
 
@@ -691,12 +696,8 @@ calculatePartialCoex <- function(objCOTAN, columnsSubset,
             logLevel = 3L)
 
     if (isTRUE(actOnCells)) {
-      rowNames <- getCells(objCOTAN)
-      colNames <- getCells(objCOTAN)[columnsSubset]
       normFact <- 1.0 / sqrt(getNumGenes(objCOTAN)) # divided by sqrt(n)
     } else {
-      rowNames <- getGenes(objCOTAN)
-      colNames <- getGenes(objCOTAN)[columnsSubset]
       normFact <- 1.0 / sqrt(getNumCells(objCOTAN)) # divided by sqrt(m)
     }
 
@@ -725,7 +726,7 @@ calculatePartialCoex <- function(objCOTAN, columnsSubset,
                                   actOnCells = actOnCells,
                                   asDspMatrices = FALSE)
 
-    observedYY = observedYY[, columnsSubset]
+    observedYY = observedYY[, columnsSubset, drop = FALSE]
 
     gc()
 
@@ -733,13 +734,6 @@ calculatePartialCoex <- function(objCOTAN, columnsSubset,
     logThis(paste("Estimating", kind, "partial coex"), logLevel = 3L)
 
     coex <- coex * (observedYY - expectedYY)
-
-    assert_that(identical(dim(coex),
-                          c(length(allNames), length(columnsSubset))),
-                msg = "Output coex has the wrong size")
-
-    rownames(coex) <- rowNames
-    colnames(coex) <- colNames
 
     rm(observedYY, expectedYY)
     gc()

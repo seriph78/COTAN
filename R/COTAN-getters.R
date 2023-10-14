@@ -720,7 +720,8 @@ NULL
 #' @param objCOTAN a `COTAN` object
 #' @param genes A vector of gene names. It will exclude any gene not on the
 #'   list. By defaults the function will keep all genes.
-#' @param zeroDiagonal When TRUE sets the diagonal to zero.
+#' @param zeroDiagonal When TRUE the `COEX` of any element with itself is set to
+#'   zero
 #' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
 #'   have been updated since the `COEX` matrix was calculated.
 #'
@@ -752,6 +753,13 @@ NULL
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' genesCoex <- getGenesCoex(objCOTAN)
 #'
+#' genesSample <- sample(getNumGenes(objCOTAN), 10)
+#' partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
+#'                                          actOnCells = FALSE)
+#'
+#' identical(partialGenesCoex,
+#'           getGenesCoex(objCOTAN, getGenes(objCOTAN)[sort(genesSample)]))
+#'
 #' ## S <- calculateS(objCOTAN)
 #' ## G <- calculateG(objCOTAN)
 #' ## pValue <- calculatePValue(objCOTAN)
@@ -760,6 +768,7 @@ NULL
 #' ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
 #' ## matrix and derivatives, so it can be dropped it from the `COTAN` object
 #' objCOTAN <- dropGenesCoex(objCOTAN)
+#'
 #'
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #'
@@ -774,6 +783,12 @@ NULL
 #'
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 #' cellsCoex <- getCellsCoex(objCOTAN)
+#'
+#' cellsSample <- sample(getNumCells(objCOTAN), 10)
+#' partialCellsCoex <- calculatePartialCoex(objCOTAN, cellsSample,
+#'                                          actOnCells = TRUE)
+#'
+#' identical(partialCellsCoex, cellsCoex[, sort(cellsSample)])
 #'
 #' objCOTAN <- dropCellsCoex(objCOTAN)
 #'
