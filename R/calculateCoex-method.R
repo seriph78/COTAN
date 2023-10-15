@@ -232,8 +232,8 @@ observedContingencyTables <- function(objCOTAN,
 }
 
 
-#' @details `expectedContingencyTablesNN()` calculates the expected No/No field
-#'   of the contingency table
+#' @details `expectedContingencyTablesNN()` calculates the expected *No/No*
+#'   field of the contingency table
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
@@ -243,8 +243,9 @@ observedContingencyTables <- function(objCOTAN,
 #' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
 #'   parallel algorithms that on the flip side use more memory
 #'
-#' @returns `expectedContingencyTablesNN()` returns a `list` with the *No/No*
-#'   expected contingency table as `matrix` and the *No* expected `vector`
+#' @returns `expectedContingencyTablesNN()` returns a `list` with:
+#'   * `expectedNN` the *No/No* expected contingency table as `matrix`
+#'   * `expectedN`  the *No* expected `vector`
 #'
 #' @importFrom Matrix t
 #' @importFrom Matrix colSums
@@ -307,6 +308,101 @@ expectedContingencyTablesNN <- function(objCOTAN,
   if (isTRUE(asDspMatrices)) {
     expectedNN <- pack(expectedNN)
   }
+
+  logThis(" done", logLevel = 3L)
+
+  return(list("expectedNN" = expectedNN, "expectedN" = expectedN))
+}
+
+
+#' @details `expectedPartialContingencyTablesNN()` calculates the expected
+#'   *No/No* field of the contingency table
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param columnsSubset a sub-set of the columns of the matrices that will be
+#'   returned
+#' @param probZero is the expected **probability of zero** for each gene/cell
+#'   pair. If not given the appropriate one will be calculated on the fly
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
+#'   parallel algorithms that on the flip side use more memory
+#'
+#' @returns `expectedPartialContingencyTablesNN()` returns a `list` with:
+#'   * `expectedNN` the *No/No* expected contingency table as `matrix`,
+#'     restricted to the selected columns as named `list` with elements
+#'   * `expectedN`  the full *No* expected `vector`
+#'
+#' @importFrom Rfast Crossprod
+#' @importFrom Rfast Tcrossprod
+#' @importFrom Rfast rowsums
+#' @importFrom Rfast colsums
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+expectedPartialContingencyTablesNN <-
+  function(objCOTAN,
+           columnsSubset,
+           probZero = NULL,
+           actOnCells = FALSE,
+           optimizeForSpeed = TRUE) {
+  if (is_empty(probZero)) {
+    # estimate Probabilities of 0 with internal function funProbZero
+    probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
+  }
+  assert_that(identical(dim(probZero), dim(getRawData(objCOTAN))))
+  assert_that(!anyNA(probZero),
+              msg = paste0("Error: some NA in matrix of probability",
+                           " of zero UMI counts"))
+  gc()
+
+  logThis("calculating partial NN..", logLevel = 3L, appendLF = FALSE)
+
+  if (is.character(columnsSubset)) {
+    if (isTRUE(actOnCells)) {
+      allColumns <- getCells(objCOTAN)
+    } else {
+      allColumns <- getGenes(objCOTAN)
+    }
+    columnsSubset <- which(allColumns %in% columnsSubset)
+  } else {
+    columnsSubset <- sort(columnsSubset)
+  }
+
+  if (isTRUE(actOnCells)) {
+    # dimension m x m (m number of cells)
+    if (isTRUE(optimizeForSpeed)) {
+      # use Rfast functions
+      expectedNN <- Crossprod(probZero,
+                              probZero[, columnsSubset, drop = FALSE])
+      expectedN  <- colsums(probZero, parallel = TRUE)
+    } else {
+      expectedNN <- crossprod(probZero,
+                              probZero[, columnsSubset, drop = FALSE])
+      expectedN  <- colSums(probZero)
+    }
+    rownames(expectedNN) <- getCells(objCOTAN)
+    colnames(expectedNN) <- getCells(objCOTAN)[columnsSubset]
+  } else {
+    # dimension n x n (n number of genes)
+    if (isTRUE(optimizeForSpeed)) {
+      # use Rfast functions
+      expectedNN <- Tcrossprod(probZero,
+                               probZero[columnsSubset, , drop = FALSE])
+      expectedN  <- rowsums(probZero, parallel = TRUE)
+    } else {
+      expectedNN <- tcrossprod(probZero,
+                               probZero[columnsSubset, , drop = FALSE])
+      expectedN  <- rowSums(probZero)
+    }
+    rownames(expectedNN) <- getGenes(objCOTAN)
+    colnames(expectedNN) <- getGenes(objCOTAN)[columnsSubset]
+  }
+  rm(probZero)
 
   logThis(" done", logLevel = 3L)
 
@@ -433,15 +529,17 @@ expectedContingencyTables <- function(objCOTAN,
 #'   of contingency tables, restricted to the specified column sub-set
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
-#'   otherwise for the genes
 #' @param columnsSubset a sub-set of the columns of the matrices that will be
 #'   returned
+#' @param probZero is the expected **probability of zero** for each gene/cell
+#'   pair. If not given the appropriate one will be calculated on the fly
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
 #' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
 #'   parallel algorithms that on the flip side use more memory
 #'
 #' @return `expectedPartialContingencyTables()` returns the expected contingency
-#'   tables, restricedt to the selected columns as named `list` with elements:
+#'   tables, restricted to the selected columns as named `list` with elements:
 #'   * `"expectedNN"`
 #'   * `"expectedNY"`
 #'   * `"expectedYN"`
@@ -451,10 +549,6 @@ expectedContingencyTables <- function(objCOTAN,
 #' @importFrom Rfast Tcrossprod
 #' @importFrom Rfast rowsums
 #' @importFrom Rfast colsums
-#'
-#' @importFrom Matrix t
-#'
-#' @importClassesFrom Matrix symmetricMatrix
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -468,6 +562,7 @@ expectedContingencyTables <- function(objCOTAN,
 expectedPartialContingencyTables <-
   function(objCOTAN,
            columnsSubset,
+           probZero = NULL,
            actOnCells = FALSE,
            optimizeForSpeed = TRUE) {
   numGenes <- getNumGenes(objCOTAN)
@@ -484,14 +579,10 @@ expectedPartialContingencyTables <-
     columnsSubset <- sort(columnsSubset)
   }
 
-  # TODO: pass on the subset
   c(expectedNN, expectedN) %<-%
-    expectedContingencyTablesNN(objCOTAN,
-                                actOnCells = actOnCells,
-                                asDspMatrices = FALSE,
-                                optimizeForSpeed = optimizeForSpeed)
-
-  expectedNN <- expectedNN[, columnsSubset, drop = FALSE]
+    expectedPartialContingencyTablesNN(objCOTAN, columnsSubset, probZero,
+                                       actOnCells = actOnCells,
+                                       optimizeForSpeed = optimizeForSpeed)
 
   gc()
 
@@ -807,7 +898,7 @@ calculatePartialCoex <- function(objCOTAN, columnsSubset,
 
     problematicPairsFraction <-
       sum(pmin(expectedYY, expectedYN,
-               expectedNY, expectedNN) < 0.5) / length(expectedYY@x)
+               expectedNY, expectedNN) < 0.5) / length(expectedYY)
 
     logThis(paste0("Fraction of genes with very low",
                    " expected contingency tables: ",

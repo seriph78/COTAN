@@ -16,6 +16,7 @@
 \alias{observedContingencyTablesYY}
 \alias{observedContingencyTables}
 \alias{expectedContingencyTablesNN}
+\alias{expectedPartialContingencyTablesNN}
 \alias{expectedContingencyTables}
 \alias{expectedPartialContingencyTables}
 \alias{contingencyTables}
@@ -61,6 +62,14 @@ expectedContingencyTablesNN(
   optimizeForSpeed = TRUE
 )
 
+expectedPartialContingencyTablesNN(
+  objCOTAN,
+  columnsSubset,
+  probZero = NULL,
+  actOnCells = FALSE,
+  optimizeForSpeed = TRUE
+)
+
 expectedContingencyTables(
   objCOTAN,
   actOnCells = FALSE,
@@ -71,6 +80,7 @@ expectedContingencyTables(
 expectedPartialContingencyTables(
   objCOTAN,
   columnsSubset,
+  probZero = NULL,
   actOnCells = FALSE,
   optimizeForSpeed = TRUE
 )
@@ -124,6 +134,9 @@ parallel algorithms that on the flip side use more memory}
 \item{columnsSubset}{a sub-set of the columns of the matrices that will be
 returned}
 
+\item{probZero}{is the expected \strong{probability of zero} for each gene/cell
+pair. If not given the appropriate one will be calculated on the fly}
+
 \item{g1}{a gene}
 
 \item{g2}{another gene}
@@ -152,8 +165,18 @@ observed contingency table as \code{matrix} and the \emph{Yes} observed \code{ve
 tables as named \code{list} with elements: "observedNN", "observedNY",
 "observedYN", "observedYY"
 
-\code{expectedContingencyTablesNN()} returns a \code{list} with the \emph{No/No}
-expected contingency table as \code{matrix} and the \emph{No} expected \code{vector}
+\code{expectedContingencyTablesNN()} returns a \code{list} with:
+\itemize{
+\item \code{expectedNN} the \emph{No/No} expected contingency table as \code{matrix}
+\item \code{expectedN}  the \emph{No} expected \code{vector}
+}
+
+\code{expectedPartialContingencyTablesNN()} returns a \code{list} with:
+\itemize{
+\item \code{expectedNN} the \emph{No/No} expected contingency table as \code{matrix},
+restricted to the selected columns as named \code{list} with elements
+\item \code{expectedN}  the full \emph{No} expected \code{vector}
+}
 
 \code{expectedContingencyTables()} returns the expected contingency tables
 as named \code{list} with elements:
@@ -165,7 +188,7 @@ as named \code{list} with elements:
 }
 
 \code{expectedPartialContingencyTables()} returns the expected contingency
-tables, restricedt to the selected columns as named \code{list} with elements:
+tables, restricted to the selected columns as named \code{list} with elements:
 \itemize{
 \item \code{"expectedNN"}
 \item \code{"expectedNY"}
@@ -240,8 +263,11 @@ effectively throw away the lower half from the returned \code{observedYN} and
 \code{observedNY} matrices, but, since they are transpose one of another, the
 full information is still available.
 
-\code{expectedContingencyTablesNN()} calculates the expected No/No field
-of the contingency table
+\code{expectedContingencyTablesNN()} calculates the expected \emph{No/No}
+field of the contingency table
+
+\code{expectedPartialContingencyTablesNN()} calculates the expected
+\emph{No/No} field of the contingency table
 
 \code{expectedContingencyTables()} calculates the expected values of
 contingency tables. When the parameter \code{asDspMatrices == TRUE}, the method
