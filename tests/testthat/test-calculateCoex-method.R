@@ -43,6 +43,8 @@ coexMatrix <- function(obs, exp, n, s) {
 }
 
 test_that("Calculations on genes", {
+  set.seed(137)
+
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
                   10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
                 nrow = 10L, ncol = 20L)
@@ -169,6 +171,8 @@ test_that("Calculations on genes", {
 
 
 test_that("Calculations on cells", {
+  set.seed(137)
+
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
                   10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
                 nrow = 10L, ncol = 20L)

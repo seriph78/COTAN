@@ -17,6 +17,7 @@
 \alias{observedContingencyTables}
 \alias{expectedContingencyTablesNN}
 \alias{expectedContingencyTables}
+\alias{expectedPartialContingencyTables}
 \alias{contingencyTables}
 \alias{calculateCoex,COTAN-method}
 \alias{calculateCoex}
@@ -67,6 +68,13 @@ expectedContingencyTables(
   optimizeForSpeed = TRUE
 )
 
+expectedPartialContingencyTables(
+  objCOTAN,
+  columnsSubset,
+  actOnCells = FALSE,
+  optimizeForSpeed = TRUE
+)
+
 contingencyTables(objCOTAN, g1, g2)
 
 \S4method{calculateCoex}{COTAN}(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
@@ -113,12 +121,12 @@ packed dense symmetric matrices}
 \item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \code{Rfast}
 parallel algorithms that on the flip side use more memory}
 
+\item{columnsSubset}{a sub-set of the columns of the matrices that will be
+returned}
+
 \item{g1}{a gene}
 
 \item{g2}{another gene}
-
-\item{columnsSubset}{a sub-set of the columns of the \code{COEX} matrix that will
-be returned}
 
 \item{geneSubsetCol}{an array of genes. It will be put in columns. If left
 empty the function will do it genome-wide.}
@@ -148,8 +156,22 @@ tables as named \code{list} with elements: "observedNN", "observedNY",
 expected contingency table as \code{matrix} and the \emph{No} expected \code{vector}
 
 \code{expectedContingencyTables()} returns the expected contingency tables
-as named \code{list} with elements: "expectedNN", "expectedNY", "expectedYN",
-"expectedYY"
+as named \code{list} with elements:
+\itemize{
+\item \code{"expectedNN"}
+\item \code{"expectedNY"}
+\item \code{"expectedYN"}
+\item \code{"expectedYY"}
+}
+
+\code{expectedPartialContingencyTables()} returns the expected contingency
+tables, restricedt to the selected columns as named \code{list} with elements:
+\itemize{
+\item \code{"expectedNN"}
+\item \code{"expectedNY"}
+\item \code{"expectedYN"}
+\item \code{"expectedYY"}
+}
 
 \code{contingencyTables()} returns a list containing the observed and
 expected contingency tables
@@ -226,6 +248,9 @@ contingency tables. When the parameter \code{asDspMatrices == TRUE}, the method
 will effectively throw away the lower half from the returned \code{expectedYN}
 and \code{expectedNY} matrices, but, since they are transpose one of another,
 the full information is still available.
+
+\code{expectedPartialContingencyTables()} calculates the expected values
+of contingency tables, restricted to the specified column sub-set
 
 \code{contingencyTables()} returns the observed and expected contingency
 tables for a given pair of genes. The implementation runs the same

@@ -329,8 +329,11 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'   parallel algorithms that on the flip side use more memory
 #'
 #' @return `expectedContingencyTables()` returns the expected contingency tables
-#'   as named `list` with elements: "expectedNN", "expectedNY", "expectedYN",
-#'   "expectedYY"
+#'   as named `list` with elements:
+#'   * `"expectedNN"`
+#'   * `"expectedNY"`
+#'   * `"expectedYN"`
+#'   * `"expectedYY"`
 #'
 #' @importFrom Rfast Crossprod
 #' @importFrom Rfast Tcrossprod
@@ -362,6 +365,7 @@ expectedContingencyTables <- function(objCOTAN,
                                 actOnCells = actOnCells,
                                 asDspMatrices = isFALSE(optimizeForSpeed),
                                 optimizeForSpeed = optimizeForSpeed)
+
   gc()
 
   if (isTRUE(actOnCells)) {
@@ -424,6 +428,108 @@ expectedContingencyTables <- function(objCOTAN,
               "expectedYY" = expectedYY))
 }
 
+
+#' @details `expectedPartialContingencyTables()` calculates the expected values
+#'   of contingency tables, restricted to the specified column sub-set
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#' @param columnsSubset a sub-set of the columns of the matrices that will be
+#'   returned
+#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
+#'   parallel algorithms that on the flip side use more memory
+#'
+#' @return `expectedPartialContingencyTables()` returns the expected contingency
+#'   tables, restricedt to the selected columns as named `list` with elements:
+#'   * `"expectedNN"`
+#'   * `"expectedNY"`
+#'   * `"expectedYN"`
+#'   * `"expectedYY"`
+#'
+#' @importFrom Rfast Crossprod
+#' @importFrom Rfast Tcrossprod
+#' @importFrom Rfast rowsums
+#' @importFrom Rfast colsums
+#'
+#' @importFrom Matrix t
+#'
+#' @importClassesFrom Matrix symmetricMatrix
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+expectedPartialContingencyTables <-
+  function(objCOTAN,
+           columnsSubset,
+           actOnCells = FALSE,
+           optimizeForSpeed = TRUE) {
+  numGenes <- getNumGenes(objCOTAN)
+  numCells <- getNumCells(objCOTAN)
+
+  if (is.character(columnsSubset)) {
+    if (isTRUE(actOnCells)) {
+      allColumns <- getCells(objCOTAN)
+    } else {
+      allColumns <- getGenes(objCOTAN)
+    }
+    columnsSubset <- which(allColumns %in% columnsSubset)
+  } else {
+    columnsSubset <- sort(columnsSubset)
+  }
+
+  # TODO: pass on the subset
+  c(expectedNN, expectedN) %<-%
+    expectedContingencyTablesNN(objCOTAN,
+                                actOnCells = actOnCells,
+                                asDspMatrices = FALSE,
+                                optimizeForSpeed = optimizeForSpeed)
+
+  expectedNN <- expectedNN[, columnsSubset, drop = FALSE]
+
+  gc()
+
+  if (isTRUE(actOnCells)) {
+    # dimension m x m (m number of cells)
+    logThis("calculating partial YN..", logLevel = 3L, appendLF = FALSE)
+
+    # Any/No vector [cycled] = No/No + Yes/No
+    expectedYN <- expectedN - expectedNN
+
+    logThis("NY..", logLevel = 3L, appendLF = FALSE)
+    expectedNY <- t(expectedN[columnsSubset] - t(expectedNN))
+
+    logThis("YY..", logLevel = 3L, appendLF = FALSE)
+    expectedYY <- numGenes - expectedN - expectedNY
+
+  } else {
+    # dimension n x n (n number of genes)
+    logThis("calculating partial NY..", logLevel = 3L, appendLF = FALSE)
+
+    # No/Any vector [cycled] = No/No + No/Yes
+    expectedNY <- expectedN - expectedNN
+
+    logThis("YN..", logLevel = 3L, appendLF = FALSE)
+    expectedYN <- t(expectedN[columnsSubset] - t(expectedNN))
+
+    logThis("YY..", logLevel = 3L, appendLF = FALSE)
+    expectedYY <- numCells - expectedN - expectedYN
+  }
+  gc()
+
+  logThis(" done", logLevel = 3L)
+
+  return(list("expectedNN" = expectedNN,
+              "expectedNY" = expectedNY,
+              "expectedYN" = expectedYN,
+              "expectedYY" = expectedYY))
+}
 
 
 #' @details `contingencyTables()` returns the observed and expected contingency
@@ -640,8 +746,8 @@ setMethod(
 #'   expected values signal that scant information is present for such a pair.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param columnsSubset a sub-set of the columns of the `COEX` matrix that will
-#'   be returned
+#' @param columnsSubset a sub-set of the columns of the matrices that will be
+#'   returned
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
@@ -671,24 +777,22 @@ calculatePartialCoex <- function(objCOTAN, columnsSubset,
     logThis(paste("Retrieving expected", kind, "partial contingency table"),
             logLevel = 3L)
 
-    # TODO: pass on the subset
-    # four estimators:
-    c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
-      expectedContingencyTables(objCOTAN,
-                                actOnCells = actOnCells,
-                                asDspMatrices = FALSE,
-                                optimizeForSpeed = optimizeForSpeed)
-
     if (is.character(columnsSubset)) {
-      columnsSubset <- which(colnames(expectedNN) %in% columnsSubset)
+      if (isTRUE(actOnCells)) {
+        allColumns <- getCells(objCOTAN)
+      } else {
+        allColumns <- getGenes(objCOTAN)
+      }
+      columnsSubset <- which(allColumns %in% columnsSubset)
     } else {
       columnsSubset <- sort(columnsSubset)
     }
 
-    expectedNN = expectedNN[, columnsSubset, drop = FALSE]
-    expectedNY = expectedNY[, columnsSubset, drop = FALSE]
-    expectedYN = expectedYN[, columnsSubset, drop = FALSE]
-    expectedYY = expectedYY[, columnsSubset, drop = FALSE]
+    # four estimators:
+    c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
+      expectedPartialContingencyTables(objCOTAN, columnsSubset,
+                                       actOnCells = actOnCells,
+                                       optimizeForSpeed = optimizeForSpeed)
 
     gc()
 
