@@ -839,6 +839,8 @@ setMethod(
 #' @param objCOTAN a `COTAN` object
 #' @param columnsSubset a sub-set of the columns of the matrices that will be
 #'   returned
+#' @param probZero is the expected **probability of zero** for each gene/cell
+#'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
 #' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
@@ -856,8 +858,11 @@ setMethod(
 #'
 #' @rdname CalculatingCOEX
 #'
-calculatePartialCoex <- function(objCOTAN, columnsSubset,
-                                 actOnCells = FALSE, optimizeForSpeed = TRUE) {
+calculatePartialCoex <- function(objCOTAN,
+                                 columnsSubset,
+                                 probZero = NULL,
+                                 actOnCells = FALSE,
+                                 optimizeForSpeed = TRUE) {
     if (isTRUE(actOnCells)) {
       kind <- "cells'"
     } else {
@@ -882,6 +887,7 @@ calculatePartialCoex <- function(objCOTAN, columnsSubset,
     # four estimators:
     c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
       expectedPartialContingencyTables(objCOTAN, columnsSubset,
+                                       probZero = probZero,
                                        actOnCells = actOnCells,
                                        optimizeForSpeed = optimizeForSpeed)
 

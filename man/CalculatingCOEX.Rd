@@ -92,6 +92,7 @@ contingencyTables(objCOTAN, g1, g2)
 calculatePartialCoex(
   objCOTAN,
   columnsSubset,
+  probZero = NULL,
   actOnCells = FALSE,
   optimizeForSpeed = TRUE
 )
