@@ -86,8 +86,9 @@ setMethod(
 #' @param asDspMatrices Boolean - when `TRUE` the function will return only
 #'   packed dense symmetric matrices
 #'
-#' @returns `observedContingencyTablesYY()` returns a `list` with the *Yes/Yes*
-#'   observed contingency table as `matrix` and the *Yes* observed `vector`
+#' @returns `observedContingencyTablesYY()` returns a `list` with:
+#'   * `observedYY` the *Yes/Yes* observed contingency table as `matrix`
+#'   * `observedY`  the full *Yes* observed `vector`
 #'
 #' @importFrom rlang is_empty
 #'
@@ -107,9 +108,10 @@ setMethod(
 observedContingencyTablesYY <- function(objCOTAN,
                                         actOnCells = FALSE,
                                         asDspMatrices = FALSE) {
+  logThis("calculating YY..", logLevel = 3L, appendLF = FALSE)
+
   zeroOne <- getZeroOneProj(objCOTAN)
 
-  logThis("calculating YY..", logLevel = 3L, appendLF = FALSE)
   if (isTRUE(actOnCells)) {
     # for cells
     observedYY <- crossprod(zeroOne)
@@ -133,6 +135,83 @@ observedContingencyTablesYY <- function(objCOTAN,
 }
 
 
+#' @details `observedPartialContingencyTablesYY()` calculates observed *Yes/Yes*
+#'   field of the contingency table
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param columnsSubset a sub-set of the columns of the matrices that will be
+#'   returned
+#' @param zeroOne the raw count matrix projected to `0` or `1`. If not given the
+#'   appropriate one will be calculated on the fly
+#' @param actOnCells Boolean - when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#' @param asDspMatrices Boolean - when `TRUE` the function will return only
+#'   packed dense symmetric matrices
+#'
+#' @returns `observedPartialContingencyTablesYY()` returns a `list` with:
+#'   * `observedYY` the *Yes/Yes* observed contingency table as `matrix`,
+#'     restricted to the selected columns as named `list` with elements
+#'   * `observedY`  the full *Yes* observed `vector`
+#'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom Matrix t
+#' @importFrom Matrix crossprod
+#' @importFrom Matrix tcrossprod
+#' @importFrom Matrix colSums
+#' @importFrom Matrix rowSums
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+observedPartialContingencyTablesYY <-
+  function(objCOTAN,
+           columnsSubset,
+           zeroOne = NULL,
+           actOnCells = FALSE) {
+  logThis("calculating partial YY..", logLevel = 3L, appendLF = FALSE)
+
+  if (is_empty(zeroOne)) {
+    # get zero/one projection with internal function get
+    zeroOne <- getZeroOneProj(objCOTAN)
+  }
+  assert_that(identical(dim(zeroOne), dim(getRawData(objCOTAN))))
+  assert_that(!anyNA(zeroOne),
+              msg = paste0("Error: some NA in matrix of probability",
+                           " of zero UMI counts"))
+  gc()
+
+  if (is.character(columnsSubset)) {
+    if (isTRUE(actOnCells)) {
+      allColumns <- getCells(objCOTAN)
+    } else {
+      allColumns <- getGenes(objCOTAN)
+    }
+    columnsSubset <- which(allColumns %in% columnsSubset)
+  } else {
+    columnsSubset <- sort(columnsSubset)
+  }
+
+  if (isTRUE(actOnCells)) {
+    # for cells
+    observedYY <- crossprod(zeroOne,
+                            zeroOne[, columnsSubset, drop = FALSE])
+    observedY  <- colSums(zeroOne)
+  } else {
+    # for genes
+    observedYY <- tcrossprod(zeroOne,
+                             zeroOne[columnsSubset, , drop = FALSE])
+    observedY  <- rowSums(zeroOne)
+  }
+  rm(zeroOne)
+
+  logThis(" done", logLevel = 3L)
+
+  return(list("observedYY" = observedYY, "observedY" = observedY))
+}
+
+
 #' @details `observedContingencyTables()` calculates the observed contingency
 #'   tables. When the parameter `asDspMatrices == TRUE`, the method will
 #'   effectively throw away the lower half from the returned `observedYN` and
@@ -146,8 +225,11 @@ observedContingencyTablesYY <- function(objCOTAN,
 #'   packed dense symmetric matrices
 #'
 #' @returns `observedContingencyTables()` returns the observed contingency
-#'   tables as named `list` with elements: "observedNN", "observedNY",
-#'   "observedYN", "observedYY"
+#'   tables as named `list` with elements:
+#'   * `"observedNN"`
+#'   * `"observedNY"`
+#'   * `"observedYN"`
+#'   * `"observedYY"`
 #'
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix symmetricMatrix
@@ -232,6 +314,94 @@ observedContingencyTables <- function(objCOTAN,
 }
 
 
+#' @details `observedPartialContingencyTables()` calculates the observed
+#'   contingency tables.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param columnsSubset a sub-set of the columns of the matrices that will be
+#'   returned
+#' @param zeroOne the raw count matrix projected to `0` or `1`. If not given the
+#'   appropriate one will be calculated on the fly
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
+#'   otherwise for the genes
+#'
+#' @returns `observedPartialContingencyTables()` returns the observed
+#'   contingency tables, restricted to the selected columns, as named `list`
+#'   with elements:
+#'   * `"observedNN"`
+#'   * `"observedNY"`
+#'   * `"observedYN"`
+#'   * `"observedYY"`
+#'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+observedPartialContingencyTables <-
+  function(objCOTAN,
+           columnsSubset,
+           zeroOne = NULL,
+           actOnCells = FALSE) {
+  numGenes <- getNumGenes(objCOTAN)
+  numCells <- getNumCells(objCOTAN)
+
+  if (is.character(columnsSubset)) {
+    if (isTRUE(actOnCells)) {
+      allColumns <- getCells(objCOTAN)
+    } else {
+      allColumns <- getGenes(objCOTAN)
+    }
+    columnsSubset <- which(allColumns %in% columnsSubset)
+  } else {
+    columnsSubset <- sort(columnsSubset)
+  }
+
+  c(observedYY, observedY) %<-%
+    observedPartialContingencyTablesYY(objCOTAN,
+                                       columnsSubset = columnsSubset,
+                                       zeroOne = zeroOne,
+                                       actOnCells = actOnCells)
+  gc()
+
+  if (isTRUE(actOnCells)) {
+    # dimension m x m (m number of cells)
+    logThis("calculating partial NY..", logLevel = 3L, appendLF = FALSE)
+
+    # Any/Yes vector [cycled] = Yes/Yes + No/Yes
+    observedNY <- observedY - observedYY
+
+    logThis("YN..", logLevel = 3L, appendLF = FALSE)
+    observedYN <- t(observedY[columnsSubset] - t(observedYY))
+
+    logThis("NN..", logLevel = 3L, appendLF = FALSE)
+    observedNN <- numGenes - observedY - observedYN
+  } else {
+    # dimension n x n (n number of genes)
+    logThis("calculating partial YN..", logLevel = 3L, appendLF = FALSE)
+
+    # Yes/Any vector [cycled] = Yes/Yes + Yes/No
+    observedYN <- observedY - observedYY
+
+    logThis("NY..", logLevel = 3L, appendLF = FALSE)
+    observedNY <- t(observedY[columnsSubset] - t(observedYY))
+
+    logThis("NN..", logLevel = 3L, appendLF = FALSE)
+    observedNN <- numCells - observedY - observedNY
+  }
+  logThis(" done", logLevel = 3L)
+
+  gc()
+
+  return(list("observedNN" = observedNN,
+              "observedNY" = observedNY,
+              "observedYN" = observedYN,
+              "observedYY" = observedYY))
+}
+
+
 #' @details `expectedContingencyTablesNN()` calculates the expected *No/No*
 #'   field of the contingency table
 #'
@@ -268,6 +438,8 @@ expectedContingencyTablesNN <- function(objCOTAN,
                                         actOnCells = FALSE,
                                         asDspMatrices = FALSE,
                                         optimizeForSpeed = TRUE) {
+  logThis("calculating NN..", logLevel = 3L, appendLF = FALSE)
+
   # estimate Probabilities of 0 with internal function funProbZero
   probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
   gc()
@@ -276,7 +448,6 @@ expectedContingencyTablesNN <- function(objCOTAN,
               msg = paste0("Error: some NA in matrix of probability",
                            " of zero UMI counts"))
 
-  logThis("calculating NN..", logLevel = 3L, appendLF = FALSE)
 
   if (isTRUE(actOnCells)) {
     # dimension m x m (m number of cells)
@@ -330,7 +501,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'
 #' @returns `expectedPartialContingencyTablesNN()` returns a `list` with:
 #'   * `expectedNN` the *No/No* expected contingency table as `matrix`,
-#'     restricted to the selected columns as named `list` with elements
+#'     restricted to the selected columns, as named `list` with elements
 #'   * `expectedN`  the full *No* expected `vector`
 #'
 #' @importFrom Rfast Crossprod
@@ -350,6 +521,8 @@ expectedPartialContingencyTablesNN <-
            probZero = NULL,
            actOnCells = FALSE,
            optimizeForSpeed = TRUE) {
+  logThis("calculating partial NN..", logLevel = 3L, appendLF = FALSE)
+
   if (is_empty(probZero)) {
     # estimate Probabilities of 0 with internal function funProbZero
     probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
@@ -360,7 +533,6 @@ expectedPartialContingencyTablesNN <-
                            " of zero UMI counts"))
   gc()
 
-  logThis("calculating partial NN..", logLevel = 3L, appendLF = FALSE)
 
   if (is.character(columnsSubset)) {
     if (isTRUE(actOnCells)) {
@@ -539,7 +711,7 @@ expectedContingencyTables <- function(objCOTAN,
 #'   parallel algorithms that on the flip side use more memory
 #'
 #' @return `expectedPartialContingencyTables()` returns the expected contingency
-#'   tables, restricted to the selected columns as named `list` with elements:
+#'   tables, restricted to the selected columns, as named `list` with elements:
 #'   * `"expectedNN"`
 #'   * `"expectedNY"`
 #'   * `"expectedYN"`
@@ -598,7 +770,6 @@ expectedPartialContingencyTables <-
 
     logThis("YY..", logLevel = 3L, appendLF = FALSE)
     expectedYY <- numGenes - expectedN - expectedNY
-
   } else {
     # dimension n x n (n number of genes)
     logThis("calculating partial NY..", logLevel = 3L, appendLF = FALSE)
@@ -861,6 +1032,7 @@ setMethod(
 calculatePartialCoex <- function(objCOTAN,
                                  columnsSubset,
                                  probZero = NULL,
+                                 zeroOne = NULL,
                                  actOnCells = FALSE,
                                  optimizeForSpeed = TRUE) {
     if (isTRUE(actOnCells)) {
@@ -872,17 +1044,6 @@ calculatePartialCoex <- function(objCOTAN,
 
     logThis(paste("Retrieving expected", kind, "partial contingency table"),
             logLevel = 3L)
-
-    if (is.character(columnsSubset)) {
-      if (isTRUE(actOnCells)) {
-        allColumns <- getCells(objCOTAN)
-      } else {
-        allColumns <- getGenes(objCOTAN)
-      }
-      columnsSubset <- which(allColumns %in% columnsSubset)
-    } else {
-      columnsSubset <- sort(columnsSubset)
-    }
 
     # four estimators:
     c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
@@ -923,11 +1084,10 @@ calculatePartialCoex <- function(objCOTAN,
             logLevel = 3L)
 
     c(observedYY, .) %<-%
-      observedContingencyTablesYY(objCOTAN,
-                                  actOnCells = actOnCells,
-                                  asDspMatrices = FALSE)
-
-    observedYY = observedYY[, columnsSubset, drop = FALSE]
+      observedPartialContingencyTablesYY(objCOTAN,
+                                         columnsSubset = columnsSubset,
+                                         zeroOne = zeroOne,
+                                         actOnCells = actOnCells)
 
     gc()
 

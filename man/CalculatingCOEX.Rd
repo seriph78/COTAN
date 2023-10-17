@@ -14,7 +14,9 @@
 \alias{calculateMu,COTAN-method}
 \alias{calculateMu}
 \alias{observedContingencyTablesYY}
+\alias{observedPartialContingencyTablesYY}
 \alias{observedContingencyTables}
+\alias{observedPartialContingencyTables}
 \alias{expectedContingencyTablesNN}
 \alias{expectedPartialContingencyTablesNN}
 \alias{expectedContingencyTables}
@@ -53,7 +55,21 @@ observedContingencyTablesYY(
   asDspMatrices = FALSE
 )
 
+observedPartialContingencyTablesYY(
+  objCOTAN,
+  columnsSubset,
+  zeroOne = NULL,
+  actOnCells = FALSE
+)
+
 observedContingencyTables(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
+
+observedPartialContingencyTables(
+  objCOTAN,
+  columnsSubset,
+  zeroOne = NULL,
+  actOnCells = FALSE
+)
 
 expectedContingencyTablesNN(
   objCOTAN,
@@ -93,6 +109,7 @@ calculatePartialCoex(
   objCOTAN,
   columnsSubset,
   probZero = NULL,
+  zeroOne = NULL,
   actOnCells = FALSE,
   optimizeForSpeed = TRUE
 )
@@ -129,11 +146,14 @@ otherwise for the genes}
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
 
-\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \code{Rfast}
-parallel algorithms that on the flip side use more memory}
-
 \item{columnsSubset}{a sub-set of the columns of the matrices that will be
 returned}
+
+\item{zeroOne}{the raw count matrix projected to \code{0} or \code{1}. If not given the
+appropriate one will be calculated on the fly}
+
+\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \code{Rfast}
+parallel algorithms that on the flip side use more memory}
 
 \item{probZero}{is the expected \strong{probability of zero} for each gene/cell
 pair. If not given the appropriate one will be calculated on the fly}
@@ -159,12 +179,37 @@ the function will do it genome-wide.}
 
 \code{calculateMu()} returns the \code{mu} matrix
 
-\code{observedContingencyTablesYY()} returns a \code{list} with the \emph{Yes/Yes}
-observed contingency table as \code{matrix} and the \emph{Yes} observed \code{vector}
+\code{observedContingencyTablesYY()} returns a \code{list} with:
+\itemize{
+\item \code{observedYY} the \emph{Yes/Yes} observed contingency table as \code{matrix}
+\item \code{observedY}  the full \emph{Yes} observed \code{vector}
+}
+
+\code{observedPartialContingencyTablesYY()} returns a \code{list} with:
+\itemize{
+\item \code{observedYY} the \emph{Yes/Yes} observed contingency table as \code{matrix},
+restricted to the selected columns as named \code{list} with elements
+\item \code{observedY}  the full \emph{Yes} observed \code{vector}
+}
 
 \code{observedContingencyTables()} returns the observed contingency
-tables as named \code{list} with elements: "observedNN", "observedNY",
-"observedYN", "observedYY"
+tables as named \code{list} with elements:
+\itemize{
+\item \code{"observedNN"}
+\item \code{"observedNY"}
+\item \code{"observedYN"}
+\item \code{"observedYY"}
+}
+
+\code{observedPartialContingencyTables()} returns the observed
+contingency tables, restricted to the selected columns, as named \code{list}
+with elements:
+\itemize{
+\item \code{"observedNN"}
+\item \code{"observedNY"}
+\item \code{"observedYN"}
+\item \code{"observedYY"}
+}
 
 \code{expectedContingencyTablesNN()} returns a \code{list} with:
 \itemize{
@@ -175,7 +220,7 @@ tables as named \code{list} with elements: "observedNN", "observedNY",
 \code{expectedPartialContingencyTablesNN()} returns a \code{list} with:
 \itemize{
 \item \code{expectedNN} the \emph{No/No} expected contingency table as \code{matrix},
-restricted to the selected columns as named \code{list} with elements
+restricted to the selected columns, as named \code{list} with elements
 \item \code{expectedN}  the full \emph{No} expected \code{vector}
 }
 
@@ -189,7 +234,7 @@ as named \code{list} with elements:
 }
 
 \code{expectedPartialContingencyTables()} returns the expected contingency
-tables, restricted to the selected columns as named \code{list} with elements:
+tables, restricted to the selected columns, as named \code{list} with elements:
 \itemize{
 \item \code{"expectedNN"}
 \item \code{"expectedNY"}
@@ -258,11 +303,17 @@ dropping) cells' \code{COEX} matrix from the \code{COTAN} object.
 \code{observedContingencyTablesYY()} calculates observed \emph{Yes/Yes} field
 of the contingency table
 
+\code{observedPartialContingencyTablesYY()} calculates observed \emph{Yes/Yes}
+field of the contingency table
+
 \code{observedContingencyTables()} calculates the observed contingency
 tables. When the parameter \code{asDspMatrices == TRUE}, the method will
 effectively throw away the lower half from the returned \code{observedYN} and
 \code{observedNY} matrices, but, since they are transpose one of another, the
 full information is still available.
+
+\code{observedPartialContingencyTables()} calculates the observed
+contingency tables.
 
 \code{expectedContingencyTablesNN()} calculates the expected \emph{No/No}
 field of the contingency table
