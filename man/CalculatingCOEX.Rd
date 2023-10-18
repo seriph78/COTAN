@@ -129,16 +129,18 @@ calculateG(
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{genes}{A vector of gene names. It will exclude any gene not on the
-list. By defaults the function will keep all genes.}
+\item{genes}{The given genes' names to select the wanted \code{COEX} columns. If
+missing all columns will be returned. When not empty a proper result is
+provided by calculating the partial \code{COEX} matrix on the fly}
 
 \item{zeroDiagonal}{When \code{TRUE} sets the diagonal to zero.}
 
 \item{ignoreSync}{When \code{TRUE} ignores whether the \code{lambda}/\code{nu}/\code{dispersion}
 have been updated since the \code{COEX} matrix was calculated.}
 
-\item{cells}{A vector of cell names. It will exclude any cell not on the
-list. By defaults the function will keep all cells.}
+\item{cells}{The given cells' names to select the wanted \code{COEX} columns. If
+missing all columns will be returned. When not empty a proper result is
+provided by calculating the partial \code{COEX} matrix on the fly}
 
 \item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
 otherwise for the genes}
