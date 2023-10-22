@@ -28,6 +28,9 @@
 #'
 #' @importFrom withr local_options
 #'
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
+#'
 #' @export
 #'
 #' @rdname UniformClusters
