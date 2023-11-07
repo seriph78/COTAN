@@ -1,3 +1,11 @@
+## COTAN 2.2.1
+
+Fixed minor issue with test on macOS on arm64 architactures
+
+## COTAN 2.2.0
+
+Produced new version 2.2.0 for BioConductor 3.18
+
 ## COTAN 2.1.8
 
 Made passing *clusterizations* to `COTAN` functions more easy:
