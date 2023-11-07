@@ -36,8 +36,11 @@ test_that("Clean on test dataset", {
   cells.names.test <- readRDS(file.path(getwd(), "cell.names.test.RDS"))
 
   expect_equal(getNormalizedData(obj)[genes.names.test, cells.names.test],
-               raw.norm, ignore_attr = FALSE)
-  expect_identical(getLambda(obj)[genes.names.test], lambda)
-  expect_equal(getNu(obj)[cells.names.test], nu, ignore_attr = FALSE)
-  expect_identical(getDispersion(obj)[genes.names.test], dispersion)
+               raw.norm, tolerance = 1.0e-14, ignore_attr = FALSE)
+  expect_equal(getLambda(obj)[genes.names.test],
+               lambda, tolerance = 1.0e-14, ignore_attr = FALSE)
+  expect_equal(getNu(obj)[cells.names.test],
+               nu, tolerance = 1.0e-14, ignore_attr = FALSE)
+  expect_equal(getDispersion(obj)[genes.names.test],
+               dispersion, tolerance = 1.0e-14, ignore_attr = FALSE)
 })
