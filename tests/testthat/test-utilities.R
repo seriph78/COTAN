@@ -230,16 +230,14 @@ test_that("parallelDist - cosine dissimilarity", {
 })
 
 
-test_that("prcomp_irlba usage", {
+test_that("pca usage", {
   utils::data("test.dataset", package = "COTAN")
 
-  pca <- irlba::prcomp_irlba(test.dataset, n = 5L)
-
-  pcaRaw <- pca[["x"]]
-  rm(pca)
-
-  rownames(pcaRaw) <- rownames(test.dataset)
+  pcaRaw <- pca(mat = test.dataset, rank = 5L,
+                transposed = TRUE, BSPARAM = IrlbaParam())[["rotated"]]
   colnames(pcaRaw) <- paste0("PC_", seq_len(ncol(pcaRaw)))
+
+  expect_identical(rownames(pcaRaw), rownames(test.dataset))
 
   #saveRDS(pcaRaw, file = "pca.test.RDS")
 

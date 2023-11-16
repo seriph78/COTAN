@@ -33,7 +33,8 @@
 #' @importFrom Matrix rowMeans
 #' @importFrom Matrix colMeans
 #'
-#' @importFrom irlba prcomp_irlba
+#' @importFrom PCAtools pca
+#' @importFrom BiocSingular IrlbaParam
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
@@ -53,6 +54,8 @@
 #'
 #' @importFrom graphics par
 #' @importFrom graphics title
+#'
+#' @importFrom assertthat assert_that
 #'
 #' @importFrom zeallot `%<-%`
 #' @importFrom zeallot `%->%`
@@ -74,10 +77,12 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     rawNorm <- getNormalizedData(objCOTAN)
 
-    pcaCells <- prcomp_irlba(t(rawNorm), n = 5L)[["x"]]
-    rownames(pcaCells) <- getCells(objCOTAN)
+    pcaCells <- pca(mat = rawNorm, rank = 5L,
+                    transposed = FALSE, BSPARAM = IrlbaParam())[["rotated"]]
+    assert_that(identical(rownames(pcaCells), getCells(objCOTAN)),
+                msg = "Issues with pca output")
 
-    distCells <- parDist(scale(pcaCells), method = "euclidean") # mhalanobis
+    distCells <- parDist(scale(pcaCells), method = "euclidean") # mahlanobis
 
     pcaCells <- as.data.frame(pcaCells)
 

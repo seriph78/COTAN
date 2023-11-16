@@ -1,3 +1,12 @@
+## COTAN 2.3.1
+
+Stopped using explicit PCA via irlba package:
+using BioConductor PCAtools::pca instead
+
+## COTAN 2.3.0
+
+First release in Bioconductor 3.19
+
 ## COTAN 2.1.8
 
 Made passing *clusterizations* to `COTAN` functions more easy:
