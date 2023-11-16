@@ -150,8 +150,6 @@ genesCoexSpace <-
 #'
 #' @importFrom rlang set_names
 #'
-#' @importFrom factoextra fviz_eig
-#'
 #' @importFrom dendextend set
 #' @importFrom dendextend color_labels
 #' @importFrom dendextend color_branches
@@ -163,7 +161,9 @@ genesCoexSpace <-
 #'
 #' @importFrom parallelDist parDist
 #'
-#' @importFrom irlba prcomp_irlba
+#' @importFrom PCAtools pca
+#' @importFrom PCAtools screeplot
+#' @importFrom BiocSingular IrlbaParam
 #'
 #' @importFrom stringr str_split
 #'
@@ -207,8 +207,11 @@ establishGenesClusters <-
                    numGenesPerMarker = numGenesPerMarker,
                    primaryMarkers = primaryMarkers)
 
-  GCSPca <- prcomp_irlba(GCS, n = 10L, center = TRUE, scale. = FALSE)
-  rownames(GCSPca[["x"]]) <- rownames(GCS)
+  GCSPca <- pca(mat = GCS, rank = 10L,
+                transposed = TRUE, BSPARAM = IrlbaParam())
+  assert_that(identical(rownames(GCSPca[["rotated"]]), rownames(GCS)) &&
+                (ncol(GCSPca[["rotated"]]) == 10L),
+              msg = "Issues with pca output")
 
   SMRelevance <- matrix(nrow = length(secondaryMarkers),
                         ncol = length(groupMarkers),
@@ -239,7 +242,7 @@ establishGenesClusters <-
     posLink[[w]] <- c(posLink[[w]], g)
   }
 
-  plotEigen <- fviz_eig(GCSPca, addlabels = TRUE, ncp = 10L)
+  plotEigen <- screeplot(GCSPca)
 
   coexDist <- parDist(as.matrix(GCS), method = distance)
 
@@ -247,7 +250,7 @@ establishGenesClusters <-
 
   dend <- as.dendrogram(hcNorm)
 
-  pca1 <- as.data.frame(GCSPca[["x"]][, 1L:10L])
+  pca1 <- as.data.frame(GCSPca[["rotated"]])
   pca1 <- pca1[order.dendrogram(dend), ]
 
   highlight <- rep("not_marked", nrow(pca1))

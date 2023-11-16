@@ -1,3 +1,8 @@
+## COTAN 2.2.2
+
+Stopped using explicit PCA via irlba package:
+using BioConductor PCAtools::pca instead
+
 ## COTAN 2.2.1
 
 Fixed minor issue with test on macOS on arm64 architactures
