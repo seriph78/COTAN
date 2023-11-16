@@ -150,8 +150,6 @@ genesCoexSpace <-
 #'
 #' @importFrom rlang set_names
 #'
-#' @importFrom factoextra fviz_eig
-#'
 #' @importFrom dendextend set
 #' @importFrom dendextend color_labels
 #' @importFrom dendextend color_branches

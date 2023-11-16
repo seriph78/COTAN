@@ -59,7 +59,6 @@ Imports:
     stringr,
     Seurat,
     umap,
-    factoextra,
     dendextend,
     zeallot,
     assertthat,
