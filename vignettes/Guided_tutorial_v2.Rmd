@@ -27,7 +27,6 @@ knitr::opts_chunk[["set"]](
 library(COTAN)
 library(zeallot)
 library(data.table)
-library(factoextra)
 library(Rtsne)
 library(qpdf)
 library(GEOquery)
