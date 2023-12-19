@@ -14,12 +14,17 @@
 \alias{calculateMu,COTAN-method}
 \alias{calculateMu}
 \alias{observedContingencyTablesYY}
+\alias{observedPartialContingencyTablesYY}
 \alias{observedContingencyTables}
+\alias{observedPartialContingencyTables}
 \alias{expectedContingencyTablesNN}
+\alias{expectedPartialContingencyTablesNN}
 \alias{expectedContingencyTables}
+\alias{expectedPartialContingencyTables}
 \alias{contingencyTables}
 \alias{calculateCoex,COTAN-method}
 \alias{calculateCoex}
+\alias{calculatePartialCoex}
 \alias{calculateS}
 \alias{calculateG}
 \title{Calculating the COEX matrix for genes and cells}
@@ -50,12 +55,34 @@ observedContingencyTablesYY(
   asDspMatrices = FALSE
 )
 
+observedPartialContingencyTablesYY(
+  objCOTAN,
+  columnsSubset,
+  zeroOne = NULL,
+  actOnCells = FALSE
+)
+
 observedContingencyTables(objCOTAN, actOnCells = FALSE, asDspMatrices = FALSE)
+
+observedPartialContingencyTables(
+  objCOTAN,
+  columnsSubset,
+  zeroOne = NULL,
+  actOnCells = FALSE
+)
 
 expectedContingencyTablesNN(
   objCOTAN,
   actOnCells = FALSE,
   asDspMatrices = FALSE,
+  optimizeForSpeed = TRUE
+)
+
+expectedPartialContingencyTablesNN(
+  objCOTAN,
+  columnsSubset,
+  probZero = NULL,
+  actOnCells = FALSE,
   optimizeForSpeed = TRUE
 )
 
@@ -66,9 +93,26 @@ expectedContingencyTables(
   optimizeForSpeed = TRUE
 )
 
+expectedPartialContingencyTables(
+  objCOTAN,
+  columnsSubset,
+  probZero = NULL,
+  actOnCells = FALSE,
+  optimizeForSpeed = TRUE
+)
+
 contingencyTables(objCOTAN, g1, g2)
 
 \S4method{calculateCoex}{COTAN}(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
+
+calculatePartialCoex(
+  objCOTAN,
+  columnsSubset,
+  probZero = NULL,
+  zeroOne = NULL,
+  actOnCells = FALSE,
+  optimizeForSpeed = TRUE
+)
 
 calculateS(
   objCOTAN,
@@ -85,16 +129,18 @@ calculateG(
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{genes}{A vector of gene names. It will exclude any gene not on the
-list. By defaults the function will keep all genes.}
+\item{genes}{The given genes' names to select the wanted \code{COEX} columns. If
+missing all columns will be returned. When not empty a proper result is
+provided by calculating the partial \code{COEX} matrix on the fly}
 
 \item{zeroDiagonal}{When \code{TRUE} sets the diagonal to zero.}
 
 \item{ignoreSync}{When \code{TRUE} ignores whether the \code{lambda}/\code{nu}/\code{dispersion}
 have been updated since the \code{COEX} matrix was calculated.}
 
-\item{cells}{A vector of cell names. It will exclude any cell not on the
-list. By defaults the function will keep all cells.}
+\item{cells}{The given cells' names to select the wanted \code{COEX} columns. If
+missing all columns will be returned. When not empty a proper result is
+provided by calculating the partial \code{COEX} matrix on the fly}
 
 \item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
 otherwise for the genes}
@@ -102,8 +148,17 @@ otherwise for the genes}
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
 
+\item{columnsSubset}{a sub-set of the columns of the matrices that will be
+returned}
+
+\item{zeroOne}{the raw count matrix projected to \code{0} or \code{1}. If not given the
+appropriate one will be calculated on the fly}
+
 \item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \code{Rfast}
 parallel algorithms that on the flip side use more memory}
+
+\item{probZero}{is the expected \strong{probability of zero} for each gene/cell
+pair. If not given the appropriate one will be calculated on the fly}
 
 \item{g1}{a gene}
 
@@ -126,24 +181,76 @@ the function will do it genome-wide.}
 
 \code{calculateMu()} returns the \code{mu} matrix
 
-\code{observedContingencyTablesYY()} returns a \code{list} with the \emph{Yes/Yes}
-observed contingency table as \code{matrix} and the \emph{Yes} observed \code{vector}
+\code{observedContingencyTablesYY()} returns a \code{list} with:
+\itemize{
+\item \code{observedYY} the \emph{Yes/Yes} observed contingency table as \code{matrix}
+\item \code{observedY}  the full \emph{Yes} observed \code{vector}
+}
+
+\code{observedPartialContingencyTablesYY()} returns a \code{list} with:
+\itemize{
+\item \code{observedYY} the \emph{Yes/Yes} observed contingency table as \code{matrix},
+restricted to the selected columns as named \code{list} with elements
+\item \code{observedY}  the full \emph{Yes} observed \code{vector}
+}
 
 \code{observedContingencyTables()} returns the observed contingency
-tables as named \code{list} with elements: "observedNN", "observedNY",
-"observedYN", "observedYY"
+tables as named \code{list} with elements:
+\itemize{
+\item \code{"observedNN"}
+\item \code{"observedNY"}
+\item \code{"observedYN"}
+\item \code{"observedYY"}
+}
 
-\code{expectedContingencyTablesNN()} returns a \code{list} with the \emph{No/No}
-expected contingency table as \code{matrix} and the \emph{No} expected \code{vector}
+\code{observedPartialContingencyTables()} returns the observed
+contingency tables, restricted to the selected columns, as named \code{list}
+with elements:
+\itemize{
+\item \code{"observedNN"}
+\item \code{"observedNY"}
+\item \code{"observedYN"}
+\item \code{"observedYY"}
+}
+
+\code{expectedContingencyTablesNN()} returns a \code{list} with:
+\itemize{
+\item \code{expectedNN} the \emph{No/No} expected contingency table as \code{matrix}
+\item \code{expectedN}  the \emph{No} expected \code{vector}
+}
+
+\code{expectedPartialContingencyTablesNN()} returns a \code{list} with:
+\itemize{
+\item \code{expectedNN} the \emph{No/No} expected contingency table as \code{matrix},
+restricted to the selected columns, as named \code{list} with elements
+\item \code{expectedN}  the full \emph{No} expected \code{vector}
+}
 
 \code{expectedContingencyTables()} returns the expected contingency tables
-as named \code{list} with elements: "expectedNN", "expectedNY", "expectedYN",
-"expectedYY"
+as named \code{list} with elements:
+\itemize{
+\item \code{"expectedNN"}
+\item \code{"expectedNY"}
+\item \code{"expectedYN"}
+\item \code{"expectedYY"}
+}
+
+\code{expectedPartialContingencyTables()} returns the expected contingency
+tables, restricted to the selected columns, as named \code{list} with elements:
+\itemize{
+\item \code{"expectedNN"}
+\item \code{"expectedNY"}
+\item \code{"expectedYN"}
+\item \code{"expectedYY"}
+}
 
 \code{contingencyTables()} returns a list containing the observed and
 expected contingency tables
 
 \code{calculateCoex()} returns the updated \code{COTAN} object
+
+\code{calculatePartialCoex()} returns the asked section of the \code{COEX}
+matrix
 
 \code{calculateS()} returns the \code{S} matrix
 
@@ -198,20 +305,32 @@ dropping) cells' \code{COEX} matrix from the \code{COTAN} object.
 \code{observedContingencyTablesYY()} calculates observed \emph{Yes/Yes} field
 of the contingency table
 
+\code{observedPartialContingencyTablesYY()} calculates observed \emph{Yes/Yes}
+field of the contingency table
+
 \code{observedContingencyTables()} calculates the observed contingency
 tables. When the parameter \code{asDspMatrices == TRUE}, the method will
 effectively throw away the lower half from the returned \code{observedYN} and
 \code{observedNY} matrices, but, since they are transpose one of another, the
 full information is still available.
 
-\code{expectedContingencyTablesNN()} calculates the expected No/No field
-of the contingency table
+\code{observedPartialContingencyTables()} calculates the observed
+contingency tables.
+
+\code{expectedContingencyTablesNN()} calculates the expected \emph{No/No}
+field of the contingency table
+
+\code{expectedPartialContingencyTablesNN()} calculates the expected
+\emph{No/No} field of the contingency table
 
 \code{expectedContingencyTables()} calculates the expected values of
 contingency tables. When the parameter \code{asDspMatrices == TRUE}, the method
 will effectively throw away the lower half from the returned \code{expectedYN}
 and \code{expectedNY} matrices, but, since they are transpose one of another,
 the full information is still available.
+
+\code{expectedPartialContingencyTables()} calculates the expected values
+of contingency tables, restricted to the specified column sub-set
 
 \code{contingencyTables()} returns the observed and expected contingency
 tables for a given pair of genes. The implementation runs the same
@@ -225,6 +344,13 @@ also calculates the percentage of \emph{problematic} genes/cells pairs. A pair
 is \emph{problematic} when one or more of the expected counts were significantly
 smaller than 1 (\eqn{< 0.5}). These small expected values signal that scant
 information is present for such a pair.
+
+\code{calculatePartialCoex()} estimates a sub-section of the \code{COEX}
+matrix in the \code{cellCoex} or \code{genesCoex} field depending on given
+\code{actOnCells} flag. It also calculates the percentage of \emph{problematic}
+genes/cells pairs. A pair is \emph{problematic} when one or more of the expected
+counts were significantly smaller than 1 (\eqn{< 0.5}). These small
+expected values signal that scant information is present for such a pair.
 
 \code{calculateS()} calculates the statistics \strong{S} for genes contingency
 tables. It always has the diagonal set to zero.
@@ -261,6 +387,13 @@ exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 genesCoex <- getGenesCoex(objCOTAN)
 
+genesSample <- sample(getNumGenes(objCOTAN), 10)
+partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
+                                         actOnCells = FALSE)
+
+identical(partialGenesCoex,
+          getGenesCoex(objCOTAN, getGenes(objCOTAN)[sort(genesSample)]))
+
 ## S <- calculateS(objCOTAN)
 ## G <- calculateG(objCOTAN)
 ## pValue <- calculatePValue(objCOTAN)
@@ -269,6 +402,7 @@ GDI <- calculateGDI(objCOTAN)
 ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
 ## matrix and derivatives, so it can be dropped it from the `COTAN` object
 objCOTAN <- dropGenesCoex(objCOTAN)
+
 
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 
@@ -283,6 +417,12 @@ tables
 
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 cellsCoex <- getCellsCoex(objCOTAN)
+
+cellsSample <- sample(getNumCells(objCOTAN), 10)
+partialCellsCoex <- calculatePartialCoex(objCOTAN, cellsSample,
+                                         actOnCells = TRUE)
+
+identical(partialCellsCoex, cellsCoex[, sort(cellsSample)])
 
 objCOTAN <- dropCellsCoex(objCOTAN)
 

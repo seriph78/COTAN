@@ -50,9 +50,11 @@ setLoggingLevel <- function(newLevel = 1L) {
 #' @export
 #'
 #' @examples
-#' setLoggingFile("./COTAN_Test1.log") # for debugging purposes only
+#' logFile <- file.path(".", "COTAN_Test1.log")
+#' setLoggingFile(logFile)
 #' logThis("Some log message")
 #' setLoggingFile("") # closes the log file
+#' file.remove(logFile)
 #'
 #' @rdname LoggingFunctions
 #'

@@ -62,9 +62,11 @@ file if active). It uses \code{\link[=message]{message()}} to actually print the
 \examples{
 setLoggingLevel(3) # for debugging purposes only
 
-setLoggingFile("./COTAN_Test1.log") # for debugging purposes only
+logFile <- file.path(".", "COTAN_Test1.log")
+setLoggingFile(logFile)
 logThis("Some log message")
 setLoggingFile("") # closes the log file
+file.remove(logFile)
 
 logThis("LogLevel 0 messages will always show, ",
         logLevel = 0, appendLF = FALSE)

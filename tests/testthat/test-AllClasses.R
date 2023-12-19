@@ -2,9 +2,6 @@ library(Matrix)
 
 setLoggingLevel(3L)
 
-tm <- tempdir()
-stopifnot(file.exists(tm))
-
 test_that("Empty matrices", {
   expect_identical(dim(emptySparseMatrix()), c(0L, 0L))
   expect_s4_class(emptySparseMatrix(), "dgCMatrix")
