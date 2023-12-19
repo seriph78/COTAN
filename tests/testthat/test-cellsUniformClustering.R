@@ -48,7 +48,7 @@ test_that("Cell Uniform Clustering", {
 
   clMarkersDF <- findClustersMarkers(obj)
 
-  expect_identical(colnames(clMarkersDF), c("CL", "Gene", "Score", "pVal",
+  expect_identical(colnames(clMarkersDF), c("CL", "Gene", "Score",
                                             "adjPVal", "DEA", "IsMarker"))
   expect_identical(nrow(clMarkersDF), 10L * 2L * length(unique(clusters)))
   expect_type(clMarkersDF[["Gene"]],     "character")
@@ -66,7 +66,7 @@ test_that("Cell Uniform Clustering", {
   clMarkersDF2 <- findClustersMarkers(obj, markers = primaryMarkers)
 
   expect_identical(colnames(clMarkersDF2), colnames(clMarkersDF))
-  expect_identical(clMarkersDF2[, -7L], clMarkersDF[, -7L])
+  expect_identical(clMarkersDF2[, -6L], clMarkersDF[, -6L])
   expect_gt(sum(clMarkersDF2[["IsMarker"]]), 0L)
 
   clMarkersDF3 <- findClustersMarkers(obj, clusters = clusters)
