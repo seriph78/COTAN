@@ -2,7 +2,7 @@
 
 Solved issue with `cleanPlots()` when the number of cells exceeded *65536*
 
-Added methods to calculate the `COEX` matrix only on a cells' subset
+Added methods to calculate the `COEX` matrix only on a subset of the columns
 
 Now the function `pValueFromDEA()` returns the p-value adjusted for multi-test
 
