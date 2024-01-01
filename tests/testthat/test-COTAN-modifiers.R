@@ -80,11 +80,17 @@ test_that("dropGenesCells", {
   obj <- dropGenesCoex(obj)
 
   expect_error(getGenesCoex(obj))
+  genesSel <- c("F", "D", "A", "C")
+  expect_identical(dim(suppressWarnings(getGenesCoex(obj, genes = genesSel))),
+                   c(getNumGenes(obj), 4L))
   expect_false(is_empty(getCellsCoex(obj)))
 
   obj <- dropCellsCoex(obj)
 
   expect_error(getCellsCoex(obj))
+  cellsSel <- c("f", "d", "a", "c")
+  expect_identical(dim(suppressWarnings(getCellsCoex(obj, cells = cellsSel))),
+                   c(getNumCells(obj), 4L))
 
   obj <- dropGenesCells(obj, genes = LETTERS[8L:9L])
 

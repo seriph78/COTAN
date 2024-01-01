@@ -1,6 +1,7 @@
 ## COTAN 2.3.2
 
 Solved issue with `cleanPlots()` when the number of cells exceeded *65536*
+Now the function `pValueFromDEA()` returns the p-value adjusted for multi-test
 
 ## COTAN 2.3.1
 
