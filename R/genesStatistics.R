@@ -73,7 +73,7 @@ calculateGDIGivenS <- function(S) {
 }
 
 #' @details `calculateGDIGivenCorr()` produces a `vector` with the *GDI* for
-#'   each column based on the given correlation matrix, uinsg the *Pearson's
+#'   each column based on the given correlation matrix, using the *Pearson's
 #'   *\eqn{\chi^{2}}* test*
 #'
 #' @param corr a `matrix` object, possibly a subset of the columns of the full

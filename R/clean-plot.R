@@ -90,10 +90,24 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     logThis("Hierarchical clustering: START", logLevel = 2L)
 
-    hcCells <- hclust(distCells, method = "complete")
-    rm(distCells)
+    # hclust cannot operate on more than 2^16 elements
+    if (getNumCells(objCOTAN) <= 65500) {
+      hcCells <- hclust(distCells, method = "complete")
+      groups <- cutree(hcCells, k = 2L)
+    }
+    else {
+      groups <- set_names(rep(1L, times = getNumCells(objCOTAN)),
+                          getCells(objCOTAN))
+      # ensure B group is not empty picking the first cell
+      groups[[1L]] <- 2L
 
-    groups <- cutree(hcCells, k = 2L)
+      warning(paste("cleanPlots() - More than 65500 cells in the COTAN object:",
+                    "'B' group cannot be established and",
+                    "is defaulted to include only the first cell"),
+                    call. = FALSE)
+      logThis("Too many cells: cannot establish 'B' group", logLevel = 3L)
+    }
+    rm(distCells)
 
     pos1 <- which(groups == 1L)
     pos2 <- which(groups == 2L)

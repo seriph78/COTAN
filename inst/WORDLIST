@@ -1,4 +1,5 @@
 ANalysis
+BioConductor
 Bioc
 CellNumber
 CellPercentage
@@ -20,6 +21,7 @@ LDI
 MeanUDE
 MedianUDE
 MetadataCells
+PCAtools
 RNAseq
 SecondaryMarkers
 UDE
@@ -119,6 +121,7 @@ heatmapPlot
 initializeMetaDataset
 interactome
 invariants
+irlba
 iteratively
 logThis
 mRNA

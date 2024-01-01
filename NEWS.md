@@ -1,3 +1,7 @@
+## COTAN 2.3.2
+
+Solved issue with `cleanPlots()` when the number of cells exceeded *65536*
+
 ## COTAN 2.3.1
 
 Stopped using explicit PCA via irlba package:

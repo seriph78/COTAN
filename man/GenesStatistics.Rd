@@ -81,7 +81,7 @@ for each gene as \emph{cross-entropy}: \eqn{-\sum_{c}{\mathbb{1}_{X_c == 0}
 observed count and \eqn{p_c} the probability of zero
 
 \code{calculateGDIGivenCorr()} produces a \code{vector} with the \emph{GDI} for
-each column based on the given correlation matrix, uinsg the \emph{Pearson's
+each column based on the given correlation matrix, using the \emph{Pearson's
 \emph{\eqn{\chi^{2}}} test}
 
 \code{calculateGDI()} produces a \code{data.frame} with the \emph{GDI} for each
