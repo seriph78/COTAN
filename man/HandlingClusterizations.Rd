@@ -25,6 +25,7 @@
 \alias{dropClusterization}
 \alias{DEAOnClusters}
 \alias{pValueFromDEA}
+\alias{distancesBetweenClusters}
 \alias{UMAPPlot}
 \alias{clustersDeltaExpression}
 \alias{clustersMarkersHeatmapPlot}
@@ -64,6 +65,8 @@ DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 pValueFromDEA(coexDF, numCells)
 
+distancesBetweenClusters(zeroOne, clusters, distance)
+
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
 clustersDeltaExpression(objCOTAN, clName = "", clusters = NULL)
@@ -99,7 +102,7 @@ clustersTreePlot(
   objCOTAN,
   kCuts,
   clName = "",
-  distance = "cosine",
+  distance = "euclidean",
   hclustMethod = "ward.D2"
 )
 
@@ -124,7 +127,7 @@ reorderClusterization(
   coexDF = NULL,
   reverse = FALSE,
   keepMinusOne = TRUE,
-  distance = "cosine",
+  distance = "euclidean",
   hclustMethod = "ward.D2"
 )
 }
@@ -152,6 +155,10 @@ of the \emph{clusters} of the \emph{clusterization}}
 data losses}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
+
+\item{zeroOne}{a \code{matrix} with the raw counts projected to \code{zero} or \code{one}}
+
+\item{distance}{type of distance to use. Default is \code{"euclidean"}}
 
 \item{df}{the \code{data.frame} to plot. It must have a row names containing the
 given elements}
@@ -184,9 +191,6 @@ on the one indicated by \code{condName} that will only indicate the relevant
 column name in the returned \code{data.frame}}
 
 \item{plotTitle}{The title to use for the returned plot}
-
-\item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
-and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
@@ -243,6 +247,8 @@ genes in each \emph{cluster}
 
 \code{pValueFromDEA()} returns a \code{data.frame} with the \emph{p-values}
 corresponding to the given \emph{coex}
+
+\code{distancesBetweenClusters()} returns a \code{dist} object
 
 \code{UMAPPlot()} returns a \code{ggplot2} object
 
@@ -355,6 +361,11 @@ given \emph{clusterization}
 \code{pValueFromDEA()} is used to convert to \emph{p-value} the Differential
 Expression analysis using the \code{COTAN} contingency tables on each \emph{cluster}
 in the given \emph{clusterization}
+
+\code{distancesBetweenClusters()} is used to obtain a model independent
+distance between the clusters. It is the \code{"euclidian"} distance between the
+per clusters averages of the corresponding columns of the
+\emph{Zero/One projection} for the raw data matrix
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
 information related to clusters after applying the UMAP transformation.

@@ -225,11 +225,11 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 clustersTreePlot <- function(objCOTAN,
                              kCuts,
                              clName = "",
-                             distance = "cosine",
+                             distance = "euclidean",
                              hclustMethod = "ward.D2") {
   # pick last if no name was given
   clName <- getClusterizationName(objCOTAN, clName = clName)
-  c(clusters, coexDF) %<-% getClusterizationData(objCOTAN, clName = clName)
+  clusters <- getClusters(objCOTAN, clName = clName)
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
@@ -241,19 +241,13 @@ clustersTreePlot <- function(objCOTAN,
 
   colVector <- getColorsVector(kCuts)
 
-  if (is_empty(coexDF)) {
-    logThis("Coex dataframe is missing: will be calculated and stored",
-            logLevel = 1L)
-    coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
-    objCOTAN <- addClusterizationCoex(objCOTAN, clName = clName,
-                                      coexDF = coexDF)
-  }
+  # merge small cluster based on distances
+  zoDist <- distancesBetweenClusters(getZeroOneProj(objCOTAN),
+                                     clusters = clusters,
+                                     distance = distance)
   rm(clusters)
 
-  # merge small cluster based on distances
-  coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
-
-  hcNorm <- hclust(coexDist, method = hclustMethod)
+  hcNorm <- hclust(zoDist, method = hclustMethod)
 
   dend <- as.dendrogram(hcNorm)
   dend <- branches_color(dend, k = kCuts, col = colVector, groupLabels = TRUE)

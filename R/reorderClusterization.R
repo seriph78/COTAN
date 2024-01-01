@@ -13,8 +13,7 @@
 #' @param reverse a flag to the output order
 #' @param keepMinusOne a flag to decide whether to keep the cluster `"-1"`
 #'   (representing the non-clustered cells) untouched
-#' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
-#'   and the others from [parallelDist::parDist()] are also available)
+#' @param distance type of distance to use. Default is `"euclidean"`
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #'
@@ -37,7 +36,7 @@
 reorderClusterization <- function(objCOTAN,
                                   clName = "", clusters = NULL, coexDF = NULL,
                                   reverse = FALSE, keepMinusOne = TRUE,
-                                  distance = "cosine",
+                                  distance = "euclidean",
                                   hclustMethod = "ward.D2") {
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
@@ -56,15 +55,13 @@ reorderClusterization <- function(objCOTAN,
   # exclude cluster "-1"
   minusOneClCoex <- NULL
   if (keepMinusOne && any(clusters == "-1")) {
-    col <- which(colnames(coexDF) == "-1")
     minusOneClCoex <- coexDF[["-1"]]
-    coexDF <- coexDF[, -col]
   }
 
-  # DEA based distance
-  coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
+  zoDist <- distancesBetweenClusters(zeroOne = getZeroOneProj(objCOTAN),
+                                     clusters = clusters, distance = distance)
 
-  hc <- hclust(coexDist, method = hclustMethod)
+  hc <- hclust(zoDist, method = hclustMethod)
 
   # we exploit the rank(x) == order(order(x))
   perm <- order(hc[["order"]])
@@ -93,8 +90,10 @@ reorderClusterization <- function(objCOTAN,
   # Reorder the columns to match wanted hc[["order"]]
   outputCoexDF <- outputCoexDF[, hc[["order"]]]
 
-  # restore cluster "-1"
+  # move cluster "-1" to last position
   if (keepMinusOne && !is_empty(minusOneClCoex)) {
+    col <- which(colnames(coexDF) == "-1")
+    coexDF <- coexDF[, -col]
     outputCoexDF[["-1"]] <- minusOneClCoex
   }
 

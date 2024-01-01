@@ -190,7 +190,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    initialResolution = 0.8,
-                                   distance = "cosine",
+                                   distance = "euclidean",
                                    hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)

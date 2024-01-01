@@ -220,20 +220,15 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     oldNumClusters <- length(unique(outputClusters))
 
-    coexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
+    zoDist <- distancesBetweenClusters(zeroOne =getZeroOneProj(objCOTAN),
+                                       clusters = outputClusters,
+                                       distance = distance)
     gc()
-
-    ## To drop the cells with only zeros
-    ## TODO: To be fixed! Where it come from?
-    coexDF <- coexDF[, colSums(coexDF != 0.0) > 0L]
-
-    # merge small cluster based on their DEA based distances
-    coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
 
     if (saveObj) {
       pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_plot.pdf")))
 
-      hcNorm <- hclust(coexDist, method = hclustMethod)
+      hcNorm <- hclust(zoDist, method = hclustMethod)
       plot(as.dendrogram(hcNorm))
 
       dev.off()
@@ -255,7 +250,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     pList <- as.list(as.data.frame(pList))
 
     # reorder based on distance
-    pList <- pList[order(coexDist)]
+    pList <- pList[order(zoDist)]
 
     # drop the already tested pairs
     pNamesList <- lapply(pList, function(p) mergedName(p[[1L]], p[[2L]]))

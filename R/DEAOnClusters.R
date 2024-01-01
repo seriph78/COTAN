@@ -124,3 +124,42 @@ pValueFromDEA <- function(coexDF, numCells) {
 
   return(as.data.frame(pValue))
 }
+
+
+#'
+#'
+#' @details `distancesBetweenClusters()` is used to obtain a model independent
+#'   distance between the clusters. It is the `"euclidian"` distance between the
+#'   per clusters averages of the corresponding columns of the
+#'   *Zero/One projection* for the raw data matrix
+#'
+#' @param zeroOne a `matrix` with the raw counts projected to `zero` or `one`
+#' @param clusters the *clusterization* to use
+#' @param distance type of distance to use. Default is `"euclidean"`
+#'
+#' @return `distancesBetweenClusters()` returns a `dist` object
+#'
+#' @export
+#'
+#' @importFrom Matrix rowSums
+#'
+#' @importFrom stats dist
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname HandlingClusterizations
+#'
+distancesBetweenClusters <- function(zeroOne, clusters, distance) {
+  assert_that(identical(colnames(zeroOne), names(clusters)),
+              msg = "Passed matrix and clusterization are not aligned")
+
+  clList <- toClustersList(clusters)
+
+  zeroOneClAvg <- data.frame(row.names = rownames(zeroOne))
+  for (cluster in clList) {
+    zeroOneClAvg <- cbind(zeroOneClAvg, rowMeans(zeroOne[, cluster]))
+  }
+  names(zeroOneClAvg) <- names(clList)
+
+  return(dist(t(zeroOneClAvg), method = distance, diag = TRUE, upper = TRUE))
+}

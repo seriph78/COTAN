@@ -24,7 +24,7 @@ cellsUniformClustering(
   cores = 1L,
   maxIterations = 25L,
   initialResolution = 0.8,
-  distance = "cosine",
+  distance = "euclidean",
   hclustMethod = "ward.D2",
   saveObj = TRUE,
   outDir = "."
