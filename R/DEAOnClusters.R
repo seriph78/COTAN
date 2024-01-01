@@ -96,9 +96,11 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
 #' @param numCells the number of overall cells in all *clusters*
+#' @param method *p-value* multi-test adjustment method. Defaults to
+#'   `"bonferroni"`; use `"none"` for no adjustment
 #'
-#' @return `pValueFromDEA()` returns a `data.frame` with the *p-values*
-#'   corresponding to the given *coex*
+#' @return `pValueFromDEA()` returns a `data.frame` containing the *p-values*
+#'   corresponding to the given `COEX` adjusted for *multi-test*
 #'
 #' @export
 #'
@@ -107,18 +109,28 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #' @importFrom Matrix rowSums
 #'
 #' @importFrom stats pchisq
+#' @importFrom stats p.adjust
 #'
 #' @importFrom assertthat assert_that
 #'
 #' @rdname HandlingClusterizations
 #'
-pValueFromDEA <- function(coexDF, numCells) {
+pValueFromDEA <- function(coexDF, numCells, method = "bonferroni") {
 
   pValue <- pchisq(as.matrix(coexDF^2L * numCells),
                              df = 1L, lower.tail = FALSE)
 
   if (anyNA(pValue)) {
     warning("Got some NA in the p-value",
+            toString(which(is.na(pValue), arr.ind = TRUE)))
+  }
+
+  for (cl in colnames(pValue)) {
+    pValue[, cl] <- p.adjust(pValue[, cl], method = method, n = nrow(coexDF))
+  }
+
+  if (anyNA(pValue)) {
+    warning("Got some NA in the adjusted p-value",
             toString(which(is.na(pValue), arr.ind = TRUE)))
   }
 

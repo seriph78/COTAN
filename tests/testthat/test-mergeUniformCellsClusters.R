@@ -2,6 +2,7 @@ tm <- tempdir()
 stopifnot(file.exists(tm))
 
 library(zeallot)
+library(stats)
 
 test_that("Merge Uniform Cells Clusters", {
 
@@ -26,10 +27,16 @@ test_that("Merge Uniform Cells Clusters", {
   expect_setequal(colnames(coexDF), levels(clusters))
   expect_identical(rownames(coexDF), getGenes(obj))
 
-  pValDF <- pValueFromDEA(coexDF, getNumCells(obj))
+  method <- "bonferroni"
+
+  pValDF <- pValueFromDEA(coexDF, numCells = getNumCells(obj), method = "none")
+  adjPValDF <- pValueFromDEA(coexDF, numCells = getNumCells(obj),
+                             method = method)
 
   expect_setequal(colnames(pValDF), levels(clusters))
   expect_identical(rownames(pValDF), getGenes(obj))
+  expect_setequal(colnames(adjPValDF), levels(clusters))
+  expect_identical(rownames(adjPValDF), getGenes(obj))
 
   coexDF_exp <- readRDS(file.path(getwd(), "coex.test.cluster1.RDS"))
   pValDF_exp <- readRDS(file.path(getwd(), "pval.test.cluster1.RDS"))

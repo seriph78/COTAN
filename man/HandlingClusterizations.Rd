@@ -63,7 +63,7 @@ getClusters(objCOTAN, clName = "")
 
 DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
-pValueFromDEA(coexDF, numCells)
+pValueFromDEA(coexDF, numCells, method = "bonferroni")
 
 distancesBetweenClusters(zeroOne, clusters, distance)
 
@@ -113,8 +113,6 @@ findClustersMarkers(
   clName = "",
   clusters = NULL,
   coexDF = NULL,
-  pValueDF = NULL,
-  deltaExp = NULL,
   method = "bonferroni"
 )
 
@@ -155,6 +153,9 @@ of the \emph{clusters} of the \emph{clusterization}}
 data losses}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
+
+\item{method}{\emph{p-value} multi-test adjustment method. Defaults to
+\code{"bonferroni"}; use \code{"none"} for no adjustment}
 
 \item{zeroOne}{a \code{matrix} with the raw counts projected to \code{zero} or \code{one}}
 
@@ -199,14 +200,6 @@ defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
 
 \item{markers}{a \code{list} of marker genes}
 
-\item{pValueDF}{a \code{data.frame} with \emph{In/Out} \emph{p-value} based on the \code{COEX}.
-E.G. the result of a call to \code{\link[=pValueFromDEA]{pValueFromDEA()}}}
-
-\item{deltaExp}{a \code{data.frame} with the \emph{delta-expression} in a \emph{cluster}.
-E.G. the result of a call to \code{\link[=clustersDeltaExpression]{clustersDeltaExpression()}}}
-
-\item{method}{\emph{p-value} adjustment method. Defaults to \code{"bonferroni"}}
-
 \item{clustersCoex}{the \code{COEX} \code{data.frame}}
 
 \item{reverse}{a flag to the output order}
@@ -245,8 +238,8 @@ column for each \emph{cluster}.
 \code{DEAOnClusters()} returns the co-expression \code{data.frame} for the
 genes in each \emph{cluster}
 
-\code{pValueFromDEA()} returns a \code{data.frame} with the \emph{p-values}
-corresponding to the given \emph{coex}
+\code{pValueFromDEA()} returns a \code{data.frame} containing the \emph{p-values}
+corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 
 \code{distancesBetweenClusters()} returns a \code{dist} object
 
@@ -290,8 +283,17 @@ the cells in the group
 \item \code{"objCOTAN"} the updated \code{COTAN} object
 }
 
-\code{findClustersMarkers()} returns a \code{data.frame} containing \code{n}
-top/bottom \code{COEX} scores for each \emph{cluster}
+\code{findClustersMarkers()} returns a \code{data.frame} containing \code{n} genes
+for each \emph{cluster} scoring top/bottom \code{COEX} scores. The \code{data.frame} also contains:
+\itemize{
+\item \code{"CL"} the cluster
+\item \code{"Gene"} the gene
+\item \code{"Score"} the \code{COEX} score of the gene
+\item \code{"adjPVal"} the \emph{p-values} associated to the \code{COEX}
+adjusted for \emph{multi-testing}
+\item \code{"DEA"} the differential expression of the gene
+\item \code{"IsMarker"} whether the gene is among the given markers
+}
 
 \code{geneSetEnrichment()} returns a \code{data.frame} with the cumulative
 score
@@ -397,7 +399,7 @@ needed calculates and stores the \code{DEA} of the relevant \emph{clusterization
 enriched and the \code{n} most negatively enriched genes for each \emph{cluster}. The
 function also provides whether and the found genes are in the given
 \code{markers} list or not. It also returns the \emph{p-value} and the \emph{adjusted}
-\emph{p-value} using the \code{\link[stats:p.adjust]{stats::p.adjust()}}
+\emph{p-value} for multi-tests using the \code{\link[stats:p.adjust]{stats::p.adjust()}}
 
 \code{geneSetEnrichment()} returns a cumulative score of enrichment in a
 \emph{cluster} over a gene set. In formulae it calculates

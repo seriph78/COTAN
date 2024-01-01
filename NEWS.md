@@ -1,3 +1,5 @@
+Now the function `pValueFromDEA()` returns the p-value adjusted for multi-test
+
 ## COTAN 2.3.1
 
 Stopped using explicit PCA via irlba package:

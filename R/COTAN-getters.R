@@ -718,9 +718,11 @@ NULL
 #'   dropping) genes' `COEX` matrix from the `COTAN` object.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param genes A vector of gene names. It will exclude any gene not on the
-#'   list. By defaults the function will keep all genes.
-#' @param zeroDiagonal When TRUE sets the diagonal to zero.
+#' @param genes The given genes' names to select the wanted `COEX` columns. If
+#'   missing all columns will be returned. When not empty a proper result is
+#'   provided by calculating the partial `COEX` matrix on the fly
+#' @param zeroDiagonal When TRUE the `COEX` of any element with itself is set to
+#'   zero
 #' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
 #'   have been updated since the `COEX` matrix was calculated.
 #'
@@ -752,6 +754,13 @@ NULL
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' genesCoex <- getGenesCoex(objCOTAN)
 #'
+#' genesSample <- sample(getNumGenes(objCOTAN), 10)
+#' partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
+#'                                          actOnCells = FALSE)
+#'
+#' identical(partialGenesCoex,
+#'           getGenesCoex(objCOTAN, getGenes(objCOTAN)[sort(genesSample)]))
+#'
 #' ## S <- calculateS(objCOTAN)
 #' ## G <- calculateG(objCOTAN)
 #' ## pValue <- calculatePValue(objCOTAN)
@@ -760,6 +769,7 @@ NULL
 #' ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
 #' ## matrix and derivatives, so it can be dropped it from the `COTAN` object
 #' objCOTAN <- dropGenesCoex(objCOTAN)
+#'
 #'
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
 #'
@@ -775,6 +785,12 @@ NULL
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 #' cellsCoex <- getCellsCoex(objCOTAN)
 #'
+#' cellsSample <- sample(getNumCells(objCOTAN), 10)
+#' partialCellsCoex <- calculatePartialCoex(objCOTAN, cellsSample,
+#'                                          actOnCells = TRUE)
+#'
+#' identical(partialCellsCoex, cellsCoex[, sort(cellsSample)])
+#'
 #' objCOTAN <- dropCellsCoex(objCOTAN)
 #'
 #' @rdname CalculatingCOEX
@@ -784,26 +800,41 @@ setMethod(
   "COTAN",
   function(objCOTAN, genes = vector(mode = "character"),
            zeroDiagonal = TRUE, ignoreSync = FALSE) {
-    if (is_empty(objCOTAN@genesCoex)) {
-      stop("Cannot return genes' coex as the matrix was never calculated")
-    }
-
-    if (isFALSE(ignoreSync) &&
-        isFALSE(as.logical(getMetadataElement(objCOTAN,
-                                              datasetTags()[["gsync"]])))) {
-      stop("Cannot return genes' coex as the matrix is",
-           " out of sync with the other parameters.",
-           " It is still ossible to access the data directly!")
-    }
+    isInSync = as.logical(getMetadataElement(objCOTAN,
+                                             datasetTags()[["gsync"]]))
 
     ret <- objCOTAN@genesCoex
 
-    if (isTRUE(zeroDiagonal)) {
-      ret@x[cumsum(seq_len(nrow(ret)))] <- 0.0
-    }
+    if (is_empty(genes)) {
+      if (is_empty(ret)) {
+        stop("Cannot return genes' coex as the matrix was never calculated")
+      }
 
-    if (!is_empty(genes)) {
-      ret <- ret[, getGenes(objCOTAN) %in% genes, drop = FALSE]
+      if (isFALSE(ignoreSync) && isFALSE(isInSync)) {
+        stop("Cannot return genes' coex as the matrix is",
+             " out of sync with the other parameters.",
+             " It is still ossible to access the data directly!")
+      }
+
+      if (isTRUE(zeroDiagonal)) {
+        diag(ret) <- 0.0
+      }
+    } else {
+      genes <- handleNamesSubsets(getGenes(objCOTAN), genes)
+
+      if (is_empty(ret) ||
+          (isFALSE(ignoreSync) && isFALSE(isInSync)))
+      {
+        warning("Missing precalculated genes' coex!")
+        ret <- calculatePartialCoex(objCOTAN, columnsSubset = genes,
+                                    actOnCells = FALSE)
+      } else {
+        ret <- ret[, genes, drop = FALSE]
+      }
+
+      if (isTRUE(zeroDiagonal)) {
+        diag(ret[genes, , drop = FALSE]) <- 0.0
+      }
     }
 
     return(ret)
@@ -817,8 +848,9 @@ setMethod(
 #'   dropping) cells' `COEX` matrix from the `COTAN` object.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param cells A vector of cell names. It will exclude any cell not on the
-#'   list. By defaults the function will keep all cells.
+#' @param cells The given cells' names to select the wanted `COEX` columns. If
+#'   missing all columns will be returned. When not empty a proper result is
+#'   provided by calculating the partial `COEX` matrix on the fly
 #' @param zeroDiagonal When `TRUE` sets the diagonal to zero.
 #' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
 #'   have been updated since the `COEX` matrix was calculated.
@@ -836,26 +868,41 @@ setMethod(
   "COTAN",
   function(objCOTAN, cells = vector(mode = "character"),
            zeroDiagonal = TRUE, ignoreSync = FALSE) {
-    if (is_empty(objCOTAN@cellsCoex)) {
-      stop("Cannot return cells' coex as the matrix was never calculated")
-    }
-
-    if (isFALSE(ignoreSync) &&
-        isFALSE(as.logical(getMetadataElement(objCOTAN,
-                                              datasetTags()[["csync"]])))) {
-      stop("Cannot return cells' coex as the matrix is",
-           " out of sync with the other parameters.",
-           " It is still ossible to access the data directly!")
-    }
+    isInSync = as.logical(getMetadataElement(objCOTAN,
+                                             datasetTags()[["csync"]]))
 
     ret <- objCOTAN@cellsCoex
 
-    if (isTRUE(zeroDiagonal)) {
-      ret@x[cumsum(seq_len(nrow(ret)))] <- 0.0
-    }
+    if (is_empty(cells)) {
+      if (is_empty(ret)) {
+        stop("Cannot return cells' coex as the matrix was never calculated")
+      }
 
-    if (!is_empty(cells)) {
-      ret <- ret[, getCells(objCOTAN) %in% cells, drop = FALSE]
+      if (isFALSE(ignoreSync) && isFALSE(isInSync)) {
+        stop("Cannot return cells' coex as the matrix is",
+             " out of sync with the other parameters.",
+             " It is still ossible to access the data directly!")
+      }
+
+      if (isTRUE(zeroDiagonal)) {
+        diag(ret) <- 0.0
+      }
+    } else {
+      cells <- handleNamesSubsets(getCells(objCOTAN), cells)
+
+      if (is_empty(ret) ||
+          (isFALSE(ignoreSync) && isFALSE(isInSync)))
+      {
+        warning("Missing precalculated cells' coex!")
+        ret <- calculatePartialCoex(objCOTAN, columnsSubset = cells,
+                                    actOnCells = TRUE)
+      } else {
+        ret <- ret[, cells, drop = FALSE]
+      }
+
+      if (isTRUE(zeroDiagonal)) {
+        diag(ret[cells, , drop = FALSE]) <- 0.0
+      }
     }
 
     return(ret)
