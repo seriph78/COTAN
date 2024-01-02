@@ -1,11 +1,15 @@
+## COTAN 2.2.3
+
+Solved issue with `cleanPlots()` when the number of cells exceeded *65536*
+
 ## COTAN 2.2.2
 
-Stopped using explicit PCA via irlba package:
-using BioConductor PCAtools::pca instead
+Stopped using explicit **PCA** via `irlba` package:
+using `BioConductor` `PCAtools::pca()` instead
 
 ## COTAN 2.2.1
 
-Fixed minor issue with test on macOS on arm64 architactures
+Fixed minor issue with test on `MacOS` on `arm64` architectures
 
 ## COTAN 2.2.0
 
