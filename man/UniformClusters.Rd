@@ -24,7 +24,7 @@ cellsUniformClustering(
   cores = 1L,
   maxIterations = 25L,
   initialResolution = 0.8,
-  distance = "euclidean",
+  distance = "kullback",
   hclustMethod = "ward.D2",
   saveObj = TRUE,
   outDir = "."
@@ -46,7 +46,7 @@ mergeUniformCellsClusters(
   GDIThreshold = 1.4,
   batchSize = 10L,
   cores = 1L,
-  distance = "cosine",
+  distance = "kullback",
   hclustMethod = "ward.D2",
   saveObj = TRUE,
   outDir = "."
@@ -79,7 +79,7 @@ here to speed up the process (default is \code{NULL})}
 before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as
 \code{\link[Seurat:FindClusters]{Seurat::FindClusters()}}}
 
-\item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
+\item{distance}{type of distance to use (default is \code{"kullback"}, \code{"cosine"}
 and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods

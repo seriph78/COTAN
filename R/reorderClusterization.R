@@ -13,7 +13,8 @@
 #' @param reverse a flag to the output order
 #' @param keepMinusOne a flag to decide whether to keep the cluster `"-1"`
 #'   (representing the non-clustered cells) untouched
-#' @param distance type of distance to use. Default is `"euclidean"`
+#' @param distance type of distance to use (default is `"kullback"`, `"cosine"`
+#'   and the others from [parallelDist::parDist()] are also available)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #'
@@ -36,7 +37,7 @@
 reorderClusterization <- function(objCOTAN,
                                   clName = "", clusters = NULL, coexDF = NULL,
                                   reverse = FALSE, keepMinusOne = TRUE,
-                                  distance = "euclidean",
+                                  distance = "kullback",
                                   hclustMethod = "ward.D2") {
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%

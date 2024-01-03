@@ -157,7 +157,7 @@ NULL
 #'   [Seurat::FindClusters()]
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
-#' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
+#' @param distance type of distance to use (default is `"kullback"`, `"cosine"`
 #'   and the others from [parallelDist::parDist()] are also available)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
@@ -190,7 +190,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    initialResolution = 0.8,
-                                   distance = "euclidean",
+                                   distance = "kullback",
                                    hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
