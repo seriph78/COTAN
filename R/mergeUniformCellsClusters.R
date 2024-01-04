@@ -18,7 +18,7 @@
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops
 #' @param cores number cores used
-#' @param distance type of distance to use (default is `"kullback"`, `"cosine"`
+#' @param distance type of distance to use (default is `"hellinger"`, `"cosine"`
 #'   and the others from [parallelDist::parDist()] are also available)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
@@ -124,7 +124,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       GDIThreshold = 1.4,
                                       batchSize = 10L,
                                       cores = 1L,
-                                      distance = "kullback",
+                                      distance = "hellinger",
                                       hclustMethod = "ward.D2",
                                       saveObj = TRUE,
                                       outDir = ".") {

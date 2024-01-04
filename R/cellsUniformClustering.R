@@ -157,7 +157,7 @@ NULL
 #'   [Seurat::FindClusters()]
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
-#' @param distance type of distance to use (default is `"kullback"`, `"cosine"`
+#' @param distance type of distance to use (default is `"hellinger"`, `"cosine"`
 #'   and the others from [parallelDist::parDist()] are also available)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
@@ -190,7 +190,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    initialResolution = 0.8,
-                                   distance = "kullback",
+                                   distance = "hellinger",
                                    hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
@@ -343,10 +343,14 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
 
-  c(outputClusters, outputCoexDF) %<-%
+  c(outputClusters, .) %<-%
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = NULL, keepMinusOne = TRUE,
                           distance = distance, hclustMethod = hclustMethod)
+
+  outputCoexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
+
+  outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
 
   if (saveObj) {
     clusterizationName <-
@@ -354,7 +358,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
 
     if (!setequal(rownames(srat@meta.data), names(outputClusters))) {
       warning("List of cells got corrupted")
-      return(outputClusters)
+      return(outputList)
     }
 
     srat@meta.data <-
@@ -364,7 +368,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
 
     if (!dim(srat)[[2L]] == getNumCells(objCOTAN)) {
       warning("Number of cells got wrong")
-      return(outputClusters)
+      return(outputList)
     }
 
     logThis("Cluster, UMAP and Saving the Seurat dataset", logLevel = 2L)
@@ -382,5 +386,5 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
 
   logThis("Creating cells' uniform clustering: DONE", logLevel = 2L)
 
-  return(list("clusters" = factor(outputClusters), "coex" = outputCoexDF))
+  return(outputList)
 }

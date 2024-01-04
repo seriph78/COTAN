@@ -147,7 +147,7 @@ pValueFromDEA <- function(coexDF, numCells, method = "bonferroni") {
 #'
 #' @param zeroOne a `matrix` with the raw counts projected to `zero` or `one`
 #' @param clusters the *clusterization* to use
-#' @param distance type of distance to use (default is `"kullback"`, `"cosine"`
+#' @param distance type of distance to use (default is `"hellinger"`, `"cosine"`
 #'   and the others from [parallelDist::parDist()] are also available)
 #'
 #' @return `distancesBetweenClusters()` returns a `dist` object
@@ -162,7 +162,8 @@ pValueFromDEA <- function(coexDF, numCells, method = "bonferroni") {
 #'
 #' @rdname HandlingClusterizations
 #'
-distancesBetweenClusters <- function(zeroOne, clusters, distance = "kullback") {
+distancesBetweenClusters <- function(zeroOne, clusters,
+                                     distance = "hellinger") {
   assert_that(identical(colnames(zeroOne), names(clusters)),
               msg = "Passed matrix and clusterization are not aligned")
 
@@ -174,7 +175,7 @@ distancesBetweenClusters <- function(zeroOne, clusters, distance = "kullback") {
   }
   # ensure no zeros in the matrix
   zeroOneClAvg[zeroOneClAvg == 0.0] <- 1.0e-6
-  names(zeroOneClAvg) <- names(clList)
+  colnames(zeroOneClAvg) <- names(clList)
 
   return(parDist(t(zeroOneClAvg), method = distance, diag = TRUE, upper = TRUE))
 }

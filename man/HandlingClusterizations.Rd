@@ -65,7 +65,7 @@ DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 pValueFromDEA(coexDF, numCells, method = "bonferroni")
 
-distancesBetweenClusters(zeroOne, clusters, distance = "kullback")
+distancesBetweenClusters(zeroOne, clusters, distance = "hellinger")
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
@@ -102,7 +102,7 @@ clustersTreePlot(
   objCOTAN,
   kCuts,
   clName = "",
-  distance = "kullback",
+  distance = "hellinger",
   hclustMethod = "ward.D2"
 )
 
@@ -125,7 +125,7 @@ reorderClusterization(
   coexDF = NULL,
   reverse = FALSE,
   keepMinusOne = TRUE,
-  distance = "kullback",
+  distance = "hellinger",
   hclustMethod = "ward.D2"
 )
 }
@@ -159,7 +159,7 @@ data losses}
 
 \item{zeroOne}{a \code{matrix} with the raw counts projected to \code{zero} or \code{one}}
 
-\item{distance}{type of distance to use (default is \code{"kullback"}, \code{"cosine"}
+\item{distance}{type of distance to use (default is \code{"hellinger"}, \code{"cosine"}
 and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
 
 \item{df}{the \code{data.frame} to plot. It must have a row names containing the
