@@ -42,6 +42,18 @@ test_that("Cell Uniform Clustering", {
   expect_lte(fracAbove, 0.01)
   expect_lte(lastPerc, GDIThreshold)
 
+  clusters2 <- factor(clusters, levels = c(levels(clusters), "-1"))
+  clusters2[1:50] <- "-1"
+  coexDF2 <- DEAOnClusters(obj, clusters = clusters2)
+  c(rClusters2, rCoexDF2) %<-%
+    reorderClusterization(obj, reverse = TRUE, keepMinusOne = TRUE,
+                          clusters = clusters2, coexDF = coexDF2)
+
+  expect_identical(names(rClusters2)[rClusters2 == "-1"],
+                   names(clusters2)[1:50])
+  expect_identical(colnames(rCoexDF2)[order(colnames(rCoexDF2))],
+                   levels(rClusters2))
+
   #clusters_exp <- readRDS(file.path(getwd(), "clusters1.RDS"))
 
   #expect_identical(clusters, clusters_exp)
@@ -56,9 +68,9 @@ test_that("Cell Uniform Clustering", {
   expect_identical(sum(clMarkersDF[["IsMarker"]]), 0L)
 
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
-  highPos <- (1L:80L) %in% c(11L:20L, 31L:40L, 41L:50L, 61L:70L)
-  expect_gt(min(topGenesNum[ highPos]), 480L)
-  expect_lt(max(topGenesNum[!highPos]), 241L)
+  lowPos <- (1L:80L) %in% c(11L:20L, 31L:40L, 41L:50L, 61L:70L)
+  expect_gt(min(topGenesNum[!lowPos]), 480L)
+  expect_lt(max(topGenesNum[ lowPos]), 241L)
 
   primaryMarkers <-
     c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",

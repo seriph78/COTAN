@@ -44,21 +44,6 @@ reorderClusterization <- function(objCOTAN,
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)
 
-  if (is_empty(coexDF)) {
-    if (clName %in% getClusterizations(objCOTAN)) {
-      coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
-    }
-    if (is_empty(coexDF)) {
-      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
-    }
-  }
-
-  # exclude cluster "-1"
-  minusOneClCoex <- NULL
-  if (keepMinusOne && any(clusters == "-1")) {
-    minusOneClCoex <- coexDF[["-1"]]
-  }
-
   zoDist <- distancesBetweenClusters(zeroOne = getZeroOneProj(objCOTAN),
                                      clusters = clusters, distance = distance)
 
@@ -74,7 +59,11 @@ reorderClusterization <- function(objCOTAN,
   clNames <- hc[["labels"]]
   clMap <- set_names(clNames[perm], clNames)
 
-  if (keepMinusOne && !is_empty(minusOneClCoex)) {
+  # handle cluster "-1" separately
+  minusOneClusterPresent <- keepMinusOne && any(clusters == "-1")
+  if (minusOneClusterPresent) {
+    pos <- which(clMap == "-1")
+    clMap[[pos]] <- clMap[["-1"]]
     clMap[["-1"]] <- "-1"
   }
 
@@ -83,19 +72,18 @@ reorderClusterization <- function(objCOTAN,
           logLevel = 1L)
 
   outputClusters <- factorToVector(factor(clusters))
-  outputCoexDF <- coexDF
-
   outputClusters <- set_names(clMap[outputClusters], names(outputClusters))
-  colnames(outputCoexDF) <- clMap[colnames(coexDF)]
 
-  # Reorder the columns to match wanted hc[["order"]]
-  outputCoexDF <- outputCoexDF[, hc[["order"]]]
+  if (is_empty(coexDF) && clName %in% getClusterizations(objCOTAN)) {
+    coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
+  }
 
-  # move cluster "-1" to last position
-  if (keepMinusOne && !is_empty(minusOneClCoex)) {
-    col <- which(colnames(coexDF) == "-1")
-    coexDF <- coexDF[, -col]
-    outputCoexDF[["-1"]] <- minusOneClCoex
+  outputCoexDF <- coexDF
+  if (!is_empty(coexDF)) {
+    colnames(outputCoexDF) <- clMap[colnames(coexDF)]
+
+    # Reorder the columns to match wanted hc[["order"]]
+    outputCoexDF <- outputCoexDF[, hc[["order"]]]
   }
 
   return(list("clusters" = factor(outputClusters), "coex" = outputCoexDF))

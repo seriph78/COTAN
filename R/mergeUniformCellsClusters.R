@@ -238,7 +238,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
     # These pairs correspond to N lowest distances as calculated before
     # If none of them can be merges, the loop stops
 
-    allLabels <- colnames(coexDF)
+    allLabels <- labels(zoDist)
+    assert_that(length(allLabels) == oldNumClusters,
+                msg = "Internal error - distance has no labels")
 
     # create all pairings with different clusters
     pList <- rbind(rep((1L:oldNumClusters), each  = oldNumClusters),
@@ -295,14 +297,15 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     outputClusters <- clTagsMap[outputClusters]
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
-
-    colnames(coexDF)   <- clTagsMap[colnames(coexDF)]
   }
 
-  c(outputClusters, coexDF) %<-%
-    reorderClusterization(objCOTAN, clusters = outputClusters, coexDF = coexDF,
+
+  c(outputClusters, .) %<-%
+    reorderClusterization(objCOTAN, clusters = outputClusters,
                           reverse = FALSE, keepMinusOne = FALSE,
                           distance = distance, hclustMethod = hclustMethod)
+
+  coexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 

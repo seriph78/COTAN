@@ -172,6 +172,8 @@ distancesBetweenClusters <- function(zeroOne, clusters, distance = "kullback") {
   for (cluster in clList) {
     zeroOneClAvg <- cbind(zeroOneClAvg, rowMeans(zeroOne[, cluster]))
   }
+  # ensure no zeros in the matrix
+  zeroOneClAvg[zeroOneClAvg == 0.0] <- 1.0e-6
   names(zeroOneClAvg) <- names(clList)
 
   return(parDist(t(zeroOneClAvg), method = distance, diag = TRUE, upper = TRUE))
