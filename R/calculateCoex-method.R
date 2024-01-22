@@ -234,8 +234,8 @@ observedPartialContingencyTablesYY <-
 #' @importFrom Matrix t
 #' @importClassesFrom Matrix symmetricMatrix
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
@@ -333,8 +333,8 @@ observedContingencyTables <- function(objCOTAN,
 #'   * `"observedYN"`
 #'   * `"observedYY"`
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
@@ -614,8 +614,8 @@ expectedPartialContingencyTablesNN <-
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
@@ -724,8 +724,8 @@ expectedContingencyTables <- function(objCOTAN,
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
@@ -892,8 +892,8 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
@@ -1022,8 +1022,8 @@ setMethod(
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
@@ -1159,8 +1159,8 @@ calculateS <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 #'
 #' @returns `calculateG()` returns the G matrix
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'

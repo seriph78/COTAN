@@ -39,7 +39,7 @@
 #' @importFrom dendextend set
 #'
 #' @importFrom tidyr pivot_wider
-#' @importFrom tidyr `%>%`
+#' @importFrom tidyr %>%
 #'
 #' @importFrom grid unit
 #' @importFrom grid gpar
@@ -55,8 +55,8 @@
 #'
 #' @importFrom circlize colorRamp2
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
