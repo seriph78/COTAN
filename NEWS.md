@@ -1,3 +1,6 @@
+Restored default adjstment method of `pValueFromDEA()` to `"none"`
+for backward compatibility reasons
+
 ## COTAN 2.3.2
 
 Solved issue with `cleanPlots()` when the number of cells exceeded *65536*

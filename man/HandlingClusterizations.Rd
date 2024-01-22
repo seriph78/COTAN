@@ -62,7 +62,7 @@ getClusters(objCOTAN, clName = "")
 
 DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
-pValueFromDEA(coexDF, numCells, method = "bonferroni")
+pValueFromDEA(coexDF, numCells, method = "none")
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
