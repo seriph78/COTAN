@@ -1,6 +1,8 @@
+## COTAN 2.3.3
+
 Minor fix in the import of operators to align to new version of `roxigen2`
 
-Restored default adjstment method of `pValueFromDEA()` to `"none"`
+Restored default adjustment method of `pValueFromDEA()` to `"none"`
 for backward compatibility reasons
 
 ## COTAN 2.3.2
