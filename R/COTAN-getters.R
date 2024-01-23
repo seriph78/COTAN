@@ -437,9 +437,11 @@ setMethod(
 #' @aliases getNormalizedData
 #'
 #' @details `getNormalizedData()` extracts the *normalized* count table (i.e.
-#'   divided by `nu`)
+#'   divided by `nu`) and returns it or its base-10 logarithm
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param returnLogs a `Boolean` to decide whether to return the normalized data
+#'   or their `log10()` instead
 #'
 #' @returns `getNormalizedData()` returns the normalized count `data.frame`
 #'
@@ -452,17 +454,17 @@ setMethod(
 #'
 #' @rdname ParametersEstimations
 #'
-setMethod(
-  "getNormalizedData",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(getNu(objCOTAN))) {
-      stop("nu must not be empty, estimate it")
-    }
-
-    return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
+getNormalizedData <- function(objCOTAN, returnLogs = FALSE) {
+  if (is_empty(getNu(objCOTAN))) {
+    stop("nu must not be empty, estimate it")
   }
-)
+
+  if (isFalse(returnLogs)) {
+    return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
+  } else {
+    return(t(log10(t(getRawData(objCOTAN) + 1L) * (1.0 / getNu(objCOTAN)))))
+  }
+}
 
 
 #' @aliases getNu

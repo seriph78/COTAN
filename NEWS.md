@@ -1,5 +1,8 @@
 ## COTAN 2.3.3
 
+Added method to handle expressio levels' change via log-normalized data:
+`logExprChangeOnClusters()`
+
 Minor fix in the import of operators to align to new version of `roxigen2`
 
 Restored default adjustment method of `pValueFromDEA()` to `"none"`

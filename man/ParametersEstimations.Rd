@@ -12,7 +12,6 @@
 \alias{estimateDispersionNuBisection,COTAN-method}
 \alias{estimateDispersionNuBisection}
 \alias{estimateDispersionNuNlminb,COTAN-method}
-\alias{getNormalizedData,COTAN-method}
 \alias{getNormalizedData}
 \alias{getNu,COTAN-method}
 \alias{getNu}
@@ -59,7 +58,7 @@
   enforceNuAverageToOne = TRUE
 )
 
-\S4method{getNormalizedData}{COTAN}(objCOTAN)
+getNormalizedData(objCOTAN, returnLogs = FALSE)
 
 \S4method{getNu}{COTAN}(objCOTAN)
 
@@ -81,6 +80,9 @@ is 1024.}
 
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
+
+\item{returnLogs}{a \code{Boolean} to decide whether to return the normalized data
+or their \code{log10()} instead}
 }
 \value{
 \code{estimateLambdaLinear()} returns the updated \code{COTAN} object
@@ -143,7 +145,7 @@ but since the joint parameters have too high dimensionality, it converges
 too slowly to be actually useful in real cases.
 
 \code{getNormalizedData()} extracts the \emph{normalized} count table (i.e.
-divided by \code{nu})
+divided by \code{nu}) and returns it or its base-10 logarithm
 
 \code{getNu()} extracts the nu array (normalized cells' counts averages)
 

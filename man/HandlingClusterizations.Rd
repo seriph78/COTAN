@@ -25,6 +25,7 @@
 \alias{dropClusterization}
 \alias{DEAOnClusters}
 \alias{pValueFromDEA}
+\alias{logExprChangeOnClusters}
 \alias{UMAPPlot}
 \alias{clustersDeltaExpression}
 \alias{clustersMarkersHeatmapPlot}
@@ -63,6 +64,8 @@ getClusters(objCOTAN, clName = "")
 DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 pValueFromDEA(coexDF, numCells, method = "none")
+
+logExprChangeOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
@@ -237,6 +240,9 @@ genes in each \emph{cluster}
 \code{pValueFromDEA()} returns a \code{data.frame} containing the \emph{p-values}
 corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 
+\code{logExprChangeOnClusters()} returns the log-expression-change
+\code{data.frame} for the genes in each \emph{cluster}
+
 \code{UMAPPlot()} returns a \code{ggplot2} object
 
 \code{clustersDeltaExpression()} returns a \code{data.frame} with the weighted
@@ -357,6 +363,10 @@ given \emph{clusterization}
 \code{pValueFromDEA()} is used to convert to \emph{p-value} the Differential
 Expression analysis using the \code{COTAN} contingency tables on each \emph{cluster}
 in the given \emph{clusterization}
+
+\code{logExprChangeOnClusters()} is used to get the log difference of the
+expression levels for each \emph{cluster} in the given \emph{clusterization} against
+the rest of the data-set
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
 information related to clusters after applying the UMAP transformation.
