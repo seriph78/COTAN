@@ -11,7 +11,7 @@
 #'
 #' @importFrom dplyr group_by
 #' @importFrom dplyr mutate
-#' @importFrom dplyr `%>%`
+#' @importFrom dplyr %>%
 #'
 #' @noRd
 #'

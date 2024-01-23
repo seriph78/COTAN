@@ -57,8 +57,8 @@
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @examples
 #' # This creates many infomative plots useful to determine whether
