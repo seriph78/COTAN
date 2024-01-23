@@ -1,7 +1,7 @@
 ## COTAN 2.3.3
 
-Added method to handle expressio levels' change via log-normalized data:
-`logExprChangeOnClusters()`
+Added method to handle expression levels' change via log-normalized data:
+`logFoldChangeOnClusters()`
 
 Minor fix in the import of operators to align to new version of `roxigen2`
 

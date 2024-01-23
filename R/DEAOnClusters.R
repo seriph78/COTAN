@@ -141,7 +141,7 @@ pValueFromDEA <- function(coexDF, numCells, method = "none") {
 
 
 #
-#' @details `logExprChangeOnClusters()` is used to get the log difference of the
+#' @details `logFoldChangeOnClusters()` is used to get the log difference of the
 #'   expression levels for each *cluster* in the given *clusterization* against
 #'   the rest of the data-set
 #'
@@ -152,21 +152,21 @@ pValueFromDEA <- function(coexDF, numCells, method = "none") {
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName`
 #'
-#' @return `logExprChangeOnClusters()` returns the log-expression-change
+#' @return `logFoldChangeOnClusters()` returns the log-expression-change
 #'   `data.frame` for the genes in each *cluster*
 #'
 #' @export
 #'
 #' @importFrom rlang is_empty
 #'
-#' @importFrom Matrix rowSums
+#' @importFrom Matrix rowMeans
 #'
 #' @importFrom assertthat assert_that
 #'
 #' @rdname HandlingClusterizations
 #'
-logExprChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
-  logThis("Log Expression Change Analysis - START", logLevel = 2L)
+logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
+  logThis("Log Fold Change Analysis - START", logLevel = 2L)
 
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
@@ -179,7 +179,7 @@ logExprChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 
   normData <- getNormalizedData(objCOTAN, returnLogs = TRUE)
 
-  lecDF <- data.frame()
+  lfcDF <- data.frame()
 
   for (cl in names(clustersList)) {
     gc()
@@ -195,22 +195,22 @@ logExprChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
       warning("Cluster '", cl, "' has no cells assigned to it!")
     }
 
-    averageIn  <- rowmeans(normData[,  cellsIn, drop = FALSE])
-    averageOut <- rowmeans(normData[, !cellsIn, drop = FALSE])
+    averageIn  <- rowMeans(normData[,  cellsIn, drop = FALSE])
+    averageOut <- rowMeans(normData[, !cellsIn, drop = FALSE])
 
-    lec <- averageIn  - averageOut
+    lfc <- averageIn  - averageOut
 
     rm(averageIn, averageOut)
     gc()
 
-    lecDF <- setColumnInDF(lecDF, colToSet = lec,
+    lfcDF <- setColumnInDF(lfcDF, colToSet = lfc,
                             colName = cl, rowNames = rownames(normData))
 
     logThis(paste0("* analysis of cluster: '", cl, "' - DONE"), logLevel = 3L)
   }
   logThis("", logLevel = 1L)
 
-  logThis("Log Expression Change Analysis - DONE", logLevel = 2L)
+  logThis("Log Fold Change Analysis - DONE", logLevel = 2L)
 
-  return(lecDF)
+  return(lfcDF)
 }

@@ -459,7 +459,7 @@ getNormalizedData <- function(objCOTAN, returnLogs = FALSE) {
     stop("nu must not be empty, estimate it")
   }
 
-  if (isFalse(returnLogs)) {
+  if (isFALSE(returnLogs)) {
     return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
   } else {
     return(t(log10(t(getRawData(objCOTAN) + 1L) * (1.0 / getNu(objCOTAN)))))
@@ -975,6 +975,10 @@ NULL
 #'
 #' objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
 #'                               clusters = clusters, coexDF = coexDF)
+#'
+#' lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
+#' umapPlot2 <- UMAPPlot(lfcDF, clusters = NULL, elements = groupMarkers)
+#' plot(umapPlot2)
 #'
 #' objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
 #'

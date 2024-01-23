@@ -25,7 +25,7 @@
 \alias{dropClusterization}
 \alias{DEAOnClusters}
 \alias{pValueFromDEA}
-\alias{logExprChangeOnClusters}
+\alias{logFoldChangeOnClusters}
 \alias{UMAPPlot}
 \alias{clustersDeltaExpression}
 \alias{clustersMarkersHeatmapPlot}
@@ -65,7 +65,7 @@ DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 pValueFromDEA(coexDF, numCells, method = "none")
 
-logExprChangeOnClusters(objCOTAN, clName = "", clusters = NULL)
+logFoldChangeOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
@@ -240,7 +240,7 @@ genes in each \emph{cluster}
 \code{pValueFromDEA()} returns a \code{data.frame} containing the \emph{p-values}
 corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 
-\code{logExprChangeOnClusters()} returns the log-expression-change
+\code{logFoldChangeOnClusters()} returns the log-expression-change
 \code{data.frame} for the genes in each \emph{cluster}
 
 \code{UMAPPlot()} returns a \code{ggplot2} object
@@ -364,7 +364,7 @@ given \emph{clusterization}
 Expression analysis using the \code{COTAN} contingency tables on each \emph{cluster}
 in the given \emph{clusterization}
 
-\code{logExprChangeOnClusters()} is used to get the log difference of the
+\code{logFoldChangeOnClusters()} is used to get the log difference of the
 expression levels for each \emph{cluster} in the given \emph{clusterization} against
 the rest of the data-set
 
@@ -431,6 +431,10 @@ plot(umapPlot)
 
 objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
                               clusters = clusters, coexDF = coexDF)
+
+lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
+umapPlot2 <- UMAPPlot(lfcDF, clusters = NULL, elements = groupMarkers)
+plot(umapPlot2)
 
 objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
 
