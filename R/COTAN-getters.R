@@ -440,8 +440,6 @@ setMethod(
 #'   divided by `nu`) and returns it or its base-10 logarithm
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param returnLogs a `Boolean` to decide whether to return the normalized data
-#'   or their `log10()` instead
 #'
 #' @returns `getNormalizedData()` returns the normalized count `data.frame`
 #'

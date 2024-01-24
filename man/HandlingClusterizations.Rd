@@ -284,7 +284,8 @@ the cells in the group
 }
 
 \code{findClustersMarkers()} returns a \code{data.frame} containing \code{n} genes
-for each \emph{cluster} scoring top/bottom \code{COEX} scores. The \code{data.frame} also contains:
+for each \emph{cluster} scoring top/bottom \code{COEX} scores. The \code{data.frame} also
+contains:
 \itemize{
 \item \code{"CL"} the cluster
 \item \code{"Gene"} the gene
@@ -293,6 +294,8 @@ for each \emph{cluster} scoring top/bottom \code{COEX} scores. The \code{data.fr
 adjusted for \emph{multi-testing}
 \item \code{"DEA"} the differential expression of the gene
 \item \code{"IsMarker"} whether the gene is among the given markers
+\item \code{"logFoldCh"} the \emph{log-fold-change} of the gene expression inside versus
+outside the cluster from \code{\link[=logFoldChangeOnClusters]{logFoldChangeOnClusters()}}
 }
 
 \code{geneSetEnrichment()} returns a \code{data.frame} with the cumulative
@@ -397,8 +400,8 @@ needed calculates and stores the \code{DEA} of the relevant \emph{clusterization
 \emph{clusterization} and produces a \code{data.frame} with the \code{n} most positively
 enriched and the \code{n} most negatively enriched genes for each \emph{cluster}. The
 function also provides whether and the found genes are in the given
-\code{markers} list or not. It also returns the \emph{p-value} and the \emph{adjusted}
-\emph{p-value} for multi-tests using the \code{\link[stats:p.adjust]{stats::p.adjust()}}
+\code{markers} list or not. It also returns the \emph{adjusted p-value} for
+multi-tests using the \code{\link[stats:p.adjust]{stats::p.adjust()}}
 
 \code{geneSetEnrichment()} returns a cumulative score of enrichment in a
 \emph{cluster} over a gene set. In formulae it calculates

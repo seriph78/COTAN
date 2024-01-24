@@ -80,9 +80,6 @@ is 1024.}
 
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
-
-\item{returnLogs}{a \code{Boolean} to decide whether to return the normalized data
-or their \code{log10()} instead}
 }
 \value{
 \code{estimateLambdaLinear()} returns the updated \code{COTAN} object
