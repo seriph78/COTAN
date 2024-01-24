@@ -159,7 +159,7 @@ pValueFromDEA <- function(coexDF, numCells, method = "none") {
 #'
 #' @importFrom rlang is_empty
 #'
-#' @importFrom Matrix rowMeans
+#' @importFrom Matrix rowSums
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -177,34 +177,38 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 
   numCells <- getNumCells(objCOTAN)
 
-  normData <- getNormalizedData(objCOTAN, returnLogs = TRUE)
+  normData <- getNormalizedData(objCOTAN)
 
   lfcDF <- data.frame()
 
   for (cl in names(clustersList)) {
-    gc()
     logThis("*", appendLF = FALSE, logLevel = 1L)
     logThis(paste0(" analysis of cluster: '", cl, "' - START"), logLevel = 3L)
 
     cellsIn <- getCells(objCOTAN) %in%  clustersList[[cl]]
 
-    #numCellsIn  <- sum(cellsIn)
-    #numCellsOut <- numCells - numCellsIn
+    numCellsIn  <- sum(cellsIn)
+    numCellsOut <- numCells - numCellsIn
 
-    if (sum(cellsIn) == 0L) {
+    if (numCellsIn == 0L) {
       warning("Cluster '", cl, "' has no cells assigned to it!")
     }
 
-    averageIn  <- rowMeans(normData[,  cellsIn, drop = FALSE])
-    averageOut <- rowMeans(normData[, !cellsIn, drop = FALSE])
+    # log of average expression inside/outside the cluster
+    logAverageIn  <-
+      log10(pmax(rowSums(normData[,  cellsIn, drop = FALSE]), 1L) /
+              max(numCellsIn,  1L))
+    logAverageOut <-
+      log10(pmax(rowSums(normData[, !cellsIn, drop = FALSE]), 1L) /
+              max(numCellsOut, 1L))
 
-    lfc <- averageIn  - averageOut
+    lfc <- logAverageIn - logAverageOut
 
-    rm(averageIn, averageOut)
+    rm(logAverageIn, logAverageOut)
     gc()
 
     lfcDF <- setColumnInDF(lfcDF, colToSet = lfc,
-                            colName = cl, rowNames = rownames(normData))
+                           colName = cl, rowNames = rownames(normData))
 
     logThis(paste0("* analysis of cluster: '", cl, "' - DONE"), logLevel = 3L)
   }

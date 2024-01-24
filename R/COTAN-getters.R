@@ -454,16 +454,12 @@ setMethod(
 #'
 #' @rdname ParametersEstimations
 #'
-getNormalizedData <- function(objCOTAN, returnLogs = FALSE) {
+getNormalizedData <- function(objCOTAN) {
   if (is_empty(getNu(objCOTAN))) {
     stop("nu must not be empty, estimate it")
   }
 
-  if (isFALSE(returnLogs)) {
-    return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
-  } else {
-    return(t(log10(t(getRawData(objCOTAN) + 1L) * (1.0 / getNu(objCOTAN)))))
-  }
+  return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
 }
 
 

@@ -58,7 +58,7 @@
   enforceNuAverageToOne = TRUE
 )
 
-getNormalizedData(objCOTAN, returnLogs = FALSE)
+getNormalizedData(objCOTAN)
 
 \S4method{getNu}{COTAN}(objCOTAN)
 
