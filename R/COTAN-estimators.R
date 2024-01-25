@@ -71,7 +71,7 @@ setMethod(
 #'
 #' @returns `estimateNuLinear()` returns the updated `COTAN` object
 #'
-#' @importFrom Matrix colMeans
+#' @importFrom Matrix colSums
 #'
 #' @export
 #'
@@ -85,8 +85,8 @@ setMethod(
   "estimateNuLinear",
   "COTAN",
   function(objCOTAN) {
-    # raw column averages divided by global_mean
-    nu <- colMeans(getRawData(objCOTAN), dims = 1L)
+    # raw column sums divided by global average
+    nu <- colSums(getRawData(objCOTAN), dims = 1L)
     nu <- nu / mean(nu)
 
     {
@@ -125,7 +125,7 @@ setMethod(
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
 #'
-#' @importFrom Matrix colMeans
+#' @importFrom Matrix colSums
 #'
 #' @export
 #'
@@ -139,10 +139,9 @@ setMethod(
       normalizeNameAndLabels(objCOTAN, name = clName,
                              labels = clusters, isCond = FALSE)
 
-    # raw column averages
-    nu <- colMeans(getRawData(objCOTAN), dims = 1L)
+    # raw column sums divided by cluster average
+    nu <- colSums(getRawData(objCOTAN), dims = 1L)
 
-    # Normalize by cluster
     for (cl in levels(clusters)) {
       c <- clusters == cl
       nu[c] <- nu[c] / mean(nu[c])

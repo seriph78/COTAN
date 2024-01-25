@@ -437,7 +437,7 @@ setMethod(
 #' @aliases getNormalizedData
 #'
 #' @details `getNormalizedData()` extracts the *normalized* count table (i.e.
-#'   divided by `nu`)
+#'   divided by `nu`) and returns it or its base-10 logarithm
 #'
 #' @param objCOTAN a `COTAN` object
 #'
@@ -452,17 +452,13 @@ setMethod(
 #'
 #' @rdname ParametersEstimations
 #'
-setMethod(
-  "getNormalizedData",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(getNu(objCOTAN))) {
-      stop("nu must not be empty, estimate it")
-    }
-
-    return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
+getNormalizedData <- function(objCOTAN) {
+  if (is_empty(getNu(objCOTAN))) {
+    stop("nu must not be empty, estimate it")
   }
-)
+
+  return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
+}
 
 
 #' @aliases getNu
@@ -973,6 +969,10 @@ NULL
 #'
 #' objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
 #'                               clusters = clusters, coexDF = coexDF)
+#'
+#' lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
+#' umapPlot2 <- UMAPPlot(lfcDF, clusters = NULL, elements = groupMarkers)
+#' plot(umapPlot2)
 #'
 #' objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
 #'

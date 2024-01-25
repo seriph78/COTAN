@@ -49,8 +49,8 @@
 #'
 #' @importFrom dendextend get_nodes_attr
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @examples
 #' data("test.dataset")

@@ -27,6 +27,14 @@ test_that("Merge Uniform Cells Clusters", {
   expect_setequal(colnames(coexDF), levels(clusters))
   expect_identical(rownames(coexDF), getGenes(obj))
 
+  lfcDF <- logFoldChangeOnClusters(obj, clusters = clusters)
+
+  expect_setequal(colnames(lfcDF), clusters)
+  expect_identical(rownames(lfcDF), getGenes(obj))
+  expect_gte(min(colSums(lfcDF > 0.0)), 280L)
+  expect_lte(max(colSums(lfcDF > 0.0)), 302L)
+  expect_lt(max(abs(colMeans(lfcDF))), 0.06)
+
   method <- "bonferroni"
 
   pValDF <- pValueFromDEA(coexDF, numCells = getNumCells(obj), method = "none")
@@ -74,7 +82,8 @@ test_that("Merge Uniform Cells Clusters", {
                               saveObj = TRUE, outDir = tm)
 
   expect_lt(nlevels(mergedClusters), nlevels(clusters))
-  expect_setequal(mergedClusters, colnames(mergedCoexDF))
+  expect_setequal(colnames(mergedCoexDF), mergedClusters)
+  expect_identical(rownames(mergedCoexDF), getGenes(obj))
 
   obj <- addClusterization(obj, clName = "merge", clusters = mergedClusters,
                            coexDF = mergedCoexDF, override = FALSE)
@@ -84,6 +93,13 @@ test_that("Merge Uniform Cells Clusters", {
 
   #cluster_data <- readRDS(file.path(getwd(), "cluster_data_merged.RDS"))
   #expect_identical(mergedClusters[genes.names.test], cluster_data)
+
+  mergedLfcDF <- logFoldChangeOnClusters(obj, clName = "merge")
+
+  expect_setequal(colnames(mergedLfcDF), mergedClusters)
+  expect_identical(rownames(mergedLfcDF), getGenes(obj))
+  # with 2 clusters the changes are symmetric
+  expect_identical(mergedLfcDF[[1]], -mergedLfcDF[[2]])
 
   for (cl in levels(mergedClusters)) {
     cellsToDrop <- names(clusters)[mergedClusters != cl]

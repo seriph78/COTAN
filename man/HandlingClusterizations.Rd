@@ -25,6 +25,7 @@
 \alias{dropClusterization}
 \alias{DEAOnClusters}
 \alias{pValueFromDEA}
+\alias{logFoldChangeOnClusters}
 \alias{distancesBetweenClusters}
 \alias{UMAPPlot}
 \alias{clustersDeltaExpression}
@@ -63,7 +64,9 @@ getClusters(objCOTAN, clName = "")
 
 DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
-pValueFromDEA(coexDF, numCells, method = "bonferroni")
+pValueFromDEA(coexDF, numCells, method = "none")
+
+logFoldChangeOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 distancesBetweenClusters(zeroOne, clusters, distance = "hellinger")
 
@@ -242,6 +245,9 @@ genes in each \emph{cluster}
 \code{pValueFromDEA()} returns a \code{data.frame} containing the \emph{p-values}
 corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 
+\code{logFoldChangeOnClusters()} returns the log-expression-change
+\code{data.frame} for the genes in each \emph{cluster}
+
 \code{distancesBetweenClusters()} returns a \code{dist} object
 
 \code{UMAPPlot()} returns a \code{ggplot2} object
@@ -285,7 +291,8 @@ the cells in the group
 }
 
 \code{findClustersMarkers()} returns a \code{data.frame} containing \code{n} genes
-for each \emph{cluster} scoring top/bottom \code{COEX} scores. The \code{data.frame} also contains:
+for each \emph{cluster} scoring top/bottom \code{COEX} scores. The \code{data.frame} also
+contains:
 \itemize{
 \item \code{"CL"} the cluster
 \item \code{"Gene"} the gene
@@ -294,6 +301,8 @@ for each \emph{cluster} scoring top/bottom \code{COEX} scores. The \code{data.fr
 adjusted for \emph{multi-testing}
 \item \code{"DEA"} the differential expression of the gene
 \item \code{"IsMarker"} whether the gene is among the given markers
+\item \code{"logFoldCh"} the \emph{log-fold-change} of the gene expression inside versus
+outside the cluster from \code{\link[=logFoldChangeOnClusters]{logFoldChangeOnClusters()}}
 }
 
 \code{geneSetEnrichment()} returns a \code{data.frame} with the cumulative
@@ -365,6 +374,10 @@ given \emph{clusterization}
 Expression analysis using the \code{COTAN} contingency tables on each \emph{cluster}
 in the given \emph{clusterization}
 
+\code{logFoldChangeOnClusters()} is used to get the log difference of the
+expression levels for each \emph{cluster} in the given \emph{clusterization} against
+the rest of the data-set
+
 \code{distancesBetweenClusters()} is used to obtain a model independent
 distance between the clusters. It is the \code{"euclidian"} distance between the
 per clusters averages of the corresponding columns of the
@@ -399,8 +412,8 @@ needed calculates and stores the \code{DEA} of the relevant \emph{clusterization
 \emph{clusterization} and produces a \code{data.frame} with the \code{n} most positively
 enriched and the \code{n} most negatively enriched genes for each \emph{cluster}. The
 function also provides whether and the found genes are in the given
-\code{markers} list or not. It also returns the \emph{p-value} and the \emph{adjusted}
-\emph{p-value} for multi-tests using the \code{\link[stats:p.adjust]{stats::p.adjust()}}
+\code{markers} list or not. It also returns the \emph{adjusted p-value} for
+multi-tests using the \code{\link[stats:p.adjust]{stats::p.adjust()}}
 
 \code{geneSetEnrichment()} returns a cumulative score of enrichment in a
 \emph{cluster} over a gene set. In formulae it calculates
@@ -433,6 +446,10 @@ plot(umapPlot)
 
 objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
                               clusters = clusters, coexDF = coexDF)
+
+lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
+umapPlot2 <- UMAPPlot(lfcDF, clusters = NULL, elements = groupMarkers)
+plot(umapPlot2)
 
 objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
 

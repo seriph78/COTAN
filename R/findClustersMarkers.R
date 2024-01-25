@@ -3,8 +3,8 @@
 #'   *clusterization* and produces a `data.frame` with the `n` most positively
 #'   enriched and the `n` most negatively enriched genes for each *cluster*. The
 #'   function also provides whether and the found genes are in the given
-#'   `markers` list or not. It also returns the *p-value* and the *adjusted*
-#'   *p-value* for multi-tests using the [stats::p.adjust()]
+#'   `markers` list or not. It also returns the *adjusted p-value* for
+#'   multi-tests using the [stats::p.adjust()]
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param n the number of extreme `COEX` values to return
@@ -20,14 +20,17 @@
 #'   `"bonferroni"`; use `"none"` for no adjustment
 #'
 #' @returns `findClustersMarkers()` returns a `data.frame` containing `n` genes
-#'   for each *cluster* scoring top/bottom `COEX` scores. The `data.frame` also contains:
+#'   for each *cluster* scoring top/bottom `COEX` scores. The `data.frame` also
+#'   contains:
 #'   * `"CL"` the cluster
 #'   * `"Gene"` the gene
 #'   * `"Score"` the `COEX` score of the gene
 #'   * `"adjPVal"` the *p-values* associated to the `COEX`
-#'       adjusted for *multi-testing*
+#'     adjusted for *multi-testing*
 #'   * `"DEA"` the differential expression of the gene
 #'   * `"IsMarker"` whether the gene is among the given markers
+#'   * `"logFoldCh"` the *log-fold-change* of the gene expression inside versus
+#'     outside the cluster from [logFoldChangeOnClusters()]
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -71,14 +74,17 @@ findClustersMarkers <- function(
   deltaExp <- clustersDeltaExpression(objCOTAN, clName = clName,
                                       clusters = clusters)
 
+  lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
+
   assert_that(all(rownames(deltaExp)    == rownames(coexDF) &
                   rownames(adjPValueDF) == rownames(coexDF) &
                   getGenes(objCOTAN)    == rownames(coexDF)),
               msg = paste("Inconsistent data-frames passed in",
                           "for 'coex', 'p-value' or 'delta expression'"))
 
-  retDF <- as.data.frame(matrix(data = NA, nrow = 0L, ncol = 6L))
-  colnames(retDF) <- c("CL", "Gene", "Score", "adjPVal", "DEA", "IsMarker")
+  retDF <- as.data.frame(matrix(data = NA, nrow = 0L, ncol = 7L))
+  colnames(retDF) <- c("CL", "Gene", "Score", "adjPVal",
+                       "DEA", "IsMarker", "logFoldCh")
 
   for (cl in unique(colnames(coexDF))) {
     for (type in c("min", "max")) {
@@ -88,12 +94,13 @@ findClustersMarkers <- function(
       # Get the first n minimum/maximum scores for each cluster
       sortedPos <- order(coexDF[, cl], decreasing = (type == "max"))[1L:n]
 
-      tmpDF[["CL"]]       <- cl
-      tmpDF[["Gene"]]     <- rownames(coexDF)[sortedPos]
-      tmpDF[["Score"]]    <- coexDF[sortedPos, cl]
-      tmpDF[["adjPVal"]]  <- adjPValueDF[sortedPos, cl]
-      tmpDF[["DEA"]]      <- deltaExp[sortedPos, cl]
-      tmpDF[["IsMarker"]] <- as.integer(tmpDF[["Gene"]] %in% marks)
+      tmpDF[["CL"]]        <- cl
+      tmpDF[["Gene"]]      <- rownames(coexDF)[sortedPos]
+      tmpDF[["Score"]]     <- coexDF[sortedPos, cl]
+      tmpDF[["adjPVal"]]   <- adjPValueDF[sortedPos, cl]
+      tmpDF[["DEA"]]       <- deltaExp[sortedPos, cl]
+      tmpDF[["IsMarker"]]  <- as.integer(tmpDF[["Gene"]] %in% marks)
+      tmpDF[["logFoldCh"]] <- lfcDF[sortedPos, cl]
 
       retDF <- rbind(retDF, tmpDF)
 

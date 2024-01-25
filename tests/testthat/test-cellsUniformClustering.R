@@ -60,12 +60,14 @@ test_that("Cell Uniform Clustering", {
 
   clMarkersDF <- findClustersMarkers(obj)
 
-  expect_identical(colnames(clMarkersDF), c("CL", "Gene", "Score",
-                                            "adjPVal", "DEA", "IsMarker"))
+  expect_identical(colnames(clMarkersDF), c("CL", "Gene", "Score", "adjPVal",
+                                            "DEA", "IsMarker", "logFoldCh"))
   expect_identical(nrow(clMarkersDF), 10L * 2L * length(unique(clusters)))
   expect_type(clMarkersDF[["Gene"]],     "character")
   expect_type(clMarkersDF[["IsMarker"]], "integer")
   expect_identical(sum(clMarkersDF[["IsMarker"]]), 0L)
+  expect_gt(min(clMarkersDF[["Score"]] * clMarkersDF[["DEA"]]), 0.0)
+  expect_gt(min(clMarkersDF[["Score"]] * clMarkersDF[["logFoldCh"]]), 0.0)
 
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
   lowPos <- (1L:80L) %in% c(11L:20L, 31L:40L, 41L:50L, 61L:70L)

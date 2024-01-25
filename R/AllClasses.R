@@ -416,8 +416,8 @@ getCOTANSlots <- function(from) {
 #' @description Automatically converts an object from class `scCOTAN` into
 #'   `COTAN`
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @importFrom methods setIs
 #'
@@ -535,8 +535,8 @@ getScCOTANSlots <- function(from) {
 #'
 #' @description Explicitly converts an object from class `COTAN` into `scCOTAN`
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @importFrom methods as
 #' @importFrom methods setAs

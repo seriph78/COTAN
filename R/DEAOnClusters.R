@@ -97,7 +97,7 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #'   of the *clusters* of the *clusterization*
 #' @param numCells the number of overall cells in all *clusters*
 #' @param method *p-value* multi-test adjustment method. Defaults to
-#'   `"bonferroni"`; use `"none"` for no adjustment
+#'   `"none"` (i.e. no adjustment)
 #'
 #' @return `pValueFromDEA()` returns a `data.frame` containing the *p-values*
 #'   corresponding to the given `COEX` adjusted for *multi-test*
@@ -115,7 +115,7 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #'
 #' @rdname HandlingClusterizations
 #'
-pValueFromDEA <- function(coexDF, numCells, method = "bonferroni") {
+pValueFromDEA <- function(coexDF, numCells, method = "none") {
 
   pValue <- pchisq(as.matrix(coexDF^2L * numCells),
                              df = 1L, lower.tail = FALSE)
@@ -125,8 +125,10 @@ pValueFromDEA <- function(coexDF, numCells, method = "bonferroni") {
             toString(which(is.na(pValue), arr.ind = TRUE)))
   }
 
-  for (cl in colnames(pValue)) {
-    pValue[, cl] <- p.adjust(pValue[, cl], method = method, n = nrow(coexDF))
+  if (method != "none") {
+    for (cl in colnames(pValue)) {
+      pValue[, cl] <- p.adjust(pValue[, cl], method = method, n = nrow(coexDF))
+    }
   }
 
   if (anyNA(pValue)) {
@@ -135,6 +137,87 @@ pValueFromDEA <- function(coexDF, numCells, method = "bonferroni") {
   }
 
   return(as.data.frame(pValue))
+}
+
+
+#
+#
+#' @details `logFoldChangeOnClusters()` is used to get the log difference of the
+#'   expression levels for each *cluster* in the given *clusterization* against
+#'   the rest of the data-set
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName`
+#'
+#' @return `logFoldChangeOnClusters()` returns the log-expression-change
+#'   `data.frame` for the genes in each *cluster*
+#'
+#' @export
+#'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom Matrix rowSums
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname HandlingClusterizations
+#'
+logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
+  logThis("Log Fold Change Analysis - START", logLevel = 2L)
+
+  # picks up the last clusterization if none was given
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
+
+  clustersList <- toClustersList(clusters)
+
+  numCells <- getNumCells(objCOTAN)
+
+  normData <- getNormalizedData(objCOTAN)
+
+  lfcDF <- data.frame()
+
+  for (cl in names(clustersList)) {
+    logThis("*", appendLF = FALSE, logLevel = 1L)
+    logThis(paste0(" analysis of cluster: '", cl, "' - START"), logLevel = 3L)
+
+    cellsIn <- getCells(objCOTAN) %in%  clustersList[[cl]]
+
+    numCellsIn  <- sum(cellsIn)
+    numCellsOut <- numCells - numCellsIn
+
+    if (numCellsIn == 0L) {
+      warning("Cluster '", cl, "' has no cells assigned to it!")
+    }
+
+    # log of average expression inside/outside the cluster
+    logAverageIn  <-
+      log10(pmax(rowSums(normData[,  cellsIn, drop = FALSE]), 1L) /
+              max(numCellsIn,  1L))
+    logAverageOut <-
+      log10(pmax(rowSums(normData[, !cellsIn, drop = FALSE]), 1L) /
+              max(numCellsOut, 1L))
+
+    lfc <- logAverageIn - logAverageOut
+
+    rm(logAverageIn, logAverageOut)
+    gc()
+
+    lfcDF <- setColumnInDF(lfcDF, colToSet = lfc,
+                           colName = cl, rowNames = rownames(normData))
+
+    logThis(paste0("* analysis of cluster: '", cl, "' - DONE"), logLevel = 3L)
+  }
+  logThis("", logLevel = 1L)
+
+  logThis("Log Fold Change Analysis - DONE", logLevel = 2L)
+
+  return(lfcDF)
 }
 
 

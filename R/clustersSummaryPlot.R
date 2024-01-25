@@ -33,8 +33,8 @@
 #'
 #' @importFrom rlang is_empty
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
@@ -210,8 +210,8 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @importFrom parallelDist parDist
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'

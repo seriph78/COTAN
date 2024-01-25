@@ -1,3 +1,13 @@
+## COTAN 2.3.3
+
+Added method to handle expression levels' change via log-normalized data:
+`logFoldChangeOnClusters()`
+
+Minor fix in the import of operators to align to new version of `roxigen2`
+
+Restored default adjustment method of `pValueFromDEA()` to `"none"`
+for backward compatibility reasons
+
 ## COTAN 2.3.2
 
 Solved issue with `cleanPlots()` when the number of cells exceeded *65536*

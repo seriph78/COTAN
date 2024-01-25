@@ -180,8 +180,8 @@ NULL
 #'
 #' @importFrom utils as.roman
 #'
-#' @importFrom zeallot `%<-%`
-#' @importFrom zeallot `%->%`
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @rdname UniformClusters
 #'
