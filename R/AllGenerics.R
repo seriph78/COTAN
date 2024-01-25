@@ -7,7 +7,7 @@ setGeneric(
   }
 )
 
-# -------------------------------------- calculate coex
+# -------- calculate coex --------
 
 setGeneric(
   "calculateMu",
@@ -21,7 +21,7 @@ setGeneric(
   }
 )
 
-#-------------------------------------- getters
+# -------- getters --------
 
 setGeneric(
   "getRawData",
@@ -71,11 +71,6 @@ setGeneric(
 setGeneric(
   "getNumOfExpressingCells",
   function(objCOTAN) standardGeneric("getNumOfExpressingCells")
-)
-
-setGeneric(
-  "getNormalizedData",
-  function(objCOTAN) standardGeneric("getNormalizedData")
 )
 
 setGeneric(
@@ -195,7 +190,7 @@ setGeneric(
   function(objCOTAN) standardGeneric("getDims")
 )
 
-#-------------------- modifiers ------------------
+# -------- modifiers --------
 
 setGeneric(
   "initializeMetaDataset",
@@ -282,7 +277,7 @@ setGeneric(
   function(objCOTAN) standardGeneric("dropCellsCoex")
 )
 
-#-------------------------------------- estimators
+# -------- estimators --------
 setGeneric(
   "estimateLambdaLinear",
   function(objCOTAN) standardGeneric("estimateLambdaLinear")
