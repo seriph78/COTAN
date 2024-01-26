@@ -209,8 +209,8 @@ establishGenesClusters <-
 
   GCSPca <- pca(mat = GCS, rank = 10L,
                 transposed = TRUE, BSPARAM = IrlbaParam())
-  assert_that(identical(rownames(GCSPca[["rotated"]]), rownames(GCS)) &&
-                (ncol(GCSPca[["rotated"]]) == 10L),
+  assert_that(identical(rownames(GCSPca[["rotated"]]), rownames(GCS)),
+              (ncol(GCSPca[["rotated"]]) == 10L),
               msg = "Issues with pca output")
 
   SMRelevance <- matrix(nrow = length(secondaryMarkers),

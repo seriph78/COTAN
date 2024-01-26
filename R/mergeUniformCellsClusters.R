@@ -224,8 +224,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
     gc()
 
     ## To drop the cells with only zeros
-    ## TODO: To be fixed! Where it come from?
-    coexDF <- coexDF[, colSums(coexDF != 0.0) > 0L]
+    ## TODO: To be fixed! Where did they come from?
+    coexDF <- coexDF[, colSums(coexDF != 0.0) != 0L]
 
     # merge small cluster based on their DEA based distances
     coexDist <- parDist(t(as.matrix(coexDF)), method = distance)

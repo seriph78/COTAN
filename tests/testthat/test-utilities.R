@@ -48,8 +48,7 @@ test_that("Clusterizations manipulations", {
   clustersList <- toClustersList(clusters)
 
   expect_length(clustersList, 7L)
-  expect_setequal(unname(vapply(clustersList, length, integer(1L))),
-                  as.vector(table(clusters)))
+  expect_setequal(lengths(clustersList), as.vector(table(clusters)))
 
   clusters2 <- fromClustersList(clustersList, elemNames)
 

@@ -222,7 +222,7 @@ genesHeatmapPlot <-
     pValue <- as.data.frame(pValue)
 
     coex <- getGenesCoex(objCOTAN)[getGenes(objCOTAN) %in% rowGenes, ]
-    if (symmetric == TRUE) {
+    if (isTRUE(symmetric)) {
       coex <- coex[, getGenes(objCOTAN) %in% rowGenes]
     }
 
@@ -249,7 +249,7 @@ genesHeatmapPlot <-
       listCols[[m]] <- genes
     }
 
-    if (symmetric == TRUE) {
+    if (isTRUE(symmetric)) {
       clGenesCols <- clGenesRows
     } else {
       clGenesCols <- data.frame()
@@ -340,7 +340,7 @@ cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
 
     # size of each cluster
     clustersList <- toClustersList(clusters)
-    clustersSize <- vapply(clustersList, length, integer(1L))
+    clustersSize <- lengths(clustersList)
 
     # cell names grouped by the identifier of the cluster to which they belong
     cellNames <- unlist(clustersList)

@@ -17,10 +17,11 @@ test_that("Linear estimates", {
 
   obj <- estimateNuLinear(obj)
 
-  expect_identical(getNu(obj), colMeans(getRawData(obj), dims = 1L)
-                                 / mean(colMeans(getRawData(obj), dims = 1L)))
+  expect_identical(getNu(obj),
+                   colMeans(getRawData(obj), dims = 1L) /
+                     mean(colMeans(getRawData(obj), dims = 1L)))
 
-  clusters <- set_names(rep(c(1,2), times = 10), getCells(obj))
+  clusters <- set_names(rep(c(1L:2L), times = 10L), getCells(obj))
   obj <- estimateNuLinearByCluster(obj, clusters = clusters)
 
   expect_identical(getNu(obj), set_names(rep_len(1.0, getNumCells(obj)),
@@ -43,17 +44,17 @@ test_that("Bisection estimates", {
   expect_length(getDispersion(obj), getNumGenes(obj))
   expect_equal(getDispersion(obj)[[1L]], -Inf, ignore_attr = TRUE)
 
-  expect_equal(rowSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj),
-                                                         calculateMu(obj))),
-              rep(getNumCells(obj), getNumGenes(obj)),
-              tolerance = 0.001, ignore_attr = TRUE)
+  expect_equal(rowSums(getZeroOneProj(obj) +
+                         funProbZero(getDispersion(obj), calculateMu(obj))),
+               rep(getNumCells(obj), getNumGenes(obj)),
+               tolerance = 0.001, ignore_attr = TRUE)
 
   obj <- estimateNuBisection(obj, cores = 6L, chunkSize = 3L)
 
   expect_length(getNu(obj), getNumCells(obj))
 
-  expect_equal(colSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj),
-                                                         calculateMu(obj))),
+  expect_equal(colSums(getZeroOneProj(obj) +
+                         funProbZero(getDispersion(obj), calculateMu(obj))),
                rep(getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
@@ -64,13 +65,13 @@ test_that("Bisection estimates", {
   expect_length(getNu(obj), getNumCells(obj))
   expect_equal(mean(getNu(obj)), 1.0, tolerance = 1.0e-12)
 
-  expect_equal(rowSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj),
-                                                         calculateMu(obj))),
+  expect_equal(rowSums(getZeroOneProj(obj) +
+                         funProbZero(getDispersion(obj), calculateMu(obj))),
                rep(getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(colSums(getZeroOneProj(obj) + funProbZero(getDispersion(obj),
-                                                         calculateMu(obj))),
+  expect_equal(colSums(getZeroOneProj(obj) +
+                         funProbZero(getDispersion(obj), calculateMu(obj))),
                rep(getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
