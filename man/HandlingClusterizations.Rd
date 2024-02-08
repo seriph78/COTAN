@@ -65,7 +65,12 @@ DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 pValueFromDEA(coexDF, numCells, method = "none")
 
-logFoldChangeOnClusters(objCOTAN, clName = "", clusters = NULL)
+logFoldChangeOnClusters(
+  objCOTAN,
+  clName = "",
+  clusters = NULL,
+  floorLambdaFraction = 0.05
+)
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
@@ -156,6 +161,10 @@ data losses}
 
 \item{method}{\emph{p-value} multi-test adjustment method. Defaults to
 \code{"bonferroni"}; use \code{"none"} for no adjustment}
+
+\item{floorLambdaFraction}{Indicates the lower bound to the average count sums
+inside or outside the cluster for each gene as fraction of the relevant
+\code{lambda} parameter. Default is \verb{5\%}}
 
 \item{df}{the \code{data.frame} to plot. It must have a row names containing the
 given elements}

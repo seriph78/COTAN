@@ -27,13 +27,15 @@ test_that("Merge Uniform Cells Clusters", {
   expect_setequal(colnames(coexDF), levels(clusters))
   expect_identical(rownames(coexDF), getGenes(obj))
 
-  lfcDF <- logFoldChangeOnClusters(obj, clusters = clusters)
+  lfcDF <- logFoldChangeOnClusters(obj, clusters = clusters,
+                                   floorLambdaFraction = 0.01)
 
   expect_setequal(colnames(lfcDF), clusters)
   expect_identical(rownames(lfcDF), getGenes(obj))
   expect_gte(min(colSums(lfcDF > 0.0)), 280L)
   expect_lte(max(colSums(lfcDF > 0.0)), 302L)
-  expect_lt(max(abs(colMeans(lfcDF))), 0.06)
+  expect_lt(max(colMeans(lfcDF)),  0.00)
+  expect_gt(min(colMeans(lfcDF)), -0.06)
 
   method <- "bonferroni"
 
