@@ -18,8 +18,12 @@
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops
 #' @param cores number cores used
-#' @param distance type of distance to use (default is `"hellinger"`, `"cosine"`
-#'   and the others from [parallelDist::parDist()] are also available)
+#' @param useDEA Boolean indicating whether to use the *DEA* to define the
+#'   distance; alternatively it will use the average *ZeroOne* counts, that is
+#'   faster but less precise.
+#' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
+#'   `"euclidean"` for *ZeroOne*. Can be chosen among those supported by
+#'   [parallelDist::parDist()]
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
@@ -124,7 +128,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       GDIThreshold = 1.4,
                                       batchSize = 10L,
                                       cores = 1L,
-                                      distance = "hellinger",
+                                      useDEA = TRUE,
+                                      distance = NULL,
                                       hclustMethod = "ward.D2",
                                       saveObj = TRUE,
                                       outDir = ".") {
@@ -220,15 +225,14 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     oldNumClusters <- length(unique(outputClusters))
 
-    zoDist <- distancesBetweenClusters(zeroOne =getZeroOneProj(objCOTAN),
-                                       clusters = outputClusters,
-                                       distance = distance)
+    clDist <- distancesBetweenClusters(objCOTAN, clusters = outputClusters,
+                                       useDEA = useDEA, distance = distance)
     gc()
 
     if (saveObj) {
       pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_plot.pdf")))
 
-      hcNorm <- hclust(zoDist, method = hclustMethod)
+      hcNorm <- hclust(clDist, method = hclustMethod)
       plot(as.dendrogram(hcNorm))
 
       dev.off()
@@ -238,7 +242,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     # These pairs correspond to N lowest distances as calculated before
     # If none of them can be merges, the loop stops
 
-    allLabels <- labels(zoDist)
+    allLabels <- labels(clDist)
     assert_that(length(allLabels) == oldNumClusters,
                 msg = "Internal error - distance has no labels")
 
@@ -252,7 +256,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     pList <- as.list(as.data.frame(pList))
 
     # reorder based on distance
-    pList <- pList[order(zoDist)]
+    pList <- pList[order(clDist)]
 
     # drop the already tested pairs
     pNamesList <- lapply(pList, function(p) mergedName(p[[1L]], p[[2L]]))

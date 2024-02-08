@@ -157,8 +157,12 @@ NULL
 #'   [Seurat::FindClusters()]
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
-#' @param distance type of distance to use (default is `"hellinger"`, `"cosine"`
-#'   and the others from [parallelDist::parDist()] are also available)
+#' @param useDEA Boolean indicating whether to use the *DEA* to define the
+#'   distance; alternatively it will use the average *ZeroOne* counts, that is
+#'   faster but less precise.
+#' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
+#'   `"euclidean"` for *ZeroOne*. Can be chosen among those supported by
+#'   [parallelDist::parDist()]
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
@@ -190,7 +194,8 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    initialResolution = 0.8,
-                                   distance = "hellinger",
+                                   useDEA = TRUE,
+                                   distance = NULL,
                                    hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
@@ -345,7 +350,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
 
   c(outputClusters, .) %<-%
     reorderClusterization(objCOTAN, clusters = outputClusters,
-                          coexDF = NULL, keepMinusOne = TRUE,
+                          coexDF = NULL, keepMinusOne = TRUE, useDEA = useDEA,
                           distance = distance, hclustMethod = hclustMethod)
 
   outputCoexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)

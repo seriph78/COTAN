@@ -228,10 +228,14 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #'   per clusters averages of the corresponding columns of the
 #'   *Zero/One projection* for the raw data matrix
 #'
-#' @param zeroOne a `matrix` with the raw counts projected to `zero` or `one`
+#' @param objCOTAN a `COTAN` object
 #' @param clusters the *clusterization* to use
-#' @param distance type of distance to use (default is `"hellinger"`, `"cosine"`
-#'   and the others from [parallelDist::parDist()] are also available)
+#' @param useDEA Boolean indicating whether to use the *DEA* to define the
+#'   distance; alternatively it will use the average *ZeroOne* counts, that is
+#'   faster but less precise.
+#' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
+#'   `"euclidean"` for *ZeroOne*. Can be chosen among those supported by
+#'   [parallelDist::parDist()]
 #'
 #' @return `distancesBetweenClusters()` returns a `dist` object
 #'
@@ -245,20 +249,37 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #'
 #' @rdname HandlingClusterizations
 #'
-distancesBetweenClusters <- function(zeroOne, clusters,
-                                     distance = "hellinger") {
-  assert_that(identical(colnames(zeroOne), names(clusters)),
-              msg = "Passed matrix and clusterization are not aligned")
+distancesBetweenClusters <- function(objCOTAN, clusters,
+                                     useDEA = TRUE, distance = NULL) {
+  assert_that(identical(getCells(objCOTAN), names(clusters)),
+              msg = "Passed COTAN object and clusterization are not aligned")
 
   clList <- toClustersList(clusters)
 
-  zeroOneClAvg <- data.frame(row.names = rownames(zeroOne))
-  for (cluster in clList) {
-    zeroOneClAvg <- cbind(zeroOneClAvg, rowMeans(zeroOne[, cluster]))
-  }
-  # ensure no zeros in the matrix
-  zeroOneClAvg[zeroOneClAvg == 0.0] <- 1.0e-6
-  colnames(zeroOneClAvg) <- names(clList)
+  if (isTRUE(useDEA)) {
+    if (is.null(distance)) {
+      distance <- "cosine"
+    }
 
-  return(parDist(t(zeroOneClAvg), method = distance, diag = TRUE, upper = TRUE))
+
+
+  } else {
+    if (is.null(distance)) {
+      distance <- "euclidean"
+    }
+
+    zeroOne <- getZeroOneProj(objCOTAN)
+
+    zeroOneClAvg <- data.frame(row.names = getGenes(objCOTAN))
+    for (cluster in clList) {
+      zeroOneClAvg <- cbind(zeroOneClAvg, rowMeans(zeroOne[, cluster]))
+    }
+
+    # ensure no zeros in the matrix
+    zeroOneClAvg[zeroOneClAvg == 0.0] <- 1.0e-6
+    colnames(zeroOneClAvg) <- names(clList)
+
+    return(parDist(t(zeroOneClAvg), method = distance,
+                   diag = TRUE, upper = TRUE))
+  }
 }

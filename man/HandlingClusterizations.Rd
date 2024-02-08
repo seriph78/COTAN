@@ -68,7 +68,7 @@ pValueFromDEA(coexDF, numCells, method = "none")
 
 logFoldChangeOnClusters(objCOTAN, clName = "", clusters = NULL)
 
-distancesBetweenClusters(zeroOne, clusters, distance = "hellinger")
+distancesBetweenClusters(objCOTAN, clusters, useDEA = TRUE, distance = NULL)
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
@@ -105,7 +105,8 @@ clustersTreePlot(
   objCOTAN,
   kCuts,
   clName = "",
-  distance = "hellinger",
+  useDEA = TRUE,
+  distance = "cosine",
   hclustMethod = "ward.D2"
 )
 
@@ -128,7 +129,8 @@ reorderClusterization(
   coexDF = NULL,
   reverse = FALSE,
   keepMinusOne = TRUE,
-  distance = "hellinger",
+  useDEA = TRUE,
+  distance = NULL,
   hclustMethod = "ward.D2"
 )
 }
@@ -160,10 +162,13 @@ data losses}
 \item{method}{\emph{p-value} multi-test adjustment method. Defaults to
 \code{"bonferroni"}; use \code{"none"} for no adjustment}
 
-\item{zeroOne}{a \code{matrix} with the raw counts projected to \code{zero} or \code{one}}
+\item{useDEA}{Boolean indicating whether to use the \emph{DEA} to define the
+distance; alternatively it will use the average \emph{ZeroOne} counts, that is
+faster but less precise.}
 
-\item{distance}{type of distance to use (default is \code{"hellinger"}, \code{"cosine"}
-and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
+\item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
+\code{"euclidean"} for \emph{ZeroOne}. Can be chosen among those supported by
+\code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
 \item{df}{the \code{data.frame} to plot. It must have a row names containing the
 given elements}
@@ -423,7 +428,7 @@ positive values from \code{\link[=DEAOnClusters]{DEAOnClusters()}} and \eqn{\the
 
 \code{reorderClusterization()} takes in a \emph{clusterizations} and reorder
 its labels so that in the new order near labels indicate near clusters
-according to a \code{DEA} based distance
+according to a \emph{DEA} (or \emph{ZeroOne}) based distance
 }
 \examples{
 data("test.dataset")

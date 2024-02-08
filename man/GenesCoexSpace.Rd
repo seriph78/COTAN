@@ -31,8 +31,8 @@ of one or more marker genes}
 \item{kCuts}{the number of estimated \emph{cluster} (this defines the height for
 the tree cut)}
 
-\item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
-and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
+\item{distance}{type of distance to use. Default is \code{"cosine"}. Can be chosen
+among those supported by \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
 \item{hclustMethod}{default is "ward.D2" but can be any method defined by
 \code{\link[stats:hclust]{stats::hclust()}} function}
