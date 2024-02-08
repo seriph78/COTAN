@@ -1,4 +1,5 @@
 
+#'
 #' @details `clustersDeltaExpression()` estimates the change in genes'
 #'   expression inside the *cluster* compared to the average situation in the
 #'   data set.

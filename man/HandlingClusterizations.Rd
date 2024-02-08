@@ -162,9 +162,9 @@ data losses}
 \item{method}{\emph{p-value} multi-test adjustment method. Defaults to
 \code{"bonferroni"}; use \code{"none"} for no adjustment}
 
-\item{floorLambdaFraction}{Indicates the lower bound to the average count sums
-inside or outside the cluster for each gene as fraction of the relevant
-\code{lambda} parameter. Default is \verb{5\%}}
+\item{floorLambdaFraction}{Indicates the lower bound to the average count
+sums inside or outside the cluster for each gene as fraction of the
+relevant \code{lambda} parameter. Default is \eqn{5\%}}
 
 \item{df}{the \code{data.frame} to plot. It must have a row names containing the
 given elements}

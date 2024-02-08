@@ -238,8 +238,6 @@ test_that("pca usage", {
 
   expect_identical(rownames(pcaRaw), rownames(test.dataset))
 
-  #saveRDS(pcaRaw, file = "pca.test.RDS")
-
   pcaExp <- readRDS(file.path(getwd(), "pca.test.RDS"))
   expect_identical(nrow(pcaRaw), nrow(pcaExp))
 

@@ -1,4 +1,5 @@
 
+#'
 #' Automatic `COTAN` shortcuts
 #'
 #' @description These functions take (or create) a `COTAN` object and run all
@@ -11,6 +12,7 @@
 #' @name COTANObjectCreation
 NULL
 
+#'
 #' @aliases proceedToCoex
 #'
 #' @details `proceedToCoex()` takes a newly created `COTAN` object (or the

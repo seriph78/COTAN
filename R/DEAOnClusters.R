@@ -151,9 +151,9 @@ pValueFromDEA <- function(coexDF, numCells, method = "none") {
 #'   significant!
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName`
-#' @param floorLambdaFraction Indicates the lower bound to the average count sums
-#'   inside or outside the cluster for each gene as fraction of the relevant
-#'   `lambda` parameter. Default is `5%`
+#' @param floorLambdaFraction Indicates the lower bound to the average count
+#'   sums inside or outside the cluster for each gene as fraction of the
+#'   relevant `lambda` parameter. Default is \eqn{5\%}
 #'
 #' @return `logFoldChangeOnClusters()` returns the log-expression-change
 #'   `data.frame` for the genes in each *cluster*

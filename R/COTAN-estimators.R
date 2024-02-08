@@ -1,5 +1,6 @@
 # ----- `COTAN` parameters' estimates methods -----
 
+#'
 #' Estimation of the `COTAN` model's parameters
 #'
 #' @description These functions are used to estimate the `COTAN` model's
@@ -14,6 +15,7 @@
 #' @name ParametersEstimations
 NULL
 
+#'
 #' @aliases estimateLambdaLinear
 #'
 #' @details `estimateLambdaLinear()` does a linear estimation of lambda (genes'
