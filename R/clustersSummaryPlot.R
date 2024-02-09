@@ -55,12 +55,12 @@ clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
     normalizeNameAndLabels(objCOTAN, name = condName,
                            labels = conditions, isCond = TRUE)
 
-  assert_that(!is_empty(clusters) && !is_empty(conditions),
+  assert_that(!is_empty(clusters), !is_empty(conditions),
               msg = "Could not retrieve proper clusters or conditions")
 
   if (isEmptyName(condName)) {
-    assert_that(levels(conditions) == c("NoCond"))
-    condName = "NoCond"
+    assert_that(levels(conditions) == "NoCond")
+    condName <- "NoCond"
   }
 
   df <- as.data.frame(cbind(factorToVector(clusters),

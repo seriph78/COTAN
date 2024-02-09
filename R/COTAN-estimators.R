@@ -1,5 +1,6 @@
 # ----- `COTAN` parameters' estimates methods -----
 
+#'
 #' Estimation of the `COTAN` model's parameters
 #'
 #' @description These functions are used to estimate the `COTAN` model's
@@ -14,6 +15,7 @@
 #' @name ParametersEstimations
 NULL
 
+#'
 #' @aliases estimateLambdaLinear
 #'
 #' @details `estimateLambdaLinear()` does a linear estimation of lambda (genes'
@@ -493,7 +495,7 @@ setMethod(
       if (isTRUE(enforceNuAverageToOne)) {
         if (!is.finite(meanNu)) {
           assert_that(iter == 1L,
-                      msg = paste("Cannot have infinite mean 'nu'",
+                      msg = paste("It can happen to have infinite mean 'nu'",
                                   "only after the first loop"))
           warning("Infinite 'nu' found: one of the cells expressed all genes\n",
                   " Setting 'enforceNuAverageToOne <- FALSE'")

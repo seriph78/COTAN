@@ -152,6 +152,9 @@ pValueFromDEA <- function(coexDF, numCells, method = "none") {
 #'   significant!
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName`
+#' @param floorLambdaFraction Indicates the lower bound to the average count
+#'   sums inside or outside the cluster for each gene as fraction of the
+#'   relevant `lambda` parameter. Default is \eqn{5\%}
 #'
 #' @return `logFoldChangeOnClusters()` returns the log-expression-change
 #'   `data.frame` for the genes in each *cluster*
@@ -166,7 +169,8 @@ pValueFromDEA <- function(coexDF, numCells, method = "none") {
 #'
 #' @rdname HandlingClusterizations
 #'
-logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
+logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
+                                    floorLambdaFraction = 0.05) {
   logThis("Log Fold Change Analysis - START", logLevel = 2L)
 
   # picks up the last clusterization if none was given
@@ -179,6 +183,12 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
   numCells <- getNumCells(objCOTAN)
 
   normData <- getNormalizedData(objCOTAN)
+
+  if (is_empty(getLambda(objCOTAN))) {
+    stop("lambda must not be empty, estimate it")
+  }
+
+  floorAverage <- getLambda(objCOTAN) * floorLambdaFraction
 
   lfcDF <- data.frame()
 
@@ -196,16 +206,17 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
     }
 
     # log of average expression inside/outside the cluster
-    logAverageIn  <-
-      log10(pmax(rowSums(normData[,  cellsIn, drop = FALSE]), 1L) /
-              max(numCellsIn,  1L))
-    logAverageOut <-
-      log10(pmax(rowSums(normData[, !cellsIn, drop = FALSE]), 1L) /
-              max(numCellsOut, 1L))
+    averageIn  <-
+      rowSums(normData[,  cellsIn, drop = FALSE]) / max(numCellsIn,  1L)
+    averageOut <-
+      rowSums(normData[, !cellsIn, drop = FALSE]) / max(numCellsOut, 1L)
+
+    logAverageIn  <- log10(pmax(averageIn,  floorAverage))
+    logAverageOut <- log10(pmax(averageOut, floorAverage))
 
     lfc <- logAverageIn - logAverageOut
 
-    rm(logAverageIn, logAverageOut)
+    rm(averageIn, averageOut, logAverageIn, logAverageOut)
     gc()
 
     lfcDF <- setColumnInDF(lfcDF, colToSet = lfc,
