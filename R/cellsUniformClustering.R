@@ -348,12 +348,13 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
 
-  c(outputClusters, .) %<-%
-    reorderClusterization(objCOTAN, clusters = outputClusters, coexDF = NULL,
-                          reverse = FALSE, keepMinusOne = TRUE, useDEA = useDEA,
-                          distance = distance, hclustMethod = hclustMethod)
-
   outputCoexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
+
+  c(outputClusters, outputCoexDF) %<-%
+    reorderClusterization(objCOTAN, clusters = outputClusters,
+                          coexDF = outputCoexDF, reverse = FALSE,
+                          keepMinusOne = TRUE, useDEA = useDEA,
+                          distance = distance, hclustMethod = hclustMethod)
 
   outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
 

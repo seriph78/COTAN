@@ -234,10 +234,9 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 
 #'
 #'
-#' @details `distancesBetweenClusters()` is used to obtain a model independent
-#'   distance between the clusters. It is the `"euclidian"` distance between the
-#'   per clusters averages of the corresponding columns of the
-#'   *Zero/One projection* for the raw data matrix
+#' @details `distancesBetweenClusters()` is used to obtain a distance between
+#'   the clusters. Depending on the value of the `useDEA` flag will base the
+#'   distance on the *DEA* columns or the averages of the *Zero-One* matrix.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName The name of the *clusterization*. If not given the last

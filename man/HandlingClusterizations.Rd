@@ -399,10 +399,9 @@ in the given \emph{clusterization}
 expression levels for each \emph{cluster} in the given \emph{clusterization} against
 the rest of the data-set
 
-\code{distancesBetweenClusters()} is used to obtain a model independent
-distance between the clusters. It is the \code{"euclidian"} distance between the
-per clusters averages of the corresponding columns of the
-\emph{Zero/One projection} for the raw data matrix
+\code{distancesBetweenClusters()} is used to obtain a distance between
+the clusters. Depending on the value of the \code{useDEA} flag will base the
+distance on the \emph{DEA} columns or the averages of the \emph{Zero-One} matrix.
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
 information related to clusters after applying the UMAP transformation.
