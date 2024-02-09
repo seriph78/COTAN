@@ -67,7 +67,7 @@ scatterPlot <- function(objCOTAN, splitPattern = " ",
                   labels = trans_format("log10", math_format(10^.x))) +
     plotTheme("size-plot")
 
-  if (splitSamples == TRUE) {
+  if (isTRUE(splitSamples)) {
     plot <- plot + facet_grid(cols = vars(sample))
   }
 

@@ -43,7 +43,7 @@ coexMatrix <- function(obs, exp, n, s) {
 }
 
 test_that("Calculations on genes", {
-  set.seed(137)
+  set.seed(137L)
 
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
                   10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
@@ -131,7 +131,7 @@ test_that("Calculations on genes", {
 
   gce <- calculateGenesCE(obj)
 
-  expect_identical(names(gce), getGenes(obj))
+  expect_named(gce, getGenes(obj))
   expect_identical(gce[[1L]], 0.0)
   expect_equal(gce, crossEntrVector(getZeroOneProj(obj),
                                     funProbZero(getDispersion(obj), mu)),
@@ -158,20 +158,21 @@ test_that("Calculations on genes", {
   genesSample1 <- sample(getNumGenes(obj), 3L)
   partialCoex1 <- calculatePartialCoex(obj, genesSample1)
 
-  expect_equal(partialCoex1,
-               getGenesCoex(obj, zeroDiagonal = FALSE)[, sort(genesSample1)])
+  # These need tolerance
+  expect_equal(
+    partialCoex1, getGenesCoex(obj, zeroDiagonal = FALSE)[, sort(genesSample1)])
 
   genesSample2 <- getGenes(obj)[sample(getNumGenes(obj), 3L)]
   partialCoex2 <- calculatePartialCoex(obj, genesSample2,
                                        optimizeForSpeed = FALSE)
 
-  expect_equal(partialCoex2,
-               getGenesCoex(obj, genesSample2, zeroDiagonal = FALSE))
+  expect_equal(
+    partialCoex2, getGenesCoex(obj, genesSample2, zeroDiagonal = FALSE))
 })
 
 
 test_that("Calculations on cells", {
-  set.seed(137)
+  set.seed(137L)
 
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
                   10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
@@ -261,15 +262,18 @@ test_that("Calculations on cells", {
   partialCoex1 <- calculatePartialCoex(obj, cellsSample1,
                                        actOnCells = TRUE)
 
-  expect_equal(partialCoex1,
-               getCellsCoex(obj, zeroDiagonal = FALSE)[, sort(cellsSample1)])
+  # These need tolerance
+  expect_equal(
+    partialCoex1,
+    getCellsCoex(obj, zeroDiagonal = FALSE)[, sort(cellsSample1)])
 
   cellsSample2 <- getCells(obj)[sample(getNumCells(obj), 3L)]
   partialCoex2 <- calculatePartialCoex(obj, cellsSample2, actOnCells = TRUE,
                                        optimizeForSpeed = FALSE)
 
-  expect_equal(partialCoex2,
-               getCellsCoex(obj, cellsSample2, zeroDiagonal = FALSE))
+  expect_equal(
+    partialCoex2,
+    getCellsCoex(obj, cellsSample2, zeroDiagonal = FALSE))
 })
 
 

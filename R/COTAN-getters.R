@@ -796,8 +796,8 @@ setMethod(
   "COTAN",
   function(objCOTAN, genes = vector(mode = "character"),
            zeroDiagonal = TRUE, ignoreSync = FALSE) {
-    isInSync = as.logical(getMetadataElement(objCOTAN,
-                                             datasetTags()[["gsync"]]))
+    isInSync <- as.logical(getMetadataElement(objCOTAN,
+                                              datasetTags()[["gsync"]]))
 
     ret <- objCOTAN@genesCoex
 
@@ -864,8 +864,8 @@ setMethod(
   "COTAN",
   function(objCOTAN, cells = vector(mode = "character"),
            zeroDiagonal = TRUE, ignoreSync = FALSE) {
-    isInSync = as.logical(getMetadataElement(objCOTAN,
-                                             datasetTags()[["csync"]]))
+    isInSync <- as.logical(getMetadataElement(objCOTAN,
+                                              datasetTags()[["csync"]]))
 
     ret <- objCOTAN@cellsCoex
 

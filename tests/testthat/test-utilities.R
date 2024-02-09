@@ -48,8 +48,7 @@ test_that("Clusterizations manipulations", {
   clustersList <- toClustersList(clusters)
 
   expect_length(clustersList, 7L)
-  expect_setequal(unname(vapply(clustersList, length, integer(1L))),
-                  as.vector(table(clusters)))
+  expect_setequal(lengths(clustersList), as.vector(table(clusters)))
 
   clusters2 <- fromClustersList(clustersList, elemNames)
 
@@ -238,8 +237,6 @@ test_that("pca usage", {
   colnames(pcaRaw) <- paste0("PC_", seq_len(ncol(pcaRaw)))
 
   expect_identical(rownames(pcaRaw), rownames(test.dataset))
-
-  #saveRDS(pcaRaw, file = "pca.test.RDS")
 
   pcaExp <- readRDS(file.path(getwd(), "pca.test.RDS"))
   expect_identical(nrow(pcaRaw), nrow(pcaExp))

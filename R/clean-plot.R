@@ -91,20 +91,18 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     logThis("Hierarchical clustering: START", logLevel = 2L)
 
     # hclust cannot operate on more than 2^16 elements
-    if (getNumCells(objCOTAN) <= 65500) {
+    if (getNumCells(objCOTAN) <= 65500L) {
       hcCells <- hclust(distCells, method = "complete")
       groups <- cutree(hcCells, k = 2L)
-    }
-    else {
+    } else {
       groups <- set_names(rep(1L, times = getNumCells(objCOTAN)),
                           getCells(objCOTAN))
       # ensure B group is not empty picking the first cell
       groups[[1L]] <- 2L
 
-      warning(paste("cleanPlots() - More than 65500 cells in the COTAN object:",
-                    "'B' group cannot be established and",
-                    "is defaulted to include only the first cell"),
-                    call. = FALSE)
+      warning("cleanPlots() - More than 65500 cells in the COTAN object: ",
+              "'B' group cannot be established and ",
+              "is defaulted to include only the first cell", call. = FALSE)
       logThis("Too many cells: cannot establish 'B' group", logLevel = 3L)
     }
     rm(distCells)
@@ -218,7 +216,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
   secondDer <- diff(nuDf[seq_len(min(100L, nrow(nuDf))), "nu"],
                     differences = 2L)
   if (min(secondDer) < -0.01) {
-    lowUDEThr <- nuDf[(max(which(secondDer < -0.01)) + 1), "nu"] - 0.005
+    lowUDEThr <- nuDf[(max(which(secondDer < -0.01)) + 1L), "nu"] - 0.005
     zNuPlot <- zNuPlot +
                geom_hline(yintercept = lowUDEThr, linetype = "dashed",
                           color = "darkred") +

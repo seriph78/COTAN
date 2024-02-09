@@ -74,8 +74,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_lte(max(e.df[, 1L:(ncol(e.df) - 2L)]), 1L)
   expect_gte(min(e.df[, 1L:(ncol(e.df) - 2L)]), 0L)
   expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0L)
-  expect_equal(e.df[["N. total"]], vapply(groupMarkers, length, integer(1L)),
-               ignore_attr = TRUE)
+  expect_equal(e.df[["N. total"]], lengths(groupMarkers), ignore_attr = TRUE)
 
   c(mergedClusters, mergedCoexDF) %<-%
     mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 12L,
@@ -101,7 +100,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_setequal(colnames(mergedLfcDF), mergedClusters)
   expect_identical(rownames(mergedLfcDF), getGenes(obj))
   # with 2 clusters the changes are symmetric
-  expect_identical(mergedLfcDF[[1]], -mergedLfcDF[[2]])
+  expect_identical(mergedLfcDF[[1L]], -mergedLfcDF[[2L]])
 
   for (cl in levels(mergedClusters)) {
     cellsToDrop <- names(clusters)[mergedClusters != cl]

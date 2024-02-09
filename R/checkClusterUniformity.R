@@ -1,4 +1,5 @@
 
+#'
 #' @details `checkClusterUniformity()` takes a `COTAN` object and a cells'
 #'   *cluster* and checks whether the latter is **uniform** by `GDI`. The
 #'   function runs `COTAN` to check whether the `GDI` is lower than the given
