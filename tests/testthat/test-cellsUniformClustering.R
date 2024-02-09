@@ -49,10 +49,22 @@ test_that("Cell Uniform Clustering", {
     reorderClusterization(obj, reverse = TRUE, keepMinusOne = TRUE,
                           clusters = clusters2, coexDF = coexDF2)
 
-  expect_identical(levels(rClusters2)[rClusters2[1:50L]],
-                   levels(clusters2)[clusters2[1:50]])
+  expect_identical(levels(rClusters2)[rClusters2[1L:50L]],
+                   levels(clusters2)[clusters2[1L:50L]])
+  expect_identical(rClusters2 == "-1", clusters2 == "-1")
   # this is an happenstance
   expect_identical(colnames(rCoexDF2), rev(levels(rClusters2)))
+
+  c(clusters3, coexDF3) %<-%
+    reorderClusterization(obj, useDEA = FALSE,
+                          reverse = FALSE, keepMinusOne = TRUE,
+                          clusters = clusters2, coexDF = coexDF2)
+
+  expect_identical(levels(clusters3)[clusters3[1L:50L]],
+                   levels(clusters2)[clusters2[1L:50L]])
+  expect_identical(clusters3 == "-1", clusters2 == "-1")
+  # this is an happenstance
+  expect_identical(colnames(coexDF3)[-5L], levels(clusters3)[-1L])
 
   #clusters_exp <- readRDS(file.path(getwd(), "clusters1.RDS"))
 
@@ -70,9 +82,9 @@ test_that("Cell Uniform Clustering", {
   expect_gt(min(clMarkersDF[["Score"]] * clMarkersDF[["logFoldCh"]]), 0.0)
 
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
-  lowPos <- (1L:80L) %in% c(11L:20L, 31L:40L, 41L:50L, 61L:70L)
-  expect_gt(min(topGenesNum[!lowPos]), 480L)
-  expect_lt(max(topGenesNum[ lowPos]), 241L)
+  highPos <- (1L:80L) %in% c(11L:20L, 31L:40L, 41L:50L, 61L:70L)
+  expect_gt(min(topGenesNum[ highPos]), 480L)
+  expect_lt(max(topGenesNum[!highPos]), 241L)
 
   primaryMarkers <-
     c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",

@@ -229,12 +229,18 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #'   *Zero/One projection* for the raw data matrix
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param clusters the *clusterization* to use
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName`
+#' @param coexDF a `data.frame` where each column indicates the `COEX` for each
+#'   of the *clusters* of the *clusterization*
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
-#'   distance; alternatively it will use the average *ZeroOne* counts, that is
+#'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
-#'   `"euclidean"` for *ZeroOne*. Can be chosen among those supported by
+#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
 #'
 #' @return `distancesBetweenClusters()` returns a `dist` object
@@ -249,10 +255,13 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #'
 #' @rdname HandlingClusterizations
 #'
-distancesBetweenClusters <- function(objCOTAN, clusters,
+distancesBetweenClusters <- function(objCOTAN, clName = "",
+                                     clusters = NULL, coexDF = NULL,
                                      useDEA = TRUE, distance = NULL) {
-  assert_that(identical(getCells(objCOTAN), names(clusters)),
-              msg = "Passed COTAN object and clusterization are not aligned")
+  # picks up the last clusterization if none was given
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
 
   clList <- toClustersList(clusters)
 
@@ -261,8 +270,16 @@ distancesBetweenClusters <- function(objCOTAN, clusters,
       distance <- "cosine"
     }
 
+    if (is_empty(coexDF) && (clName %in% getClusterizations(objCOTAN))) {
+        coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
+    }
+    if (is_empty(coexDF)) {
+      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+    }
 
-
+    # merge small cluster based on distances
+    return(parDist(t(as.matrix(coexDF)), method = distance,
+                   diag = TRUE, upper = TRUE))
   } else {
     if (is.null(distance)) {
       distance <- "euclidean"

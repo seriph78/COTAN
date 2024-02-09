@@ -68,7 +68,14 @@ pValueFromDEA(coexDF, numCells, method = "none")
 
 logFoldChangeOnClusters(objCOTAN, clName = "", clusters = NULL)
 
-distancesBetweenClusters(objCOTAN, clusters, useDEA = TRUE, distance = NULL)
+distancesBetweenClusters(
+  objCOTAN,
+  clName = "",
+  clusters = NULL,
+  coexDF = NULL,
+  useDEA = TRUE,
+  distance = NULL
+)
 
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
@@ -163,11 +170,11 @@ data losses}
 \code{"bonferroni"}; use \code{"none"} for no adjustment}
 
 \item{useDEA}{Boolean indicating whether to use the \emph{DEA} to define the
-distance; alternatively it will use the average \emph{ZeroOne} counts, that is
+distance; alternatively it will use the average \emph{Zero-One} counts, that is
 faster but less precise.}
 
 \item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
-\code{"euclidean"} for \emph{ZeroOne}. Can be chosen among those supported by
+\code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
 \item{df}{the \code{data.frame} to plot. It must have a row names containing the
@@ -428,7 +435,7 @@ positive values from \code{\link[=DEAOnClusters]{DEAOnClusters()}} and \eqn{\the
 
 \code{reorderClusterization()} takes in a \emph{clusterizations} and reorder
 its labels so that in the new order near labels indicate near clusters
-according to a \emph{DEA} (or \emph{ZeroOne}) based distance
+according to a \emph{DEA} (or \emph{Zero-One}) based distance
 }
 \examples{
 data("test.dataset")

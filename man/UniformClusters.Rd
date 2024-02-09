@@ -82,11 +82,11 @@ before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as
 \code{\link[Seurat:FindClusters]{Seurat::FindClusters()}}}
 
 \item{useDEA}{Boolean indicating whether to use the \emph{DEA} to define the
-distance; alternatively it will use the average \emph{ZeroOne} counts, that is
+distance; alternatively it will use the average \emph{Zero-One} counts, that is
 faster but less precise.}
 
 \item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
-\code{"euclidean"} for \emph{ZeroOne}. Can be chosen among those supported by
+\code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods

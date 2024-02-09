@@ -19,10 +19,10 @@
 #'   succeeds the merge stops
 #' @param cores number cores used
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
-#'   distance; alternatively it will use the average *ZeroOne* counts, that is
+#'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
-#'   `"euclidean"` for *ZeroOne*. Can be chosen among those supported by
+#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
@@ -303,13 +303,13 @@ mergeUniformCellsClusters <- function(objCOTAN,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
 
-
-  c(outputClusters, .) %<-%
-    reorderClusterization(objCOTAN, clusters = outputClusters,
-                          reverse = FALSE, keepMinusOne = FALSE,
-                          distance = distance, hclustMethod = hclustMethod)
-
   coexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
+
+  c(outputClusters, coexDF) %<-%
+    reorderClusterization(objCOTAN, clusters = outputClusters,
+                          coexDF = coexDF, reverse = FALSE,
+                          keepMinusOne = FALSE, useDEA = useDEA,
+                          distance = distance, hclustMethod = hclustMethod)
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 

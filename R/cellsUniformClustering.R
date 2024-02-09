@@ -158,10 +158,10 @@ NULL
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
-#'   distance; alternatively it will use the average *ZeroOne* counts, that is
+#'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
-#'   `"euclidean"` for *ZeroOne*. Can be chosen among those supported by
+#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
@@ -349,8 +349,8 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
   }
 
   c(outputClusters, .) %<-%
-    reorderClusterization(objCOTAN, clusters = outputClusters,
-                          coexDF = NULL, keepMinusOne = TRUE, useDEA = useDEA,
+    reorderClusterization(objCOTAN, clusters = outputClusters, coexDF = NULL,
+                          reverse = FALSE, keepMinusOne = TRUE, useDEA = useDEA,
                           distance = distance, hclustMethod = hclustMethod)
 
   outputCoexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)

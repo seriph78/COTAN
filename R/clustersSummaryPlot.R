@@ -190,10 +190,10 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #'   available *clusterization* will be returned, as it is probably the most
 #'   significant!
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
-#'   distance; alternatively it will use the average *ZeroOne* counts, that is
+#'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
-#'   `"euclidean"` for *ZeroOne*. Can be chosen among those supported by
+#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
@@ -247,7 +247,8 @@ clustersTreePlot <- function(objCOTAN,
   colVector <- getColorsVector(kCuts)
 
   # merge small cluster based on distances
-  clDist <- distancesBetweenClusters(objCOTAN, clusters = clusters,
+  clDist <- distancesBetweenClusters(objCOTAN,
+                                     clName = clName, clusters = clusters,
                                      useDEA = useDEA, distance = distance)
   rm(clusters)
 
