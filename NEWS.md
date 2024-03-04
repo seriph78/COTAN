@@ -1,3 +1,5 @@
+## COTAN 2.3.4
+
 Added possibility of using distance between clusters based on *Zero-One* matrix
 instead of *DEA*
 
