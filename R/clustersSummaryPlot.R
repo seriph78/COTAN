@@ -189,8 +189,12 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be returned, as it is probably the most
 #'   significant!
-#' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
-#'   and the others from [parallelDist::parDist()] are also available)
+#' @param useDEA Boolean indicating whether to use the *DEA* to define the
+#'   distance; alternatively it will use the average *Zero-One* counts, that is
+#'   faster but less precise.
+#' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
+#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
+#'   [parallelDist::parDist()]
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
 #'
@@ -225,11 +229,12 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 clustersTreePlot <- function(objCOTAN,
                              kCuts,
                              clName = "",
+                             useDEA = TRUE,
                              distance = "cosine",
                              hclustMethod = "ward.D2") {
   # pick last if no name was given
   clName <- getClusterizationName(objCOTAN, clName = clName)
-  c(clusters, coexDF) %<-% getClusterizationData(objCOTAN, clName = clName)
+  clusters <- getClusters(objCOTAN, clName = clName)
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
@@ -241,19 +246,13 @@ clustersTreePlot <- function(objCOTAN,
 
   colVector <- getColorsVector(kCuts)
 
-  if (is_empty(coexDF)) {
-    logThis("Coex dataframe is missing: will be calculated and stored",
-            logLevel = 1L)
-    coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
-    objCOTAN <- addClusterizationCoex(objCOTAN, clName = clName,
-                                      coexDF = coexDF)
-  }
+  # merge small cluster based on distances
+  clDist <- distancesBetweenClusters(objCOTAN,
+                                     clName = clName, clusters = clusters,
+                                     useDEA = useDEA, distance = distance)
   rm(clusters)
 
-  # merge small cluster based on distances
-  coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
-
-  hcNorm <- hclust(coexDist, method = hclustMethod)
+  hcNorm <- hclust(clDist, method = hclustMethod)
 
   dend <- as.dendrogram(hcNorm)
   dend <- branches_color(dend, k = kCuts, col = colVector, groupLabels = TRUE)

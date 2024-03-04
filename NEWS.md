@@ -1,3 +1,9 @@
+Added possibility of using distance between clusters based on *Zero-One* matrix
+instead of *DEA*
+
+Added average floor to `logFoldChangeOnClusters()` to dampen extreme results
+when genes are essentially absent from a cluster.
+
 ## COTAN 2.3.3
 
 Added method to handle expression levels' change via log-normalized data:

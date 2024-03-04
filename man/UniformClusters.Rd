@@ -24,7 +24,8 @@ cellsUniformClustering(
   cores = 1L,
   maxIterations = 25L,
   initialResolution = 0.8,
-  distance = "cosine",
+  useDEA = TRUE,
+  distance = NULL,
   hclustMethod = "ward.D2",
   saveObj = TRUE,
   outDir = "."
@@ -46,7 +47,8 @@ mergeUniformCellsClusters(
   GDIThreshold = 1.4,
   batchSize = 10L,
   cores = 1L,
-  distance = "cosine",
+  useDEA = TRUE,
+  distance = NULL,
   hclustMethod = "ward.D2",
   saveObj = TRUE,
   outDir = "."
@@ -79,8 +81,13 @@ here to speed up the process (default is \code{NULL})}
 before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as
 \code{\link[Seurat:FindClusters]{Seurat::FindClusters()}}}
 
-\item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
-and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
+\item{useDEA}{Boolean indicating whether to use the \emph{DEA} to define the
+distance; alternatively it will use the average \emph{Zero-One} counts, that is
+faster but less precise.}
+
+\item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
+\code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
+\code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}

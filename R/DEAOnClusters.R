@@ -141,6 +141,7 @@ pValueFromDEA <- function(coexDF, numCells, method = "none") {
 
 
 #
+#
 #' @details `logFoldChangeOnClusters()` is used to get the log difference of the
 #'   expression levels for each *cluster* in the given *clusterization* against
 #'   the rest of the data-set
@@ -228,4 +229,84 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
   logThis("Log Fold Change Analysis - DONE", logLevel = 2L)
 
   return(lfcDF)
+}
+
+
+#'
+#'
+#' @details `distancesBetweenClusters()` is used to obtain a distance between
+#'   the clusters. Depending on the value of the `useDEA` flag will base the
+#'   distance on the *DEA* columns or the averages of the *Zero-One* matrix.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param clName The name of the *clusterization*. If not given the last
+#'   available *clusterization* will be used, as it is probably the most
+#'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName`
+#' @param coexDF a `data.frame` where each column indicates the `COEX` for each
+#'   of the *clusters* of the *clusterization*
+#' @param useDEA Boolean indicating whether to use the *DEA* to define the
+#'   distance; alternatively it will use the average *Zero-One* counts, that is
+#'   faster but less precise.
+#' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
+#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
+#'   [parallelDist::parDist()]
+#'
+#' @return `distancesBetweenClusters()` returns a `dist` object
+#'
+#' @export
+#'
+#' @importFrom Matrix rowSums
+#'
+#' @importFrom parallelDist parDist
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname HandlingClusterizations
+#'
+distancesBetweenClusters <- function(objCOTAN, clName = "",
+                                     clusters = NULL, coexDF = NULL,
+                                     useDEA = TRUE, distance = NULL) {
+  # picks up the last clusterization if none was given
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
+
+  clList <- toClustersList(clusters)
+
+  if (isTRUE(useDEA)) {
+    if (is.null(distance)) {
+      distance <- "cosine"
+    }
+
+    if (is_empty(coexDF) && (clName %in% getClusterizations(objCOTAN))) {
+        coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
+    }
+    if (is_empty(coexDF)) {
+      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+    }
+
+    # merge small cluster based on distances
+    return(parDist(t(as.matrix(coexDF)), method = distance,
+                   diag = TRUE, upper = TRUE))
+  } else {
+    if (is.null(distance)) {
+      distance <- "euclidean"
+    }
+
+    zeroOne <- getZeroOneProj(objCOTAN)
+
+    zeroOneClAvg <- data.frame(row.names = getGenes(objCOTAN))
+    for (cluster in clList) {
+      zeroOneClAvg <- cbind(zeroOneClAvg, rowMeans(zeroOne[, cluster]))
+    }
+
+    # ensure no zeros in the matrix
+    zeroOneClAvg[zeroOneClAvg == 0.0] <- 1.0e-6
+    colnames(zeroOneClAvg) <- names(clList)
+
+    return(parDist(t(zeroOneClAvg), method = distance,
+                   diag = TRUE, upper = TRUE))
+  }
 }

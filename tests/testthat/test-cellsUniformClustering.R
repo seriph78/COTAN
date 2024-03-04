@@ -42,6 +42,30 @@ test_that("Cell Uniform Clustering", {
   expect_lte(fracAbove, 0.01)
   expect_lte(lastPerc, GDIThreshold)
 
+  clusters2 <- factor(clusters, levels = c(levels(clusters), "-1"))
+  clusters2[1:50L] <- "-1"
+  coexDF2 <- DEAOnClusters(obj, clusters = clusters2)
+  c(rClusters2, rCoexDF2) %<-%
+    reorderClusterization(obj, reverse = TRUE, keepMinusOne = TRUE,
+                          clusters = clusters2, coexDF = coexDF2)
+
+  expect_identical(levels(rClusters2)[rClusters2[1L:50L]],
+                   levels(clusters2)[clusters2[1L:50L]])
+  expect_identical(rClusters2 == "-1", clusters2 == "-1")
+  # this is an happenstance
+  expect_identical(colnames(rCoexDF2), rev(levels(rClusters2)))
+
+  c(clusters3, coexDF3) %<-%
+    reorderClusterization(obj, useDEA = FALSE,
+                          reverse = FALSE, keepMinusOne = TRUE,
+                          clusters = clusters2, coexDF = coexDF2)
+
+  expect_identical(levels(clusters3)[clusters3[1L:50L]],
+                   levels(clusters2)[clusters2[1L:50L]])
+  expect_identical(clusters3 == "-1", clusters2 == "-1")
+  # this is an happenstance
+  expect_identical(colnames(coexDF3)[-5L], levels(clusters3)[-1L])
+
   #clusters_exp <- readRDS(file.path(getwd(), "clusters1.RDS"))
 
   #expect_identical(clusters, clusters_exp)

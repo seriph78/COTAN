@@ -18,8 +18,12 @@
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops
 #' @param cores number cores used
-#' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
-#'   and the others from [parallelDist::parDist()] are also available)
+#' @param useDEA Boolean indicating whether to use the *DEA* to define the
+#'   distance; alternatively it will use the average *Zero-One* counts, that is
+#'   faster but less precise.
+#' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
+#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
+#'   [parallelDist::parDist()]
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
@@ -124,7 +128,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       GDIThreshold = 1.4,
                                       batchSize = 10L,
                                       cores = 1L,
-                                      distance = "cosine",
+                                      useDEA = TRUE,
+                                      distance = NULL,
                                       hclustMethod = "ward.D2",
                                       saveObj = TRUE,
                                       outDir = ".") {
@@ -220,20 +225,14 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     oldNumClusters <- length(unique(outputClusters))
 
-    coexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
+    clDist <- distancesBetweenClusters(objCOTAN, clusters = outputClusters,
+                                       useDEA = useDEA, distance = distance)
     gc()
-
-    ## To drop the cells with only zeros
-    ## TODO: To be fixed! Where did they come from?
-    coexDF <- coexDF[, colSums(coexDF != 0.0) != 0L]
-
-    # merge small cluster based on their DEA based distances
-    coexDist <- parDist(t(as.matrix(coexDF)), method = distance)
 
     if (saveObj) {
       pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_plot.pdf")))
 
-      hcNorm <- hclust(coexDist, method = hclustMethod)
+      hcNorm <- hclust(clDist, method = hclustMethod)
       plot(as.dendrogram(hcNorm))
 
       dev.off()
@@ -243,7 +242,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
     # These pairs correspond to N lowest distances as calculated before
     # If none of them can be merges, the loop stops
 
-    allLabels <- colnames(coexDF)
+    allLabels <- labels(clDist)
+    assert_that(length(allLabels) == oldNumClusters,
+                msg = "Internal error - distance has no labels")
 
     # create all pairings with different clusters
     pList <- rbind(rep((1L:oldNumClusters), each  = oldNumClusters),
@@ -255,7 +256,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     pList <- as.list(as.data.frame(pList))
 
     # reorder based on distance
-    pList <- pList[order(coexDist)]
+    pList <- pList[order(clDist)]
 
     # drop the already tested pairs
     pNamesList <- lapply(pList, function(p) mergedName(p[[1L]], p[[2L]]))
@@ -300,13 +301,14 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     outputClusters <- clTagsMap[outputClusters]
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
-
-    colnames(coexDF)   <- clTagsMap[colnames(coexDF)]
   }
 
+  coexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
+
   c(outputClusters, coexDF) %<-%
-    reorderClusterization(objCOTAN, clusters = outputClusters, coexDF = coexDF,
-                          reverse = FALSE, keepMinusOne = FALSE,
+    reorderClusterization(objCOTAN, clusters = outputClusters,
+                          coexDF = coexDF, reverse = FALSE,
+                          keepMinusOne = FALSE, useDEA = useDEA,
                           distance = distance, hclustMethod = hclustMethod)
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)

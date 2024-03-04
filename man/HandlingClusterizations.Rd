@@ -26,6 +26,7 @@
 \alias{DEAOnClusters}
 \alias{pValueFromDEA}
 \alias{logFoldChangeOnClusters}
+\alias{distancesBetweenClusters}
 \alias{UMAPPlot}
 \alias{clustersDeltaExpression}
 \alias{clustersMarkersHeatmapPlot}
@@ -72,6 +73,15 @@ logFoldChangeOnClusters(
   floorLambdaFraction = 0.05
 )
 
+distancesBetweenClusters(
+  objCOTAN,
+  clName = "",
+  clusters = NULL,
+  coexDF = NULL,
+  useDEA = TRUE,
+  distance = NULL
+)
+
 UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
 
 clustersDeltaExpression(objCOTAN, clName = "", clusters = NULL)
@@ -107,6 +117,7 @@ clustersTreePlot(
   objCOTAN,
   kCuts,
   clName = "",
+  useDEA = TRUE,
   distance = "cosine",
   hclustMethod = "ward.D2"
 )
@@ -130,7 +141,8 @@ reorderClusterization(
   coexDF = NULL,
   reverse = FALSE,
   keepMinusOne = TRUE,
-  distance = "cosine",
+  useDEA = TRUE,
+  distance = NULL,
   hclustMethod = "ward.D2"
 )
 }
@@ -166,6 +178,14 @@ data losses}
 sums inside or outside the cluster for each gene as fraction of the
 relevant \code{lambda} parameter. Default is \eqn{5\%}}
 
+\item{useDEA}{Boolean indicating whether to use the \emph{DEA} to define the
+distance; alternatively it will use the average \emph{Zero-One} counts, that is
+faster but less precise.}
+
+\item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
+\code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
+\code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+
 \item{df}{the \code{data.frame} to plot. It must have a row names containing the
 given elements}
 
@@ -197,9 +217,6 @@ on the one indicated by \code{condName} that will only indicate the relevant
 column name in the returned \code{data.frame}}
 
 \item{plotTitle}{The title to use for the returned plot}
-
-\item{distance}{type of distance to use (default is \code{"cosine"}, \code{"euclidean"}
-and the others from \code{\link[parallelDist:parDist]{parallelDist::parDist()}} are also available)}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
@@ -251,6 +268,8 @@ corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 
 \code{logFoldChangeOnClusters()} returns the log-expression-change
 \code{data.frame} for the genes in each \emph{cluster}
+
+\code{distancesBetweenClusters()} returns a \code{dist} object
 
 \code{UMAPPlot()} returns a \code{ggplot2} object
 
@@ -380,6 +399,10 @@ in the given \emph{clusterization}
 expression levels for each \emph{cluster} in the given \emph{clusterization} against
 the rest of the data-set
 
+\code{distancesBetweenClusters()} is used to obtain a distance between
+the clusters. Depending on the value of the \code{useDEA} flag will base the
+distance on the \emph{DEA} columns or the averages of the \emph{Zero-One} matrix.
+
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
 information related to clusters after applying the UMAP transformation.
 
@@ -420,7 +443,7 @@ positive values from \code{\link[=DEAOnClusters]{DEAOnClusters()}} and \eqn{\the
 
 \code{reorderClusterization()} takes in a \emph{clusterizations} and reorder
 its labels so that in the new order near labels indicate near clusters
-according to a \code{DEA} based distance
+according to a \emph{DEA} (or \emph{Zero-One}) based distance
 }
 \examples{
 data("test.dataset")

@@ -135,8 +135,8 @@ genesCoexSpace <-
 #'   markers (default 25)
 #' @param kCuts the number of estimated *cluster* (this defines the height for
 #'   the tree cut)
-#' @param distance type of distance to use (default is `"cosine"`, `"euclidean"`
-#'   and the others from [parallelDist::parDist()] are also available)
+#' @param distance type of distance to use. Default is `"cosine"`. Can be chosen
+#'   among those supported by [parallelDist::parDist()]
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
 #'
