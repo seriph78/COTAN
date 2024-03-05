@@ -10,11 +10,6 @@ setGeneric(
 # -------- calculate coex --------
 
 setGeneric(
-  "calculateMu",
-  function(objCOTAN) standardGeneric("calculateMu")
-)
-
-setGeneric(
   "calculateCoex",
   function(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE) {
     standardGeneric("calculateCoex")

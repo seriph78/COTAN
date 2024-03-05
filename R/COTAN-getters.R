@@ -555,6 +555,66 @@ setMethod(
 )
 
 
+#' @aliases getMu
+#'
+#' @details `getMu()` calculates the vector \eqn{\mu = \lambda \times
+#'   \nu^T}
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getMu()` returns the `mu` matrix
+#'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom Matrix t
+#'
+#' @importClassesFrom Matrix dgeMatrix
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+getMu <- function(objCOTAN) {
+  if (is_empty(getLambda(objCOTAN))) {
+    stop("lambda must not be empty, estimate it")
+  }
+
+  if (is_empty(getNu(objCOTAN))) {
+    stop("nu must not be empty, estimate it")
+  }
+
+  return(getLambda(objCOTAN) %o% getNu(objCOTAN))
+}
+
+
+#' @aliases getProbabilityOfZero
+#'
+#' @details `getProbabilityOfZero()` gives for each cell and each gene the
+#'   probability of observing zero reads
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getProbabilityOfZero()` returns a `data.frame` with the
+#'   probabilities of zero
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' probZero <- getProbabilityOfZero(objCOTAN)
+#'
+#' @rdname ParametersEstimations
+#'
+getProbabilityOfZero <- function(objCOTAN) {
+  if (is_empty(getDispersion(objCOTAN))) {
+    stop("dispersion must not be empty, estimate it")
+  }
+
+  # estimate Probabilities of 0 with internal function funProbZero
+  return(funProbZero(getDispersion(objCOTAN), getMu(objCOTAN)))
+}
+
 # ----------- Raw data cleaning ------------
 
 #' Raw data cleaning
@@ -740,7 +800,7 @@ NULL
 #'
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 #'
-#' ## mu <- calculateMu(objCOTAN)
+#' ## mu <- getMu(objCOTAN)
 #' ## observedY <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
 #' obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 #'

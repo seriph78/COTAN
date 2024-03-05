@@ -27,7 +27,7 @@ NULL
 #'
 calculateGenesCE <- function(objCOTAN) {
   # estimate Probabilities of 0 with internal function funProbZero
-  probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
+  probZero <- getProbabilityOfZero(objCOTAN)
 
   zeroOne <- as.matrix(getZeroOneProj(objCOTAN))
 

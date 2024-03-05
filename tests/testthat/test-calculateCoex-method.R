@@ -54,7 +54,7 @@ test_that("Calculations on genes", {
   obj <- COTAN(raw = raw)
   obj <- clean(obj)
 
-  mu <- calculateMu(obj)
+  mu <- getMu(obj)
 
   expect_identical(dim(mu), dim(getRawData(obj)))
   expect_equal(mu[ 1L,  1L], getLambda(obj)[[ 1L]] * getNu(obj)[[ 1L]],
@@ -134,7 +134,7 @@ test_that("Calculations on genes", {
   expect_named(gce, getGenes(obj))
   expect_identical(gce[[1L]], 0.0)
   expect_equal(gce, crossEntrVector(getZeroOneProj(obj),
-                                    funProbZero(getDispersion(obj), mu)),
+                                    getProbabilityOfZero(obj)),
                ignore_attr = TRUE)
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)

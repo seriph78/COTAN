@@ -35,7 +35,6 @@ bonferroni
 calculateCoex
 calculateG
 calculateGDI
-calculateMu
 calculatePValue
 calculateS
 cellSizePlot
@@ -108,6 +107,7 @@ getMetadataCells
 getMetadataDataset
 getMetadataElement
 getMetadataGenes
+getMu
 getNormalizedData
 getNu
 getNumCells

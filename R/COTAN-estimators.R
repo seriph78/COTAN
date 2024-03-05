@@ -513,8 +513,7 @@ setMethod(
         break
       }
 
-      genesMarginals <- rowSums(funProbZero(getDispersion(objCOTAN),
-                                            calculateMu(objCOTAN)))
+      genesMarginals <- rowSums(getProbabilityOfZero(objCOTAN))
 
       marginalsErrors <- abs(genesMarginals - sumZeros)
 
