@@ -587,8 +587,6 @@ getMu <- function(objCOTAN) {
 }
 
 
-#' @aliases getProbabilityOfZero
-#'
 #' @details `getProbabilityOfZero()` gives for each cell and each gene the
 #'   probability of observing zero reads
 #'

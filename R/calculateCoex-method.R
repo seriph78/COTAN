@@ -42,6 +42,31 @@
 #'
 NULL
 
+#' @details `calculateLikelihoodOfObserved()` gives for each cell and each gene
+#'   the likelihood of the observed zero/one data
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `calculateLikelihoodOfObserved()` returns a `data.frame` with the
+#'   likelihood of the observed zero/one
+#'
+#' @export
+#'
+#' @examples
+#' lh <- calculateLikelihoodOfObserved(objCOTAN)
+#'
+#' @rdname CalculatingCOEX
+#'
+calculateLikelihoodOfObserved <- function(objCOTAN) {
+  zeroOne <- getZeroOneProj(objCOTAN)
+
+  probZero <- getProbabilityOfZero(objCOTAN)
+
+  # estimate the likelihood of observed result
+  return((1 - zeroOne) * probZero + zeroOne * (1 - probZero))
+}
+
+
 #' @details `observedContingencyTablesYY()` calculates observed *Yes/Yes* field
 #'   of the contingency table
 #'

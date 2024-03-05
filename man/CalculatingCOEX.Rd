@@ -12,6 +12,7 @@
 \alias{dropGenesCoex}
 \alias{dropCellsCoex,COTAN-method}
 \alias{dropCellsCoex}
+\alias{calculateLikelihoodOfObserved}
 \alias{observedContingencyTablesYY}
 \alias{observedPartialContingencyTablesYY}
 \alias{observedContingencyTables}
@@ -47,6 +48,8 @@ getMu(objCOTAN)
 \S4method{dropGenesCoex}{COTAN}(objCOTAN)
 
 \S4method{dropCellsCoex}{COTAN}(objCOTAN)
+
+calculateLikelihoodOfObserved(objCOTAN)
 
 observedContingencyTablesYY(
   objCOTAN,
@@ -180,6 +183,9 @@ the function will do it genome-wide.}
 
 \code{dropCellsCoex()} returns the updated \code{COTAN} object
 
+\code{calculateLikelihoodOfObserved()} returns a \code{data.frame} with the
+likelihood of the observed zero/one
+
 \code{observedContingencyTablesYY()} returns a \code{list} with:
 \itemize{
 \item \code{observedYY} the \emph{Yes/Yes} observed contingency table as \code{matrix}
@@ -300,6 +306,9 @@ dropping) cells' \code{COEX} matrix from the \code{COTAN} object.
 
 \code{dropCellsCoex()} drops the \code{cellsCoex} member from the given
 \code{COTAN} object
+
+\code{calculateLikelihoodOfObserved()} gives for each cell and each gene
+the likelihood of the observed zero/one data
 
 \code{observedContingencyTablesYY()} calculates observed \emph{Yes/Yes} field
 of the contingency table
@@ -424,6 +433,8 @@ partialCellsCoex <- calculatePartialCoex(objCOTAN, cellsSample,
 identical(partialCellsCoex, cellsCoex[, sort(cellsSample)])
 
 objCOTAN <- dropCellsCoex(objCOTAN)
+
+lh <- calculateLikelihoodOfObserved(objCOTAN)
 
 }
 \seealso{
