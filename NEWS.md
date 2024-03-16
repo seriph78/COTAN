@@ -1,5 +1,7 @@
 ## COTAN 2.3.4
 
+Speed-up of GDI calculation via Rfast package
+
 Added possibility of using distance between clusters based on *Zero-One* matrix
 instead of *DEA*
 
