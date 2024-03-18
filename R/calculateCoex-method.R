@@ -283,7 +283,7 @@ observedContingencyTables <- function(objCOTAN,
     observedNY <- as(observedNY, "denseMatrix")
   }
   gc()
-  logThis(" done", logLevel = 3L)
+  logThis("t()..", logLevel = 3L, appendLF = FALSE)
 
   observedNN <- forceSymmetric(as(observedNN, "denseMatrix"))
 
@@ -306,6 +306,7 @@ observedContingencyTables <- function(objCOTAN,
       observedYN <- t(observedNY)
     }
   }
+  logThis(" done", logLevel = 3L)
 
   return(list("observedNN" = observedNN,
               "observedNY" = observedNY,
@@ -666,6 +667,7 @@ expectedContingencyTables <- function(objCOTAN,
     expectedYN <- as(expectedYN, "denseMatrix")
   }
   gc()
+  logThis("t()..", logLevel = 3L, appendLF = FALSE)
 
   expectedYY <- forceSymmetric(as(expectedYY, "denseMatrix"))
 
