@@ -42,7 +42,6 @@ calculateGenesCE <- function(objCOTAN) {
 }
 
 
-
 #' @details `calculateGDI()` produces a `data.frame` with the *GDI* for each
 #'   gene based on the `COEX` matrix
 #'
@@ -63,6 +62,8 @@ calculateGenesCE <- function(objCOTAN) {
 #' @importFrom Matrix colMeans
 #' @importFrom Matrix forceSymmetric
 #'
+#' @importFrom Rfast colSort
+#'
 #' @rdname GenesStatistics
 #'
 calculateGDI <- function(objCOTAN, statType = "S") {
@@ -81,11 +82,12 @@ calculateGDI <- function(objCOTAN, statType = "S") {
   top5pcRows <- as.integer(max(1L:round(getNumGenes(objCOTAN) / 20.0,
                                         digits = 0L)))
 
-  pValueSorted <- apply(S, 2L, sort, decreasing = TRUE)
+  pValueSorted <- colSort(as.matrix(S), descending = TRUE)
+  logThis("S matrix sorted", logLevel = 3)
   pValueSorted <- pValueSorted[1L:top5pcRows, , drop = FALSE]
   pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1L, lower.tail = FALSE)
 
-  GDI <- log(-log(colMeans(pValueSorted)))
+  GDI <- set_names(log(-log(colMeans(pValueSorted))), colnames(S))
   GDI <- set_names(as.data.frame(GDI), "GDI")
   rm(pValueSorted)
   gc()

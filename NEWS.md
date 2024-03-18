@@ -1,3 +1,7 @@
+## COTAN 2.2.4
+
+Speed-up of GDI calculation via Rfast package
+
 ## COTAN 2.2.3
 
 Solved issue with `cleanPlots()` when the number of cells exceeded *65536*

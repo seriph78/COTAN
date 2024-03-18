@@ -220,7 +220,7 @@ setMethod(
     spGenes <- lapply(spIdx, function(x) genes[x])
 
     numSplits <- length(spGenes)
-    splitStep <- max(16L, cores * 2L)
+    splitStep <- max(4L, cores * 2L)
 
     gc()
 
@@ -351,7 +351,7 @@ setMethod(
     spCells <- lapply(spIdx, function(x) cells[x])
 
     numSplits <- length(spCells)
-    splitStep <- max(16L, cores * 2L)
+    splitStep <- max(4L, cores * 2L)
 
     gc()
 
