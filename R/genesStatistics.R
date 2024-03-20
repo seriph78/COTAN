@@ -56,6 +56,8 @@ calculateGenesCE <- function(objCOTAN) {
 #'
 #' @importFrom Matrix colMeans
 #'
+#' @importFrom Rfast colSort
+#'
 #' @noRd
 #'
 
@@ -63,7 +65,8 @@ calculateGDIGivenS <- function(S) {
   top5pcRows <- as.integer(max(1L:round(nrow(S) / 20.0,
                                         digits = 0L)))
 
-  pValue <- apply(as.matrix(S), 2L, sort, decreasing = TRUE)
+  pValue <- colSort(as.matrix(S), descending = TRUE)
+  logThis("S matrix sorted", logLevel = 3)
   pValue <- pValue[1L:top5pcRows, , drop = FALSE]
   pValue <- pchisq(as.matrix(pValue), df = 1L, lower.tail = FALSE)
 
