@@ -184,11 +184,18 @@ setMethod(
 #'
 #' @returns `estimateDispersionBisection()` returns the updated `COTAN` object
 #'
+#' @importFrom rlang is_null
+#'
+#' @importFrom assertthat assert_that
+#'
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
 #'
 #' @importFrom parallelly supportsMulticore
 #' @importFrom parallelly availableCores
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
@@ -225,6 +232,29 @@ setMethod(
 
     gc()
 
+    runSolver <- function(pBegin, pEnd) {
+      if (cores != 1L) {
+        return(parallel::mclapply(
+          spGenes[pBegin:pEnd],
+          parallelDispersionBisection,
+          sumZeros = sumZeros,
+          lambda = lambda,
+          nu = nu,
+          threshold = threshold,
+          maxIterations = maxIterations,
+          mc.cores = cores))
+      } else {
+        return(lapply(
+          spGenes[pBegin:pEnd],
+          parallelDispersionBisection,
+          sumZeros = sumZeros,
+          lambda = lambda,
+          nu = nu,
+          threshold = threshold,
+          maxIterations = maxIterations))
+      }
+    }
+
     pBegin <- 1L
     while (pBegin <= numSplits) {
       pEnd <- min(pBegin + splitStep - 1L, numSplits)
@@ -233,27 +263,22 @@ setMethod(
                      " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
               logLevel = 3L)
 
-      if (cores != 1L) {
-        res  <- parallel::mclapply(
-                  spGenes[pBegin:pEnd],
-                  parallelDispersionBisection,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  nu = nu,
-                  threshold = threshold,
-                  maxIterations = maxIterations,
-                  mc.cores = cores)
-      } else {
-        res  <- lapply(
-                  spGenes[pBegin:pEnd],
-                  parallelDispersionBisection,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  nu = nu,
-                  threshold = threshold,
-                  maxIterations = maxIterations)
+      # as the runSolver() might trow, we force up to 5 reruns
+      res <- NULL
+      resError <- "No errors"
+      failCount <- 0
+      while (!is_null(resError) && failCount < 5) {
+        failCount <- failCount + 1
+        c(res, resError) %<-%
+          tryCatch(list(runSolver(pBegin, pEnd), NULL),
+                   error = function(e) {
+                     logThis(paste("In genes batches -", e), logLevel = 2L)
+                     list(NULL, e) })
       }
 
+      assert_that(is_null(resError),
+                  msg = paste("Genes batches failed", failCount,
+                              "times with", resError))
       dispList <- append(dispList, res)
       rm(res)
 
@@ -308,6 +333,9 @@ setMethod(
 #' @returns `estimateNuBisection()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang is_null
+#'
+#' @importFrom assertthat assert_that
 #'
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
@@ -316,6 +344,9 @@ setMethod(
 #' @importFrom parallelly availableCores
 #'
 #' @importFrom stats median
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @rdname ParametersEstimations
 #'
@@ -356,6 +387,31 @@ setMethod(
 
     gc()
 
+    runSolver <- function(pBegin, pEnd) {
+      if (cores != 1L) {
+        return(parallel::mclapply(
+          spCells[pBegin:pEnd],
+          parallelNuBisection,
+          sumZeros = sumZeros,
+          lambda = lambda,
+          dispersion = dispersion,
+          initialGuess = initialGuess,
+          threshold = threshold,
+          maxIterations = maxIterations,
+          mc.cores = cores))
+      } else {
+        return(lapply(
+          spCells[pBegin:pEnd],
+          parallelNuBisection,
+          sumZeros = sumZeros,
+          lambda = lambda,
+          dispersion = dispersion,
+          initialGuess = initialGuess,
+          threshold = threshold,
+          maxIterations = maxIterations))
+      }
+    }
+
     pBegin <- 1L
     while (pBegin <= numSplits) {
       pEnd <- min(pBegin + splitStep - 1L, numSplits)
@@ -364,29 +420,22 @@ setMethod(
                      " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
               logLevel = 3L)
 
-      if (cores != 1L) {
-        res  <- parallel::mclapply(
-                  spCells[pBegin:pEnd],
-                  parallelNuBisection,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  dispersion = dispersion,
-                  initialGuess = initialGuess,
-                  threshold = threshold,
-                  maxIterations = maxIterations,
-                  mc.cores = cores)
-      } else {
-        res  <- lapply(
-                  spCells[pBegin:pEnd],
-                  parallelNuBisection,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  dispersion = dispersion,
-                  initialGuess = initialGuess,
-                  threshold = threshold,
-                  maxIterations = maxIterations)
+      # as the runSolver() might trow, we force up to 5 reruns
+      res <- NULL
+      resError <- "No errors"
+      failCount <- 0
+      while (!is_null(resError) && failCount < 5) {
+        failCount <- failCount + 1
+        c(res, resError) %<-%
+          tryCatch(list(runSolver(pBegin, pEnd), NULL),
+                   error = function(e) {
+                     logThis(paste("In cells batches -", e), logLevel = 2L)
+                     list(NULL, e) })
       }
 
+      assert_that(is_null(resError),
+                  msg = paste("Cells batches failed", failCount,
+                              "times with", resError))
       nuList <- append(nuList, res)
       rm(res)
 
