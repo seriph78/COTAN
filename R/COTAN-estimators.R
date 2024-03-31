@@ -166,6 +166,37 @@ setMethod(
   }
 )
 
+# local utility wrapper for parallel estimation of dispersion
+runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
+                          threshold, maxIterations, cores) {
+  if (cores != 1L) {
+    res <- parallel::mclapply(
+      genesBatches,
+      parallelDispersionBisection,
+      sumZeros = sumZeros,
+      lambda = lambda,
+      nu = nu,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      mc.cores = cores)
+    # spawned errors are stored as try-error classes
+    resError <- unlist(lapply(res, inherits, "try-error"))
+    if(any(resError)) {
+      stop(paste(res[which(resError)[1L]]), call. = FALSE)
+    }
+    return(res)
+  } else {
+    return(lapply(
+      genesBatches,
+      parallelDispersionBisection,
+      sumZeros = sumZeros,
+      lambda = lambda,
+      nu = nu,
+      threshold = threshold,
+      maxIterations = maxIterations))
+  }
+}
+
 
 #' @aliases estimateDispersionBisection
 #'
@@ -183,11 +214,18 @@ setMethod(
 #'
 #' @returns `estimateDispersionBisection()` returns the updated `COTAN` object
 #'
+#' @importFrom rlang is_null
+#'
+#' @importFrom assertthat assert_that
+#'
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
 #'
 #' @importFrom parallelly supportsMulticore
 #' @importFrom parallelly availableCores
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @export
 #'
@@ -232,27 +270,28 @@ setMethod(
                      " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
               logLevel = 3L)
 
-      if (cores != 1L) {
-        res  <- parallel::mclapply(
-                  spGenes[pBegin:pEnd],
-                  parallelDispersionBisection,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  nu = nu,
-                  threshold = threshold,
-                  maxIterations = maxIterations,
-                  mc.cores = cores)
-      } else {
-        res  <- lapply(
-                  spGenes[pBegin:pEnd],
-                  parallelDispersionBisection,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  nu = nu,
-                  threshold = threshold,
-                  maxIterations = maxIterations)
+      # as the runSolver() might trow, we force up to 5 reruns
+      res <- NULL
+      resError <- "No errors"
+      failCount <- 0
+      while (!is_null(resError) && failCount < 5) {
+        failCount <- failCount + 1
+        c(res, resError) %<-%
+          tryCatch(list(runDispSolver(genesBatches = spGenes[pBegin:pEnd],
+                                      sumZeros = sumZeros,
+                                      lambda = lambda,
+                                      nu = nu,
+                                      threshold = threshold,
+                                      maxIterations = maxIterations,
+                                      cores = cores), NULL),
+                   error = function(e) {
+                     logThis(paste("In genes batches -", e), logLevel = 2L)
+                     list(NULL, e) })
       }
 
+      assert_that(is_null(resError),
+                  msg = paste("Genes batches failed", failCount,
+                              "times with", resError))
       dispList <- append(dispList, res)
       rm(res)
 
@@ -289,6 +328,39 @@ setMethod(
   }
 )
 
+# local utility wrapper for parallel estimation of nu
+runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
+                        initialGuess, threshold, maxIterations, cores) {
+  if (cores != 1L) {
+    res <- parallel::mclapply(
+      cellsBatches,
+      parallelNuBisection,
+      sumZeros = sumZeros,
+      lambda = lambda,
+      dispersion = dispersion,
+      initialGuess = initialGuess,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      mc.cores = cores)
+    # spawned errors are stored as try-error classes
+    resError <- unlist(lapply(res, inherits, "try-error"))
+    if(any(resError)) {
+      stop(paste(res[which(resError)[1L]]), call. = FALSE)
+    }
+    return(res)
+  } else {
+    return(lapply(
+      cellsBatches,
+      parallelNuBisection,
+      sumZeros = sumZeros,
+      lambda = lambda,
+      dispersion = dispersion,
+      initialGuess = initialGuess,
+      threshold = threshold,
+      maxIterations = maxIterations))
+  }
+}
+
 
 #' @details `estimateNuBisection()` estimates the `nu` vector of a `COTAN`
 #'   object by bisection. It determines the `nu` parameters such that, for each
@@ -307,6 +379,9 @@ setMethod(
 #' @returns `estimateNuBisection()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang is_null
+#'
+#' @importFrom assertthat assert_that
 #'
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
@@ -315,6 +390,9 @@ setMethod(
 #' @importFrom parallelly availableCores
 #'
 #' @importFrom stats median
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
 #'
 #' @rdname ParametersEstimations
 #'
@@ -363,29 +441,29 @@ setMethod(
                      " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
               logLevel = 3L)
 
-      if (cores != 1L) {
-        res  <- parallel::mclapply(
-                  spCells[pBegin:pEnd],
-                  parallelNuBisection,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  dispersion = dispersion,
-                  initialGuess = initialGuess,
-                  threshold = threshold,
-                  maxIterations = maxIterations,
-                  mc.cores = cores)
-      } else {
-        res  <- lapply(
-                  spCells[pBegin:pEnd],
-                  parallelNuBisection,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  dispersion = dispersion,
-                  initialGuess = initialGuess,
-                  threshold = threshold,
-                  maxIterations = maxIterations)
+      # as the runSolver() might trow, we force up to 5 reruns
+      res <- NULL
+      resError <- "No errors"
+      failCount <- 0
+      while (!is_null(resError) && failCount < 5) {
+        failCount <- failCount + 1
+        c(res, resError) %<-%
+          tryCatch(list(runNuSolver(spCells[pBegin:pEnd],
+                                    sumZeros = sumZeros,
+                                    lambda = lambda,
+                                    dispersion = dispersion,
+                                    initialGuess = initialGuess,
+                                    threshold = threshold,
+                                    maxIterations = maxIterations,
+                                    cores = cores), NULL),
+                   error = function(e) {
+                     logThis(paste("In cells batches -", e), logLevel = 2L)
+                     list(NULL, e) })
       }
 
+      assert_that(is_null(resError),
+                  msg = paste("Cells batches failed", failCount,
+                              "times with", resError))
       nuList <- append(nuList, res)
       rm(res)
 

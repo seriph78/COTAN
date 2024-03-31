@@ -1,3 +1,8 @@
+## COTAN 2.2.5
+
+Increased reliability of clustering functions by allowing retry runs
+on estimators functions
+
 ## COTAN 2.2.4
 
 Speed-up of GDI calculation via Rfast package
