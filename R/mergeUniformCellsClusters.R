@@ -190,14 +190,20 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
       mergedCluster <- names(outputClusters)[outputClusters %in% c(cl1, cl2)]
 
-      clusterIsUniform <-
+      clusterIsUniform <- tryCatch(
         checkClusterUniformity(objCOTAN,
                                cluster = mergedClName,
                                cells = mergedCluster,
                                GDIThreshold = GDIThreshold,
                                cores = cores,
                                saveObj = saveObj,
-                               outDir = mergeOutDir)[["isUniform"]]
+                               outDir = mergeOutDir)[["isUniform"]],
+        error = function(err) {
+          logThis(paste("While checking cluster uniformity", err),
+                  logLevel = 0L)
+          logThis("Marking pair as not mergable", logLevel = 1L)
+          return(FALSE)
+        })
 
       gc()
 
@@ -229,14 +235,18 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                        useDEA = useDEA, distance = distance)
     gc()
 
-    if (saveObj) {
-      pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_plot.pdf")))
+    if (isTRUE(saveObj)) tryCatch({
+        pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_plot.pdf")))
 
-      hcNorm <- hclust(clDist, method = hclustMethod)
-      plot(as.dendrogram(hcNorm))
+        hcNorm <- hclust(clDist, method = hclustMethod)
+        plot(as.dendrogram(hcNorm))
 
-      dev.off()
-    }
+        dev.off()
+      },
+      error = function(err) {
+        logThis(paste("While saving dendogram plot", err), logLevel = 0L)
+      }
+    )
 
     # We will check whether it is possible to merge a list of cluster pairs.
     # These pairs correspond to N lowest distances as calculated before
@@ -285,6 +295,17 @@ mergeUniformCellsClusters <- function(objCOTAN,
       logThis(paste0("Executed ", (oldNumClusters - newNumClusters),
                      " merges out of ", numPairsToTest), logLevel = 3L)
     }
+
+    if (isTRUE(saveObj)) tryCatch({
+        outFile <- file.path(mergeOutDir,
+                             paste0("merge_clusterization_", iter, ".csv"))
+        write.csv(outputClusters, file = outFile)
+      },
+      error = function(err) {
+        logThis(paste("While saving current clusterization", err),
+                logLevel = 0L)
+      }
+    )
   }
 
   logThis(paste0("The final merged clusterization contains [",
