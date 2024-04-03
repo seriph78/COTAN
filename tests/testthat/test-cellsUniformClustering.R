@@ -68,11 +68,13 @@ test_that("Cell Uniform Clustering", {
 
   exactClusters <- set_names(rep(1:2, each = 600), nm = getCells(obj))
 
-  splitList <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
-                                      initialResolution = initialResolution,
-                                      initialClusters = exactClusters,
-                                      cores = 12L, saveObj = TRUE,
-                                      outDir = tm)
+  suppressWarnings({
+    splitList <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+                                        initialResolution = initialResolution,
+                                        initialClusters = exactClusters,
+                                        cores = 12L, saveObj = TRUE,
+                                        outDir = tm)
+  })
 
   expect_identical(splitList[["clusters"]], factor(exactClusters))
 
