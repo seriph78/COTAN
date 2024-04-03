@@ -263,6 +263,9 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom rlang is_empty
+#' @importFrom rlang is_null
+#'
 #' @rdname HandlingClusterizations
 #'
 distancesBetweenClusters <- function(objCOTAN, clName = "",
@@ -276,20 +279,31 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
   clList <- toClustersList(clusters)
 
   if (isTRUE(useDEA)) {
-    if (is.null(distance)) {
+    if (is_null(distance)) {
       distance <- "cosine"
     }
 
     if (is_empty(coexDF) && (clName %in% getClusterizations(objCOTAN))) {
         coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
     }
-    if (is_empty(coexDF)) {
-      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
-    }
 
-    # merge small cluster based on distances
-    return(parDist(t(as.matrix(coexDF)), method = distance,
-                   diag = TRUE, upper = TRUE))
+    return(tryCatch({
+        if (is_empty(coexDF)) {
+          coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+        }
+
+        # merge small cluster based on distances
+        parDist(t(as.matrix(coexDF)), method = distance,
+                diag = TRUE, upper = TRUE)
+      },
+      error = function(err) {
+        logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
+        logThis("Falling back to non-DEA distance", logLevel = 1L)
+        return(distancesBetweenClusters(objCOTAN, clName = clName,
+                                        clusters = clusters,
+                                        coexDF = NULL, useDEA = FALSE))
+      })
+    )
   } else {
     if (is.null(distance)) {
       distance <- "euclidean"

@@ -269,10 +269,12 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
 
     testClusters <- factor(metaData[["seurat_clusters"]])
     allCells <- rownames(metaData)
+    names(testClusters) <- allCells
     if (iter == 0L && !is_null(initialClusters)) {
       assert_that(setequal(names(initialClusters), getCells(objCOTAN)),
                   msg = "Given clusterization has the wrong set of cells")
-      testClusters <- levels(factor(initialClusters))
+      logThis("Using passed in clusterization", logLevel = 3L)
+      testClusters <- factor(initialClusters)
       allCells <- names(initialClusters)
     }
     testClList <- toClustersList(testClusters)
@@ -283,19 +285,20 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                      "' of ", length(testClList), " clusters"),
               logLevel = 2L)
 
-      if (cl == "singleton") {
+      if (clName == "singleton") {
         next
       }
 
-      cells <- testClList[clName]
-      if (length(cells) < 20L) {
-        logThis(paste("cluster", cl, "has too few cells:",
+      cells <- testClList[[clName]]
+      if (length(cells) < 10L) {
+        logThis(paste("cluster", clName, "has too few cells:",
                       "will be reclustered!"), logLevel = 1L)
+        # keep numClustersToRecluster unchanged
         cellsToRecluster <- c(cellsToRecluster, cells)
       } else {
         clusterIsUniform <- tryCatch(
           checkClusterUniformity(objCOTAN = objCOTAN,
-                                 cluster = cl,
+                                 cluster = clName,
                                  cells = cells,
                                  cores = cores,
                                  GDIThreshold = GDIThreshold,
@@ -309,13 +312,13 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
           })
 
         if (!clusterIsUniform) {
-          logThis(paste("cluster", cl, "has too high GDI:",
+          logThis(paste("cluster", clName, "has too high GDI:",
                         "will be reclustered!"), logLevel = 1L)
 
           numClustersToRecluster <- numClustersToRecluster + 1L
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
-          logThis(paste("cluster", cl, "is uniform"), logLevel = 1L)
+          logThis(paste("cluster", clName, "is uniform"), logLevel = 1L)
         }
       }
     }
@@ -388,7 +391,12 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
   }
 
-  outputCoexDF <- DEAOnClusters(objCOTAN, clusters = outputClusters)
+  outputCoexDF <-
+    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters),
+             error = function(err) {
+               logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
+               return(NULL)
+               })
 
   c(outputClusters, outputCoexDF) %<-%
     reorderClusterization(objCOTAN, clusters = outputClusters,
