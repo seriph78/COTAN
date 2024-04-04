@@ -50,26 +50,33 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
   GDIData <- calculateGDI(objCOTAN)
 
   # Plots
-  if (saveObj) {
-    # this will be restored to previous value on function exit
-    local_options(list(ggrepel.max.overlaps = Inf))
+  if (isTRUE(saveObj)) tryCatch({
+      # this will be restored to previous value on function exit
+      local_options(list(ggrepel.max.overlaps = Inf))
 
-    pdf(file.path(outDir, paste0("cluster_", cluster, "_plots.pdf")))
+      pdf(file.path(outDir, paste0("cluster_", cluster, "_plots.pdf")))
 
-    c(..., nuPlot, zoomedNuPlot) %<-% cleanPlots(objCOTAN, includePCA = FALSE)
+      c(..., nuPlot, zoomedNuPlot) %<-%
+        cleanPlots(objCOTAN, includePCA = FALSE)
 
-    genesToLabel <- head(rownames(GDIData[order(GDIData[["GDI"]],
-                                                decreasing = TRUE), ]), n = 10L)
-    gdiPlot <- GDIPlot(objCOTAN, GDIIn = GDIData, GDIThreshold = GDIThreshold,
-                       genes = list("top 10 GDI genes" = genesToLabel))
+      genesToLabel <-
+        head(rownames(GDIData[order(GDIData[["GDI"]],
+                                    decreasing = TRUE), ]), n = 10L)
+      gdiPlot <- GDIPlot(objCOTAN, GDIIn = GDIData, GDIThreshold = GDIThreshold,
+                         genes = list("top 10 GDI genes" = genesToLabel))
 
-    plot(nuPlot)
-    plot(zoomedNuPlot)
-    plot(gdiPlot)
+      plot(nuPlot)
+      plot(zoomedNuPlot)
+      plot(gdiPlot)
 
-    dev.off()
-    rm(nuPlot, zoomedNuPlot, gdiPlot)
-  }
+      rm(nuPlot, zoomedNuPlot, gdiPlot)
+      dev.off()
+    },
+    error = function(err) {
+      logThis(paste("While saving cluster plots", err),
+              logLevel = 0L)
+    }
+  )
 
   rm(objCOTAN)
   gc()
@@ -90,11 +97,20 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
                  GDIThreshold, "\n", "GDI 99% quantile is at ",
                  round(quantAboveThr, digits = 4L)), logLevel = 3L)
 
-  if (!clusterIsUniform && saveObj) {
-    outFile <- file.path(outDir,
-                         paste0("non-uniform_cluster_", cluster, ".csv"))
-    write.csv(cells, file = outFile)
-  }
+  if (isTRUE(saveObj)) tryCatch({
+      pre <- ""
+      if(!clusterIsUniform) {
+        pre <- "non-"
+      }
+      outFile <- file.path(outDir,
+                           paste0(pre, "uniform_cluster_", cluster, ".csv"))
+      write.csv(cells, file = outFile)
+    },
+    error = function(err) {
+      logThis(paste("While saving current clusterization", err),
+              logLevel = 0L)
+    }
+  )
 
   return(list("isUniform" = clusterIsUniform,
               "fractionAbove" = percAboveThr,

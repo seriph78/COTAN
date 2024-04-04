@@ -33,6 +33,10 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)
 
+  assert_that(estimatorsAreReady(objCOTAN),
+              msg = paste("Estimators lambda, nu, dispersion are not ready:",
+                          "Use proceeedToCoex() to prepare them"))
+
   clustersList <- toClustersList(clusters)
 
   zeroOne <- getZeroOneProj(objCOTAN)

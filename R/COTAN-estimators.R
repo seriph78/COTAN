@@ -224,8 +224,8 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 #' @importFrom parallelly supportsMulticore
 #' @importFrom parallelly availableCores
 #'
-#' @importFrom zeallot %<-%
-#' @importFrom zeallot %->%
+#' @importFrom zeallot `%<-%`
+#' @importFrom zeallot `%->%`
 #'
 #' @export
 #'
