@@ -19,6 +19,7 @@
 \alias{getLambda}
 \alias{getDispersion,COTAN-method}
 \alias{getDispersion}
+\alias{estimatorsAreReady}
 \title{Estimation of the \code{COTAN} model's parameters}
 \usage{
 \S4method{estimateLambdaLinear}{COTAN}(objCOTAN)
@@ -65,6 +66,8 @@ getNormalizedData(objCOTAN)
 \S4method{getLambda}{COTAN}(objCOTAN)
 
 \S4method{getDispersion}{COTAN}(objCOTAN)
+
+estimatorsAreReady(objCOTAN)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
@@ -101,6 +104,9 @@ equal to 1}
 \code{getLambda()} returns the lambda array
 
 \code{getDispersion()} returns the dispersion array
+
+\code{estimatorsAreReady()} returns a boolean specifying whether all
+three arrays are non-empty
 }
 \description{
 These functions are used to estimate the \code{COTAN} model's
@@ -150,6 +156,9 @@ divided by \code{nu}) and returns it or its base-10 logarithm
 gene)
 
 \code{getDispersion()} extracts the dispersion array (a)
+
+\code{estimatorsAreReady()} checks whether the estimators arrays lambda,
+nu, dispersion are available
 }
 \examples{
 data("test.dataset")

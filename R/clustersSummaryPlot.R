@@ -230,7 +230,7 @@ clustersTreePlot <- function(objCOTAN,
                              kCuts,
                              clName = "",
                              useDEA = TRUE,
-                             distance = "cosine",
+                             distance = NULL,
                              hclustMethod = "ward.D2") {
   # pick last if no name was given
   clName <- getClusterizationName(objCOTAN, clName = clName)

@@ -33,6 +33,10 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)
 
+  assert_that(estimatorsAreReady(objCOTAN),
+              msg = paste("Estimators lambda, nu, dispersion are not ready:",
+                          "Use proceeedToCoex() to prepare them"))
+
   clustersList <- toClustersList(clusters)
 
   zeroOne <- getZeroOneProj(objCOTAN)
@@ -184,9 +188,8 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 
   normData <- getNormalizedData(objCOTAN)
 
-  if (is_empty(getLambda(objCOTAN))) {
-    stop("lambda must not be empty, estimate it")
-  }
+  assert_that(!is_empty(getLambda(objCOTAN)),
+              msg = "lambda must not be empty, estimate it")
 
   floorAverage <- getLambda(objCOTAN) * floorLambdaFraction
 
@@ -263,6 +266,9 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom rlang is_empty
+#' @importFrom rlang is_null
+#'
 #' @rdname HandlingClusterizations
 #'
 distancesBetweenClusters <- function(objCOTAN, clName = "",
@@ -275,14 +281,21 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
 
   clList <- toClustersList(clusters)
 
+  if (isTRUE(useDEA) && is_empty(coexDF) && !estimatorsAreReady(objCOTAN)) {
+    logThis("cannot calculate DEA - falling back to case 'useDEA = FALSE'",
+            logLevel = 1L)
+    useDEA <- FALSE
+  }
+
   if (isTRUE(useDEA)) {
-    if (is.null(distance)) {
+    if (is_null(distance)) {
       distance <- "cosine"
     }
 
     if (is_empty(coexDF) && (clName %in% getClusterizations(objCOTAN))) {
         coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
     }
+
     if (is_empty(coexDF)) {
       coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
     }

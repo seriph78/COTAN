@@ -23,6 +23,7 @@ cellsUniformClustering(
   GDIThreshold = 1.4,
   cores = 1L,
   maxIterations = 25L,
+  initialClusters = NULL,
   initialResolution = 0.8,
   useDEA = TRUE,
   distance = NULL,
@@ -76,6 +77,10 @@ here to speed up the process (default is \code{NULL})}
 
 \item{maxIterations}{max number of re-clustering iterations. It defaults to
 \eqn{25}}
+
+\item{initialClusters}{an existing \emph{clusterization} to use as starting point:
+the \emph{clusters} deemed \strong{uniform} will be kept and the rest processed as
+normal}
 
 \item{initialResolution}{a number indicating how refined are the clusters
 before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as

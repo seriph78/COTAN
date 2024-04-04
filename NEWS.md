@@ -1,7 +1,7 @@
 ## COTAN 2.3.5
 
-Increased reliability of clustering functions by allowing retry runs
-on estimators functions
+Increased reliability of clustering functions by improved error handling and 
+by allowing retry runs on estimators functions
 
 ## COTAN 2.3.4
 
