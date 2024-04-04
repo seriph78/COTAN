@@ -190,6 +190,8 @@ NULL
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @rdname UniformClusters
 #'
 
@@ -203,6 +205,10 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                                    hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
+
+  assert_that(estimatorsAreReady(objCOTAN),
+              msg = paste("Estimators lambda, nu, dispersion are not ready:",
+                          "Use proceeedToCoex() to prepare them"))
 
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
@@ -230,17 +236,12 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                   numClustersToRecluster, "clusters"), logLevel = 2L)
 
     #Step 1
-    c(objSeurat, usedMaxResolution) %<-% tryCatch(
+    c(objSeurat, usedMaxResolution) %<-%
       seuratClustering(rawData = getRawData(objCOTAN)[, is.na(outputClusters)],
                        cond = cond, iter = iter,
                        initialResolution = initialResolution,
                        minNumClusters = numClustersToRecluster + 1L,
-                       saveObj = saveObj, outDir = outDirIter),
-      error = function(err) {
-        logThis(paste("while creating Seurat object", err), logLevel = 0L)
-        return(list(NULL, initialResolution))
-      }
-    )
+                       saveObj = saveObj, outDir = outDirIter)
 
     if (is_null(objSeurat)) {
       logThis(paste("NO new possible uniform clusters!",

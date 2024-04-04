@@ -33,6 +33,10 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)
 
+  assert_that(estimatorsAreReady(objCOTAN),
+              msg = paste("Estimators lambda, nu, dispersion are not ready:",
+                          "Use proceeedToCoex() to prepare them"))
+
   clustersList <- toClustersList(clusters)
 
   zeroOne <- getZeroOneProj(objCOTAN)
@@ -184,9 +188,8 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 
   normData <- getNormalizedData(objCOTAN)
 
-  if (is_empty(getLambda(objCOTAN))) {
-    stop("lambda must not be empty, estimate it")
-  }
+  assert_that(!is_empty(getLambda(objCOTAN)),
+              msg = "lambda must not be empty, estimate it")
 
   floorAverage <- getLambda(objCOTAN) * floorLambdaFraction
 
@@ -278,6 +281,12 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
 
   clList <- toClustersList(clusters)
 
+  if (isTRUE(useDEA) && is_empty(coexDF) && !estimatorsAreReady(objCOTAN)) {
+    logThis("cannot calculate DEA - falling back to case 'useDEA = FALSE'",
+            logLevel = 1L)
+    useDEA <- FALSE
+  }
+
   if (isTRUE(useDEA)) {
     if (is_null(distance)) {
       distance <- "cosine"
@@ -287,23 +296,13 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
         coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
     }
 
-    return(tryCatch({
-        if (is_empty(coexDF)) {
-          coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
-        }
+    if (is_empty(coexDF)) {
+      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+    }
 
-        # merge small cluster based on distances
-        parDist(t(as.matrix(coexDF)), method = distance,
-                diag = TRUE, upper = TRUE)
-      },
-      error = function(err) {
-        logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
-        logThis("Falling back to non-DEA distance", logLevel = 1L)
-        return(distancesBetweenClusters(objCOTAN, clName = clName,
-                                        clusters = clusters,
-                                        coexDF = NULL, useDEA = FALSE))
-      })
-    )
+    # merge small cluster based on distances
+    return(parDist(t(as.matrix(coexDF)), method = distance,
+                   diag = TRUE, upper = TRUE))
   } else {
     if (is.null(distance)) {
       distance <- "euclidean"

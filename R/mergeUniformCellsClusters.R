@@ -135,6 +135,10 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       outDir = ".") {
   logThis("Merging cells' uniform clustering: START", logLevel = 2L)
 
+  assert_that(estimatorsAreReady(objCOTAN),
+              msg = paste("Estimators lambda, nu, dispersion are not ready:",
+                          "Use proceeedToCoex() to prepare them"))
+
   outputClusters <- clusters
   if (is_empty(outputClusters)) {
     # pick the last clusterization
