@@ -66,6 +66,18 @@ test_that("Cell Uniform Clustering", {
   # this is an happenstance
   expect_identical(colnames(coexDF3)[-5L], levels(clusters3)[-1L])
 
+  exactClusters <- set_names(rep(1:2, each = 600), nm = getCells(obj))
+
+  suppressWarnings({
+    splitList <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+                                        initialResolution = initialResolution,
+                                        initialClusters = exactClusters,
+                                        cores = 12L, saveObj = TRUE,
+                                        outDir = tm)
+  })
+
+  expect_identical(splitList[["clusters"]], factor(exactClusters))
+
   #clusters_exp <- readRDS(file.path(getwd(), "clusters1.RDS"))
 
   #expect_identical(clusters, clusters_exp)

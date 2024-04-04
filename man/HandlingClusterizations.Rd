@@ -118,7 +118,7 @@ clustersTreePlot(
   kCuts,
   clName = "",
   useDEA = TRUE,
-  distance = "cosine",
+  distance = NULL,
   hclustMethod = "ward.D2"
 )
 

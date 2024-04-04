@@ -555,6 +555,34 @@ setMethod(
 )
 
 
+#' @details `estimatorsAreReady()` checks whether the estimators arrays lambda,
+#'   nu, dispersion are available
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `estimatorsAreReady()` returns a boolean specifying whether all
+#'   three arrays are non-empty
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @rdname ParametersEstimations
+#'
+estimatorsAreReady <- function(objCOTAN) {
+  anyEmptyArrays <- is_empty(getLambda(objCOTAN)) ||
+                    is_empty(getNu(objCOTAN)) ||
+                    is_empty(getDispersion(objCOTAN))
+  if (anyEmptyArrays) {
+    logThis(paste0("Estimators are not ready - array sizes: lambda ",
+                   length(getLambda(objCOTAN)), ", nu ",
+                   length(getNu(objCOTAN)), ", dispersion ",
+                   length(getDispersion(objCOTAN))), logLevel = 2L)
+  }
+  return(!anyEmptyArrays)
+}
+
+
 #' @aliases getMu
 #'
 #' @details `getMu()` calculates the vector \eqn{\mu = \lambda \times
@@ -612,6 +640,7 @@ getProbabilityOfZero <- function(objCOTAN) {
   # estimate Probabilities of 0 with internal function funProbZero
   return(funProbZero(getDispersion(objCOTAN), getMu(objCOTAN)))
 }
+
 
 # ----------- Raw data cleaning ------------
 

@@ -19,6 +19,7 @@
 \alias{getLambda}
 \alias{getDispersion,COTAN-method}
 \alias{getDispersion}
+\alias{estimatorsAreReady}
 \alias{getProbabilityOfZero}
 \title{Estimation of the \code{COTAN} model's parameters}
 \usage{
@@ -67,6 +68,8 @@ getNormalizedData(objCOTAN)
 
 \S4method{getDispersion}{COTAN}(objCOTAN)
 
+estimatorsAreReady(objCOTAN)
+
 getProbabilityOfZero(objCOTAN)
 }
 \arguments{
@@ -104,6 +107,9 @@ equal to 1}
 \code{getLambda()} returns the lambda array
 
 \code{getDispersion()} returns the dispersion array
+
+\code{estimatorsAreReady()} returns a boolean specifying whether all
+three arrays are non-empty
 
 \code{getProbabilityOfZero()} returns a \code{data.frame} with the
 probabilities of zero
@@ -156,6 +162,9 @@ divided by \code{nu}) and returns it or its base-10 logarithm
 gene)
 
 \code{getDispersion()} extracts the dispersion array (a)
+
+\code{estimatorsAreReady()} checks whether the estimators arrays lambda,
+nu, dispersion are available
 
 \code{getProbabilityOfZero()} gives for each cell and each gene the
 probability of observing zero reads
