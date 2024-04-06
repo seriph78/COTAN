@@ -335,11 +335,15 @@ mergeUniformCellsClusters <- function(objCOTAN,
                return(NULL)
              })
 
-  c(outputClusters, outputCoexDF) %<-%
+  c(outputClusters, outputCoexDF) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
                           keepMinusOne = FALSE, useDEA = useDEA,
-                          distance = distance, hclustMethod = hclustMethod)
+                          distance = distance, hclustMethod = hclustMethod),
+    error = function(err) {
+      logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
+      return(list(outputClusters, outputCoexDF))
+    })
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 

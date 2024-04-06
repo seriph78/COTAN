@@ -416,17 +416,15 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                return(NULL)
                })
 
-  if (length(unique(outputClusters)) > 2L) {
-    c(outputClusters, outputCoexDF) %<-% tryCatch(
-      reorderClusterization(objCOTAN, clusters = outputClusters,
-                            coexDF = outputCoexDF, reverse = FALSE,
-                            keepMinusOne = TRUE, useDEA = useDEA,
-                            distance = distance, hclustMethod = hclustMethod),
-      error = function(err) {
-        logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
-        return(list(outputClusters, outputCoexDF))
-      })
-  }
+  c(outputClusters, outputCoexDF) %<-% tryCatch(
+    reorderClusterization(objCOTAN, clusters = outputClusters,
+                          coexDF = outputCoexDF, reverse = FALSE,
+                          keepMinusOne = TRUE, useDEA = useDEA,
+                          distance = distance, hclustMethod = hclustMethod),
+    error = function(err) {
+      logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
+      return(list(outputClusters, outputCoexDF))
+    })
 
   outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
 

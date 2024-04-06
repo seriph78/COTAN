@@ -59,6 +59,11 @@ reorderClusterization <- function(objCOTAN,
     clDist <- as.dist(as.matrix(clDist)[-minuOnePos, -minuOnePos])
   }
 
+  if (length(labels(clDist)) <= 1L) {
+    # too few clusters, nothing to reorder: return input as is
+    return(list("clusters" = factor(clusters), "coex" = coexDF))
+  }
+
   hc <- hclust(clDist, method = hclustMethod)
 
   # we exploit the rank(x) == order(order(x))
