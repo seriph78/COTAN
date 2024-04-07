@@ -237,7 +237,8 @@ setMethod(
     genesPosToKeep <- which(!(getGenes(objCOTAN) %in% genes))
     cellsPosToKeep <- which(!(getCells(objCOTAN) %in% cells))
 
-    assert_that((length(genesPosToKeep) != 0L && length(cellsPosToKeep) != 0L),
+    assert_that(length(genesPosToKeep) != 0L,
+                length(cellsPosToKeep) != 0L,
                 msg = "Asked to drop all genes and/or cells")
 
     # As all estimates would be wrong, a completely new object is created
@@ -297,6 +298,8 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @export
 #'
 #' @rdname HandlingClusterizations
@@ -311,26 +314,39 @@ setMethod(
       internalName <- paste0("CL_", clName)
     }
 
-    if (nchar(internalName) < 4L) {
-      stop("Given an empty name for the new clusterization.")
+    clusters <- factor(clusters)
+
+    assert_that(nchar(internalName) >= 4L,
+                msg = "Given an empty name for the new clusterization.")
+
+    assert_that(isTRUE(override) ||
+                  !(internalName %in% colnames(getMetadataCells(objCOTAN))),
+                msg = paste0("A clusterization with name '",
+                             clName, "' already exists."))
+
+    assert_that(length(clusters) == getNumCells(objCOTAN),
+                msg = paste0("The passed clusterization has the ",
+                             "wrong number of elements [", length(clusters),
+                             "] instead of the expected number of cells [",
+                             getNumCells(objCOTAN), "]."))
+
+    assert_that(identical(names(clusters), getCells(objCOTAN)),
+                msg = paste0("The passed clusterization must be named ",
+                             "and aligned to the cells' list"))
+
+    if (!is_empty(coexDF)) {
+      assert_that(isa(coexDF, "data.frame"),
+                  msg = paste0("'coexDF' is supposedly composed of ",
+                               "data.frames. A '", class(coexDF),
+                               "' was given  instead for clusterization '",
+                               clName, "'."))
+
+      assert_that(identical(rownames(coexDF), getGenes(objCOTAN)),
+                  setequal(colnames(coexDF), levels(clusters)),
+                  msg = "coex is not aligned to the given clusterization")
     }
 
-    if (!override && (internalName %in% colnames(getMetadataCells(objCOTAN)))) {
-      stop("A clusterization with name '", clName, "' already exists.")
-    }
-
-    if (length(clusters) != getNumCells(objCOTAN)) {
-      stop("The passed clusterization has the wrong number of elements [",
-           length(clusters), "] instead of the expected number of cells [",
-           getNumCells(objCOTAN), "].")
-    }
-    if (!is_empty(coexDF) && !isa(coexDF, "data.frame")) {
-      stop("'clusterCoex' is supposedly composed of data.frames.",
-           " A '", class(coexDF), "' was given instead for clusterization '",
-           clName, "'.")
-    }
-
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, factor(clusters),
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, clusters,
                                         internalName, getCells(objCOTAN))
 
     # this add a new entry in the list for the new name!
@@ -365,19 +381,21 @@ setMethod(
   "addClusterizationCoex",
   "COTAN",
   function(objCOTAN, clName, coexDF) {
-    assert_that(isa(coexDF, "data.frame"),
-                msg = paste0("'clusterCoex' is supposedly composed ",
-                             "of data.frames. A '", class(coexDF),
-                             "' was given instead for clusterization '",
-                             clName, "'"))
-
     internalName <- getClusterizationName(objCOTAN, clName = clName,
                                           keepPrefix = TRUE)
 
-    assert_that(setequal(colnames(coexDF),
-                         getClusters(objCOTAN, clName = internalName)),
-                msg = paste0("The column names of passed data.frame does not
-                             match the expected list of clusters"))
+    if (!is_empty(coexDF)) {
+      assert_that(isa(coexDF, "data.frame"),
+                  msg = paste0("'coexDF' is supposedly composed of ",
+                               "data.frames. A '", class(coexDF),
+                               "' was given  instead for clusterization '",
+                               clName, "'."))
+
+      assert_that(identical(rownames(coexDF), getGenes(objCOTAN)),
+                  setequal(colnames(coexDF),
+                           getClusters(objCOTAN, clName = internalName)),
+                  msg = "coex is not aligned to the given clusterization")
+    }
 
     # this should not add any new elements to the list!
     objCOTAN@clustersCoex[[internalName]] <- coexDF
@@ -400,6 +418,8 @@ setMethod(
 #'
 #' @export
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @rdname HandlingClusterizations
 #'
 setMethod(
@@ -411,9 +431,9 @@ setMethod(
       internalName <- paste0("CL_", clName)
     }
 
-    if (!internalName %in% names(getClustersCoex(objCOTAN))) {
-      stop("A clusterization with name '", clName, "' does not exists.")
-    }
+    assert_that(internalName %in% colnames(getMetadataCells(objCOTAN)),
+                msg = paste0("No clusterization with name '",
+                             clName, "' is present."))
 
     keptCols <- !colnames(objCOTAN@metaCells) %in% internalName
     objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols, drop = FALSE]
@@ -445,6 +465,8 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @export
 #'
 #' @rdname HandlingConditions
@@ -458,19 +480,23 @@ setMethod(
       internalName <- paste0("COND_", condName)
     }
 
-    if (nchar(internalName) < 6L) {
-      stop("Given an empty name for the new condition")
-    }
+    assert_that(nchar(internalName) >= 6L,
+                msg = "Given an empty name for the new condition")
 
-    if (!override && (internalName %in% colnames(getMetadataCells(objCOTAN)))) {
-      stop("A condition with name '", condName, "' already exists.")
-    }
+    assert_that(isTRUE(override) ||
+                  !(internalName %in% colnames(getMetadataCells(objCOTAN))),
+                msg = paste0("A condition with name '",
+                             condName, "' already exists."))
 
-    if (length(conditions) != getNumCells(objCOTAN)) {
-      stop("The passed condition has the wrong number of elements [",
-           length(conditions), "] instead of the expected number of cells [",
-           getNumCells(objCOTAN), "].")
-    }
+    assert_that(length(conditions) == getNumCells(objCOTAN),
+                msg = paste0("The passed condition has the wrong ",
+                             "number of elements [", length(conditions),
+                             "] instead ofthe expected number of cells [",
+                             getNumCells(objCOTAN), "]."))
+
+    assert_that(identical(names(conditions), getCells(objCOTAN)),
+                msg = paste0("The passed condition must be named ",
+                             "and aligned to the cells' list"))
 
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, factor(conditions),
                                         internalName, getCells(objCOTAN))
@@ -493,6 +519,8 @@ setMethod(
 #'
 #' @returns `dropCondition()` returns the updated `COTAN` object
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @export
 #'
 #' @rdname HandlingConditions
@@ -506,9 +534,9 @@ setMethod(
       internalName <- paste0("COND_", condName)
     }
 
-    if (!internalName %in% colnames(getMetadataCells(objCOTAN))) {
-      stop("A condition with name '", condName, "' does not exists.")
-    }
+    assert_that(internalName %in% colnames(getMetadataCells(objCOTAN)),
+                msg = paste0("No condition with name '",
+                             condName, "' is present."))
 
     keptCols <- !colnames(objCOTAN@metaCells) %in% internalName
     objCOTAN@metaCells <- objCOTAN@metaCells[, keptCols, drop = FALSE]

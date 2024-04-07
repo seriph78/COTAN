@@ -1143,11 +1143,12 @@ setMethod(
     assert_that(!isEmptyName(internalName),
                 msg = "No clusterizations are present in the 'COTAN' object")
 
-    clusters <- set_names(getMetadataCells(objCOTAN)[[internalName]],
-                          getCells(objCOTAN))
+    clusters <- factor(set_names(getMetadataCells(objCOTAN)[[internalName]],
+                                 getCells(objCOTAN)))
 
-    return(list("clusters" = clusters,
-                "coex" = getClustersCoex(objCOTAN)[[internalName]]))
+    coexDF <- getClustersCoex(objCOTAN)[[internalName]]
+
+    return(list("clusters" = clusters, "coex" = coexDF))
   }
 )
 
