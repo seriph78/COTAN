@@ -1233,8 +1233,9 @@ NULL
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
-#' genre <- rep(c("F", "M"), getNumCells(objCOTAN) / 2)
-#' objCOTAN <- addCondition(objCOTAN, condName = "Genre", conditions = genre)
+#' cellLine <- rep(c("A", "B"), getNumCells(objCOTAN) / 2)
+#' names(cellLine) <- getCells(objCOTAN)
+#' objCOTAN <- addCondition(objCOTAN, condName = "Line", conditions = cellLine)
 #'
 #' ##objCOTAN <- dropCondition(objCOTAN, "Genre")
 #'

@@ -1,5 +1,9 @@
 ## COTAN 2.3.5
 
+Made checks when adding a clusterization or condition more strict
+
+## COTAN 2.3.5
+
 Increased reliability of clustering functions by improved error handling and 
 by allowing retry runs on estimators functions
 
