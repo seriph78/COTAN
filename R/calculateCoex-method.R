@@ -1131,7 +1131,9 @@ calculateS <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
   geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
-  logThis("Calculating S: START", logLevel = 2L)
+  logThis("Calculating S: START", logLevel = 3L)
+
+  assert_that(isCoexAvailable(objCOTAN), msg = "Coex is missing")
 
   coex <- getGenesCoex(objCOTAN, zeroDiagonal = TRUE)
   if (!identical(geneSubsetRow, getGenes(objCOTAN)) ||
@@ -1139,11 +1141,11 @@ calculateS <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
     coex <- coex[geneSubsetRow, geneSubsetCol, drop = FALSE]
   }
 
-  assert_that(!is_empty(coex), msg = "Coex is missing")
+  assert_that(!is_empty(coex), msg = "Genes subset result in empty matrix")
 
   S <- coex^2L * getNumCells(objCOTAN)
 
-  logThis("Calculating S: DONE", logLevel = 2L)
+  logThis("Calculating S: DONE", logLevel = 3L)
 
   return(S)
 }

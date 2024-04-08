@@ -1,3 +1,8 @@
+## COTAN 2.3.6
+
+Added possibility to query whether the `COEX` matrix is available in a `COTAN`
+object
+
 ## COTAN 2.3.5
 
 Increased reliability of clustering functions by improved error handling and 
