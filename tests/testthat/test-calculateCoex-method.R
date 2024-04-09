@@ -139,6 +139,7 @@ test_that("Calculations on genes", {
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
+  expect_true(isCoexAvailable(obj, actOnCells = FALSE, ignoreSync = FALSE))
   expect_identical(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2L))
   expect_identical(getGenesCoex(obj)[1L, 1L], 0.0)
   expect_equal(abs(as.vector(getGenesCoex(obj,
@@ -237,6 +238,7 @@ test_that("Calculations on cells", {
 
   expect_identical(c(genesCoexInSync, cellsCoexInSync), c("FALSE", "TRUE"))
 
+  expect_true(isCoexAvailable(obj, actOnCells = TRUE))
   expect_identical(dim(getCellsCoex(obj)), rep(getNumCells(obj), 2L))
 
   # as all cells are repeated altenating
@@ -292,6 +294,7 @@ test_that("Coex", {
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
+  expect_true(isCoexAvailable(obj))
   expect_identical(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2L))
 
   S <- as.matrix(calculateS(obj))
@@ -367,6 +370,7 @@ test_that("Coex vs saved results", {
 
   coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
+  expect_true(isCoexAvailable(obj))
   expect_equal(getGenesCoex(obj, genes = genes.names.test,
                             zeroDiagonal = FALSE),
                coex_test, tolerance = 1.0e-12)
