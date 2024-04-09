@@ -15,14 +15,18 @@ test_that("COTAN getters", {
   obj <- calculateCoex(obj, actOnCells = TRUE,  optimizeForSpeed = TRUE)
 
   obj <- addClusterization(obj, clName = "Test",
-                           clusters = rep(c(1L, 2L), 10L))
+                           clusters = set_names(rep(c(1L, 2L), 10L),
+                                                colnames(raw)))
   obj <- addClusterization(obj, clName = "Test2",
-                           clusters = rep(c(2L, 1L), 10L))
+                           clusters = set_names(rep(c(2L, 1L), 10L),
+                                                colnames(raw)))
 
   obj <- addCondition(obj, condName = "Test",
-                      conditions = rep(c("F", "M"), 10L))
+                      conditions = set_names(rep(c("F", "M"), 10L),
+                                             colnames(raw)))
   obj <- addCondition(obj, condName = "Test", override = TRUE,
-                      conditions = c(rep(c("F", "M"), 9L), "M", "F"))
+                      conditions = set_names(c(rep(c("F", "M"), 9L), "M", "F"),
+                                             colnames(raw)))
 
   metaInfo <- c("V", "10X", "Test", "20", "TRUE", "TRUE",
                 paste0(10.0 / 55.0), paste0(0L))

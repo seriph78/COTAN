@@ -159,17 +159,20 @@ setClass(
     }
 
     for (name in colnames(object@metaCells)) {
-      if (!startsWith(name, "CL_")) {
-        # not a clusterization name
-        next
-      }
-      if (!inherits(object@metaCells[[name]], "factor")) {
-        # ensure the clusters are factors
-        object@metaCells[[name]] <- factor(object@metaCells[[name]])
-      }
-      if (!name %in% names(object@clustersCoex)) {
-        stop("The clusterization name '", name, "' does not have",
-             " an element in the 'clusterCoex' list")
+      if (startsWith(name, "CL_")) {
+        if (!inherits(object@metaCells[[name]], "factor")) {
+          # ensure the clusters are factors
+          object@metaCells[[name]] <- factor(object@metaCells[[name]])
+        }
+        if (!name %in% names(object@clustersCoex)) {
+          stop("The clusterization name '", name, "' does not have",
+               " an element in the 'clusterCoex' list")
+        }
+      } else if (startsWith(name, "COND_")) {
+        if (!inherits(object@metaCells[[name]], "factor")) {
+          # ensure the clusters are factors
+          object@metaCells[[name]] <- factor(object@metaCells[[name]])
+        }
       }
     }
 

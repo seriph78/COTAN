@@ -192,13 +192,17 @@ test_that("Managed clusterizations and conditions", {
   expect_error(getClusters(obj, clName = "Test"))
   expect_error(getCondition(obj, condName = "Test"))
 
-  # empyt name clusterization/consition
+  # empty name clusterization/condition
   expect_error(addClusterization(obj, clName = "", clusters = rep(0L, 20L)))
   expect_error(addCondition(obj, condName = "", conditions = rep(0L, 20L)))
 
+  # no names in clusterization
+  expect_error(addClusterization(obj, clName = "Test", clusters = rep(0L, 20L)))
+  expect_error(addCondition(obj, condName = "Cond", conditions = rep(0L, 20L)))
+
   # already existing clusterization
   expect_error(addClusterization(obj, clName = "Test2",
-                                 clusters = rep(0L, 20L)))
+                                 clusters = clusters2))
 
   # wrong clusters/conditions size
   expect_error(addClusterization(obj, clName = "Test", clusters = rep(0L, 17L)))
