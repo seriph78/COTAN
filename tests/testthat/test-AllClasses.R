@@ -42,7 +42,8 @@ test_that("'scCOTAN' converters", {
     c(1L, 2L))
 
   obj <- addClusterization(obj, clName = "clusters",
-                           clusters = rep(colnames(coexDF), 10L),
+                           clusters = set_names(rep(colnames(coexDF), 10L),
+                                                colnames(raw)),
                            coexDF = coexDF)
 
   # coerce 'COTAN' -> 'scCOTAN'

@@ -233,8 +233,10 @@ clustersTreePlot <- function(objCOTAN,
                              distance = NULL,
                              hclustMethod = "ward.D2") {
   # pick last if no name was given
-  clName <- getClusterizationName(objCOTAN, clName = clName)
-  clusters <- getClusters(objCOTAN, clName = clName)
+  # picks up the last clusterization if none was given
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
