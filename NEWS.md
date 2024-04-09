@@ -1,5 +1,10 @@
 ## COTAN 2.3.6
 
+Changed default `GDI` threshold to 1.43
+
+Added new input to `mergeUniformCellsClusters()` to allow proper resume of
+interrupted merges
+
 Added possibility to query whether the `COEX` matrix is available in a `COTAN`
 object
 

@@ -14,13 +14,13 @@ GDIPlot(
   genes,
   condition = "",
   statType = "S",
-  GDIThreshold = 1.4,
+  GDIThreshold = 1.43,
   GDIIn = NULL
 )
 
 cellsUniformClustering(
   objCOTAN,
-  GDIThreshold = 1.4,
+  GDIThreshold = 1.43,
   cores = 1L,
   maxIterations = 25L,
   initialClusters = NULL,
@@ -36,7 +36,7 @@ checkClusterUniformity(
   objCOTAN,
   cluster,
   cells,
-  GDIThreshold = 1.4,
+  GDIThreshold = 1.43,
   cores = 1L,
   saveObj = TRUE,
   outDir = "."
@@ -45,8 +45,9 @@ checkClusterUniformity(
 mergeUniformCellsClusters(
   objCOTAN,
   clusters = NULL,
-  GDIThreshold = 1.4,
+  GDIThreshold = 1.43,
   batchSize = 10L,
+  notMergeable = NULL,
   cores = 1L,
   useDEA = TRUE,
   distance = NULL,
@@ -68,7 +69,7 @@ only for the title).}
 chi-squared test statistics. "G" is G-test statistics}
 
 \item{GDIThreshold}{the threshold level that discriminates uniform clusters.
-It defaults to \eqn{1.4}}
+It defaults to \eqn{1.43}}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
@@ -113,6 +114,10 @@ significant!}
 
 \item{batchSize}{Number pairs to test in a single round. If none of them
 succeeds the merge stops}
+
+\item{notMergeable}{An array of names of merged clusters that are already
+known for not being uniform. Useful to restart the \emph{merging} process after
+an interruption.}
 }
 \value{
 \code{GDIPlot()} returns a \code{ggplot2} object
@@ -196,13 +201,13 @@ plot(gdiPlot)
 
 splitList <- cellsUniformClustering(objCOTAN, cores = 12,
                                     initialResolution = 0.8,
-                                    GDIThreshold = 1.5, saveObj = FALSE)
+                                    GDIThreshold = 1.46, saveObj = FALSE)
 
 clusters <- splitList[["clusters"]]
 
 firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
 checkClusterUniformity(objCOTAN,
-                       GDIThreshold = 1.5,
+                       GDIThreshold = 1.46,
                        cluster = clusters[[1L]],
                        cells = firstCluster,
                        cores = 12L,
@@ -219,7 +224,7 @@ objCOTAN <- addClusterizationCoex(objCOTAN,
 identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 
 mergedList <- mergeUniformCellsClusters(objCOTAN,
-                                        GDIThreshold = 1.5,
+                                        GDIThreshold = 1.46,
                                         batchSize = 5L,
                                         clusters = clusters,
                                         cores = 12L,

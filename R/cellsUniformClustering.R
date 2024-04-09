@@ -49,8 +49,8 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
 
     srat <- CreateSeuratObject(counts = as.data.frame(rawData),
                                project = paste0(cond, "_reclustering_", iter),
-                               min.cells = if (iter == 0L) 3L else 1L,
-                               min.features = if (iter == 0L) 4L else 2L)
+                               min.cells = if (iter == 1L) 3L else 1L,
+                               min.features = if (iter == 1L) 4L else 2L)
     srat <- NormalizeData(srat)
     srat <- FindVariableFeatures(srat, selection.method = "vst",
                                  nfeatures = 2000L)
@@ -98,7 +98,7 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
                      file.path(outDir, "pdf_umap.pdf")), logLevel = 2L)
       pdf(file.path(outDir, "pdf_umap.pdf"))
 
-      if (iter == 0L) {
+      if (iter == 1L) {
         plot(DimPlot(srat, reduction = "umap", label = FALSE,
                      group.by = "orig.ident"))
       }
@@ -152,7 +152,7 @@ NULL
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.4}
+#'   *clusters*. It defaults to \eqn{1.43}
 #' @param cores number of cores used
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
@@ -197,7 +197,8 @@ NULL
 #' @rdname UniformClusters
 #'
 
-cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
+cellsUniformClustering <- function(objCOTAN,
+                                   GDIThreshold = 1.43,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    initialClusters = NULL,
@@ -228,6 +229,8 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
   srat <- NULL
 
   repeat {
+    iter <- iter + 1L
+
     outDirIter <- file.path(outDirCond, paste0("reclustering_", iter))
     if (!file.exists(outDirIter)) {
       dir.create(file.path(outDirIter))
@@ -254,7 +257,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
       break
     }
 
-    if (saveObj && iter == 0L) {
+    if (saveObj && iter == 1L) {
       # save the Seurat object on the global raw data
       srat <- objSeurat
     }
@@ -275,7 +278,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     testClusters <- factor(metaData[["seurat_clusters"]])
     allCells <- rownames(metaData)
     names(testClusters) <- allCells
-    if (iter == 0L && !is_null(initialClusters)) {
+    if (iter == 1L && !is_null(initialClusters)) {
       assert_that(setequal(names(initialClusters), getCells(objCOTAN)),
                   msg = "Given clusterization has the wrong set of cells")
       logThis("Using passed in clusterization", logLevel = 3L)
@@ -386,8 +389,6 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
       break
     }
     rm(cellsToRecluster)
-
-    iter <- iter + 1L
   } # End repeat
 
   logThis(paste("The final raw clusterization contains [",

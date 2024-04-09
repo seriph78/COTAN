@@ -117,6 +117,7 @@ clustersTreePlot(
   objCOTAN,
   kCuts,
   clName = "",
+  clusters = NULL,
   useDEA = TRUE,
   distance = NULL,
   hclustMethod = "ward.D2"
