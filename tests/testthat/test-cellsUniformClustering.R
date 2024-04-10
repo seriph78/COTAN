@@ -14,14 +14,17 @@ test_that("Cell Uniform Clustering", {
   obj <- proceedToCoex(obj, calcCoex = FALSE,
                        cores = 12L, saveObj = TRUE, outDir = tm)
 
-  GDIThreshold <- 1.5
+  GDIThreshold <- 1.46
   initialResolution <- 0.8
   suppressWarnings({
-    clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+  clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
                                        initialResolution = initialResolution,
                                        cores = 12L, saveObj = TRUE,
                                        outDir = tm)[["clusters"]]
   })
+
+  expect_true(file.exists(file.path(tm, "test", "reclustering_1",
+                                    "partial_clusterization.csv")))
 
   gc()
 

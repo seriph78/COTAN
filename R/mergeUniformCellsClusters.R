@@ -14,9 +14,12 @@
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
-#'   It defaults to \eqn{1.4}
+#'   It defaults to \eqn{1.43}
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops
+#' @param notMergeable An array of names of merged clusters that are already
+#'   known for not being uniform. Useful to restart the *merging* process after
+#'   an interruption.
 #' @param cores number cores used
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
@@ -82,13 +85,13 @@
 #'
 #' splitList <- cellsUniformClustering(objCOTAN, cores = 12,
 #'                                     initialResolution = 0.8,
-#'                                     GDIThreshold = 1.5, saveObj = FALSE)
+#'                                     GDIThreshold = 1.46, saveObj = FALSE)
 #'
 #' clusters <- splitList[["clusters"]]
 #'
 #' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
 #' checkClusterUniformity(objCOTAN,
-#'                        GDIThreshold = 1.5,
+#'                        GDIThreshold = 1.46,
 #'                        cluster = clusters[[1L]],
 #'                        cells = firstCluster,
 #'                        cores = 12L,
@@ -105,7 +108,7 @@
 #' identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 #'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
-#'                                         GDIThreshold = 1.5,
+#'                                         GDIThreshold = 1.46,
 #'                                         batchSize = 5L,
 #'                                         clusters = clusters,
 #'                                         cores = 12L,
@@ -125,8 +128,9 @@
 
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
-                                      GDIThreshold = 1.4,
+                                      GDIThreshold = 1.43,
                                       batchSize = 10L,
+                                      notMergeable = NULL,
                                       cores = 1L,
                                       useDEA = TRUE,
                                       distance = NULL,
@@ -159,7 +163,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
     dir.create(mergeOutDir)
   }
 
-  notMergeable <- vector(mode = "character")
+  if (is_empty(notMergeable)) {
+    notMergeable <- vector(mode = "character")
+  }
 
   mergedName <- function(cl1, cl2) {
     return(paste0(min(cl1, cl2), "_", max(cl1, cl2), "-merge"))
@@ -288,6 +294,20 @@ mergeUniformCellsClusters <- function(objCOTAN,
       break
     }
 
+    if (isTRUE(saveObj)) tryCatch({
+        outFile <- file.path(mergeOutDir,
+                             paste0("merge_clusterization_", iter, ".csv"))
+        write.csv(outputClusters, file = outFile)
+
+        outFile <- file.path(mergeOutDir,
+                             paste0("non_mergeable_clusters_", iter, ".csv"))
+        write.csv(notMergeable, file = outFile)
+      },
+      error = function(err) {
+        logThis(paste("While saving current clusterization", err),
+                logLevel = 0L)
+      }
+    )
     if (newNumClusters == oldNumClusters) {
       logThis(msg = paste("None of the", numPairsToTest,
                           "nearest cluster pairs could be merged"),
@@ -299,17 +319,6 @@ mergeUniformCellsClusters <- function(objCOTAN,
       logThis(paste0("Executed ", (oldNumClusters - newNumClusters),
                      " merges out of ", numPairsToTest), logLevel = 3L)
     }
-
-    if (isTRUE(saveObj)) tryCatch({
-        outFile <- file.path(mergeOutDir,
-                             paste0("merge_clusterization_", iter, ".csv"))
-        write.csv(outputClusters, file = outFile)
-      },
-      error = function(err) {
-        logThis(paste("While saving current clusterization", err),
-                logLevel = 0L)
-      }
-    )
   }
 
   logThis(paste0("The final merged clusterization contains [",

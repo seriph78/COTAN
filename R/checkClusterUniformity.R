@@ -10,7 +10,7 @@
 #' @param cluster the tag of the *cluster*
 #' @param cells the cells belonging to the *cluster*
 #' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.4}
+#'   *clusters*. It defaults to \eqn{1.43}
 #' @param cores number of cores used
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file(s)
@@ -38,7 +38,7 @@
 #'
 
 checkClusterUniformity <- function(objCOTAN, cluster, cells,
-                                   GDIThreshold = 1.4, cores = 1L,
+                                   GDIThreshold = 1.43, cores = 1L,
                                    saveObj = TRUE, outDir = ".") {
 
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]

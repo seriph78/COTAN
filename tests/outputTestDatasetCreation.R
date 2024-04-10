@@ -42,7 +42,7 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
   pval.test <- calculatePValue(obj, geneSubsetCol = genes.names.test)
   saveRDS(pval.test, file.path(testsDir, "pval.test.RDS"))
 
-  GDIThreshold <- 1.5
+  GDIThreshold <- 1.46
   initialResolution <- 0.8
 
   clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,

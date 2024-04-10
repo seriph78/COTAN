@@ -12,7 +12,7 @@
 #' @param statType type of statistic to be used. Default is "S": Pearson's
 #'   chi-squared test statistics. "G" is G-test statistics
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
-#'   It defaults to \eqn{1.4}
+#'   It defaults to \eqn{1.43}
 #' @param GDIIn when the `GDI` data frame was already calculated, it can be put
 #'   here to speed up the process (default is `NULL`)
 #'
@@ -42,7 +42,7 @@
 #' @rdname UniformClusters
 #'
 GDIPlot <- function(objCOTAN, genes, condition = "",
-                    statType = "S", GDIThreshold = 1.4,
+                    statType = "S", GDIThreshold = 1.43,
                     GDIIn = NULL) {
   logThis("GDI plot", logLevel = 2L)
 
