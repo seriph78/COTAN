@@ -17,7 +17,7 @@
 #'   resolution of the *clusterization*.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
-#' @param outDir an existing directory for the analysis output.
+#' @param outDirCond an existing directory for the analysis output.
 #'
 #' @returns a list with a `Seurat` object along a Boolean on whether maximum
 #'   resolution has been used
@@ -43,7 +43,7 @@
 #' @noRd
 #'
 seuratClustering <- function(rawData, cond, iter, initialResolution,
-                             minNumClusters, saveObj, outDir) {
+                             minNumClusters, saveObj, outDirCond) {
   ret <- tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
@@ -94,9 +94,9 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
                                  dims = 1L:min(c(50L, maxRows))))
 
     if (isTRUE(saveObj)) {
-      logThis(paste0("Creating PDF UMAP in file:",
-                     file.path(outDir, "pdf_umap.pdf")), logLevel = 2L)
-      pdf(file.path(outDir, "pdf_umap.pdf"))
+      outFile <- file.path(outDirCond, paste0("pdf_umap_", iter, ".pdf"))
+      logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
+      pdf(outFile)
 
       if (iter == 1L) {
         plot(DimPlot(srat, reduction = "umap", label = FALSE,
@@ -220,6 +220,11 @@ cellsUniformClustering <- function(objCOTAN,
     dir.create(outDirCond)
   }
 
+  splitOutDir <- file.path(outDirCond, "reclustering")
+  if (isTRUE(saveObj) && !file.exists(splitOutDir)) {
+    dir.create(splitOutDir)
+  }
+
   outputClusters <- set_names(rep(NA, length = getNumCells(objCOTAN)),
                               getCells(objCOTAN))
 
@@ -227,14 +232,12 @@ cellsUniformClustering <- function(objCOTAN,
   iterReset <- -1L
   numClustersToRecluster <- 0L
   srat <- NULL
+  allCheckResults <- data.frame()
+  errorCheckResults <-
+    list("isUniform" = FALSE, "fractionAbove" = NA, "firstPercentile" = NA)
 
   repeat {
     iter <- iter + 1L
-
-    outDirIter <- file.path(outDirCond, paste0("reclustering_", iter))
-    if (!file.exists(outDirIter)) {
-      dir.create(file.path(outDirIter))
-    }
 
     logThis(paste0("In iteration ", iter, " "), logLevel = 1L, appendLF = FALSE)
     logThis(paste("the number of cells to re-cluster is",
@@ -248,7 +251,7 @@ cellsUniformClustering <- function(objCOTAN,
                        cond = cond, iter = iter,
                        initialResolution = initialResolution,
                        minNumClusters = minNumClusters,
-                       saveObj = saveObj, outDir = outDirIter)
+                       saveObj = saveObj, outDirCond = splitOutDir)
 
     if (is_null(objSeurat)) {
       logThis(paste("NO new possible uniform clusters!",
@@ -287,6 +290,8 @@ cellsUniformClustering <- function(objCOTAN,
     }
     testClList <- toClustersList(testClusters)
 
+    globalClName <- ""
+
     for (clName in names(testClList)) {
       logThis("*", logLevel = 1L, appendLF = FALSE)
       logThis(paste0(" checking uniformity of cluster '", clName,
@@ -297,37 +302,46 @@ cellsUniformClustering <- function(objCOTAN,
         next
       }
 
+      globalClName <-
+        paste0(str_pad(iter, width = 2L, pad = "0"), "_",
+               str_pad(clName, width = 4L, pad = "0"))
+
       cells <- testClList[[clName]]
       if (length(cells) < 20L) {
-        logThis(paste("cluster", clName, "has too few cells:",
+        logThis(paste("cluster", globalClName, "has too few cells:",
                       "will be reclustered!"), logLevel = 1L)
 
         numClustersToRecluster <- numClustersToRecluster + 1L
         cellsToRecluster <- c(cellsToRecluster, cells)
       } else {
-        clusterIsUniform <- tryCatch(
+        checkResults <- tryCatch(
           checkClusterUniformity(objCOTAN = objCOTAN,
-                                 cluster = clName,
+                                 cluster = globalClName,
                                  cells = cells,
                                  cores = cores,
                                  GDIThreshold = GDIThreshold,
                                  saveObj = saveObj,
-                                 outDir = outDirIter)[["isUniform"]],
+                                 outDir = splitOutDir),
           error = function(err) {
             logThis(paste("while checking cluster uniformity", err),
                     logLevel = 0L)
             logThis("marking cluster as not uniform", logLevel = 1L)
-            return(FALSE)
+            return(errorCheckResults)
           })
 
-        if (!clusterIsUniform) {
-          logThis(paste("cluster", clName, "has too high GDI:",
+        gc()
+
+        allCheckResults <- rbind(allCheckResults, checkResults)
+        rownames(allCheckResults)[[nrow(allCheckResults)]] <- globalClName
+
+        if (!checkResults[["isUniform"]]) {
+          logThis(paste("cluster", globalClName, "has too high GDI:",
                         "will be reclustered!"), logLevel = 1L)
 
           numClustersToRecluster <- numClustersToRecluster + 1L
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
-          logThis(paste("cluster", clName, "is uniform"), logLevel = 1L)
+          logThis(paste("cluster", globalClName, "is uniform"), logLevel = 1L)
         }
       }
     }
@@ -368,9 +382,14 @@ cellsUniformClustering <- function(objCOTAN,
     }
 
     if (isTRUE(saveObj)) tryCatch({
-        outFile <- file.path(outDirIter, "partial_clusterization.csv")
+        outFile <- file.path(splitOutDir,
+                             paste0("partial_clusterization_", iter, ".csv"))
         write.csv(outputClusters, file = outFile)
-      },
+
+        outFile <- file.path(splitOutDir,
+                             paste0("all_check_results_", iter, ".csv"))
+        write.csv(allCheckResults, file = outFile)
+    },
       error = function(err) {
         logThis(paste("While saving current clusterization", err),
                 logLevel = 0L)
@@ -408,6 +427,12 @@ cellsUniformClustering <- function(objCOTAN,
       clTagsMap[outputClusters[!unclusteredCells]]
     outputClusters[unclusteredCells] <- "-1"
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
+
+    allCheckResults <- allCheckResults[clTags, , drop = FALSE]
+    allCheckResults <- allCheckResults[clTagsMap[clTags], , drop = FALSE]
+    if (any(unclusteredCells)) {
+      allCheckResults <- rbind(allCheckResults, "-1" <- errorCheckResults)
+    }
   }
 
   outputCoexDF <-
@@ -430,6 +455,9 @@ cellsUniformClustering <- function(objCOTAN,
   outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
 
   if (isTRUE(saveObj)) tryCatch({
+      outFile <- file.path(outDirCond, "split_check_results.csv")
+      write.csv(allCheckResults, file = outFile)
+
       clusterizationName <-
         paste0(as.roman(length(getClusterizations(objCOTAN)) + 1L))
 

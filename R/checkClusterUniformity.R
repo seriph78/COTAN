@@ -20,7 +20,7 @@
 #' @returns `checkClusterUniformity` returns a list with:
 #'   * `"isUniform"`: a flag indicating whether the *cluster* is **uniform**
 #'   * `"fractionAbove"`: the percentage of genes with `GDI` above the threshold
-#'   * `"1stPercentile"`: the quantile associated to the highest percentile
+#'   * `"firstPercentile"`: the quantile associated to the highest percentile
 #'
 #' @importFrom utils head
 #'
@@ -118,5 +118,5 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
 
   return(list("isUniform" = clusterIsUniform,
               "fractionAbove" = percAboveThr,
-              "1stPercentile" = quantAboveThr))
+              "firstPercentile" = quantAboveThr[[1L]]))
 }

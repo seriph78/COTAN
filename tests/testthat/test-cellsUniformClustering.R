@@ -17,14 +17,17 @@ test_that("Cell Uniform Clustering", {
   GDIThreshold <- 1.46
   initialResolution <- 0.8
   suppressWarnings({
-  clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+    clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
                                        initialResolution = initialResolution,
                                        cores = 12L, saveObj = TRUE,
                                        outDir = tm)[["clusters"]]
   })
 
-  expect_true(file.exists(file.path(tm, "test", "reclustering_1",
-                                    "partial_clusterization.csv")))
+  expect_true(file.exists(file.path(tm, "test", "reclustering",
+                                    "partial_clusterization_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "reclustering",
+                                    "all_check_results_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "split_check_results.csv")))
 
   gc()
 

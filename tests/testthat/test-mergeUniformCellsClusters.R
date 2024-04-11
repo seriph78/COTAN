@@ -86,6 +86,9 @@ test_that("Merge Uniform Cells Clusters", {
                                     "merge_clusterization_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "non_mergeable_clusters_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "leafs_merge",
+                                    "all_check_results_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "merge_check_results.csv")))
 
   expect_lt(nlevels(mergedClusters), nlevels(clusters))
   expect_setequal(colnames(mergedCoexDF), mergedClusters)

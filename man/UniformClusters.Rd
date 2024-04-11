@@ -132,7 +132,7 @@ an interruption.}
 \itemize{
 \item \code{"isUniform"}: a flag indicating whether the \emph{cluster} is \strong{uniform}
 \item \code{"fractionAbove"}: the percentage of genes with \code{GDI} above the threshold
-\item \code{"1stPercentile"}: the quantile associated to the highest percentile
+\item \code{"firstPercentile"}: the quantile associated to the highest percentile
 }
 
 a \code{list} with:
