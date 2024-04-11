@@ -49,7 +49,7 @@ test_that("Cell Uniform Clustering", {
   expect_lte(lastPerc, GDIThreshold)
 
   clusters2 <- factor(clusters, levels = c(levels(clusters), "-1"))
-  clusters2[1:50L] <- "-1"
+  clusters2[1L:50L] <- "-1"
   coexDF2 <- DEAOnClusters(obj, clusters = clusters2)
   c(rClusters2, rCoexDF2) %<-%
     reorderClusterization(obj, reverse = TRUE, keepMinusOne = TRUE,
@@ -72,7 +72,7 @@ test_that("Cell Uniform Clustering", {
   # this is an happenstance
   expect_identical(colnames(coexDF3)[-5L], levels(clusters3)[-1L])
 
-  exactClusters <- set_names(rep(1:2, each = 600), nm = getCells(obj))
+  exactClusters <- set_names(rep(1L:2L, each = 600L), nm = getCells(obj))
 
   suppressWarnings({
     splitList <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
@@ -83,10 +83,6 @@ test_that("Cell Uniform Clustering", {
   })
 
   expect_identical(splitList[["clusters"]], factor(exactClusters))
-
-  #clusters_exp <- readRDS(file.path(getwd(), "clusters1.RDS"))
-
-  #expect_identical(clusters, clusters_exp)
 
   clMarkersDF <- findClustersMarkers(obj)
 
@@ -107,7 +103,8 @@ test_that("Cell Uniform Clustering", {
   primaryMarkers <-
     c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",
       "g-000510", "g-000530", "g-000550", "g-000570", "g-000590")
-  clMarkersDF2 <- findClustersMarkers(obj, markers = primaryMarkers)
+  clMarkersDF2 <- findClustersMarkers(obj, markers = primaryMarkers,
+                                      cores = 12L)
 
   expect_identical(colnames(clMarkersDF2), colnames(clMarkersDF))
   expect_identical(clMarkersDF2[, -6L], clMarkersDF[, -6L])

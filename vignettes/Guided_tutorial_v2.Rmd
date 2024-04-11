@@ -421,7 +421,7 @@ obj <- addClusterization(obj, clName = "FineClusters", clusters = fineClusters)
 
 
 ```{r eval=FALSE, include=TRUE}
-coexDF <- DEAOnClusters(obj, clusters = fineClusters)
+coexDF <- DEAOnClusters(obj, clusters = fineClusters, cores = 10L)
 obj <- addClusterizationCoex(obj, clName = "FineClusters",
                              coexDF = coexDF)
 ```

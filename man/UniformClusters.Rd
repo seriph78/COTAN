@@ -74,7 +74,7 @@ It defaults to \eqn{1.43}}
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
 
-\item{cores}{number cores used}
+\item{cores}{number of cores to use. Default is 1.}
 
 \item{maxIterations}{max number of re-clustering iterations. It defaults to
 \eqn{25}}

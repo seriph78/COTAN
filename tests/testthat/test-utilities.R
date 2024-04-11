@@ -6,8 +6,12 @@ stopifnot(file.exists(tm))
 test_that("Logging", {
   logPath <- file.path(tm, "COTAN_Test.log")
 
-  suppressMessages({currentLevel <- setLoggingLevel(0L)})
-  suppressMessages({currentFile  <- setLoggingFile(logPath)})
+  suppressMessages({
+    currentLevel <- setLoggingLevel(0L)
+  })
+  suppressMessages({
+    currentFile  <- setLoggingFile(logPath)
+  })
 
   expect_false(is.null(currentLevel[[1L]]))
   expect_null(currentFile[[1L]])

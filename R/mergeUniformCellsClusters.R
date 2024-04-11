@@ -20,7 +20,7 @@
 #' @param notMergeable An array of names of merged clusters that are already
 #'   known for not being uniform. Useful to restart the *merging* process after
 #'   an interruption.
-#' @param cores number cores used
+#' @param cores number of cores to use. Default is 1.
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
@@ -250,7 +250,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
     oldNumClusters <- length(unique(outputClusters))
 
     clDist <- distancesBetweenClusters(objCOTAN, clusters = outputClusters,
-                                       useDEA = useDEA, distance = distance)
+                                       useDEA = useDEA, cores = cores,
+                                       distance = distance)
     gc()
 
     if (isTRUE(saveObj)) tryCatch({
@@ -353,7 +354,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   }
 
   outputCoexDF <-
-    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters),
+    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters, cores = cores),
              error = function(err) {
                logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
                return(NULL)
@@ -362,7 +363,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   c(outputClusters, outputCoexDF) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = FALSE, useDEA = useDEA,
+                          keepMinusOne = FALSE, useDEA = useDEA, cores = cores,
                           distance = distance, hclustMethod = hclustMethod),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)

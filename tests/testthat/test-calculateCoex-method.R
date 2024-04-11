@@ -160,15 +160,17 @@ test_that("Calculations on genes", {
   partialCoex1 <- calculatePartialCoex(obj, genesSample1)
 
   # These need tolerance
-  expect_equal(
-    partialCoex1, getGenesCoex(obj, zeroDiagonal = FALSE)[, sort(genesSample1)])
+  expect_equal(partialCoex1,
+               getGenesCoex(obj, zeroDiagonal = FALSE)[, sort(genesSample1)],
+               tolerance = 1e-12)
 
   genesSample2 <- getGenes(obj)[sample(getNumGenes(obj), 3L)]
   partialCoex2 <- calculatePartialCoex(obj, genesSample2,
                                        optimizeForSpeed = FALSE)
 
-  expect_equal(
-    partialCoex2, getGenesCoex(obj, genesSample2, zeroDiagonal = FALSE))
+  expect_equal(partialCoex2,
+               getGenesCoex(obj, genesSample2, zeroDiagonal = FALSE),
+               tolerance = 1e-12)
 })
 
 
@@ -265,17 +267,17 @@ test_that("Calculations on cells", {
                                        actOnCells = TRUE)
 
   # These need tolerance
-  expect_equal(
-    partialCoex1,
-    getCellsCoex(obj, zeroDiagonal = FALSE)[, sort(cellsSample1)])
+  expect_equal(partialCoex1,
+               getCellsCoex(obj, zeroDiagonal = FALSE)[, sort(cellsSample1)],
+               tolerance = 1e-12)
 
   cellsSample2 <- getCells(obj)[sample(getNumCells(obj), 3L)]
   partialCoex2 <- calculatePartialCoex(obj, cellsSample2, actOnCells = TRUE,
                                        optimizeForSpeed = FALSE)
 
-  expect_equal(
-    partialCoex2,
-    getCellsCoex(obj, cellsSample2, zeroDiagonal = FALSE))
+  expect_equal(partialCoex2,
+               getCellsCoex(obj, cellsSample2, zeroDiagonal = FALSE),
+               tolerance = 1e-12)
 })
 
 

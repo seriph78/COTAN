@@ -5,7 +5,6 @@ test_that("Establish genes clusters", {
   objCOTAN <- COTAN(raw = test.dataset)
   objCOTAN <- proceedToCoex(objCOTAN, cores = 12L, saveObj = FALSE)
 
-  #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                        G2 = c("g-000300", "g-000330"),
                        G3 = c("g-000510", "g-000530", "g-000550",
@@ -24,7 +23,6 @@ test_that("Establish genes clusters", {
   expect_lte(max(abs(GCS)), 1L)
 
   if (TRUE) {
-    # saveRDS(GCS, file = "genes.coex.space.RDS")
     GCS_old <- readRDS(file.path(getwd(), "genes.coex.space.RDS"))
     expect_equal(GCS, GCS_old, tolerance = 1.0e-12)
   }

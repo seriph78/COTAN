@@ -62,7 +62,7 @@ getClusters(objCOTAN, clName = "")
 
 \S4method{dropClusterization}{COTAN}(objCOTAN, clName)
 
-DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
+DEAOnClusters(objCOTAN, clName = "", clusters = NULL, cores = 1L)
 
 pValueFromDEA(coexDF, numCells, method = "none")
 
@@ -79,6 +79,7 @@ distancesBetweenClusters(
   clusters = NULL,
   coexDF = NULL,
   useDEA = TRUE,
+  cores = 1L,
   distance = NULL
 )
 
@@ -130,7 +131,8 @@ findClustersMarkers(
   clName = "",
   clusters = NULL,
   coexDF = NULL,
-  method = "bonferroni"
+  method = "bonferroni",
+  cores = 1L
 )
 
 geneSetEnrichment(clustersCoex, groupMarkers)
@@ -143,6 +145,7 @@ reorderClusterization(
   reverse = FALSE,
   keepMinusOne = TRUE,
   useDEA = TRUE,
+  cores = 1L,
   distance = NULL,
   hclustMethod = "ward.D2"
 )
@@ -169,6 +172,8 @@ of the \emph{clusters} of the \emph{clusterization}}
 \item{override}{When \code{TRUE} silently allows overriding data for an existing
 \emph{clusterization} name. Otherwise the default behavior will avoid potential
 data losses}
+
+\item{cores}{number of cores to use. Default is 1.}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
@@ -455,7 +460,7 @@ objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
 data("test.dataset.clusters1")
 clusters <- test.dataset.clusters1
 
-coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+coexDF <- DEAOnClusters(objCOTAN, clusters = clusters, cores = 12)
 
 groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                      G2 = c("g-000300", "g-000330"),

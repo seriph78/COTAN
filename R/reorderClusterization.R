@@ -16,6 +16,7 @@
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
+#' @param cores number of cores to use. Default is 1.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
@@ -41,7 +42,7 @@
 reorderClusterization <- function(objCOTAN,
                                   clName = "", clusters = NULL, coexDF = NULL,
                                   reverse = FALSE, keepMinusOne = TRUE,
-                                  useDEA = TRUE, distance = NULL,
+                                  useDEA = TRUE, cores = 1L, distance = NULL,
                                   hclustMethod = "ward.D2") {
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
@@ -50,7 +51,8 @@ reorderClusterization <- function(objCOTAN,
 
   clDist <- distancesBetweenClusters(objCOTAN, clName = clName,
                                      clusters = clusters, coexDF = coexDF,
-                                     useDEA = useDEA, distance = distance)
+                                     useDEA = useDEA, cores = cores,
+                                     distance = distance)
 
   minuOnePos <- 0L
   if (keepMinusOne && any(clusters == "-1")) {

@@ -1,5 +1,10 @@
 
-runDEA <- function(probZero, zeroOne, cellsIn) {
+runSingleDEA <- function(clName, probZero, zeroOne, cellsInList) {
+  cellsIn <- cellsInList[[clName]]
+  if (!any(cellsIn)) {
+    warning("Cluster '", clName, "' has no cells assigned to it!")
+  }
+
   numCells <- ncol(zeroOne)
   numCellsIn  <- sum(cellsIn)
   numCellsOut <- numCells - numCellsIn
@@ -20,6 +25,32 @@ runDEA <- function(probZero, zeroOne, cellsIn) {
   return(clCoex)
 }
 
+runDEA <- function(clNames, probZero, zeroOne, cellsInList, cores) {
+  if (cores != 1L) {
+    res <- parallel::mclapply(
+      clNames,
+      runSingleDEA,
+      probZero = probZero,
+      zeroOne = zeroOne,
+      cellsInList = cellsInList,
+      mc.cores = cores)
+
+    # spawned errors are stored as try-error classes
+    resError <- unlist(lapply(res, inherits, "try-error"))
+    if (any(resError)) {
+      stop(paste(res[which(resError)[[1L]]]), call. = FALSE)
+    }
+    return(res)
+  } else {
+    return(lapply(
+      clNames,
+      runSingleDEA,
+      probZero = probZero,
+      zeroOne = zeroOne,
+      cellsInList = cellsInList))
+  }
+}
+
 #'
 #'
 #' @details `DEAOnClusters()` is used to run the Differential Expression
@@ -32,6 +63,7 @@ runDEA <- function(probZero, zeroOne, cellsIn) {
 #'   significant!
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName`
+#' @param cores number of cores to use. Default is 1.
 #'
 #' @return `DEAOnClusters()` returns the co-expression `data.frame` for the
 #'   genes in each *cluster*
@@ -39,15 +71,27 @@ runDEA <- function(probZero, zeroOne, cellsIn) {
 #' @export
 #'
 #' @importFrom rlang is_empty
-#'
-#' @importFrom Matrix rowSums
+#' @importFrom rlang is_null
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom parallel mclapply
+#' @importFrom parallel splitIndices
+#'
+#' @importFrom parallelly supportsMulticore
+#' @importFrom parallelly availableCores
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @importFrom Matrix rowSums
+#'
 #' @rdname HandlingClusterizations
 #'
-DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
+DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL, cores = 1L) {
   logThis("Differential Expression Analysis - START", logLevel = 2L)
+
+  cores <- handleMultiCore(cores)
 
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
@@ -64,84 +108,49 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 
   probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
 
-  numCells <- getNumCells(objCOTAN)
-
-  coexDF <- data.frame()
-
   cellsInList <- lapply(clustersList, function(cl) {getCells(objCOTAN) %in% cl})
 
-  coexCls <- lapply(names(cellsInList), function(clName, cellsInList) {
+  numSplits <- length(cellsInList)
+  splitStep <- max(4L, cores * 2L)
+
+  coexCls <- list()
+
+  pBegin <- 1L
+  while (pBegin <= numSplits) {
     logThis("*", appendLF = FALSE, logLevel = 1L)
-    logThis(paste0(" analysis of cluster: '", clName, "' - START"),
+
+    pEnd <- min(pBegin + splitStep - 1L, numSplits)
+
+    logThis(paste0(" Executing ", (pEnd - pBegin + 1L), " DEA batches from",
+                   " [", pBegin, ":", pEnd, "]"),
             logLevel = 3L)
 
-    cellsIn <- cellsInList[[clName]]
-    if (!any(cellsIn)) {
-      warning("Cluster '", clName, "' has no cells assigned to it!")
+    res <- NULL
+    resError <- "No errors"
+    failCount <- 0L
+    while (!is_null(resError) && failCount < 3L) {
+      failCount <- failCount + 1L
+      c(res, resError) %<-%
+        tryCatch(list(runDEA(clNames = names(cellsInList)[pBegin:pEnd],
+                             probZero = probZero, zeroOne = zeroOne,
+                             cellsInList = cellsInList, cores = cores), NULL),
+                 error = function(e) {
+                   logThis(paste("In DEA batches -", e), logLevel = 2L)
+                   list(NULL, e) })
     }
 
-    clCoex <- runDEA(probZero, zeroOne, cellsIn)
+    assert_that(is_null(resError),
+                msg = paste("DEA batches failed", failCount,
+                            "times with", resError))
 
-    logThis(paste0("* analysis of cluster: '", clName, "' - DONE"),
-            logLevel = 3L)
-    gc()
+    coexCls <- append(coexCls, res)
 
-    return(clCoex)
-  }, cellsInList)
-
+    pBegin <- pEnd + 1L
+  }
   logThis("", logLevel = 1L)
 
   coexDF <- as.data.frame(coexCls)
   colnames(coexDF) <- names(cellsInList)
-
-#  dispList <- list()
-#
-#  spIdx <- parallel::splitIndices(length(genes),
-#                                  ceiling(length(genes) / chunkSize))
-#
-#  spGenes <- lapply(spIdx, function(x) genes[x])
-#
-#  numSplits <- length(spGenes)
-#  splitStep <- max(4L, cores * 2L)
-#
-#  gc()
-#
-#  pBegin <- 1L
-#  while (pBegin <= numSplits) {
-#    pEnd <- min(pBegin + splitStep - 1L, numSplits)
-#
-#    logThis(paste0("Executing ", (pEnd - pBegin + 1L), " genes batches from",
-#                   " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
-#            logLevel = 3L)
-#
-#    # as the runSolver() might trow, we force up to 5 reruns
-#    res <- NULL
-#    resError <- "No errors"
-#    failCount <- 0
-#    while (!is_null(resError) && failCount < 5) {
-#      failCount <- failCount + 1
-#      c(res, resError) %<-%
-#        tryCatch(list(runDispSolver(genesBatches = spGenes[pBegin:pEnd],
-#                                    sumZeros = sumZeros,
-#                                    lambda = lambda,
-#                                    nu = nu,
-#                                    threshold = threshold,
-#                                    maxIterations = maxIterations,
-#                                    cores = cores), NULL),
-#                 error = function(e) {
-#                   logThis(paste("In genes batches -", e), logLevel = 2L)
-#                   list(NULL, e) })
-#    }
-#
-#    assert_that(is_null(resError),
-#                msg = paste("Genes batches failed", failCount,
-#                            "times with", resError))
-#    dispList <- append(dispList, res)
-#    rm(res)
-#
-#    pBegin <- pEnd + 1L
-#  }
-#  logThis("Estimate dispersion: DONE", logLevel = 2L)
 
   logThis("Differential Expression Analysis - DONE", logLevel = 2L)
 
@@ -310,6 +319,7 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
+#' @param cores number of cores to use. Default is 1.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
@@ -331,7 +341,8 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 distancesBetweenClusters <- function(objCOTAN, clName = "",
                                      clusters = NULL, coexDF = NULL,
-                                     useDEA = TRUE, distance = NULL) {
+                                     useDEA = TRUE, cores = 1L,
+                                     distance = NULL) {
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
     normalizeNameAndLabels(objCOTAN, name = clName,
@@ -355,7 +366,7 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
     }
 
     if (is_empty(coexDF)) {
-      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters, cores = cores)
     }
 
     # merge small cluster based on distances
