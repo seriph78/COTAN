@@ -1,4 +1,25 @@
 
+runDEA <- function(probZero, zeroOne, cellsIn) {
+  numCells <- ncol(zeroOne)
+  numCellsIn  <- sum(cellsIn)
+  numCellsOut <- numCells - numCellsIn
+
+  observedYI <- rowSums(zeroOne[, cellsIn, drop = FALSE])
+
+  expectedNI <- rowSums(probZero[,  cellsIn, drop = FALSE])
+  expectedNO <- rowSums(probZero[, !cellsIn, drop = FALSE])
+  expectedYI <- numCellsIn  - expectedNI
+  expectedYO <- numCellsOut - expectedNO
+
+  clCoex <- (observedYI  - expectedYI) / sqrt(numCells) *
+    sqrt(1.0 / pmax(1.0, expectedNI) +
+         1.0 / pmax(1.0, expectedNO) +
+         1.0 / pmax(1.0, expectedYI) +
+         1.0 / pmax(1.0, expectedYO))
+
+  return(clCoex)
+}
+
 #'
 #'
 #' @details `DEAOnClusters()` is used to run the Differential Expression
@@ -47,43 +68,80 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 
   coexDF <- data.frame()
 
-  for (cl in names(clustersList)) {
-    gc()
+  cellsInList <- lapply(clustersList, function(cl) {getCells(objCOTAN) %in% cl})
+
+  coexCls <- lapply(names(cellsInList), function(clName, cellsInList) {
     logThis("*", appendLF = FALSE, logLevel = 1L)
-    logThis(paste0(" analysis of cluster: '", cl, "' - START"), logLevel = 3L)
+    logThis(paste0(" analysis of cluster: '", clName, "' - START"),
+            logLevel = 3L)
 
-    cellsIn <- getCells(objCOTAN) %in%  clustersList[[cl]]
-
-    numCellsIn  <- sum(cellsIn)
-    numCellsOut <- numCells - numCellsIn
-
-    if (numCellsIn == 0L) {
-      warning("Cluster '", cl, "' has no cells assigned to it!")
+    cellsIn <- cellsInList[[clName]]
+    if (!any(cellsIn)) {
+      warning("Cluster '", clName, "' has no cells assigned to it!")
     }
 
-    observedYI <- rowSums(zeroOne[, cellsIn, drop = FALSE])
+    clCoex <- runDEA(probZero, zeroOne, cellsIn)
 
-    expectedNI <- rowSums(probZero[,  cellsIn, drop = FALSE])
-    expectedNO <- rowSums(probZero[, !cellsIn, drop = FALSE])
-    expectedYI <- numCellsIn  - expectedNI
-    expectedYO <- numCellsOut - expectedNO
-
-    coex <- (observedYI  - expectedYI) / sqrt(numCells) *
-              sqrt(1.0 / pmax(1.0, expectedNI) +
-                   1.0 / pmax(1.0, expectedNO) +
-                   1.0 / pmax(1.0, expectedYI) +
-                   1.0 / pmax(1.0, expectedYO))
-
-    rm(expectedYO, expectedYI, expectedNO, expectedNI)
-    rm(observedYI)
+    logThis(paste0("* analysis of cluster: '", clName, "' - DONE"),
+            logLevel = 3L)
     gc()
 
-    coexDF <- setColumnInDF(coexDF, colToSet = coex,
-                            colName = cl, rowNames = rownames(zeroOne))
+    return(clCoex)
+  }, cellsInList)
 
-    logThis(paste0("* analysis of cluster: '", cl, "' - DONE"), logLevel = 3L)
-  }
   logThis("", logLevel = 1L)
+
+  coexDF <- as.data.frame(coexCls)
+  colnames(coexDF) <- names(cellsInList)
+
+#  dispList <- list()
+#
+#  spIdx <- parallel::splitIndices(length(genes),
+#                                  ceiling(length(genes) / chunkSize))
+#
+#  spGenes <- lapply(spIdx, function(x) genes[x])
+#
+#  numSplits <- length(spGenes)
+#  splitStep <- max(4L, cores * 2L)
+#
+#  gc()
+#
+#  pBegin <- 1L
+#  while (pBegin <= numSplits) {
+#    pEnd <- min(pBegin + splitStep - 1L, numSplits)
+#
+#    logThis(paste0("Executing ", (pEnd - pBegin + 1L), " genes batches from",
+#                   " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
+#            logLevel = 3L)
+#
+#    # as the runSolver() might trow, we force up to 5 reruns
+#    res <- NULL
+#    resError <- "No errors"
+#    failCount <- 0
+#    while (!is_null(resError) && failCount < 5) {
+#      failCount <- failCount + 1
+#      c(res, resError) %<-%
+#        tryCatch(list(runDispSolver(genesBatches = spGenes[pBegin:pEnd],
+#                                    sumZeros = sumZeros,
+#                                    lambda = lambda,
+#                                    nu = nu,
+#                                    threshold = threshold,
+#                                    maxIterations = maxIterations,
+#                                    cores = cores), NULL),
+#                 error = function(e) {
+#                   logThis(paste("In genes batches -", e), logLevel = 2L)
+#                   list(NULL, e) })
+#    }
+#
+#    assert_that(is_null(resError),
+#                msg = paste("Genes batches failed", failCount,
+#                            "times with", resError))
+#    dispList <- append(dispList, res)
+#    rm(res)
+#
+#    pBegin <- pEnd + 1L
+#  }
+#  logThis("Estimate dispersion: DONE", logLevel = 2L)
 
   logThis("Differential Expression Analysis - DONE", logLevel = 2L)
 
