@@ -1,5 +1,7 @@
 ## COTAN 2.3.6
 
+Now clustering functions dump the `GDI` check results for all clusters
+
 Changed default `GDI` threshold to 1.43
 
 Added new input to `mergeUniformCellsClusters()` to allow proper resume of
@@ -10,9 +12,7 @@ object
 
 ## COTAN 2.3.5
 
-Made checks when adding a clusterization or condition more strict
-
-## COTAN 2.3.5
+Made checks more strict when adding a *clusterization* or *condition*
 
 Increased reliability of clustering functions by improved error handling and 
 by allowing retry runs on estimators functions
