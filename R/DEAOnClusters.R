@@ -95,7 +95,7 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL, cores = 1L) {
   # it is much better to use only a few separate processes at a time:
   # dividing bt 4 makes possible to re-use the same number of cores
   # as the one passed in for the dispersion estimator
-  cores <- handleMultiCore(cores %/% 4L)
+  cores <- handleMultiCore(min(4L, cores %/% 4L + 1L))
 
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
