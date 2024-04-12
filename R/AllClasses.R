@@ -363,7 +363,7 @@ getCOTANSlots <- function(from) {
     }
 
     if (!is_empty(clusterData) &&
-        !all(rownames(clusterData) %in% rownames(from@raw))) {
+          !all(rownames(clusterData) %in% rownames(from@raw))) {
       warning("scCOTAN as COTAN: 'cluster_data' refers to unknown genes",
               " - clusters' coex will be discarded!", call. = FALSE)
       clusterData <- data.frame()
@@ -386,7 +386,7 @@ getCOTANSlots <- function(from) {
     }
 
     if (!is_empty(clusterData) &&
-        !all(rownames(from@raw) %in% union(rownames(clusterData), from@hk))) {
+          !all(rownames(from@raw) %in% union(rownames(clusterData), from@hk))) {
       warning("scCOTAN as COTAN: 'cluster_data' has no information",
               " on some genes that are not fully-expressed",
               " - clusters' coex will be discarded!", call. = FALSE)

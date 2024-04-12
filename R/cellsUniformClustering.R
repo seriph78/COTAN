@@ -153,7 +153,7 @@ NULL
 #' @param objCOTAN a `COTAN` object
 #' @param GDIThreshold the threshold level that discriminates uniform
 #'   *clusters*. It defaults to \eqn{1.43}
-#' @param cores number of cores used
+#' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
 #' @param initialResolution a number indicating how refined are the clusters
@@ -370,7 +370,7 @@ cellsUniformClustering <- function(objCOTAN,
         }
       }
     } else {
-      iterReset <- -1
+      iterReset <- -1L
     }
 
     # Step 3: save the already uniform clusters keeping track of the iteration
@@ -436,7 +436,7 @@ cellsUniformClustering <- function(objCOTAN,
   }
 
   outputCoexDF <-
-    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters),
+    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters, cores = cores),
              error = function(err) {
                logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
                return(NULL)
@@ -445,7 +445,7 @@ cellsUniformClustering <- function(objCOTAN,
   c(outputClusters, outputCoexDF) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = TRUE, useDEA = useDEA,
+                          keepMinusOne = TRUE, useDEA = useDEA, cores = cores,
                           distance = distance, hclustMethod = hclustMethod),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)

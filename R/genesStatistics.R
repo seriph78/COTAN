@@ -66,7 +66,7 @@ calculateGDIGivenS <- function(S) {
                                         digits = 0L)))
 
   pValue <- colSort(as.matrix(S), descending = TRUE)
-  logThis("S matrix sorted", logLevel = 3)
+  logThis("S matrix sorted", logLevel = 3L)
   pValue <- pValue[1L:top5pcRows, , drop = FALSE]
   pValue <- pchisq(as.matrix(pValue), df = 1L, lower.tail = FALSE)
 

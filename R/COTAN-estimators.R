@@ -182,8 +182,8 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
       mc.cores = cores)
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
-    if(any(resError)) {
-      stop(paste(res[which(resError)[1L]]), call. = FALSE)
+    if (any(resError)) {
+      stop(paste(res[which(resError)[[1L]]]), call. = FALSE)
     }
     return(res)
   } else {
@@ -274,9 +274,9 @@ setMethod(
       # as the runSolver() might trow, we force up to 5 reruns
       res <- NULL
       resError <- "No errors"
-      failCount <- 0
-      while (!is_null(resError) && failCount < 5) {
-        failCount <- failCount + 1
+      failCount <- 0L
+      while (!is_null(resError) && failCount < 5L) {
+        failCount <- failCount + 1L
         c(res, resError) %<-%
           tryCatch(list(runDispSolver(genesBatches = spGenes[pBegin:pEnd],
                                       sumZeros = sumZeros,
@@ -445,9 +445,9 @@ setMethod(
       # as the runSolver() might trow, we force up to 5 reruns
       res <- NULL
       resError <- "No errors"
-      failCount <- 0
-      while (!is_null(resError) && failCount < 5) {
-        failCount <- failCount + 1
+      failCount <- 0L
+      while (!is_null(resError) && failCount < 5L) {
+        failCount <- failCount + 1L
         c(res, resError) %<-%
           tryCatch(list(runNuSolver(spCells[pBegin:pEnd],
                                     sumZeros = sumZeros,

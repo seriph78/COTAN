@@ -848,8 +848,7 @@ setMethod(
 
       ret <- objCOTAN@genesCoex
 
-      if (!coexIsReady)
-      {
+      if (!coexIsReady) {
         warning("Missing or out-of-sync genes' coex:",
                 "calculating the required subset now!")
         ret <- calculatePartialCoex(objCOTAN, columnsSubset = genes,
@@ -913,8 +912,7 @@ setMethod(
 
       ret <- objCOTAN@cellsCoex
 
-      if (!coexIsReady)
-      {
+      if (!coexIsReady) {
         warning("Missing or out-of-sync cells' coex:",
                 "calculating the required subset now!")
         ret <- calculatePartialCoex(objCOTAN, columnsSubset = cells,
@@ -1023,7 +1021,7 @@ NULL
 #' data("test.dataset.clusters1")
 #' clusters <- test.dataset.clusters1
 #'
-#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters, cores = 12)
 #'
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
 #'                      G2 = c("g-000300", "g-000330"),
