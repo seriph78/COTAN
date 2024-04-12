@@ -91,7 +91,11 @@ runDEA <- function(clNames, probZero, zeroOne, cellsInList, cores) {
 DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL, cores = 1L) {
   logThis("Differential Expression Analysis - START", logLevel = 2L)
 
-  cores <- handleMultiCore(cores)
+  # as sharing the enviroment with the forked processes takes a LOT of memory
+  # it is much better to use only a few separate processes at a time:
+  # dividing bt 4 makes possible to re-use the same number of cores
+  # as the one passed in for the dispersion estimator
+  cores <- handleMultiCore(cores %/% 4L)
 
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
@@ -111,7 +115,7 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL, cores = 1L) {
   cellsInList <- lapply(clustersList, function(cl) {getCells(objCOTAN) %in% cl})
 
   numSplits <- length(cellsInList)
-  splitStep <- max(4L, cores * 2L)
+  splitStep <- max(1L, cores)
 
   coexCls <- list()
 
