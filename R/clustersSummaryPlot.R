@@ -189,6 +189,9 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be returned, as it is probably the most
 #'   significant!
+#' @param clusters A *clusterization* to use. If given it will take precedence
+#'   on the one indicated by `clName` that will only indicate the relevant
+#'   column name in the returned `data.frame`
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
@@ -229,12 +232,15 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 clustersTreePlot <- function(objCOTAN,
                              kCuts,
                              clName = "",
+                             clusters = NULL,
                              useDEA = TRUE,
                              distance = NULL,
                              hclustMethod = "ward.D2") {
   # pick last if no name was given
-  clName <- getClusterizationName(objCOTAN, clName = clName)
-  clusters <- getClusters(objCOTAN, clName = clName)
+  # picks up the last clusterization if none was given
+  c(clName, clusters) %<-%
+    normalizeNameAndLabels(objCOTAN, name = clName,
+                           labels = clusters, isCond = FALSE)
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 

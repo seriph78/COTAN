@@ -42,7 +42,7 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
   pval.test <- calculatePValue(obj, geneSubsetCol = genes.names.test)
   saveRDS(pval.test, file.path(testsDir, "pval.test.RDS"))
 
-  GDIThreshold <- 1.5
+  GDIThreshold <- 1.46
   initialResolution <- 0.8
 
   clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
@@ -50,7 +50,7 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
                                      cores = 12L, saveObj = FALSE)[["clusters"]]
   saveRDS(clusters, file.path(testsDir, "clusters1.RDS"))
 
-  coexDF <- DEAOnClusters(obj, clusters = clusters)
+  coexDF <- DEAOnClusters(obj, clusters = clusters, cores = 12L)
   obj <- addClusterization(obj, clName = "clusters",
                            clusters = clusters, coexDF = coexDF)
 

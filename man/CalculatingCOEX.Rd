@@ -8,6 +8,8 @@
 \alias{getGenesCoex}
 \alias{getCellsCoex,COTAN-method}
 \alias{getCellsCoex}
+\alias{isCoexAvailable,COTAN-method}
+\alias{isCoexAvailable}
 \alias{dropGenesCoex,COTAN-method}
 \alias{dropGenesCoex}
 \alias{dropCellsCoex,COTAN-method}
@@ -44,6 +46,8 @@ getMu(objCOTAN)
   zeroDiagonal = TRUE,
   ignoreSync = FALSE
 )
+
+\S4method{isCoexAvailable}{COTAN}(objCOTAN, actOnCells = FALSE, ignoreSync = FALSE)
 
 \S4method{dropGenesCoex}{COTAN}(objCOTAN)
 
@@ -179,6 +183,9 @@ the function will do it genome-wide.}
 
 \code{getCellsCoex()} returns the cells' \code{COEX} values
 
+\code{isCoexAvailable()} returns whether relevant \code{COEX} matrix has been
+calculated and, in case, if it is still aligned to the estimators.
+
 \code{dropGenesCoex()} returns the updated \code{COTAN} object
 
 \code{dropCellsCoex()} returns the updated \code{COTAN} object
@@ -301,6 +308,9 @@ dropping) genes' \code{COEX} matrix from the \code{COTAN} object.
 \code{getCellsCoex()} extracts a complete (or a partial after cells
 dropping) cells' \code{COEX} matrix from the \code{COTAN} object.
 
+\code{isCoexAvailable()} allows to query whether the relevant \code{COEX}
+matrix from the \code{COTAN} object is available to use
+
 \code{dropGenesCoex()} drops the \code{genesCoex} member from the given
 \code{COTAN} object
 
@@ -381,7 +391,7 @@ objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
                                   sampleCondition = "reconstructed_dataset")
 objCOTAN <- clean(objCOTAN)
 
-objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 
 ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 
@@ -393,8 +403,9 @@ obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 exp <- expectedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
-genesCoex <- getGenesCoex(objCOTAN)
 
+stopifnot(isCoexAvailable(objCOTAN))
+genesCoex <- getGenesCoex(objCOTAN)
 genesSample <- sample(getNumGenes(objCOTAN), 10)
 partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
                                          actOnCells = FALSE)
@@ -410,9 +421,10 @@ GDI <- calculateGDI(objCOTAN)
 ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
 ## matrix and derivatives, so it can be dropped it from the `COTAN` object
 objCOTAN <- dropGenesCoex(objCOTAN)
+stopifnot(!isCoexAvailable(objCOTAN))
 
 
-objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
+objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 
 ## Now the `COTAN` object is ready to calculate the cells' `COEX`
 ## In case one need to caclualte both it is more sensible to run the above
@@ -424,6 +436,7 @@ tables <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
 tables
 
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
+stopifnot(isCoexAvailable(objCOTAN, actOnCells = TRUE, ignoreSync = TRUE))
 cellsCoex <- getCellsCoex(objCOTAN)
 
 cellsSample <- sample(getNumCells(objCOTAN), 10)
@@ -433,6 +446,7 @@ partialCellsCoex <- calculatePartialCoex(objCOTAN, cellsSample,
 identical(partialCellsCoex, cellsCoex[, sort(cellsSample)])
 
 objCOTAN <- dropCellsCoex(objCOTAN)
+stopifnot(!isCoexAvailable(objCOTAN, actOnCells = TRUE))
 
 lh <- calculateLikelihoodOfObserved(objCOTAN)
 

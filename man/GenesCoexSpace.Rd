@@ -74,7 +74,7 @@ pool of gene markers, using the genes' \code{COEX} space
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-objCOTAN <- proceedToCoex(objCOTAN, cores = 12, saveObj = FALSE)
+objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, saveObj = FALSE)
 
 markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
 GCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,

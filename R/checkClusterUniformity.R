@@ -10,7 +10,7 @@
 #' @param cluster the tag of the *cluster*
 #' @param cells the cells belonging to the *cluster*
 #' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.4}
+#'   *clusters*. It defaults to \eqn{1.43}
 #' @param cores number of cores used
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file(s)
@@ -20,7 +20,7 @@
 #' @returns `checkClusterUniformity` returns a list with:
 #'   * `"isUniform"`: a flag indicating whether the *cluster* is **uniform**
 #'   * `"fractionAbove"`: the percentage of genes with `GDI` above the threshold
-#'   * `"1stPercentile"`: the quantile associated to the highest percentile
+#'   * `"firstPercentile"`: the quantile associated to the highest percentile
 #'
 #' @importFrom utils head
 #'
@@ -38,7 +38,7 @@
 #'
 
 checkClusterUniformity <- function(objCOTAN, cluster, cells,
-                                   GDIThreshold = 1.4, cores = 1L,
+                                   GDIThreshold = 1.43, cores = 1L,
                                    saveObj = TRUE, outDir = ".") {
 
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
@@ -118,5 +118,5 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
 
   return(list("isUniform" = clusterIsUniform,
               "fractionAbove" = percAboveThr,
-              "1stPercentile" = quantAboveThr))
+              "firstPercentile" = quantAboveThr[[1L]]))
 }

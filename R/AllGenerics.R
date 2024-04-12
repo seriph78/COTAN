@@ -145,6 +145,15 @@ setGeneric(
 )
 
 setGeneric(
+  "isCoexAvailable",
+  function(objCOTAN, actOnCells = FALSE, ignoreSync = FALSE) {
+    standardGeneric("isCoexAvailable")
+  }
+)
+
+## ------- `COTAN` clusterization and conditions ------
+
+setGeneric(
   "getClusterizations",
   function(objCOTAN, dropNoCoex = FALSE, keepPrefix = FALSE) {
     standardGeneric("getClusterizations")

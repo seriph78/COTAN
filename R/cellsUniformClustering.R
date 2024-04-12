@@ -17,7 +17,7 @@
 #'   resolution of the *clusterization*.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
-#' @param outDir an existing directory for the analysis output.
+#' @param outDirCond an existing directory for the analysis output.
 #'
 #' @returns a list with a `Seurat` object along a Boolean on whether maximum
 #'   resolution has been used
@@ -43,14 +43,14 @@
 #' @noRd
 #'
 seuratClustering <- function(rawData, cond, iter, initialResolution,
-                             minNumClusters, saveObj, outDir) {
+                             minNumClusters, saveObj, outDirCond) {
   ret <- tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
     srat <- CreateSeuratObject(counts = as.data.frame(rawData),
                                project = paste0(cond, "_reclustering_", iter),
-                               min.cells = if (iter == 0L) 3L else 1L,
-                               min.features = if (iter == 0L) 4L else 2L)
+                               min.cells = if (iter == 1L) 3L else 1L,
+                               min.features = if (iter == 1L) 4L else 2L)
     srat <- NormalizeData(srat)
     srat <- FindVariableFeatures(srat, selection.method = "vst",
                                  nfeatures = 2000L)
@@ -63,23 +63,26 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
     srat <- FindNeighbors(srat, dims = 1L:min(25L, maxRows))
 
     resolution <- initialResolution
+    resolutionStep <- 0.5
+    maxResolution <- initialResolution + 10.0 * resolutionStep
+    usedMaxResolution <- FALSE
     repeat {
       srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
 
       # The next lines are necessary to make cluster smaller while
       # the number of residual cells decrease and to stop clustering
       # if the algorithm gives too many singletons.
-      if ((minNumClusters <
-             nlevels(factor(srat[["seurat_clusters", drop = TRUE]]))) ||
-          (resolution > initialResolution + 5.0)) {
+      usedMaxResolution <- (resolution + 0.1 * resolutionStep) > maxResolution
+      numClusters <- nlevels(factor(srat[["seurat_clusters", drop = TRUE]]))
+      if (numClusters > minNumClusters || usedMaxResolution) {
         break
       }
 
       logThis(paste("Number of clusters is too small.",
-                    "Reclustering at higher resolution:", resolution),
+                    "Reclustering at resolution higher than:", resolution),
               logLevel = 3L)
 
-      resolution <- resolution + 0.5
+      resolution <- resolution + resolutionStep
     }
 
     logThis(paste("Used resolution for Seurat clusterization is:", resolution),
@@ -91,11 +94,11 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
                                  dims = 1L:min(c(50L, maxRows))))
 
     if (isTRUE(saveObj)) {
-      logThis(paste0("Creating PDF UMAP in file:",
-                     file.path(outDir, "pdf_umap.pdf")), logLevel = 2L)
-      pdf(file.path(outDir, "pdf_umap.pdf"))
+      outFile <- file.path(outDirCond, paste0("pdf_umap_", iter, ".pdf"))
+      logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
+      pdf(outFile)
 
-      if (iter == 0L) {
+      if (iter == 1L) {
         plot(DimPlot(srat, reduction = "umap", label = FALSE,
                      group.by = "orig.ident"))
       }
@@ -112,8 +115,7 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
     logThis("Creating Seurat object: DONE", logLevel = 2L)
 
     # returned objects
-    list("SeuratObj" = srat,
-         "UsedMaxResolution" = resolution > initialResolution + 1.5)
+    list("SeuratObj" = srat, "UsedMaxResolution" = usedMaxResolution)
   },
   error = function(e) {
     logThis(msg = paste("Seurat clusterization failed with", ncol(rawData),
@@ -150,8 +152,8 @@ NULL
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.4}
-#' @param cores number of cores used
+#'   *clusters*. It defaults to \eqn{1.43}
+#' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
 #' @param initialResolution a number indicating how refined are the clusters
@@ -195,7 +197,8 @@ NULL
 #' @rdname UniformClusters
 #'
 
-cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
+cellsUniformClustering <- function(objCOTAN,
+                                   GDIThreshold = 1.43,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    initialClusters = NULL,
@@ -217,18 +220,24 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     dir.create(outDirCond)
   }
 
+  splitOutDir <- file.path(outDirCond, "reclustering")
+  if (isTRUE(saveObj) && !file.exists(splitOutDir)) {
+    dir.create(splitOutDir)
+  }
+
   outputClusters <- set_names(rep(NA, length = getNumCells(objCOTAN)),
                               getCells(objCOTAN))
 
   iter <- 0L
+  iterReset <- -1L
   numClustersToRecluster <- 0L
   srat <- NULL
+  allCheckResults <- data.frame()
+  errorCheckResults <-
+    list("isUniform" = FALSE, "fractionAbove" = NA, "firstPercentile" = NA)
 
   repeat {
-    outDirIter <- file.path(outDirCond, paste0("reclustering_", iter))
-    if (!file.exists(outDirIter)) {
-      dir.create(file.path(outDirIter))
-    }
+    iter <- iter + 1L
 
     logThis(paste0("In iteration ", iter, " "), logLevel = 1L, appendLF = FALSE)
     logThis(paste("the number of cells to re-cluster is",
@@ -236,12 +245,13 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                   numClustersToRecluster, "clusters"), logLevel = 2L)
 
     #Step 1
+    minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
     c(objSeurat, usedMaxResolution) %<-%
       seuratClustering(rawData = getRawData(objCOTAN)[, is.na(outputClusters)],
                        cond = cond, iter = iter,
                        initialResolution = initialResolution,
-                       minNumClusters = numClustersToRecluster + 1L,
-                       saveObj = saveObj, outDir = outDirIter)
+                       minNumClusters = minNumClusters,
+                       saveObj = saveObj, outDirCond = splitOutDir)
 
     if (is_null(objSeurat)) {
       logThis(paste("NO new possible uniform clusters!",
@@ -250,7 +260,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
       break
     }
 
-    if (saveObj && iter == 0L) {
+    if (saveObj && iter == 1L) {
       # save the Seurat object on the global raw data
       srat <- objSeurat
     }
@@ -271,7 +281,7 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     testClusters <- factor(metaData[["seurat_clusters"]])
     allCells <- rownames(metaData)
     names(testClusters) <- allCells
-    if (iter == 0L && !is_null(initialClusters)) {
+    if (iter == 1L && !is_null(initialClusters)) {
       assert_that(setequal(names(initialClusters), getCells(objCOTAN)),
                   msg = "Given clusterization has the wrong set of cells")
       logThis("Using passed in clusterization", logLevel = 3L)
@@ -279,6 +289,8 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
       allCells <- names(initialClusters)
     }
     testClList <- toClustersList(testClusters)
+
+    globalClName <- ""
 
     for (clName in names(testClList)) {
       logThis("*", logLevel = 1L, appendLF = FALSE)
@@ -290,36 +302,46 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
         next
       }
 
+      globalClName <-
+        paste0(str_pad(iter, width = 2L, pad = "0"), "_",
+               str_pad(clName, width = 4L, pad = "0"))
+
       cells <- testClList[[clName]]
-      if (length(cells) < 10L) {
-        logThis(paste("cluster", clName, "has too few cells:",
+      if (length(cells) < 20L) {
+        logThis(paste("cluster", globalClName, "has too few cells:",
                       "will be reclustered!"), logLevel = 1L)
-        # keep numClustersToRecluster unchanged
+
+        numClustersToRecluster <- numClustersToRecluster + 1L
         cellsToRecluster <- c(cellsToRecluster, cells)
       } else {
-        clusterIsUniform <- tryCatch(
+        checkResults <- tryCatch(
           checkClusterUniformity(objCOTAN = objCOTAN,
-                                 cluster = clName,
+                                 cluster = globalClName,
                                  cells = cells,
                                  cores = cores,
                                  GDIThreshold = GDIThreshold,
                                  saveObj = saveObj,
-                                 outDir = outDirIter)[["isUniform"]],
+                                 outDir = splitOutDir),
           error = function(err) {
             logThis(paste("while checking cluster uniformity", err),
                     logLevel = 0L)
             logThis("marking cluster as not uniform", logLevel = 1L)
-            return(FALSE)
+            return(errorCheckResults)
           })
 
-        if (!clusterIsUniform) {
-          logThis(paste("cluster", clName, "has too high GDI:",
+        gc()
+
+        allCheckResults <- rbind(allCheckResults, checkResults)
+        rownames(allCheckResults)[[nrow(allCheckResults)]] <- globalClName
+
+        if (!checkResults[["isUniform"]]) {
+          logThis(paste("cluster", globalClName, "has too high GDI:",
                         "will be reclustered!"), logLevel = 1L)
 
           numClustersToRecluster <- numClustersToRecluster + 1L
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
-          logThis(paste("cluster", clName, "is uniform"), logLevel = 1L)
+          logThis(paste("cluster", globalClName, "is uniform"), logLevel = 1L)
         }
       }
     }
@@ -330,13 +352,25 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
                   "non-uniform clusters"), logLevel = 2L)
 
     if (numClustersToRecluster == length(testClList)) {
-      warning("In iteration", iter, "no uniform clusters found!")
+      warning("In iteration '", iter, "' no uniform clusters found!")
       # Another iteration can be attempted as the minimum number of clusters
       # will be higher. This happens unless the resolution already reached
       # its maximum. In the latter case we simply stop here.
       if (isTRUE(usedMaxResolution)) {
-        break
+        logThis("Max resolution reached", logLevel = 1L)
+        if (iterReset != -1L) {
+          logThis("Cannot clusterize anything more", logLevel = 2L)
+          break
+        } else {
+          # try to recluster remaining cells from scratch
+          logThis("Trying to recluster remaining cells from scratch",
+                  logLevel = 2L)
+          numClustersToRecluster <- 0L
+          iterReset <- iter
+        }
       }
+    } else {
+      iterReset <- -1L
     }
 
     # Step 3: save the already uniform clusters keeping track of the iteration
@@ -348,9 +382,14 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
     }
 
     if (isTRUE(saveObj)) tryCatch({
-        outFile <- file.path(outDirIter, "partial_clusterization.csv")
+        outFile <- file.path(splitOutDir,
+                             paste0("partial_clusterization_", iter, ".csv"))
         write.csv(outputClusters, file = outFile)
-      },
+
+        outFile <- file.path(splitOutDir,
+                             paste0("all_check_results_", iter, ".csv"))
+        write.csv(allCheckResults, file = outFile)
+    },
       error = function(err) {
         logThis(paste("While saving current clusterization", err),
                 logLevel = 0L)
@@ -362,15 +401,13 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
       break
     }
 
-    if (length(cellsToRecluster) <= 50L || iter >= maxIterations) {
+    if (length(cellsToRecluster) < 40L || iter >= maxIterations) {
       logThis(paste("NO new possible uniform clusters!",
                     "Unclustered cell left:", length(cellsToRecluster)),
               logLevel = 1L)
       break
     }
     rm(cellsToRecluster)
-
-    iter <- iter + 1L
   } # End repeat
 
   logThis(paste("The final raw clusterization contains [",
@@ -390,24 +427,37 @@ cellsUniformClustering <- function(objCOTAN,  GDIThreshold = 1.4,
       clTagsMap[outputClusters[!unclusteredCells]]
     outputClusters[unclusteredCells] <- "-1"
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
+
+    allCheckResults <- allCheckResults[clTags, , drop = FALSE]
+    allCheckResults <- allCheckResults[clTagsMap[clTags], , drop = FALSE]
+    if (any(unclusteredCells)) {
+      allCheckResults <- rbind(allCheckResults, "-1" <- errorCheckResults)
+    }
   }
 
   outputCoexDF <-
-    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters),
+    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters, cores = cores),
              error = function(err) {
                logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
                return(NULL)
                })
 
-  c(outputClusters, outputCoexDF) %<-%
+  c(outputClusters, outputCoexDF) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = TRUE, useDEA = useDEA,
-                          distance = distance, hclustMethod = hclustMethod)
+                          keepMinusOne = TRUE, useDEA = useDEA, cores = cores,
+                          distance = distance, hclustMethod = hclustMethod),
+    error = function(err) {
+      logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
+      return(list(outputClusters, outputCoexDF))
+    })
 
   outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
 
   if (isTRUE(saveObj)) tryCatch({
+      outFile <- file.path(outDirCond, "split_check_results.csv")
+      write.csv(allCheckResults, file = outFile)
+
       clusterizationName <-
         paste0(as.roman(length(getClusterizations(objCOTAN)) + 1L))
 

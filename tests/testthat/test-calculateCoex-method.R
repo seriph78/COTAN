@@ -147,6 +147,7 @@ test_that("Calculations on genes", {
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
+  expect_true(isCoexAvailable(obj, actOnCells = FALSE, ignoreSync = FALSE))
   expect_identical(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2L))
   expect_identical(getGenesCoex(obj)[1L, 1L], 0.0)
   expect_equal(abs(as.vector(getGenesCoex(obj,
@@ -167,15 +168,17 @@ test_that("Calculations on genes", {
   partialCoex1 <- calculatePartialCoex(obj, genesSample1)
 
   # These need tolerance
-  expect_equal(
-    partialCoex1, getGenesCoex(obj, zeroDiagonal = FALSE)[, sort(genesSample1)])
+  expect_equal(partialCoex1,
+               getGenesCoex(obj, zeroDiagonal = FALSE)[, sort(genesSample1)],
+               tolerance = 1e-12)
 
   genesSample2 <- getGenes(obj)[sample(getNumGenes(obj), 3L)]
   partialCoex2 <- calculatePartialCoex(obj, genesSample2,
                                        optimizeForSpeed = FALSE)
 
-  expect_equal(
-    partialCoex2, getGenesCoex(obj, genesSample2, zeroDiagonal = FALSE))
+  expect_equal(partialCoex2,
+               getGenesCoex(obj, genesSample2, zeroDiagonal = FALSE),
+               tolerance = 1e-12)
 })
 
 
@@ -245,6 +248,7 @@ test_that("Calculations on cells", {
 
   expect_identical(c(genesCoexInSync, cellsCoexInSync), c("FALSE", "TRUE"))
 
+  expect_true(isCoexAvailable(obj, actOnCells = TRUE))
   expect_identical(dim(getCellsCoex(obj)), rep(getNumCells(obj), 2L))
 
   # as all cells are repeated altenating
@@ -271,17 +275,17 @@ test_that("Calculations on cells", {
                                        actOnCells = TRUE)
 
   # These need tolerance
-  expect_equal(
-    partialCoex1,
-    getCellsCoex(obj, zeroDiagonal = FALSE)[, sort(cellsSample1)])
+  expect_equal(partialCoex1,
+               getCellsCoex(obj, zeroDiagonal = FALSE)[, sort(cellsSample1)],
+               tolerance = 1e-12)
 
   cellsSample2 <- getCells(obj)[sample(getNumCells(obj), 3L)]
   partialCoex2 <- calculatePartialCoex(obj, cellsSample2, actOnCells = TRUE,
                                        optimizeForSpeed = FALSE)
 
-  expect_equal(
-    partialCoex2,
-    getCellsCoex(obj, cellsSample2, zeroDiagonal = FALSE))
+  expect_equal(partialCoex2,
+               getCellsCoex(obj, cellsSample2, zeroDiagonal = FALSE),
+               tolerance = 1e-12)
 })
 
 
@@ -300,6 +304,7 @@ test_that("Coex", {
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
+  expect_true(isCoexAvailable(obj))
   expect_identical(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2L))
 
   S <- as.matrix(calculateS(obj))
@@ -375,6 +380,7 @@ test_that("Coex vs saved results", {
 
   coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
+  expect_true(isCoexAvailable(obj))
   expect_equal(getGenesCoex(obj, genes = genes.names.test,
                             zeroDiagonal = FALSE),
                coex_test, tolerance = 1.0e-12)

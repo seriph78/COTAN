@@ -2,7 +2,6 @@ tm <- tempdir()
 stopifnot(file.exists(tm))
 
 library(zeallot)
-library(stats)
 
 test_that("Merge Uniform Cells Clusters", {
 
@@ -20,7 +19,7 @@ test_that("Merge Uniform Cells Clusters", {
 
   obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
 
-  coexDF <- DEAOnClusters(obj)
+  coexDF <- DEAOnClusters(obj, cores = 4L)
 
   obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = coexDF)
 
@@ -54,14 +53,13 @@ test_that("Merge Uniform Cells Clusters", {
   expect_equal(coexDF[genes.names.test, ], coexDF_exp, tolerance = 1.0e-12)
   expect_equal(pValDF[genes.names.test, ], pValDF_exp, tolerance = 1.0e-12)
 
-  GDIThreshold <- 1.5
+  GDIThreshold <- 1.46
 
   deltaExpression <- clustersDeltaExpression(obj)
 
   expect_identical(rownames(deltaExpression), getGenes(obj))
   expect_setequal(colnames(deltaExpression), levels(clusters))
 
-  #primaryMarkers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                        G2 = c("g-000300", "g-000330"),
                        G3 = c("g-000510", "g-000530", "g-000550",
@@ -82,6 +80,14 @@ test_that("Merge Uniform Cells Clusters", {
                               distance = "cosine", hclustMethod = "ward.D2",
                               saveObj = TRUE, outDir = tm)
 
+  expect_true(file.exists(file.path(tm, "test", "leafs_merge",
+                                    "merge_clusterization_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "leafs_merge",
+                                    "non_mergeable_clusters_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "leafs_merge",
+                                    "all_check_results_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "merge_check_results.csv")))
+
   expect_lt(nlevels(mergedClusters), nlevels(clusters))
   expect_setequal(colnames(mergedCoexDF), mergedClusters)
   expect_identical(rownames(mergedCoexDF), getGenes(obj))
@@ -91,9 +97,6 @@ test_that("Merge Uniform Cells Clusters", {
 
   expect_identical(reorderClusterization(obj),
                    list("clusters" = mergedClusters, "coex" = mergedCoexDF))
-
-  #cluster_data <- readRDS(file.path(getwd(), "cluster_data_merged.RDS"))
-  #expect_identical(mergedClusters[genes.names.test], cluster_data)
 
   mergedLfcDF <- logFoldChangeOnClusters(obj, clName = "merge")
 

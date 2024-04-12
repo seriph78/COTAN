@@ -248,7 +248,7 @@ In this part, all the contingency tables are computed
 and used to get the statistics necessary to `COEX` evaluation and storing
 
 ```{r}
-obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 10L,
+obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 6L,
                      saveObj = TRUE, outDir = outDir)
 ```
 
@@ -268,7 +268,7 @@ obj2 <- automaticCOTANObjectCreation(
   GEO = GEO,
   sequencingMethod = "Drop_seq",
   sampleCondition = cond,
-  calcCoex = TRUE, saveObj = TRUE, outDir = outDir, cores = 10L)
+  calcCoex = TRUE, saveObj = TRUE, outDir = outDir, cores = 6L)
 ```
 
 # Analysis of the elaborated data
@@ -284,7 +284,7 @@ head(quantP)
 
 The next function can either plot the `GDI` for the dataset directly or
 use the pre-computed dataframe.
-It marks a `1.5` threshold (in red) and
+It marks a `1.43` threshold (in red) and
 the two highest quantiles (in blue) by default.
 We can also specify some gene sets (three in this case) that
 we want to label explicitly in the `GDI` plot.
@@ -301,7 +301,8 @@ genesList <- list(
 # needs to be recalculated after the changes in nu/dispersion above
 #obj <- calculateCoex(obj, actOnCells = FALSE)
 
-GDIPlot(obj, GDIIn = quantP, cond = cond, genes = genesList)
+GDIPlot(obj, GDIIn = quantP, cond = cond,
+        genes = genesList, GDIThreshold = 1.43)
 ```
 
 The percentage of cells expressing the gene in the third column of this
@@ -411,23 +412,23 @@ satisfies the null hypothesis of the `COTAN` model:
 the genes expression is not dependent on the cell in consideration.
 
 ```{r eval=FALSE, include=TRUE}
-fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.4,
+fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.43,
                                        initialResolution = 0.8,
-                                       cores = 10L, saveObj = TRUE,
+                                       cores = 6L, saveObj = TRUE,
                                        outDir = outDir)[["clusters"]]
 obj <- addClusterization(obj, clName = "FineClusters", clusters = fineClusters)
 ```
 
 
 ```{r eval=FALSE, include=TRUE}
-coexDF <- DEAOnClusters(obj, clusters = fineClusters)
+coexDF <- DEAOnClusters(obj, clusters = fineClusters, cores = 6L)
 obj <- addClusterizationCoex(obj, clName = "FineClusters",
                              coexDF = coexDF)
 ```
 
 ```{r eval=FALSE, include=TRUE}
 c(mergedClusters, coexDF) %<-%
-  mergeUniformCellsClusters(obj, GDIThreshold = 1.4, cores = 10L,
+  mergeUniformCellsClusters(obj, GDIThreshold = 1.43, cores = 6L,
                             saveObj = TRUE, outDir = outDir)
 obj <- addClusterization(obj, clName = "MergedClusters",
                          clusters = mergedClusters, coexDF = coexDF)

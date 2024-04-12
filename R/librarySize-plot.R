@@ -27,7 +27,7 @@ geom_flat_violin <- function(
     ...) {
   GeomFlatViolin <- ggproto("GeomFlatViolin", Geom,
      setup_data = function(data, params) {
-       "%||%" <- function(a, b) {
+       `%||%` <- function(a, b) {
          if (!is.null(a)) a else b
        }
 

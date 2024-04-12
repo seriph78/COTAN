@@ -179,10 +179,10 @@ lambda <- getLambda(objCOTAN)
 objCOTAN <- estimateNuLinear(objCOTAN)
 nu <- getNu(objCOTAN)
 
-objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 dispersion <- getDispersion(objCOTAN)
 
-objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12,
+objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L,
                                           enforceNuAverageToOne = TRUE)
 nu <- getNu(objCOTAN)
 dispersion <- getDispersion(objCOTAN)

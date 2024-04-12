@@ -81,7 +81,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
   scoreDF <- geneSetEnrichment(groupMarkers = groupMarkers,
                                clustersCoex = expressionCl)
 
-  scoreDFT <- t(scoreDF[, 1L:(ncol(scoreDF) - 2L)])
+  scoreDFT <- t(scoreDF[, 1L:(ncol(scoreDF) - 2L), drop = FALSE])
   dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
 
   dend <- set(dend = dend, "branches_lwd", 2L)
