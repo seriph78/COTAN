@@ -766,7 +766,7 @@ NULL
 #'                                   sampleCondition = "reconstructed_dataset")
 #' objCOTAN <- clean(objCOTAN)
 #'
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 #'
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 #'
@@ -799,7 +799,7 @@ NULL
 #' stopifnot(!isCoexAvailable(objCOTAN))
 #'
 #'
-#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 #'
 #' ## Now the `COTAN` object is ready to calculate the cells' `COEX`
 #' ## In case one need to caclualte both it is more sensible to run the above
@@ -1016,12 +1016,12 @@ NULL
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 #'
 #' data("test.dataset.clusters1")
 #' clusters <- test.dataset.clusters1
 #'
-#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters, cores = 12)
+#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters, cores = 6L)
 #'
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
 #'                      G2 = c("g-000300", "g-000330"),

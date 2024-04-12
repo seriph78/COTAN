@@ -66,7 +66,7 @@
 #'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
-#'                                          cores = 12L,
+#'                                          cores = 6L,
 #'                                          saveObj = FALSE)
 #'
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
@@ -83,7 +83,7 @@
 #' ## rough clusterization is needed in the early satges of the analysis
 #' ##
 #'
-#' splitList <- cellsUniformClustering(objCOTAN, cores = 12,
+#' splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
 #'                                     initialResolution = 0.8,
 #'                                     GDIThreshold = 1.46, saveObj = FALSE)
 #'
@@ -94,7 +94,7 @@
 #'                        GDIThreshold = 1.46,
 #'                        cluster = clusters[[1L]],
 #'                        cells = firstCluster,
-#'                        cores = 12L,
+#'                        cores = 6L,
 #'                        saveObj = FALSE)
 #'
 #' objCOTAN <- addClusterization(objCOTAN,
@@ -111,7 +111,7 @@
 #'                                         GDIThreshold = 1.46,
 #'                                         batchSize = 5L,
 #'                                         clusters = clusters,
-#'                                         cores = 12L,
+#'                                         cores = 6L,
 #'                                         distance = "cosine",
 #'                                         hclustMethod = "ward.D2",
 #'                                         saveObj = FALSE)

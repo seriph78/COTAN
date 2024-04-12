@@ -383,7 +383,7 @@ objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
                                   sampleCondition = "reconstructed_dataset")
 objCOTAN <- clean(objCOTAN)
 
-objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 
 ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 
@@ -416,7 +416,7 @@ objCOTAN <- dropGenesCoex(objCOTAN)
 stopifnot(!isCoexAvailable(objCOTAN))
 
 
-objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12)
+objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 
 ## Now the `COTAN` object is ready to calculate the cells' `COEX`
 ## In case one need to caclualte both it is more sensible to run the above

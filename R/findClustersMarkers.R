@@ -41,7 +41,7 @@
 #'
 #' @examples
 #' clMarkers <- findClustersMarkers(objCOTAN, markers = list(),
-#'                                  clusters = clusters, cores = 10L)
+#'                                  clusters = clusters, cores = 6L)
 #'
 #' @rdname HandlingClusterizations
 #'

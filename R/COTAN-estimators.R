@@ -231,7 +231,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 #' @export
 #'
 #' @examples
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 12)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 #' dispersion <- getDispersion(objCOTAN)
 #'
 #' @rdname ParametersEstimations
@@ -526,7 +526,7 @@ setMethod(
 #' @importFrom assertthat assert_that
 #'
 #' @examples
-#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 12,
+#' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L,
 #'                                           enforceNuAverageToOne = TRUE)
 #' nu <- getNu(objCOTAN)
 #' dispersion <- getDispersion(objCOTAN)

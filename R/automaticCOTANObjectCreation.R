@@ -57,7 +57,7 @@ NULL
 #' ## # in case the genes' `COEX` is not needed it can be skipped
 #' ## # (e.g. for [cellsUniformClustering()])
 #' ## objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-#' ##                           cores = 12, saveObj = FALSE)
+#' ##                           cores = 6L, saveObj = FALSE)
 #'
 #' @rdname COTANObjectCreation
 #'
@@ -210,7 +210,7 @@ setMethod(
 #'   calcCoex = TRUE,
 #'   saveObj = FALSE,
 #'   outDir = tempdir(),
-#'   cores = 12)
+#'   cores = 6L)
 #'
 #' @rdname COTANObjectCreation
 

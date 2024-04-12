@@ -1,5 +1,7 @@
 ## COTAN 2.3.6
 
+Made function `DEAOnCluster()` parallelized
+
 Now clustering functions dump the `GDI` check results for all clusters
 
 Changed default `GDI` threshold to 1.43
