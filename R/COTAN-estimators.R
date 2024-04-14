@@ -523,6 +523,8 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom Rfast rowsums
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @examples
@@ -591,8 +593,9 @@ setMethod(
         break
       }
 
-      genesMarginals <- rowSums(funProbZero(getDispersion(objCOTAN),
-                                            calculateMu(objCOTAN)))
+      genesMarginals <- rowsums(funProbZero(getDispersion(objCOTAN),
+                                            calculateMu(objCOTAN)),
+                                parallel = TRUE)
 
       marginalsErrors <- abs(genesMarginals - sumZeros)
 
@@ -635,6 +638,9 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom Rfast rowsums
+#' @importFrom Rfast colsums
+#'
 #' @importFrom stats nlminb
 #'
 #' @importFrom assertthat assert_that
@@ -672,8 +678,8 @@ setMethod(
 
       probZero <- funProbZero(dispersion, lambda %o% nu)
 
-      diffGenes <- rowSums(probZero) - zeroGenes
-      diffCells <- colSums(probZero) - zeroCells
+      diffGenes <- rowsums(probZero, parallel = TRUE) - zeroGenes
+      diffCells <- colsums(probZero, parallel = TRUE) - zeroCells
 
       diffNu <- 0.0
       if (enforceNuAverageToOne) {

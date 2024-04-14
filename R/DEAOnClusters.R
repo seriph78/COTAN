@@ -11,8 +11,8 @@ runSingleDEA <- function(clName, probZero, zeroOne, cellsInList) {
 
   observedYI <- rowSums(zeroOne[, cellsIn, drop = FALSE])
 
-  expectedNI <- rowSums(probZero[,  cellsIn, drop = FALSE])
-  expectedNO <- rowSums(probZero[, !cellsIn, drop = FALSE])
+  expectedNI <- rowsums(probZero[,  cellsIn, drop = FALSE], parallel = TRUE)
+  expectedNO <- rowsums(probZero[, !cellsIn, drop = FALSE], parallel = TRUE)
   expectedYI <- numCellsIn  - expectedNI
   expectedYO <- numCellsOut - expectedNO
 
@@ -26,7 +26,7 @@ runSingleDEA <- function(clName, probZero, zeroOne, cellsInList) {
 }
 
 runDEA <- function(clNames, probZero, zeroOne, cellsInList, cores) {
-  if (cores != 1L) {
+  if (FALSE) {
     res <- parallel::mclapply(
       clNames,
       runSingleDEA,
@@ -84,7 +84,7 @@ runDEA <- function(clNames, probZero, zeroOne, cellsInList, cores) {
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
-#' @importFrom Matrix rowSums
+#' @importFrom Rfast rowsums
 #'
 #' @rdname HandlingClusterizations
 #'

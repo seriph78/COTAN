@@ -21,6 +21,8 @@ NULL
 #' @return `calculateGenesCE()` returns a named `array` with the *cross-entropy*
 #'   of each gene
 #'
+#' @importFrom Rfast rowsums
+#'
 #' @export
 #'
 #' @rdname GenesStatistics
@@ -38,7 +40,8 @@ calculateGenesCE <- function(objCOTAN) {
   minusEntrM[!feg, ] <- (zeroOne[!feg, ] * log(1.0 - probZero[!feg, ])) +
                         ((1.0 - zeroOne[!feg, ]) * log(probZero[!feg, ]))
 
-  return(set_names(-rowMeans(minusEntrM), getGenes(objCOTAN)))
+  return(set_names(-rowsums(minusEntrM, parallel = TRUE) /
+                     getNumCells(objCOTAN), getGenes(objCOTAN)))
 }
 
 
@@ -46,6 +49,8 @@ calculateGenesCE <- function(objCOTAN) {
 #'   column based on the `S` matrix (*Pearson's *\eqn{\chi^{2}}* test*)
 #'
 #' @param S a `matrix` object
+#' @param rowsFraction The fraction of rows that will be averaged to calcualate
+#'   the `GDI`. Defaults to \eqn{5\%}
 #'
 #' @returns `calculateGDIGivenS()` returns a `vector` with the *GDI* data for
 #'   each column of the input
@@ -54,23 +59,21 @@ calculateGenesCE <- function(objCOTAN) {
 #'
 #' @importFrom stats pchisq
 #'
-#' @importFrom Matrix colMeans
-#'
 #' @importFrom Rfast colSort
+#' @importFrom Rfast colmeans
 #'
 #' @noRd
 #'
 
-calculateGDIGivenS <- function(S) {
-  top5pcRows <- as.integer(max(1L:round(nrow(S) / 20.0,
-                                        digits = 0L)))
+calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
+  topRows <- as.integer(max(1L:round(nrow(S) * rowsFraction, digits = 0L)))
 
   pValue <- colSort(as.matrix(S), descending = TRUE)
   logThis("S matrix sorted", logLevel = 3L)
-  pValue <- pValue[1L:top5pcRows, , drop = FALSE]
+  pValue <- pValue[1L:topRows, , drop = FALSE]
   pValue <- pchisq(as.matrix(pValue), df = 1L, lower.tail = FALSE)
 
-  GDI <- set_names(log(-log(colMeans(pValue))), colnames(S))
+  GDI <- set_names(log(-log(colmeans(pValue, parallel = TRUE))), colnames(S))
 
   return(GDI)
 }
@@ -83,6 +86,8 @@ calculateGDIGivenS <- function(S) {
 #'   symmetric matrix
 #' @param numDegreesOfFreedom a `int` that determines the number of degree of
 #'   freedom to use in the \eqn{\chi^{2}} test
+#' @param rowsFraction The fraction of rows that will be averaged to calcualate
+#'   the `GDI`. Defaults to \eqn{5\%}
 #'
 #' @returns `calculateGDIGivenCorr()` returns a `vector` with the *GDI* data for
 #'   each column of the input
@@ -92,8 +97,10 @@ calculateGDIGivenS <- function(S) {
 #' @rdname GenesStatistics
 #'
 
-calculateGDIGivenCorr <- function(corr, numDegreesOfFreedom) {
-  return(calculateGDIGivenS(corr^2L * numDegreesOfFreedom))
+calculateGDIGivenCorr <-
+  function(corr, numDegreesOfFreedom, rowsFraction = 0.05) {
+  return(calculateGDIGivenS(corr^2L * numDegreesOfFreedom,
+                            rowsFraction = rowsFraction))
 }
 
 
@@ -104,6 +111,8 @@ calculateGDIGivenCorr <- function(corr, numDegreesOfFreedom) {
 #' @param statType Which statistics to use to compute the p-values. By default
 #'   it will use the `S` (*Pearson's *\eqn{\chi^{2}}* test*) otherwise the `G`
 #'   (*G-test*)
+#' @param rowsFraction The fraction of rows that will be averaged to calcualate
+#'   the `GDI`. Defaults to \eqn{5\%}
 #'
 #' @returns `calculateGDI()` returns a `data.frame` with:
 #'  * `"sum.raw.norm"` the sum of the normalized data rows
@@ -121,7 +130,7 @@ calculateGDIGivenCorr <- function(corr, numDegreesOfFreedom) {
 #' @rdname GenesStatistics
 #'
 
-calculateGDI <- function(objCOTAN, statType = "S") {
+calculateGDI <- function(objCOTAN, statType = "S", rowsFraction = 0.05) {
   logThis("Calculate GDI dataframe: START", logLevel = 2L)
 
   if (statType == "S") {
@@ -134,7 +143,7 @@ calculateGDI <- function(objCOTAN, statType = "S") {
     stop("Unrecognised stat type: must be either 'S' or 'G'")
   }
 
-  GDI <- calculateGDIGivenS(S)
+  GDI <- calculateGDIGivenS(S, rowsFraction = rowsFraction)
   GDI <- set_names(as.data.frame(GDI), "GDI")
   gc()
 
