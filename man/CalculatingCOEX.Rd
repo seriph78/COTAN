@@ -160,8 +160,7 @@ returned}
 \item{zeroOne}{the raw count matrix projected to \code{0} or \code{1}. If not given the
 appropriate one will be calculated on the fly}
 
-\item{optimizeForSpeed}{Boolean; when \code{TRUE} the function will use \code{Rfast}
-parallel algorithms that on the flip side use more memory}
+\item{optimizeForSpeed}{Boolean; deprecated: always TRUE}
 
 \item{probZero}{is the expected \strong{probability of zero} for each gene/cell
 pair. If not given the appropriate one will be calculated on the fly}

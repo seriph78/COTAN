@@ -401,8 +401,7 @@ observedPartialContingencyTables <-
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
-#'   parallel algorithms that on the flip side use more memory
+#' @param optimizeForSpeed Boolean; deprecated: always TRUE
 #'
 #' @returns `expectedContingencyTablesNN()` returns a `list` with:
 #'   * `expectedNN` the *No/No* expected contingency table as `matrix`
@@ -442,25 +441,13 @@ expectedContingencyTablesNN <- function(objCOTAN,
 
   if (isTRUE(actOnCells)) {
     # dimension m x m (m number of cells)
-    if (isTRUE(optimizeForSpeed)) {
-      # use Rfast functions
-      expectedNN <- Crossprod(probZero, probZero)
-      expectedN  <- colsums(probZero, parallel = TRUE)
-    } else {
-      expectedNN <- crossprod(probZero)
-      expectedN  <- colSums(probZero)
-    }
+    expectedNN <- Crossprod(probZero, probZero)
+    expectedN  <- colsums(probZero, parallel = TRUE)
     rownames(expectedNN) <- colnames(expectedNN) <- getCells(objCOTAN)
   } else {
     # dimension n x n (n number of genes)
-    if (isTRUE(optimizeForSpeed)) {
-      # use Rfast functions
-      expectedNN <- Tcrossprod(probZero, probZero)
-      expectedN  <- rowsums(probZero, parallel = TRUE)
-    } else {
-      expectedNN <- tcrossprod(probZero)
-      expectedN  <- rowSums(probZero)
-    }
+    expectedNN <- Tcrossprod(probZero, probZero)
+    expectedN  <- rowsums(probZero, parallel = TRUE)
     rownames(expectedNN) <- colnames(expectedNN) <- getGenes(objCOTAN)
   }
   rm(probZero)
@@ -487,8 +474,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
-#'   parallel algorithms that on the flip side use more memory
+#' @param optimizeForSpeed Boolean; deprecated: always TRUE
 #'
 #' @returns `expectedPartialContingencyTablesNN()` returns a `list` with:
 #'   * `expectedNN` the *No/No* expected contingency table as `matrix`,
@@ -538,30 +524,16 @@ expectedPartialContingencyTablesNN <-
 
   if (isTRUE(actOnCells)) {
     # dimension m x m (m number of cells)
-    if (isTRUE(optimizeForSpeed)) {
-      # use Rfast functions
-      expectedNN <- Crossprod(probZero,
-                              probZero[, columnsSubset, drop = FALSE])
-      expectedN  <- colsums(probZero, parallel = TRUE)
-    } else {
-      expectedNN <- crossprod(probZero,
-                              probZero[, columnsSubset, drop = FALSE])
-      expectedN  <- colSums(probZero)
-    }
+    expectedNN <- Crossprod(probZero,
+                            probZero[, columnsSubset, drop = FALSE])
+    expectedN  <- colsums(probZero, parallel = TRUE)
     rownames(expectedNN) <- getCells(objCOTAN)
     colnames(expectedNN) <- getCells(objCOTAN)[columnsSubset]
   } else {
     # dimension n x n (n number of genes)
-    if (isTRUE(optimizeForSpeed)) {
-      # use Rfast functions
-      expectedNN <- Tcrossprod(probZero,
-                               probZero[columnsSubset, , drop = FALSE])
-      expectedN  <- rowsums(probZero, parallel = TRUE)
-    } else {
-      expectedNN <- tcrossprod(probZero,
-                               probZero[columnsSubset, , drop = FALSE])
-      expectedN  <- rowSums(probZero)
-    }
+    expectedNN <- Tcrossprod(probZero,
+                             probZero[columnsSubset, , drop = FALSE])
+    expectedN  <- rowsums(probZero, parallel = TRUE)
     rownames(expectedNN) <- getGenes(objCOTAN)
     colnames(expectedNN) <- getGenes(objCOTAN)[columnsSubset]
   }
@@ -584,8 +556,7 @@ expectedPartialContingencyTablesNN <-
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
-#'   parallel algorithms that on the flip side use more memory
+#' @param optimizeForSpeed Boolean; deprecated: always TRUE
 #'
 #' @return `expectedContingencyTables()` returns the expected contingency tables
 #'   as named `list` with elements:
@@ -622,8 +593,8 @@ expectedContingencyTables <- function(objCOTAN,
   c(expectedNN, expectedN) %<-%
     expectedContingencyTablesNN(objCOTAN,
                                 actOnCells = actOnCells,
-                                asDspMatrices = isFALSE(optimizeForSpeed),
-                                optimizeForSpeed = optimizeForSpeed)
+                                asDspMatrices = FALSE,
+                                optimizeForSpeed = TRUE)
 
   gc()
 
@@ -699,8 +670,7 @@ expectedContingencyTables <- function(objCOTAN,
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
-#'   parallel algorithms that on the flip side use more memory
+#' @param optimizeForSpeed Boolean; deprecated: always TRUE
 #'
 #' @return `expectedPartialContingencyTables()` returns the expected contingency
 #'   tables, restricted to the selected columns, as named `list` with elements:
@@ -746,7 +716,7 @@ expectedPartialContingencyTables <-
   c(expectedNN, expectedN) %<-%
     expectedPartialContingencyTablesNN(objCOTAN, columnsSubset, probZero,
                                        actOnCells = actOnCells,
-                                       optimizeForSpeed = optimizeForSpeed)
+                                       optimizeForSpeed = TRUE)
 
   gc()
 
@@ -877,8 +847,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 #' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
-#'   parallel algorithms that on the flip side use more memory
+#' @param optimizeForSpeed Boolean; deprecated: always TRUE
 #'
 #' @returns `calculateCoex()` returns the updated `COTAN` object
 #'
@@ -894,8 +863,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 setMethod(
   "calculateCoex",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE,
-           optimizeForSpeed = TRUE) {
+  function(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE) {
     if (isTRUE(actOnCells)) {
       kind <- "cells'"
     } else {
@@ -911,7 +879,7 @@ setMethod(
       expectedContingencyTables(objCOTAN,
                                 actOnCells = actOnCells,
                                 asDspMatrices = TRUE,
-                                optimizeForSpeed = optimizeForSpeed)
+                                optimizeForSpeed = TRUE)
 
     gc()
 
@@ -1006,8 +974,7 @@ setMethod(
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; when `TRUE` the function will use `Rfast`
-#'   parallel algorithms that on the flip side use more memory
+#' @param optimizeForSpeed Boolean; deprecated: always TRUE
 #'
 #' @returns `calculatePartialCoex()` returns the asked section of the `COEX`
 #'   matrix
@@ -1042,7 +1009,7 @@ calculatePartialCoex <- function(objCOTAN,
       expectedPartialContingencyTables(objCOTAN, columnsSubset,
                                        probZero = probZero,
                                        actOnCells = actOnCells,
-                                       optimizeForSpeed = optimizeForSpeed)
+                                       optimizeForSpeed = TRUE)
 
     gc()
 

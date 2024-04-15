@@ -42,7 +42,7 @@ among those supported by \code{\link[parallelDist:parDist]{parallelDist::parDist
 \itemize{
 \item \code{"SecondaryMarkers"} a named \code{list} that for each secondary marker,
 gives the \code{list} of primary markers that selected for it
-\item \code{"GCS"} the \code{COEX} \code{data.frame}
+\item \code{"GCS"} the relevant subset of \code{COEX} \code{matrix}
 \item \code{"rankGenes"} a \code{data.frame} with the rank of each gene according to its
 \emph{p-value}
 }

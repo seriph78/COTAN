@@ -23,7 +23,7 @@ NULL
 #' @returns `genesCoexSpace()` returns a `list` with:
 #'  * `"SecondaryMarkers"` a named `list` that for each secondary marker,
 #'    gives the `list` of primary markers that selected for it
-#'  * `"GCS"` the `COEX` `data.frame`
+#'  * `"GCS"` the relevant subset of `COEX` `matrix`
 #'  * `"rankGenes"` a `data.frame` with the rank of each gene according to its
 #'    *p-value*
 #'
@@ -36,7 +36,7 @@ NULL
 #'
 #' @importFrom tibble rownames_to_column
 #'
-#' @importFrom Matrix rowMeans
+#' @importFrom Rfast rowsums
 #'
 #' @examples
 #' data("test.dataset")
@@ -91,25 +91,17 @@ genesCoexSpace <-
                                colName = marker,
                                rowNames = secondaryMarkers)
   }
+  rm(pValue)
 
-  top10pcCols <- as.integer(max(1L, round(length(secondaryMarkers) / 10.0,
-                                          digits = 0L)))
+  # put on the left the smalles log(-log(pValues)) for each row
+  S <- calculateS(objCOTAN, geneSubsetRow = secondaryMarkers)
+  LDI <- calculateGDIGivenS(S = S, rowsFraction = 0.1)
 
-  pValueSorted <- calculateS(objCOTAN, geneSubsetCol = secondaryMarkers)
-  # put on the left the smalles pValues for each row
-  pValueSorted <- t(apply(t(pValueSorted), 2L, sort, decreasing = TRUE))
-  pValueSorted <- pValueSorted[, 1L:top10pcCols, drop = FALSE]
-  pValueSorted <- pchisq(as.matrix(pValueSorted), df = 1L, lower.tail = FALSE)
-
-  LDI <- set_names(as.data.frame(rowMeans(pValueSorted)), "Local.GDI")
-
-  rm(pValueSorted)
-
-  lowLDIGenes <- LDI[["Local.GDI"]] <= quantile(LDI[["Local.GDI"]], probs = 0.1)
-  goodGenes <- getGenes(objCOTAN) %in% rownames(LDI)[lowLDIGenes]
-
-  rm(LDI)
+  rm(S)
   gc()
+
+  lowLDIGenes <- LDI >= quantile(LDI, probs = 0.9)
+  goodGenes <- getGenes(objCOTAN) %in% names(LDI)[lowLDIGenes]
 
   GCS <- getGenesCoex(objCOTAN, genes = secondaryMarkers)[goodGenes, ]
   GCS <- tanh(GCS * sqrt(getNumCells(objCOTAN)))

@@ -1,6 +1,6 @@
 ## COTAN 2.3.6
 
-Made function `DEAOnCluster()` parallelized
+Refactored `DEAOnCluster()` to make it run faster.
 
 Now clustering functions dump the `GDI` check results for all clusters
 

@@ -1,5 +1,9 @@
 
-runSingleDEA <- function(clName, probZero, zeroOne, cellsInList) {
+runSingleDEA <- function(clName, cellsInList,
+                         probZero, rowSumsProbZero, zeroOne) {
+  logThis("*", appendLF = FALSE, logLevel = 1L)
+  logThis(paste0(" DEA on cluster '", clName, "'"), logLevel = 3L)
+
   cellsIn <- cellsInList[[clName]]
   if (!any(cellsIn)) {
     warning("Cluster '", clName, "' has no cells assigned to it!")
@@ -11,8 +15,8 @@ runSingleDEA <- function(clName, probZero, zeroOne, cellsInList) {
 
   observedYI <- rowSums(zeroOne[, cellsIn, drop = FALSE])
 
-  expectedNI <- rowSums(probZero[,  cellsIn, drop = FALSE])
-  expectedNO <- rowSums(probZero[, !cellsIn, drop = FALSE])
+  expectedNI <- rowsums(probZero[,  cellsIn, drop = FALSE], parallel = TRUE)
+  expectedNO <- rowSumsProbZero - expectedNI
   expectedYI <- numCellsIn  - expectedNI
   expectedYO <- numCellsOut - expectedNO
 
@@ -25,31 +29,6 @@ runSingleDEA <- function(clName, probZero, zeroOne, cellsInList) {
   return(clCoex)
 }
 
-runDEA <- function(clNames, probZero, zeroOne, cellsInList, cores) {
-  if (cores != 1L) {
-    res <- parallel::mclapply(
-      clNames,
-      runSingleDEA,
-      probZero = probZero,
-      zeroOne = zeroOne,
-      cellsInList = cellsInList,
-      mc.cores = cores)
-
-    # spawned errors are stored as try-error classes
-    resError <- unlist(lapply(res, inherits, "try-error"))
-    if (any(resError)) {
-      stop(paste(res[which(resError)[[1L]]]), call. = FALSE)
-    }
-    return(res)
-  } else {
-    return(lapply(
-      clNames,
-      runSingleDEA,
-      probZero = probZero,
-      zeroOne = zeroOne,
-      cellsInList = cellsInList))
-  }
-}
 
 #'
 #'
@@ -75,15 +54,10 @@ runDEA <- function(clNames, probZero, zeroOne, cellsInList, cores) {
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @importFrom parallel mclapply
-#' @importFrom parallel splitIndices
-#'
-#' @importFrom parallelly supportsMulticore
-#' @importFrom parallelly availableCores
-#'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
+#' @importFrom Rfast rowsums
 #' @importFrom Matrix rowSums
 #'
 #' @rdname HandlingClusterizations
@@ -112,45 +86,15 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL, cores = 1L) {
 
   probZero <- getProbabilityOfZero(objCOTAN)
 
+  rowSumsProbZero <- rowsums(probZero, parallel = TRUE)
+
   cellsInList <- lapply(clustersList, function(cl) {getCells(objCOTAN) %in% cl})
 
-  numSplits <- length(cellsInList)
-  splitStep <- max(1L, cores)
+  coexCls <- lapply(names(cellsInList), runSingleDEA,
+                    cellsInList = cellsInList,
+                    probZero = probZero, rowSumsProbZero = rowSumsProbZero,
+                    zeroOne = zeroOne)
 
-  coexCls <- list()
-
-  pBegin <- 1L
-  while (pBegin <= numSplits) {
-    logThis("*", appendLF = FALSE, logLevel = 1L)
-
-    pEnd <- min(pBegin + splitStep - 1L, numSplits)
-
-    logThis(paste0(" Executing ", (pEnd - pBegin + 1L), " DEA batches from",
-                   " [", pBegin, ":", pEnd, "]"),
-            logLevel = 3L)
-
-    res <- NULL
-    resError <- "No errors"
-    failCount <- 0L
-    while (!is_null(resError) && failCount < 3L) {
-      failCount <- failCount + 1L
-      c(res, resError) %<-%
-        tryCatch(list(runDEA(clNames = names(cellsInList)[pBegin:pEnd],
-                             probZero = probZero, zeroOne = zeroOne,
-                             cellsInList = cellsInList, cores = cores), NULL),
-                 error = function(e) {
-                   logThis(paste("In DEA batches -", e), logLevel = 2L)
-                   list(NULL, e) })
-    }
-
-    assert_that(is_null(resError),
-                msg = paste("DEA batches failed", failCount,
-                            "times with", resError))
-
-    coexCls <- append(coexCls, res)
-
-    pBegin <- pEnd + 1L
-  }
   logThis("", logLevel = 1L)
 
   coexDF <- as.data.frame(coexCls)
@@ -268,7 +212,7 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 
   for (cl in names(clustersList)) {
     logThis("*", appendLF = FALSE, logLevel = 1L)
-    logThis(paste0(" analysis of cluster: '", cl, "' - START"), logLevel = 3L)
+    logThis(paste0(" Analysis of cluster: '", cl, "'"), logLevel = 3L)
 
     cellsIn <- getCells(objCOTAN) %in%  clustersList[[cl]]
 
@@ -295,8 +239,6 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 
     lfcDF <- setColumnInDF(lfcDF, colToSet = lfc,
                            colName = cl, rowNames = rownames(normData))
-
-    logThis(paste0("* analysis of cluster: '", cl, "' - DONE"), logLevel = 3L)
   }
   logThis("", logLevel = 1L)
 
