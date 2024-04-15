@@ -21,6 +21,8 @@
 #'
 #' @importFrom Matrix rowSums
 #'
+#' @importFrom Rfast rowsums
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @examples
@@ -50,7 +52,7 @@ clustersDeltaExpression <- function(objCOTAN, clName = "", clusters = NULL) {
     cellsPos <- getCells(objCOTAN) %in% clustersList[[cl]]
 
     observedYI <- rowSums(zeroOne[, cellsPos])
-    expectedYI <- rowSums(probOne[, cellsPos])
+    expectedYI <- rowsums(probOne[, cellsPos], parallel = TRUE)
     sumUDECluster <- sum(getNu(objCOTAN)[cellsPos])
 
     logThis(paste0(" with mean UDE ", sumUDECluster / sum(cellsPos)),

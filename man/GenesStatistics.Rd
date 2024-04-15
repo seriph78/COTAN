@@ -11,9 +11,9 @@
 \usage{
 calculateGenesCE(objCOTAN)
 
-calculateGDIGivenCorr(corr, numDegreesOfFreedom)
+calculateGDIGivenCorr(corr, numDegreesOfFreedom, rowsFraction = 0.05)
 
-calculateGDI(objCOTAN, statType = "S")
+calculateGDI(objCOTAN, statType = "S", rowsFraction = 0.05)
 
 calculatePValue(
   objCOTAN,
@@ -37,6 +37,9 @@ symmetric matrix}
 
 \item{numDegreesOfFreedom}{a \code{int} that determines the number of degree of
 freedom to use in the \eqn{\chi^{2}} test}
+
+\item{rowsFraction}{The fraction of rows that will be averaged to calcualate
+the \code{GDI}. Defaults to \eqn{5\%}}
 
 \item{statType}{Which statistics to use to compute the p-values. By default
 it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
