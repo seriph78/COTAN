@@ -847,7 +847,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 # --------------- COEX and GDI -----------
 
 # legacy code for cases when the torch library is not available
-calculateCoex_Legacy <- function(objCOTAN, actOnCells) {
+calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
   startTime <- Sys.time()
 
   if (isTRUE(actOnCells)) {
@@ -868,7 +868,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells) {
                               optimizeForSpeed = TRUE)
 
   expectedTime <- Sys.time()
-  logThis(paste("Expected", kind, "contingency table time:",
+  logThis(paste("Expected", kind, "contingency table elapsed time:",
                 difftime(expectedTime, startTime, units = "secs")),
           logLevel = 3L)
 
@@ -884,13 +884,16 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells) {
   }
 
   thresholdForPP <- 0.5
-  problematicPairsFraction <-
-    sum(pmin(expectedYY@x, expectedYN@x, expectedNY@x, expectedNN@x) <
-          thresholdForPP) / length(expectedYY@x)
+  problematicPairsFraction <- NA
+  if (isTRUE(returnPPFract)) {
+    problematicPairsFraction <-
+      sum(pmin(expectedYY@x, expectedYN@x, expectedNY@x, expectedNN@x) <
+            thresholdForPP) / length(expectedYY@x)
 
-  logThis(paste("Fraction of", kind, "with very low",
-                 "expected contingency tables:",
-                 problematicPairsFraction), logLevel = 3L)
+    logThis(paste("Fraction of", kind, "with very low",
+                   "expected contingency tables:",
+                   problematicPairsFraction), logLevel = 3L)
+  }
 
   coex <- normFact * sqrt(1.0 / pmax(1.0, expectedYY@x) +
                           1.0 / pmax(1.0, expectedYN@x) +
@@ -900,7 +903,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells) {
   rm(expectedYN, expectedNY, expectedNN)
 
   sqrtTime <- Sys.time()
-  logThis(paste("Calculate", kind, "normalization factor time:",
+  logThis(paste("Calculate", kind, "normalization factor elapsed time:",
                 difftime(sqrtTime, expectedTime, units = "secs")),
           logLevel = 3L)
 
@@ -913,7 +916,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells) {
                                 asDspMatrices = TRUE)
 
   observedTime <- Sys.time()
-  logThis(paste("Observed", kind, "contingency table time:",
+  logThis(paste("Observed", kind, "contingency table elapsed time:",
                  difftime(observedTime, sqrtTime, units = "secs")),
           logLevel = 3L)
 
@@ -931,11 +934,11 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells) {
   gc()
 
   endTime <- Sys.time()
-  logThis(paste("Calculate", kind, "coex time:",
+  logThis(paste("Calculate", kind, "coex elapsed time:",
                  difftime(endTime, observedTime, units = "secs")),
           logLevel = 3L)
 
-  logThis(paste("Total calculations time:",
+  logThis(paste("Total calculations elapsed time:",
                 difftime(endTime, startTime, units = "secs")),
           logLevel = 2L)
 
@@ -946,17 +949,22 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells) {
 
 
 # torch based code
-calculateCoex_Torch <- function(objCOTAN, deviceStr = "cpu") {
+calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   logThis(paste0("Calculate genes coex (torch) on device ", deviceStr,
                  ": START"), logLevel = 1L)
 
   startTime <- Sys.time()
 
+  gc()
+  cuda_empty_cache()
+
   # TODO: 16 bits are OK here?
   if(deviceStr == "cpu"){
     dtypeForCalc <- torch_float64()
+    halfDtypeForCalc <- torch_float32()
   } else {
     dtypeForCalc <- torch_float32()
+    halfDtypeForCalc <- torch_float16()
   }
 
   device <- torch_device(deviceStr)
@@ -991,7 +999,7 @@ calculateCoex_Torch <- function(objCOTAN, deviceStr = "cpu") {
                          dtype = torch_float64(), device = device),
             torch_tensor(getDispersion(objCOTAN),
                          dtype = torch_float64(), device = device)),
-    device = device, dtype = torch_float64())
+    device = device, dtype = dtypeForCalc)
   cuda_empty_cache()
 
   expectedY <- torch_sum(expectedYY, 1L, dtype = dtypeForCalc)
@@ -999,7 +1007,7 @@ calculateCoex_Torch <- function(objCOTAN, deviceStr = "cpu") {
   expectedYY <- torch_matmul(torch_t(expectedYY), expectedYY)
 
   expectedTime <- Sys.time()
-  logThis(paste("Expected genes contingency table time:",
+  logThis(paste("Expected genes contingency table elapsed time:",
                 difftime(expectedTime, startTime, units = "secs")),
           logLevel = 3L)
 
@@ -1008,40 +1016,63 @@ calculateCoex_Torch <- function(objCOTAN, deviceStr = "cpu") {
   coex <- torch_maximum(expectedYY, one)$reciprocal_()
 
   thresholdForPP <- 0.5
-  problematicPairs <-
-    torch_tensor(expectedYY < thresholdForPP,
-                 dtype = torch_bool(), device = device)
+  problematicPairs <- NULL
+  if (isTRUE(returnPPFract)) {
+    problematicPairs <-
+      torch_tensor(expectedYY < thresholdForPP,
+                   dtype = torch_bool(), device = device)
+  }
 
   # expectedYN
   tmp <- expectedY$view(c(-1L, 1L)) - expectedYY
   invisible(coex$add_(torch_maximum(tmp, one)$reciprocal_()))
-  invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
+  if (isTRUE(returnPPFract)) {
+    invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
+  }
+  rm(tmp)
+  cuda_empty_cache()
 
   # expectedNY
   tmp <- expectedY$view(c(1L, -1L)) - expectedYY
   invisible(coex$add_(torch_maximum(tmp, one)$reciprocal_()))
-  invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
+  if (isTRUE(returnPPFract)) {
+    invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
+  }
+  rm(tmp)
+  cuda_empty_cache()
 
   # expectedNN
   tmp <- expectedYY - expectedY$view(c(-1L, 1L))
   invisible(expectedY$sub_(m))
   invisible(tmp$sub_(expectedY$view(c(1L, -1L))))
   invisible(coex$add_(torch_maximum(tmp, one)$reciprocal_()))
-  invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
+  if (isTRUE(returnPPFract)) {
+    invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
+  }
+  rm(tmp, expectedY)
+  gc()
+  cuda_empty_cache()
 
   invisible(coex$divide_(m)$sqrt_())
 
   # count problematic pairs
-  numDiagPP <- torch_diag(problematicPairs)$sum()$item()
-  problematicPairsFraction <-
-    (problematicPairs$sum()$item() + numDiagPP) /
-    (problematicPairs$size(1) * (problematicPairs$size(1) + 1L))
+  problematicPairsFraction <- NA
+  if (isTRUE(returnPPFract)) {
+    numDiagPP <- torch_diag(problematicPairs)$sum()$item()
+    problematicPairsFraction <-
+      ((problematicPairs$sum()$item() + numDiagPP) /
+         (problematicPairs$size(1) * (problematicPairs$size(1) + 1L)))
 
-  rm(tmp, expectedY, problematicPairs)
-  cuda_empty_cache()
+    logThis(paste("Fraction of genes with very low",
+                  "expected contingency tables:",
+                  problematicPairsFraction), logLevel = 3L)
+
+    rm(problematicPairs)
+    cuda_empty_cache()
+  }
 
   sqrtTime <- Sys.time()
-  logThis(paste("Calculating genes coex normalization factor time:",
+  logThis(paste("Calculating genes coex normalization factor elapsed time:",
                 difftime(sqrtTime, expectedTime, units = "secs")),
           logLevel = 3L)
 
@@ -1050,17 +1081,17 @@ calculateCoex_Torch <- function(objCOTAN, deviceStr = "cpu") {
   # observedYY
   observedYY <- torch_tensor(t(as.matrix(getRawData(objCOTAN))),
                              device = device, dtype = torch_int16())
-  observedYY <- torch_tensor(observedYY != 0L, dtype = dtypeForCalc)
+  observedYY <- torch_tensor(observedYY != 0L, dtype = halfDtypeForCalc)
 
   observedYY <- torch_matmul(torch_t(observedYY), observedYY)
 
   observedTime <- Sys.time()
-  logThis(paste("Observed genes contingency table time:",
+  logThis(paste("Observed genes contingency table elapsed time:",
                 difftime(observedTime, sqrtTime, units = "secs")),
           logLevel = 3L)
 
-  invisible(observedYY$subtract_(expectedYY))
-  invisible(coex$multiply_(observedYY))
+  invisible(expectedYY$subtract_(observedYY))
+  invisible(coex$multiply_(expectedYY$neg()))
 
   rm(expectedYY, observedYY)
   cuda_empty_cache()
@@ -1073,10 +1104,10 @@ calculateCoex_Torch <- function(objCOTAN, deviceStr = "cpu") {
   cuda_empty_cache()
 
   endTime <- Sys.time()
-  logThis(paste("Calculate cenes coex time:",
+  logThis(paste("Calculate genes coex elapsed time:",
                 difftime(endTime, observedTime, units = "secs")),
           logLevel = 3L)
-  logThis(paste("Total calculations time:",
+  logThis(paste("Total calculations elapsed time:",
                 difftime(endTime, startTime, units = "secs")),
           logLevel = 2L)
 
@@ -1099,6 +1130,9 @@ calculateCoex_Torch <- function(objCOTAN, deviceStr = "cpu") {
 #' @param objCOTAN a `COTAN` object
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
+#' @param returnPPFract Boolean; when `TRUE` the function returns the fraction
+#'   of genes/cells pairs for which the *expected contingency table* is smaller
+#'   than \eqn{0.5}. Default is FALSE
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
 #'   not available will run the slower legacy code
@@ -1121,7 +1155,7 @@ calculateCoex_Torch <- function(objCOTAN, deviceStr = "cpu") {
 setMethod(
   "calculateCoex",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE,
+  function(objCOTAN, actOnCells = FALSE, returnPPFract = FALSE,
            optimizeForSpeed = TRUE, deviceStr = "cuda") {
     coex <- NULL
     problematicPairsFraction <- NA
@@ -1131,7 +1165,8 @@ setMethod(
         warning("The 'torch' package is not supported yet for cells' COEX")
       }
       c(coex, problematicPairsFraction) %<-%
-        calculateCoex_Legacy(objCOTAN, actOnCells = TRUE)
+        calculateCoex_Legacy(objCOTAN, actOnCells = TRUE,
+                             returnPPFract = returnPPFract)
 
       objCOTAN@cellsCoex <- coex
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
@@ -1149,7 +1184,8 @@ setMethod(
 
         # Run torch-based calculation
         c(coex, problematicPairsFraction) %<-%
-          calculateCoex_Torch(objCOTAN, deviceStr)
+          calculateCoex_Torch(objCOTAN, deviceStr = deviceStr,
+                              returnPPFract = returnPPFract)
       } else {
         if(optimizeForSpeed) {
           warning("The 'torch' package is not installed.",
@@ -1158,7 +1194,8 @@ setMethod(
 
         # Run legacy calculation
         c(coex, problematicPairsFraction) %<-%
-          calculateCoex_Legacy(objCOTAN, actOnCells = FALSE)
+          calculateCoex_Legacy(objCOTAN, actOnCells = FALSE,
+                               returnPPFract = returnPPFract)
       }
 
       objCOTAN@genesCoex <- coex

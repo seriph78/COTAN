@@ -62,7 +62,7 @@ getClusters(objCOTAN, clName = "")
 
 \S4method{dropClusterization}{COTAN}(objCOTAN, clName)
 
-DEAOnClusters(objCOTAN, clName = "", clusters = NULL, cores = 1L)
+DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 pValueFromDEA(coexDF, numCells, method = "none")
 
@@ -79,7 +79,6 @@ distancesBetweenClusters(
   clusters = NULL,
   coexDF = NULL,
   useDEA = TRUE,
-  cores = 1L,
   distance = NULL
 )
 
@@ -131,8 +130,7 @@ findClustersMarkers(
   clName = "",
   clusters = NULL,
   coexDF = NULL,
-  method = "bonferroni",
-  cores = 1L
+  method = "bonferroni"
 )
 
 geneSetEnrichment(clustersCoex, groupMarkers)
@@ -145,7 +143,6 @@ reorderClusterization(
   reverse = FALSE,
   keepMinusOne = TRUE,
   useDEA = TRUE,
-  cores = 1L,
   distance = NULL,
   hclustMethod = "ward.D2"
 )
@@ -172,8 +169,6 @@ of the \emph{clusters} of the \emph{clusterization}}
 \item{override}{When \code{TRUE} silently allows overriding data for an existing
 \emph{clusterization} name. Otherwise the default behavior will avoid potential
 data losses}
-
-\item{cores}{number of cores to use. Default is 1.}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
@@ -237,6 +232,8 @@ defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
 
 \item{keepMinusOne}{a flag to decide whether to keep the cluster \code{"-1"}
 (representing the non-clustered cells) untouched}
+
+\item{cores}{number of cores to use. Default is 1.}
 }
 \value{
 \code{estimateNuLinearByCluster()} returns the updated \code{COTAN} object
@@ -522,6 +519,6 @@ objCOTAN <- treePlotAndObj[["objCOTAN"]]
 plot(treePlotAndObj[["dend"]])
 
 clMarkers <- findClustersMarkers(objCOTAN, markers = list(),
-                                 clusters = clusters, cores = 6L)
+                                 clusters = clusters)
 
 }

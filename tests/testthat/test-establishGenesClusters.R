@@ -3,7 +3,8 @@ library(zeallot)
 test_that("Establish genes clusters", {
   data("test.dataset")
   objCOTAN <- COTAN(raw = test.dataset)
-  objCOTAN <- proceedToCoex(objCOTAN, cores = 12L, saveObj = FALSE)
+  objCOTAN <- proceedToCoex(objCOTAN, cores = 6L,
+                            optimizeForSpeed = FALSE, saveObj = FALSE)
 
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                        G2 = c("g-000300", "g-000330"),

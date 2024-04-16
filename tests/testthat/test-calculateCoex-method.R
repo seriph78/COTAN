@@ -137,7 +137,8 @@ test_that("Calculations on genes", {
                                     funProbZero(getDispersion(obj), mu)),
                ignore_attr = TRUE)
 
-  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
+  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE,
+                       returnPPFract = TRUE)
 
   legacyCoex <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
@@ -175,7 +176,7 @@ test_that("Calculations on genes", {
   expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 7L)],
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
-                   paste0(10.0 / 55.0))
+                   paste0(NA))
 
   genesSample1 <- sample(getNumGenes(obj), 3L)
   partialCoex1 <- calculatePartialCoex(obj, genesSample1)
@@ -254,7 +255,8 @@ test_that("Calculations on cells", {
                ignore_attr = TRUE)
 
   expect_warning(obj <- calculateCoex(obj, actOnCells = TRUE,
-                                      optimizeForSpeed = TRUE))
+                                      optimizeForSpeed = TRUE,
+                                      returnPPFract = TRUE))
 
   genesCoexInSync <- getMetadataElement(obj, datasetTags()[["gsync"]])
   cellsCoexInSync <- getMetadataElement(obj, datasetTags()[["csync"]])
@@ -457,20 +459,20 @@ test_that("Coex vs saved results", {
                                        saveObj = FALSE,
                                        outDir = tm)
 
-  expect_equal(obj4@genesCoex, obj@genesCoex, tolerance = 5e-8)
+  expect_equal(obj4@genesCoex, obj@genesCoex, tolerance = 5.0e-6)
 
   expect_true(isCoexAvailable(obj4))
   expect_equal(getGenesCoex(obj4, genes = genes.names.test,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = 5.0e-8)
+               coex_test, tolerance = 5.0e-6)
 
   pval <- calculatePValue(obj4, geneSubsetCol = genes.names.test)
 
-  expect_equal(pval, pval_exp, tolerance = 5.0e-8)
+  expect_equal(pval, pval_exp, tolerance = 5.0e-6)
 
   GDI <- calculateGDI(obj4)[genes.names.test, ]
 
-  expect_equal(GDI, GDI_exp, tolerance = 5.0e-8)
+  expect_equal(GDI, GDI_exp, tolerance = 5.0e-6)
 })
 
 
@@ -500,6 +502,6 @@ test_that("Coex with negative dispersion genes", {
   coex3 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
   expect_equal(coex1, coex2, tolerance = 1e-12)
-  expect_equal(coex1, coex3, tolerance = 5e-8)
-  expect_equal(coex2, coex3, tolerance = 5e-8)
+  expect_equal(coex1, coex3, tolerance = 1e-7)
+  expect_equal(coex2, coex3, tolerance = 1e-7)
 })

@@ -138,7 +138,7 @@ setMethod(
       genesCoexTime <- Sys.time()
       analysisTime <- difftime(genesCoexTime, analysisTime, units = "secs")
 
-      logThis(paste0("Only analysis time ", analysisTime), logLevel = 3L)
+      logThis(paste("Only analysis elapsed time:", analysisTime), logLevel = 3L)
 
       logThis("Cotan genes' coex estimation started", logLevel = 1L)
       objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE,
@@ -151,7 +151,7 @@ setMethod(
 
       genesCoexTime <- difftime(endTime, genesCoexTime, units = "secs")
 
-      logThis(paste0("Only genes' coex time ", genesCoexTime), logLevel = 3L)
+      logThis(paste("Only genes' coex elapsed time:", genesCoexTime), logLevel = 3L)
     } else {
       logThis("Cotan genes' coex estimation not requested", logLevel = 2L)
 
@@ -163,7 +163,7 @@ setMethod(
     }
 
     allTime <- difftime(endTime, startTimeAll, units = "secs")
-    logThis(paste0("Total time ", allTime), logLevel = 3L)
+    logThis(paste("Total elapsed time:", allTime), logLevel = 3L)
 
     if (saveObj) {
       utils::write.csv(data.frame("type"  = c("tot_time",
@@ -176,8 +176,8 @@ setMethod(
                                   "n.genes" = getNumGenes(objCOTAN)),
                        file = file.path(outDir, paste0(cond, "_times.csv")))
 
-      logThis(paste0("Saving elaborated data locally at: ",
-                     file.path(outDir, paste0(cond, ".cotan.RDS"))),
+      logThis(paste("Saving elaborated data locally at:",
+                    file.path(outDir, paste0(cond, ".cotan.RDS"))),
               logLevel = 1L)
       saveRDS(objCOTAN, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
     }

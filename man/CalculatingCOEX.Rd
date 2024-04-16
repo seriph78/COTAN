@@ -110,6 +110,7 @@ contingencyTables(objCOTAN, g1, g2)
 \S4method{calculateCoex}{COTAN}(
   objCOTAN,
   actOnCells = FALSE,
+  returnPPFract = FALSE,
   optimizeForSpeed = TRUE,
   deviceStr = "cuda"
 )
@@ -171,6 +172,10 @@ pair. If not given the appropriate one will be calculated on the fly}
 \item{g1}{a gene}
 
 \item{g2}{another gene}
+
+\item{returnPPFract}{Boolean; when \code{TRUE} the function returns the fraction
+of genes/cells pairs for which the \emph{expected contingency table} is smaller
+than \eqn{0.5}. Default is FALSE}
 
 \item{deviceStr}{On the \code{torch} library enforces which device to use to run
 the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},

@@ -41,14 +41,14 @@
 #'
 #' @examples
 #' clMarkers <- findClustersMarkers(objCOTAN, markers = list(),
-#'                                  clusters = clusters, cores = 6L)
+#'                                  clusters = clusters)
 #'
 #' @rdname HandlingClusterizations
 #'
 findClustersMarkers <- function(
     objCOTAN, n = 10L, markers = NULL,
     clName = "", clusters = NULL,
-    coexDF = NULL, method = "bonferroni", cores = 1L) {
+    coexDF = NULL, method = "bonferroni") {
   logThis("findClustersMarkers - START", logLevel = 2L)
 
   marks <- unlist(markers)
@@ -66,7 +66,7 @@ findClustersMarkers <- function(
       coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
     }
     if (is_empty(coexDF)) {
-      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters, cores = cores)
+      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
     }
   }
 

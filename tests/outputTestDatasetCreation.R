@@ -12,7 +12,7 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, cores = 12L, saveObj = FALSE)
+  obj <- proceedToCoex(obj, cores = 6L, saveObj = FALSE)
   #saveRDS(obj, file = file.path(testsDir,"temp.RDS"))
 
   cells.names.test <- getCells(obj)[c(1L:10L, 591L:610L, 991L:1000L)]
@@ -47,10 +47,10 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
 
   clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
                                      initialResolution =   initialResolution,
-                                     cores = 12L, saveObj = FALSE)[["clusters"]]
+                                     cores = 6L, saveObj = FALSE)[["clusters"]]
   saveRDS(clusters, file.path(testsDir, "clusters1.RDS"))
 
-  coexDF <- DEAOnClusters(obj, clusters = clusters, cores = 12L)
+  coexDF <- DEAOnClusters(obj, clusters = clusters)
   obj <- addClusterization(obj, clName = "clusters",
                            clusters = clusters, coexDF = coexDF)
 
@@ -66,7 +66,7 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
     mergeUniformCellsClusters(objCOTAN = obj,
                               clusters = NULL,
                               GDIThreshold = GDIThreshold,
-                              cores = 12L,
+                              cores = 6L,
                               distance = "cosine",
                               hclustMethod = "ward.D2",
                               saveObj = FALSE)

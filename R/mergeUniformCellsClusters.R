@@ -267,8 +267,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     oldNumClusters <- length(unique(outputClusters))
 
     clDist <- distancesBetweenClusters(objCOTAN, clusters = outputClusters,
-                                       useDEA = useDEA, cores = cores,
-                                       distance = distance)
+                                       useDEA = useDEA, distance = distance)
     gc()
 
     if (isTRUE(saveObj)) tryCatch({
@@ -371,7 +370,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   }
 
   outputCoexDF <-
-    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters, cores = cores),
+    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters),
              error = function(err) {
                logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
                return(NULL)
@@ -380,7 +379,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   c(outputClusters, outputCoexDF) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = FALSE, useDEA = useDEA, cores = cores,
+                          keepMinusOne = FALSE, useDEA = useDEA,
                           distance = distance, hclustMethod = hclustMethod),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)

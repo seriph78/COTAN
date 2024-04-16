@@ -269,10 +269,14 @@ cellsUniformClustering <- function(objCOTAN,
       break
     }
 
-    if (saveObj && iter == 1L) {
-      # save the Seurat object on the global raw data
-      srat <- objSeurat
-    }
+    if (saveObj && iter == 1L) tryCatch({
+      # save the Seurat object to file to be reloaded later
+      saveRDS(objSeurat,
+              file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
+      },
+      error = function(err) {
+        logThis(paste("While saving seurat object", err), logLevel = 1L)
+      })
 
     metaData <- objSeurat@meta.data
 
@@ -447,7 +451,7 @@ cellsUniformClustering <- function(objCOTAN,
   }
 
   outputCoexDF <-
-    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters, cores = cores),
+    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters),
              error = function(err) {
                logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
                return(NULL)
@@ -456,7 +460,7 @@ cellsUniformClustering <- function(objCOTAN,
   c(outputClusters, outputCoexDF) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = TRUE, useDEA = useDEA, cores = cores,
+                          keepMinusOne = TRUE, useDEA = useDEA,
                           distance = distance, hclustMethod = hclustMethod),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
@@ -471,6 +475,9 @@ cellsUniformClustering <- function(objCOTAN,
 
       clusterizationName <-
         paste0(as.roman(length(getClusterizations(objCOTAN)) + 1L))
+
+      srat <-
+        readRDS(file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
 
       if (!setequal(rownames(srat@meta.data), names(outputClusters))) {
         warning("List of cells got corrupted")

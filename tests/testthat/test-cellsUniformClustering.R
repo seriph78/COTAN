@@ -80,7 +80,7 @@ test_that("Cell Uniform Clustering", {
     splitList <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
                                         initialResolution = initialResolution,
                                         initialClusters = exactClusters,
-                                        cores = 12L, optimizeForSpeed = FALSE,
+                                        cores = 6L, optimizeForSpeed = FALSE,
                                         deviceStr = "cpu", saveObj = TRUE,
                                         outDir = tm)
   })
@@ -106,8 +106,7 @@ test_that("Cell Uniform Clustering", {
   primaryMarkers <-
     c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",
       "g-000510", "g-000530", "g-000550", "g-000570", "g-000590")
-  clMarkersDF2 <- findClustersMarkers(obj, markers = primaryMarkers,
-                                      cores = 12L)
+  clMarkersDF2 <- findClustersMarkers(obj, markers = primaryMarkers)
 
   expect_identical(colnames(clMarkersDF2), colnames(clMarkersDF))
   expect_identical(clMarkersDF2[, -6L], clMarkersDF[, -6L])
@@ -131,7 +130,7 @@ test_that("Cell Uniform Clustering", {
     temp.obj <- dropGenesCells(objCOTAN = obj,
                                cells = getCells(obj)[cellsToDrop])
 
-    temp.obj <- proceedToCoex(temp.obj, cores = 12L, saveObj = FALSE)
+    temp.obj <- proceedToCoex(temp.obj, cores = 6L, saveObj = FALSE)
     gc()
 
     GDI_data <- calculateGDI(temp.obj)

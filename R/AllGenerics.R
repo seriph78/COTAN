@@ -16,7 +16,7 @@ setGeneric(
 
 setGeneric(
   "calculateCoex",
-  function(objCOTAN, actOnCells = FALSE,
+  function(objCOTAN, actOnCells = FALSE, returnPPFract = FALSE,
            optimizeForSpeed = TRUE, deviceStr = "cuda") {
     standardGeneric("calculateCoex")
   }
