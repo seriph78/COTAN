@@ -37,7 +37,7 @@ automaticCOTANObjectCreation(
 or stop just before at the \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} step}
 
 \item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
-library to run the matrix calcualtions. Otherwise, or when the library is
+library to run the matrix calculations. Otherwise, or when the library is
 not available will run the slower legacy code}
 
 \item{deviceStr}{On the \code{torch} library enforces which device to use to run

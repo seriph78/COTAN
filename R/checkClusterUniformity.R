@@ -12,6 +12,13 @@
 #' @param GDIThreshold the threshold level that discriminates uniform
 #'   *clusters*. It defaults to \eqn{1.43}
 #' @param cores number of cores used
+#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
+#'   library to run the matrix calculations. Otherwise, or when the library is
+#'   not available will run the slower legacy code
+#' @param deviceStr On the `torch` library enforces which device to use to run
+#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
+#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
+#'   to a specific device
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file(s)
 #' @param outDir an existing directory for the analysis output. The effective
@@ -39,14 +46,16 @@
 
 checkClusterUniformity <- function(objCOTAN, clusterName, cells,
                                    GDIThreshold = 1.43, cores = 1L,
+                                   optimizeForSpeed = TRUE, deviceStr = "cuda",
                                    saveObj = TRUE, outDir = ".") {
 
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-  objCOTAN <- proceedToCoex(objCOTAN, cores = cores, optimizeForSpeed = TRUE,
-                            deviceStr = "cuda", saveObj = FALSE)
+  objCOTAN <- proceedToCoex(objCOTAN, cores = cores,
+                            optimizeForSpeed = optimizeForSpeed,
+                            deviceStr = deviceStr, saveObj = FALSE)
   gc()
 
   logThis(paste0("Checking uniformity for the cluster '", clusterName,

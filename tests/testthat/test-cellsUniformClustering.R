@@ -12,14 +12,15 @@ test_that("Cell Uniform Clustering", {
                                sampleCondition = "test")
 
   obj <- proceedToCoex(obj, calcCoex = FALSE,
-                       cores = 12L, saveObj = TRUE, outDir = tm)
+                       cores = 6L, saveObj = TRUE, outDir = tm)
 
   GDIThreshold <- 1.46
   initialResolution <- 0.8
   suppressWarnings({
     clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
                                        initialResolution = initialResolution,
-                                       cores = 12L, saveObj = TRUE,
+                                       cores = 6L, optimizeForSpeed = TRUE,
+                                       deviceStr = "cuda", saveObj = TRUE,
                                        outDir = tm)[["clusters"]]
   })
 
@@ -41,8 +42,9 @@ test_that("Cell Uniform Clustering", {
   firstCl <- clusters[[1L]]
   c(isUniform, fracAbove, lastPerc) %<-%
     checkClusterUniformity(obj, GDIThreshold = GDIThreshold,
-                           cluster = paste0("Cluster_", firstCl),
+                           clusterName = paste0("Cluster_", firstCl),
                            cells = names(clusters)[clusters == firstCl],
+                           optimizeForSpeed = TRUE, deviceStr = "cpu",
                            saveObj = TRUE, outDir = tm)
   expect_true(isUniform)
   expect_lte(fracAbove, 0.01)
@@ -78,7 +80,8 @@ test_that("Cell Uniform Clustering", {
     splitList <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
                                         initialResolution = initialResolution,
                                         initialClusters = exactClusters,
-                                        cores = 12L, saveObj = TRUE,
+                                        cores = 12L, optimizeForSpeed = FALSE,
+                                        deviceStr = "cpu", saveObj = TRUE,
                                         outDir = tm)
   })
 

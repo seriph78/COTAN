@@ -156,6 +156,13 @@ NULL
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
+#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
+#'   library to run the matrix calculations. Otherwise, or when the library is
+#'   not available will run the slower legacy code
+#' @param deviceStr On the `torch` library enforces which device to use to run
+#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
+#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
+#'   to a specific device
 #' @param initialResolution a number indicating how refined are the clusters
 #'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
 #'   [Seurat::FindClusters()]
@@ -201,6 +208,8 @@ cellsUniformClustering <- function(objCOTAN,
                                    GDIThreshold = 1.43,
                                    cores = 1L,
                                    maxIterations = 25L,
+                                   optimizeForSpeed = TRUE,
+                                   deviceStr = "cuda",
                                    initialClusters = NULL,
                                    initialResolution = 0.8,
                                    useDEA = TRUE,
@@ -316,10 +325,12 @@ cellsUniformClustering <- function(objCOTAN,
       } else {
         checkResults <- tryCatch(
           checkClusterUniformity(objCOTAN = objCOTAN,
-                                 cluster = globalClName,
+                                 clusterName = globalClName,
                                  cells = cells,
-                                 cores = cores,
                                  GDIThreshold = GDIThreshold,
+                                 cores = cores,
+                                 optimizeForSpeed = optimizeForSpeed,
+                                 deviceStr = deviceStr,
                                  saveObj = saveObj,
                                  outDir = splitOutDir),
           error = function(err) {

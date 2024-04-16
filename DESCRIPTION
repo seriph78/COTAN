@@ -81,7 +81,8 @@ Suggests:
     cowplot,
     qpdf,
     GEOquery,
-    sf
+    sf,
+    torch
 Config/testthat/edition: 3
 Language: en-US
 biocViews: 

@@ -23,6 +23,8 @@ cellsUniformClustering(
   GDIThreshold = 1.43,
   cores = 1L,
   maxIterations = 25L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
   initialClusters = NULL,
   initialResolution = 0.8,
   useDEA = TRUE,
@@ -38,6 +40,8 @@ checkClusterUniformity(
   cells,
   GDIThreshold = 1.43,
   cores = 1L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
   saveObj = TRUE,
   outDir = "."
 )
@@ -49,6 +53,8 @@ mergeUniformCellsClusters(
   batchSize = 10L,
   notMergeable = NULL,
   cores = 1L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
   hclustMethod = "ward.D2",
@@ -78,6 +84,15 @@ here to speed up the process (default is \code{NULL})}
 
 \item{maxIterations}{max number of re-clustering iterations. It defaults to
 \eqn{25}}
+
+\item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
+library to run the matrix calculations. Otherwise, or when the library is
+not available will run the slower legacy code}
+
+\item{deviceStr}{On the \code{torch} library enforces which device to use to run
+the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
+\code{"cuda"} to use the system \emph{GPUs} or something like \code{"cuda:0"} to restrict
+to a specific device}
 
 \item{initialClusters}{an existing \emph{clusterization} to use as starting point:
 the \emph{clusters} deemed \strong{uniform} will be kept and the rest processed as
@@ -200,6 +215,8 @@ plot(gdiPlot)
 ##
 
 splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
+                                    optimizeForSpeed = TRUE,
+                                    deviceStr = "cuda",
                                     initialResolution = 0.8,
                                     GDIThreshold = 1.46, saveObj = FALSE)
 
@@ -211,6 +228,8 @@ checkClusterUniformity(objCOTAN,
                        cluster = clusters[[1L]],
                        cells = firstCluster,
                        cores = 6L,
+                       optimizeForSpeed = TRUE,
+                       deviceStr = "cuda",
                        saveObj = FALSE)
 
 objCOTAN <- addClusterization(objCOTAN,
@@ -228,6 +247,8 @@ mergedList <- mergeUniformCellsClusters(objCOTAN,
                                         batchSize = 5L,
                                         clusters = clusters,
                                         cores = 6L,
+                                        optimizeForSpeed = TRUE,
+                                        deviceStr = "cpu",
                                         distance = "cosine",
                                         hclustMethod = "ward.D2",
                                         saveObj = FALSE)

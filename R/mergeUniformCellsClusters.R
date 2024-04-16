@@ -21,6 +21,13 @@
 #'   known for not being uniform. Useful to restart the *merging* process after
 #'   an interruption.
 #' @param cores number of cores to use. Default is 1.
+#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
+#'   library to run the matrix calculations. Otherwise, or when the library is
+#'   not available will run the slower legacy code
+#' @param deviceStr On the `torch` library enforces which device to use to run
+#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
+#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
+#'   to a specific device
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
@@ -84,6 +91,8 @@
 #' ##
 #'
 #' splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
+#'                                     optimizeForSpeed = TRUE,
+#'                                     deviceStr = "cuda",
 #'                                     initialResolution = 0.8,
 #'                                     GDIThreshold = 1.46, saveObj = FALSE)
 #'
@@ -95,6 +104,8 @@
 #'                        cluster = clusters[[1L]],
 #'                        cells = firstCluster,
 #'                        cores = 6L,
+#'                        optimizeForSpeed = TRUE,
+#'                        deviceStr = "cuda",
 #'                        saveObj = FALSE)
 #'
 #' objCOTAN <- addClusterization(objCOTAN,
@@ -112,6 +123,8 @@
 #'                                         batchSize = 5L,
 #'                                         clusters = clusters,
 #'                                         cores = 6L,
+#'                                         optimizeForSpeed = TRUE,
+#'                                         deviceStr = "cpu",
 #'                                         distance = "cosine",
 #'                                         hclustMethod = "ward.D2",
 #'                                         saveObj = FALSE)
@@ -132,6 +145,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       batchSize = 10L,
                                       notMergeable = NULL,
                                       cores = 1L,
+                                      optimizeForSpeed = TRUE,
+                                      deviceStr = "cuda",
                                       useDEA = TRUE,
                                       distance = NULL,
                                       hclustMethod = "ward.D2",
@@ -208,10 +223,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
       checkResults <- tryCatch(
         checkClusterUniformity(objCOTAN,
-                               cluster = mergedClName,
+                               clusterName = mergedClName,
                                cells = mergedCluster,
                                GDIThreshold = GDIThreshold,
                                cores = cores,
+                               optimizeForSpeed = optimizeForSpeed,
+                               deviceStr = deviceStr,
                                saveObj = saveObj,
                                outDir = mergeOutDir),
         error = function(err) {

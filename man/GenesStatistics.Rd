@@ -38,7 +38,7 @@ symmetric matrix}
 \item{numDegreesOfFreedom}{a \code{int} that determines the number of degree of
 freedom to use in the \eqn{\chi^{2}} test}
 
-\item{rowsFraction}{The fraction of rows that will be averaged to calcualate
+\item{rowsFraction}{The fraction of rows that will be averaged to calculate
 the \code{GDI}. Defaults to \eqn{5\%}}
 
 \item{statType}{Which statistics to use to compute the p-values. By default

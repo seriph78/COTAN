@@ -1,7 +1,8 @@
 ## 2.5.0
 
-Added support for the `torch` library in the heavy lifting calculations,
-with consequent substantial speed-up, especially of a **GPU** is available
+Added support for the `torch` library to help with the heavy lifting
+calculations of the *genes' COEX* matrix, with consequent substantial speed-up,
+especially when a **GPU** is available on the system
 
 ## COTAN 2.3.6
 
