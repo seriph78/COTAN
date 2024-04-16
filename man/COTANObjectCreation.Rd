@@ -10,6 +10,8 @@
 \S4method{proceedToCoex}{COTAN}(
   objCOTAN,
   calcCoex = TRUE,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
   cores = 1L,
   saveObj = TRUE,
   outDir = "."
@@ -21,6 +23,8 @@ automaticCOTANObjectCreation(
   sequencingMethod,
   sampleCondition,
   calcCoex = TRUE,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
   cores = 1L,
   saveObj = TRUE,
   outDir = "."
@@ -31,6 +35,15 @@ automaticCOTANObjectCreation(
 
 \item{calcCoex}{a Boolean to determine whether to calculate the genes' \code{COEX}
 or stop just before at the \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} step}
+
+\item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
+library to run the matrix calcualtions. Otherwise, or when the library is
+not available will run the slower legacy code}
+
+\item{deviceStr}{On the \code{torch} library enforces which device to use to run
+the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
+\code{"cuda"} to use the system \emph{GPUs} or something like \code{"cuda:0"} to restrict
+to a specific device}
 
 \item{cores}{number of cores to be used}
 
@@ -87,7 +100,7 @@ data("test.dataset")
 ## # in case the genes' `COEX` is not needed it can be skipped
 ## # (e.g. for [cellsUniformClustering()])
 ## objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-##                           cores = 6L, saveObj = FALSE)
+##                           cores = 6L, optimizeForSpeed, deviceStr, saveObj = FALSE)
 
 
 ## Otherwise it is possible to run all at once.

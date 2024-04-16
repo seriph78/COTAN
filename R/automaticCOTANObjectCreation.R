@@ -21,6 +21,13 @@ NULL
 #' @param objCOTAN a newly created `COTAN` object
 #' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
 #'   or stop just before at the [estimateDispersionBisection()] step
+#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
+#'   library to run the matrix calcualtions. Otherwise, or when the library is
+#'   not available will run the slower legacy code
+#' @param deviceStr On the `torch` library enforces which device to use to run
+#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
+#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
+#'   to a specific device
 #' @param cores number of cores to be used
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
@@ -57,15 +64,15 @@ NULL
 #' ## # in case the genes' `COEX` is not needed it can be skipped
 #' ## # (e.g. for [cellsUniformClustering()])
 #' ## objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-#' ##                           cores = 6L, saveObj = FALSE)
+#' ##                           cores = 6L, optimizeForSpeed, deviceStr, saveObj = FALSE)
 #'
 #' @rdname COTANObjectCreation
 #'
 setMethod(
   "proceedToCoex",
   "COTAN",
-  function(objCOTAN, calcCoex = TRUE,
-           cores = 1L, saveObj = TRUE, outDir = ".") {
+  function(objCOTAN, calcCoex = TRUE, optimizeForSpeed = TRUE,
+           deviceStr = "cuda", cores = 1L, saveObj = TRUE, outDir = ".") {
     startTimeAll <- Sys.time()
 
     logThis("Cotan analysis functions started", logLevel = 1L)
@@ -129,18 +136,20 @@ setMethod(
 
     if (isTRUE(calcCoex)) {
       genesCoexTime <- Sys.time()
-      analysisTime <- difftime(genesCoexTime, analysisTime, units = "mins")
+      analysisTime <- difftime(genesCoexTime, analysisTime, units = "secs")
 
       logThis(paste0("Only analysis time ", analysisTime), logLevel = 3L)
 
       logThis("Cotan genes' coex estimation started", logLevel = 1L)
-      objCOTAN <- calculateCoex(objCOTAN)
+      objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE,
+                                optimizeForSpeed = optimizeForSpeed,
+                                deviceStr = deviceStr)
 
       gc()
 
       endTime <- Sys.time()
 
-      genesCoexTime <- difftime(endTime, genesCoexTime, units = "mins")
+      genesCoexTime <- difftime(endTime, genesCoexTime, units = "secs")
 
       logThis(paste0("Only genes' coex time ", genesCoexTime), logLevel = 3L)
     } else {
@@ -153,7 +162,7 @@ setMethod(
       endTime <- Sys.time()
     }
 
-    allTime <- difftime(endTime, startTimeAll, units = "mins")
+    allTime <- difftime(endTime, startTimeAll, units = "secs")
     logThis(paste0("Total time ", allTime), logLevel = 3L)
 
     if (saveObj) {
@@ -188,6 +197,13 @@ setMethod(
 #'   time point.
 #' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
 #'   or stop just before at the [estimateDispersionBisection()] step
+#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
+#'   library to run the matrix calcualtions. Otherwise, or when the library is
+#'   not available will run the slower legacy code
+#' @param deviceStr On the `torch` library enforces which device to use to run
+#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
+#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
+#'   to a specific device
 #' @param cores number of cores to be used
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
@@ -216,7 +232,8 @@ setMethod(
 
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,
-           calcCoex = TRUE, cores = 1L, saveObj = TRUE, outDir = ".") {
+           calcCoex = TRUE, optimizeForSpeed = TRUE, deviceStr = "cuda",
+           cores = 1L, saveObj = TRUE, outDir = ".") {
 
   objCOTAN <- COTAN(raw = raw)
   objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
@@ -226,6 +243,8 @@ automaticCOTANObjectCreation <-
   logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
   logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)
 
-  return(proceedToCoex(objCOTAN, calcCoex = calcCoex, cores = cores,
+  return(proceedToCoex(objCOTAN, calcCoex = calcCoex,
+                       optimizeForSpeed = optimizeForSpeed,
+                       deviceStr = deviceStr, cores = cores,
                        saveObj = saveObj, outDir = outDir))
 }

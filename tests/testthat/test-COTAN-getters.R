@@ -11,8 +11,9 @@ test_that("COTAN getters", {
                                sampleCondition = "Test")
   obj <- clean(obj)
   obj <- estimateDispersionBisection(obj)
-  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
-  obj <- calculateCoex(obj, actOnCells = TRUE,  optimizeForSpeed = TRUE)
+  obj <- calculateCoex(obj, actOnCells = FALSE,
+                       optimizeForSpeed = TRUE, deviceStr = "cpu")
+  obj <- calculateCoex(obj, actOnCells = TRUE,  optimizeForSpeed = FALSE)
 
   obj <- addClusterization(obj, clName = "Test",
                            clusters = set_names(rep(c(1L, 2L), 10L),

@@ -1,3 +1,8 @@
+## 2.5.0
+
+Added support for the `torch` library in the heavy lifting calculations,
+with consequent substantial speed-up, especially of a **GPU** is available
+
 ## COTAN 2.3.6
 
 Refactored `DEAOnCluster()` to make it run faster.

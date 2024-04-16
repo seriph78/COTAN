@@ -841,6 +841,7 @@ setMethod(
       ret <- objCOTAN@genesCoex
       if (isTRUE(zeroDiagonal)) {
         diag(ret) <- 0.0
+        ret <- pack(forceSymmetric(ret))
       }
       return(ret)
     } else {
@@ -905,6 +906,7 @@ setMethod(
       ret <- objCOTAN@cellsCoex
       if (isTRUE(zeroDiagonal)) {
         diag(ret) <- 0.0
+        ret <- pack(forceSymmetric(ret))
       }
       return(ret)
     } else {

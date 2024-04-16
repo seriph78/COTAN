@@ -139,14 +139,35 @@ test_that("Calculations on genes", {
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
+  legacyCoex <- getGenesCoex(obj, zeroDiagonal = FALSE)
+
   expect_true(isCoexAvailable(obj, actOnCells = FALSE, ignoreSync = FALSE))
-  expect_identical(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2L))
+  expect_identical(dim(legacyCoex), rep(getNumGenes(obj), 2L))
   expect_identical(getGenesCoex(obj)[1L, 1L], 0.0)
-  expect_equal(abs(as.vector(getGenesCoex(obj,
-                                          zeroDiagonal = FALSE)[-1L, -1L])),
+  expect_equal(abs(as.vector(legacyCoex[-1L, -1L])),
                rep(1.0, 81L), tolerance = 0.01)
 
-  expect_equal(as.matrix(getGenesCoex(obj, zeroDiagonal = FALSE)),
+  expect_equal(as.matrix(legacyCoex),
+               coexMatrix(observed, expected,
+                          getNumCells(obj), getNumGenes(obj)),
+               tolerance = 0.001, ignore_attr = TRUE)
+
+  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 7L)],
+               ignore_attr = TRUE)
+  expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
+                   paste0(10.0 / 55.0))
+
+  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
+
+  torchCoex <- getGenesCoex(obj, zeroDiagonal = FALSE)
+
+  expect_true(isCoexAvailable(obj, actOnCells = FALSE, ignoreSync = FALSE))
+  expect_identical(dim(torchCoex), rep(getNumGenes(obj), 2L))
+  expect_identical(getGenesCoex(obj)[1L, 1L], 0.0)
+  expect_equal(abs(as.vector(torchCoex[-1L, -1L])),
+               rep(1.0, 81L), tolerance = 0.01)
+
+  expect_equal(as.matrix(torchCoex),
                coexMatrix(observed, expected,
                           getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
@@ -161,15 +182,14 @@ test_that("Calculations on genes", {
 
   # These need tolerance
   expect_equal(partialCoex1,
-               getGenesCoex(obj, zeroDiagonal = FALSE)[, sort(genesSample1)],
+               legacyCoex[, sort(genesSample1)],
                tolerance = 1e-12)
 
   genesSample2 <- getGenes(obj)[sample(getNumGenes(obj), 3L)]
   partialCoex2 <- calculatePartialCoex(obj, genesSample2,
                                        optimizeForSpeed = FALSE)
 
-  expect_equal(partialCoex2,
-               getGenesCoex(obj, genesSample2, zeroDiagonal = FALSE),
+  expect_equal(partialCoex2, legacyCoex[, sort(genesSample2), drop = FALSE],
                tolerance = 1e-12)
 })
 
@@ -233,7 +253,8 @@ test_that("Calculations on cells", {
                       ncol = getNumCells(obj)),
                ignore_attr = TRUE)
 
-  obj <- calculateCoex(obj, actOnCells = TRUE, optimizeForSpeed = TRUE)
+  expect_warning(obj <- calculateCoex(obj, actOnCells = TRUE,
+                                      optimizeForSpeed = TRUE))
 
   genesCoexInSync <- getMetadataElement(obj, datasetTags()[["gsync"]])
   cellsCoexInSync <- getMetadataElement(obj, datasetTags()[["csync"]])
@@ -352,7 +373,12 @@ test_that("Coex vs saved results", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, cores = 12L, saveObj = FALSE)
+  obj <- proceedToCoex(obj,
+                       cores = 12L,
+                       optimizeForSpeed = FALSE,
+                       deviceStr = "cpu",
+                       saveObj = FALSE,
+                       outDir = tm)
 
   genesCoexInSync <- getMetadataElement(obj, datasetTags()[["gsync"]])
   cellsCoexInSync <- getMetadataElement(obj, datasetTags()[["csync"]])
@@ -364,7 +390,10 @@ test_that("Coex vs saved results", {
                                        sequencingMethod = "artificial",
                                        sampleCondition = "test",
                                        cores = 12L,
-                                       saveObj = FALSE)
+                                       optimizeForSpeed = FALSE,
+                                       deviceStr = "cpu",
+                                       saveObj = FALSE,
+                                       outDir = tm)
 
   expect_identical(obj2, obj)
 
@@ -388,4 +417,58 @@ test_that("Coex vs saved results", {
   GDI_exp <- readRDS(file.path(getwd(), "GDI.test.RDS"))
 
   expect_equal(GDI, GDI_exp, tolerance = 1.0e-12)
+
+  # Torch CPU
+
+  obj3 <- automaticCOTANObjectCreation(raw = test.dataset,
+                                       GEO = " ",
+                                       sequencingMethod = "artificial",
+                                       sampleCondition = "test",
+                                       cores = 12L,
+                                       optimizeForSpeed = TRUE,
+                                       deviceStr = "cpu",
+                                       saveObj = FALSE,
+                                       outDir = tm)
+
+  expect_equal(obj3@genesCoex, obj@genesCoex, tolerance = 1e-12)
+
+  expect_true(isCoexAvailable(obj3))
+  expect_equal(getGenesCoex(obj3, genes = genes.names.test,
+                            zeroDiagonal = FALSE),
+               coex_test, tolerance = 1.0e-12)
+
+  pval <- calculatePValue(obj3, geneSubsetCol = genes.names.test)
+
+  expect_equal(pval, pval_exp, tolerance = 1.0e-12)
+
+  GDI <- calculateGDI(obj3)[genes.names.test, ]
+
+  expect_equal(GDI, GDI_exp, tolerance = 1.0e-12)
+
+  # Torch GPU
+
+  obj4 <- automaticCOTANObjectCreation(raw = test.dataset,
+                                       GEO = " ",
+                                       sequencingMethod = "artificial",
+                                       sampleCondition = "test",
+                                       cores = 12L,
+                                       optimizeForSpeed = TRUE,
+                                       deviceStr = "cuda",
+                                       saveObj = FALSE,
+                                       outDir = tm)
+
+  expect_equal(obj4@genesCoex, obj@genesCoex, tolerance = 5e-8)
+
+  expect_true(isCoexAvailable(obj4))
+  expect_equal(getGenesCoex(obj4, genes = genes.names.test,
+                            zeroDiagonal = FALSE),
+               coex_test, tolerance = 5.0e-8)
+
+  pval <- calculatePValue(obj4, geneSubsetCol = genes.names.test)
+
+  expect_equal(pval, pval_exp, tolerance = 5.0e-8)
+
+  GDI <- calculateGDI(obj4)[genes.names.test, ]
+
+  expect_equal(GDI, GDI_exp, tolerance = 5.0e-8)
 })
