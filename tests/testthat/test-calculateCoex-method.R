@@ -374,7 +374,7 @@ test_that("Coex vs saved results", {
                                sampleCondition = "test")
 
   obj <- proceedToCoex(obj,
-                       cores = 12L,
+                       cores = 6L,
                        optimizeForSpeed = FALSE,
                        deviceStr = "cpu",
                        saveObj = FALSE,
@@ -389,7 +389,7 @@ test_that("Coex vs saved results", {
                                        GEO = " ",
                                        sequencingMethod = "artificial",
                                        sampleCondition = "test",
-                                       cores = 12L,
+                                       cores = 6L,
                                        optimizeForSpeed = FALSE,
                                        deviceStr = "cpu",
                                        saveObj = FALSE,
@@ -424,7 +424,7 @@ test_that("Coex vs saved results", {
                                        GEO = " ",
                                        sequencingMethod = "artificial",
                                        sampleCondition = "test",
-                                       cores = 12L,
+                                       cores = 6L,
                                        optimizeForSpeed = TRUE,
                                        deviceStr = "cpu",
                                        saveObj = FALSE,
@@ -451,7 +451,7 @@ test_that("Coex vs saved results", {
                                        GEO = " ",
                                        sequencingMethod = "artificial",
                                        sampleCondition = "test",
-                                       cores = 12L,
+                                       cores = 6L,
                                        optimizeForSpeed = TRUE,
                                        deviceStr = "cuda",
                                        saveObj = FALSE,
@@ -471,4 +471,35 @@ test_that("Coex vs saved results", {
   GDI <- calculateGDI(obj4)[genes.names.test, ]
 
   expect_equal(GDI, GDI_exp, tolerance = 5.0e-8)
+})
+
+
+test_that("Coex with negative dispersion genes", {
+  utils::data("test.dataset", package = "COTAN")
+
+  obj <- COTAN(raw = test.dataset)
+  obj <- initializeMetaDataset(obj, GEO = " ",
+                               sequencingMethod = "artificial",
+                               sampleCondition = "test")
+
+  cells.names.test <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
+  cellsToDrop <- getCells(obj)[!getCells(obj) %in% cells.names.test]
+  obj <- dropGenesCells(obj, cells = cellsToDrop)
+
+  obj <- proceedToCoex(obj, cores = 6L, calcCoex = FALSE, saveObj = FALSE)
+
+  expect_true(any(getDispersion(obj) < 0.0))
+
+  obj <- calculateCoex(obj, optimizeForSpeed = FALSE, deviceStr = "cpu")
+  coex1 <- getGenesCoex(obj, zeroDiagonal = FALSE)
+
+  obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cpu")
+  coex2 <- getGenesCoex(obj, zeroDiagonal = FALSE)
+
+  obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cuda")
+  coex3 <- getGenesCoex(obj, zeroDiagonal = FALSE)
+
+  expect_equal(coex1, coex2, tolerance = 1e-12)
+  expect_equal(coex1, coex3, tolerance = 5e-8)
+  expect_equal(coex2, coex3, tolerance = 5e-8)
 })

@@ -34,7 +34,7 @@ cellsUniformClustering(
 
 checkClusterUniformity(
   objCOTAN,
-  cluster,
+  clusterName,
   cells,
   GDIThreshold = 1.43,
   cores = 1L,
@@ -104,7 +104,7 @@ plots to file}
 \item{outDir}{an existing directory for the analysis output. The effective
 output will be paced in a sub-folder.}
 
-\item{cluster}{the tag of the \emph{cluster}}
+\item{clusterName}{the tag of the \emph{cluster}}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
 

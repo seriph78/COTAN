@@ -15,15 +15,15 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
   obj <- proceedToCoex(obj, cores = 12L, saveObj = FALSE)
   #saveRDS(obj, file = file.path(testsDir,"temp.RDS"))
 
-  cell.names.test  <- getCells(obj)[c(1L:10L, 591L:610L, 991L:1000L)]
+  cells.names.test <- getCells(obj)[c(1L:10L, 591L:610L, 991L:1000L)]
   genes.names.test <- getGenes(obj)[c(1L:10L, 291L:310L, 591L: 600L)]
-  saveRDS(cell.names.test, file.path(testsDir, "cell.names.test.RDS"))
+  saveRDS(cells.names.test, file.path(testsDir, "cells.names.test.RDS"))
   saveRDS(genes.names.test, file.path(testsDir, "genes.names.test.RDS"))
 
   dispersion.test <- getDispersion(obj)[genes.names.test]
   saveRDS(dispersion.test, file.path(testsDir, "dispersion.test.RDS"))
 
-  raw.norm.test <- getNormalizedData(obj)[genes.names.test, cell.names.test]
+  raw.norm.test <- getNormalizedData(obj)[genes.names.test, cells.names.test]
   saveRDS(raw.norm.test, file.path(testsDir, "raw.norm.test.RDS"))
 
   coex.test <- getGenesCoex(obj, genes = genes.names.test, zeroDiagonal = FALSE)
@@ -36,7 +36,7 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
   GDI.test <- GDI.test[genes.names.test, ]
   saveRDS(GDI.test, file.path(testsDir, "GDI.test.RDS"))
 
-  nu.test <- getNu(obj)[cell.names.test]
+  nu.test <- getNu(obj)[cells.names.test]
   saveRDS(nu.test, file.path(testsDir, "nu.test.RDS"))
 
   pval.test <- calculatePValue(obj, geneSubsetCol = genes.names.test)

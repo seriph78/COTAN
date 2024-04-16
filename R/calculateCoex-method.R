@@ -967,7 +967,7 @@ calculateCoex_Torch <- function(objCOTAN, deviceStr = "cpu") {
 
     # Calculate terms based on conditions
     term1 <- (a <= zero) *
-      torch_exp(torch_ger(nu, lambda) * torch_minimum(a, zero) + minusOne)
+      torch_exp(torch_ger(nu, lambda) * (torch_minimum(a, zero) + minusOne))
 
     term2 <- (a >  zero) *
       torch_pow(one + torch_ger(nu, lambda) * torch_maximum(a, zero),
