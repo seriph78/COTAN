@@ -242,8 +242,8 @@ cellsUniformClustering <- function(objCOTAN,
   numClustersToRecluster <- 0L
   srat <- NULL
   allCheckResults <- data.frame()
-  errorCheckResults <-
-    list("isUniform" = FALSE, "fractionAbove" = NA, "firstPercentile" = NA)
+  errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
+                            "firstPercentile" = NA, "size" = NA)
 
   repeat {
     iter <- iter + 1L
@@ -341,6 +341,7 @@ cellsUniformClustering <- function(objCOTAN,
             logThis(paste("while checking cluster uniformity", err),
                     logLevel = 0L)
             logThis("marking cluster as not uniform", logLevel = 1L)
+            errorCheckResults[["size"]] <- length(cells)
             return(errorCheckResults)
           })
 
@@ -446,6 +447,7 @@ cellsUniformClustering <- function(objCOTAN,
     allCheckResults <- allCheckResults[clTags, , drop = FALSE]
     allCheckResults <- allCheckResults[clTagsMap[clTags], , drop = FALSE]
     if (any(unclusteredCells)) {
+      errorCheckResults[["size"]] <- length(unclusteredCells)
       allCheckResults <- rbind(allCheckResults, "-1" <- errorCheckResults)
     }
   }

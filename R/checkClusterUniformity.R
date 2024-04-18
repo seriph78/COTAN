@@ -28,6 +28,7 @@
 #'   * `"isUniform"`: a flag indicating whether the *cluster* is **uniform**
 #'   * `"fractionAbove"`: the percentage of genes with `GDI` above the threshold
 #'   * `"firstPercentile"`: the quantile associated to the highest percentile
+#'   * `"size"`: the number of cells in the cluster
 #'
 #' @importFrom utils head
 #'
@@ -58,8 +59,10 @@ checkClusterUniformity <- function(objCOTAN, clusterName, cells,
                             deviceStr = deviceStr, saveObj = FALSE)
   gc()
 
+  clusterSize <- getNumCells(objCOTAN)
+
   logThis(paste0("Checking uniformity for the cluster '", clusterName,
-                 "' with ", getNumCells(objCOTAN), " cells"), logLevel = 2L)
+                 "' with ", clusterSize, " cells"), logLevel = 2L)
 
   GDIData <- calculateGDI(objCOTAN)
 
@@ -104,7 +107,7 @@ checkClusterUniformity <- function(objCOTAN, clusterName, cells,
 
   clusterIsUniform <- percAboveThr <= 0.01
 
-  logThis(paste0("Cluster ", clusterName, " is ",
+  logThis(paste0("Cluster ", clusterName, ", with size ", clusterSize, ", is ",
                  (if (clusterIsUniform) {""} else {"not "}), "uniform\n",
                  round(percAboveThr * 100.0, digits = 2L),
                  "% of the genes is above the given GDI threshold ",
@@ -128,5 +131,6 @@ checkClusterUniformity <- function(objCOTAN, clusterName, cells,
 
   return(list("isUniform" = clusterIsUniform,
               "fractionAbove" = percAboveThr,
-              "firstPercentile" = quantAboveThr[[1L]]))
+              "firstPercentile" = quantAboveThr[[1L]],
+              "size" = clusterSize))
 }

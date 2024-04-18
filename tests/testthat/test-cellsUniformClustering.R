@@ -40,7 +40,7 @@ test_that("Cell Uniform Clustering", {
   expect_identical(reorderClusterization(obj)[["clusters"]], clusters)
 
   firstCl <- clusters[[1L]]
-  c(isUniform, fracAbove, lastPerc) %<-%
+  c(isUniform, fracAbove, firstPerc, clSize) %<-%
     checkClusterUniformity(obj, GDIThreshold = GDIThreshold,
                            clusterName = paste0("Cluster_", firstCl),
                            cells = names(clusters)[clusters == firstCl],
@@ -48,7 +48,8 @@ test_that("Cell Uniform Clustering", {
                            saveObj = TRUE, outDir = tm)
   expect_true(isUniform)
   expect_lte(fracAbove, 0.01)
-  expect_lte(lastPerc, GDIThreshold)
+  expect_lte(firstPerc, GDIThreshold)
+  expect_identical(clSize, sum(clusters == firstCl))
 
   clusters2 <- factor(clusters, levels = c(levels(clusters), "-1"))
   clusters2[1L:50L] <- "-1"

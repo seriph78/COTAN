@@ -148,6 +148,7 @@ an interruption.}
 \item \code{"isUniform"}: a flag indicating whether the \emph{cluster} is \strong{uniform}
 \item \code{"fractionAbove"}: the percentage of genes with \code{GDI} above the threshold
 \item \code{"firstPercentile"}: the quantile associated to the highest percentile
+\item \code{"size"}: the number of cells in the cluster
 }
 
 a \code{list} with:
@@ -223,14 +224,11 @@ splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
 clusters <- splitList[["clusters"]]
 
 firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
-checkClusterUniformity(objCOTAN,
-                       GDIThreshold = 1.46,
-                       cluster = clusters[[1L]],
-                       cells = firstCluster,
-                       cores = 6L,
-                       optimizeForSpeed = TRUE,
-                       deviceStr = "cuda",
-                       saveObj = FALSE)
+firstClusterIsUniform <-
+  checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
+                         cluster = clusters[[1L]], cells = firstCluster,
+                         cores = 6L, optimizeForSpeed = TRUE,
+                         deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
 
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "split",

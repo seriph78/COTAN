@@ -99,14 +99,11 @@
 #' clusters <- splitList[["clusters"]]
 #'
 #' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
-#' checkClusterUniformity(objCOTAN,
-#'                        GDIThreshold = 1.46,
-#'                        cluster = clusters[[1L]],
-#'                        cells = firstCluster,
-#'                        cores = 6L,
-#'                        optimizeForSpeed = TRUE,
-#'                        deviceStr = "cuda",
-#'                        saveObj = FALSE)
+#' firstClusterIsUniform <-
+#'   checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
+#'                          cluster = clusters[[1L]], cells = firstCluster,
+#'                          cores = 6L, optimizeForSpeed = TRUE,
+#'                          deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
 #'
 #' objCOTAN <- addClusterization(objCOTAN,
 #'                               clName = "split",
@@ -188,9 +185,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   iter <- 0L
   allCheckResults <- data.frame()
-  errorCheckResults <-
-    list("isUniform" = FALSE, "fractionAbove" = NA, "firstPercentile" = NA)
-
+  errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
+                            "firstPercentile" = NA, "size" = NA)
 
   testPairListMerge <- function(pList) {
     logThis(paste0("Clusters pairs for merging:\n",
@@ -235,6 +231,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
           logThis(paste("While checking cluster uniformity", err),
                   logLevel = 0L)
           logThis("Marking pair as not mergable", logLevel = 1L)
+          errorCheckResults[["size"]] <- length(mergedCluster)
           return(errorCheckResults)
         })
 

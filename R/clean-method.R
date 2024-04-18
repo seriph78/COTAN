@@ -57,11 +57,11 @@ setMethod(
     logThis(paste0("Genes/cells selection done:",
                    " dropped [", length(genesToDrop), "] genes",
                    " and [", length(cellsToDrop), "] cells"),
-            logLevel = 1L)
+            logLevel = 2L)
 
     logThis(paste0("Working on [", getNumGenes(objCOTAN), "]",
                    " genes and [", getNumCells(objCOTAN), "] cells"),
-            logLevel = 2L)
+            logLevel = 1L)
 
     objCOTAN <- findFullyExpressedGenes(objCOTAN,
                                         cellsThreshold = cellsThreshold)
