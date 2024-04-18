@@ -1,15 +1,4 @@
 
-#' Calculations of genes statistics
-#'
-#' @description A collection of functions returning various statistics
-#'   associated to the genes. In particular the *discrepancy* between the
-#'   expected probabilities of zero and their actual occurrences, both at single
-#'   gene level or looking at genes' pairs
-#'
-#' @name GenesStatistics
-NULL
-
-
 #' @details `calculateGenesCE()` is used to calculate the discrepancy between
 #'   the expected probability of zero and the observed zeros across all cells
 #'   for each gene as *cross-entropy*: \eqn{-\sum_{c}{\mathbb{1}_{X_c == 0}

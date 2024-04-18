@@ -1,9 +1,17 @@
+#'
+#' @title Numeric Utilities
+#'
+#' @description A set of function helper related to the statistical model
+#'   underlying the `COTAN` package
+#'
+#' @name NumericUtilities
+NULL
+
 #------------------- negative binomial ----------
 
-#' funProbZero
 #'
-#' @description Private function that gives the probability of a sample gene
-#'   count being zero given the given the dispersion and mu
+#' @details `funProbZero` is a private function that gives the probability that
+#'   a sample gene's reads are zero, given the `dispersion` and `mu` parameters.
 #'
 #' @details Using \eqn{d}{`disp`} for `disp` and \eqn{\mu}{`mu`} for `mu`,
 #'   it returns:
@@ -16,16 +24,16 @@
 #'   \eqn{\mu = \infty}{`mu = Inf`}.
 #'   It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
 #'
-#' @param disp the estimated dispersion (can be a \eqn{n}-sized vector)
-#' @param mu the lambda times nu value  (can be a \eqn{n \times m} matrix)
+#' @param dispersion the estimated `dispersion` (a \eqn{n}-sized vector)
+#' @param mu the `lambda` times `nu` values (a \eqn{n \times m} matrix)
 #'
-#' @returns the probability (matrix) that a count is identically zero
+#' @returns the probability `matrix` that a *read count* is identically zero
 #'
-#' @rdname funProbZero
+#' @rdname NumericUtilities
 #'
-funProbZero <- function(disp, mu) {
-  neg <- (disp <= 0.0)
-  ad <- abs(disp)
+funProbZero <- function(dispersion, mu) {
+  neg <- (dispersion <= 0.0)
+  ad <- abs(dispersion)
   return(( neg) * (exp(-(1.0 + ad) * mu)) +
          (!neg) * (1.0 + ad * mu)^(-1.0 / ad))
 }
@@ -33,24 +41,21 @@ funProbZero <- function(disp, mu) {
 
 #--------------------- dispersion solvers ----------------
 
-#' dispersionBisection
+#' @details `dispersionBisection` is a private function for the estimation of
+#'   *dispersion* slot of a `COTAN` object via a bisection solver
 #'
-#' @description Private function invoked by [estimateDispersionBisection()] for
-#'   the estimation of 'dispersion' slot of a `COTAN` object via a bisection
-#'   solver
-#'
-#' @details The goal is to find a dispersion value that reduces to zero the
+#' @details The goal is to find a `dispersion` value that reduces to zero the
 #'   difference between the number of estimated and counted zeros
 #'
 #' @param sumZeros the number of cells that didn't express the gene
-#' @param lambda the lambda parameter
-#' @param nu the nu vector
+#' @param lambda the estimated `lambda` (a \eqn{n}-sized vector)
+#' @param nu the estimated `nu` (a \eqn{m}-sized vector)
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
 #' @returns the dispersion value
 #'
-#' @noRd
+#' @rdname NumericUtilities
 #'
 dispersionBisection <-
   function(sumZeros,
@@ -123,25 +128,24 @@ dispersionBisection <-
   }
 
 
-#' parallelDispersionBisection
+#' @details `parallelDispersionBisection` is a private function invoked by
+#'   [estimateDispersionBisection()] for the estimation of the `dispersion` slot
+#'   of a `COTAN` object via a parallel bisection solver
 #'
-#' @description Private function invoked by [estimateDispersionBisection()] for
-#'   the estimation of the `dispersion` slot of a `COTAN` object via a parallel
-#'   bisection solver
-#'
-#' @details The goal is to find a dispersion array that reduces to zero the
+#' @details The goal is to find a `dispersion array` that reduces to zero the
 #'   difference between the number of estimated and counted zeros
 #'
 #' @param genes names of the relevant genes
-#' @param sumZeros the number of cells that didn't express the relevant gene
-#' @param lambda the lambda vector
-#' @param nu the nu vector
+#' @param sumZeros the number of cells that didn't express the relevant gene (a
+#'   \eqn{n}-sized vector)
+#' @param lambda the estimated `lambda` (a \eqn{n}-sized vector)
+#' @param nu the estimated `nu` (a \eqn{m}-sized vector)
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
 #' @returns the dispersion values
 #'
-#' @noRd
+#' @rdname NumericUtilities
 #'
 parallelDispersionBisection <-
   function(genes,
@@ -246,24 +250,22 @@ parallelDispersionBisection <-
 
 #------------------------- nu solvers ---------------------
 
-#' nuBisection
+#' @details `nuBisection` is a private function for the estimation of `nu` slot
+#'   of a `COTAN` object via a bisection solver
 #'
-#' @description Private function invoked by [estimateNuBisection()] for the
-#'   estimation of `nu` slot of a `COTAN` object via a bisection solver
-#'
-#' @details The goal is to find a nu value that reduces to zero the difference
+#' @details The goal is to find a `nu` value that reduces to zero the difference
 #'   between the number of estimated and counted zeros
 #'
 #' @param sumZeros the number non expressed genes in the cell
-#' @param lambda the lambda vector
-#' @param dispersion the dispersion vector
-#' @param initialGuess the initial guess for nu
+#' @param lambda the estimated `lambda` (a \eqn{n}-sized vector)
+#' @param dispersion the estimated `dispersion` (a \eqn{n}-sized vector)
+#' @param initialGuess the initial guess for `nu`
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
 #' @returns the nu value
 #'
-#' @noRd
+#' @rdname NumericUtilities
 #'
 nuBisection <-
   function(sumZeros,
@@ -333,19 +335,19 @@ nuBisection <-
   }
 
 
-#' parallelNuBisection
+#' @details `parallelNuBisection` is a private function invoked by
+#'   [estimateNuBisection()] for the estimation of `nu` slot of a `COTAN` object
+#'   via a parallel bisection solver
 #'
-#' @description Private function invoked by [estimateNuBisection()] for the
-#'   estimation of `nu` slot of a `COTAN` object via a parallel bisection solver
-#'
-#' @details The goal is to find a nu array that reduces to zero the difference
+#' @details The goal is to find a `nu array` that reduces to zero the difference
 #'   between the number of estimated and counted zeros
 #'
 #' @param cells names of the relevant cells
-#' @param sumZeros the number of genes not expressed in the relevant cell
-#' @param lambda the lambda vector
-#' @param dispersion the dispersion vector
-#' @param initialGuess the initial guess vector for nu
+#' @param sumZeros the number of genes not expressed in the relevant cell (a
+#'   \eqn{m}-sized vector)
+#' @param lambda the estimated `lambda` (a \eqn{n}-sized vector)
+#' @param dispersion the estimated `dispersion` (a \eqn{n}-sized vector)
+#' @param initialGuess the initial guess for `nu`  (a \eqn{m}-sized vector)
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
@@ -353,7 +355,7 @@ nuBisection <-
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @noRd
+#' @rdname NumericUtilities
 #'
 parallelNuBisection <-
   function(cells,
@@ -459,31 +461,18 @@ parallelNuBisection <-
 
 #----------------- legacy functions --------------------
 
-#' Handle symmetric matrix <-> vector conversions
-#'
-#' @description Converts a symmetric matrix into a compacted symmetric matrix
-#'   and vice-versa.
-#'
-#' @name LegacyFastSymmMatrix
-NULL
-
 #' @details This is a legacy function related to old `scCOTAN` objects. Use the
 #'   more appropriate `Matrix::dspMatrix` type for similar functionality.
 #'
-#'   `mat2vec_rfast`will forcibly make its argument symmetric.
+#'   `mat2vec_rfast` converts a compacted symmetric matrix (that is an array)
+#'   into a symmetric matrix.
 #'
-#' @param x a `list` formed by two arrays: `genes` with the unique gene names
-#'   and `values` with all the values.
-#' @param genes an array with all wanted genes or the string `"all"`. When equal
-#'   to `"all"` (the default), it recreates the entire matrix.
 #' @param mat a square (possibly symmetric) matrix with all genes as row and
 #'   column names.
 #'
-#' @returns `vec2mat_rfast` returns the reconstructed symmetric matrix
-#'
-#'   `mat2vec_rfast` a `list` formed by two arrays:
-#'   * `genes` with the unique gene names,
-#'   * `values` with all the values.
+#' @returns `mat2vec_rfast` returns a `list` formed by two arrays:
+#'   * `"genes"` with the unique gene names,
+#'   * `"values"` with all the values.
 #'
 #' @examples
 #' v <- list("genes" = paste0("gene_", c(1:9)), "values" = c(1:45))
@@ -501,7 +490,6 @@ NULL
 #' v2 <- mat2vec_rfast(M)
 #' all.equal(v, v2)
 #'
-
 #' @importFrom Rfast lower_tri.assign
 #' @importFrom Rfast upper_tri.assign
 #' @importFrom Rfast upper_tri
@@ -509,7 +497,7 @@ NULL
 #'
 #' @export
 #'
-#' @rdname LegacyFastSymmMatrix
+#' @rdname COTAN-Legacy
 #'
 vec2mat_rfast <- function(x, genes = "all") {
   if (!isa(x, "list") || !identical(names(x), c("genes", "values"))) {
@@ -565,13 +553,24 @@ vec2mat_rfast <- function(x, genes = "all") {
   return(m)
 }
 
-
+#' @details This is a legacy function related to old `scCOTAN` objects. Use the
+#'   more appropriate `Matrix::dspMatrix` type for similar functionality.
+#'
+#'   `vec2mat_rfast` converts a symmetric matrix into a compacted symmetric
+#'   matrix. It will forcibly make its argument symmetric.
+#'
+#' @param x a `list` formed by two arrays: `genes` with the unique gene names
+#'   and `values` with all the values.
+#' @param genes an array with all wanted genes or the string `"all"`. When equal
+#'   to `"all"` (the default), it recreates the entire matrix.
+#'
+#' @returns `vec2mat_rfast` returns the reconstructed symmetric matrix
 #'
 #' @importFrom Rfast lower_tri
 #'
 #' @export
 #'
-#' @rdname LegacyFastSymmMatrix
+#' @rdname COTAN-Legacy
 #'
 mat2vec_rfast <- function(mat) {
   mat <- as.matrix(mat)

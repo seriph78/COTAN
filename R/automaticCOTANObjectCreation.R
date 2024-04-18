@@ -1,18 +1,5 @@
 
 #'
-#' Automatic `COTAN` shortcuts
-#'
-#' @description These functions take (or create) a `COTAN` object and run all
-#'   the necessary steps until the genes' `COEX` matrix is calculated.
-#'
-#'   takes a newly created `COTAN` object (or the result of a call to
-#'   [dropGenesCells()]) and applies all steps until the genes' `COEX` matrix is
-#'   stored in the object
-#'
-#' @name COTANObjectCreation
-NULL
-
-#'
 #' @aliases proceedToCoex
 #'
 #' @details `proceedToCoex()` takes a newly created `COTAN` object (or the
@@ -28,7 +15,7 @@ NULL
 #'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
-#' @param cores number of cores to be used
+#' @param cores number of cores to use. Default is 1.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.
@@ -51,12 +38,10 @@ NULL
 #' @importFrom ggplot2 annotate
 #'
 #' @examples
-#' data("test.dataset")
 #'
 #' ## In case one needs to run more steps to clean the datatset the following
 #' ## might apply
 #' ##
-#' ## objCOTAN <- COTAN(raw = test.dataset)
 #' ## objCOTAN <- initializeMetaDataset(objCOTAN,
 #' ##                                   GEO = "test",
 #' ##                                   sequencingMethod = "artificial",
@@ -64,7 +49,8 @@ NULL
 #' ## # in case the genes' `COEX` is not needed it can be skipped
 #' ## # (e.g. for [cellsUniformClustering()])
 #' ## objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-#' ##                           cores = 6L, optimizeForSpeed, deviceStr, saveObj = FALSE)
+#' ##                           cores = 6L, optimizeForSpeed = TRUE,
+#' ##                           deviceStr = "cuda", saveObj = FALSE)
 #'
 #' @rdname COTANObjectCreation
 #'
@@ -187,7 +173,7 @@ setMethod(
 )
 
 #' @details `automaticCOTANObjectCreation()` takes a raw dataset, creates and
-#'   initializes a `COTAN` objects and runs proceedToCoex()
+#'   initializes a `COTAN` object and runs [proceedToCoex()]
 #'
 #' @param raw a matrix or dataframe with the raw counts
 #' @param GEO a code reporting the GEO identification or other specific dataset
@@ -204,7 +190,7 @@ setMethod(
 #'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
-#' @param cores number of cores to be used
+#' @param cores number of cores to use. Default is 1.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.

@@ -1,5 +1,5 @@
 
-#' Get a clusterization running the `Seurat` package
+#' @title Get a clusterization running the `Seurat` package
 #'
 #' @description The function uses the [Seurat-package] to clusterize the given
 #'   counts raw data.
@@ -129,7 +129,7 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
 
 # --------------------- Uniform Clusters ----------------------
 
-#' Uniform Clusters
+#' @title Uniform Clusters
 #'
 #' @description This group of functions takes in input a `COTAN` object and
 #'   handle the task of dividing the dataset into **Uniform Clusters**, that is

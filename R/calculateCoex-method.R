@@ -1,5 +1,8 @@
 # ----------- Contingency tables --------------
 
+#'
+#' @title Calculating the `COEX` matrix
+#'
 #' @description These are the functions and methods used to calculate the
 #'   **COEX** matrices according to the `COTAN` model. From there it is possible
 #'   to calculate the associated *pValue* and the *GDI* (*Global Differential

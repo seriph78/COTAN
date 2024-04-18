@@ -4,10 +4,10 @@
 %   R/clustersDeltaExpression.R, R/clustersMarkersHeatmapPlot.R,
 %   R/clustersSummaryPlot.R, R/findClustersMarkers.R, R/geneSetEnrichment.R,
 %   R/reorderClusterization.R
-\name{estimateNuLinearByCluster,COTAN-method}
+\name{HandlingClusterizations}
+\alias{HandlingClusterizations}
 \alias{estimateNuLinearByCluster,COTAN-method}
 \alias{estimateNuLinearByCluster}
-\alias{HandlingClusterizations}
 \alias{getClusterizations,COTAN-method}
 \alias{getClusterizations}
 \alias{getClusterizationName,COTAN-method}
@@ -232,8 +232,6 @@ defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
 
 \item{keepMinusOne}{a flag to decide whether to keep the cluster \code{"-1"}
 (representing the non-clustered cells) untouched}
-
-\item{cores}{number of cores to use. Default is 1.}
 }
 \value{
 \code{estimateNuLinearByCluster()} returns the updated \code{COTAN} object

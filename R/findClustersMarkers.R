@@ -18,7 +18,6 @@
 #'   of the *clusters* of the *clusterization*
 #' @param method *p-value* multi-test adjustment method. Defaults to
 #'   `"bonferroni"`; use `"none"` for no adjustment
-#' @param cores number of cores to use. Default is 1.
 #'
 #' @returns `findClustersMarkers()` returns a `data.frame` containing `n` genes
 #'   for each *cluster* scoring top/bottom `COEX` scores. The `data.frame` also
