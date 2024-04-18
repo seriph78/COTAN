@@ -94,13 +94,21 @@ reorderClusterization <- function(objCOTAN,
 
   outputCoexDF <- coexDF
   if (!is_empty(coexDF)) {
-    colnames(outputCoexDF) <- clMap[colnames(coexDF)]
+
+    minusOnePosInCoex <- 0L
+    if (minuOnePos != 0L) {
+      minusOnePosInCoex <- which(colnames(coexDF) == "-1")
+      outputCoexDF <- coexDF[, -minusOnePosInCoex]
+    }
+
+    colnames(outputCoexDF) <- clMap[colnames(outputCoexDF)]
 
     # Reorder the columns to match wanted order
     outputCoexDF <- outputCoexDF[, hc[["order"]]]
+
     if (minuOnePos != 0L) {
       outputCoexDF <- setColumnInDF(df = outputCoexDF, colName = "-1",
-                                    colToSet = coexDF[["-1"]])
+                                    colToSet = coexDF[, minusOnePosInCoex])
     }
   }
 

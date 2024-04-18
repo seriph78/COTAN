@@ -17,11 +17,11 @@ test_that("Cell Uniform Clustering", {
   GDIThreshold <- 1.46
   initialResolution <- 0.8
   suppressWarnings({
-    clusters <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
-                                       initialResolution = initialResolution,
-                                       cores = 6L, optimizeForSpeed = TRUE,
-                                       deviceStr = "cuda", saveObj = TRUE,
-                                       outDir = tm)[["clusters"]]
+    c(clusters, coexDF) %<-%
+      cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+                             initialResolution = initialResolution,
+                             cores = 6L, optimizeForSpeed = TRUE,
+                             deviceStr = "cuda", saveObj = TRUE, outDir = tm)
   })
 
   expect_true(file.exists(file.path(tm, "test", "reclustering",
@@ -33,8 +33,10 @@ test_that("Cell Uniform Clustering", {
   gc()
 
   expect_identical(nlevels(clusters), 4L)
+  expect_setequal(levels(clusters), colnames(coexDF))
 
-  obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
+  obj <- addClusterization(obj, clName = "clusters",
+                           clusters = clusters, coexDF = coexDF)
 
   expect_equal(getClusters(obj), clusters, ignore_attr = TRUE)
   expect_identical(reorderClusterization(obj)[["clusters"]], clusters)
@@ -51,7 +53,7 @@ test_that("Cell Uniform Clustering", {
   expect_lte(firstPerc, GDIThreshold)
   expect_identical(clSize, sum(clusters == firstCl))
 
-  clusters2 <- factor(clusters, levels = c(levels(clusters), "-1"))
+  clusters2 <- factor(clusters, levels = c("-1", levels(clusters)))
   clusters2[1L:50L] <- "-1"
   coexDF2 <- DEAOnClusters(obj, clusters = clusters2)
   c(rClusters2, rCoexDF2) %<-%
@@ -64,14 +66,16 @@ test_that("Cell Uniform Clustering", {
   # this is an happenstance
   expect_identical(colnames(rCoexDF2), rev(levels(rClusters2)))
 
+  clusters3 <- factor(clusters, levels = c(levels(clusters), "-1"))
+  clusters3[51L:100L] <- "-1"
   c(clusters3, coexDF3) %<-%
     reorderClusterization(obj, useDEA = FALSE,
                           reverse = FALSE, keepMinusOne = TRUE,
-                          clusters = clusters2, coexDF = coexDF2)
+                          clusters = clusters3, coexDF = coexDF2)
 
-  expect_identical(levels(clusters3)[clusters3[1L:50L]],
+  expect_identical(levels(clusters3)[clusters3[51L:100L]],
                    levels(clusters2)[clusters2[1L:50L]])
-  expect_identical(clusters3 == "-1", clusters2 == "-1")
+  expect_identical((clusters3 == "-1")[51:150], (clusters2 == "-1")[1:100])
   # this is an happenstance
   expect_identical(colnames(coexDF3)[-5L], levels(clusters3)[-1L])
 
@@ -117,11 +121,7 @@ test_that("Cell Uniform Clustering", {
 
   expect_identical(clMarkersDF3, clMarkersDF)
 
-  ####################################
-
   # Test the low GDI (homogeneity) for each defined clusters
-
-  ####################################
 
   for (cl in sample(unique(clusters[!is.na(clusters)]), size = 2L)) {
     print(cl)
