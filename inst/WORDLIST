@@ -1,5 +1,4 @@
 ANalysis
-BLAS
 BioConductor
 Bioc
 COEX
@@ -9,13 +8,12 @@ ERCC
 GDI
 GPUs
 GSM
-MKL
 PCAtools
 Rfast
 UDE
 UMAP
 UMI
-WLS
+WSL
 clusterization
 clusterizations
 coex
@@ -38,4 +36,3 @@ pre
 scRNA
 seriph
 splitPattern
-wsl

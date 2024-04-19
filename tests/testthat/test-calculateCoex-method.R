@@ -432,20 +432,20 @@ test_that("Coex vs saved results", {
                                        saveObj = FALSE,
                                        outDir = tm)
 
-  expect_equal(obj3@genesCoex, obj@genesCoex, tolerance = 1e-12)
+  expect_equal(obj3@genesCoex, obj@genesCoex, tolerance = 5.0e-6)
 
   expect_true(isCoexAvailable(obj3))
   expect_equal(getGenesCoex(obj3, genes = genes.names.test,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = 1.0e-12)
+               coex_test, tolerance = 5.0e-6)
 
   pval <- calculatePValue(obj3, geneSubsetCol = genes.names.test)
 
-  expect_equal(pval, pval_exp, tolerance = 1.0e-12)
+  expect_equal(pval, pval_exp, tolerance = 5.0e-6)
 
   GDI <- calculateGDI(obj3)[genes.names.test, ]
 
-  expect_equal(GDI, GDI_exp, tolerance = 1.0e-12)
+  expect_equal(GDI, GDI_exp, tolerance = 5.0e-6)
 
   # Torch GPU
 
@@ -501,7 +501,7 @@ test_that("Coex with negative dispersion genes", {
   obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cuda")
   coex3 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
-  expect_equal(coex1, coex2, tolerance = 1e-12)
+  expect_equal(coex1, coex2, tolerance = 1e-7)
   expect_equal(coex1, coex3, tolerance = 1e-7)
-  expect_equal(coex2, coex3, tolerance = 1e-7)
+  expect_equal(coex2, coex3, tolerance = 5e-7)
 })

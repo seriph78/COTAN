@@ -28,15 +28,16 @@
 #'   once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for
 #'   some constant \eqn{r} for all \eqn{i,j \in \{\text{Y, N}\}}.
 #'
-#'   The latter follows from the fact that the relevant marginal sums of the the
+#'   The latter follows from the fact that the relevant marginal sums of the
 #'   expected contingency tables were enforced to match the marginal sums of the
 #'   observed ones.
 #'
 #' @description The new implementation of the function relies on the `torch`
-#'   package. This implies that is potentially able to use the system `GPU` to
-#'   run the heavy duty calculations required by this method. However installing
-#'   the `torch` package on a system can be *finicky*, so we humbly provide a
-#'   short help page [Installing_torch] hoping that it will help...
+#'   package. This implies that it is potentially able to use the system `GPU`
+#'   to run the heavy duty calculations required by this method. However
+#'   installing the `torch` package on a system can be *finicky*, so we
+#'   tentatively provide a short help page [Installing_torch] hoping that it
+#'   will help...
 #'
 #' @seealso [ParametersEstimations] for more details.
 #'
@@ -971,7 +972,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   # TODO: 16 bits are OK here?
   if(deviceStr == "cpu"){
-    dtypeForCalc <- torch_float64()
+    dtypeForCalc <- torch_float32()
     halfDtypeForCalc <- torch_float32()
   } else {
     dtypeForCalc <- torch_float32()
@@ -1035,6 +1036,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   }
 
   # expectedYN
+  #TODO: use in-place torch_maximum_() as soon as it becomes available
   tmp <- expectedY$view(c(-1L, 1L)) - expectedYY
   invisible(coex$add_(torch_maximum(tmp, one)$reciprocal_()))
   if (isTRUE(returnPPFract)) {
@@ -1161,6 +1163,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
+#' @importFrom stringr str_sub
+#'
 #' @export
 #'
 #' @rdname CalculatingCOEX
@@ -1192,8 +1196,10 @@ setMethod(
         library("torch", character.only = TRUE)
 
         # Device configuration - fall-back to cpu if no cuda device is available
-        deviceStr <- ifelse(deviceStr == "cuda" && torch::cuda_is_available(),
-                            "cuda", "cpu")
+        if (str_sub(deviceStr, 1L, 4L) == "cuda" &&
+            !torch::cuda_is_available()) {
+          deviceStr <- "cpu"
+        }
 
         # Run torch-based calculation
         c(coex, problematicPairsFraction) %<-%

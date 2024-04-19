@@ -4,9 +4,11 @@
 \alias{Installing_torch}
 \title{Installing torch R library (on Linux)}
 \description{
-A brief explanation of how to install the torch package on WLS2
-Linux. Naturally it makes a difference whether one wants to install support
-only for the \code{CPU} or also have the eventual system \code{GPU} at the ready!
+A brief explanation of how to install the torch package on
+\code{WSL2} (Windows Subsystem for Linux), but it might work the same for other
+\code{Linux} systems. Naturally it makes a difference whether one wants to
+install support only for the \code{CPU} or also have the system \code{GPU} at the
+ready!
 
 The main resources to install \code{torch} is
 \url{https://torch.mlverse.org/docs/articles/installation.html} or
@@ -14,21 +16,21 @@ The main resources to install \code{torch} is
 }
 \details{
 For the \code{CPU}-only support one need to ensure that also numeric
-libraries are installed, like BLAS and LAPACK and/or MKL if your \code{CPU} is
-from Intel. Otherwise torch will be stuck at using a single core for all
-computations.
+libraries are installed, like \code{BLAS} and \code{LAPACK} and/or \code{MKL} if your
+\code{CPU} is from \emph{Intel}. Otherwise \code{torch} will be stuck at using a single
+core for all computations.
 
 For the \code{GPU}, currently only \code{cuda} devices are supported. Moreover
 only some specific versions of \code{cuda} (and corresponding \code{cudnn}) are
 effectively usable, so one needs to install them to actually use the \code{GPU}.
 
-Currently only \code{cuda} 11.7 and 11.8 are supported, but check the \code{torch}
+As of today only \code{cuda} 11.7 and 11.8 are supported, but check the \code{torch}
 documentation for more up-to-date information. Before downgrading your
 \code{cuda} version, please be aware that it is possible to maintain separate
-main versions of \code{cuda} contemporaneously on the system: that is one can
-have installed 11.8 and a 12.4 \code{cuda} versions at the same time.
+main versions of \code{cuda} at the same time on the system: that is one can
+have installed both 11.8 and a 12.4 \code{cuda} versions on the same system.
 
-Below a link to install \code{cuda} 11.8 for \code{WSL2} Linux Windows sub-system is
-given: use a local installer to be sure the wanted \code{cuda} version is being
-installed, and not the latest one: \href{https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_local}{cuda 11.8 for WSL2}
+Below a link to install \code{cuda} 11.8 for \code{WSL2} given: use a local installer
+to be sure the wanted \code{cuda} version is being installed, and not the latest
+one: \href{https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_local}{cuda 11.8 for WSL2}
 }
