@@ -34,6 +34,7 @@
 #' @importFrom parallelDist parDist
 #'
 #' @importFrom stats hclust
+#' @importFrom stats as.dist
 #'
 #' @rdname HandlingClusterizations
 #'

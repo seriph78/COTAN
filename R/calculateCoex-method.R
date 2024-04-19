@@ -28,11 +28,19 @@
 #'   once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for
 #'   some constant \eqn{r} for all \eqn{i,j \in \{\text{Y, N}\}}.
 #'
-#'   The latter follows from the fact that the relevant marginal sums of the
-#'   the expected contingency tables were enforced to match the marginal sums
-#'   of the observed ones.
+#'   The latter follows from the fact that the relevant marginal sums of the the
+#'   expected contingency tables were enforced to match the marginal sums of the
+#'   observed ones.
+#'
+#' @description The new implementation of the function relies on the `torch`
+#'   package. This implies that is potentially able to use the system `GPU` to
+#'   run the heavy duty calculations required by this method. However installing
+#'   the `torch` package on a system can be *finicky*, so we humbly provide a
+#'   short help page [Installing_torch] hoping that it will help...
 #'
 #' @seealso [ParametersEstimations] for more details.
+#'
+#' @seealso [Installing_torch] about the `torch` package
 #'
 #' @name CalculatingCOEX
 #'
@@ -1120,6 +1128,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   return(list("coex" = ret, "ppf" = problematicPairsFraction))
 }
 
+
+## ---- Calculate COEX ----
 
 #' @aliases calculateCoex
 #'
