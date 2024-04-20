@@ -1,4 +1,4 @@
-#' emptySparseMatrix
+#' @title emptySparseMatrix
 #'
 #' @description Useful to default initialize `COTAN` slots
 #'
@@ -13,7 +13,7 @@ emptySparseMatrix <- function() {
                "generalMatrix"), "CsparseMatrix"))
 }
 
-#' emptySymmetricMatrix
+#' @title emptySymmetricMatrix
 #'
 #' @description Useful to default initialize `COTAN` slots
 #'
@@ -181,9 +181,16 @@ setClass(
 ) #end class COTAN
 
 
-#' COTAN
 #'
-#' @description Constructor of the class `COTAN`
+#' @title `COTAN` shortcuts
+#'
+#' @description These functions create a `COTAN` object and/or also run all
+#'   the necessary steps until the genes' `COEX` matrix is calculated.
+#'
+#' @name COTANObjectCreation
+NULL
+
+#' @details Constructor of the class `COTAN`
 #'
 #' @param raw any object that can be converted to a matrix, but with row (genes)
 #'   and column (cells) names
@@ -201,7 +208,7 @@ setClass(
 #' data("test.dataset")
 #' obj <- COTAN(raw = test.dataset)
 #'
-#' @name COTAN
+#' @name COTANObjectCreation
 #'
 COTAN <- function(raw = "ANY") {
   raw <- as(as(raw, "Matrix"), "sparseMatrix")
@@ -212,10 +219,18 @@ COTAN <- function(raw = "ANY") {
   new("COTAN", raw = raw)
 }
 
-
-#' scCOTAN-class (for legacy usage)
 #'
-#' Define `scCOTAN` structure
+#' @title Handle legacy `scCOTAN`-class and related symmetric matrix <-> vector
+#' conversions
+#'
+#' @description A class and some functions related to the `V1` version of the
+#'   `COTAN` package
+#'
+#' @name COTAN-Legacy
+NULL
+
+
+#' @details Define the legacy `scCOTAN`-class
 #'
 #' @slot raw `ANY`. To store the raw data matrix
 #' @slot raw.norm `ANY`. To store the raw data matrix divided for the cell
@@ -236,7 +251,7 @@ COTAN <- function(raw = "ANY") {
 #'
 #' @export
 #'
-#' @rdname scCOTAN
+#' @rdname COTAN-Legacy
 #'
 setClass(
   "scCOTAN",
@@ -257,7 +272,7 @@ setClass(
 ) -> scCOTAN
 
 
-#' getCOTANSlots
+#' @title getCOTANSlots
 #'
 #' @description Helper function to be shared by coerce() and replace()
 #'
@@ -414,7 +429,7 @@ getCOTANSlots <- function(from) {
   return(list(raw, genesCoex, cellsCoex, metaGenes, metaCells, clustersCoex))
 }
 
-#' setIs():  `scCOTAN` -> `COTAN`
+#' @title setIs():  `scCOTAN` -> `COTAN`
 #'
 #' @description Automatically converts an object from class `scCOTAN` into
 #'   `COTAN`
@@ -460,7 +475,7 @@ setIs("scCOTAN",
      ) # end setIs
 
 
-#' getScCOTANSlots
+#' @title getScCOTANSlots
 #'
 #' @description Helper function to be shared by coerce() and replace()
 #'
@@ -534,7 +549,7 @@ getScCOTANSlots <- function(from) {
   return(list(rawNorm, nu, lambda, a, hk, clusters, clusterData))
 }
 
-#' setAs(): `COTAN` -> `scCOTAN`
+#' @title setAs(): `COTAN` -> `scCOTAN`
 #'
 #' @description Explicitly converts an object from class `COTAN` into `scCOTAN`
 #'

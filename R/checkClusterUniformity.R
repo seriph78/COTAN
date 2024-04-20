@@ -7,11 +7,18 @@
 #'   too high for too many genes, the *cluster* is deemed **non-uniform**.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param cluster the tag of the *cluster*
+#' @param clusterName the tag of the *cluster*
 #' @param cells the cells belonging to the *cluster*
 #' @param GDIThreshold the threshold level that discriminates uniform
 #'   *clusters*. It defaults to \eqn{1.43}
-#' @param cores number of cores used
+#' @param cores number of cores to use. Default is 1.
+#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
+#'   library to run the matrix calculations. Otherwise, or when the library is
+#'   not available will run the slower legacy code
+#' @param deviceStr On the `torch` library enforces which device to use to run
+#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
+#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
+#'   to a specific device
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file(s)
 #' @param outDir an existing directory for the analysis output. The effective
@@ -21,6 +28,7 @@
 #'   * `"isUniform"`: a flag indicating whether the *cluster* is **uniform**
 #'   * `"fractionAbove"`: the percentage of genes with `GDI` above the threshold
 #'   * `"firstPercentile"`: the quantile associated to the highest percentile
+#'   * `"size"`: the number of cells in the cluster
 #'
 #' @importFrom utils head
 #'
@@ -37,19 +45,24 @@
 #' @rdname UniformClusters
 #'
 
-checkClusterUniformity <- function(objCOTAN, cluster, cells,
+checkClusterUniformity <- function(objCOTAN, clusterName, cells,
                                    GDIThreshold = 1.43, cores = 1L,
+                                   optimizeForSpeed = TRUE, deviceStr = "cuda",
                                    saveObj = TRUE, outDir = ".") {
 
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-  objCOTAN <- proceedToCoex(objCOTAN, cores = cores, saveObj = FALSE)
+  objCOTAN <- proceedToCoex(objCOTAN, cores = cores,
+                            optimizeForSpeed = optimizeForSpeed,
+                            deviceStr = deviceStr, saveObj = FALSE)
   gc()
 
-  logThis(paste0("Checking uniformity for the cluster '", cluster,
-                 "' with ", getNumCells(objCOTAN), " cells"), logLevel = 2L)
+  clusterSize <- getNumCells(objCOTAN)
+
+  logThis(paste0("Checking uniformity for the cluster '", clusterName,
+                 "' with ", clusterSize, " cells"), logLevel = 2L)
 
   GDIData <- calculateGDI(objCOTAN)
 
@@ -58,7 +71,7 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
       # this will be restored to previous value on function exit
       local_options(list(ggrepel.max.overlaps = Inf))
 
-      pdf(file.path(outDir, paste0("cluster_", cluster, "_plots.pdf")))
+      pdf(file.path(outDir, paste0("cluster_", clusterName, "_plots.pdf")))
 
       c(..., nuPlot, zoomedNuPlot) %<-%
         cleanPlots(objCOTAN, includePCA = FALSE)
@@ -94,7 +107,7 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
 
   clusterIsUniform <- percAboveThr <= 0.01
 
-  logThis(paste0("Cluster ", cluster, " is ",
+  logThis(paste0("Cluster ", clusterName, ", with size ", clusterSize, ", is ",
                  (if (clusterIsUniform) {""} else {"not "}), "uniform\n",
                  round(percAboveThr * 100.0, digits = 2L),
                  "% of the genes is above the given GDI threshold ",
@@ -107,7 +120,7 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
         pre <- "non-"
       }
       outFile <- file.path(outDir,
-                           paste0(pre, "uniform_cluster_", cluster, ".csv"))
+                           paste0(pre, "uniform_cluster_", clusterName, ".csv"))
       write.csv(cells, file = outFile)
     },
     error = function(err) {
@@ -118,5 +131,6 @@ checkClusterUniformity <- function(objCOTAN, cluster, cells,
 
   return(list("isUniform" = clusterIsUniform,
               "fractionAbove" = percAboveThr,
-              "firstPercentile" = quantAboveThr[[1L]]))
+              "firstPercentile" = quantAboveThr[[1L]],
+              "size" = clusterSize))
 }

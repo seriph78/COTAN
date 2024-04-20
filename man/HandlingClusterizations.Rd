@@ -4,10 +4,10 @@
 %   R/clustersDeltaExpression.R, R/clustersMarkersHeatmapPlot.R,
 %   R/clustersSummaryPlot.R, R/findClustersMarkers.R, R/geneSetEnrichment.R,
 %   R/reorderClusterization.R
-\name{estimateNuLinearByCluster,COTAN-method}
+\name{HandlingClusterizations}
+\alias{HandlingClusterizations}
 \alias{estimateNuLinearByCluster,COTAN-method}
 \alias{estimateNuLinearByCluster}
-\alias{HandlingClusterizations}
 \alias{getClusterizations,COTAN-method}
 \alias{getClusterizations}
 \alias{getClusterizationName,COTAN-method}
@@ -62,7 +62,7 @@ getClusters(objCOTAN, clName = "")
 
 \S4method{dropClusterization}{COTAN}(objCOTAN, clName)
 
-DEAOnClusters(objCOTAN, clName = "", clusters = NULL, cores = 1L)
+DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 pValueFromDEA(coexDF, numCells, method = "none")
 
@@ -79,7 +79,6 @@ distancesBetweenClusters(
   clusters = NULL,
   coexDF = NULL,
   useDEA = TRUE,
-  cores = 1L,
   distance = NULL
 )
 
@@ -131,8 +130,7 @@ findClustersMarkers(
   clName = "",
   clusters = NULL,
   coexDF = NULL,
-  method = "bonferroni",
-  cores = 1L
+  method = "bonferroni"
 )
 
 geneSetEnrichment(clustersCoex, groupMarkers)
@@ -145,7 +143,6 @@ reorderClusterization(
   reverse = FALSE,
   keepMinusOne = TRUE,
   useDEA = TRUE,
-  cores = 1L,
   distance = NULL,
   hclustMethod = "ward.D2"
 )
@@ -172,8 +169,6 @@ of the \emph{clusters} of the \emph{clusterization}}
 \item{override}{When \code{TRUE} silently allows overriding data for an existing
 \emph{clusterization} name. Otherwise the default behavior will avoid potential
 data losses}
-
-\item{cores}{number of cores to use. Default is 1.}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
@@ -460,7 +455,7 @@ objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 data("test.dataset.clusters1")
 clusters <- test.dataset.clusters1
 
-coexDF <- DEAOnClusters(objCOTAN, clusters = clusters, cores = 6L)
+coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
 
 groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                      G2 = c("g-000300", "g-000330"),
@@ -522,6 +517,6 @@ objCOTAN <- treePlotAndObj[["objCOTAN"]]
 plot(treePlotAndObj[["dend"]])
 
 clMarkers <- findClustersMarkers(objCOTAN, markers = list(),
-                                 clusters = clusters, cores = 6L)
+                                 clusters = clusters)
 
 }

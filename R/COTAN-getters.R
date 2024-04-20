@@ -1,6 +1,6 @@
 # ------- `COTAN` raw data accessors --------
 
-#' Raw data `COTAN` accessors
+#' @title Raw data `COTAN` accessors
 #'
 #' @description These methods extract information out of a just created `COTAN`
 #'   object. The accessors have **read-only** access to the object.
@@ -268,7 +268,7 @@ setMethod(
 
 # ---------- Handle meta-data --------
 
-#' Handling *meta-data* in `COTAN` objects
+#' @title Handling *meta-data* in `COTAN` objects
 #'
 #' @description Much of the information stored in the `COTAN` object is
 #'   compacted into three `data.frame`s:
@@ -585,7 +585,7 @@ estimatorsAreReady <- function(objCOTAN) {
 
 # ----------- Raw data cleaning ------------
 
-#' Raw data cleaning
+#' @title Raw data cleaning
 #'
 #' @description These methods are to be used to clean the raw data. That is drop
 #'   any number of genes/cells that are too sparse or too present to allow
@@ -841,6 +841,7 @@ setMethod(
       ret <- objCOTAN@genesCoex
       if (isTRUE(zeroDiagonal)) {
         diag(ret) <- 0.0
+        ret <- pack(forceSymmetric(ret))
       }
       return(ret)
     } else {
@@ -905,6 +906,7 @@ setMethod(
       ret <- objCOTAN@cellsCoex
       if (isTRUE(zeroDiagonal)) {
         diag(ret) <- 0.0
+        ret <- pack(forceSymmetric(ret))
       }
       return(ret)
     } else {
@@ -970,30 +972,6 @@ setMethod(
 )
 
 
-# ------- `COTAN` clusterization data accessors ------
-
-#' Handling cells' *clusterization* and related functions
-#'
-#' @description These functions manage the *clusterizations* and their
-#'   associated *cluster* `COEX` `data.frame`s.
-#'
-#'   A *clusterization* is any partition of the cells where to each cell it is
-#'   assigned a **label**; a group of cells with the same label is called
-#'   *cluster*.
-#'
-#'   For each *cluster* is also possible to define a `COEX` value for each gene,
-#'   indicating its increased or decreased expression in the *cluster* compared
-#'   to the whole background. A `data.frame` with these values listed in a
-#'   column for each *cluster* is stored separately for each *clusterization* in
-#'   the `clustersCoex` member.
-#'
-#'   The formulae for this *In/Out* `COEX` are similar to those used in the
-#'   [calculateCoex()] method, with the **role** of the second gene taken by the
-#'   *In/Out* status of the cells with respect to each *cluster*.
-#'
-#' @name HandlingClusterizations
-NULL
-
 #' @aliases getClusterizations
 #'
 #' @details `getClusterizations()` extracts the list of the *clusterizations*
@@ -1021,7 +999,7 @@ NULL
 #' data("test.dataset.clusters1")
 #' clusters <- test.dataset.clusters1
 #'
-#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters, cores = 6L)
+#' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
 #'
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
 #'                      G2 = c("g-000300", "g-000330"),
@@ -1238,7 +1216,7 @@ setMethod(
 
 # ------- `COTAN` conditions data accessors ------
 
-#' Handling cells' *conditions* and related functions
+#' @title Handling cells' *conditions* and related functions
 #'
 #' @description These functions manage the *conditions*.
 #'

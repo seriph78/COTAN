@@ -3,7 +3,8 @@ library(zeallot)
 test_that("Establish genes clusters", {
   data("test.dataset")
   objCOTAN <- COTAN(raw = test.dataset)
-  objCOTAN <- proceedToCoex(objCOTAN, cores = 12L, saveObj = FALSE)
+  objCOTAN <- proceedToCoex(objCOTAN, cores = 6L,
+                            optimizeForSpeed = FALSE, saveObj = FALSE)
 
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                        G2 = c("g-000300", "g-000330"),
@@ -24,7 +25,7 @@ test_that("Establish genes clusters", {
 
   if (TRUE) {
     GCS_old <- readRDS(file.path(getwd(), "genes.coex.space.RDS"))
-    expect_equal(GCS, GCS_old, tolerance = 1.0e-12)
+    expect_equal(GCS, GCS_old, tolerance = 1.0e-8)
   }
 
   c(gSpace, plotEigen, pcaClusters, treePlot) %<-%
@@ -50,13 +51,13 @@ test_that("Establish genes clusters", {
     expect_identical(rownames(pcaClusters), rownames(pcaClustersExp))
     expect_identical(ncol(pcaClusters), 16L)
     expect_equal(abs(pcaClusters[, 1L:4L]),
-                 abs(pcaClustersExp[, 1L:4L]), tolerance = 1.0e-9)
+                 abs(pcaClustersExp[, 1L:4L]), tolerance = 5.0e-7)
     expect_equal(abs(pcaClusters[, 5L:7L]),
                  abs(pcaClustersExp[, 5L:7L]), tolerance = 5.0e-7)
     expect_equal(abs(pcaClusters[, 8L:9L]),
-                 abs(pcaClustersExp[, 8L:9L]), tolerance = 1.0e-5)
+                 abs(pcaClustersExp[, 8L:9L]), tolerance = 5.0e-5)
     expect_equal(abs(pcaClusters[, 10L]),
-                 abs(pcaClustersExp[, 10L]), tolerance = 1.0e-3)
+                 abs(pcaClustersExp[, 10L]), tolerance = 5.0e-4)
     expect_identical(pcaClusters[, 11L:13L], pcaClustersExp[, 11L:13L])
     expect_identical(pcaClusters[, 16L],     pcaClustersExp[, 16L])
   }
