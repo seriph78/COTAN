@@ -1,15 +1,4 @@
 
-#' Calculations of genes statistics
-#'
-#' @description A collection of functions returning various statistics
-#'   associated to the genes. In particular the *discrepancy* between the
-#'   expected probabilities of zero and their actual occurrences, both at single
-#'   gene level or looking at genes' pairs
-#'
-#' @name GenesStatistics
-NULL
-
-
 #' @details `calculateGenesCE()` is used to calculate the discrepancy between
 #'   the expected probability of zero and the observed zeros across all cells
 #'   for each gene as *cross-entropy*: \eqn{-\sum_{c}{\mathbb{1}_{X_c == 0}
@@ -49,7 +38,7 @@ calculateGenesCE <- function(objCOTAN) {
 #'   column based on the `S` matrix (*Pearson's *\eqn{\chi^{2}}* test*)
 #'
 #' @param S a `matrix` object
-#' @param rowsFraction The fraction of rows that will be averaged to calcualate
+#' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
 #'
 #' @returns `calculateGDIGivenS()` returns a `vector` with the *GDI* data for
@@ -86,7 +75,7 @@ calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
 #'   symmetric matrix
 #' @param numDegreesOfFreedom a `int` that determines the number of degree of
 #'   freedom to use in the \eqn{\chi^{2}} test
-#' @param rowsFraction The fraction of rows that will be averaged to calcualate
+#' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
 #'
 #' @returns `calculateGDIGivenCorr()` returns a `vector` with the *GDI* data for
@@ -111,7 +100,7 @@ calculateGDIGivenCorr <-
 #' @param statType Which statistics to use to compute the p-values. By default
 #'   it will use the `S` (*Pearson's *\eqn{\chi^{2}}* test*) otherwise the `G`
 #'   (*G-test*)
-#' @param rowsFraction The fraction of rows that will be averaged to calcualate
+#' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
 #'
 #' @returns `calculateGDI()` returns a `data.frame` with:

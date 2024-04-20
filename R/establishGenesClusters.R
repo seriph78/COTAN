@@ -1,15 +1,20 @@
 
-#' Local Differentiation Index
+#' @title Calculations of genes statistics
+#'
+#' @description A collection of functions returning various statistics
+#'   associated to the genes. In particular the *discrepancy* between the
+#'   expected probabilities of zero and their actual occurrences, both at single
+#'   gene level or looking at genes' pairs
 #'
 #' @description To make the `GDI` more specific, it may be desirable to restrict
 #'   the set of genes against which `GDI` is computed to a selected subset, with
 #'   the recommendation to include a consistent fraction of cell-identity genes,
 #'   and possibly focusing on markers specific for the biological question of
 #'   interest (for instance neural cortex layering markers). In this case we
-#'   denote it as *Local Differentiation Index* (LDI) relative to the selected
+#'   denote it as *Local Differentiation Index* (`LDI`) relative to the selected
 #'   subset.
 #'
-#' @name GenesCoexSpace
+#' @name GenesStatistics
 NULL
 
 #' @details `genesCoexSpace()` calculates genes groups based on the primary
@@ -47,7 +52,7 @@ NULL
 #' GCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
 #'                       numGenesPerMarker = 15)
 #'
-#' @rdname GenesCoexSpace
+#' @rdname GenesStatistics
 #'
 genesCoexSpace <-
   function(objCOTAN, primaryMarkers, numGenesPerMarker = 25L) {
@@ -173,7 +178,7 @@ genesCoexSpace <-
 #' resList <-  establishGenesClusters(objCOTAN, groupMarkers = groupMarkers,
 #'                                    numGenesPerMarker = 11)
 #'
-#' @rdname GenesCoexSpace
+#' @rdname GenesStatistics
 #'
 establishGenesClusters <-
   function(objCOTAN, groupMarkers, numGenesPerMarker = 25L,

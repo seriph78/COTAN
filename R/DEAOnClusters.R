@@ -42,7 +42,6 @@ runSingleDEA <- function(clName, cellsInList,
 #'   significant!
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName`
-#' @param cores number of cores to use. Default is 1.
 #'
 #' @return `DEAOnClusters()` returns the co-expression `data.frame` for the
 #'   genes in each *cluster*
@@ -62,14 +61,8 @@ runSingleDEA <- function(clName, cellsInList,
 #'
 #' @rdname HandlingClusterizations
 #'
-DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL, cores = 1L) {
+DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
   logThis("Differential Expression Analysis - START", logLevel = 2L)
-
-  # as sharing the enviroment with the forked processes takes a LOT of memory
-  # it is much better to use only a few separate processes at a time:
-  # dividing bt 4 makes possible to re-use the same number of cores
-  # as the one passed in for the dispersion estimator
-  cores <- handleMultiCore(min(4L, cores %/% 4L + 1L))
 
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
@@ -265,7 +258,6 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
-#' @param cores number of cores to use. Default is 1.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
@@ -287,8 +279,7 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 distancesBetweenClusters <- function(objCOTAN, clName = "",
                                      clusters = NULL, coexDF = NULL,
-                                     useDEA = TRUE, cores = 1L,
-                                     distance = NULL) {
+                                     useDEA = TRUE, distance = NULL) {
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
     normalizeNameAndLabels(objCOTAN, name = clName,
@@ -312,7 +303,7 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
     }
 
     if (is_empty(coexDF)) {
-      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters, cores = cores)
+      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
     }
 
     # merge small cluster based on distances

@@ -1,3 +1,9 @@
+## 2.4.2
+
+Added support for the `torch` library to help with the heavy lifting
+calculations of the *genes' COEX* matrix, with consequent substantial speed-up,
+especially when a **GPU** is available on the system
+
 ## COTAN 2.4.1
 
 Fixed bug in `reorderClusterization()` function

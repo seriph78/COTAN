@@ -9,9 +9,11 @@
 \alias{estimateDispersionBisection,COTAN-method}
 \alias{estimateDispersionBisection}
 \alias{estimateNuBisection,COTAN-method}
+\alias{estimateNuBisection}
 \alias{estimateDispersionNuBisection,COTAN-method}
 \alias{estimateDispersionNuBisection}
 \alias{estimateDispersionNuNlminb,COTAN-method}
+\alias{estimateDispersionNuNlminb}
 \alias{getNormalizedData}
 \alias{getNu,COTAN-method}
 \alias{getNu}
@@ -134,8 +136,8 @@ zeros. It assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being alre
 object by bisection. It determines the \code{nu} parameters such that, for each
 cell, the probability of zero counts matches the number of observed zeros.
 It assumes \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} being already run. Since this
-breaks the assumption that the average \code{nu} is \code{1}, it is recommended not
-to run this in isolation but use \code{estimateDispersionNuBisection()} instead.
+breaks the assumption that the average \code{nu} is one, it is recommended not
+to run this in isolation but use \code{\link[=estimateDispersionNuBisection]{estimateDispersionNuBisection()}} instead.
 
 \code{estimateDispersionNuBisection()} estimates the \code{dispersion} and
 \code{nu} field of a \code{COTAN} object by running sequentially a bisection for each
