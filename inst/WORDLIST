@@ -19,9 +19,7 @@ clusterizations
 coex
 cuda
 dendogram
-devtools
 getColorsVector
-github
 interactome
 invariants
 irlba
@@ -34,5 +32,5 @@ pValue
 pca
 pre
 scRNA
-seriph
 splitPattern
+uri
