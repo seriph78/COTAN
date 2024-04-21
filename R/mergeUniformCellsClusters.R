@@ -16,7 +16,7 @@
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
 #'   It defaults to \eqn{1.43}
 #' @param batchSize Number pairs to test in a single round. If none of them
-#'   succeeds the merge stops
+#'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
 #' @param notMergeable An array of names of merged clusters that are already
 #'   known for not being uniform. Useful to restart the *merging* process after
 #'   an interruption.
@@ -139,7 +139,7 @@
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
                                       GDIThreshold = 1.43,
-                                      batchSize = 10L,
+                                      batchSize = 0L,
                                       notMergeable = NULL,
                                       cores = 1L,
                                       optimizeForSpeed = TRUE,
@@ -162,6 +162,13 @@ mergeUniformCellsClusters <- function(objCOTAN,
   }
 
   outputClusters <- factorToVector(outputClusters)
+
+  if (batchSize == 0L) {
+    # default is twice the (2/3) power of the number of clusters
+    numCl <- length(unique(outputClusters))
+    batchSize <- as.integer(ceiling(2.0 * numCl^(2.0 / 3.0)))
+    rm(numCl)
+  }
 
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 

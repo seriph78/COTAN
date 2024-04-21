@@ -16,9 +16,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk[["set"]](
   collapse = TRUE,
-  comment = "#>",
-  fig.width = 5L,
-  fig.height = 5L
+  comment = "#>"
+#  fig.width = 5L,
+#  fig.height = 5L
 )
 
 ```
@@ -409,47 +409,68 @@ UMAPPlot(pcaClustersDF[, 1L:10L],
 ## Uniform Clustering
 
 It is possible to obtain a cell clusterization based on the concept of 
-uniformity of expression of the genes across the cells. That is the cluster
-satisfies the null hypothesis of the `COTAN` model:
+*uniformity* of expression of the genes across the cells.
+That is the cluster satisfies the null hypothesis of the `COTAN` model:
 the genes expression is not dependent on the cell in consideration.
 
+There are two functions involved into obtaining a proper clusterization:
+the first is `cellsUniformClustering` that uses standard tools clusterization
+methods, but then discards and re-clusters any *non-uniform* cluster.
+Please not that the most important parameter for the users is the
+`GDIThreshold`: it defines how strict is the uniformity check,
+good values are between 1.42 (more strict) and 1.43 (less strict).
+
 ```{r eval=FALSE, include=TRUE}
-c(fineClusters, fineCoexDF) %<-%
+c(splitClusters, splitCoexDF) %<-%
   cellsUniformClustering(obj, GDIThreshold = 1.43, initialResolution = 0.8,
                          optimizeForSpeed = TRUE, cores = 6L,
                          saveObj = TRUE, outDir = outDir)
-obj <- addClusterization(obj, clName = "Fine",
-                         clusters = fineClusters, coexDF = fineCoexDF)
+obj <- addClusterization(obj, clName = "split",
+                         clusters = splitClusters, coexDF = splitCoexDF)
 ```
-
 
 In the case one already has an existing clusterization, it is possible to
 calculate the *DEA* `data.frame` and add it to the `COTAN` object.
 ```{r eval=FALSE, include=TRUE}
-fineCoexDF <- DEAOnClusters(obj, clusters = fineClusters)
+splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
 
-obj <- addClusterization(obj, clName = "Fine",
-                         clusters = fineClusters, coexDF = fineCoexDF)
+obj <- addClusterization(obj, clName = "split",
+                         clusters = splitClusters, coexDF = splitCoexDF)
 ```
 
-
-However since the algorithm to create the clusters is not geared directly
+However since the algorithm that creates the clusters is not geared directly
 to achieve cluster uniformity, there might be clusters that can be merged back
-together and still be uniform.
+together and still be uniform. This is the purpose of the function 
+`mergeUniformCellsClusters` that takes a clusterization and tries to merge
+cluster pairs after checking that together the pair forms a uniform cluster.
+In order to avoid the massive possible checks the function relies on a *related*
+distance the find the cluster pairs that will be most likely merged. 
+Again the most important parameter for the users is the `GDIThreshold`, it is 
+supposed to be the same as the one used to generate the clusterization in the
+first place, but if needed it can be slightly relaxed in order to reduce the
+number of clusters.
+
 ```{r eval=FALSE, include=TRUE}
-c(mergedClusters, mergedCoexDF) %<-%
-  mergeUniformCellsClusters(obj, GDIThreshold = 1.43,
+c(mergeClusters, mergeCoexDF) %<-%
+  mergeUniformCellsClusters(obj, clusters = splitClusters, GDIThreshold = 1.43,
                             optimizeForSpeed = TRUE, cores = 6L,
                             saveObj = TRUE, outDir = outDir)
 
-obj <- addClusterization(obj, clName = "Merged",
-                         clusters = mergedClusters, coexDF = mergedCoexDF)
+obj <- addClusterization(obj, clName = "merge",
+                         clusters = mergeClusters, coexDF = mergeCoexDF)
 ```
 
+In the following graph, it is possible to check that the found clusters align
+very well to the expression of the layers' genes defined above...
 
 ```{r eval=FALSE, include=TRUE}
 clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                           clName = "Merged", kCuts = 6L)
+                           clName = "split", kCuts = 6L)
+```
+
+```{r}
+clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
+                           clName = "merge", kCuts = 6L)
 ```
 
 ## Vignette clean-up stage
