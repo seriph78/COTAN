@@ -456,6 +456,13 @@ c(mergeClusters, mergeCoexDF) %<-%
                             optimizeForSpeed = TRUE, cores = 6L,
                             saveObj = TRUE, outDir = outDir)
 
+# merges are:
+#  1 <- '-1' + 1 + 4
+#  2 <- 2 + 3 + 8
+#  3 <- 5
+#  4 <- 6
+#  5 <- 7
+
 obj <- addClusterization(obj, clName = "merge",
                          clusters = mergeClusters, coexDF = mergeCoexDF)
 ```
@@ -465,12 +472,12 @@ very well to the expression of the layers' genes defined above...
 
 ```{r eval=FALSE, include=TRUE}
 clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                           clName = "split", kCuts = 6L)
+                           clName = "split", kCuts = 5L)
 ```
 
 ```{r}
 clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                           clName = "merge", kCuts = 6L)
+                           clName = "merge", kCuts = 5L)
 ```
 
 ## Vignette clean-up stage
