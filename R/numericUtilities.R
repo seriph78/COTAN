@@ -145,6 +145,8 @@ dispersionBisection <-
 #'
 #' @returns the dispersion values
 #'
+#' @importFrom Rfast rowsums
+#'
 #' @rdname NumericUtilities
 #'
 parallelDispersionBisection <-
@@ -179,7 +181,7 @@ parallelDispersionBisection <-
     # we look for two dispersion values where the first leads to a
     # diffZeros negative and the second positive
     disps1 <- rep(0.0, length(sumZeros))
-    diffs1 <- rowSums(funProbZero(disps1, mu)) - sumZeros
+    diffs1 <- rowsums(funProbZero(disps1, mu)) - sumZeros
     if (all(abs(diffs1) <= threshold)) {
       output[goodPos] <- disps1
       return(output)
@@ -191,7 +193,7 @@ parallelDispersionBisection <-
     runPos <- rep(TRUE, length(diffs1))
     iter <- 1L
     repeat {
-      diffs2[runPos] <- (rowSums(funProbZero(disps2[runPos],
+      diffs2[runPos] <- (rowsums(funProbZero(disps2[runPos],
                                              mu[runPos, , drop = FALSE])) -
                            sumZeros[runPos])
 
@@ -221,7 +223,7 @@ parallelDispersionBisection <-
     repeat {
       disps[runPos] <- (disps1[runPos] + disps2[runPos]) / 2.0
 
-      diffs[runPos] <- (rowSums(funProbZero(disps[runPos],
+      diffs[runPos] <- (rowsums(funProbZero(disps[runPos],
                                             mu[runPos, , drop = FALSE])) -
                           sumZeros[runPos])
 
@@ -355,6 +357,8 @@ nuBisection <-
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom Rfast colsums
+#'
 #' @rdname NumericUtilities
 #'
 parallelNuBisection <-
@@ -386,7 +390,7 @@ parallelNuBisection <-
     # diffZeros negative and the second positive
     nus1 <- initialGuess[goodPos]
 
-    diffs1 <- colSums(funProbZero(dispersion, lambda %o% nus1)) - sumZeros
+    diffs1 <- colsums(funProbZero(dispersion, lambda %o% nus1)) - sumZeros
     if (all(abs(diffs1) <= threshold)) {
       output[goodPos] <- nus1
       return(output)
@@ -399,7 +403,7 @@ parallelNuBisection <-
     runPos <- rep(TRUE, length(diffs1))
     iter <- 1L
     repeat {
-      diffs2[runPos] <- (colSums(funProbZero(dispersion,
+      diffs2[runPos] <- (colsums(funProbZero(dispersion,
                                              lambda %o% nus2[runPos])) -
                            sumZeros[runPos])
 
@@ -432,7 +436,7 @@ parallelNuBisection <-
     repeat {
       nus[runPos] <- (nus1[runPos] + nus2[runPos]) / 2.0
 
-      diffs[runPos] <- (colSums(funProbZero(dispersion,
+      diffs[runPos] <- (colsums(funProbZero(dispersion,
                                             lambda %o% nus[runPos])) -
                           sumZeros[runPos])
 

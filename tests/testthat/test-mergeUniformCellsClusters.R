@@ -103,7 +103,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_setequal(colnames(mergedLfcDF), mergedClusters)
   expect_identical(rownames(mergedLfcDF), getGenes(obj))
   # with 2 clusters the changes are symmetric
-  expect_identical(mergedLfcDF[[1L]], -mergedLfcDF[[2L]])
+  expect_equal(mergedLfcDF[[1L]], -mergedLfcDF[[2L]], tolerance = 1.0e-12)
 
   for (cl in levels(mergedClusters)) {
     cellsToDrop <- names(clusters)[mergedClusters != cl]

@@ -1020,7 +1020,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   expectedY <- torch::torch_sum(expectedYY, 1L, dtype = dtypeForCalc)
 
-  expectedYY <- torch::torch_matmul(torch::torch_t(expectedYY), expectedYY)
+  expectedYY <- torch::torch_mm(torch::torch_t(expectedYY), expectedYY)
 
   expectedTime <- Sys.time()
   logThis(paste("Expected genes contingency table elapsed time:",
@@ -1097,11 +1097,11 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   # observedYY
   observedYY <- torch::torch_tensor(
-    t(as.matrix(getRawData(objCOTAN))),
+    as.matrix(getRawData(objCOTAN)),
     device = device, dtype = torch::torch_int16())
   observedYY <- torch::torch_tensor(observedYY != 0L, dtype = halfDtypeForCalc)
 
-  observedYY <- torch::torch_matmul(torch::torch_t(observedYY), observedYY)
+  observedYY <- torch::torch_mm(observedYY, torch::torch_t(observedYY))
 
   observedTime <- Sys.time()
   logThis(paste("Observed genes contingency table elapsed time:",
@@ -1184,7 +1184,8 @@ setMethod(
 
     if (isTRUE(actOnCells)) {
       if(isTRUE(optimizeForSpeed)) {
-        warning("The 'torch' package is not supported yet for cells' COEX")
+        warning("The 'torch' package is not supported yet for cells' COEX",
+                " Falling back to legacy code.")
       }
       c(coex, problematicPairsFraction) %<-%
         calculateCoex_Legacy(objCOTAN, actOnCells = TRUE,
@@ -1203,6 +1204,8 @@ setMethod(
         # Device configuration - fall-back to cpu if no cuda device is available
         if (str_sub(deviceStr, 1L, 4L) == "cuda" &&
             !torch::cuda_is_available()) {
+          warning("The 'torch' package could not find 'cuda',",
+                  " Falling back to 'cpu' calculations.")
           deviceStr <- "cpu"
         }
 

@@ -201,6 +201,8 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 
   floorAverage <- getLambda(objCOTAN) * floorLambdaFraction
 
+  allSums <- rowSums(normData)
+
   lfcDF <- data.frame()
 
   for (cl in names(clustersList)) {
@@ -217,10 +219,10 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
     }
 
     # log of average expression inside/outside the cluster
-    averageIn  <-
-      rowSums(normData[,  cellsIn, drop = FALSE]) / max(numCellsIn,  1L)
-    averageOut <-
-      rowSums(normData[, !cellsIn, drop = FALSE]) / max(numCellsOut, 1L)
+    inSums <- rowSums(normData[,  cellsIn, drop = FALSE])
+
+    averageIn  <- inSums             / max(numCellsIn,  1L)
+    averageOut <- (allSums - inSums) / max(numCellsOut, 1L)
 
     logAverageIn  <- log10(pmax(averageIn,  floorAverage))
     logAverageOut <- log10(pmax(averageOut, floorAverage))
