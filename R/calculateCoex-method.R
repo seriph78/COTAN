@@ -968,30 +968,33 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   startTime <- Sys.time()
 
   gc()
-  cuda_empty_cache()
+  torch::cuda_empty_cache()
 
   # TODO: 16 bits are OK here?
   if(deviceStr == "cpu"){
-    dtypeForCalc <- torch_float32()
-    halfDtypeForCalc <- torch_float32()
+    dtypeForCalc <- torch::torch_float32()
+    halfDtypeForCalc <- torch::torch_float32()
   } else {
-    dtypeForCalc <- torch_float32()
-    halfDtypeForCalc <- torch_float16()
+    dtypeForCalc <- torch::torch_float32()
+    halfDtypeForCalc <- torch::torch_float16()
   }
 
-  device <- torch_device(deviceStr)
+  device <- torch::torch_device(deviceStr)
 
   probOne <- function(nu, lambda, a) {
-    zero     <- torch_tensor( 0.0, device = device, dtype = torch_float64())
-    minusOne <- torch_tensor(-1.0, device = device, dtype = torch_float64())
+    zero     <- torch::torch_tensor( 0.0, device = device,
+                                     dtype = torch::torch_float64())
+    minusOne <- torch::torch_tensor(-1.0, device = device,
+                                    dtype = torch::torch_float64())
 
     # Calculate terms based on conditions
     term1 <- (a <= zero) *
-      torch_exp(torch_ger(nu, lambda) * (torch_minimum(a, zero) + minusOne))
+      torch::torch_exp(torch::torch_ger(nu, lambda) *
+                         (torch::torch_minimum(a, zero) + minusOne))
 
     term2 <- (a >  zero) *
-      torch_pow(one + torch_ger(nu, lambda) * torch_maximum(a, zero),
-                minusOne / a)
+      torch::torch_pow(one + torch::torch_ger(nu, lambda)
+                       * torch::torch_maximum(a, zero), minusOne / a)
 
     invisible(term1$add_(term2)$add_(minusOne)$neg_())
 
@@ -1000,23 +1003,24 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   logThis("Retrieving expected genes contingency table", logLevel = 3L)
 
-  one <- torch_tensor(1.0, device = device, dtype = dtypeForCalc)
-  m   <- torch_tensor(getNumCells(objCOTAN),
-                      device = device, dtype = dtypeForCalc)
+  one <- torch::torch_tensor(1.0, device = device,
+                             dtype = dtypeForCalc)
+  m   <- torch::torch_tensor(getNumCells(objCOTAN),
+                             device = device, dtype = dtypeForCalc)
 
-  expectedYY <-torch_tensor(
-    probOne(torch_tensor(getNu(objCOTAN),
-                         dtype = torch_float64(), device = device),
-            torch_tensor(getLambda(objCOTAN),
-                         dtype = torch_float64(), device = device),
-            torch_tensor(getDispersion(objCOTAN),
-                         dtype = torch_float64(), device = device)),
+  expectedYY <-torch::torch_tensor(probOne(
+    torch::torch_tensor(getNu(objCOTAN),
+                        dtype = torch::torch_float64(), device = device),
+    torch::torch_tensor(getLambda(objCOTAN),
+                        dtype = torch::torch_float64(), device = device),
+    torch::torch_tensor(getDispersion(objCOTAN),
+                        dtype = torch::torch_float64(), device = device)),
     device = device, dtype = dtypeForCalc)
-  cuda_empty_cache()
+  torch::cuda_empty_cache()
 
-  expectedY <- torch_sum(expectedYY, 1L, dtype = dtypeForCalc)
+  expectedY <- torch::torch_sum(expectedYY, 1L, dtype = dtypeForCalc)
 
-  expectedYY <- torch_matmul(torch_t(expectedYY), expectedYY)
+  expectedYY <- torch::torch_matmul(torch::torch_t(expectedYY), expectedYY)
 
   expectedTime <- Sys.time()
   logThis(paste("Expected genes contingency table elapsed time:",
@@ -1025,53 +1029,53 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   logThis("Calculating genes coex normalization factor", logLevel = 3L)
 
-  coex <- torch_maximum(expectedYY, one)$reciprocal_()
+  coex <- torch::torch_maximum(expectedYY, one)$reciprocal_()
 
   thresholdForPP <- 0.5
   problematicPairs <- NULL
   if (isTRUE(returnPPFract)) {
     problematicPairs <-
-      torch_tensor(expectedYY < thresholdForPP,
-                   dtype = torch_bool(), device = device)
+      torch::torch_tensor(expectedYY < thresholdForPP,
+                          dtype = torch::torch_bool(), device = device)
   }
 
   # expectedYN
   #TODO: use in-place torch_maximum_() as soon as it becomes available
   tmp <- expectedY$view(c(-1L, 1L)) - expectedYY
-  invisible(coex$add_(torch_maximum(tmp, one)$reciprocal_()))
   if (isTRUE(returnPPFract)) {
     invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
   }
+  invisible(coex$add_(tmp$sub_(one)$relu_()$add_(one)$reciprocal_()))
   rm(tmp)
-  cuda_empty_cache()
+  torch::cuda_empty_cache()
 
   # expectedNY
   tmp <- expectedY$view(c(1L, -1L)) - expectedYY
-  invisible(coex$add_(torch_maximum(tmp, one)$reciprocal_()))
   if (isTRUE(returnPPFract)) {
     invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
   }
+  invisible(coex$add_(tmp$sub_(one)$relu_()$add_(one)$reciprocal_()))
   rm(tmp)
-  cuda_empty_cache()
+  torch::cuda_empty_cache()
 
   # expectedNN
   tmp <- expectedYY - expectedY$view(c(-1L, 1L))
   invisible(expectedY$sub_(m))
   invisible(tmp$sub_(expectedY$view(c(1L, -1L))))
-  invisible(coex$add_(torch_maximum(tmp, one)$reciprocal_()))
   if (isTRUE(returnPPFract)) {
     invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
   }
+  invisible(coex$add_(tmp$sub_(one)$relu_()$add_(one)$reciprocal_()))
   rm(tmp, expectedY)
   gc()
-  cuda_empty_cache()
+  torch::cuda_empty_cache()
 
   invisible(coex$divide_(m)$sqrt_())
 
   # count problematic pairs
   problematicPairsFraction <- NA
   if (isTRUE(returnPPFract)) {
-    numDiagPP <- torch_diag(problematicPairs)$sum()$item()
+    numDiagPP <- torch::torch_diag(problematicPairs)$sum()$item()
     problematicPairsFraction <-
       ((problematicPairs$sum()$item() + numDiagPP) /
          (problematicPairs$size(1) * (problematicPairs$size(1) + 1L)))
@@ -1081,7 +1085,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
                   problematicPairsFraction), logLevel = 3L)
 
     rm(problematicPairs)
-    cuda_empty_cache()
+    torch::cuda_empty_cache()
   }
 
   sqrtTime <- Sys.time()
@@ -1092,11 +1096,12 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   logThis("Retrieving observed genes yes/yes contingency table", logLevel = 3L)
 
   # observedYY
-  observedYY <- torch_tensor(t(as.matrix(getRawData(objCOTAN))),
-                             device = device, dtype = torch_int16())
-  observedYY <- torch_tensor(observedYY != 0L, dtype = halfDtypeForCalc)
+  observedYY <- torch::torch_tensor(
+    t(as.matrix(getRawData(objCOTAN))),
+    device = device, dtype = torch::torch_int16())
+  observedYY <- torch::torch_tensor(observedYY != 0L, dtype = halfDtypeForCalc)
 
-  observedYY <- torch_matmul(torch_t(observedYY), observedYY)
+  observedYY <- torch::torch_matmul(torch::torch_t(observedYY), observedYY)
 
   observedTime <- Sys.time()
   logThis(paste("Observed genes contingency table elapsed time:",
@@ -1107,14 +1112,14 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   invisible(coex$multiply_(expectedYY$neg()))
 
   rm(expectedYY, observedYY)
-  cuda_empty_cache()
+  torch::cuda_empty_cache()
 
   ret <- pack(forceSymmetric(as(as.matrix(coex$cpu()), "denseMatrix")))
   rownames(ret) <- colnames(ret) <- getGenes(objCOTAN)
 
   rm(coex, device)
   gc()
-  cuda_empty_cache()
+  torch::cuda_empty_cache()
 
   endTime <- Sys.time()
   logThis(paste("Calculate genes coex elapsed time:",
@@ -1124,7 +1129,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
                 difftime(endTime, startTime, units = "secs")),
           logLevel = 2L)
 
-  logThis(paste("Calculate genes coex (torch) on device", deviceStr,
+  logThis(paste0("Calculate genes coex (torch) on device ", deviceStr,
                 ": DONE"), logLevel = 1L)
 
   return(list("coex" = ret, "ppf" = problematicPairsFraction))
