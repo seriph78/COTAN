@@ -475,7 +475,7 @@ clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
                            clName = "split", kCuts = 5L)
 ```
 
-```{r}
+```{r eval=FALSE, include=TRUE}
 clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
                            clName = "merge", kCuts = 5L)
 ```
