@@ -25,6 +25,7 @@
 #' @returns `reorderClusterization()` returns a `list` with 2 elements:
 #'   * `"clusters"` the newly reordered cluster labels array
 #'   * `"coex"` the associated `COEX` `data.frame`
+#'   * `"permMap"` the reordering mapping
 #'
 #' @export
 #'
@@ -113,5 +114,6 @@ reorderClusterization <- function(objCOTAN,
     }
   }
 
-  return(list("clusters" = factor(outputClusters), "coex" = outputCoexDF))
+  return(list("clusters" = factor(outputClusters),
+              "coex" = outputCoexDF, "permMap" = clMap))
 }
