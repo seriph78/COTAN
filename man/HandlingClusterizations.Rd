@@ -334,6 +334,7 @@ score
 \itemize{
 \item \code{"clusters"} the newly reordered cluster labels array
 \item \code{"coex"} the associated \code{COEX} \code{data.frame}
+\item \code{"permMap"} the reordering mapping
 }
 }
 \description{

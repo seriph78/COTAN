@@ -445,10 +445,10 @@ cellsUniformClustering <- function(objCOTAN,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
     allCheckResults <- allCheckResults[clTags, , drop = FALSE]
-    allCheckResults <- allCheckResults[clTagsMap[clTags], , drop = FALSE]
+    rownames(allCheckResults) <- clTagsMap[clTags]
     if (any(unclusteredCells)) {
       errorCheckResults[["size"]] <- length(unclusteredCells)
-      allCheckResults <- rbind(allCheckResults, "-1" <- errorCheckResults)
+      allCheckResults <- rbind(allCheckResults, "-1" = errorCheckResults)
     }
   }
 
@@ -459,7 +459,7 @@ cellsUniformClustering <- function(objCOTAN,
                return(NULL)
                })
 
-  c(outputClusters, outputCoexDF) %<-% tryCatch(
+  c(outputClusters, outputCoexDF, permMap) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
                           keepMinusOne = TRUE, useDEA = useDEA,
@@ -468,6 +468,7 @@ cellsUniformClustering <- function(objCOTAN,
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
       return(list(outputClusters, outputCoexDF))
     })
+  rownames(allCheckResults) <- permMap[rownames(allCheckResults)]
 
   outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
 

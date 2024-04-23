@@ -56,7 +56,7 @@ test_that("Cell Uniform Clustering", {
   clusters2 <- factor(clusters, levels = c("-1", levels(clusters)))
   clusters2[1L:50L] <- "-1"
   coexDF2 <- DEAOnClusters(obj, clusters = clusters2)
-  c(rClusters2, rCoexDF2) %<-%
+  c(rClusters2, rCoexDF2, permMap2) %<-%
     reorderClusterization(obj, reverse = TRUE, keepMinusOne = TRUE,
                           clusters = clusters2, coexDF = coexDF2)
 
@@ -65,10 +65,12 @@ test_that("Cell Uniform Clustering", {
   expect_identical(rClusters2 == "-1", clusters2 == "-1")
   # this is an happenstance
   expect_identical(colnames(rCoexDF2), rev(levels(rClusters2)))
+  expect_identical(permMap2, set_names(paste0(c(2, 1, 4, 3, -1)),
+                                       paste0(c(1:4, -1))))
 
   clusters3 <- factor(clusters, levels = c(levels(clusters), "-1"))
   clusters3[51L:100L] <- "-1"
-  c(clusters3, coexDF3) %<-%
+  c(clusters3, coexDF3, permMap3) %<-%
     reorderClusterization(obj, useDEA = FALSE,
                           reverse = FALSE, keepMinusOne = TRUE,
                           clusters = clusters3, coexDF = coexDF2)
@@ -78,6 +80,8 @@ test_that("Cell Uniform Clustering", {
   expect_identical((clusters3 == "-1")[51:150], (clusters2 == "-1")[1:100])
   # this is an happenstance
   expect_identical(colnames(coexDF3)[-5L], levels(clusters3)[-1L])
+  expect_identical(permMap3, set_names(paste0(c(2, 3, 1, 4, -1)),
+                                       paste0(c(1:4, -1))))
 
   exactClusters <- set_names(rep(1L:2L, each = 600L), nm = getCells(obj))
 
