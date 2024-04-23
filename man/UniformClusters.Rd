@@ -50,7 +50,7 @@ mergeUniformCellsClusters(
   objCOTAN,
   clusters = NULL,
   GDIThreshold = 1.43,
-  batchSize = 10L,
+  batchSize = 0L,
   notMergeable = NULL,
   cores = 1L,
   optimizeForSpeed = TRUE,
@@ -128,7 +128,7 @@ available \emph{clusterization} will be used, as it is probably the most
 significant!}
 
 \item{batchSize}{Number pairs to test in a single round. If none of them
-succeeds the merge stops}
+succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}}
 
 \item{notMergeable}{An array of names of merged clusters that are already
 known for not being uniform. Useful to restart the \emph{merging} process after
