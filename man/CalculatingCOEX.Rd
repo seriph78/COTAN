@@ -109,7 +109,13 @@ expectedPartialContingencyTables(
 
 contingencyTables(objCOTAN, g1, g2)
 
-\S4method{calculateCoex}{COTAN}(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE)
+\S4method{calculateCoex}{COTAN}(
+  objCOTAN,
+  actOnCells = FALSE,
+  returnPPFract = FALSE,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda"
+)
 
 calculatePartialCoex(
   objCOTAN,
@@ -168,6 +174,15 @@ pair. If not given the appropriate one will be calculated on the fly}
 \item{g1}{a gene}
 
 \item{g2}{another gene}
+
+\item{returnPPFract}{Boolean; when \code{TRUE} the function returns the fraction
+of genes/cells pairs for which the \emph{expected contingency table} is smaller
+than \eqn{0.5}. Default is FALSE}
+
+\item{deviceStr}{On the \code{torch} library enforces which device to use to run
+the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
+\code{"cuda"} to use the system \emph{GPUs} or something like \code{"cuda:0"} to restrict
+to a specific device}
 
 \item{geneSubsetCol}{an array of genes. It will be put in columns. If left
 empty the function will do it genome-wide.}
@@ -294,8 +309,15 @@ once one notices that \eqn{O_{ij} - E_{ij} = (-1)^{\#\{i,j\}} \, r} for
 some constant \eqn{r} for all \eqn{i,j \in \{\text{Y, N}\}}.
 
 The latter follows from the fact that the relevant marginal sums of the
-the expected contingency tables were enforced to match the marginal sums
-of the observed ones.
+expected contingency tables were enforced to match the marginal sums of the
+observed ones.
+
+The new implementation of the function relies on the \code{torch}
+package. This implies that it is potentially able to use the system \code{GPU}
+to run the heavy duty calculations required by this method. However
+installing the \code{torch} package on a system can be \emph{finicky}, so we
+tentatively provide a short help page \link{Installing_torch} hoping that it
+will help...
 }
 \details{
 \code{getMu()} calculates the vector \eqn{\mu = \lambda \times
@@ -452,4 +474,6 @@ lh <- calculateLikelihoodOfObserved(objCOTAN)
 }
 \seealso{
 \link{ParametersEstimations} for more details.
+
+\link{Installing_torch} about the \code{torch} package
 }

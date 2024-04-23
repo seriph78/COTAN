@@ -1,7 +1,7 @@
 # ----- `COTAN` parameters' estimates methods -----
 
 #'
-#' Estimation of the `COTAN` model's parameters
+#' @title Estimation of the `COTAN` model's parameters
 #'
 #' @description These functions are used to estimate the `COTAN` model's
 #'   parameters. That is the average count for each gene (lambda) the average
@@ -109,6 +109,30 @@ setMethod(
   }
 )
 
+
+# ------- `COTAN` clusterization data accessors ------
+
+#' @title Handling cells' *clusterization* and related functions
+#'
+#' @description These functions manage the *clusterizations* and their
+#'   associated *cluster* `COEX` `data.frame`s.
+#'
+#'   A *clusterization* is any partition of the cells where to each cell it is
+#'   assigned a **label**; a group of cells with the same label is called
+#'   *cluster*.
+#'
+#'   For each *cluster* is also possible to define a `COEX` value for each gene,
+#'   indicating its increased or decreased expression in the *cluster* compared
+#'   to the whole background. A `data.frame` with these values listed in a
+#'   column for each *cluster* is stored separately for each *clusterization* in
+#'   the `clustersCoex` member.
+#'
+#'   The formulae for this *In/Out* `COEX` are similar to those used in the
+#'   [calculateCoex()] method, with the **role** of the second gene taken by the
+#'   *In/Out* status of the cells with respect to each *cluster*.
+#'
+#' @name HandlingClusterizations
+NULL
 
 #' @aliases estimateNuLinearByCluster
 #'
@@ -362,13 +386,14 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
   }
 }
 
-
+#' @aliases estimateNuBisection
+#'
 #' @details `estimateNuBisection()` estimates the `nu` vector of a `COTAN`
 #'   object by bisection. It determines the `nu` parameters such that, for each
 #'   cell, the probability of zero counts matches the number of observed zeros.
 #'   It assumes [estimateDispersionBisection()] being already run. Since this
-#'   breaks the assumption that the average `nu` is `1`, it is recommended not
-#'   to run this in isolation but use `estimateDispersionNuBisection()` instead.
+#'   breaks the assumption that the average `nu` is one, it is recommended not
+#'   to run this in isolation but use [estimateDispersionNuBisection()] instead.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param threshold minimal solution precision
@@ -618,7 +643,8 @@ setMethod(
   }
 )
 
-
+#' @aliases estimateDispersionNuNlminb
+#'
 #' @details `estimateDispersionNuNlminb()` estimates the `nu` and
 #'   `dispersion` parameters to minimize the discrepancy between the observed
 #'   and expected probability of zero. It uses the [stats::nlminb()] solver,

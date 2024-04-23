@@ -1,8 +1,8 @@
 
 setGeneric(
   "proceedToCoex",
-  function(objCOTAN, calcCoex = TRUE,
-           cores = 1L, saveObj = TRUE, outDir = ".") {
+  function(objCOTAN, calcCoex = TRUE, optimizeForSpeed = TRUE,
+           deviceStr = "cuda", cores = 1L, saveObj = TRUE, outDir = ".") {
     standardGeneric("proceedToCoex")
   }
 )
@@ -11,7 +11,8 @@ setGeneric(
 
 setGeneric(
   "calculateCoex",
-  function(objCOTAN, actOnCells = FALSE, optimizeForSpeed = TRUE) {
+  function(objCOTAN, actOnCells = FALSE, returnPPFract = FALSE,
+           optimizeForSpeed = TRUE, deviceStr = "cuda") {
     standardGeneric("calculateCoex")
   }
 )

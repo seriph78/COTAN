@@ -1,6 +1,6 @@
 #----------------- log functions --------------------
 
-#' Logging in the `COTAN` package
+#' @title Logging in the `COTAN` package
 #'
 #' @description Logging is currently supported for all `COTAN` functions. It is
 #'   possible to see the output on the terminal and/or on a log file. The level
@@ -129,7 +129,7 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
 
 #----------------- miscellanea --------------------
 
-#' handleMultiCore
+#' @title Handling Multi-Core Enviroments
 #'
 #' @description Check whether session supports multi-core evaluation and
 #'   provides an effective upper bound to the number of cores.
@@ -174,7 +174,7 @@ handleMultiCore <- function(cores) {
 }
 
 
-#' Internal function to handle names subset...
+#' @title Internal function to handle names subset...
 #'
 #' @description Returns the given subset or the full list of names if none were
 #'   specified
@@ -204,7 +204,7 @@ handleNamesSubsets <- function(names, subset = vector(mode = "character")) {
 }
 
 
-#' Internal function to check if a name is empty...
+#' @title Internal function to check if a name is empty...
 #'
 #' @description Returns whether the passed name is not null and has non-zero
 #'   characters
@@ -222,7 +222,7 @@ isEmptyName <- function(name) {
 }
 
 
-#' Internal function to convert a named factor to a character vector
+#' @title Internal function to convert a named factor to a character vector
 #'
 #' @description Returns the factor cast to a vector along its names
 #'
@@ -242,8 +242,8 @@ factorToVector <- function(v) {
 }
 
 
-#' Internal function to have nicer factor labels that have all the same number
-#' of characters
+#' @title Internal function to have nicer factor labels that have all the same
+#'   number of characters
 #'
 #' @description Returns the factor with the new labels
 #'
@@ -320,7 +320,7 @@ setColumnInDF <- function(df, colToSet, colName,
 
 #------------------- clusters utilities ----------
 
-#' *Clusters* utilities
+#' @title *Clusters* utilities
 #'
 #' @description Handle *clusterization* <-> *clusters* `list` conversions,
 #'   *clusters* grouping and merge
@@ -721,7 +721,7 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   return(basicTheme)
 }
 
-#' getColorsVector
+#' @title getColorsVector
 #'
 #' @description This function returns a list of colors based on the
 #'   [brewer.pal()] function

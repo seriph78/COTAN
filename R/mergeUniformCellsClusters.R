@@ -16,11 +16,18 @@
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
 #'   It defaults to \eqn{1.43}
 #' @param batchSize Number pairs to test in a single round. If none of them
-#'   succeeds the merge stops
+#'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
 #' @param notMergeable An array of names of merged clusters that are already
 #'   known for not being uniform. Useful to restart the *merging* process after
 #'   an interruption.
 #' @param cores number of cores to use. Default is 1.
+#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
+#'   library to run the matrix calculations. Otherwise, or when the library is
+#'   not available will run the slower legacy code
+#' @param deviceStr On the `torch` library enforces which device to use to run
+#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
+#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
+#'   to a specific device
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
@@ -84,18 +91,19 @@
 #' ##
 #'
 #' splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
+#'                                     optimizeForSpeed = TRUE,
+#'                                     deviceStr = "cuda",
 #'                                     initialResolution = 0.8,
 #'                                     GDIThreshold = 1.46, saveObj = FALSE)
 #'
 #' clusters <- splitList[["clusters"]]
 #'
 #' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
-#' checkClusterUniformity(objCOTAN,
-#'                        GDIThreshold = 1.46,
-#'                        cluster = clusters[[1L]],
-#'                        cells = firstCluster,
-#'                        cores = 6L,
-#'                        saveObj = FALSE)
+#' firstClusterIsUniform <-
+#'   checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
+#'                          cluster = clusters[[1L]], cells = firstCluster,
+#'                          cores = 6L, optimizeForSpeed = TRUE,
+#'                          deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
 #'
 #' objCOTAN <- addClusterization(objCOTAN,
 #'                               clName = "split",
@@ -112,6 +120,8 @@
 #'                                         batchSize = 5L,
 #'                                         clusters = clusters,
 #'                                         cores = 6L,
+#'                                         optimizeForSpeed = TRUE,
+#'                                         deviceStr = "cpu",
 #'                                         distance = "cosine",
 #'                                         hclustMethod = "ward.D2",
 #'                                         saveObj = FALSE)
@@ -129,9 +139,11 @@
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
                                       GDIThreshold = 1.43,
-                                      batchSize = 10L,
+                                      batchSize = 0L,
                                       notMergeable = NULL,
                                       cores = 1L,
+                                      optimizeForSpeed = TRUE,
+                                      deviceStr = "cuda",
                                       useDEA = TRUE,
                                       distance = NULL,
                                       hclustMethod = "ward.D2",
@@ -150,6 +162,13 @@ mergeUniformCellsClusters <- function(objCOTAN,
   }
 
   outputClusters <- factorToVector(outputClusters)
+
+  if (batchSize == 0L) {
+    # default is twice the (2/3) power of the number of clusters
+    numCl <- length(unique(outputClusters))
+    batchSize <- as.integer(ceiling(2.0 * numCl^(2.0 / 3.0)))
+    rm(numCl)
+  }
 
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
@@ -173,9 +192,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   iter <- 0L
   allCheckResults <- data.frame()
-  errorCheckResults <-
-    list("isUniform" = FALSE, "fractionAbove" = NA, "firstPercentile" = NA)
-
+  errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
+                            "firstPercentile" = NA, "size" = NA)
 
   testPairListMerge <- function(pList) {
     logThis(paste0("Clusters pairs for merging:\n",
@@ -208,16 +226,19 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
       checkResults <- tryCatch(
         checkClusterUniformity(objCOTAN,
-                               cluster = mergedClName,
+                               clusterName = mergedClName,
                                cells = mergedCluster,
                                GDIThreshold = GDIThreshold,
                                cores = cores,
+                               optimizeForSpeed = optimizeForSpeed,
+                               deviceStr = deviceStr,
                                saveObj = saveObj,
                                outDir = mergeOutDir),
         error = function(err) {
           logThis(paste("While checking cluster uniformity", err),
                   logLevel = 0L)
           logThis("Marking pair as not mergable", logLevel = 1L)
+          errorCheckResults[["size"]] <- length(mergedCluster)
           return(errorCheckResults)
         })
 
@@ -250,8 +271,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     oldNumClusters <- length(unique(outputClusters))
 
     clDist <- distancesBetweenClusters(objCOTAN, clusters = outputClusters,
-                                       useDEA = useDEA, cores = cores,
-                                       distance = distance)
+                                       useDEA = useDEA, distance = distance)
     gc()
 
     if (isTRUE(saveObj)) tryCatch({
@@ -350,25 +370,26 @@ mergeUniformCellsClusters <- function(objCOTAN,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
     allCheckResults <- allCheckResults[clTags, , drop = FALSE]
-    allCheckResults <- allCheckResults[clTagsMap[clTags], , drop = FALSE]
+    rownames(allCheckResults) <- clTagsMap[clTags]
   }
 
   outputCoexDF <-
-    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters, cores = cores),
+    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters),
              error = function(err) {
                logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
                return(NULL)
              })
 
-  c(outputClusters, outputCoexDF) %<-% tryCatch(
+  c(outputClusters, outputCoexDF, permMap) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = FALSE, useDEA = useDEA, cores = cores,
+                          keepMinusOne = FALSE, useDEA = useDEA,
                           distance = distance, hclustMethod = hclustMethod),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
       return(list(outputClusters, outputCoexDF))
     })
+  rownames(allCheckResults) <- permMap[rownames(allCheckResults)]
 
   if (isTRUE(saveObj)) tryCatch({
     outFile <- file.path(outDirCond, "merge_check_results.csv")

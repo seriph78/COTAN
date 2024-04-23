@@ -23,6 +23,8 @@ cellsUniformClustering(
   GDIThreshold = 1.43,
   cores = 1L,
   maxIterations = 25L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
   initialClusters = NULL,
   initialResolution = 0.8,
   useDEA = TRUE,
@@ -34,10 +36,12 @@ cellsUniformClustering(
 
 checkClusterUniformity(
   objCOTAN,
-  cluster,
+  clusterName,
   cells,
   GDIThreshold = 1.43,
   cores = 1L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
   saveObj = TRUE,
   outDir = "."
 )
@@ -46,9 +50,11 @@ mergeUniformCellsClusters(
   objCOTAN,
   clusters = NULL,
   GDIThreshold = 1.43,
-  batchSize = 10L,
+  batchSize = 0L,
   notMergeable = NULL,
   cores = 1L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
   hclustMethod = "ward.D2",
@@ -79,6 +85,15 @@ here to speed up the process (default is \code{NULL})}
 \item{maxIterations}{max number of re-clustering iterations. It defaults to
 \eqn{25}}
 
+\item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
+library to run the matrix calculations. Otherwise, or when the library is
+not available will run the slower legacy code}
+
+\item{deviceStr}{On the \code{torch} library enforces which device to use to run
+the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
+\code{"cuda"} to use the system \emph{GPUs} or something like \code{"cuda:0"} to restrict
+to a specific device}
+
 \item{initialClusters}{an existing \emph{clusterization} to use as starting point:
 the \emph{clusters} deemed \strong{uniform} will be kept and the rest processed as
 normal}
@@ -104,7 +119,7 @@ plots to file}
 \item{outDir}{an existing directory for the analysis output. The effective
 output will be paced in a sub-folder.}
 
-\item{cluster}{the tag of the \emph{cluster}}
+\item{clusterName}{the tag of the \emph{cluster}}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
 
@@ -113,7 +128,7 @@ available \emph{clusterization} will be used, as it is probably the most
 significant!}
 
 \item{batchSize}{Number pairs to test in a single round. If none of them
-succeeds the merge stops}
+succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}}
 
 \item{notMergeable}{An array of names of merged clusters that are already
 known for not being uniform. Useful to restart the \emph{merging} process after
@@ -133,6 +148,7 @@ an interruption.}
 \item \code{"isUniform"}: a flag indicating whether the \emph{cluster} is \strong{uniform}
 \item \code{"fractionAbove"}: the percentage of genes with \code{GDI} above the threshold
 \item \code{"firstPercentile"}: the quantile associated to the highest percentile
+\item \code{"size"}: the number of cells in the cluster
 }
 
 a \code{list} with:
@@ -200,18 +216,19 @@ plot(gdiPlot)
 ##
 
 splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
+                                    optimizeForSpeed = TRUE,
+                                    deviceStr = "cuda",
                                     initialResolution = 0.8,
                                     GDIThreshold = 1.46, saveObj = FALSE)
 
 clusters <- splitList[["clusters"]]
 
 firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
-checkClusterUniformity(objCOTAN,
-                       GDIThreshold = 1.46,
-                       cluster = clusters[[1L]],
-                       cells = firstCluster,
-                       cores = 6L,
-                       saveObj = FALSE)
+firstClusterIsUniform <-
+  checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
+                         cluster = clusters[[1L]], cells = firstCluster,
+                         cores = 6L, optimizeForSpeed = TRUE,
+                         deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
 
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "split",
@@ -228,6 +245,8 @@ mergedList <- mergeUniformCellsClusters(objCOTAN,
                                         batchSize = 5L,
                                         clusters = clusters,
                                         cores = 6L,
+                                        optimizeForSpeed = TRUE,
+                                        deviceStr = "cpu",
                                         distance = "cosine",
                                         hclustMethod = "ward.D2",
                                         saveObj = FALSE)

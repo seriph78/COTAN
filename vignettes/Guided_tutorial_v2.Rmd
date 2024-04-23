@@ -16,9 +16,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk[["set"]](
   collapse = TRUE,
-  comment = "#>",
-  fig.width = 5L,
-  fig.height = 5L
+  comment = "#>"
+#  fig.width = 5L,
+#  fig.height = 5L
 )
 
 ```
@@ -79,9 +79,7 @@ the metadata for the experiment.
 
 ```{r}
 cond <- "mouse_cortex_E17.5"
-#cond <- "test"
 
-#obj = COTAN(raw = sampled.dataset)
 obj <- COTAN(raw = sample.dataset)
 obj <- initializeMetaDataset(obj,
                              GEO = GEO,
@@ -248,11 +246,14 @@ In this part, all the contingency tables are computed
 and used to get the statistics necessary to `COEX` evaluation and storing
 
 ```{r}
-obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 6L,
+obj <- proceedToCoex(obj, calcCoex = TRUE,
+                     optimizeForSpeed = TRUE, cores = 6L,
                      saveObj = TRUE, outDir = outDir)
 ```
 
-```{r eval=TRUE, include=TRUE}
+Since `saveObj = TRUE`, this step can be skipped as the `COTAN` object has
+already been saved in the `outDir`.
+```{r eval=FALSE, include=TRUE}
 # saving the structure
 saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
 ```
@@ -268,7 +269,8 @@ obj2 <- automaticCOTANObjectCreation(
   GEO = GEO,
   sequencingMethod = "Drop_seq",
   sampleCondition = cond,
-  calcCoex = TRUE, saveObj = TRUE, outDir = outDir, cores = 6L)
+  calcCoex = TRUE, cores = 6L, optimizeForSpeed = TRUE,
+  saveObj = TRUE, outDir = outDir)
 ```
 
 # Analysis of the elaborated data
@@ -337,7 +339,7 @@ genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Vim", "Hes1"),
                  pValueThreshold = 0.001, symmetric = TRUE)
 ```
 
-```{r}
+```{r eval=FALSE, include=TRUE}
 genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
                  secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
                  pValueThreshold = 0.001, symmetric = FALSE)
@@ -388,7 +390,7 @@ layersGenes <- list(
 )
 c(gSpace, eigPlot, pcaClustersDF, treePlot) %<-%
   establishGenesClusters(obj, groupMarkers = layersGenes,
-                         numGenesPerMarker = 25L, kCuts = 6L)
+                         numGenesPerMarker = 25L, kCuts = 5L)
 
 plot(eigPlot)
 ```
@@ -407,38 +409,75 @@ UMAPPlot(pcaClustersDF[, 1L:10L],
 ## Uniform Clustering
 
 It is possible to obtain a cell clusterization based on the concept of 
-uniformity of expression of the genes across the cells. That is the cluster
-satisfies the null hypothesis of the `COTAN` model:
+*uniformity* of expression of the genes across the cells.
+That is the cluster satisfies the null hypothesis of the `COTAN` model:
 the genes expression is not dependent on the cell in consideration.
 
+There are two functions involved into obtaining a proper clusterization:
+the first is `cellsUniformClustering` that uses standard tools clusterization
+methods, but then discards and re-clusters any *non-uniform* cluster.
+Please not that the most important parameter for the users is the
+`GDIThreshold`: it defines how strict is the uniformity check,
+good values are between 1.42 (more strict) and 1.43 (less strict).
+
 ```{r eval=FALSE, include=TRUE}
-fineClusters <- cellsUniformClustering(obj, GDIThreshold = 1.43,
-                                       initialResolution = 0.8,
-                                       cores = 6L, saveObj = TRUE,
-                                       outDir = outDir)[["clusters"]]
-obj <- addClusterization(obj, clName = "FineClusters", clusters = fineClusters)
+c(splitClusters, splitCoexDF) %<-%
+  cellsUniformClustering(obj, GDIThreshold = 1.43, initialResolution = 0.8,
+                         optimizeForSpeed = TRUE, cores = 6L,
+                         saveObj = TRUE, outDir = outDir)
+obj <- addClusterization(obj, clName = "split",
+                         clusters = splitClusters, coexDF = splitCoexDF)
 ```
 
-
+In the case one already has an existing clusterization, it is possible to
+calculate the *DEA* `data.frame` and add it to the `COTAN` object.
 ```{r eval=FALSE, include=TRUE}
-coexDF <- DEAOnClusters(obj, clusters = fineClusters, cores = 6L)
-obj <- addClusterizationCoex(obj, clName = "FineClusters",
-                             coexDF = coexDF)
+splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
+
+obj <- addClusterization(obj, clName = "split",
+                         clusters = splitClusters, coexDF = splitCoexDF)
 ```
 
+However since the algorithm that creates the clusters is not geared directly
+to achieve cluster uniformity, there might be clusters that can be merged back
+together and still be uniform. This is the purpose of the function 
+`mergeUniformCellsClusters` that takes a clusterization and tries to merge
+cluster pairs after checking that together the pair forms a uniform cluster.
+In order to avoid the massive possible checks the function relies on a *related*
+distance the find the cluster pairs that will be most likely merged. 
+Again the most important parameter for the users is the `GDIThreshold`, it is 
+supposed to be the same as the one used to generate the clusterization in the
+first place, but if needed it can be slightly relaxed in order to reduce the
+number of clusters.
+
 ```{r eval=FALSE, include=TRUE}
-c(mergedClusters, coexDF) %<-%
-  mergeUniformCellsClusters(obj, GDIThreshold = 1.43, cores = 6L,
+c(mergeClusters, mergeCoexDF) %<-%
+  mergeUniformCellsClusters(obj, clusters = splitClusters, GDIThreshold = 1.43,
+                            optimizeForSpeed = TRUE, cores = 6L,
                             saveObj = TRUE, outDir = outDir)
-obj <- addClusterization(obj, clName = "MergedClusters",
-                         clusters = mergedClusters, coexDF = coexDF)
+
+# merges are:
+#  1 <- '-1' + 1 + 4
+#  2 <- 2 + 3 + 8
+#  3 <- 5
+#  4 <- 6
+#  5 <- 7
+
+obj <- addClusterization(obj, clName = "merge",
+                         clusters = mergeClusters, coexDF = mergeCoexDF)
 ```
 
+In the following graph, it is possible to check that the found clusters align
+very well to the expression of the layers' genes defined above...
 
 ```{r eval=FALSE, include=TRUE}
-mergedUMAPPlot <- UMAPPlot(coexDF, elements = layersGenes,
-                           title = "Merged Clusters UMAP Plot")
-plot(mergedUMAPPlot)
+clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
+                           clName = "split", kCuts = 5L)
+```
+
+```{r eval=FALSE, include=TRUE}
+clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
+                           clName = "merge", kCuts = 5L)
 ```
 
 ## Vignette clean-up stage

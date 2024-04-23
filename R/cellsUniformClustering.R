@@ -1,5 +1,5 @@
 
-#' Get a clusterization running the `Seurat` package
+#' @title Get a clusterization running the `Seurat` package
 #'
 #' @description The function uses the [Seurat-package] to clusterize the given
 #'   counts raw data.
@@ -129,7 +129,7 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
 
 # --------------------- Uniform Clusters ----------------------
 
-#' Uniform Clusters
+#' @title Uniform Clusters
 #'
 #' @description This group of functions takes in input a `COTAN` object and
 #'   handle the task of dividing the dataset into **Uniform Clusters**, that is
@@ -156,6 +156,13 @@ NULL
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
+#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
+#'   library to run the matrix calculations. Otherwise, or when the library is
+#'   not available will run the slower legacy code
+#' @param deviceStr On the `torch` library enforces which device to use to run
+#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
+#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
+#'   to a specific device
 #' @param initialResolution a number indicating how refined are the clusters
 #'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
 #'   [Seurat::FindClusters()]
@@ -201,6 +208,8 @@ cellsUniformClustering <- function(objCOTAN,
                                    GDIThreshold = 1.43,
                                    cores = 1L,
                                    maxIterations = 25L,
+                                   optimizeForSpeed = TRUE,
+                                   deviceStr = "cuda",
                                    initialClusters = NULL,
                                    initialResolution = 0.8,
                                    useDEA = TRUE,
@@ -233,8 +242,8 @@ cellsUniformClustering <- function(objCOTAN,
   numClustersToRecluster <- 0L
   srat <- NULL
   allCheckResults <- data.frame()
-  errorCheckResults <-
-    list("isUniform" = FALSE, "fractionAbove" = NA, "firstPercentile" = NA)
+  errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
+                            "firstPercentile" = NA, "size" = NA)
 
   repeat {
     iter <- iter + 1L
@@ -260,10 +269,14 @@ cellsUniformClustering <- function(objCOTAN,
       break
     }
 
-    if (saveObj && iter == 1L) {
-      # save the Seurat object on the global raw data
-      srat <- objSeurat
-    }
+    if (saveObj && iter == 1L) tryCatch({
+      # save the Seurat object to file to be reloaded later
+      saveRDS(objSeurat,
+              file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
+      },
+      error = function(err) {
+        logThis(paste("While saving seurat object", err), logLevel = 1L)
+      })
 
     metaData <- objSeurat@meta.data
 
@@ -316,16 +329,19 @@ cellsUniformClustering <- function(objCOTAN,
       } else {
         checkResults <- tryCatch(
           checkClusterUniformity(objCOTAN = objCOTAN,
-                                 cluster = globalClName,
+                                 clusterName = globalClName,
                                  cells = cells,
-                                 cores = cores,
                                  GDIThreshold = GDIThreshold,
+                                 cores = cores,
+                                 optimizeForSpeed = optimizeForSpeed,
+                                 deviceStr = deviceStr,
                                  saveObj = saveObj,
                                  outDir = splitOutDir),
           error = function(err) {
             logThis(paste("while checking cluster uniformity", err),
                     logLevel = 0L)
             logThis("marking cluster as not uniform", logLevel = 1L)
+            errorCheckResults[["size"]] <- length(cells)
             return(errorCheckResults)
           })
 
@@ -429,28 +445,30 @@ cellsUniformClustering <- function(objCOTAN,
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
     allCheckResults <- allCheckResults[clTags, , drop = FALSE]
-    allCheckResults <- allCheckResults[clTagsMap[clTags], , drop = FALSE]
+    rownames(allCheckResults) <- clTagsMap[clTags]
     if (any(unclusteredCells)) {
-      allCheckResults <- rbind(allCheckResults, "-1" <- errorCheckResults)
+      errorCheckResults[["size"]] <- length(unclusteredCells)
+      allCheckResults <- rbind(allCheckResults, "-1" = errorCheckResults)
     }
   }
 
   outputCoexDF <-
-    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters, cores = cores),
+    tryCatch(DEAOnClusters(objCOTAN, clusters = outputClusters),
              error = function(err) {
                logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
                return(NULL)
                })
 
-  c(outputClusters, outputCoexDF) %<-% tryCatch(
+  c(outputClusters, outputCoexDF, permMap) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = TRUE, useDEA = useDEA, cores = cores,
+                          keepMinusOne = TRUE, useDEA = useDEA,
                           distance = distance, hclustMethod = hclustMethod),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
       return(list(outputClusters, outputCoexDF))
     })
+  rownames(allCheckResults) <- permMap[rownames(allCheckResults)]
 
   outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
 
@@ -460,6 +478,9 @@ cellsUniformClustering <- function(objCOTAN,
 
       clusterizationName <-
         paste0(as.roman(length(getClusterizations(objCOTAN)) + 1L))
+
+      srat <-
+        readRDS(file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
 
       if (!setequal(rownames(srat@meta.data), names(outputClusters))) {
         warning("List of cells got corrupted")

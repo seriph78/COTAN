@@ -16,7 +16,6 @@
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise.
-#' @param cores number of cores to use. Default is 1.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
@@ -26,6 +25,7 @@
 #' @returns `reorderClusterization()` returns a `list` with 2 elements:
 #'   * `"clusters"` the newly reordered cluster labels array
 #'   * `"coex"` the associated `COEX` `data.frame`
+#'   * `"permMap"` the reordering mapping
 #'
 #' @export
 #'
@@ -35,6 +35,7 @@
 #' @importFrom parallelDist parDist
 #'
 #' @importFrom stats hclust
+#' @importFrom stats as.dist
 #'
 #' @rdname HandlingClusterizations
 #'
@@ -42,7 +43,7 @@
 reorderClusterization <- function(objCOTAN,
                                   clName = "", clusters = NULL, coexDF = NULL,
                                   reverse = FALSE, keepMinusOne = TRUE,
-                                  useDEA = TRUE, cores = 1L, distance = NULL,
+                                  useDEA = TRUE, distance = NULL,
                                   hclustMethod = "ward.D2") {
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
@@ -51,8 +52,7 @@ reorderClusterization <- function(objCOTAN,
 
   clDist <- distancesBetweenClusters(objCOTAN, clName = clName,
                                      clusters = clusters, coexDF = coexDF,
-                                     useDEA = useDEA, cores = cores,
-                                     distance = distance)
+                                     useDEA = useDEA, distance = distance)
 
   minuOnePos <- 0L
   if (keepMinusOne && any(clusters == "-1")) {
@@ -96,15 +96,24 @@ reorderClusterization <- function(objCOTAN,
 
   outputCoexDF <- coexDF
   if (!is_empty(coexDF)) {
-    colnames(outputCoexDF) <- clMap[colnames(coexDF)]
+
+    minusOnePosInCoex <- 0L
+    if (minuOnePos != 0L) {
+      minusOnePosInCoex <- which(colnames(coexDF) == "-1")
+      outputCoexDF <- coexDF[, -minusOnePosInCoex]
+    }
+
+    colnames(outputCoexDF) <- clMap[colnames(outputCoexDF)]
 
     # Reorder the columns to match wanted order
     outputCoexDF <- outputCoexDF[, hc[["order"]]]
+
     if (minuOnePos != 0L) {
       outputCoexDF <- setColumnInDF(df = outputCoexDF, colName = "-1",
-                                    colToSet = coexDF[["-1"]])
+                                    colToSet = coexDF[, minusOnePosInCoex])
     }
   }
 
-  return(list("clusters" = factor(outputClusters), "coex" = outputCoexDF))
+  return(list("clusters" = factor(outputClusters),
+              "coex" = outputCoexDF, "permMap" = clMap))
 }
