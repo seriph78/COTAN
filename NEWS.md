@@ -1,8 +1,12 @@
-## 2.5.0
+## 2.5.1
 
 Added support for the `torch` library to help with the heavy lifting
 calculations of the *genes' COEX* matrix, with consequent substantial speed-up,
 especially when a **GPU** is available on the system
+
+## COTAN 2.5.0
+
+First release in Bioconductor 3.20
 
 ## COTAN 2.3.6
 
