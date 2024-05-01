@@ -1,3 +1,11 @@
+## COTAN 2.4.1
+
+Fixed bug in `reorderClusterization()` function
+
+## COTAN 2.4.0
+
+First release in production
+
 ## COTAN 2.3.6
 
 Refactored `DEAOnCluster()` to make it run faster.
