@@ -137,7 +137,8 @@ setMethod(
 
       genesCoexTime <- difftime(endTime, genesCoexTime, units = "secs")
 
-      logThis(paste("Only genes' coex elapsed time:", genesCoexTime), logLevel = 3L)
+      logThis(paste("Only genes' coex elapsed time:", genesCoexTime),
+              logLevel = 3L)
     } else {
       logThis("Cotan genes' coex estimation not requested", logLevel = 2L)
 

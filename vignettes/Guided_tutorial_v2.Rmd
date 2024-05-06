@@ -70,6 +70,21 @@ setLoggingLevel(2L)
 # This file will contain all the logs produced by the package
 # as if at the highest logging level
 setLoggingFile(file.path(outDir, "vignette_v2.log"))
+
+# this command does check whether the torch library is properly installed
+c(useTorch, deviceStr) %<-% COTAN:::canUseTorch(TRUE, "cuda")
+if (useTorch) {
+  message("The torch library is availble and ready to use")
+  if (deviceStr == "cuda") {
+    message("The torch library can use the CUDA GPU")
+  } else {
+    message("The torch library can only use the CPU")
+    message("Please ensure you have the OpenBLAS libraries",
+            " installed on the system")
+  }
+}
+
+rm(useTorch, deviceStr)
 ```
 
 # Analytical pipeline
