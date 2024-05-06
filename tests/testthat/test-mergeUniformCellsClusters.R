@@ -95,7 +95,7 @@ test_that("Merge Uniform Cells Clusters", {
   obj <- addClusterization(obj, clName = "merge", clusters = mergedClusters,
                            coexDF = mergedCoexDF, override = FALSE)
 
-  expect_identical(reorderClusterization(obj)[1:2],
+  expect_identical(reorderClusterization(obj)[1L:2L],
                    list("clusters" = mergedClusters, "coex" = mergedCoexDF))
 
   mergedLfcDF <- logFoldChangeOnClusters(obj, clName = "merge")
