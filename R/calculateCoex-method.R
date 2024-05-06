@@ -1168,8 +1168,6 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
-#' @importFrom stringr str_sub
-#'
 #' @export
 #'
 #' @rdname CalculatingCOEX
@@ -1183,7 +1181,7 @@ setMethod(
     problematicPairsFraction <- NA
 
     if (isTRUE(actOnCells)) {
-      if(isTRUE(optimizeForSpeed)) {
+      if (isTRUE(optimizeForSpeed)) {
         warning("The 'torch' package is not supported yet for cells' COEX",
                 " Falling back to legacy code.")
       }
@@ -1198,28 +1196,13 @@ setMethod(
                                              datasetTags()[["cbad"]],
                                              problematicPairsFraction)
     } else {
-      if (optimizeForSpeed && requireNamespace("torch", quietly = TRUE)) {
-        library("torch", character.only = TRUE)
+      c(useTorch, deviceStr) %<-% canUseTorch(optimizeForSpeed, deviceStr)
 
-        # Device configuration - fall-back to cpu if no cuda device is available
-        if (str_sub(deviceStr, 1L, 4L) == "cuda" &&
-            !torch::cuda_is_available()) {
-          warning("The 'torch' package could not find 'cuda',",
-                  " Falling back to 'cpu' calculations.")
-          deviceStr <- "cpu"
-        }
-
-        # Run torch-based calculation
+      if (useTorch) {
         c(coex, problematicPairsFraction) %<-%
           calculateCoex_Torch(objCOTAN, deviceStr = deviceStr,
                               returnPPFract = returnPPFract)
       } else {
-        if(optimizeForSpeed) {
-          warning("The 'torch' package is not installed.",
-                  " Falling back to legacy code.")
-        }
-
-        # Run legacy calculation
         c(coex, problematicPairsFraction) %<-%
           calculateCoex_Legacy(objCOTAN, actOnCells = FALSE,
                                returnPPFract = returnPPFract)

@@ -65,8 +65,8 @@ test_that("Cell Uniform Clustering", {
   expect_identical(rClusters2 == "-1", clusters2 == "-1")
   # this is an happenstance
   expect_identical(colnames(rCoexDF2), rev(levels(rClusters2)))
-  expect_identical(permMap2, set_names(paste0(c(2, 1, 4, 3, -1)),
-                                       paste0(c(1:4, -1))))
+  expect_identical(permMap2, set_names(paste0(c(2L, 1L, 4L, 3L, -1L)),
+                                       paste0(c(1L:4L, -1L))))
 
   clusters3 <- factor(clusters, levels = c(levels(clusters), "-1"))
   clusters3[51L:100L] <- "-1"
@@ -77,11 +77,11 @@ test_that("Cell Uniform Clustering", {
 
   expect_identical(levels(clusters3)[clusters3[51L:100L]],
                    levels(clusters2)[clusters2[1L:50L]])
-  expect_identical((clusters3 == "-1")[51:150], (clusters2 == "-1")[1:100])
+  expect_identical((clusters3 == "-1")[51L:150L], (clusters2 == "-1")[1L:100L])
   # this is an happenstance
   expect_identical(colnames(coexDF3)[-5L], levels(clusters3)[-1L])
-  expect_identical(permMap3, set_names(paste0(c(2, 3, 1, 4, -1)),
-                                       paste0(c(1:4, -1))))
+  expect_identical(permMap3, set_names(paste0(c(2L, 3L, 1L, 4L, -1L)),
+                                       paste0(c(1L:4L, -1L))))
 
   exactClusters <- set_names(rep(1L:2L, each = 600L), nm = getCells(obj))
 
