@@ -1,3 +1,8 @@
+## 2.5.2
+
+Made `torch` support as **opt-in**: COTAN will try to use the `torch` library
+only if the option `"COTAN.UseTorch"` is set to `TRUE`
+
 ## 2.5.1
 
 Added support for the `torch` library to help with the heavy lifting
