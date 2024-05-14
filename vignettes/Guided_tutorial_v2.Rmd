@@ -71,12 +71,9 @@ setLoggingLevel(2L)
 # as if at the highest logging level
 setLoggingFile(file.path(outDir, "vignette_v2.log"))
 
-message("The `torch` library support is avalable only as opt-in:")
-message("Run the command 'options(COTAN.UseTorch = TRUE)'",
-        " in your session to enable it!")
-if (FALSE) {
-  options(COTAN.UseTorch = TRUE)
-}
+message("COTAN uses the `torch` library when asked to `optimizeForSpeed`")
+message("Run the command 'options(COTAN.UseTorch = FALSE)'",
+        " in your session to disable `torch` completely!")
 
 # this command does check whether the torch library is properly installed
 c(useTorch, deviceStr) %<-% COTAN:::canUseTorch(TRUE, "cuda")

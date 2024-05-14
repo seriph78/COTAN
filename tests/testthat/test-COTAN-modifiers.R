@@ -74,7 +74,7 @@ test_that("dropGenesCells", {
   obj <- clean(obj)
   obj <- estimateDispersionNuBisection(obj, cores = 4L,
                                        enforceNuAverageToOne = TRUE)
-  expect_warning({
+  suppressWarnings({
     obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
   })
   expect_no_warning({

@@ -14,10 +14,10 @@ test_that("COTAN getters", {
   obj <- clean(obj)
   obj <- estimateDispersionBisection(obj)
 
-  expect_warning(expect_warning(expect_warning({
+  suppressWarnings({
     obj <- calculateCoex(obj, actOnCells = FALSE, returnPPFract = TRUE,
                          optimizeForSpeed = TRUE, deviceStr = "cpu")
-  })))
+  })
   expect_no_warning({
     obj <- calculateCoex(obj, actOnCells = TRUE, returnPPFract = TRUE,
                          optimizeForSpeed = FALSE)

@@ -164,10 +164,10 @@ test_that("Calculations on genes", {
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
                    paste0(10.0 / 55.0))
 
-  expect_warning(expect_warning(expect_warning({
+  suppressWarnings({
     obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
-  })))
-  expect_identical(getOption("COTAN.TorchWarning"), "Published")
+  })
+  expect_null(getOption("COTAN.TorchWarning"))
 
   torchCoex <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
@@ -435,7 +435,7 @@ test_that("Coex vs saved results", {
   expect_equal(GDI, GDI_exp, tolerance = 1.0e-12)
 
   # Torch CPU
-  expect_warning({
+  suppressWarnings({
     obj3 <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = " ",
                                          sequencingMethod = "artificial",
@@ -463,7 +463,7 @@ test_that("Coex vs saved results", {
   expect_equal(GDI, GDI_exp, tolerance = 5.0e-6)
 
   # Torch GPU
-  expect_warning({
+  suppressWarnings({
     obj4 <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = " ",
                                          sequencingMethod = "artificial",
@@ -513,12 +513,12 @@ test_that("Coex with negative dispersion genes", {
   })
   coex1 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
-  expect_warning({
+  suppressWarnings({
     obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cpu")
   })
   coex2 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
-  expect_warning({
+  suppressWarnings({
     obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cuda")
   })
   coex3 <- getGenesCoex(obj, zeroDiagonal = FALSE)

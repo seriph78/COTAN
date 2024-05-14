@@ -43,7 +43,7 @@ test_that("Cell Uniform Clustering", {
   expect_identical(reorderClusterization(obj)[["clusters"]], clusters)
 
   firstCl <- clusters[[1L]]
-  expect_warning({
+  suppressWarnings({
     c(isUniform, fracAbove, firstPerc, clSize) %<-%
       checkClusterUniformity(obj, GDIThreshold = GDIThreshold,
                              clusterName = paste0("Cluster_", firstCl),
@@ -138,7 +138,7 @@ test_that("Cell Uniform Clustering", {
     temp.obj <- dropGenesCells(objCOTAN = obj,
                                cells = getCells(obj)[cellsToDrop])
 
-    expect_warning({
+    suppressWarnings({
       temp.obj <- proceedToCoex(temp.obj, cores = 6L, saveObj = FALSE)
     })
     gc()

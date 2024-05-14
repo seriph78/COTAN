@@ -177,7 +177,7 @@ handleMultiCore <- function(cores) {
 #' @title Internal function to handle the [torch] library
 #'
 #' @description Returns whether the torch library is ready to be used:
-#'   it obeys the opt-in flag set via the `COTAN.UseTorch` option
+#'   it obeys the opt-out flag set via the `COTAN.UseTorch` option
 #'
 #' @param optimizeForSpeed A Boolean to indicate whether to try to use the
 #'   faster torch library
@@ -201,12 +201,12 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
     # there is no clean way to check if it is usable
     useTorchOpt <- getOption("COTAN.UseTorch")
     if (is.null(useTorchOpt)) {
-      # default case: explicit opt-in only!
-      useTorchOpt <- FALSE
+      # default case: explicit opt-out only!
+      useTorchOpt <- TRUE
     }
     if (is.character(useTorchOpt)) {
       useTorchOpt <- toupper(useTorchOpt)
-      useTorchOpt <- useTorchOpt %in% c("TRUE", "T")
+      useTorchOpt <- !(useTorchOpt %in% c("FALSE", "F"))
     }
     useTorch <- isTRUE(useTorchOpt)
 
@@ -221,10 +221,14 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
 
   if (useTorch) {
     tryCatch({
+      if (!torch::torch_is_installed()) {
+        stop("The `torch` library is installed but the required",
+             " additional libraries are not avalable yet")
+      }
       library("torch", character.only = TRUE)
       # Call a simple torch function to check if it's working
       if (is.null(torch::torch_tensor(1))) {
-        stop("The `torch` library is installed but not working correctly.")
+        stop("The `torch` library is installed but not working correctly")
       }
     },
     error = function(err) {
@@ -232,9 +236,9 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
               logLevel = 0L)
       if (!warnedAboutTorch) {
         warning("The `torch` library is installed,",
-                " but requires further initialization")
-        warning("Please try to execute the command 'library(\"torch\")'",
-                " in an interactive console")
+                " but might require further initialization")
+        warning("Please look at the `torch` package installation guide",
+                " to complete the installation")
         warnedAboutTorch <- TRUE
       }
       useTorch <- FALSE

@@ -112,7 +112,7 @@ test_that("Merge Uniform Cells Clusters", {
 
     clObj <- dropGenesCells(obj, cells = cellsToDrop)
 
-    expect_warning({
+    suppressWarnings({
       clObj <- proceedToCoex(clObj, cores = 6L, saveObj = FALSE)
     })
 
