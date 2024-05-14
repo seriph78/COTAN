@@ -176,7 +176,8 @@ handleMultiCore <- function(cores) {
 
 #' @title Internal function to handle the [torch] library
 #'
-#' @description Returns whether the torch library is ready to be used
+#' @description Returns whether the torch library is ready to be used:
+#'   it obeys the opt-out flag set via the `COTAN.UseTorch` option
 #'
 #' @param optimizeForSpeed A Boolean to indicate whether to try to use the
 #'   faster torch library
@@ -190,23 +191,54 @@ handleMultiCore <- function(cores) {
 #' @noRd
 #'
 canUseTorch <- function(optimizeForSpeed, deviceStr) {
+  warnedAboutTorch <- !is.null(getOption("COTAN.TorchWarning"))
+
   useTorch <- isTRUE(optimizeForSpeed) &&
     requireNamespace("torch", quietly = TRUE)
 
-  warnedAboutTorch <- is.null(getOption("COTAN.TorchWarning"))
+  if (useTorch) {
+    # if torch is not explicitly opted-in, we avoid using it as
+    # there is no clean way to check if it is usable
+    useTorchOpt <- getOption("COTAN.UseTorch")
+    if (is.null(useTorchOpt)) {
+      # default case: explicit opt-out only!
+      useTorchOpt <- TRUE
+    }
+    if (is.character(useTorchOpt)) {
+      useTorchOpt <- toupper(useTorchOpt)
+      useTorchOpt <- !(useTorchOpt %in% c("FALSE", "F"))
+    }
+    useTorch <- isTRUE(useTorchOpt)
+
+    if (!useTorch && !warnedAboutTorch) {
+      warning("The `torch` library is installed,",
+              " but has not been opted in yet")
+      warning("In case you might try 'options(COTAN.UseTorch = TRUE)'",
+              " to enable it")
+      warnedAboutTorch <- TRUE
+    }
+  }
 
   if (useTorch) {
     tryCatch({
+      if (!torch::torch_is_installed()) {
+        stop("The `torch` library is installed but the required",
+             " additional libraries are not avalable yet")
+      }
       library("torch", character.only = TRUE)
+      # Call a simple torch function to check if it's working
+      if (is.null(torch::torch_tensor(1))) {
+        stop("The `torch` library is installed but not working correctly")
+      }
     },
     error = function(err) {
-      logThis(paste("While trying to load the torch library", err),
+      logThis(paste("While trying to load the `torch` library", err),
               logLevel = 0L)
       if (!warnedAboutTorch) {
-        warning("The 'torch' library is installed,",
-                " but requires further initialization")
-        warning("Please try to execute the command 'library(\"torch\")'",
-                " in an interactive console")
+        warning("The `torch` library is installed,",
+                " but might require further initialization")
+        warning("Please look at the `torch` package installation guide",
+                " to complete the installation")
         warnedAboutTorch <- TRUE
       }
       useTorch <- FALSE
@@ -218,16 +250,17 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
     if (substr(deviceStr, 1L, 4L) == "cuda" &&
         !torch::cuda_is_available()) {
       if (!warnedAboutTorch) {
-        warning("The 'torch' library could not find any 'cuda' device")
-        warning("Falling back to 'cpu' calculations")
+        warning("The `torch` library could not find any `CUDA` device")
+        warning("Falling back to CPU calculations")
         warnedAboutTorch <- TRUE
       }
       deviceStr <- "cpu"
     }
+
   } else {
     if(optimizeForSpeed) {
       if (!warnedAboutTorch) {
-        warning("The 'torch' library is not installed.")
+        warning("The `torch` library is not installed.")
         warnedAboutTorch <- TRUE
       }
       warning("Falling back to legacy [non-torch] code.")
