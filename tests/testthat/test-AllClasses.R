@@ -1,6 +1,8 @@
 library(Matrix)
 
-setLoggingLevel(3L)
+setLoggingLevel(4L)
+
+options(COTAN.TorchWarning = NULL)
 
 test_that("Empty matrices", {
   expect_identical(dim(emptySparseMatrix()), c(0L, 0L))

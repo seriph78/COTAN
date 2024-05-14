@@ -4,6 +4,9 @@ stopifnot(file.exists(tm))
 library(zeallot)
 library(rlang)
 
+options(COTAN.TorchWarning = NULL)
+
+
 crossEntrVector <- function(zeroOne, probZero) {
   crossEntr <- rep_len(0.0, nrow(zeroOne))
   for (r in seq_len(nrow(zeroOne))) {
@@ -145,8 +148,11 @@ test_that("Calculations on genes", {
   expect_equal(lh, ((1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero)),
                ignore_attr = TRUE)
 
-  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE,
-                       returnPPFract = TRUE)
+  expect_no_warning({
+    obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE,
+                         returnPPFract = TRUE)
+  })
+  expect_null(getOption("COTAN.TorchWarning"))
 
   legacyCoex <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
@@ -166,7 +172,10 @@ test_that("Calculations on genes", {
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
                    paste0(10.0 / 55.0))
 
-  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
+  suppressWarnings({
+    obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
+  })
+  expect_null(getOption("COTAN.TorchWarning"))
 
   torchCoex <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
@@ -262,9 +271,11 @@ test_that("Calculations on cells", {
                       ncol = getNumCells(obj)),
                ignore_attr = TRUE)
 
-  expect_warning(obj <- calculateCoex(obj, actOnCells = TRUE,
-                                      optimizeForSpeed = TRUE,
-                                      returnPPFract = TRUE))
+  expect_warning({
+    obj <- calculateCoex(obj, actOnCells = TRUE,
+                         optimizeForSpeed = TRUE,
+                         returnPPFract = TRUE)
+  })
 
   genesCoexInSync <- getMetadataElement(obj, datasetTags()[["gsync"]])
   cellsCoexInSync <- getMetadataElement(obj, datasetTags()[["csync"]])
@@ -325,8 +336,9 @@ test_that("Coex", {
   obj <- estimateDispersionNuBisection(obj, cores = 4L, chunkSize = 4L,
                                        enforceNuAverageToOne = FALSE)
 
-  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
-
+  expect_no_warning({
+    obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
+  })
   expect_true(isCoexAvailable(obj))
   expect_identical(dim(getGenesCoex(obj)), rep(getNumGenes(obj), 2L))
 
@@ -395,15 +407,17 @@ test_that("Coex vs saved results", {
 
   expect_identical(c(genesCoexInSync, cellsCoexInSync), c("TRUE", "FALSE"))
 
-  obj2 <- automaticCOTANObjectCreation(raw = test.dataset,
-                                       GEO = " ",
-                                       sequencingMethod = "artificial",
-                                       sampleCondition = "test",
-                                       cores = 6L,
-                                       optimizeForSpeed = FALSE,
-                                       deviceStr = "cpu",
-                                       saveObj = FALSE,
-                                       outDir = tm)
+  expect_no_warning({
+    obj2 <- automaticCOTANObjectCreation(raw = test.dataset,
+                                         GEO = " ",
+                                         sequencingMethod = "artificial",
+                                         sampleCondition = "test",
+                                         cores = 6L,
+                                         optimizeForSpeed = FALSE,
+                                         deviceStr = "cpu",
+                                         saveObj = FALSE,
+                                         outDir = tm)
+  })
 
   expect_identical(obj2, obj)
 
@@ -429,16 +443,17 @@ test_that("Coex vs saved results", {
   expect_equal(GDI, GDI_exp, tolerance = 1.0e-12)
 
   # Torch CPU
-
-  obj3 <- automaticCOTANObjectCreation(raw = test.dataset,
-                                       GEO = " ",
-                                       sequencingMethod = "artificial",
-                                       sampleCondition = "test",
-                                       cores = 6L,
-                                       optimizeForSpeed = TRUE,
-                                       deviceStr = "cpu",
-                                       saveObj = FALSE,
-                                       outDir = tm)
+  suppressWarnings({
+    obj3 <- automaticCOTANObjectCreation(raw = test.dataset,
+                                         GEO = " ",
+                                         sequencingMethod = "artificial",
+                                         sampleCondition = "test",
+                                         cores = 6L,
+                                         optimizeForSpeed = TRUE,
+                                         deviceStr = "cpu",
+                                         saveObj = FALSE,
+                                         outDir = tm)
+  })
 
   expect_equal(obj3@genesCoex, obj@genesCoex, tolerance = 5.0e-6)
 
@@ -456,16 +471,17 @@ test_that("Coex vs saved results", {
   expect_equal(GDI, GDI_exp, tolerance = 5.0e-6)
 
   # Torch GPU
-
-  obj4 <- automaticCOTANObjectCreation(raw = test.dataset,
-                                       GEO = " ",
-                                       sequencingMethod = "artificial",
-                                       sampleCondition = "test",
-                                       cores = 6L,
-                                       optimizeForSpeed = TRUE,
-                                       deviceStr = "cuda",
-                                       saveObj = FALSE,
-                                       outDir = tm)
+  suppressWarnings({
+    obj4 <- automaticCOTANObjectCreation(raw = test.dataset,
+                                         GEO = " ",
+                                         sequencingMethod = "artificial",
+                                         sampleCondition = "test",
+                                         cores = 6L,
+                                         optimizeForSpeed = TRUE,
+                                         deviceStr = "cuda",
+                                         saveObj = FALSE,
+                                         outDir = tm)
+  })
 
   expect_equal(obj4@genesCoex, obj@genesCoex, tolerance = 5.0e-6)
 
@@ -500,13 +516,19 @@ test_that("Coex with negative dispersion genes", {
 
   expect_true(any(getDispersion(obj) < 0.0))
 
-  obj <- calculateCoex(obj, optimizeForSpeed = FALSE, deviceStr = "cpu")
+  expect_no_warning({
+    obj <- calculateCoex(obj, optimizeForSpeed = FALSE, deviceStr = "cpu")
+  })
   coex1 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
-  obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cpu")
+  suppressWarnings({
+    obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cpu")
+  })
   coex2 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
-  obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cuda")
+  suppressWarnings({
+    obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cuda")
+  })
   coex3 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
   expect_equal(coex1, coex2, tolerance = 1e-7)

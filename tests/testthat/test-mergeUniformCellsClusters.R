@@ -3,6 +3,7 @@ stopifnot(file.exists(tm))
 
 library(zeallot)
 
+
 test_that("Merge Uniform Cells Clusters", {
 
   utils::data("test.dataset", package = "COTAN")
@@ -74,12 +75,13 @@ test_that("Merge Uniform Cells Clusters", {
   expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0L)
   expect_equal(e.df[["N. total"]], lengths(groupMarkers), ignore_attr = TRUE)
 
-  c(mergedClusters, mergedCoexDF) %<-%
-    mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 6L,
-                              GDIThreshold = GDIThreshold,
-                              distance = "cosine", hclustMethod = "ward.D2",
-                              saveObj = TRUE, outDir = tm)
-
+  suppressWarnings({
+    c(mergedClusters, mergedCoexDF) %<-%
+      mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 6L,
+                                GDIThreshold = GDIThreshold,
+                                distance = "cosine", hclustMethod = "ward.D2",
+                                saveObj = TRUE, outDir = tm)
+  })
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "merge_clusterization_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
@@ -95,7 +97,7 @@ test_that("Merge Uniform Cells Clusters", {
   obj <- addClusterization(obj, clName = "merge", clusters = mergedClusters,
                            coexDF = mergedCoexDF, override = FALSE)
 
-  expect_identical(reorderClusterization(obj)[1:2],
+  expect_identical(reorderClusterization(obj)[1L:2L],
                    list("clusters" = mergedClusters, "coex" = mergedCoexDF))
 
   mergedLfcDF <- logFoldChangeOnClusters(obj, clName = "merge")
@@ -110,7 +112,9 @@ test_that("Merge Uniform Cells Clusters", {
 
     clObj <- dropGenesCells(obj, cells = cellsToDrop)
 
-    clObj <- proceedToCoex(clObj, cores = 6L, saveObj = FALSE)
+    suppressWarnings({
+      clObj <- proceedToCoex(clObj, cores = 6L, saveObj = FALSE)
+    })
 
     GDIData <- calculateGDI(clObj)
 

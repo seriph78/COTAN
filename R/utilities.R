@@ -127,7 +127,7 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
   return(invisible(showMessage))
 }
 
-#----------------- miscellanea --------------------
+#----------------- multi-threading --------------------
 
 #' @title Handling Multi-Core Enviroments
 #'
@@ -157,12 +157,12 @@ handleMultiCore <- function(cores) {
   if (!supportsMulticore() && cores != 1L) {
     if (is.null(getOption("COTAN.MultiCoreWarning"))) {
       warning("On this system multi-core is not currently supported;",
-              " this can happen on some systems like 'windows'.\n",
-              " In case you can try 'options(parallelly.fork.enable = TRUE)'",
-              " to enable multi-core support.\n",
-              " The number of cores used will be set 1!")
+              " this can happen on some systems like 'windows'")
+      warning("In case you might try 'options(parallelly.fork.enable = TRUE)'",
+              " to enable multi-core support")
     }
     options(COTAN.MultiCoreWarning = "Published")
+    warning("The number of cores used will be set 1!")
     cores <- 1L
   }
 
@@ -173,6 +173,109 @@ handleMultiCore <- function(cores) {
   return(cores)
 }
 
+
+#' @title Internal function to handle the [torch] library
+#'
+#' @description Returns whether the torch library is ready to be used:
+#'   it obeys the opt-out flag set via the `COTAN.UseTorch` option
+#'
+#' @param optimizeForSpeed A Boolean to indicate whether to try to use the
+#'   faster torch library
+#' @param deviceStr The name of the device to be used by torch
+#'
+#' @returns A list with 2 elements:
+#' * `"useTorch"`: a Boolean indicating whether the torch library can be used
+#' * `"deviceStr"`: the updated name of the device to be used: if no `cuda` GPU
+#'   is available it will fallback to CPU calculations
+#'
+#' @noRd
+#'
+canUseTorch <- function(optimizeForSpeed, deviceStr) {
+  warnedAboutTorch <- !is.null(getOption("COTAN.TorchWarning"))
+
+  useTorch <- isTRUE(optimizeForSpeed) &&
+    requireNamespace("torch", quietly = TRUE)
+
+  if (useTorch) {
+    # if torch is not explicitly opted-in, we avoid using it as
+    # there is no clean way to check if it is usable
+    useTorchOpt <- getOption("COTAN.UseTorch")
+    if (is.null(useTorchOpt)) {
+      # default case: explicit opt-out only!
+      useTorchOpt <- TRUE
+    }
+    if (is.character(useTorchOpt)) {
+      useTorchOpt <- toupper(useTorchOpt)
+      useTorchOpt <- !(useTorchOpt %in% c("FALSE", "F"))
+    }
+    useTorch <- isTRUE(useTorchOpt)
+
+    if (!useTorch && !warnedAboutTorch) {
+      warning("The `torch` library is installed,",
+              " but has not been opted in yet")
+      warning("In case you might try 'options(COTAN.UseTorch = TRUE)'",
+              " to enable it")
+      warnedAboutTorch <- TRUE
+    }
+  }
+
+  if (useTorch) {
+    tryCatch({
+      if (!torch::torch_is_installed()) {
+        stop("The `torch` library is installed but the required",
+             " additional libraries are not avalable yet")
+      }
+      library("torch", character.only = TRUE)
+      # Call a simple torch function to check if it's working
+      if (is.null(torch::torch_tensor(1))) {
+        stop("The `torch` library is installed but not working correctly")
+      }
+    },
+    error = function(err) {
+      logThis(paste("While trying to load the `torch` library", err),
+              logLevel = 0L)
+      if (!warnedAboutTorch) {
+        warning("The `torch` library is installed,",
+                " but might require further initialization")
+        warning("Please look at the `torch` package installation guide",
+                " to complete the installation")
+        warnedAboutTorch <- TRUE
+      }
+      useTorch <- FALSE
+    })
+  }
+
+  if (useTorch) {
+    # Device configuration - fall-back to cpu if no cuda device is available
+    if (substr(deviceStr, 1L, 4L) == "cuda" &&
+        !torch::cuda_is_available()) {
+      if (!warnedAboutTorch) {
+        warning("The `torch` library could not find any `CUDA` device")
+        warning("Falling back to CPU calculations")
+        warnedAboutTorch <- TRUE
+      }
+      deviceStr <- "cpu"
+    }
+
+  } else {
+    if(optimizeForSpeed) {
+      if (!warnedAboutTorch) {
+        warning("The `torch` library is not installed.")
+        warnedAboutTorch <- TRUE
+      }
+      warning("Falling back to legacy [non-torch] code.")
+    }
+    deviceStr <- ""
+  }
+  if (warnedAboutTorch) {
+    options(COTAN.TorchWarning = "Published")
+  }
+
+  return(list("useTorch" = useTorch, "deviceStr" = deviceStr))
+}
+
+
+#----------------- miscellanea --------------------
 
 #' @title Internal function to handle names subset...
 #'
