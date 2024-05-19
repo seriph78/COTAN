@@ -1,6 +1,6 @@
 ## 2.5.2
 
-Solved issue with usage of the `torch` library
+Solved issue with usage checks about the `torch` library
 
 Allowed user to explicitly **opt-out** from the `torch` library usage:
 COTAN will avoid `torch` commands when the option `"COTAN.UseTorch"` is

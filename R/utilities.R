@@ -239,10 +239,10 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
                 " but might require further initialization")
         warning("Please look at the `torch` package installation guide",
                 " to complete the installation")
-        warnedAboutTorch <- TRUE
       }
-      useTorch <- FALSE
+      useTorch <<- FALSE
     })
+    warnedAboutTorch <- !useTorch
   }
 
   if (useTorch) {
@@ -256,7 +256,6 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
       }
       deviceStr <- "cpu"
     }
-
   } else {
     if(optimizeForSpeed) {
       if (!warnedAboutTorch) {
@@ -267,6 +266,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
     }
     deviceStr <- ""
   }
+
   if (warnedAboutTorch) {
     options(COTAN.TorchWarning = "Published")
   }
