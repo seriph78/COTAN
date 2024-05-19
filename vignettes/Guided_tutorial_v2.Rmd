@@ -34,21 +34,6 @@ library(GEOquery)
 options(parallelly.fork.enable = TRUE)
 ```
 
-```{r}
-useTorch <- requireNamespace("torch", quietly = TRUE)
-print(useTorch)
-
-if (useTorch) {
-  useTorch <- torch::torch_is_installed()
-}
-print(useTorch)
-```
-
-```{r}
-useTorch <- COTAN:::canUseTorch(TRUE, "cuda")[[1L]]
-print(useTorch)
-```
-
 ## Introduction
 
 This tutorial contains the same functionalities as the first release of the
