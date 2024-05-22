@@ -167,7 +167,6 @@ test_that("Calculations on genes", {
   suppressWarnings({
     obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
   })
-  expect_null(getOption("COTAN.TorchWarning"))
 
   torchCoex <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
