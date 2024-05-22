@@ -110,7 +110,7 @@ checkClusterUniformity <- function(
   gc()
 
   # A cluster is deemed uniform if the number of genes
-  # with [GDI > GDIThreshold] is not more than 1%
+  # with [GDI > GDIThreshold] is at the most ratioAboveThreshold
   gdi <- GDIData[["GDI"]]
 
   quantAboveThr <- quantile(gdi, probs = 1.0 - ratioAboveThreshold)

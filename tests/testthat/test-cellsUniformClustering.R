@@ -21,6 +21,7 @@ test_that("Cell Uniform Clustering", {
   suppressWarnings({
     c(clusters, coexDF) %<-%
       cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
+                             ratioAboveThreshold = ratioAboveThreshold,
                              initialResolution = initialResolution,
                              cores = 6L, optimizeForSpeed = TRUE,
                              deviceStr = "cuda", saveObj = TRUE, outDir = tm)
@@ -54,7 +55,7 @@ test_that("Cell Uniform Clustering", {
                              saveObj = TRUE, outDir = tm)
   })
   expect_true(isUniform)
-  expect_lte(fracAbove, 0.01)
+  expect_lte(fracAbove, ratioAboveThreshold)
   expect_lte(firstPerc, GDIThreshold)
   expect_identical(clSize, sum(clusters == firstCl))
 
@@ -91,12 +92,13 @@ test_that("Cell Uniform Clustering", {
   exactClusters <- set_names(rep(1L:2L, each = 600L), nm = getCells(obj))
 
   suppressWarnings({
-    splitList <- cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
-                                        initialResolution = initialResolution,
-                                        initialClusters = exactClusters,
-                                        cores = 6L, optimizeForSpeed = FALSE,
-                                        deviceStr = "cpu", saveObj = TRUE,
-                                        outDir = tm)
+    splitList <- cellsUniformClustering(
+      obj, GDIThreshold = GDIThreshold,
+      ratioAboveThreshold = ratioAboveThreshold,
+      initialResolution = initialResolution,
+      initialClusters = exactClusters,
+      cores = 6L, optimizeForSpeed = FALSE,
+      deviceStr = "cpu", saveObj = TRUE, outDir = tm)
   })
 
   expect_identical(splitList[["clusters"]], factor(exactClusters))
@@ -147,7 +149,7 @@ test_that("Cell Uniform Clustering", {
 
     GDI_data <- calculateGDI(temp.obj)
 
-    expect_lt(nrow(GDI_data[GDI_data[["GDI"]] >= GDIThreshold, ]),
-              0.01 * nrow(GDI_data))
+    expect_lte(nrow(GDI_data[GDI_data[["GDI"]] >= GDIThreshold, ]),
+               ratioAboveThreshold * nrow(GDI_data))
   }
 })

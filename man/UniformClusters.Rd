@@ -21,6 +21,7 @@ GDIPlot(
 cellsUniformClustering(
   objCOTAN,
   GDIThreshold = 1.43,
+  ratioAboveThreshold = 0.01,
   cores = 1L,
   maxIterations = 25L,
   optimizeForSpeed = TRUE,
@@ -51,6 +52,7 @@ mergeUniformCellsClusters(
   objCOTAN,
   clusters = NULL,
   GDIThreshold = 1.43,
+  ratioAboveThreshold = 0.01,
   batchSize = 0L,
   notMergeable = NULL,
   cores = 1L,
@@ -80,6 +82,9 @@ It defaults to \eqn{1.43}}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
+
+\item{ratioAboveThreshold}{the fraction of genes allowed to be above the
+\code{GDIThreshold}. It defaults to \eqn{1\%}}
 
 \item{cores}{number of cores to use. Default is 1.}
 
@@ -123,9 +128,6 @@ output will be paced in a sub-folder.}
 \item{clusterName}{the tag of the \emph{cluster}}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
-
-\item{ratioAboveThreshold}{the fraction of genes allowed to be above the
-\code{GDIThreshold}. It defaults to \eqn{1\%}}
 
 \item{clusters}{The \emph{clusterization} to merge. If not given the last
 available \emph{clusterization} will be used, as it is probably the most
@@ -249,7 +251,8 @@ objCOTAN <- addClusterizationCoex(objCOTAN,
 identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 
 mergedList <- mergeUniformCellsClusters(objCOTAN,
-                                        GDIThreshold = 1.46,
+                                        GDIThreshold = 1.43,
+                                        ratioAboveThreshold = 0.02,
                                         batchSize = 5L,
                                         clusters = clusters,
                                         cores = 6L,

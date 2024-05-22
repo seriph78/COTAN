@@ -55,6 +55,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_equal(pValDF[genes.names.test, ], pValDF_exp, tolerance = 1.0e-12)
 
   GDIThreshold <- 1.46
+  ratioAboveThreshold <- 0.01
 
   deltaExpression <- clustersDeltaExpression(obj)
 
@@ -77,10 +78,12 @@ test_that("Merge Uniform Cells Clusters", {
 
   suppressWarnings({
     c(mergedClusters, mergedCoexDF) %<-%
-      mergeUniformCellsClusters(objCOTAN = obj, clusters = clusters, cores = 6L,
-                                GDIThreshold = GDIThreshold,
-                                distance = "cosine", hclustMethod = "ward.D2",
-                                saveObj = TRUE, outDir = tm)
+      mergeUniformCellsClusters(
+        objCOTAN = obj, clusters = clusters,
+        GDIThreshold = GDIThreshold,
+        ratioAboveThreshold = ratioAboveThreshold,
+        distance = "cosine", hclustMethod = "ward.D2",
+        cores = 6L, saveObj = TRUE, outDir = tm)
   })
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "merge_clusterization_1.csv")))
@@ -118,7 +121,8 @@ test_that("Merge Uniform Cells Clusters", {
 
     GDIData <- calculateGDI(clObj)
 
-    expect_lte(sum(GDIData[["GDI"]] >= GDIThreshold), 0.01 * nrow(GDIData))
+    expect_lte(sum(GDIData[["GDI"]] >= GDIThreshold),
+               ratioAboveThreshold * nrow(GDIData))
 
     gc()
   }

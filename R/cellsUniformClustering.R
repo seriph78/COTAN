@@ -153,6 +153,8 @@ NULL
 #' @param objCOTAN a `COTAN` object
 #' @param GDIThreshold the threshold level that discriminates uniform
 #'   *clusters*. It defaults to \eqn{1.43}
+#' @param ratioAboveThreshold the fraction of genes allowed to be above the
+#'   `GDIThreshold`. It defaults to \eqn{1\%}
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
@@ -206,6 +208,7 @@ NULL
 
 cellsUniformClustering <- function(objCOTAN,
                                    GDIThreshold = 1.43,
+                                   ratioAboveThreshold = 0.01,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    optimizeForSpeed = TRUE,
@@ -332,7 +335,7 @@ cellsUniformClustering <- function(objCOTAN,
                                  clusterName = globalClName,
                                  cells = cells,
                                  GDIThreshold = GDIThreshold,
-#                                 ratioAboveThreshold = ratioAboveThreshold,
+                                 ratioAboveThreshold = ratioAboveThreshold,
                                  cores = cores,
                                  optimizeForSpeed = optimizeForSpeed,
                                  deviceStr = deviceStr,

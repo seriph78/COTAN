@@ -15,6 +15,8 @@
 #'   significant!
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
 #'   It defaults to \eqn{1.43}
+#' @param ratioAboveThreshold the fraction of genes allowed to be above the
+#'   `GDIThreshold`. It defaults to \eqn{1\%}
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
 #' @param notMergeable An array of names of merged clusters that are already
@@ -117,7 +119,8 @@
 #' identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 #'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
-#'                                         GDIThreshold = 1.46,
+#'                                         GDIThreshold = 1.43,
+#'                                         ratioAboveThreshold = 0.02,
 #'                                         batchSize = 5L,
 #'                                         clusters = clusters,
 #'                                         cores = 6L,
@@ -140,6 +143,7 @@
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
                                       GDIThreshold = 1.43,
+                                      ratioAboveThreshold = 0.01,
                                       batchSize = 0L,
                                       notMergeable = NULL,
                                       cores = 1L,
@@ -230,7 +234,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                clusterName = mergedClName,
                                cells = mergedCluster,
                                GDIThreshold = GDIThreshold,
-#                               ratioAboveThreshold = ratioAboveThreshold,
+                               ratioAboveThreshold = ratioAboveThreshold,
                                cores = cores,
                                optimizeForSpeed = optimizeForSpeed,
                                deviceStr = deviceStr,
