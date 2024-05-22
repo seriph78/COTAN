@@ -16,6 +16,7 @@ test_that("Cell Uniform Clustering", {
                        cores = 6L, saveObj = TRUE, outDir = tm)
 
   GDIThreshold <- 1.46
+  ratioAboveThreshold <- 0.01
   initialResolution <- 0.8
   suppressWarnings({
     c(clusters, coexDF) %<-%
@@ -46,6 +47,7 @@ test_that("Cell Uniform Clustering", {
   suppressWarnings({
     c(isUniform, fracAbove, firstPerc, clSize) %<-%
       checkClusterUniformity(obj, GDIThreshold = GDIThreshold,
+                             ratioAboveThreshold = ratioAboveThreshold,
                              clusterName = paste0("Cluster_", firstCl),
                              cells = names(clusters)[clusters == firstCl],
                              optimizeForSpeed = TRUE, deviceStr = "cpu",

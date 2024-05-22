@@ -101,6 +101,7 @@
 #' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
 #' firstClusterIsUniform <-
 #'   checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
+#'                          ratioAboveThreshold = 0.01,
 #'                          cluster = clusters[[1L]], cells = firstCluster,
 #'                          cores = 6L, optimizeForSpeed = TRUE,
 #'                          deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
@@ -193,7 +194,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   iter <- 0L
   allCheckResults <- data.frame()
   errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
-                            "firstPercentile" = NA, "size" = NA)
+                            "ratioQuantile" = NA, "size" = NA)
 
   testPairListMerge <- function(pList) {
     logThis(paste0("Clusters pairs for merging:\n",
@@ -229,6 +230,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                clusterName = mergedClName,
                                cells = mergedCluster,
                                GDIThreshold = GDIThreshold,
+#                               ratioAboveThreshold = ratioAboveThreshold,
                                cores = cores,
                                optimizeForSpeed = optimizeForSpeed,
                                deviceStr = deviceStr,

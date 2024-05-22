@@ -243,7 +243,7 @@ cellsUniformClustering <- function(objCOTAN,
   srat <- NULL
   allCheckResults <- data.frame()
   errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
-                            "firstPercentile" = NA, "size" = NA)
+                            "ratioQuantile" = NA, "size" = NA)
 
   repeat {
     iter <- iter + 1L
@@ -332,6 +332,7 @@ cellsUniformClustering <- function(objCOTAN,
                                  clusterName = globalClName,
                                  cells = cells,
                                  GDIThreshold = GDIThreshold,
+#                                 ratioAboveThreshold = ratioAboveThreshold,
                                  cores = cores,
                                  optimizeForSpeed = optimizeForSpeed,
                                  deviceStr = deviceStr,
