@@ -399,7 +399,7 @@ head(coex)
 
 `COTAN` provides a way to establish genes' clusters given some lists of markers
 
-```{r}
+```{r eval=FALSE, include=TRUE}
 layersGenes <- list(
   "L1"   = c("Reln",   "Lhx5"),
   "L2/3" = c("Satb2",  "Cux1"),
@@ -414,11 +414,11 @@ c(gSpace, eigPlot, pcaClustersDF, treePlot) %<-%
 plot(eigPlot)
 ```
 
-```{r}
+```{r eval=FALSE, include=TRUE}
 plot(treePlot)
 ```
 
-```{r}
+```{r eval=FALSE, include=TRUE}
 UMAPPlot(pcaClustersDF[, 1L:10L],
          clusters = pcaClustersDF[["hclust"]],
          elements = layersGenes,
