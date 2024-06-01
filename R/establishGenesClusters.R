@@ -108,7 +108,8 @@ genesCoexSpace <-
   lowLDIGenes <- LDI >= quantile(LDI, probs = 0.9)
   goodGenes <- getGenes(objCOTAN) %in% names(LDI)[lowLDIGenes]
 
-  GCS <- getGenesCoex(objCOTAN, genes = secondaryMarkers)[goodGenes, ]
+  GCS <- as.matrix(getGenesCoex(objCOTAN,
+                                genes = secondaryMarkers))[goodGenes, ]
   GCS <- tanh(GCS * sqrt(getNumCells(objCOTAN)))
 
   logThis(paste0("Number of columns (V set - secondary markers): ",
