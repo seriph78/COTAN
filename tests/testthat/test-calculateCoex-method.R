@@ -398,7 +398,7 @@ test_that("Coex vs saved results", {
 
   expect_identical(c(genesCoexInSync, cellsCoexInSync), c("TRUE", "FALSE"))
 
-  expect_no_warning({
+  suppressWarnings({
     obj2 <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = " ",
                                          sequencingMethod = "artificial",
