@@ -1,3 +1,5 @@
+# ---------- Dataset definitions ----------
+
 #' @title Data-sets
 #'
 #' @description Simple data-sets included in the package
@@ -13,6 +15,8 @@ NULL
 #' @format `raw.dataset` is a data frame with \eqn{2000} genes and \eqn{815}
 #'   cells
 #'
+#' @docType data
+#'
 #' @usage data(raw.dataset)
 #'
 #' @source GEO GSM2861514
@@ -26,6 +30,8 @@ NULL
 #' @details `ERCCRaw` dataset
 #'
 #' @format `ERCCRaw` is a `data.frame`
+#'
+#' @docType data
 #'
 #' @usage data(ERCCraw)
 #'
@@ -44,6 +50,8 @@ NULL
 #' @format `test.dataset` is a `data.frame` with \eqn{600} genes and \eqn{1200}
 #'   cells
 #'
+#' @docType data
+#'
 #' @usage data(test.dataset)
 #'
 #' @rdname Datasets
@@ -54,6 +62,8 @@ NULL
 #'   `cellsUniformClustering()` on the `test.dataset`
 #'
 #' @format `test.dataset.clusters1` is a `character array`
+#'
+#' @docType data
 #'
 #' @usage data(test.dataset.clusters1)
 #'
@@ -67,6 +77,8 @@ NULL
 #'
 #' @format `test.dataset.clusters2` is a `character array`
 #'
+#' @docType data
+#'
 #' @usage data(test.dataset.clusters2)
 #'
 #' @rdname Datasets
@@ -74,6 +86,37 @@ NULL
 "test.dataset.clusters2"
 
 
+#' @details `vignette.split.clusters` is the clusterization obtained running
+#'   `cellsUniformClustering()` on the vignette dataset (mouse cortex E17.5,
+#'   GEO: GSM2861514)
+#'
+#' @format `vignette.split.clusters` is a `factor`
+#'
+#' @docType data
+#'
+#' @usage data(vignette.split.clusters)
+#'
+#' @rdname Datasets
+#'
+"vignette.split.clusters"
+
+
+#' @details `vignette.merge.clusters` is the clusterization obtained running
+#'   `mergeUniformCellsClusters()` on the vignette dataset (mouse cortex E17.5,
+#'   GEO: GSM2861514) using the previous *clusterization*
+#'
+#' @format `vignette.merge.clusters` is a `factor`
+#'
+#' @docType data
+#'
+#' @usage data(vignette.merge.clusters)
+#'
+#' @rdname Datasets
+#'
+"vignette.merge.clusters"
+
+
+# ---------- Torch library section ----------
 
 #' @title Installing torch R library (on Linux)
 #'

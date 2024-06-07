@@ -138,9 +138,9 @@ an interruption.}
 \code{GDIPlot()} returns a \code{ggplot2} object
 
 \code{cellsUniformClustering()} returns a \code{list} with 2 elements:
-\itemize{
-\item \code{"clusters"} the newly found cluster labels array
-\item \code{"coex"} the associated \code{COEX} \code{data.frame}
+#' \describe{
+\item{"clusters"}{the newly found cluster labels array}
+\item{"coex"}{the associated \code{COEX} \code{data.frame}}
 }
 
 \code{checkClusterUniformity} returns a list with:
