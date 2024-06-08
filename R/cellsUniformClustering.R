@@ -183,12 +183,8 @@ NULL
 #'   output will be paced in a sub-folder.
 #'
 #' @returns `cellsUniformClustering()` returns a `list` with 2 elements:
-#' #' \describe{
-#'   \item{"clusters"}{the newly found cluster labels array}
-#'   \item{"coex"}{the associated `COEX` `data.frame`}
-#' }
-# #'   * `"clusters"` the newly found cluster labels array
-# #'   * `"coex"` the associated `COEX` `data.frame`
+#'   * `"clusters"` the newly found cluster labels array
+#'   * `"coex"` the associated `COEX` `data.frame`
 #'
 #' @export
 #'
