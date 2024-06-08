@@ -200,7 +200,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
                             "ratioQuantile" = NA, "size" = NA)
 
-  testPairListMerge <- function(pList) {
+  testPairListMerge <- function(pList, allCheckResults) {
     logThis(paste0("Clusters pairs for merging:\n",
                    paste(pList, collapse = " ")), logLevel = 1L)
 
@@ -266,7 +266,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
       }
     }
 
-    return(list("oc" = outputClusters, "nm" = notMergeable))
+    return(list("oc" = outputClusters, "nm" = notMergeable,
+                "acr" = allCheckResults))
   }
 
   repeat {
@@ -321,7 +322,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
     numPairsToTest <- min(batchSize, length(pList))
     pList <- pList[1L:numPairsToTest]
 
-    c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
+    c(outputClusters, notMergeable, allCheckResults) %<-%
+      testPairListMerge(pList, allCheckResults)
 
     newNumClusters <- length(unique(outputClusters))
     if (newNumClusters == 1L) {
@@ -375,8 +377,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
     outputClusters <- clTagsMap[outputClusters]
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
-    allCheckResults <- allCheckResults[clTags, , drop = FALSE]
-    rownames(allCheckResults) <- clTagsMap[clTags]
+    checksTokeep <- rownames(allCheckResults) %in% clTags
+    allCheckResults <- allCheckResults[checksTokeep, , drop = FALSE]
+    rownames(allCheckResults) <- clTagsMap[rownames(allCheckResults)]
   }
 
   outputCoexDF <-

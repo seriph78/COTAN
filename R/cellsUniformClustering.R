@@ -448,8 +448,9 @@ cellsUniformClustering <- function(objCOTAN,
     outputClusters[unclusteredCells] <- "-1"
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
-    allCheckResults <- allCheckResults[clTags, , drop = FALSE]
-    rownames(allCheckResults) <- clTagsMap[clTags]
+    checksTokeep <- rownames(allCheckResults) %in% clTags
+    allCheckResults <- allCheckResults[checksTokeep, , drop = FALSE]
+    rownames(allCheckResults) <- clTagsMap[rownames(allCheckResults)]
     if (any(unclusteredCells)) {
       errorCheckResults[["size"]] <- length(unclusteredCells)
       allCheckResults <- rbind(allCheckResults, "-1" = errorCheckResults)
