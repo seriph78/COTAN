@@ -54,8 +54,8 @@ if (!file.exists(dataSetFile)) {
   getGEOSuppFiles(GEO, makeDirectory = TRUE,
                   baseDir = dataDir, fetch_files = TRUE,
                   filter_regex = fName)
-  sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 }
+sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 ```
 
 Define a directory where the output will be stored.

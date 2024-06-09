@@ -1,3 +1,8 @@
+## 2.5.3
+
+Now `checkClusterUniformity()` can take as input the `ratioAboveThreshold`:
+the fraction of genes allowed to be above the given `GDIThreshold`
+
 ## 2.5.2
 
 Solved issue with usage checks about the `torch` library
