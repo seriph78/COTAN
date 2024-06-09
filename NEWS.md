@@ -1,7 +1,9 @@
 ## 2.5.3
 
-Now `checkClusterUniformity()` can take as input the `ratioAboveThreshold`:
-the fraction of genes allowed to be above the given `GDIThreshold`
+Updated the vignette to the most recent changes
+
+Allowed user to set the ratio of genes above the threshold allowed
+in a Uniform Transcript cluster
 
 ## 2.5.2
 
