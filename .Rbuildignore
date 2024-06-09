@@ -1,7 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-data\cleaning\*
-data\E17*
 .RData
 .Rhistory
 .gitignore

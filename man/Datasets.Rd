@@ -8,6 +8,8 @@
 \alias{test.dataset}
 \alias{test.dataset.clusters1}
 \alias{test.dataset.clusters2}
+\alias{vignette.split.clusters}
+\alias{vignette.merge.clusters}
 \title{Data-sets}
 \format{
 \code{raw.dataset} is a data frame with \eqn{2000} genes and \eqn{815}
@@ -21,6 +23,10 @@ cells
 \code{test.dataset.clusters1} is a \verb{character array}
 
 \code{test.dataset.clusters2} is a \verb{character array}
+
+\code{vignette.split.clusters} is a \code{factor}
+
+\code{vignette.merge.clusters} is a \code{factor}
 }
 \source{
 GEO GSM2861514
@@ -37,6 +43,10 @@ data(test.dataset)
 data(test.dataset.clusters1)
 
 data(test.dataset.clusters2)
+
+data(vignette.split.clusters)
+
+data(vignette.merge.clusters)
 }
 \description{
 Simple data-sets included in the package
@@ -58,5 +68,13 @@ the same expression in both \emph{clusters}.
 \code{test.dataset.clusters2} is the \emph{clusterization} obtained running
 \code{mergeUniformCellsClusters()} on the \code{test.dataset} using the previous
 \emph{clusterization}
+
+\code{vignette.split.clusters} is the clusterization obtained running
+\code{cellsUniformClustering()} on the vignette dataset (mouse cortex E17.5,
+GEO: GSM2861514)
+
+\code{vignette.merge.clusters} is the clusterization obtained running
+\code{mergeUniformCellsClusters()} on the vignette dataset (mouse cortex E17.5,
+GEO: GSM2861514) using the previous \emph{clusterization}
 }
 \keyword{datasets}

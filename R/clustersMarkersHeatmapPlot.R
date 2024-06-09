@@ -169,13 +169,14 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
               x, y, gp = gpar(fontsize = 9L))
   }
 
-  heatmap <- Heatmap(scoreDFT, rect_gp = gpar(col = "white", lwd = 1L),
+  heatmap <- Heatmap(scoreDFT,
+                     rect_gp = gpar(col = "white", lwd = 1L),
                      cluster_rows = dend,
                      cluster_columns = FALSE,
                      col = colorFunc,
-                     width = unit(28.0, "cm"),
-                     row_dend_width = unit(8.0, "cm"),
-                     #height = unit(6.0, "cm"),
+#                     row_dend_width = unit(8.0, "cm"),
+#                     width = unit(10, "cm"),
+#                     height = unit(10, "cm")
                      column_names_gp = gpar(fontsize = 11L),
                      row_names_gp = gpar(fontsize = 11L),
                      cell_fun = cellFunc,
