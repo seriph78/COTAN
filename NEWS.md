@@ -1,3 +1,7 @@
+## 2.4.3
+
+Updated vignette to the most recent changes
+
 ## 2.4.2
 
 Added support for the `torch` library to help with the heavy lifting
