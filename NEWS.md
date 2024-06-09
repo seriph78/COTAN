@@ -1,3 +1,10 @@
+## 2.5.3
+
+Updated the vignette to the most recent changes
+
+Allowed user to set the ratio of genes above the threshold allowed
+in a Uniform Transcript cluster
+
 ## 2.5.2
 
 Solved issue with usage checks about the `torch` library

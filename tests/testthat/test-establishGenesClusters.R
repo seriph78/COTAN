@@ -24,7 +24,7 @@ test_that("Establish genes clusters", {
   expect_lte(max(abs(GCS)), 1L)
 
   if (TRUE) {
-    GCS_old <- readRDS(file.path(getwd(), "genes.coex.space.RDS"))
+    GCS_old <- as.matrix(readRDS(file.path(getwd(), "genes.coex.space.RDS")))
     expect_equal(GCS, GCS_old, tolerance = 1.0e-8)
   }
 

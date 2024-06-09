@@ -21,6 +21,7 @@ GDIPlot(
 cellsUniformClustering(
   objCOTAN,
   GDIThreshold = 1.43,
+  ratioAboveThreshold = 0.01,
   cores = 1L,
   maxIterations = 25L,
   optimizeForSpeed = TRUE,
@@ -39,6 +40,7 @@ checkClusterUniformity(
   clusterName,
   cells,
   GDIThreshold = 1.43,
+  ratioAboveThreshold = 0.01,
   cores = 1L,
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
@@ -50,6 +52,7 @@ mergeUniformCellsClusters(
   objCOTAN,
   clusters = NULL,
   GDIThreshold = 1.43,
+  ratioAboveThreshold = 0.01,
   batchSize = 0L,
   notMergeable = NULL,
   cores = 1L,
@@ -79,6 +82,9 @@ It defaults to \eqn{1.43}}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
+
+\item{ratioAboveThreshold}{the fraction of genes allowed to be above the
+\code{GDIThreshold}. It defaults to \eqn{1\%}}
 
 \item{cores}{number of cores to use. Default is 1.}
 
@@ -147,7 +153,8 @@ an interruption.}
 \itemize{
 \item \code{"isUniform"}: a flag indicating whether the \emph{cluster} is \strong{uniform}
 \item \code{"fractionAbove"}: the percentage of genes with \code{GDI} above the threshold
-\item \code{"firstPercentile"}: the quantile associated to the highest percentile
+\item \code{"ratioQuantile"}: the quantile associated to the high quantile
+associated to given ratio
 \item \code{"size"}: the number of cells in the cluster
 }
 
@@ -180,8 +187,10 @@ deemed \strong{uniform}. In the case only a few cells are left out (\eqn{\leq
 \code{checkClusterUniformity()} takes a \code{COTAN} object and a cells'
 \emph{cluster} and checks whether the latter is \strong{uniform} by \code{GDI}. The
 function runs \code{COTAN} to check whether the \code{GDI} is lower than the given
-\code{GDIThreshold} for the \eqn{99\%} of the genes. If the \code{GDI} results to be
-too high for too many genes, the \emph{cluster} is deemed \strong{non-uniform}.
+\code{GDIThreshold} (1.43) for all but at the most \code{ratioAboveThreshold}
+(\eqn{1\%}) genes. If the \code{GDI} results to be too high for too many genes,
+the \emph{cluster} is deemed
+\strong{non-uniform}.
 
 \code{mergeUniformCellsClusters()} takes in a \strong{uniform}
 \emph{clusterization} and iteratively checks whether merging two \emph{near clusters}
@@ -226,6 +235,7 @@ clusters <- splitList[["clusters"]]
 firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
 firstClusterIsUniform <-
   checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
+                         ratioAboveThreshold = 0.01,
                          cluster = clusters[[1L]], cells = firstCluster,
                          cores = 6L, optimizeForSpeed = TRUE,
                          deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
@@ -241,7 +251,8 @@ objCOTAN <- addClusterizationCoex(objCOTAN,
 identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 
 mergedList <- mergeUniformCellsClusters(objCOTAN,
-                                        GDIThreshold = 1.46,
+                                        GDIThreshold = 1.43,
+                                        ratioAboveThreshold = 0.02,
                                         batchSize = 5L,
                                         clusters = clusters,
                                         cores = 6L,

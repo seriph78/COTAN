@@ -15,6 +15,8 @@
 #'   significant!
 #' @param GDIThreshold the threshold level that discriminates uniform clusters.
 #'   It defaults to \eqn{1.43}
+#' @param ratioAboveThreshold the fraction of genes allowed to be above the
+#'   `GDIThreshold`. It defaults to \eqn{1\%}
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
 #' @param notMergeable An array of names of merged clusters that are already
@@ -101,6 +103,7 @@
 #' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
 #' firstClusterIsUniform <-
 #'   checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
+#'                          ratioAboveThreshold = 0.01,
 #'                          cluster = clusters[[1L]], cells = firstCluster,
 #'                          cores = 6L, optimizeForSpeed = TRUE,
 #'                          deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
@@ -116,7 +119,8 @@
 #' identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 #'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
-#'                                         GDIThreshold = 1.46,
+#'                                         GDIThreshold = 1.43,
+#'                                         ratioAboveThreshold = 0.02,
 #'                                         batchSize = 5L,
 #'                                         clusters = clusters,
 #'                                         cores = 6L,
@@ -139,6 +143,7 @@
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
                                       GDIThreshold = 1.43,
+                                      ratioAboveThreshold = 0.01,
                                       batchSize = 0L,
                                       notMergeable = NULL,
                                       cores = 1L,
@@ -193,9 +198,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
   iter <- 0L
   allCheckResults <- data.frame()
   errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
-                            "firstPercentile" = NA, "size" = NA)
+                            "ratioQuantile" = NA, "size" = NA)
 
-  testPairListMerge <- function(pList) {
+  testPairListMerge <- function(pList, allCheckResults) {
     logThis(paste0("Clusters pairs for merging:\n",
                    paste(pList, collapse = " ")), logLevel = 1L)
 
@@ -229,6 +234,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                clusterName = mergedClName,
                                cells = mergedCluster,
                                GDIThreshold = GDIThreshold,
+                               ratioAboveThreshold = ratioAboveThreshold,
                                cores = cores,
                                optimizeForSpeed = optimizeForSpeed,
                                deviceStr = deviceStr,
@@ -260,7 +266,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
       }
     }
 
-    return(list("oc" = outputClusters, "nm" = notMergeable))
+    return(list("oc" = outputClusters, "nm" = notMergeable,
+                "acr" = allCheckResults))
   }
 
   repeat {
@@ -315,7 +322,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
     numPairsToTest <- min(batchSize, length(pList))
     pList <- pList[1L:numPairsToTest]
 
-    c(outputClusters, notMergeable) %<-% testPairListMerge(pList)
+    c(outputClusters, notMergeable, allCheckResults) %<-%
+      testPairListMerge(pList, allCheckResults)
 
     newNumClusters <- length(unique(outputClusters))
     if (newNumClusters == 1L) {
@@ -369,8 +377,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
     outputClusters <- clTagsMap[outputClusters]
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
-    allCheckResults <- allCheckResults[clTags, , drop = FALSE]
-    rownames(allCheckResults) <- clTagsMap[clTags]
+    checksTokeep <- rownames(allCheckResults) %in% clTags
+    allCheckResults <- allCheckResults[checksTokeep, , drop = FALSE]
+    rownames(allCheckResults) <- clTagsMap[rownames(allCheckResults)]
   }
 
   outputCoexDF <-

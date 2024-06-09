@@ -1,7 +1,7 @@
 Package: COTAN
 Type: Package
 Title: COexpression Tables ANalysis 
-Version: 2.5.2
+Version: 2.5.3
 Authors@R: c(
   person("Galfrè", "Silvia Giulia",email = "silvia.galfre@di.unipi.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
   person("Morandin","Francesco", email = "francesco.morandin@unipr.it", role = "aut",comment = c(ORCID = "0000-0002-2022-2300")),
@@ -25,7 +25,7 @@ Description: Statistical and computational method to analyze the co-expression o
     of gene interactions and becoming a new tool to identify cell-identity marker genes.
 URL: https://github.com/seriph78/COTAN
 BugReports: https://github.com/seriph78/COTAN/issues
-Depends: R (>= 4.2)
+Depends: R (>= 4.3)
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 7.3.1
@@ -64,7 +64,7 @@ Imports:
     assertthat,
     withr
 Suggests: 
-    testthat (>= 3.0.0),
+    testthat (>= 3.2.0),
     proto,
     spelling,
     knitr,

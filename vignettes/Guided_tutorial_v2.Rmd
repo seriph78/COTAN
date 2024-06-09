@@ -54,14 +54,15 @@ if (!file.exists(dataSetFile)) {
   getGEOSuppFiles(GEO, makeDirectory = TRUE,
                   baseDir = dataDir, fetch_files = TRUE,
                   filter_regex = fName)
-  sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 }
+
+sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 ```
 
 Define a directory where the output will be stored.
 
 ```{r}
-outDir <- tempdir()
+outDir <- dataDir
 
 # Log-level 2 was chosen to showcase better how the package works
 # In normal usage a level of 0 or 1 is more appropriate
@@ -131,40 +132,66 @@ cellSizePlot(obj)
 genesSizePlot(obj)
 ```
 
-```{r}
-mit <- mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
-mit[["plot"]]
-```
-
 During the cleaning, every time we want to remove cells or genes
 we can use the `dropGenesCells()`function.
 
-To drop cells by cell library size:
-
+Drop cells with too many reads as they are probably doublets or multiplets
 ```{r}
-cells_to_rem <- getCells(obj)[getCellsSize(obj) > 6000L]
+cellsSizeThr <- 6000L
+obj <- addElementToMetaDataset(obj, "Cells size threshold", cellsSizeThr)
+
+cells_to_rem <- getCells(obj)[getCellsSize(obj) > cellsSizeThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
+
+cellSizePlot(obj)
 ```
 
-To drop cells by gene number: high genes count might indicate doublets...
+To drop cells by gene number: high genes count might also indicate doublets...
 
 ```{r}
-cells_to_rem <- getCells(obj)[getNumExpressedGenes(obj) > 3000L]
+genesSizeHighThr <- 3000L
+obj <- addElementToMetaDataset(obj, "Num genes high threshold", genesSizeHighThr)
+
+cells_to_rem <- getCells(obj)[getNumExpressedGenes(obj) > genesSizeHighThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
 genesSizePlot(obj)
 ```
 
-To drop cells by mitochondrial percentage:
+Drop cells with too low genes expression as they are probably dead
 
 ```{r}
-to_rem <- mit[["sizes"]][["mit.percentage"]] > 1.5
-cells_to_rem <- rownames(mit[["sizes"]])[to_rem]
+genesSizeLowThr <- 500L
+obj <- addElementToMetaDataset(obj, "Num genes low threshold", genesSizeLowThr)
+
+cells_to_rem <- getCells(obj)[getNumExpressedGenes(obj) < genesSizeLowThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
-mit <- mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
-mit[["plot"]]
+genesSizePlot(obj)
 ```
+
+
+Cells with a too high percentage of mitochondrial genes are
+likely dead (or at the last problematic) cells. So we drop them!
+
+```{r}
+c(mitPlot, mitSizes) %<-% mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
+
+mitPlot
+```
+
+```{r}
+mitPercThr <- 1.0
+obj <- addElementToMetaDataset(obj, "Mitoc. perc. threshold", mitPercThr)
+
+cells_to_rem <- rownames(mitSizes)[mitSizes[["mit.percentage"]] > mitPercThr]
+obj <- dropGenesCells(obj, cells = cells_to_rem)
+
+c(mitPlot, mitSizes) %<-% mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
+
+plot(mitPlot)
+```
+
 
 If we do not want to consider the mitochondrial genes we can remove them
 before starting the analysis.
@@ -172,6 +199,7 @@ before starting the analysis.
 ```{r}
 genes_to_rem <- getGenes(obj)[grep("^Mt", getGenes(obj))]
 cells_to_rem <- getCells(obj)[which(getCellsSize(obj) == 0L)]
+
 obj <- dropGenesCells(obj, genes_to_rem, cells_to_rem)
 ```
 
@@ -184,11 +212,12 @@ logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
 The `clean()` function estimates all the parameters for the data. Therefore, we have to run it again every time we remove any genes or cells from the data.
 
 ```{r}
-n_it <- 1L
+obj <- addElementToMetaDataset(obj, "Num drop B group", 0)
 
 obj <- clean(obj)
-c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
-  cleanPlots(obj)
+
+c(pcaCellsPlot, pcaCellsData, genesPlot,
+  UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -203,9 +232,10 @@ We can observe here that the red cells are really enriched in hemoglobin genes s
 cells_to_rem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
-n_it <- 2L
+obj <- addElementToMetaDataset(obj, "Num drop B group", 1)
 
 obj <- clean(obj)
+
 c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
   cleanPlots(obj)
 
@@ -236,19 +266,20 @@ plot(zoomedNuPlot)
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
-yset <- 0.28
-obj <- addElementToMetaDataset(obj, "Threshold low UDE cells:", yset)
+UDELowThr <- 0.28
+obj <- addElementToMetaDataset(obj, "Low UDE cells' threshold", UDELowThr)
 
-cells_to_rem <- getCells(obj)[getNu(obj) < yset]
+obj <- addElementToMetaDataset(obj, "Num drop B group", 2)
+
+cells_to_rem <- getCells(obj)[getNu(obj) < UDELowThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 ```
 
 Repeat the estimation after the cells are removed
 
 ```{r}
-n_it <- 3L
-
 obj <- clean(obj)
+
 c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
   cleanPlots(obj)
 
@@ -378,6 +409,8 @@ print("Observed CT")
 observedCT
 print("Expected CT")
 expectedCT
+print("Coex")
+getGenesCoex(obj)["Satb2", "Bcl11b"]
 ```
 
 Another useful function is `getGenesCoex()`. This can be used to extract
@@ -386,20 +419,20 @@ the whole or a partial `COEX` matrix from a `COTAN` object.
 ```{r}
 # For the whole matrix
 coex <- getGenesCoex(obj, zeroDiagonal = FALSE)
-coex[1L:5L, 1L:5L]
+coex[1000L:1005L, 1000L:1005L]
 ```
 
 ```{r}
 # For a partial matrix
 coex <- getGenesCoex(obj, genes = c("Satb2", "Bcl11b", "Fezf2"))
-head(coex)
+coex[1000L:1005L, ]
 ```
 
 ## Establishing genes' clusters
 
 `COTAN` provides a way to establish genes' clusters given some lists of markers
 
-```{r}
+```{r eval=TRUE, include=TRUE}
 layersGenes <- list(
   "L1"   = c("Reln",   "Lhx5"),
   "L2/3" = c("Satb2",  "Cux1"),
@@ -407,20 +440,20 @@ layersGenes <- list(
   "L5/6" = c("Bcl11b", "Fezf2"),
   "Prog" = c("Vim",    "Hes1")
 )
-c(gSpace, eigPlot, pcaClustersDF, treePlot) %<-%
+c(gSpace, eigPlot, pcaGenesClDF, treePlot) %<-%
   establishGenesClusters(obj, groupMarkers = layersGenes,
                          numGenesPerMarker = 25L, kCuts = 5L)
 
 plot(eigPlot)
 ```
 
-```{r}
+```{r eval=TRUE, include=TRUE}
 plot(treePlot)
 ```
 
-```{r}
-UMAPPlot(pcaClustersDF[, 1L:10L],
-         clusters = pcaClustersDF[["hclust"]],
+```{r eval=TRUE, include=TRUE}
+UMAPPlot(pcaGenesClDF[, 1L:10L],
+         clusters = pcaGenesClDF[["hclust"]],
          elements = layersGenes,
          title = "Genes' clusters UMAP Plot")
 ```
@@ -450,7 +483,10 @@ obj <- addClusterization(obj, clName = "split",
 
 In the case one already has an existing clusterization, it is possible to
 calculate the *DEA* `data.frame` and add it to the `COTAN` object.
-```{r eval=FALSE, include=TRUE}
+```{r eval=TRUE, include=TRUE}
+data("vignette.split.clusters", package = "COTAN")
+splitClusters <- vignette.split.clusters
+
 splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
 
 obj <- addClusterization(obj, clName = "split",
@@ -486,17 +522,30 @@ obj <- addClusterization(obj, clName = "merge",
                          clusters = mergeClusters, coexDF = mergeCoexDF)
 ```
 
+In the case one already has an existing clusterization, it is possible to
+calculate the *DEA* `data.frame` and add it to the `COTAN` object.
+```{r eval=TRUE, include=TRUE}
+data("vignette.merge.clusters", package = "COTAN")
+mergeClusters <- vignette.merge.clusters
+
+mergeCoexDF <- DEAOnClusters(obj, clusters = mergeClusters)
+
+obj <- addClusterization(obj, clName = "merge",
+                         clusters = mergeClusters, coexDF = mergeCoexDF)
+```
+
+
 In the following graph, it is possible to check that the found clusters align
 very well to the expression of the layers' genes defined above...
 
-```{r eval=FALSE, include=TRUE}
-clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                           clName = "split", kCuts = 5L)
+```{r eval=TRUE, include=TRUE}
+c(.,scoreDF) %<-% clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
+                                             clName = "split", kCuts = 5L)
 ```
 
-```{r eval=FALSE, include=TRUE}
-clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                           clName = "merge", kCuts = 5L)
+```{r eval=TRUE, include=TRUE}
+c(.,scoreDF) %<-% clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
+                                             clName = "merge", kCuts = 5L)
 ```
 
 ## Vignette clean-up stage
@@ -508,12 +557,20 @@ if (file.exists(file.path(outDir, paste0(cond, ".cotan.RDS")))) {
   #Delete file if it exists
   file.remove(file.path(outDir, paste0(cond, ".cotan.RDS")))
 }
-unlink(file.path(outDir, cond), recursive = TRUE)
-file.remove(dataSetFile)
+if (file.exists(file.path(outDir, paste0(cond, "_times.csv")))) {
+  #Delete file if it exists
+  file.remove(file.path(outDir, paste0(cond, "_times.csv")))
+}
+if (dir.exists(file.path(outDir, cond))) {
+  unlink(file.path(outDir, cond), recursive = TRUE)
+}
+if (dir.exists(file.path(outDir, GEO))) {
+  unlink(file.path(outDir, GEO), recursive = TRUE)
+}
 
 # stop logging to file
 setLoggingFile("")
-file.remove(file.path(outDir, "vignette_v1.log"))
+file.remove(file.path(outDir, "vignette_v2.log"))
 
 options(parallelly.fork.enable = FALSE)
 

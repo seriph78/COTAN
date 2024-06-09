@@ -3,14 +3,18 @@
 #' @details `checkClusterUniformity()` takes a `COTAN` object and a cells'
 #'   *cluster* and checks whether the latter is **uniform** by `GDI`. The
 #'   function runs `COTAN` to check whether the `GDI` is lower than the given
-#'   `GDIThreshold` for the \eqn{99\%} of the genes. If the `GDI` results to be
-#'   too high for too many genes, the *cluster* is deemed **non-uniform**.
+#'   `GDIThreshold` (1.43) for all but at the most `ratioAboveThreshold`
+#'   (\eqn{1\%}) genes. If the `GDI` results to be too high for too many genes,
+#'   the *cluster* is deemed
+#'   **non-uniform**.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clusterName the tag of the *cluster*
 #' @param cells the cells belonging to the *cluster*
 #' @param GDIThreshold the threshold level that discriminates uniform
 #'   *clusters*. It defaults to \eqn{1.43}
+#' @param ratioAboveThreshold the fraction of genes allowed to be above the
+#'   `GDIThreshold`. It defaults to \eqn{1\%}
 #' @param cores number of cores to use. Default is 1.
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
@@ -27,7 +31,8 @@
 #' @returns `checkClusterUniformity` returns a list with:
 #'   * `"isUniform"`: a flag indicating whether the *cluster* is **uniform**
 #'   * `"fractionAbove"`: the percentage of genes with `GDI` above the threshold
-#'   * `"firstPercentile"`: the quantile associated to the highest percentile
+#'   * `"ratioQuantile"`: the quantile associated to the high quantile
+#'   associated to given ratio
 #'   * `"size"`: the number of cells in the cluster
 #'
 #' @importFrom utils head
@@ -45,11 +50,17 @@
 #' @rdname UniformClusters
 #'
 
-checkClusterUniformity <- function(objCOTAN, clusterName, cells,
-                                   GDIThreshold = 1.43, cores = 1L,
-                                   optimizeForSpeed = TRUE, deviceStr = "cuda",
-                                   saveObj = TRUE, outDir = ".") {
-
+checkClusterUniformity <- function(
+    objCOTAN,
+    clusterName,
+    cells,
+    GDIThreshold = 1.43,
+    ratioAboveThreshold = 0.01,
+    cores = 1L,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    saveObj = TRUE,
+    outDir = ".") {
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
@@ -99,20 +110,21 @@ checkClusterUniformity <- function(objCOTAN, clusterName, cells,
   gc()
 
   # A cluster is deemed uniform if the number of genes
-  # with [GDI > GDIThreshold] is not more than 1%
+  # with [GDI > GDIThreshold] is at the most ratioAboveThreshold
   gdi <- GDIData[["GDI"]]
 
-  quantAboveThr <- quantile(gdi, probs = 0.99)
+  quantAboveThr <- quantile(gdi, probs = 1.0 - ratioAboveThreshold)
   percAboveThr <- sum(gdi >= GDIThreshold) / length(gdi)
 
-  clusterIsUniform <- percAboveThr <= 0.01
+  clusterIsUniform <- percAboveThr <= ratioAboveThreshold
 
-  logThis(paste0("Cluster ", clusterName, ", with size ", clusterSize, ", is ",
-                 (if (clusterIsUniform) {""} else {"not "}), "uniform\n",
-                 round(percAboveThr * 100.0, digits = 2L),
-                 "% of the genes is above the given GDI threshold ",
-                 GDIThreshold, "\n", "GDI 99% quantile is at ",
-                 round(quantAboveThr, digits = 4L)), logLevel = 3L)
+  logThis(paste0(
+    "Cluster ", clusterName, ", with size ", clusterSize, ", is ",
+    (if (clusterIsUniform) {""} else {"not "}), "uniform\n",
+    round(percAboveThr * 100.0, digits = 2L), "% of the genes is above ",
+    "the given GDI threshold ", GDIThreshold, "\n",
+    "highest ", round(ratioAboveThreshold * 100.0, digits = 2L),
+    "% GDI quantile is at ", round(quantAboveThr, digits = 4L)), logLevel = 3L)
 
   if (isTRUE(saveObj)) tryCatch({
       pre <- ""
@@ -131,6 +143,6 @@ checkClusterUniformity <- function(objCOTAN, clusterName, cells,
 
   return(list("isUniform" = clusterIsUniform,
               "fractionAbove" = percAboveThr,
-              "firstPercentile" = quantAboveThr[[1L]],
+              "ratioQuantile" = quantAboveThr[[1L]],
               "size" = clusterSize))
 }
