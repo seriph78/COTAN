@@ -11,6 +11,9 @@
 #'   their centroids
 #' @param title a string giving the plot title. Will default to UMAP Plot if not
 #'   specified
+#' @param colors an `array` of colors to use in the plot. If not sufficient
+#'   colors are given it will complete the list using colors from
+#'   [getColorsVector()]
 #'
 #'
 #' @returns `UMAPPlot()` returns a `ggplot2` object
@@ -19,8 +22,7 @@
 #' @importFrom ggplot2 geom_point
 #' @importFrom ggplot2 geom_tile
 #' @importFrom ggplot2 aes
-#' @importFrom ggplot2 xlab
-#' @importFrom ggplot2 ylab
+#' @importFrom ggplot2 labs
 #' @importFrom ggplot2 ggtitle
 #' @importFrom ggplot2 scale_color_manual
 #' @importFrom ggplot2 scale_fill_manual
@@ -39,11 +41,12 @@
 #'
 #' @rdname HandlingClusterizations
 #'
-UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
+UMAPPlot <- function(df, clusters = NULL, elements = NULL,
+                     title = "", colors = NULL) {
   logThis("UMAP plot", logLevel = 2L)
 
   assert_that(is_empty(clusters) || length(clusters) == nrow(df),
-              msg = paste("Clusters vector must have size equal to",
+              msg = paste("UMAPPlot - clusters vector must have size equal to",
                           "the number of rows in the data.frame"))
 
   # empty title
@@ -55,88 +58,120 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
     clusters <- factor(clusters)
   }
 
-  colors <- rep_len("none", nrow(df))
+  entryType <- rep_len("none", nrow(df))
 
   # assign a different color to each list of elements
   for (nm in names(elements)) {
     selec <- rownames(df) %in% elements[[nm]]
     if (any(selec)) {
-      colors[selec] <- nm
+      entryType[selec] <- nm
     } else {
       logThis(paste("UMAPPlot - none of the elements in group", nm,
                     "is present: will be ignored"), logLevel = 1L)
     }
   }
 
-  labelled <- colors != "none"
+  labelled <- entryType != "none"
 
   # assign a different color to each cluster
   for (cl in levels(clusters)) {
     selec <- !labelled & clusters == cl
     if (any(selec)) {
-      colors[selec] <- cl
+      entryType[selec] <- cl
     } else {
       logThis(paste("UMAPPlot - none of the elements of the cluster", cl,
                     "is present unlabelled: cluster will be ignored"),
               logLevel = 1L)
     }
+    rm(selec)
   }
 
-  clustered <- !labelled & colors != "none"
+  clustered <- !labelled & entryType != "none"
+
 
   umap <- umap(df)
 
   plotDF <- data.frame(x = umap[["layout"]][, 1L],
                        y = umap[["layout"]][, 2L],
-                       colors = colors)
+                       types = entryType)
 
-  centroids <- NULL
-  if (is_empty(elements) && !is_empty(clusters)) {
-    centroids <- data.frame()
-
+  # add the centroids to the data.frame
+  centroids <- rep(FALSE, times = nrow(plotDF))
+  if (!is_empty(clusters)) {
     clList <- toClustersList(clusters)
+    numericDF <- plotDF[, -3]
     for (clName in names(clList)) {
-      row <- colMeans(plotDF[clList[[clName]], 1:2, drop = FALSE])
-      centroids <- rbind(centroids, row)
+      subsetDF <- as.matrix(numericDF[clList[[clName]], , drop = FALSE])
+      plotDF <- rbind(plotDF, c(colMeans(subsetDF), clName))
+      rownames(plotDF)[nrow(plotDF)] <- clName
     }
-    colnames(centroids) <- c("x", "y")
-
-    centroids <- setColumnInDF(centroids, colName = "colors",
-                               colToSet = names(clList))
+    numCl <- length(clList)
+    centroids <- c(centroids, rep(TRUE, numCl))
+    entryType <- c(as.character(entryType), rep("centroid", numCl))
+    labelled <- c(labelled,  rep(FALSE, numCl))
+    clustered <- c(clustered,  rep(FALSE, numCl))
+    rm(numericDF, subsetDF, clList, clName, numCl)
   }
 
-  allTypes <- setdiff(unique(colors), "none")
-  myColours <- set_names(getColorsVector(length(allTypes)), allTypes)
+  # Ensure x and y columns are numeric
+  plotDF[["x"]] <- as.numeric(plotDF[["x"]])
+  plotDF[["y"]] <- as.numeric(plotDF[["y"]])
+  plotDF[["types"]] <- factor(plotDF[["types"]])
+
+  generic <- (!labelled & !clustered & !centroids)
+
+  allTypes  <- c(unique(setdiff(entryType, c("none", "centroid"))),
+                        "none", "centroid")
+  myColours <- colors
+  if (length(colors) < length(allTypes)) {
+    if (!is_empty(colors)) {
+      warning("UMAPPlot - not enough colors passed in")
+    }
+    numMissing <- length(allTypes) - length(myColours)
+    myColours <- c(myColours, getColorsVector(numMissing))
+    names(myColours) <- allTypes
+    if (numMissing > 1){
+      myColours[["none"]] <- "#8491B4B2"
+    }
+    myColours[["centroid"]] <- "#000000"
+  } else {
+    myColours <- myColours[1:length(allTypes)]
+    names(myColours) <- allTypes
+  }
+
+  assert_that(setequal(c(entryType, "none", "centroid"), names(myColours)))
 
   pointSize <- min(max(1.0, 200000.0/dim(plotDF)[1]), 5)
 
-  plot <- ggplot(subset(plotDF, (!labelled & !clustered))) +
-    geom_point(aes(x, y, colour = "#8491B4B2"),
+  plot <- ggplot() +
+    geom_point(data = plotDF[generic, , drop = FALSE],
+               aes(x, y, colour = types),
                size = pointSize, alpha = 0.3) +
-    geom_point(data = subset(plotDF, clustered),
-               aes(x, y, colour = colors),
+    geom_point(data = plotDF[clustered, , drop = FALSE],
+               aes(x, y, colour = types),
                size = pointSize, alpha = 0.5) +
-    geom_point(data = subset(plotDF, labelled),
-               aes(x, y, colour = colors),
+    geom_point(data = plotDF[labelled, , drop = FALSE],
+               aes(x, y, colour = types),
                size = 1.5*pointSize, alpha = 0.8) +
     scale_color_manual("Status", values = myColours) +
-    scale_fill_manual( "Status", values = myColours) +
     labs(x = "UMAP 1", y = "UMAP 2") +
-    geom_label_repel(data = subset(plotDF, labelled),
-                     aes(x, y, fill = colors),
-                     label = rownames(plotDF)[labelled],
-                     label.size = NA, max.overlaps = 40L, alpha = 0.8,
-                     direction = "both", na.rm = TRUE, seed = 1234L) +
     ggtitle(title) +
     plotTheme("UMAP", textSize = 10L)
 
-  if (!is.null(centroids)) {
-    plot <- plot +
-      geom_text_repel(data = centroids,
-                      aes(x, y, label = colors, colour = colors),
-                      fontface = "bold",
-                      size = 0.1*pointSize)
-  }
+  plot <- plot +
+    geom_label_repel(data = plotDF[labelled, , drop = FALSE],
+                     aes(x, y, fill = types,
+                         label = rownames(plotDF)[labelled]),
+                     label.size = NA, show.legend = FALSE, force = 2.0,
+                     box.padding = 0.25,
+                     max.overlaps = 40L, alpha = 0.8,
+                     direction = "both", na.rm = TRUE, seed = 1234L) +
+    geom_text(data = plotDF[centroids, , drop = FALSE],
+              aes(x, y, colour = "centroid"),
+              label = rownames(plotDF)[centroids],
+              show.legend = FALSE, alpha = 0.8,
+              fontface = "bold", size = 1.5 * pointSize) +
+    scale_fill_manual("Status", values = myColours)
 
   return(plot)
 }

@@ -82,7 +82,7 @@ distancesBetweenClusters(
   distance = NULL
 )
 
-UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
+UMAPPlot(df, clusters = NULL, elements = NULL, title = "", colors = NULL)
 
 clustersDeltaExpression(objCOTAN, clName = "", clusters = NULL)
 
@@ -187,14 +187,19 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
-\item{df}{the \code{data.frame} to plot. It must have a row names containing the
+\item{df}{The \code{data.frame} to plot. It must have a row names containing the
 given elements}
 
 \item{elements}{a named \code{list} of elements to label. Each array in the list
-will have different color}
+will have different color. When not given it will label the clusters using
+their centroids}
 
 \item{title}{a string giving the plot title. Will default to UMAP Plot if not
 specified}
+
+\item{colors}{an \code{array} of colors to use in the plot. If not sufficient
+colors are given it will complete the list using colors from
+\code{\link[=getColorsVector]{getColorsVector()}}}
 
 \item{groupMarkers}{a named \code{list} with an element for each group comprised
 of one or more marker genes}
@@ -458,10 +463,14 @@ clusters <- test.dataset.clusters1
 
 coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
 
-groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-                     G2 = c("g-000300", "g-000330"),
+groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030",
+                            "g-000150", "g-000160", "g-000170"),
+                     G2 = c("g-000300", "g-000330", "g-000450",
+                            "g-000460", "g-000470"),
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
+
+geneClusters <- set_names(rep(1:3, each = 240)[1:600], getGenes(objCOTAN))
 
 umapPlot <- UMAPPlot(coexDF, clusters = NULL, elements = groupMarkers)
 plot(umapPlot)
@@ -470,7 +479,7 @@ objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
                               clusters = clusters, coexDF = coexDF)
 
 lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
-umapPlot2 <- UMAPPlot(lfcDF, clusters = NULL, elements = groupMarkers)
+umapPlot2 <- UMAPPlot(lfcDF, clusters = geneClusters)
 plot(umapPlot2)
 
 objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
@@ -478,9 +487,11 @@ objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
 clSummaryPlotAndData <-
   clustersSummaryPlot(objCOTAN, clName = "first_clusterization",
                       plotTitle = "first clusterization")
-##plot(clSummaryPlotAndData[["plot"]])
+plot(clSummaryPlotAndData[["plot"]])
 
-##objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
+if (FALSE) {
+  objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
+}
 
 clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 
@@ -488,7 +499,6 @@ enrichment <- geneSetEnrichment(clustersCoex = coexDF,
                                 groupMarkers = groupMarkers)
 
 clHeatmapPlotAndData <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
-##plot(clHeatmapPlotAndData[["heatmapPlot"]])
 
 conditions <- as.integer(substring(getCells(objCOTAN), 3L))
 conditions <- factor(ifelse(conditions <= 600, "L", "H"))
@@ -498,7 +508,6 @@ clHeatmapPlotAndData2 <-
   clustersMarkersHeatmapPlot(objCOTAN, groupMarkers, kCuts = 2,
                              condNameList = list("High/Low"),
                              conditionsList = list(conditions))
-##plot(clHeatmapPlotAndData2[["heatmapPlot"]])
 
 clName <- getClusterizationName(objCOTAN)
 

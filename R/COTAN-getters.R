@@ -1067,6 +1067,8 @@ setMethod(
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
 #'                             "g-000570", "g-000590"))
 #'
+#' geneClusters <- set_names(rep(1:3, each = 240)[1:600], getGenes(objCOTAN))
+#'
 #' umapPlot <- UMAPPlot(coexDF, clusters = NULL, elements = groupMarkers)
 #' plot(umapPlot)
 #'
@@ -1074,7 +1076,7 @@ setMethod(
 #'                               clusters = clusters, coexDF = coexDF)
 #'
 #' lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
-#' umapPlot2 <- UMAPPlot(lfcDF, clusters = NULL, elements = groupMarkers)
+#' umapPlot2 <- UMAPPlot(lfcDF, clusters = geneClusters)
 #' plot(umapPlot2)
 #'
 #' objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
@@ -1094,7 +1096,6 @@ setMethod(
 #'                                 groupMarkers = groupMarkers)
 #'
 #' clHeatmapPlotAndData <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
-#' ##plot(clHeatmapPlotAndData[["heatmapPlot"]])
 #'
 #' conditions <- as.integer(substring(getCells(objCOTAN), 3L))
 #' conditions <- factor(ifelse(conditions <= 600, "L", "H"))
@@ -1104,7 +1105,6 @@ setMethod(
 #'   clustersMarkersHeatmapPlot(objCOTAN, groupMarkers, kCuts = 2,
 #'                              condNameList = list("High/Low"),
 #'                              conditionsList = list(conditions))
-#' ##plot(clHeatmapPlotAndData2[["heatmapPlot"]])
 #'
 #' @rdname HandlingClusterizations
 #'
