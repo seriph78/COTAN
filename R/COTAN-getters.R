@@ -1080,9 +1080,11 @@ setMethod(
 #' clSummaryPlotAndData <-
 #'   clustersSummaryPlot(objCOTAN, clName = "first_clusterization",
 #'                       plotTitle = "first clusterization")
-#' ##plot(clSummaryPlotAndData[["plot"]])
+#' plot(clSummaryPlotAndData[["plot"]])
 #'
-#' ##objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
+#' if (FALSE) {
+#'   objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
+#' }
 #'
 #' clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 #'
