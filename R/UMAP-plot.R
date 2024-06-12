@@ -99,7 +99,7 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL,
   centroids <- rep(FALSE, times = nrow(plotDF))
   if (!is_empty(clusters)) {
     clList <- toClustersList(clusters)
-    numericDF <- plotDF[, -3]
+    numericDF <- plotDF[, -3L]
     for (clName in names(clList)) {
       subsetDF <- as.matrix(numericDF[clList[[clName]], , drop = FALSE])
       plotDF <- rbind(plotDF, c(colMeans(subsetDF), clName))
@@ -130,18 +130,18 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL,
     numMissing <- length(allTypes) - length(myColours)
     myColours <- c(myColours, getColorsVector(numMissing))
     names(myColours) <- allTypes
-    if (numMissing > 1){
+    if (numMissing > 1L){
       myColours[["none"]] <- "#8491B4B2"
     }
     myColours[["centroid"]] <- "#000000"
   } else {
-    myColours <- myColours[1:length(allTypes)]
+    myColours <- myColours[1L:length(allTypes)]
     names(myColours) <- allTypes
   }
 
   assert_that(setequal(c(entryType, "none", "centroid"), names(myColours)))
 
-  pointSize <- min(max(1.0, 200000.0/dim(plotDF)[1]), 5)
+  pointSize <- min(max(1.0, 200000.0/dim(plotDF)[1L]), 3.0)
 
   plot <- ggplot() +
     geom_point(data = plotDF[generic, , drop = FALSE],
@@ -152,7 +152,7 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL,
                size = pointSize, alpha = 0.5) +
     geom_point(data = plotDF[labelled, , drop = FALSE],
                aes(x, y, colour = types),
-               size = 1.5*pointSize, alpha = 0.8) +
+               size = 1.5 * pointSize, alpha = 0.8) +
     scale_color_manual("Status", values = myColours) +
     labs(x = "UMAP 1", y = "UMAP 2") +
     ggtitle(title) +

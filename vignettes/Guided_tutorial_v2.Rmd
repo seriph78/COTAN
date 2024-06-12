@@ -236,8 +236,8 @@ obj <- addElementToMetaDataset(obj, "Num drop B group", 1)
 
 obj <- clean(obj)
 
-c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
-  cleanPlots(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot,
+  UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -266,7 +266,7 @@ plot(zoomedNuPlot)
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
-UDELowThr <- 0.28
+UDELowThr <- 0.30
 obj <- addElementToMetaDataset(obj, "Low UDE cells' threshold", UDELowThr)
 
 obj <- addElementToMetaDataset(obj, "Num drop B group", 2)
@@ -280,8 +280,8 @@ Repeat the estimation after the cells are removed
 ```{r}
 obj <- clean(obj)
 
-c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
-  cleanPlots(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot,
+  UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -452,10 +452,13 @@ plot(treePlot)
 ```
 
 ```{r eval=TRUE, include=TRUE}
-UMAPPlot(pcaGenesClDF[, 1L:10L],
-         clusters = pcaGenesClDF[["hclust"]],
-         elements = layersGenes,
-         title = "Genes' clusters UMAP Plot")
+genesUmapPl <- UMAPPlot(pcaGenesClDF[, 1L:10L],
+                        clusters = set_names(pcaGenesClDF[["hclust"]],
+                                             rownames(pcaGenesClDF)),
+                        elements = layersGenes,
+                        title = "Genes' clusters UMAP Plot")
+
+plot(genesUmapPl)
 ```
 
 ## Uniform Clustering
@@ -485,13 +488,14 @@ In the case one already has an existing clusterization, it is possible to
 calculate the *DEA* `data.frame` and add it to the `COTAN` object.
 ```{r eval=TRUE, include=TRUE}
 data("vignette.split.clusters", package = "COTAN")
-splitClusters <- vignette.split.clusters
+splitClusters <- vignette.split.clusters[getCells(obj)]
 
 splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
 
 obj <- addClusterization(obj, clName = "split",
                          clusters = splitClusters, coexDF = splitCoexDF)
 ```
+
 
 However since the algorithm that creates the clusters is not geared directly
 to achieve cluster uniformity, there might be clusters that can be merged back
@@ -526,7 +530,7 @@ In the case one already has an existing clusterization, it is possible to
 calculate the *DEA* `data.frame` and add it to the `COTAN` object.
 ```{r eval=TRUE, include=TRUE}
 data("vignette.merge.clusters", package = "COTAN")
-mergeClusters <- vignette.merge.clusters
+mergeClusters <- vignette.merge.clusters[getCells(obj)]
 
 mergeCoexDF <- DEAOnClusters(obj, clusters = mergeClusters)
 
