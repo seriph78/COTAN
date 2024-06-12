@@ -92,15 +92,17 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
 
   centroids <- NULL
   if (is_empty(elements) && !is_empty(clusters)) {
-    # Group the data by 'cluster'
-    groupedDf <- group_by(plotDf, clusters)
+    centroids <- data.frame()
 
-    # Summarize the data to calculate mean x and y for each cluster
-    centroids <- summarise(groupedDf, x = mean(x), y = mean(y))
+    clList <- toClustersList(clusters)
+    for (clName in names(clList)) {
+      row <- colMeans(plotDF[clList[[clName]], 1:2, drop = FALSE])
+      centroids <- rbind(centroids, row)
+    }
+    colnames(centroids) <- c("x", "y")
 
-    assert_that(nrow(centroids) == nlevels(clusters))
-
-    setColumnInDF(centroids, colName = "colors", colToSet = levels(clusters))
+    centroids <- setColumnInDF(centroids, colName = "colors",
+                               colToSet = names(clList))
   }
 
   allTypes <- setdiff(unique(colors), "none")
@@ -131,7 +133,7 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
   if (!is.null(centroids)) {
     plot <- plot +
       geom_text_repel(data = centroids,
-                      aes(x, y, label = levels(clusters), colour = colors),
+                      aes(x, y, label = colors, colour = colors),
                       fontface = "bold",
                       size = 0.1*pointSize)
   }
