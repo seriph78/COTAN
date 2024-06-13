@@ -453,9 +453,11 @@ plot(treePlot)
 ```
 
 ```{r eval=TRUE, include=TRUE}
-genesUmapPl <- UMAPPlot(pcaGenesClDF[, 1L:10L],
-                        clusters = set_names(pcaGenesClDF[["hclust"]],
-                                             rownames(pcaGenesClDF)),
+genesClusters <- set_names(pcaGenesClDF[["hclust"]], rownames(pcaGenesClDF))
+numericCols <- sapply(pcaGenesClDF, is.numeric)
+
+genesUmapPl <- UMAPPlot(pcaGenesClDF[, numericCols, drop = FALSE],
+                        clusters = genesClusters,
                         elements = layersGenes,
                         title = "Genes' clusters UMAP Plot")
 
@@ -495,6 +497,13 @@ splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
 
 obj <- addClusterization(obj, clName = "split",
                          clusters = splitClusters, coexDF = splitCoexDF)
+```
+
+```{r}
+c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "split", colors = NULL,
+                                         method = "Likelyhood", geneSel = NULL)
+
+plot(umapPlot)
 ```
 
 

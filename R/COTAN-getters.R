@@ -440,6 +440,8 @@ setMethod(
 #'   divided by `nu`) and returns it or its base-10 logarithm
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param retLog When `TRUE` returns the \eqn{\log_{10}{(10^4 * x + 1)}} of the
+#'   normalized data
 #'
 #' @returns `getNormalizedData()` returns the normalized count `data.frame`
 #'
@@ -448,16 +450,22 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' rawNorm <- getNormalizedData(objCOTAN)
+#' logNorm <- getNormalizedData(objCOTAN, retLog = TRUE)
 #'
 #' @rdname ParametersEstimations
 #'
-getNormalizedData <- function(objCOTAN) {
+getNormalizedData <- function(objCOTAN, retLog = FALSE) {
   if (is_empty(getNu(objCOTAN))) {
     stop("nu must not be empty, estimate it")
   }
 
-  return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
+  normData <- t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN)))
+
+  if (retLog) {
+    normData <- log1p(normData) / log(10.0)
+  }
+
+  return(normData)
 }
 
 
@@ -1048,8 +1056,8 @@ setMethod(
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
+#' objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calculateCoex = TRUE,
+#'                           optimizeForSpeed = TRUE, saveObj = FALSE)
 #'
 #' data("test.dataset.clusters1")
 #' clusters <- test.dataset.clusters1
@@ -1087,6 +1095,12 @@ setMethod(
 #' }
 #'
 #' clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
+#' stopifnot(length(clusterizations) == 1)
+#'
+#' cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "Likelyhood"
+#'                                     clName = "first_clusterization",
+#'                                     geneSel = NULL)
+#' plot(cellsUmapPlotAndDF[["plot"]])
 #'
 #' enrichment <- geneSetEnrichment(clustersCoex = coexDF,
 #'                                 groupMarkers = groupMarkers)

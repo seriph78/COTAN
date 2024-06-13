@@ -62,7 +62,7 @@
   enforceNuAverageToOne = TRUE
 )
 
-getNormalizedData(objCOTAN)
+getNormalizedData(objCOTAN, retLog = FALSE)
 
 \S4method{getNu}{COTAN}(objCOTAN)
 
@@ -88,6 +88,9 @@ is 1024.}
 
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
+
+\item{retLog}{When \code{TRUE} returns the \eqn{\log_{10}{(10^4 * x + 1)}} of the
+normalized data}
 }
 \value{
 \code{estimateLambdaLinear()} returns the updated \code{COTAN} object
@@ -189,7 +192,7 @@ objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L,
 nu <- getNu(objCOTAN)
 dispersion <- getDispersion(objCOTAN)
 
-rawNorm <- getNormalizedData(objCOTAN)
+logNorm <- getNormalizedData(objCOTAN, retLog = TRUE)
 
 probZero <- getProbabilityOfZero(objCOTAN)
 

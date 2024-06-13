@@ -38,19 +38,23 @@
 #' @importFrom ggplot2 annotate
 #'
 #' @examples
-#'
-#' ## In case one needs to run more steps to clean the datatset the following
-#' ## might apply
-#' ##
-#' ## objCOTAN <- initializeMetaDataset(objCOTAN,
-#' ##                                   GEO = "test",
-#' ##                                   sequencingMethod = "artificial",
-#' ##                                   sampleCondition = "test dataset")
-#' ## # in case the genes' `COEX` is not needed it can be skipped
-#' ## # (e.g. for [cellsUniformClustering()])
-#' ## objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-#' ##                           cores = 6L, optimizeForSpeed = TRUE,
-#' ##                           deviceStr = "cuda", saveObj = FALSE)
+#' #
+#' # In case one needs to run more steps to clean the datatset
+#' # the following might apply
+#' if (FALSE) {
+#'   objCOTAN <- initializeMetaDataset(objCOTAN,
+#'                                     GEO = "test",
+#'                                     sequencingMethod = "artificial",
+#'                                     sampleCondition = "test dataset")
+#' #
+#' # doing all the cleaning...
+#' #
+#' # in case the genes' `COEX` is not needed it can be skipped
+#' # (e.g. when calling [cellsUniformClustering()])
+#'   objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
+#'                             cores = 6L, optimizeForSpeed = TRUE,
+#'                             deviceStr = "cuda", saveObj = FALSE)
+#' }
 #'
 #' @rdname COTANObjectCreation
 #'
