@@ -26,6 +26,7 @@ knitr::opts_chunk[["set"]](
 ```{r message=FALSE, warning=FALSE}
 library(COTAN)
 library(zeallot)
+library(rlang)
 library(data.table)
 library(Rtsne)
 library(qpdf)

@@ -152,7 +152,7 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL,
                size = pointSize, alpha = 0.5) +
     geom_point(data = plotDF[labelled, , drop = FALSE],
                aes(x, y, colour = types),
-               size = 1.5 * pointSize, alpha = 0.8) +
+               size = 1.2 * pointSize, alpha = 0.8) +
     scale_color_manual("Status", values = myColours) +
     labs(x = "UMAP 1", y = "UMAP 2") +
     ggtitle(title) +

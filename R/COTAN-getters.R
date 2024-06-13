@@ -594,10 +594,6 @@ estimatorsAreReady <- function(objCOTAN) {
 #'
 #' @importFrom rlang is_empty
 #'
-#' @importFrom Matrix t
-#'
-#' @importClassesFrom Matrix dgeMatrix
-#'
 #' @export
 #'
 #' @rdname CalculatingCOEX

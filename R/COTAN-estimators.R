@@ -618,7 +618,7 @@ setMethod(
         break
       }
 
-      genesMarginals <- rowSums(getProbabilityOfZero(objCOTAN),
+      genesMarginals <- rowsums(getProbabilityOfZero(objCOTAN),
                                 parallel = TRUE)
 
       marginalsErrors <- abs(genesMarginals - sumZeros)
