@@ -334,6 +334,8 @@ To calculate the `GDI` we can run:
 quantP <- calculateGDI(obj)
 
 head(quantP)
+
+obj <- storeGDI(obj, genesGDI = getColumnFromDF(quantP, "GDI"))
 ```
 
 The next function can either plot the `GDI` for the dataset directly or
@@ -460,7 +462,8 @@ numericCols <- sapply(pcaGenesClDF, is.numeric)
 genesUmapPl <- UMAPPlot(pcaGenesClDF[, numericCols, drop = FALSE],
                         clusters = genesClusters,
                         elements = layersGenes,
-                        title = "Genes' clusters UMAP Plot")
+                        title = "Genes' clusters UMAP Plot",
+                        numNeighbors = 64, minPointsDist = 0.5)
 
 plot(genesUmapPl)
 ```
@@ -544,8 +547,11 @@ obj <- addClusterization(obj, clName = "merge",
 It is possible to plot the clusterization on a UMAP plot
 
 ```{r}
-c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge", colors = NULL,
-                                         method = "AdjZeroOne", genesSel = NULL)
+c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge",
+                                         method = "Likelyhood",
+                                         genesSel = "HVG_Seurat",
+                                         colors = NULL, numNeighbors = 20,
+                                         minPointsDist = 0.1)
 
 plot(umapPlot)
 ```

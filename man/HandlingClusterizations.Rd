@@ -100,7 +100,9 @@ cellsUMAPPlot(
   method = "",
   genesSel = NULL,
   numGenes = 2000L,
-  colors = NULL
+  colors = NULL,
+  numNeighbors = 0L,
+  minPointsDist = NA
 )
 
 clustersDeltaExpression(objCOTAN, clName = "", clusters = NULL)
@@ -503,7 +505,7 @@ according to a \emph{DEA} (or \emph{Zero-One}) based distance
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calculateCoex = TRUE,
+objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calculateCoex = FALSE,
                           optimizeForSpeed = TRUE, saveObj = FALSE)
 
 data("test.dataset.clusters1")
@@ -544,9 +546,9 @@ if (FALSE) {
 clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 stopifnot(length(clusterizations) == 1)
 
-cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "Likelyhood"
+cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "LogNormalized"
                                     clName = "first_clusterization",
-                                    geneSel = NULL)
+                                    geneSel = "HVG_Seurat")
 plot(cellsUmapPlotAndDF[["plot"]])
 
 enrichment <- geneSetEnrichment(clustersCoex = coexDF,

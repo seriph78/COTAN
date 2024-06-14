@@ -44,8 +44,13 @@
 #'
 #' @rdname HandlingClusterizations
 #'
-UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "",
-                     colors = NULL, numNeighbors = 0L, minPointsDist = NA) {
+UMAPPlot <- function(df,
+                     clusters = NULL,
+                     elements = NULL,
+                     title = "",
+                     colors = NULL,
+                     numNeighbors = 0L,
+                     minPointsDist = NA) {
   logThis("UMAP plot", logLevel = 2L)
 
   assert_that(is_empty(clusters) || length(clusters) == nrow(df),
@@ -195,6 +200,52 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "",
   return(plot)
 }
 
+#' @title Get High Variable Genes running the `Seurat` package
+#'
+#' @description The function uses the [Seurat-package] to extract the high
+#'   variable genes given the counts raw data
+#'
+#' @param rawData the raw counts
+#' @param method the HVG method
+#' @param cond the sample condition
+#'
+#' @returns a subset of the genes in the dataset
+#'
+#' @importFrom Seurat CreateSeuratObject
+#' @importFrom Seurat NormalizeData
+#' @importFrom Seurat FindVariableFeatures
+#' @importFrom Seurat ScaleData
+#' @importFrom Seurat VariableFeatures
+#'
+#' @importFrom withr with_options
+#'
+#' @noRd
+#'
+seuratHVG <- function(rawData, method, cond) {
+  tryCatch({
+    logThis("Creating Seurat object: START", logLevel = 2L)
+
+    srat <- CreateSeuratObject(counts = as.data.frame(rawData),
+                               project = paste0(cond, "_UMAP"),
+                               min.cells = 3L, min.features = 4L)
+    srat <- NormalizeData(srat)
+    srat <- FindVariableFeatures(srat, selection.method = method,
+                                 nfeatures = 2000L)
+
+    hvg <- VariableFeatures(object = srat)
+
+    rm(srat)
+    logThis("Creating Seurat object: DONE", logLevel = 2L)
+
+    return(hvg)
+  },
+  error = function(e) {
+    logThis(msg = paste("Seurat HVG failed with", nrow(rawData),
+                        "genes with the following error:"), logLevel = 1L)
+    logThis(msg = conditionMessage(e), logLevel = 1L)
+    return(NULL)
+  })
+}
 
 
 #' @details `cellsUMAPPlot()` returns a `ggplot2` plot where the given
@@ -212,20 +263,22 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "",
 #'   the [UMAPPlot()]. The following methods calculate, for each cell, a
 #'   statistic for each gene based on available data/model. The following
 #'   methods are supported:
-#'   * `"AdjZeroOne"` uses the binarized data matrix adjusted by the genes'
-#'     probabilities. The default method
-#'   * `"AdjZeroOne_CE"` uses the binarized data matrix adjusted by the genes'
-#'     cross entropies
+#'   * `"Normalized"` uses the normalized counts
+#'   * `"LogNormalized"` uses the log-normalized counts. The default method
 #'   * `"Likelyhood"` uses the likelyhood of observed presence/absence of each
-#'   gene. The default method
-#'   * `"LogNorm"` uses the log-normalized counts
-#'   * `"Norm"` uses the normalized counts
+#'     gene
+#'   * `"LogLikelyhood"` uses the likelyhood of observed presence/absence of
+#'     each gene
+#'   * `"Binarized"` uses the binarized data matrix
+#'   * `"AdjBinarized"` uses the binarized data matrix where ones and zeros
+#'     are replaced by the per-gene estimated probability of zero and its
+#'     complement respectively
 #' @param genesSel Decides whether and how to perform gene-selection. It can be
 #'   a string indicating one of the following methods or a straight list of
 #'   genes. The following methods are supported:
 #'   * `"HGDI"` Will pick-up the genes with highest **GDI**. The default method.
-#'     Since it requires an available `COEX` matrix it will fall-back to `"HVG"`
-#'     when not available
+#'   Since it requires an available `COEX` matrix it will fall-back to `"HVG"`
+#'   when not available
 #'   * `"HVG"` Will pick-up the genes with the highest variability
 #'   * `"None"` Will use all genes
 #' @param numGenes the number of genes to select using the above method. Will be
@@ -234,6 +287,8 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "",
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
+#' @param numNeighbors Overrides the `n_neighbors` value from [umap.defaults]
+#' @param minPointsDist Overrides the `min_dist` value from [umap.defaults]
 #'
 #' @returns `cellsUMAPPlot()` returns a list with 2 objects:
 #'  * `"plot"` a `ggplot2` object representing the `umap` plot
@@ -258,7 +313,9 @@ cellsUMAPPlot <- function(objCOTAN,
                           method = "",
                           genesSel = NULL,
                           numGenes = 2000L,
-                          colors = NULL) {
+                          colors = NULL,
+                          numNeighbors = 0L,
+                          minPointsDist = NA) {
   # pick last if no name was given
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
@@ -280,18 +337,19 @@ cellsUMAPPlot <- function(objCOTAN,
   }
 
   cellsMatrix <- NULL
-  if (str_equal(method, "AdjZeroOne", ignore_case = TRUE)) {
+  if (str_equal(method, "Binarized", ignore_case = TRUE)) {
+    cellsMatrix <- getZeroOneProj(objCOTAN)
+  } else if (str_equal(method, "AdjBinarized", ignore_case = TRUE)) {
     zeroOne <- getZeroOneProj(objCOTAN)
     rwMns <- rowMeans(zeroOne)
     cellsMatrix <- (zeroOne * (1.0 - rwMns) + (1.0 - zeroOne) * rwMns)
-  } else if (str_equal(method, "AdjZeroOne_CE", ignore_case = TRUE)) {
-    rwCE <- calculateGenesCE(objCOTAN)
-    cellsMatrix <- (zeroOne * (1.0 - rwCE) + (1.0 - zeroOne) * rwCE)
   } else if (str_equal(method, "Likelyhood", ignore_case = TRUE)) {
     cellsMatrix <- calculateLikelihoodOfObserved(objCOTAN)
-  } else if (str_equal(method, "LogNorm", ignore_case = TRUE)) {
+  } else if (str_equal(method, "LogLikelyhood", ignore_case = TRUE)) {
+    cellsMatrix <- log(calculateLikelihoodOfObserved(objCOTAN))
+  } else if (str_equal(method, "LogNormalized", ignore_case = TRUE)) {
     cellsMatrix <- getNormalizedData(objCOTAN, retLog = TRUE)
-  } else if (str_equal(method, "Norm", ignore_case = TRUE)) {
+  } else if (str_equal(method, "Normalized", ignore_case = TRUE)) {
     cellsMatrix <- getNormalizedData(objCOTAN, retLog = FALSE)
   } else {
     stop("Unrecognised `method` passed in: ", method)
@@ -306,8 +364,10 @@ cellsUMAPPlot <- function(objCOTAN,
     genesPos <- getGenes(objCOTAN) %in% genesSel
     logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
   } else if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-    gdi <- calculateGDI(objCOTAN, statType = "S", rowsFraction = 0.05)[["GDI"]]
-
+    gdi <- getGDI(objCOTAN)
+    if (is_empty(gdi)) {
+      gdi <- calculateGDI(objCOTAN, statType = "S", rowsFraction = 0.05)[["GDI"]]
+    }
     if(sum(gdi >= 1.5) > numGenes) {
       genesPos <- order(gdi, decreasing = TRUE)[1:numGenes]
     } else {
@@ -316,8 +376,18 @@ cellsUMAPPlot <- function(objCOTAN,
     rm(gdi)
     logThis(paste("Selected", sum(genesPos), "genes using HGDI selector"),
             logLevel = 2L)
-  } else if (str_equal(genesSel, "HVG", ignore_case = TRUE)) {
-    stop("Unsupported `genesSel = HVG`")
+  } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
+    condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
+    genesPos <- getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
+                                                  method = "vst",
+                                                  cond = condition)
+    rm(condition)
+  } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
+    condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
+    genesPos <- getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
+                                                  method = "mean.var.plot",
+                                                  cond = condition)
+    rm(condition)
   } else {
     stop("Unrecognised `genesSel` passed in: ", genesSel)
   }
@@ -332,9 +402,13 @@ cellsUMAPPlot <- function(objCOTAN,
 
   cellsPCA <- as.data.frame(cellsPCA)
 
-  umapPlot <- UMAPPlot(cellsPCA, clusters = clusters, colors = colors,
-                       title = paste("UMAP of", method,
-                                     "matrix using clusterization", clName))
+  umapTitle <- paste("UMAP of", method, "matrix using clusterization", clName)
+  umapPlot <- UMAPPlot(cellsPCA,
+                       clusters = clusters,
+                       colors = colors,
+                       numNeighbors = numNeighbors,
+                       minPointsDist = minPointsDist,
+                       title = umapTitle)
 
   return(list("plot" = umapPlot, "cellsPCA" = cellsPCA))
 }

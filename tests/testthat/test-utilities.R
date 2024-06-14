@@ -103,7 +103,7 @@ test_that("Clusterizations manipulations", {
 })
 
 
-test_that("Adding columns to data.frames", {
+test_that("Adding/extracting columns to/from data.frames", {
   df <- data.frame()
 
   df <- setColumnInDF(df, colName = "constant", colToSet = rep(1L, 10L))
@@ -114,6 +114,8 @@ test_that("Adding columns to data.frames", {
                       colName = "sequence", rowNames = LETTERS[1L:10L])
   expect_identical(rownames(df), LETTERS[1L:10L])
   expect_identical(colnames(df), c("constant", "sequence"))
+  expect_identical(getColumnFromDF(df, "constant"),
+                   rlang::set_names(rep(1L, 10L), LETTERS[1L:10L]))
 
   df <- setColumnInDF(df, colName = "constant", colToSet = rep(2L, 10L))
   expect_identical(colnames(df), c("constant", "sequence"))

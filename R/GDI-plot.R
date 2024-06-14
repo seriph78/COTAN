@@ -46,10 +46,20 @@ GDIPlot <- function(objCOTAN, genes, condition = "",
                     GDIIn = NULL) {
   logThis("GDI plot", logLevel = 2L)
 
-  if (is_empty(GDIIn)) {
-    GDIDf <- calculateGDI(objCOTAN, statType = statType)
-  } else {
+  if (!is_empty(GDIIn)) {
     GDIDf <- GDIIn
+  } else {
+    gdi <- getGDI(objCOTAN)
+    if (!is_empty(gdi) && statType == "S") {
+      # complete the GDIDf
+      GDIDf <- setColumnInDF(GDIDf, colToSet = gdi, colName = "GDI",
+                             rowNames = getGenes(objCOTAN))
+      sumRawNorm <- rowSums(getNormalizedData(objCOTAN, retLog = TRUE))
+      GDIDf <- setColumnInDF(GDIDf, colToSet = sumRawNorm,
+                             colName = "sum.raw.norm")
+    } else {
+      GDIDf <- calculateGDI(objCOTAN, statType = statType)
+    }
   }
 
   GDIDf[["colors"]] <- "none"

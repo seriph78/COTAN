@@ -378,6 +378,35 @@ niceFactorLevels <- function(v) {
 }
 
 
+#' @details `getColumnFromDF()` is a function to extract a column from a
+#'   `data.frame`, while keeping the `rowNames` as `vector` names
+#'
+#' @param df the `data.frame`
+#' @param colName the name of the new or existing column in the `data.frame`
+#'
+#' @returns `getColumnFromDF()` returns the column in the `data.frame` as named
+#'   `array`, `NULL` if the wanted column is not available
+#'
+#' @export
+#'
+#' @importFrom rlang is_empty
+#' @importFrom rlang set_names
+#'
+#' @rdname HandleMetaData
+#'
+getColumnFromDF <- function(df, colName) {
+  if (is_empty(df)) {
+    return(NULL)
+  } else {
+    retArray <- df[[colName]]
+    if (!is_empty(retArray)) {
+      names(retArray) <- rownames(df)
+    }
+    return(retArray)
+  }
+}
+
+
 #' @details `setColumnInDF()` is a function to append, if missing, or resets, if
 #'   present, a column into a `data.frame`, whether the `data.frame` is empty or
 #'   not. The given `rowNames` are used only in the case the `data.frame` has
@@ -385,7 +414,7 @@ niceFactorLevels <- function(v) {
 #'   row names
 #'
 #' @param df the `data.frame`
-#' @param colToSet the the column to add
+#' @param colToSet the column to add
 #' @param colName the name of the new or existing column in the `data.frame`
 #' @param rowNames when not empty, if the input `data.frame` has no real row
 #'   names, the new row names of the resulting `data.frame`

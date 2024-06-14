@@ -534,7 +534,7 @@ setMethod(
 
 #' @aliases getDispersion
 #'
-#' @details `getDispersion()` extracts the dispersion array (a)
+#' @details `getDispersion()` extracts the dispersion array
 #'
 #' @param objCOTAN a `COTAN` object
 #'
@@ -854,7 +854,8 @@ NULL
 #' ## S <- calculateS(objCOTAN)
 #' ## G <- calculateG(objCOTAN)
 #' ## pValue <- calculatePValue(objCOTAN)
-#' GDI <- calculateGDI(objCOTAN)
+#' gdiDF <- calculateGDI(objCOTAN)
+#' objCOTAN <- storeGDI(objCOTAN, genesGDI = getColumnFromDF(gdiDF, "GDI"))
 #'
 #' ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
 #' ## matrix and derivatives, so it can be dropped it from the `COTAN` object
@@ -1035,6 +1036,38 @@ setMethod(
 )
 
 
+#' @aliases getGDI
+#'
+#' @details `getGDI()` extracts the genes' **GDI** array
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getGDI()` returns the genes' **GDI** array if available or `NULL`
+#'   otherwise
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @rdname GenesStatistics
+#'
+setMethod(
+  "getGDI",
+  "COTAN",
+  function(objCOTAN) {
+    gdi <- getMetadataGenes(objCOTAN)[["GDI"]]
+
+    if (is_empty(gdi)) {
+      warning("no GDI data has been stored")
+    } else {
+      names(gdi) <- getGenes(objCOTAN)
+    }
+
+    return(gdi)
+  }
+)
+
+
 #' @aliases getClusterizations
 #'
 #' @details `getClusterizations()` extracts the list of the *clusterizations*
@@ -1056,7 +1089,7 @@ setMethod(
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calculateCoex = TRUE,
+#' objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calculateCoex = FALSE,
 #'                           optimizeForSpeed = TRUE, saveObj = FALSE)
 #'
 #' data("test.dataset.clusters1")
@@ -1097,9 +1130,9 @@ setMethod(
 #' clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 #' stopifnot(length(clusterizations) == 1)
 #'
-#' cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "Likelyhood"
+#' cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "LogNormalized"
 #'                                     clName = "first_clusterization",
-#'                                     geneSel = NULL)
+#'                                     geneSel = "HVG_Seurat")
 #' plot(cellsUmapPlotAndDF[["plot"]])
 #'
 #' enrichment <- geneSetEnrichment(clustersCoex = coexDF,

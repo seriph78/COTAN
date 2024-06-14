@@ -166,7 +166,7 @@ divided by \code{nu}) and returns it or its base-10 logarithm
 \code{getLambda()} extracts the lambda array (mean expression for each
 gene)
 
-\code{getDispersion()} extracts the dispersion array (a)
+\code{getDispersion()} extracts the dispersion array
 
 \code{estimatorsAreReady()} checks whether the estimators arrays lambda,
 nu, dispersion are available

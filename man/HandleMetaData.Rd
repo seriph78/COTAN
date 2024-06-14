@@ -18,6 +18,7 @@
 \alias{initializeMetaDataset}
 \alias{addElementToMetaDataset,COTAN-method}
 \alias{addElementToMetaDataset}
+\alias{getColumnFromDF}
 \alias{setColumnInDF}
 \title{Handling \emph{meta-data} in \code{COTAN} objects}
 \usage{
@@ -36,6 +37,8 @@ datasetTags()
 \S4method{initializeMetaDataset}{COTAN}(objCOTAN, GEO, sequencingMethod, sampleCondition)
 
 \S4method{addElementToMetaDataset}{COTAN}(objCOTAN, tag, value)
+
+getColumnFromDF(df, colName)
 
 setColumnInDF(df, colToSet, colName, rowNames = vector(mode = "character"))
 }
@@ -56,9 +59,9 @@ time point}
 
 \item{df}{the \code{data.frame}}
 
-\item{colToSet}{the the column to add}
-
 \item{colName}{the name of the new or existing column in the \code{data.frame}}
+
+\item{colToSet}{the column to add}
 
 \item{rowNames}{when not empty, if the input \code{data.frame} has no real row
 names, the new row names of the resulting \code{data.frame}}
@@ -81,6 +84,9 @@ used in the \code{metaDataset} of the \code{COTAN} objects
 updated \code{metaDataset}
 
 \code{addElementToMetaDataset()} returns the updated \code{COTAN} object
+
+\code{getColumnFromDF()} returns the column in the \code{data.frame} as named
+\code{array}, \code{NULL} if the wanted column is not available
 
 \code{setColumnInDF()} returns the updated, or the newly created,
 \code{data.frame}
@@ -119,6 +125,9 @@ meta-data
 \code{addElementToMetaDataset()} is used to add a line of information to
 the meta-data \code{data.frame}. If the tag was already used it will update the
 associated value(s) instead
+
+\code{getColumnFromDF()} is a function to extract a column from a
+\code{data.frame}, while keeping the \code{rowNames} as \code{vector} names
 
 \code{setColumnInDF()} is a function to append, if missing, or resets, if
 present, a column into a \code{data.frame}, whether the \code{data.frame} is empty or

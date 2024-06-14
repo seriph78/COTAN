@@ -846,7 +846,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 
 
 
-# --------------- COEX and GDI -----------
+# --------------- COEX and related matrices -----------
 
 # legacy code for cases when the torch library is not available
 calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {

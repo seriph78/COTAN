@@ -85,6 +85,11 @@ setGeneric(
 )
 
 setGeneric(
+  "getGDI",
+  function(objCOTAN) standardGeneric("getGDI")
+)
+
+setGeneric(
   "getMetadataDataset",
   function(objCOTAN) standardGeneric("getMetadataDataset")
 )
@@ -332,4 +337,9 @@ setGeneric(
            enforceNuAverageToOne = TRUE) {
     standardGeneric("estimateDispersionNuNlminb")
   }
+)
+
+setGeneric(
+  "storeGDI",
+  function(objCOTAN, genesGDI) standardGeneric("storeGDI")
 )
