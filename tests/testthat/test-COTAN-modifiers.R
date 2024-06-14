@@ -83,7 +83,7 @@ test_that("dropGenesCells", {
 
   gdiDF <- calculateGDI(obj)
   obj <- storeGDI(obj, getColumnFromDF(gdiDF, "GDI"))
-  expect_equal(gdiDF[, "GDI"], getGDI(obj), , ignore_attr = TRUE)
+  expect_equal(gdiDF[, "GDI"], getGDI(obj), ignore_attr = TRUE)
 
   obj <- dropGenesCoex(obj)
 

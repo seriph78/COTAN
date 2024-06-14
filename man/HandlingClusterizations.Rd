@@ -505,7 +505,7 @@ according to a \emph{DEA} (or \emph{Zero-One}) based distance
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calculateCoex = FALSE,
+objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calcCoex = FALSE,
                           optimizeForSpeed = TRUE, saveObj = FALSE)
 
 data("test.dataset.clusters1")
@@ -520,7 +520,8 @@ groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030",
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
 
-geneClusters <- set_names(rep(1:3, each = 240)[1:600], getGenes(objCOTAN))
+geneClusters <- rep(1:3, each = 240)[1:600]
+names(geneClusters) <- getGenes(objCOTAN)
 
 umapPlot <- UMAPPlot(coexDF, clusters = NULL, elements = groupMarkers)
 plot(umapPlot)
@@ -546,9 +547,9 @@ if (FALSE) {
 clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 stopifnot(length(clusterizations) == 1)
 
-cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "LogNormalized"
+cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "LogNormalized",
                                     clName = "first_clusterization",
-                                    geneSel = "HVG_Seurat")
+                                    genesSel = "HVG_Seurat")
 plot(cellsUmapPlotAndDF[["plot"]])
 
 enrichment <- geneSetEnrichment(clustersCoex = coexDF,

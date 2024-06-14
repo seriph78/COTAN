@@ -168,34 +168,45 @@ UMAPPlot <- function(df,
   pointSize <- min(max(1.0, 200000.0/dim(plotDF)[1L]), 3.0)
 
   plot <- ggplot() +
-    geom_point(data = plotDF[generic, , drop = FALSE],
-               aes(x, y, colour = types),
-               size = pointSize, alpha = 0.3) +
-    geom_point(data = plotDF[clustered, , drop = FALSE],
-               aes(x, y, colour = types),
-               size = pointSize, alpha = 0.5) +
-    geom_point(data = plotDF[labelled, , drop = FALSE],
-               aes(x, y, colour = types),
-               size = 1.2 * pointSize, alpha = 0.8) +
     scale_color_manual("Status", values = myColours) +
     labs(x = "UMAP 1", y = "UMAP 2") +
     ggtitle(title) +
     plotTheme("UMAP", textSize = 10L)
 
-  plot <- plot +
-    geom_label_repel(data = plotDF[labelled, , drop = FALSE],
-                     aes(x, y, fill = types,
-                         label = rownames(plotDF)[labelled]),
-                     label.size = NA, show.legend = FALSE, force = 2.0,
-                     box.padding = 0.25,
-                     max.overlaps = 40L, alpha = 0.8,
-                     direction = "both", na.rm = TRUE, seed = 1234L) +
-    geom_text(data = plotDF[centroids, , drop = FALSE],
+  if (any(generic)) {
+    plot <- plot +
+      geom_point(data = plotDF[generic, , drop = FALSE],
+                 aes(x, y, colour = types),
+                 size = pointSize, alpha = 0.3)
+  }
+  if (any(labelled)) {
+    plot <- plot +
+      geom_point(data = plotDF[labelled, , drop = FALSE],
+                 aes(x, y, colour = types),
+                 size = 1.2 * pointSize, alpha = 0.8) +
+      geom_label_repel(data = plotDF[labelled, , drop = FALSE],
+                       aes(x, y, fill = types,
+                           label = rownames(plotDF)[labelled]),
+                       label.size = NA, show.legend = FALSE, force = 2.0,
+                       box.padding = 0.25,
+                       max.overlaps = 40L, alpha = 0.8,
+                       direction = "both", na.rm = TRUE, seed = 1234L)
+  }
+  if (any(clustered | centroids)) {
+    plot <- plot +
+      geom_point(data = plotDF[clustered, , drop = FALSE],
+                 aes(x, y, colour = types),
+                 size = pointSize, alpha = 0.5) +
+      geom_text(data = plotDF[centroids, , drop = FALSE],
               aes(x, y, colour = "centroid"),
               label = rownames(plotDF)[centroids],
               show.legend = FALSE, alpha = 0.8,
-              fontface = "bold", size = 1.5 * pointSize) +
-    scale_fill_manual("Status", values = myColours)
+              fontface = "bold", size = 1.5 * pointSize)
+  }
+  if (any(labelled | clustered | centroids)) {
+    plot <- plot +
+      scale_fill_manual("Status", values = myColours)
+  }
 
   return(plot)
 }
@@ -333,7 +344,7 @@ cellsUMAPPlot <- function(objCOTAN,
               msg = "Internal error - clusters must be factors")
 
   if (isEmptyName(method)) {
-    method = "AdjZeroOne"
+    method = "LogNormalized"
   }
 
   cellsMatrix <- NULL
@@ -347,10 +358,10 @@ cellsUMAPPlot <- function(objCOTAN,
     cellsMatrix <- calculateLikelihoodOfObserved(objCOTAN)
   } else if (str_equal(method, "LogLikelyhood", ignore_case = TRUE)) {
     cellsMatrix <- log(calculateLikelihoodOfObserved(objCOTAN))
-  } else if (str_equal(method, "LogNormalized", ignore_case = TRUE)) {
-    cellsMatrix <- getNormalizedData(objCOTAN, retLog = TRUE)
   } else if (str_equal(method, "Normalized", ignore_case = TRUE)) {
     cellsMatrix <- getNormalizedData(objCOTAN, retLog = FALSE)
+  } else if (str_equal(method, "LogNormalized", ignore_case = TRUE)) {
+    cellsMatrix <- getNormalizedData(objCOTAN, retLog = TRUE)
   } else {
     stop("Unrecognised `method` passed in: ", method)
   }

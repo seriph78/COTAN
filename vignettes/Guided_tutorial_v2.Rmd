@@ -49,7 +49,10 @@ dataDir <- tempdir()
 
 GEO <- "GSM2861514"
 fName <- "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"
+
 dataSetFile <- file.path(dataDir, GEO, fName)
+
+dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
 
 if (!file.exists(dataSetFile)) {
   getGEOSuppFiles(GEO, makeDirectory = TRUE,
@@ -131,6 +134,10 @@ cellSizePlot(obj)
 
 ```{r}
 genesSizePlot(obj)
+```
+
+```{r}
+scatterPlot(obj)
 ```
 
 During the cleaning, every time we want to remove cells or genes
@@ -284,7 +291,10 @@ obj <- clean(obj)
 c(pcaCellsPlot, pcaCellsData, genesPlot,
   UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
 
-pcaCellsPlot
+plot(pcaCellsPlot)
+```
+```{r}
+scatterPlot(obj)
 ```
 
 ```{r}
@@ -456,14 +466,11 @@ plot(treePlot)
 ```
 
 ```{r eval=TRUE, include=TRUE}
-genesClusters <- set_names(pcaGenesClDF[["hclust"]], rownames(pcaGenesClDF))
-numericCols <- sapply(pcaGenesClDF, is.numeric)
-
-genesUmapPl <- UMAPPlot(pcaGenesClDF[, numericCols, drop = FALSE],
-                        clusters = genesClusters,
+genesUmapPl <- UMAPPlot(pcaGenesClDF[, sapply(pcaGenesClDF, is.numeric)],
+                        clusters = getColumnFromDF(pcaGenesClDF, "hclust"),
                         elements = layersGenes,
                         title = "Genes' clusters UMAP Plot",
-                        numNeighbors = 64, minPointsDist = 0.5)
+                        numNeighbors = 32, minPointsDist = 0.25)
 
 plot(genesUmapPl)
 ```
@@ -548,9 +555,9 @@ It is possible to plot the clusterization on a UMAP plot
 
 ```{r}
 c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge",
-                                         method = "Likelyhood",
-                                         genesSel = "HVG_Seurat",
-                                         colors = NULL, numNeighbors = 20,
+                                         method = "LogNormalized",
+                                         genesSel = "HGDI",
+                                         colors = NULL, numNeighbors = 25,
                                          minPointsDist = 0.1)
 
 plot(umapPlot)
