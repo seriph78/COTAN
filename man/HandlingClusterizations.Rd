@@ -97,8 +97,8 @@ cellsUMAPPlot(
   objCOTAN,
   clName = "",
   clusters = NULL,
-  method = "Likelyhood",
-  geneSel = NULL,
+  method = "",
+  genesSel = NULL,
   numGenes = 2000L,
   colors = NULL
 )
@@ -223,9 +223,9 @@ colors are given it will complete the list using colors from
 
 \item{minPointsDist}{Overrides the \code{min_dist} value from \link{umap.defaults}}
 
-\item{geneSel}{Decides whether and how to perform gene-selection. It can be a
-string indicating one of the following methods or a straight list of genes.
-The following methods are supported:
+\item{genesSel}{Decides whether and how to perform gene-selection. It can be
+a string indicating one of the following methods or a straight list of
+genes. The following methods are supported:
 \itemize{
 \item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}. The default method.
 Since it requires an available \code{COEX} matrix it will fall-back to \code{"HVG"}

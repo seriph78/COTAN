@@ -35,6 +35,7 @@
 #' @importFrom stats quantile
 #'
 #' @importFrom umap umap
+#' @importFrom umap umap.defaults
 #'
 #' @importFrom rlang set_names
 #' @importFrom rlang is_empty
@@ -100,11 +101,15 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "",
   }
   umapConfig$verbose <- TRUE
 
+  logThis("Calculating UMAP: START", logLevel = 3L)
+
   umap <- umap(df, config = umapConfig)
 
   plotDF <- data.frame(x = umap[["layout"]][, 1L],
                        y = umap[["layout"]][, 2L],
                        types = entryType)
+
+  logThis("Calculating UMAP: DONE", logLevel = 3L)
 
   # add the centroids to the data.frame
   centroids <- rep(FALSE, times = nrow(plotDF))
@@ -207,12 +212,17 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "",
 #'   the [UMAPPlot()]. The following methods calculate, for each cell, a
 #'   statistic for each gene based on available data/model. The following
 #'   methods are supported:
+#'   * `"AdjZeroOne"` uses the binarized data matrix adjusted by the genes'
+#'     probabilities. The default method
+#'   * `"AdjZeroOne_CE"` uses the binarized data matrix adjusted by the genes'
+#'     cross entropies
 #'   * `"Likelyhood"` uses the likelyhood of observed presence/absence of each
 #'   gene. The default method
 #'   * `"LogNorm"` uses the log-normalized counts
-#' @param geneSel Decides whether and how to perform gene-selection. It can be a
-#'   string indicating one of the following methods or a straight list of genes.
-#'   The following methods are supported:
+#'   * `"Norm"` uses the normalized counts
+#' @param genesSel Decides whether and how to perform gene-selection. It can be
+#'   a string indicating one of the following methods or a straight list of
+#'   genes. The following methods are supported:
 #'   * `"HGDI"` Will pick-up the genes with highest **GDI**. The default method.
 #'     Since it requires an available `COEX` matrix it will fall-back to `"HVG"`
 #'     when not available
@@ -245,8 +255,8 @@ UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "",
 cellsUMAPPlot <- function(objCOTAN,
                           clName = "",
                           clusters = NULL,
-                          method = "Likelyhood",
-                          geneSel = NULL,
+                          method = "",
+                          genesSel = NULL,
                           numGenes = 2000L,
                           colors = NULL) {
   # pick last if no name was given
@@ -265,17 +275,24 @@ cellsUMAPPlot <- function(objCOTAN,
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
-
-
   if (isEmptyName(method)) {
-    method = "Likelyhood"
+    method = "AdjZeroOne"
   }
 
   cellsMatrix <- NULL
-  if (str_equal(method, "Likelyhood", ignore_case = TRUE)) {
+  if (str_equal(method, "AdjZeroOne", ignore_case = TRUE)) {
+    zeroOne <- getZeroOneProj(objCOTAN)
+    rwMns <- rowMeans(zeroOne)
+    cellsMatrix <- (zeroOne * (1.0 - rwMns) + (1.0 - zeroOne) * rwMns)
+  } else if (str_equal(method, "AdjZeroOne_CE", ignore_case = TRUE)) {
+    rwCE <- calculateGenesCE(objCOTAN)
+    cellsMatrix <- (zeroOne * (1.0 - rwCE) + (1.0 - zeroOne) * rwCE)
+  } else if (str_equal(method, "Likelyhood", ignore_case = TRUE)) {
     cellsMatrix <- calculateLikelihoodOfObserved(objCOTAN)
   } else if (str_equal(method, "LogNorm", ignore_case = TRUE)) {
     cellsMatrix <- getNormalizedData(objCOTAN, retLog = TRUE)
+  } else if (str_equal(method, "Norm", ignore_case = TRUE)) {
+    cellsMatrix <- getNormalizedData(objCOTAN, retLog = FALSE)
   } else {
     stop("Unrecognised `method` passed in: ", method)
   }
@@ -287,6 +304,7 @@ cellsUMAPPlot <- function(objCOTAN,
   genesPos <- rep(TRUE, getNumGenes(objCOTAN))
   if (length(genesSel) > 1L) {
     genesPos <- getGenes(objCOTAN) %in% genesSel
+    logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
   } else if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
     gdi <- calculateGDI(objCOTAN, statType = "S", rowsFraction = 0.05)[["GDI"]]
 
@@ -296,23 +314,27 @@ cellsUMAPPlot <- function(objCOTAN,
       genesPos <- gdi >= 1.4
     }
     rm(gdi)
+    logThis(paste("Selected", sum(genesPos), "genes using HGDI selector"),
+            logLevel = 2L)
   } else if (str_equal(genesSel, "HVG", ignore_case = TRUE)) {
-    stop("Unsupported `geneSel`")
+    stop("Unsupported `genesSel = HVG`")
   } else {
-    stop("Unrecognised `geneSel` passed in: ", genesSel)
+    stop("Unrecognised `genesSel` passed in: ", genesSel)
   }
+
 
   cellsMatrix <- cellsMatrix[genesPos, ]
 
-  pcaCells <- pca(mat = cellsMatrix, rank = 50L,
+  cellsPCA <- pca(mat = cellsMatrix, rank = 50L,
                   transposed = FALSE, BSPARAM = IrlbaParam())[["rotated"]]
 
   gc()
 
-  pcaCells <- as.data.frame(pcaCells)
+  cellsPCA <- as.data.frame(cellsPCA)
 
-  umapPlot <- UMAPPlot(pcaCells, clusters = clusters, colors = colors,
-                       title = paste("UMAP of clusterization", clName))
+  umapPlot <- UMAPPlot(cellsPCA, clusters = clusters, colors = colors,
+                       title = paste("UMAP of", method,
+                                     "matrix using clusterization", clName))
 
   return(list("plot" = umapPlot, "cellsPCA" = cellsPCA))
 }

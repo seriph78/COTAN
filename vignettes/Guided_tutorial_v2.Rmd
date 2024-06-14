@@ -332,6 +332,7 @@ To calculate the `GDI` we can run:
 
 ```{r}
 quantP <- calculateGDI(obj)
+
 head(quantP)
 ```
 
@@ -499,14 +500,6 @@ obj <- addClusterization(obj, clName = "split",
                          clusters = splitClusters, coexDF = splitCoexDF)
 ```
 
-```{r}
-c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "split", colors = NULL,
-                                         method = "Likelyhood", geneSel = NULL)
-
-plot(umapPlot)
-```
-
-
 However since the algorithm that creates the clusters is not geared directly
 to achieve cluster uniformity, there might be clusters that can be merged back
 together and still be uniform. This is the purpose of the function 
@@ -548,6 +541,14 @@ obj <- addClusterization(obj, clName = "merge",
                          clusters = mergeClusters, coexDF = mergeCoexDF)
 ```
 
+It is possible to plot the clusterization on a UMAP plot
+
+```{r}
+c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge", colors = NULL,
+                                         method = "AdjZeroOne", genesSel = NULL)
+
+plot(umapPlot)
+```
 
 In the following graph, it is possible to check that the found clusters align
 very well to the expression of the layers' genes defined above...
