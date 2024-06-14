@@ -77,7 +77,7 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 
   zeroOne <- getZeroOneProj(objCOTAN)
 
-  probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
+  probZero <- getProbabilityOfZero(objCOTAN)
 
   rowSumsProbZero <- rowsums(probZero, parallel = TRUE)
 

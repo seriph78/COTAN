@@ -22,6 +22,7 @@
 \alias{getDispersion,COTAN-method}
 \alias{getDispersion}
 \alias{estimatorsAreReady}
+\alias{getProbabilityOfZero}
 \title{Estimation of the \code{COTAN} model's parameters}
 \usage{
 \S4method{estimateLambdaLinear}{COTAN}(objCOTAN)
@@ -61,7 +62,7 @@
   enforceNuAverageToOne = TRUE
 )
 
-getNormalizedData(objCOTAN)
+getNormalizedData(objCOTAN, retLog = FALSE)
 
 \S4method{getNu}{COTAN}(objCOTAN)
 
@@ -70,6 +71,8 @@ getNormalizedData(objCOTAN)
 \S4method{getDispersion}{COTAN}(objCOTAN)
 
 estimatorsAreReady(objCOTAN)
+
+getProbabilityOfZero(objCOTAN)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
@@ -85,6 +88,9 @@ is 1024.}
 
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
+
+\item{retLog}{When \code{TRUE} returns the \eqn{\log_{10}{(10^4 * x + 1)}} of the
+normalized data}
 }
 \value{
 \code{estimateLambdaLinear()} returns the updated \code{COTAN} object
@@ -109,6 +115,9 @@ equal to 1}
 
 \code{estimatorsAreReady()} returns a boolean specifying whether all
 three arrays are non-empty
+
+\code{getProbabilityOfZero()} returns a \code{data.frame} with the
+probabilities of zero
 }
 \description{
 These functions are used to estimate the \code{COTAN} model's
@@ -157,10 +166,13 @@ divided by \code{nu}) and returns it or its base-10 logarithm
 \code{getLambda()} extracts the lambda array (mean expression for each
 gene)
 
-\code{getDispersion()} extracts the dispersion array (a)
+\code{getDispersion()} extracts the dispersion array
 
 \code{estimatorsAreReady()} checks whether the estimators arrays lambda,
 nu, dispersion are available
+
+\code{getProbabilityOfZero()} gives for each cell and each gene the
+probability of observing zero reads
 }
 \examples{
 data("test.dataset")
@@ -180,6 +192,8 @@ objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L,
 nu <- getNu(objCOTAN)
 dispersion <- getDispersion(objCOTAN)
 
-rawNorm <- getNormalizedData(objCOTAN)
+logNorm <- getNormalizedData(objCOTAN, retLog = TRUE)
+
+probZero <- getProbabilityOfZero(objCOTAN)
 
 }

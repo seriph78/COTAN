@@ -42,7 +42,7 @@ clustersDeltaExpression <- function(objCOTAN, clName = "", clusters = NULL) {
   clustersList <- toClustersList(clusters)
 
   zeroOne <- getZeroOneProj(objCOTAN)
-  probOne <- 1.0 - funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
+  probOne <- 1.0 - getProbabilityOfZero(objCOTAN)
 
   deltaExpression <- data.frame()
   for (cl in names(clustersList)) {

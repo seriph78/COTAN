@@ -10,11 +10,6 @@ setGeneric(
 # -------- calculate coex --------
 
 setGeneric(
-  "calculateMu",
-  function(objCOTAN) standardGeneric("calculateMu")
-)
-
-setGeneric(
   "calculateCoex",
   function(objCOTAN, actOnCells = FALSE, returnPPFract = FALSE,
            optimizeForSpeed = TRUE, deviceStr = "cuda") {
@@ -87,6 +82,11 @@ setGeneric(
 setGeneric(
   "getDispersion",
   function(objCOTAN) standardGeneric("getDispersion")
+)
+
+setGeneric(
+  "getGDI",
+  function(objCOTAN) standardGeneric("getGDI")
 )
 
 setGeneric(
@@ -337,4 +337,9 @@ setGeneric(
            enforceNuAverageToOne = TRUE) {
     standardGeneric("estimateDispersionNuNlminb")
   }
+)
+
+setGeneric(
+  "storeGDI",
+  function(objCOTAN, genesGDI) standardGeneric("storeGDI")
 )

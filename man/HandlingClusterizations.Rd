@@ -28,6 +28,7 @@
 \alias{logFoldChangeOnClusters}
 \alias{distancesBetweenClusters}
 \alias{UMAPPlot}
+\alias{cellsUMAPPlot}
 \alias{clustersDeltaExpression}
 \alias{clustersMarkersHeatmapPlot}
 \alias{clustersSummaryData}
@@ -82,7 +83,27 @@ distancesBetweenClusters(
   distance = NULL
 )
 
-UMAPPlot(df, clusters = NULL, elements = NULL, title = "")
+UMAPPlot(
+  df,
+  clusters = NULL,
+  elements = NULL,
+  title = "",
+  colors = NULL,
+  numNeighbors = 0L,
+  minPointsDist = NA
+)
+
+cellsUMAPPlot(
+  objCOTAN,
+  clName = "",
+  clusters = NULL,
+  method = "",
+  genesSel = NULL,
+  numGenes = 2000L,
+  colors = NULL,
+  numNeighbors = 0L,
+  minPointsDist = NA
+)
 
 clustersDeltaExpression(objCOTAN, clName = "", clusters = NULL)
 
@@ -187,14 +208,37 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
-\item{df}{the \code{data.frame} to plot. It must have a row names containing the
+\item{df}{The \code{data.frame} to plot. It must have a row names containing the
 given elements}
 
 \item{elements}{a named \code{list} of elements to label. Each array in the list
-will have different color}
+will be shown with a different color}
 
 \item{title}{a string giving the plot title. Will default to UMAP Plot if not
 specified}
+
+\item{colors}{an \code{array} of colors to use in the plot. If not sufficient
+colors are given it will complete the list using colors from
+\code{\link[=getColorsVector]{getColorsVector()}}}
+
+\item{numNeighbors}{Overrides the \code{n_neighbors} value from \link{umap.defaults}}
+
+\item{minPointsDist}{Overrides the \code{min_dist} value from \link{umap.defaults}}
+
+\item{genesSel}{Decides whether and how to perform gene-selection. It can be
+a string indicating one of the following methods or a straight list of
+genes. The following methods are supported:
+\itemize{
+\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}. The default method.
+Since it requires an available \code{COEX} matrix it will fall-back to \code{"HVG"}
+when not available
+\item \code{"HVG"} Will pick-up the genes with the highest variability
+\item \code{"None"} Will use all genes
+}}
+
+\item{numGenes}{the number of genes to select using the above method. Will be
+ignored when no selection have been asked or when an explicit list of genes
+was passed in}
 
 \item{groupMarkers}{a named \code{list} with an element for each group comprised
 of one or more marker genes}
@@ -273,6 +317,12 @@ corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 \code{distancesBetweenClusters()} returns a \code{dist} object
 
 \code{UMAPPlot()} returns a \code{ggplot2} object
+
+\code{cellsUMAPPlot()} returns a list with 2 objects:
+\itemize{
+\item \code{"plot"} a \code{ggplot2} object representing the \code{umap} plot
+\item \code{"cellsPCA"} the \code{data.frame} PCA used to create the plot
+}
 
 \code{clustersDeltaExpression()} returns a \code{data.frame} with the weighted
 discrepancy of the expression of each gene within the \emph{cluster} against
@@ -406,7 +456,12 @@ the clusters. Depending on the value of the \code{useDEA} flag will base the
 distance on the \emph{DEA} columns or the averages of the \emph{Zero-One} matrix.
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
-information related to clusters after applying the UMAP transformation.
+information related to clusters after applying the \code{\link[umap:umap]{umap::umap()}}
+transformation
+
+\code{cellsUMAPPlot()} returns a \code{ggplot2} plot where the given
+\emph{clusters} are placed on the base of their relative distance. Also if
+needed calculates and stores the \code{DEA} of the relevant \emph{clusterization}.
 
 \code{clustersDeltaExpression()} estimates the change in genes'
 expression inside the \emph{cluster} compared to the average situation in the
@@ -450,18 +505,23 @@ according to a \emph{DEA} (or \emph{Zero-One}) based distance
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-objCOTAN <- clean(objCOTAN)
-objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
+objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calcCoex = FALSE,
+                          optimizeForSpeed = TRUE, saveObj = FALSE)
 
 data("test.dataset.clusters1")
 clusters <- test.dataset.clusters1
 
 coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
 
-groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-                     G2 = c("g-000300", "g-000330"),
+groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030",
+                            "g-000150", "g-000160", "g-000170"),
+                     G2 = c("g-000300", "g-000330", "g-000450",
+                            "g-000460", "g-000470"),
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
+
+geneClusters <- rep(1:3, each = 240)[1:600]
+names(geneClusters) <- getGenes(objCOTAN)
 
 umapPlot <- UMAPPlot(coexDF, clusters = NULL, elements = groupMarkers)
 plot(umapPlot)
@@ -470,7 +530,7 @@ objCOTAN <- addClusterization(objCOTAN, clName = "first_clusterization",
                               clusters = clusters, coexDF = coexDF)
 
 lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
-umapPlot2 <- UMAPPlot(lfcDF, clusters = NULL, elements = groupMarkers)
+umapPlot2 <- UMAPPlot(lfcDF, clusters = geneClusters)
 plot(umapPlot2)
 
 objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
@@ -478,17 +538,24 @@ objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
 clSummaryPlotAndData <-
   clustersSummaryPlot(objCOTAN, clName = "first_clusterization",
                       plotTitle = "first clusterization")
-##plot(clSummaryPlotAndData[["plot"]])
+plot(clSummaryPlotAndData[["plot"]])
 
-##objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
+if (FALSE) {
+  objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
+}
 
 clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
+stopifnot(length(clusterizations) == 1)
+
+cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "LogNormalized",
+                                    clName = "first_clusterization",
+                                    genesSel = "HVG_Seurat")
+plot(cellsUmapPlotAndDF[["plot"]])
 
 enrichment <- geneSetEnrichment(clustersCoex = coexDF,
                                 groupMarkers = groupMarkers)
 
 clHeatmapPlotAndData <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
-##plot(clHeatmapPlotAndData[["heatmapPlot"]])
 
 conditions <- as.integer(substring(getCells(objCOTAN), 3L))
 conditions <- factor(ifelse(conditions <= 600, "L", "H"))
@@ -498,7 +565,6 @@ clHeatmapPlotAndData2 <-
   clustersMarkersHeatmapPlot(objCOTAN, groupMarkers, kCuts = 2,
                              condNameList = list("High/Low"),
                              conditionsList = list(conditions))
-##plot(clHeatmapPlotAndData2[["heatmapPlot"]])
 
 clName <- getClusterizationName(objCOTAN)
 

@@ -46,47 +46,37 @@
 #' @name CalculatingCOEX
 #'
 #' @rdname CalculatingCOEX
-NULL
-
-#' @aliases calculateMu
 #'
 #' @note The sum of the matrices returned by the function
 #'   `observedContingencyTables()` and `expectedContingencyTables()` will have
 #'   the same value on all elements. This value is the number of genes/cells
 #'   depending on the parameter `actOnCells` being `TRUE/FALSE`.
 #'
-#' @details `calculateMu()` calculates the vector \eqn{\mu = \lambda \times
-#'   \nu^T}
+NULL
+
+#' @details `calculateLikelihoodOfObserved()` gives for each cell and each gene
+#'   the likelihood of the observed zero/one data
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `calculateMu()` returns the `mu` matrix
-#'
-#' @importFrom rlang is_empty
-#'
-#' @importFrom Matrix t
-#'
-#' @importClassesFrom Matrix dgeMatrix
+#' @returns `calculateLikelihoodOfObserved()` returns a `data.frame` with the
+#'   likelihood of the observed zero/one
 #'
 #' @export
 #'
+#' @examples
+#' lh <- calculateLikelihoodOfObserved(objCOTAN)
+#'
 #' @rdname CalculatingCOEX
 #'
-setMethod(
-  "calculateMu",
-  "COTAN",
-  function(objCOTAN) {
-    if (is_empty(getLambda(objCOTAN))) {
-      stop("lambda must not be empty, estimate it")
-    }
+calculateLikelihoodOfObserved <- function(objCOTAN) {
+  zeroOne <- getZeroOneProj(objCOTAN)
 
-    if (is_empty(getNu(objCOTAN))) {
-      stop("nu must not be empty, estimate it")
-    }
+  probZero <- getProbabilityOfZero(objCOTAN)
 
-    return(getLambda(objCOTAN) %o% getNu(objCOTAN))
-  }
-)
+  # estimate the likelihood of observed result
+  return((1 - zeroOne) * probZero + zeroOne * (1 - probZero))
+}
 
 
 #' @details `observedContingencyTablesYY()` calculates observed *Yes/Yes* field
@@ -453,7 +443,7 @@ expectedContingencyTablesNN <- function(objCOTAN,
   logThis("calculating NN..", logLevel = 3L, appendLF = FALSE)
 
   # estimate Probabilities of 0 with internal function funProbZero
-  probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
+  probZero <- getProbabilityOfZero(objCOTAN)
   gc()
 
   assert_that(!anyNA(probZero),
@@ -523,7 +513,7 @@ expectedPartialContingencyTablesNN <-
 
   if (is_empty(probZero)) {
     # estimate Probabilities of 0 with internal function funProbZero
-    probZero <- funProbZero(getDispersion(objCOTAN), calculateMu(objCOTAN))
+    probZero <- getProbabilityOfZero(objCOTAN)
   }
   assert_that(identical(dim(probZero), dim(getRawData(objCOTAN))))
   assert_that(!anyNA(probZero),
@@ -856,7 +846,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 
 
 
-# --------------- COEX and GDI -----------
+# --------------- COEX and related matrices -----------
 
 # legacy code for cases when the torch library is not available
 calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {

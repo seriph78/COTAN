@@ -26,6 +26,7 @@ knitr::opts_chunk[["set"]](
 ```{r message=FALSE, warning=FALSE}
 library(COTAN)
 library(zeallot)
+library(rlang)
 library(data.table)
 library(Rtsne)
 library(qpdf)
@@ -48,7 +49,10 @@ dataDir <- tempdir()
 
 GEO <- "GSM2861514"
 fName <- "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"
+
 dataSetFile <- file.path(dataDir, GEO, fName)
+
+dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
 
 if (!file.exists(dataSetFile)) {
   getGEOSuppFiles(GEO, makeDirectory = TRUE,
@@ -130,6 +134,10 @@ cellSizePlot(obj)
 
 ```{r}
 genesSizePlot(obj)
+```
+
+```{r}
+scatterPlot(obj)
 ```
 
 During the cleaning, every time we want to remove cells or genes
@@ -236,8 +244,8 @@ obj <- addElementToMetaDataset(obj, "Num drop B group", 1)
 
 obj <- clean(obj)
 
-c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
-  cleanPlots(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot,
+  UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
 
 pcaCellsPlot
 ```
@@ -266,7 +274,7 @@ plot(zoomedNuPlot)
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
-UDELowThr <- 0.28
+UDELowThr <- 0.30
 obj <- addElementToMetaDataset(obj, "Low UDE cells' threshold", UDELowThr)
 
 obj <- addElementToMetaDataset(obj, "Num drop B group", 2)
@@ -280,10 +288,13 @@ Repeat the estimation after the cells are removed
 ```{r}
 obj <- clean(obj)
 
-c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
-  cleanPlots(obj)
+c(pcaCellsPlot, pcaCellsData, genesPlot,
+  UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
 
-pcaCellsPlot
+plot(pcaCellsPlot)
+```
+```{r}
+scatterPlot(obj)
 ```
 
 ```{r}
@@ -331,7 +342,10 @@ To calculate the `GDI` we can run:
 
 ```{r}
 quantP <- calculateGDI(obj)
+
 head(quantP)
+
+obj <- storeGDI(obj, genesGDI = getColumnFromDF(quantP, "GDI"))
 ```
 
 The next function can either plot the `GDI` for the dataset directly or
@@ -452,10 +466,13 @@ plot(treePlot)
 ```
 
 ```{r eval=TRUE, include=TRUE}
-UMAPPlot(pcaGenesClDF[, 1L:10L],
-         clusters = pcaGenesClDF[["hclust"]],
-         elements = layersGenes,
-         title = "Genes' clusters UMAP Plot")
+genesUmapPl <- UMAPPlot(pcaGenesClDF[, sapply(pcaGenesClDF, is.numeric)],
+                        clusters = getColumnFromDF(pcaGenesClDF, "hclust"),
+                        elements = layersGenes,
+                        title = "Genes' clusters UMAP Plot",
+                        numNeighbors = 32, minPointsDist = 0.25)
+
+plot(genesUmapPl)
 ```
 
 ## Uniform Clustering
@@ -485,7 +502,7 @@ In the case one already has an existing clusterization, it is possible to
 calculate the *DEA* `data.frame` and add it to the `COTAN` object.
 ```{r eval=TRUE, include=TRUE}
 data("vignette.split.clusters", package = "COTAN")
-splitClusters <- vignette.split.clusters
+splitClusters <- vignette.split.clusters[getCells(obj)]
 
 splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
 
@@ -526,7 +543,7 @@ In the case one already has an existing clusterization, it is possible to
 calculate the *DEA* `data.frame` and add it to the `COTAN` object.
 ```{r eval=TRUE, include=TRUE}
 data("vignette.merge.clusters", package = "COTAN")
-mergeClusters <- vignette.merge.clusters
+mergeClusters <- vignette.merge.clusters[getCells(obj)]
 
 mergeCoexDF <- DEAOnClusters(obj, clusters = mergeClusters)
 
@@ -534,6 +551,17 @@ obj <- addClusterization(obj, clName = "merge",
                          clusters = mergeClusters, coexDF = mergeCoexDF)
 ```
 
+It is possible to plot the clusterization on a UMAP plot
+
+```{r}
+c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge",
+                                         method = "LogNormalized",
+                                         genesSel = "HGDI",
+                                         colors = NULL, numNeighbors = 25,
+                                         minPointsDist = 0.1)
+
+plot(umapPlot)
+```
 
 In the following graph, it is possible to check that the found clusters align
 very well to the expression of the layers' genes defined above...

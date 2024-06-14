@@ -194,6 +194,40 @@ setMethod(
 )
 
 
+#' @aliases storeGDI
+#'
+#' @details `storeGDI()` stored and already calculated genes' GDI `array` in a
+#'   `COTAN` object
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param genesGDI the genes' GDI `array` to store
+#'
+#' @returns `storeGDI()` returns the given `COTAN` object  with updated
+#'   **GDI** genes' information
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+#'
+#' @rdname GenesStatistics
+#'
+setMethod(
+  "storeGDI",
+  "COTAN",
+  function(objCOTAN, genesGDI) {
+    allGenes <- getGenes(objCOTAN)
+    assert_that(setequal(names(genesGDI), allGenes),
+                msg = paste("Passed GDI array must be named",
+                            "and aligned to the object genes' list"))
+
+    objCOTAN@metaGenes <-
+      setColumnInDF(objCOTAN@metaGenes, genesGDI[allGenes], "GDI", allGenes)
+
+    return(objCOTAN)
+  }
+)
+
+
 #' @aliases dropGenesCells
 #'
 #' @details `dropGenesCells()` removes an array of genes and/or cells from the
@@ -249,7 +283,7 @@ setMethod(
 
     # Filter the meta data for genes keeping those not related to estimates
     colsToKeep <- !(names(getMetadataGenes(objCOTAN)) %in%
-                     c("feGenes", "lambda", "dispersion"))
+                     c("feGenes", "lambda", "dispersion", "GDI"))
     if (any(colsToKeep)) {
       output@metaGenes <-
         getMetadataGenes(objCOTAN)[genesPosToKeep, colsToKeep, drop = FALSE]

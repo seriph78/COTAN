@@ -118,7 +118,7 @@ clusters <- c(rep_len("1", getNumCells(objCOTAN)/2),
 names(clusters) <- getCells(objCOTAN)
 
 chPlot <- cellsHeatmapPlot(objCOTAN, clusters = clusters)
-plot(chPlot)
+## plot(chPlot)
 
 theme <- plotTheme("pca")
 

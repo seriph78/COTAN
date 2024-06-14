@@ -44,7 +44,7 @@
 #'
 seuratClustering <- function(rawData, cond, iter, initialResolution,
                              minNumClusters, saveObj, outDirCond) {
-  ret <- tryCatch({
+  tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
     srat <- CreateSeuratObject(counts = as.data.frame(rawData),
@@ -115,7 +115,7 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
     logThis("Creating Seurat object: DONE", logLevel = 2L)
 
     # returned objects
-    list("SeuratObj" = srat, "UsedMaxResolution" = usedMaxResolution)
+    return(list("SeuratObj" = srat, "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
     logThis(msg = paste("Seurat clusterization failed with", ncol(rawData),
@@ -123,8 +123,6 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
     logThis(msg = conditionMessage(e), logLevel = 1L)
     return(list("SeuratObj" = NULL, "UsedMaxResolution" = FALSE))
   })
-
-  return(ret)
 }
 
 # --------------------- Uniform Clusters ----------------------

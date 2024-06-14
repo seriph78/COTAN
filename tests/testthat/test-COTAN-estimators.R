@@ -44,8 +44,7 @@ test_that("Bisection estimates", {
   expect_length(getDispersion(obj), getNumGenes(obj))
   expect_equal(getDispersion(obj)[[1L]], -Inf, ignore_attr = TRUE)
 
-  expect_equal(rowSums(getZeroOneProj(obj) +
-                         funProbZero(getDispersion(obj), calculateMu(obj))),
+  expect_equal(rowSums(getZeroOneProj(obj) + getProbabilityOfZero(obj)),
                rep(getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
@@ -53,8 +52,7 @@ test_that("Bisection estimates", {
 
   expect_length(getNu(obj), getNumCells(obj))
 
-  expect_equal(colSums(getZeroOneProj(obj) +
-                         funProbZero(getDispersion(obj), calculateMu(obj))),
+  expect_equal(colSums(getZeroOneProj(obj) + getProbabilityOfZero(obj)),
                rep(getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
@@ -65,13 +63,11 @@ test_that("Bisection estimates", {
   expect_length(getNu(obj), getNumCells(obj))
   expect_equal(mean(getNu(obj)), 1.0, tolerance = 1.0e-12)
 
-  expect_equal(rowSums(getZeroOneProj(obj) +
-                         funProbZero(getDispersion(obj), calculateMu(obj))),
+  expect_equal(rowSums(getZeroOneProj(obj) + getProbabilityOfZero(obj)),
                rep(getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(colSums(getZeroOneProj(obj) +
-                         funProbZero(getDispersion(obj), calculateMu(obj))),
+  expect_equal(colSums(getZeroOneProj(obj) + getProbabilityOfZero(obj)),
                rep(getNumGenes(obj), getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 

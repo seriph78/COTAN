@@ -325,7 +325,7 @@ genesHeatmapPlot <-
 #' names(clusters) <- getCells(objCOTAN)
 #'
 #' chPlot <- cellsHeatmapPlot(objCOTAN, clusters = clusters)
-#' plot(chPlot)
+#' ## plot(chPlot)
 #'
 #' @rdname HeatmapPlots
 #'

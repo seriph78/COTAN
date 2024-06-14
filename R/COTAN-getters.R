@@ -440,6 +440,8 @@ setMethod(
 #'   divided by `nu`) and returns it or its base-10 logarithm
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param retLog When `TRUE` returns the \eqn{\log_{10}{(10^4 * x + 1)}} of the
+#'   normalized data
 #'
 #' @returns `getNormalizedData()` returns the normalized count `data.frame`
 #'
@@ -448,16 +450,22 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' rawNorm <- getNormalizedData(objCOTAN)
+#' logNorm <- getNormalizedData(objCOTAN, retLog = TRUE)
 #'
 #' @rdname ParametersEstimations
 #'
-getNormalizedData <- function(objCOTAN) {
+getNormalizedData <- function(objCOTAN, retLog = FALSE) {
   if (is_empty(getNu(objCOTAN))) {
     stop("nu must not be empty, estimate it")
   }
 
-  return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
+  normData <- t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN)))
+
+  if (retLog) {
+    normData <- log1p(normData) / log(10.0)
+  }
+
+  return(normData)
 }
 
 
@@ -526,7 +534,7 @@ setMethod(
 
 #' @aliases getDispersion
 #'
-#' @details `getDispersion()` extracts the dispersion array (a)
+#' @details `getDispersion()` extracts the dispersion array
 #'
 #' @param objCOTAN a `COTAN` object
 #'
@@ -580,6 +588,61 @@ estimatorsAreReady <- function(objCOTAN) {
                    length(getDispersion(objCOTAN))), logLevel = 2L)
   }
   return(!anyEmptyArrays)
+}
+
+
+#' @aliases getMu
+#'
+#' @details `getMu()` calculates the vector \eqn{\mu = \lambda \times
+#'   \nu^T}
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getMu()` returns the `mu` matrix
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+getMu <- function(objCOTAN) {
+  if (is_empty(getLambda(objCOTAN))) {
+    stop("lambda must not be empty, estimate it")
+  }
+
+  if (is_empty(getNu(objCOTAN))) {
+    stop("nu must not be empty, estimate it")
+  }
+
+  return(getLambda(objCOTAN) %o% getNu(objCOTAN))
+}
+
+
+#' @details `getProbabilityOfZero()` gives for each cell and each gene the
+#'   probability of observing zero reads
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getProbabilityOfZero()` returns a `data.frame` with the
+#'   probabilities of zero
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' probZero <- getProbabilityOfZero(objCOTAN)
+#'
+#' @rdname ParametersEstimations
+#'
+getProbabilityOfZero <- function(objCOTAN) {
+  if (is_empty(getDispersion(objCOTAN))) {
+    stop("dispersion must not be empty, estimate it")
+  }
+
+  # estimate Probabilities of 0 with internal function funProbZero
+  return(funProbZero(getDispersion(objCOTAN), getMu(objCOTAN)))
 }
 
 
@@ -770,7 +833,7 @@ NULL
 #'
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 #'
-#' ## mu <- calculateMu(objCOTAN)
+#' ## mu <- getMu(objCOTAN)
 #' ## observedY <- observedContingencyTablesYY(objCOTAN, asDspMatrices = TRUE)
 #' obs <- observedContingencyTables(objCOTAN, asDspMatrices = TRUE)
 #'
@@ -791,7 +854,8 @@ NULL
 #' ## S <- calculateS(objCOTAN)
 #' ## G <- calculateG(objCOTAN)
 #' ## pValue <- calculatePValue(objCOTAN)
-#' GDI <- calculateGDI(objCOTAN)
+#' gdiDF <- calculateGDI(objCOTAN)
+#' objCOTAN <- storeGDI(objCOTAN, genesGDI = getColumnFromDF(gdiDF, "GDI"))
 #'
 #' ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
 #' ## matrix and derivatives, so it can be dropped it from the `COTAN` object
@@ -972,6 +1036,38 @@ setMethod(
 )
 
 
+#' @aliases getGDI
+#'
+#' @details `getGDI()` extracts the genes' **GDI** array
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getGDI()` returns the genes' **GDI** array if available or `NULL`
+#'   otherwise
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @rdname GenesStatistics
+#'
+setMethod(
+  "getGDI",
+  "COTAN",
+  function(objCOTAN) {
+    gdi <- getMetadataGenes(objCOTAN)[["GDI"]]
+
+    if (is_empty(gdi)) {
+      warning("no GDI data has been stored")
+    } else {
+      names(gdi) <- getGenes(objCOTAN)
+    }
+
+    return(gdi)
+  }
+)
+
+
 #' @aliases getClusterizations
 #'
 #' @details `getClusterizations()` extracts the list of the *clusterizations*
@@ -993,18 +1089,23 @@ setMethod(
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- clean(objCOTAN)
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
+#' objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calcCoex = FALSE,
+#'                           optimizeForSpeed = TRUE, saveObj = FALSE)
 #'
 #' data("test.dataset.clusters1")
 #' clusters <- test.dataset.clusters1
 #'
 #' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
 #'
-#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-#'                      G2 = c("g-000300", "g-000330"),
+#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030",
+#'                             "g-000150", "g-000160", "g-000170"),
+#'                      G2 = c("g-000300", "g-000330", "g-000450",
+#'                             "g-000460", "g-000470"),
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
 #'                             "g-000570", "g-000590"))
+#'
+#' geneClusters <- rep(1:3, each = 240)[1:600]
+#' names(geneClusters) <- getGenes(objCOTAN)
 #'
 #' umapPlot <- UMAPPlot(coexDF, clusters = NULL, elements = groupMarkers)
 #' plot(umapPlot)
@@ -1013,7 +1114,7 @@ setMethod(
 #'                               clusters = clusters, coexDF = coexDF)
 #'
 #' lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
-#' umapPlot2 <- UMAPPlot(lfcDF, clusters = NULL, elements = groupMarkers)
+#' umapPlot2 <- UMAPPlot(lfcDF, clusters = geneClusters)
 #' plot(umapPlot2)
 #'
 #' objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
@@ -1021,17 +1122,24 @@ setMethod(
 #' clSummaryPlotAndData <-
 #'   clustersSummaryPlot(objCOTAN, clName = "first_clusterization",
 #'                       plotTitle = "first clusterization")
-#' ##plot(clSummaryPlotAndData[["plot"]])
+#' plot(clSummaryPlotAndData[["plot"]])
 #'
-#' ##objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
+#' if (FALSE) {
+#'   objCOTAN <- dropClusterization(objCOTAN, "first_clusterization")
+#' }
 #'
 #' clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
+#' stopifnot(length(clusterizations) == 1)
+#'
+#' cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "LogNormalized",
+#'                                     clName = "first_clusterization",
+#'                                     genesSel = "HVG_Seurat")
+#' plot(cellsUmapPlotAndDF[["plot"]])
 #'
 #' enrichment <- geneSetEnrichment(clustersCoex = coexDF,
 #'                                 groupMarkers = groupMarkers)
 #'
 #' clHeatmapPlotAndData <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
-#' ##plot(clHeatmapPlotAndData[["heatmapPlot"]])
 #'
 #' conditions <- as.integer(substring(getCells(objCOTAN), 3L))
 #' conditions <- factor(ifelse(conditions <= 600, "L", "H"))
@@ -1041,7 +1149,6 @@ setMethod(
 #'   clustersMarkersHeatmapPlot(objCOTAN, groupMarkers, kCuts = 2,
 #'                              condNameList = list("High/Low"),
 #'                              conditionsList = list(conditions))
-#' ##plot(clHeatmapPlotAndData2[["heatmapPlot"]])
 #'
 #' @rdname HandlingClusterizations
 #'

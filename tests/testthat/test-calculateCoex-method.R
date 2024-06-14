@@ -57,7 +57,7 @@ test_that("Calculations on genes", {
   obj <- COTAN(raw = raw)
   obj <- clean(obj)
 
-  mu <- calculateMu(obj)
+  mu <- getMu(obj)
 
   expect_identical(dim(mu), dim(getRawData(obj)))
   expect_equal(mu[ 1L,  1L], getLambda(obj)[[ 1L]] * getNu(obj)[[ 1L]],
@@ -132,12 +132,20 @@ test_that("Calculations on genes", {
                                    expectedNY[g1, g2], expectedNN[g1, g2]),
                tolerance = 1.0e-12)
 
+  zeroOne <- getZeroOneProj(obj)
+  probZero <- getProbabilityOfZero(obj)
+
   gce <- calculateGenesCE(obj)
 
   expect_named(gce, getGenes(obj))
   expect_identical(gce[[1L]], 0.0)
-  expect_equal(gce, crossEntrVector(getZeroOneProj(obj),
-                                    funProbZero(getDispersion(obj), mu)),
+  expect_equal(gce, crossEntrVector(zeroOne, probZero), ignore_attr = TRUE)
+
+  lh <- calculateLikelihoodOfObserved(obj)
+  expect_identical(rownames(lh), getGenes(obj))
+  expect_identical(colnames(lh), getCells(obj))
+  expect_identical(lh[1L, ], set_names(rep(1.0, 20L), getCells(obj)))
+  expect_equal(lh, ((1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero)),
                ignore_attr = TRUE)
 
   expect_no_warning({
