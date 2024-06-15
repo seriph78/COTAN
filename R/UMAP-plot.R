@@ -165,7 +165,7 @@ UMAPPlot <- function(df,
 
   assert_that(setequal(c(entryType, "none", "centroid"), names(myColours)))
 
-  pointSize <- min(max(1.0, 200000.0/dim(plotDF)[1L]), 3.0)
+  pointSize <- min(max(0.33, 10000.0/nrow(plotDF)), 3.0)
 
   plot <- ggplot() +
     scale_color_manual("Status", values = myColours) +
@@ -191,17 +191,21 @@ UMAPPlot <- function(df,
                        box.padding = 0.25,
                        max.overlaps = 40L, alpha = 0.8,
                        direction = "both", na.rm = TRUE, seed = 1234L)
+  } else {
+    plot <- plot +
+      theme(legend.position = "none")
   }
+
   if (any(clustered | centroids)) {
     plot <- plot +
       geom_point(data = plotDF[clustered, , drop = FALSE],
                  aes(x, y, colour = types),
                  size = pointSize, alpha = 0.5) +
-      geom_text(data = plotDF[centroids, , drop = FALSE],
-              aes(x, y, colour = "centroid"),
-              label = rownames(plotDF)[centroids],
-              show.legend = FALSE, alpha = 0.8,
-              fontface = "bold", size = 1.5 * pointSize)
+      geom_text_repel(data = plotDF[centroids, , drop = FALSE],
+                      aes(x, y, colour = "centroid"),
+                      label = rownames(plotDF)[centroids],
+                      max.overlaps = 40L, fontface = "bold",
+                      show.legend = FALSE, alpha = 0.8)
   }
   if (any(labelled | clustered | centroids)) {
     plot <- plot +
@@ -367,7 +371,11 @@ cellsUMAPPlot <- function(objCOTAN,
   }
 
   if (is_empty(genesSel)) {
-    genesSel <- "HGDI"
+    if (isCoexAvailable(objCOTAN)) {
+      genesSel <- "HGDI"
+    } else {
+      genesSel <- "HVG_Seurat"
+    }
   }
 
   genesPos <- rep(TRUE, getNumGenes(objCOTAN))
@@ -380,13 +388,11 @@ cellsUMAPPlot <- function(objCOTAN,
       gdi <- calculateGDI(objCOTAN, statType = "S", rowsFraction = 0.05)[["GDI"]]
     }
     if(sum(gdi >= 1.5) > numGenes) {
-      genesPos <- order(gdi, decreasing = TRUE)[1:numGenes]
+      genesPos <- 1:length(gdi) %in% order(gdi, decreasing = TRUE)[1:numGenes]
     } else {
       genesPos <- gdi >= 1.4
     }
     rm(gdi)
-    logThis(paste("Selected", sum(genesPos), "genes using HGDI selector"),
-            logLevel = 2L)
   } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
     condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
     genesPos <- getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
@@ -402,18 +408,22 @@ cellsUMAPPlot <- function(objCOTAN,
   } else {
     stop("Unrecognised `genesSel` passed in: ", genesSel)
   }
-
+  logThis(paste("Selected", sum(genesPos), "genes using", genesSel, "selector"),
+          logLevel = 2L)
 
   cellsMatrix <- cellsMatrix[genesPos, ]
 
+  logThis("Elaborating PCA - START", logLevel = 3L)
   cellsPCA <- pca(mat = cellsMatrix, rank = 50L,
                   transposed = FALSE, BSPARAM = IrlbaParam())[["rotated"]]
 
   gc()
 
   cellsPCA <- as.data.frame(cellsPCA)
+  logThis("Elaborating PCA - END", logLevel = 3L)
 
-  umapTitle <- paste("UMAP of", method, "matrix using clusterization", clName)
+  umapTitle <- paste("UMAP of clusterization", clName, "using", method,
+                     "matrix with", genesSel, "genes selector")
   umapPlot <- UMAPPlot(cellsPCA,
                        clusters = clusters,
                        colors = colors,

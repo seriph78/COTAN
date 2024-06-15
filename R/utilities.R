@@ -890,12 +890,14 @@ getColorsVector <- function(numNeededColors = 0L) {
 
   rm(qualColPalets, numColPalets)
 
-  assert_that(numNeededColors <= length(colVector),
-              msg = paste("Needed more colors than the number",
-                          "of possible supported colors:", length(colVector)))
-
   if (numNeededColors == 0L) {
     return(colVector)
+  } else if (numNeededColors <= length(colVector)) {
+    return(head(colVector, numNeededColors))
+  } else {
+    warning("Needed more colors than the number ",
+            "of possible different colors:", length(colVector))
+    return(head(rep(colVector, ceiling(numNeededColors / length(colVector))),
+                numNeededColors))
   }
-  return(head(colVector, numNeededColors))
 }
