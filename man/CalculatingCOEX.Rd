@@ -3,6 +3,7 @@
 %   R/calculateCoex-method.R
 \name{getMu}
 \alias{getMu}
+\alias{calculateMu}
 \alias{CalculatingCOEX}
 \alias{getGenesCoex,COTAN-method}
 \alias{getGenesCoex}

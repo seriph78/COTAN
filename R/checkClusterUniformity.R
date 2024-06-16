@@ -111,7 +111,7 @@ checkClusterUniformity <- function(
 
   # A cluster is deemed uniform if the number of genes
   # with [GDI > GDIThreshold] is at the most ratioAboveThreshold
-  gdi <- GDIData[["GDI"]]
+  gdi <- getColumnFromDF(GDIData, "GDI")
 
   quantAboveThr <- quantile(gdi, probs = 1.0 - ratioAboveThreshold)
   percAboveThr <- sum(gdi >= GDIThreshold) / length(gdi)
@@ -128,7 +128,7 @@ checkClusterUniformity <- function(
 
   if (isTRUE(saveObj)) tryCatch({
       pre <- ""
-      if(!clusterIsUniform) {
+      if (!clusterIsUniform) {
         pre <- "non-"
       }
       outFile <- file.path(outDir,

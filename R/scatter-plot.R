@@ -44,7 +44,7 @@ scatterPlot <- function(objCOTAN, splitPattern = " ",
   toPlot <- cbind(cellsSize, genesSize)
   toPlot <- as.data.frame(toPlot)
 
-  {
+  if (TRUE) {
     splitNames <- str_split(rownames(toPlot),
                             pattern = splitPattern, simplify = TRUE)
     if (ncol(splitNames) < numCol) {

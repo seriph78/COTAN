@@ -1,6 +1,6 @@
 ## 2.5.4
 
-Added possibility to displa UMAP plots of cells clusters, using the function
+Added possibility to display UMAP plots of cells clusters, using the function
 `cellsUMAPPlot()`
 
 ## 2.5.3

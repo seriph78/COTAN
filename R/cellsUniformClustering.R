@@ -392,7 +392,7 @@ cellsUniformClustering <- function(objCOTAN,
     }
 
     # Step 3: save the already uniform clusters keeping track of the iteration
-    {
+    if (TRUE) {
       flagInUniformCl <- !allCells %in% cellsToRecluster
       outputClusters[allCells[flagInUniformCl]] <-
         paste0(str_pad(iter, width = 2L, pad = "0"), "_",
@@ -433,7 +433,7 @@ cellsUniformClustering <- function(objCOTAN,
                 toString(unique(sort(outputClusters)))), logLevel = 3L)
 
   # replace the clusters' tags
-  {
+  if (TRUE) {
     clTags <- unique(sort(outputClusters))
 
     clTagsMap <- paste0(seq_along(clTags))

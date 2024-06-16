@@ -45,7 +45,7 @@ setMethod(
   function(objCOTAN) {
     lambda <- rowMeans(getRawData(objCOTAN), dims = 1L)
 
-    {
+    if (TRUE) {
       oldLambda <- getMetadataGenes(objCOTAN)[["lambda"]]
       if (!identical(lambda, oldLambda)) {
         # flag the coex slots are out of sync (if any)!
@@ -91,7 +91,7 @@ setMethod(
     nu <- colSums(getRawData(objCOTAN), dims = 1L)
     nu <- nu / mean(nu)
 
-    {
+    if (TRUE) {
       oldNu <- getMetadataCells(objCOTAN)[["nu"]]
       if (!identical(nu, oldNu)) {
         # flag the coex slots are out of sync (if any)!
@@ -173,7 +173,7 @@ setMethod(
       nu[c] <- nu[c] / mean(nu[c])
     }
 
-    {
+    if (TRUE) {
       oldNu <- getMetadataCells(objCOTAN)[["nu"]]
       if (!identical(nu, oldNu)) {
         # flag the coex slots are out of sync (if any)!
@@ -327,7 +327,7 @@ setMethod(
     gc()
 
     dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
-    {
+    if (TRUE) {
       oldDispersion <-  getMetadataGenes(objCOTAN)[["dispersion"]]
       if (!identical(dispersion, oldDispersion)) {
         # flag the coex slots are out of sync (if any)!
@@ -369,8 +369,8 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       mc.cores = cores)
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
-    if(any(resError)) {
-      stop(paste(res[which(resError)[1L]]), call. = FALSE)
+    if (any(resError)) {
+      stop(paste(res[[which(resError)[[1L]]]]), call. = FALSE)
     }
     return(res)
   } else {
@@ -500,7 +500,7 @@ setMethod(
     logThis("Estimate nu: DONE", logLevel = 2L)
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
-    {
+    if (TRUE) {
       if (!identical(nu, initialGuess)) {
         # flag the coex slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
@@ -513,7 +513,7 @@ setMethod(
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
                                         "nu", cells)
 
-    {
+    if (TRUE) {
       nuChange <- abs(nu - initialGuess)
       logThis(paste("nu change (abs)",
                     "| max:",     max(nuChange),

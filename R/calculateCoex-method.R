@@ -961,7 +961,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   torch::cuda_empty_cache()
 
   # TODO: 16 bits are OK here?
-  if(deviceStr == "cpu"){
+  if (deviceStr == "cpu") {
     dtypeForCalc <- torch::torch_float32()
     halfDtypeForCalc <- torch::torch_float32()
   } else {
@@ -973,7 +973,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   probOne <- function(nu, lambda, a) {
     zero     <- torch::torch_tensor( 0.0, device = device,
-                                     dtype = torch::torch_float64())
+                                    dtype = torch::torch_float64())
     minusOne <- torch::torch_tensor(-1.0, device = device,
                                     dtype = torch::torch_float64())
 
@@ -998,7 +998,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   m   <- torch::torch_tensor(getNumCells(objCOTAN),
                              device = device, dtype = dtypeForCalc)
 
-  expectedYY <-torch::torch_tensor(probOne(
+  expectedYY <- torch::torch_tensor(probOne(
     torch::torch_tensor(getNu(objCOTAN),
                         dtype = torch::torch_float64(), device = device),
     torch::torch_tensor(getLambda(objCOTAN),
@@ -1068,7 +1068,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     numDiagPP <- torch::torch_diag(problematicPairs)$sum()$item()
     problematicPairsFraction <-
       ((problematicPairs$sum()$item() + numDiagPP) /
-         (problematicPairs$size(1) * (problematicPairs$size(1) + 1L)))
+         (problematicPairs$size(1L) * (problematicPairs$size(1L) + 1L)))
 
     logThis(paste("Fraction of genes with very low",
                   "expected contingency tables:",

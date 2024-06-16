@@ -43,7 +43,7 @@ mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
   sizes <- getCellsSize(objCOTAN)
   sizes <- as.data.frame(sizes)
   sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
-  {
+  if (TRUE) {
     splitNames <- str_split(rownames(sizes),
                             pattern = splitPattern, simplify = TRUE)
     if (ncol(splitNames) < numCol) {

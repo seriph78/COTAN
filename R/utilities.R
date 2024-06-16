@@ -227,7 +227,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
       }
       library("torch", character.only = TRUE)
       # Call a simple torch function to check if it's working
-      if (is.null(torch::torch_tensor(1))) {
+      if (is.null(torch::torch_tensor(1L))) {
         stop("The `torch` library is installed but not working correctly")
       }
     },
@@ -247,8 +247,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
 
   if (useTorch) {
     # Device configuration - fall-back to cpu if no cuda device is available
-    if (substr(deviceStr, 1L, 4L) == "cuda" &&
-        !torch::cuda_is_available()) {
+    if (startsWith(deviceStr, "cuda") && !torch::cuda_is_available()) {
       if (!warnedAboutTorch) {
         warning("The `torch` library could not find any `CUDA` device")
         warning("Falling back to CPU calculations")
@@ -257,7 +256,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
       deviceStr <- "cpu"
     }
   } else {
-    if(optimizeForSpeed) {
+    if (optimizeForSpeed) {
       if (!warnedAboutTorch) {
         warning("The `torch` library is not installed.")
         warnedAboutTorch <- TRUE

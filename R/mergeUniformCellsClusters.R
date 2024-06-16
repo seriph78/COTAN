@@ -367,7 +367,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                  toString(sort(unique(outputClusters)))), logLevel = 1L)
 
   # replace the clusters' tags with completely new ones
-  {
+  if (TRUE) {
     clTags <- sort(unique(outputClusters))
 
     clTagsMap <- paste0(seq_along(clTags))

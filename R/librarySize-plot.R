@@ -127,7 +127,7 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
   sizes <- sort(getCellsSize(objCOTAN))
   sizes <- as.data.frame(sizes)
   sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
-  {
+  if (TRUE) {
     splitNames <- str_split(rownames(sizes),
                             pattern = splitPattern, simplify = TRUE)
     if (ncol(splitNames) < numCol) {
@@ -196,7 +196,7 @@ genesSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
   sizes <- sort(getNumExpressedGenes(objCOTAN))
   sizes <- as.data.frame(sizes)
   sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
-  {
+  if (TRUE) {
     splitNames <- str_split(rownames(sizes),
                             pattern = splitPattern, simplify = TRUE)
     if (ncol(splitNames) < numCol) {

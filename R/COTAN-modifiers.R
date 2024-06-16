@@ -283,7 +283,7 @@ setMethod(
 
     # Filter the meta data for genes keeping those not related to estimates
     colsToKeep <- !(names(getMetadataGenes(objCOTAN)) %in%
-                     c("feGenes", "lambda", "dispersion", "GDI"))
+                      c("feGenes", "lambda", "dispersion", "GDI"))
     if (any(colsToKeep)) {
       output@metaGenes <-
         getMetadataGenes(objCOTAN)[genesPosToKeep, colsToKeep, drop = FALSE]

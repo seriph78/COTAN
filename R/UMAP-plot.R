@@ -154,18 +154,18 @@ UMAPPlot <- function(df,
     numMissing <- length(allTypes) - length(myColours)
     myColours <- c(myColours, getColorsVector(numMissing))
     names(myColours) <- allTypes
-    if (numMissing > 1L){
+    if (numMissing > 1L) {
       myColours[["none"]] <- "#8491B4B2"
     }
     myColours[["centroid"]] <- "#000000"
   } else {
-    myColours <- myColours[1L:length(allTypes)]
+    myColours <- myColours[seq_along(allTypes)]
     names(myColours) <- allTypes
   }
 
   assert_that(setequal(c(entryType, "none", "centroid"), names(myColours)))
 
-  pointSize <- min(max(0.33, 10000.0/nrow(plotDF)), 3.0)
+  pointSize <- min(max(0.33, 10000.0 / nrow(plotDF)), 3.0)
 
   plot <- ggplot() +
     scale_color_manual("Status", values = myColours) +
@@ -348,7 +348,7 @@ cellsUMAPPlot <- function(objCOTAN,
               msg = "Internal error - clusters must be factors")
 
   if (isEmptyName(method)) {
-    method = "LogNormalized"
+    method <- "LogNormalized"
   }
 
   cellsMatrix <- NULL
@@ -385,10 +385,11 @@ cellsUMAPPlot <- function(objCOTAN,
   } else if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
     gdi <- getGDI(objCOTAN)
     if (is_empty(gdi)) {
-      gdi <- calculateGDI(objCOTAN, statType = "S", rowsFraction = 0.05)[["GDI"]]
+      gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
+                                          rowsFraction = 0.05), "GDI")
     }
     if(sum(gdi >= 1.5) > numGenes) {
-      genesPos <- 1:length(gdi) %in% order(gdi, decreasing = TRUE)[1:numGenes]
+      genesPos <- seq_along(gdi) %in% order(gdi, decreasing = TRUE)[1L:numGenes]
     } else {
       genesPos <- gdi >= 1.4
     }

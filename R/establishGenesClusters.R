@@ -59,7 +59,7 @@ genesCoexSpace <-
   # TODO: output tanh of reduced coex matrix
   logThis("Calculating gene co-expression space - START", logLevel = 2L)
 
-  {
+  if (TRUE) {
     genesBelong <- primaryMarkers %in% getGenes(objCOTAN)
     if (!all(genesBelong)) {
       warning("Genes [", toString(primaryMarkers[!genesBelong]),

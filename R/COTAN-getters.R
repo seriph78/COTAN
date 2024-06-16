@@ -592,6 +592,7 @@ estimatorsAreReady <- function(objCOTAN) {
 
 
 #' @aliases getMu
+#' @aliases calculateMu
 #'
 #' @details `getMu()` calculates the vector \eqn{\mu = \lambda \times
 #'   \nu^T}
