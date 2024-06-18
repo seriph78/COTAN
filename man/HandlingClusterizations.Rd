@@ -109,7 +109,7 @@ clustersDeltaExpression(objCOTAN, clName = "", clusters = NULL)
 
 clustersMarkersHeatmapPlot(
   objCOTAN,
-  groupMarkers,
+  groupMarkers = list(),
   clName = "",
   clusters = NULL,
   kCuts = 3L,
@@ -154,7 +154,7 @@ findClustersMarkers(
   method = "bonferroni"
 )
 
-geneSetEnrichment(clustersCoex, groupMarkers)
+geneSetEnrichment(clustersCoex, groupMarkers = list())
 
 reorderClusterization(
   objCOTAN,
@@ -240,8 +240,8 @@ when not available
 ignored when no selection have been asked or when an explicit list of genes
 was passed in}
 
-\item{groupMarkers}{a named \code{list} with an element for each group comprised
-of one or more marker genes}
+\item{groupMarkers}{an optional named \code{list} with an element for each group
+comprised of one or more marker genes}
 
 \item{kCuts}{the number of estimated \emph{cluster} (this defines the height for
 the tree cut)}

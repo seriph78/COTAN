@@ -8,8 +8,8 @@
 #'   easier to derive the *clusters*' cell types.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param groupMarkers a named `list` with an element for each group comprised
-#'   of one or more marker genes
+#' @param groupMarkers an optional named `list` with an element for each group
+#'   comprised of one or more marker genes
 #' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
@@ -62,7 +62,7 @@
 #'
 #' @rdname HandlingClusterizations
 #'
-clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers,
+clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
                                        clName = "", clusters = NULL,
                                        kCuts = 3L,
                                        condNameList = NULL,
