@@ -77,6 +77,9 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 #'   * `"ratioQuantile"`: the quantile associated to the high quantile
 #'   associated to given ratio
 #'   * `"size"`: the number of cells in the cluster
+#'   * `"GDIThreshold"` the used `GDI` threshold
+#'   * `"ratioAboveThreshold"` the used fraction of genes above threshold
+#'     allowed in **uniform** *clusters*
 #'
 #' @importFrom utils head
 #'

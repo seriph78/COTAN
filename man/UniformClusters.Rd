@@ -179,6 +179,9 @@ with the given information and \code{NA} otherwise
 \item \code{"ratioQuantile"}: the quantile associated to the high quantile
 associated to given ratio
 \item \code{"size"}: the number of cells in the cluster
+\item \code{"GDIThreshold"} the used \code{GDI} threshold
+\item \code{"ratioAboveThreshold"} the used fraction of genes above threshold
+allowed in \strong{uniform} \emph{clusters}
 }
 
 a \code{list} with:
