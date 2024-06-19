@@ -88,7 +88,7 @@ clustersDeltaExpression(objCOTAN, clName = "", clusters = NULL)
 
 clustersMarkersHeatmapPlot(
   objCOTAN,
-  groupMarkers,
+  groupMarkers = list(),
   clName = "",
   clusters = NULL,
   kCuts = 3L,
@@ -133,7 +133,7 @@ findClustersMarkers(
   method = "bonferroni"
 )
 
-geneSetEnrichment(clustersCoex, groupMarkers)
+geneSetEnrichment(clustersCoex, groupMarkers = list())
 
 reorderClusterization(
   objCOTAN,
@@ -196,8 +196,8 @@ will have different color}
 \item{title}{a string giving the plot title. Will default to UMAP Plot if not
 specified}
 
-\item{groupMarkers}{a named \code{list} with an element for each group comprised
-of one or more marker genes}
+\item{groupMarkers}{an optional named \code{list} with an element for each group
+comprised of one or more marker genes}
 
 \item{kCuts}{the number of estimated \emph{cluster} (this defines the height for
 the tree cut)}

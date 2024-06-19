@@ -1,3 +1,7 @@
+## 2.4.4
+
+Fixed minor bugs in function `clustersMarkersHeatmapPlot()`
+
 ## 2.4.3
 
 Updated vignette to the most recent changes
