@@ -1,3 +1,7 @@
+## 2.5.5
+
+Fixed minor bugs in functions `GDIPlot()` and `clustersMarkersHeatmapPlot()`
+
 ## 2.5.4
 
 Added possibility to display UMAP plots of cells clusters, using the function

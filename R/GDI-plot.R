@@ -52,6 +52,7 @@ GDIPlot <- function(objCOTAN, genes, condition = "",
     gdi <- getGDI(objCOTAN)
     if (!is_empty(gdi) && statType == "S") {
       # complete the GDIDf
+      GDIDf <- data.frame()
       GDIDf <- setColumnInDF(GDIDf, colToSet = gdi, colName = "GDI",
                              rowNames = getGenes(objCOTAN))
       sumRawNorm <- log(rowSums(getNormalizedData(objCOTAN, retLog = FALSE)))

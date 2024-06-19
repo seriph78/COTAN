@@ -6,8 +6,8 @@
 #'   \ln(0.25)}
 #'
 #' @param clustersCoex the `COEX` `data.frame`
-#' @param groupMarkers a named `list` with an element for each group comprised
-#'   of one or more marker genes
+#' @param groupMarkers an optional named `list` with an element for each group
+#'   comprised of one or more marker genes
 #'
 #' @returns `geneSetEnrichment()` returns a `data.frame` with the cumulative
 #'   score
@@ -16,12 +16,16 @@
 #'
 #' @importFrom rlang set_names
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @importFrom stringr str_remove
 #' @importFrom stringr fixed
 #'
 #' @rdname HandlingClusterizations
 #'
-geneSetEnrichment <- function(clustersCoex, groupMarkers) {
+geneSetEnrichment <- function(clustersCoex, groupMarkers = list()) {
+  assert_that(isa(groupMarkers, "list"))
+
   # It might be possible that the column names have the old extra
   # prefix 'cl.'. It will be remove in such cases.
   clTagsMap <- set_names(colnames(clustersCoex),
