@@ -1,3 +1,46 @@
+#'
+#' @details `isClusterUniform()` takes in the current thresholds and used them
+#'   to check whether the calculated cluster parameters are sufficient to
+#'   determine whether the cluster is **uniform** and in the positive scenario
+#'   the corresponding answer
+#'
+#' @param GDIThreshold the threshold level that discriminates uniform
+#'   *clusters*. It defaults to \eqn{1.43}
+#' @param ratioAboveThreshold the fraction of genes allowed to be above the
+#'   `GDIThreshold`. It defaults to \eqn{1\%}
+#' @param ratioQuantile the `GDI` quantile corresponding to the `usedRatioAbove`
+#' @param fractionAbove the fraction of genes above the `usedGDIThreshold`
+#' @param usedGDIThreshold the threshold level actually used to calculate fourth
+#'   argument
+#' @param usedRatioAbove the fraction of genes actually used to calculate the
+#'   thirdargument
+#'
+#' @returns a single `Boolean` value when it is possible to decide the answer
+#'   with the given information and `NA` otherwise
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname UniformClusters
+#'
+
+isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
+                             ratioQuantile, fractionAbove,
+                             usedGDIThreshold, usedRatioAbove) {
+  assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
+              !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
+              GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
+              ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
+
+  if (!is.na(fractionAbove) && GDIThreshold == usedGDIThreshold) {
+    return(fractionAbove <= ratioAboveThreshold)
+  } else if (!is.na(ratioQuantile) && ratioAboveThreshold == usedRatioAbove) {
+    return(ratioQuantile < GDIThreshold)
+  } else {
+    return(NA)
+  }
+}
+
+
 
 #'
 #' @details `checkClusterUniformity()` takes a `COTAN` object and a cells'
@@ -116,7 +159,9 @@ checkClusterUniformity <- function(
   quantAboveThr <- quantile(gdi, probs = 1.0 - ratioAboveThreshold)
   percAboveThr <- sum(gdi >= GDIThreshold) / length(gdi)
 
-  clusterIsUniform <- percAboveThr <= ratioAboveThreshold
+  clusterIsUniform <- isClusterUniform(GDIThreshold, ratioAboveThreshold,
+                                       quantAboveThr, percAboveThr,
+                                       GDIThreshold, ratioAboveThreshold)
 
   logThis(paste0(
     "Cluster ", clusterName, ", with size ", clusterSize, ", is ",
@@ -144,5 +189,7 @@ checkClusterUniformity <- function(
   return(list("isUniform" = clusterIsUniform,
               "fractionAbove" = percAboveThr,
               "ratioQuantile" = quantAboveThr[[1L]],
-              "size" = clusterSize))
+              "size" = clusterSize,
+              "GDIThreshold" = GDIThreshold,
+              "ratioAboveThreshold" = ratioAboveThreshold))
 }

@@ -5,6 +5,7 @@
 \alias{UniformClusters}
 \alias{GDIPlot}
 \alias{cellsUniformClustering}
+\alias{isClusterUniform}
 \alias{checkClusterUniformity}
 \alias{mergeUniformCellsClusters}
 \title{Uniform Clusters}
@@ -35,6 +36,15 @@ cellsUniformClustering(
   outDir = "."
 )
 
+isClusterUniform(
+  GDIThreshold,
+  ratioAboveThreshold,
+  ratioQuantile,
+  fractionAbove,
+  usedGDIThreshold,
+  usedRatioAbove
+)
+
 checkClusterUniformity(
   objCOTAN,
   clusterName,
@@ -54,7 +64,7 @@ mergeUniformCellsClusters(
   GDIThreshold = 1.43,
   ratioAboveThreshold = 0.01,
   batchSize = 0L,
-  notMergeable = NULL,
+  allCheckResults = data.frame(),
   cores = 1L,
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
@@ -125,6 +135,16 @@ plots to file}
 \item{outDir}{an existing directory for the analysis output. The effective
 output will be paced in a sub-folder.}
 
+\item{ratioQuantile}{the \code{GDI} quantile corresponding to the \code{usedRatioAbove}}
+
+\item{fractionAbove}{the fraction of genes above the \code{usedGDIThreshold}}
+
+\item{usedGDIThreshold}{the threshold level actually used to calculate fourth
+argument}
+
+\item{usedRatioAbove}{the fraction of genes actually used to calculate the
+thirdargument}
+
 \item{clusterName}{the tag of the \emph{cluster}}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
@@ -148,6 +168,9 @@ an interruption.}
 \item \code{"clusters"} the newly found cluster labels array
 \item \code{"coex"} the associated \code{COEX} \code{data.frame}
 }
+
+a single \code{Boolean} value when it is possible to decide the answer
+with the given information and \code{NA} otherwise
 
 \code{checkClusterUniformity} returns a list with:
 \itemize{
@@ -183,6 +206,11 @@ checked, all cells from the \strong{non-uniform} clusters are pooled together
 for another iteration of the entire process, until all \emph{clusters} are
 deemed \strong{uniform}. In the case only a few cells are left out (\eqn{\leq
   50}), those are flagged as \code{"-1"} and the process is stopped.
+
+\code{isClusterUniform()} takes in the current thresholds and used them
+to check whether the calculated cluster parameters are sufficient to
+determine whether the cluster is \strong{uniform} and in the positive scenario
+the corresponding answer
 
 \code{checkClusterUniformity()} takes a \code{COTAN} object and a cells'
 \emph{cluster} and checks whether the latter is \strong{uniform} by \code{GDI}. The
