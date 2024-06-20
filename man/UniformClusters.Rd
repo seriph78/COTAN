@@ -225,11 +225,15 @@ the \emph{cluster} is deemed
 
 \code{mergeUniformCellsClusters()} takes in a \strong{uniform}
 \emph{clusterization} and iteratively checks whether merging two \emph{near clusters}
-would form a \strong{uniform} \emph{cluster} still. This function uses the \emph{cosine
-distance} to establish the \emph{nearest clusters pairs}. It will use the
-\code{\link[=checkClusterUniformity]{checkClusterUniformity()}} function to check whether the merged \emph{clusters}
-are \strong{uniform}. The function will stop once no \emph{near pairs} of clusters
-are mergeable in a single batch
+would form a \strong{uniform} \emph{cluster} still. Multiple thresholds will be used
+from \eqn{1.37} up to the given one in order to prioritize merge of the
+best fitting pairs.
+
+This function uses the \emph{cosine distance} to establish the \emph{nearest clusters
+pairs}. It will use the \code{\link[=checkClusterUniformity]{checkClusterUniformity()}} function to check
+whether the merged \emph{clusters} are \strong{uniform}. The function will stop once
+no \emph{tested pairs} of clusters are mergeable after testing all pairs in a
+single batch
 }
 \examples{
 data("test.dataset")
