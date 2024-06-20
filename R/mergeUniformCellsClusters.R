@@ -19,9 +19,9 @@
 #'   `GDIThreshold`. It defaults to \eqn{1\%}
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
-#' @param notMergeable An array of names of merged clusters that are already
-#'   known for not being uniform. Useful to restart the *merging* process after
-#'   an interruption.
+#' @param allCheckResults An optional `data.frame` with the results of previous
+#'   checks about the merging of clusters. Useful to restart the *merging*
+#'   process after an interruption.
 #' @param cores number of cores to use. Default is 1.
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
@@ -221,6 +221,26 @@ mergeUniformCellsClusters <- function(objCOTAN,
     }
   }
 
+
+  selectPairsList <- function(pList, batchSize, allCheckResults,
+                              GDIThreshold, ratioAboveThreshold) {
+    # drop the already tested pairs
+    pNamesList <- lapply(pList, function(p) mergedName(p[[1L]], p[[2L]]))
+
+    pNamesUntested <-
+      lapply(pNamesList, function(pName, allRes,
+                                  GDIThreshold, ratioAboveThreshold) {
+        !hasBeenChecked(pName, allRes, GDIThreshold, ratioAboveThreshold)
+      }, allCheckResults, GDIThreshold, ratioAboveThreshold)
+    pNamesUntested <- unlist(pNamesUntested)
+
+    pList <- pList[pNamesUntested]
+
+    # take the first N remaining
+    numPairsToTest <- min(batchSize, length(pList))
+    return(pList[seq_len(numPairsToTest)])
+  }
+
   testPairListMerge <- function(pList, outputClusters, allCheckResults,
                                 GDIThreshold, ratioAboveThreshold) {
     logThis(paste0("Clusters pairs for merging:\n",
@@ -290,23 +310,27 @@ mergeUniformCellsClusters <- function(objCOTAN,
     return(allCheckResults)
   }
 
-  selectPairsList <- function(pList, batchSize, allCheckResults,
-                              GDIThreshold, ratioAboveThreshold) {
-    # drop the already tested pairs
-    pNamesList <- lapply(pList, function(p) mergedName(p[[1L]], p[[2L]]))
-
-    pNamesUntested <-
-      lapply(pNamesList, function(pName, allRes,
-                                  GDIThreshold, ratioAboveThreshold) {
-          !hasBeenChecked(pName, allRes, GDIThreshold, ratioAboveThreshold)
-        }, allCheckResults, GDIThreshold, ratioAboveThreshold)
-    pNamesUntested <- unlist(pNamesUntested)
-
-    pList <- pList[pNamesUntested]
-
-    # take the first N remaining
-    numPairsToTest <- min(batchSize, length(pList))
-    return(pList[seq_len(numPairsToTest)])
+  equivFractionAbove <- function(GDIThreshold, ratioAboveThreshold,
+                                 ratioQuantile, fractionAbove,
+                                 usedGDIThreshold, usedRatioAbove) {
+    assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
+                !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
+                GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
+                ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
+    if (GDIThreshold == usedGDIThreshold) {
+      return(fractionAbove)
+    } else if (ratioAboveThreshold == usedRatioAbove) {
+      # here we assume exponential taper
+      fractionAbove <- max(fractionAbove, 1.0e-4)
+      if (abs(usedGDIThreshold - ratioQuantile) <= 1e-4) {
+        return(NA)
+      }
+      exponent <- (GDIThreshold - usedGDIThreshold) /
+                    (usedGDIThreshold - ratioQuantile)
+      return(fractionAbove * (fractionAbove/usedRatioAbove)^exponent)
+    } else {
+      return(NA)
+    }
   }
 
   mergeAllClusters <- function(outputClusters, allCheckResults,
@@ -334,37 +358,30 @@ mergeUniformCellsClusters <- function(objCOTAN,
                          logical(1L))
     checkRes <- checkRes[rowsToKeep, , drop = FALSE]
 
-    #order results by least fraction
-    equivFractionAbove <- function(GDIThreshold, ratioAboveThreshold,
-                                   ratioQuantile, fractionAbove,
-                                   usedGDIThreshold, usedRatioAbove) {
-      assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
-                  !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
-                  GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
-                  ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
-      if (GDIThreshold == usedGDIThreshold) {
-        return(fractionAbove)
-      } else if (ratioAboveThreshold == usedRatioAbove) {
-        fractionAbove <- max(fractionAbove, 1.0e-4)
-        delta <- (GDIThreshold - usedGDIThreshold) /
-                   (usedGDIThreshold - ratioQuantile)
-        return(fractionAbove * (fractionAbove/usedRatioAbove)^delta)
-      } else {
-        return(NA)
-      }
-    }
+    perm <- seq_len(nrow(checkRes))
+    if (length(unique(checkRes[, "GDIThreshold", drop = TRUE])) == 1L) {
+      # order results by least fraction
+      perm <- order(checkRes[, "fractionAbove", drop = TRUE])
+    } else if (length(unique(checkRes[, "ratioAboveThreshold",
+                                      drop = TRUE])) == 1L) {
+      perm <- order(checkRes[, "ratioQuantile", drop = TRUE])
+    } else {
+      # mixed case: convert to least faction estimates and
+      # order results by least fraction
 
-    fractionsAbove <-
-      vapply(seq_len(nrow(checkRes)),
-             function(r) {
-               equivFractionAbove(GDIThreshold, ratioAboveThreshold,
-                                  checkRes[r, "ratioQuantile"],
-                                  checkRes[r, "fractionAbove"],
-                                  checkRes[r, "GDIThreshold"],
-                                  checkRes[r, "ratioAboveThreshold"])
-             },
-             double(1L))
-    checkRes <- checkRes[order(fractionsAbove), , drop = FALSE]
+      fractionsAbove <-
+        vapply(seq_len(nrow(checkRes)),
+               function(r) {
+                 equivFractionAbove(GDIThreshold, ratioAboveThreshold,
+                                    checkRes[r, "ratioQuantile"],
+                                    checkRes[r, "fractionAbove"],
+                                    checkRes[r, "GDIThreshold"],
+                                    checkRes[r, "ratioAboveThreshold"])
+               },
+               double(1L))
+      perm <- order(fractionsAbove)
+    }
+    checkRes <- checkRes[perm, , drop = FALSE]
 
     #operate the merges
     for (r in seq_len(nrow(checkRes))) {

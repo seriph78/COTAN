@@ -13,7 +13,7 @@
 #' @param usedGDIThreshold the threshold level actually used to calculate fourth
 #'   argument
 #' @param usedRatioAbove the fraction of genes actually used to calculate the
-#'   thirdargument
+#'   third argument
 #'
 #' @returns a single `Boolean` value when it is possible to decide the answer
 #'   with the given information and `NA` otherwise

@@ -143,7 +143,7 @@ output will be paced in a sub-folder.}
 argument}
 
 \item{usedRatioAbove}{the fraction of genes actually used to calculate the
-thirdargument}
+third argument}
 
 \item{clusterName}{the tag of the \emph{cluster}}
 
@@ -156,9 +156,9 @@ significant!}
 \item{batchSize}{Number pairs to test in a single round. If none of them
 succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}}
 
-\item{notMergeable}{An array of names of merged clusters that are already
-known for not being uniform. Useful to restart the \emph{merging} process after
-an interruption.}
+\item{allCheckResults}{An optional \code{data.frame} with the results of previous
+checks about the merging of clusters. Useful to restart the \emph{merging}
+process after an interruption.}
 }
 \value{
 \code{GDIPlot()} returns a \code{ggplot2} object
