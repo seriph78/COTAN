@@ -1,5 +1,8 @@
 ## 2.5.5
 
+Stopped function `cellsUniformClustering()` from saving the internally created
+`Seurat` object due to possibly long saving times
+
 Fixed minor bugs in functions `GDIPlot()` and `clustersMarkersHeatmapPlot()`
 
 ## 2.5.4
