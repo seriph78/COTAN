@@ -367,7 +367,7 @@ cellsUMAPPlot <- function(objCOTAN,
     cellsMatrix <- getNuNormData(objCOTAN)
   } else if (str_equal(method, "LogNorm", ignore_case = TRUE) ||
              str_equal(method, "LogNormalized", ignore_case = TRUE)) {
-    cellsMatrix <- getlogNormData(objCOTAN)
+    cellsMatrix <- getLogNormData(objCOTAN)
   } else {
     stop("Unrecognised `method` passed in: ", method)
   }
