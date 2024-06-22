@@ -80,7 +80,7 @@ test_that("Merge Uniform Cells Clusters", {
     c(mergedClusters, mergedCoexDF) %<-%
       mergeUniformCellsClusters(
         objCOTAN = obj, clusters = clusters,
-        GDIThreshold = GDIThreshold,
+        GDIThreshold = GDIThreshold, batchSize = 2L,
         ratioAboveThreshold = ratioAboveThreshold,
         distance = "cosine", hclustMethod = "ward.D2",
         cores = 6L, saveObj = TRUE, outDir = tm)

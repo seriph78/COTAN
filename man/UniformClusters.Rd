@@ -288,7 +288,7 @@ identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 mergedList <- mergeUniformCellsClusters(objCOTAN,
                                         GDIThreshold = 1.43,
                                         ratioAboveThreshold = 0.02,
-                                        batchSize = 5L,
+                                        batchSize = 2L,
                                         clusters = clusters,
                                         cores = 6L,
                                         optimizeForSpeed = TRUE,

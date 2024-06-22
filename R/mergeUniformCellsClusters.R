@@ -127,7 +127,7 @@
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
 #'                                         GDIThreshold = 1.43,
 #'                                         ratioAboveThreshold = 0.02,
-#'                                         batchSize = 5L,
+#'                                         batchSize = 2L,
 #'                                         clusters = clusters,
 #'                                         cores = 6L,
 #'                                         optimizeForSpeed = TRUE,
@@ -185,19 +185,19 @@ mergeUniformCellsClusters <- function(objCOTAN,
   if (batchSize == 0L) {
     # default is twice the (2/3) power of the number of clusters
     numCl <- length(unique(outputClusters))
-    batchSize <- as.integer(ceiling(2.0 * numCl^(2.0 / 3.0)))
+    batchSize <- as.integer(ceiling(1.2 * numCl^(2.0 / 3.0)))
     rm(numCl)
   }
 
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
   outDirCond <- file.path(outDir, cond)
-  if (!file.exists(outDirCond)) {
+  if (!dir.exists(outDirCond)) {
     dir.create(outDirCond)
   }
 
   mergeOutDir <- file.path(outDirCond, "leafs_merge")
-  if (isTRUE(saveObj) && !file.exists(mergeOutDir)) {
+  if (isTRUE(saveObj) && !dir.exists(mergeOutDir)) {
     dir.create(mergeOutDir)
   }
 
@@ -392,6 +392,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
       cl1 <- checkRes[r, "cluster_1"]
       cl2 <- checkRes[r, "cluster_2"]
       if (!(any(outputClusters %in% cl1) && any(outputClusters %in% cl2))) {
+        logThis(paste0("One or both of the clusters ", cl1, ", ", cl2,
+                      " is no more in the clusterization"), logLevel = 3L)
         next
       }
       logThis(paste("Clusters", cl1, "and", cl2, "will be merged"),
@@ -423,6 +425,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
       logThis(paste0("Start merging nearest clusters: iteration ", iter),
               logLevel = 3L)
 
+      firstBatch <- is_empty(allCheckResults)
       oldNumClusters <- length(unique(outputClusters))
 
       clDist <- distancesBetweenClusters(objCOTAN, clusters = outputClusters,
@@ -430,7 +433,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
       gc()
 
       if (isTRUE(saveObj)) tryCatch({
-          pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_plot.pdf")))
+          pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_tau_",
+                                            threshold, "_plot.pdf")))
 
           hcNorm <- hclust(clDist, method = hclustMethod)
           plot(as.dendrogram(hcNorm))
@@ -468,8 +472,10 @@ mergeUniformCellsClusters <- function(objCOTAN,
         testPairListMerge(pList, outputClusters, allCheckResults,
                           threshold, ratioAboveThreshold)
 
-      outputClusters <- mergeAllClusters(outputClusters, allCheckResults,
-                                         threshold, ratioAboveThreshold)
+      if (!firstBatch) {
+        outputClusters <- mergeAllClusters(outputClusters, allCheckResults,
+                                           threshold, ratioAboveThreshold)
+      }
 
       newNumClusters <- length(unique(outputClusters))
       if (newNumClusters == 1L) {
@@ -490,7 +496,10 @@ mergeUniformCellsClusters <- function(objCOTAN,
           logThis(paste("While saving current clusterization", err),
                   logLevel = 0L)
         })
-      if (newNumClusters == oldNumClusters) {
+      if (firstBatch) {
+        logThis("Finished the first batch - no merges were executed",
+                logLevel = 3L)
+      } else if (newNumClusters == oldNumClusters) {
         logThis(paste("None of the", nrow(allCheckResults),
                       "tested cluster pairs could be merged"), logLevel = 3L)
 

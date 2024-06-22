@@ -309,11 +309,11 @@ and used to get the statistics necessary to `COEX` evaluation and storing
 ```{r}
 obj <- proceedToCoex(obj, calcCoex = TRUE,
                      optimizeForSpeed = TRUE, cores = 6L,
-                     saveObj = TRUE, outDir = outDir)
+                     saveObj = FALSE, outDir = outDir)
 ```
 
-Since `saveObj = TRUE`, this step can be skipped as the `COTAN` object has
-already been saved in the `outDir`.
+When `saveObj == TRUE`, in the previous step, this step can be skipped
+as the `COTAN` object has already been saved in the `outDir`.
 ```{r eval=FALSE, include=TRUE}
 # saving the structure
 saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
@@ -338,7 +338,7 @@ obj2 <- automaticCOTANObjectCreation(
 
 ## GDI
 
-To calculate the `GDI` we can run:
+To calculate and store the Global Differentiation Index (`GDI`) we can run:
 
 ```{r}
 quantP <- calculateGDI(obj)
@@ -350,7 +350,8 @@ obj <- storeGDI(obj, genesGDI = getColumnFromDF(quantP, "GDI"))
 
 The next function can either plot the `GDI` for the dataset directly or
 use the pre-computed dataframe.
-It marks a `1.43` threshold (in red) and
+
+It marks a \eqn{1.43} threshold (in red) and
 the two highest quantiles (in blue) by default.
 We can also specify some gene sets (three in this case) that
 we want to label explicitly in the `GDI` plot.
@@ -386,11 +387,11 @@ We also have to provide an array of the file name prefixes for each condition
 In fact, this function can plot genes relationships across many different
 conditions to get a complete overview.
 
-```{r}
+```{r eval=FALSE}
 print(cond)
 ```
 
-```{r}
+```{r eval=FALSE}
 heatmapPlot(genesLists = genesList, sets = (1L:3L),
             conditions = c(cond), dir = outDir)
 ```
@@ -491,7 +492,7 @@ good values are between 1.42 (more strict) and 1.43 (less strict).
 
 ```{r eval=FALSE, include=TRUE}
 c(splitClusters, splitCoexDF) %<-%
-  cellsUniformClustering(obj, GDIThreshold = 1.43, initialResolution = 0.8,
+  cellsUniformClustering(obj, GDIThreshold = 1.40, initialResolution = 0.8,
                          optimizeForSpeed = TRUE, cores = 6L,
                          saveObj = TRUE, outDir = outDir)
 obj <- addClusterization(obj, clName = "split",
@@ -506,9 +507,16 @@ splitClusters <- vignette.split.clusters[getCells(obj)]
 
 splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
 
-obj <- addClusterization(obj, clName = "split",
-                         clusters = splitClusters, coexDF = splitCoexDF)
+obj <- addClusterization(obj, clName = "split", clusters = splitClusters,
+                         coexDF = splitCoexDF, override = FALSE)
 ```
+
+
+```{r eval=TRUE, include=TRUE}
+c(.,scoreDF) %<-% clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
+                                             clName = "split", kCuts = 5L)
+```
+
 
 However since the algorithm that creates the clusters is not geared directly
 to achieve cluster uniformity, there might be clusters that can be merged back
@@ -523,58 +531,49 @@ first place, but if needed it can be slightly relaxed in order to reduce the
 number of clusters.
 
 ```{r eval=FALSE, include=TRUE}
-c(mergeClusters, mergeCoexDF) %<-%
-  mergeUniformCellsClusters(obj, clusters = splitClusters, GDIThreshold = 1.43,
+c(mergedClusters, mergedCoexDF) %<-%
+  mergeUniformCellsClusters(obj, clusters = splitClusters, GDIThreshold = 1.40,
                             optimizeForSpeed = TRUE, cores = 6L,
                             saveObj = TRUE, outDir = outDir)
 
 # merges are:
-#  1 <- '-1' + 1 + 4
-#  2 <- 2 + 3 + 8
-#  3 <- 5
-#  4 <- 6
-#  5 <- 7
+#  1 <- 2 + 7 + 8
+#  2 <- 6
+#  3 <- '-1' + 1 + 3 + 4
+#  4 <- 5
 
 obj <- addClusterization(obj, clName = "merge",
-                         clusters = mergeClusters, coexDF = mergeCoexDF)
+                         clusters = mergedClusters, coexDF = mergedCoexDF)
 ```
 
 In the case one already has an existing clusterization, it is possible to
 calculate the *DEA* `data.frame` and add it to the `COTAN` object.
 ```{r eval=TRUE, include=TRUE}
 data("vignette.merge.clusters", package = "COTAN")
-mergeClusters <- vignette.merge.clusters[getCells(obj)]
+mergedClusters <- vignette.merge.clusters[getCells(obj)]
 
-mergeCoexDF <- DEAOnClusters(obj, clusters = mergeClusters)
+mergedCoexDF <- DEAOnClusters(obj, clusters = mergedClusters)
 
-obj <- addClusterization(obj, clName = "merge",
-                         clusters = mergeClusters, coexDF = mergeCoexDF)
+obj <- addClusterization(obj, clName = "merge", clusters = mergedClusters,
+                         coexDF = mergedCoexDF, override = FALSE)
 ```
+In the following graph, it is possible to check that the found clusters align
+very well to the expression of the layers' genes defined above...
+
+
 
 It is possible to plot the clusterization on a UMAP plot
 
 ```{r}
 c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge",
-                                         method = "LogNormalized",
+                                         method = "AdjBinarized",
                                          genesSel = "HGDI",
-                                         colors = NULL, numNeighbors = 25,
+                                         colors = NULL, numNeighbors = 30,
                                          minPointsDist = 0.1)
 
 plot(umapPlot)
 ```
 
-In the following graph, it is possible to check that the found clusters align
-very well to the expression of the layers' genes defined above...
-
-```{r eval=TRUE, include=TRUE}
-c(.,scoreDF) %<-% clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                                             clName = "split", kCuts = 5L)
-```
-
-```{r eval=TRUE, include=TRUE}
-c(.,scoreDF) %<-% clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                                             clName = "merge", kCuts = 5L)
-```
 
 ## Vignette clean-up stage
 
