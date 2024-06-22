@@ -1,5 +1,8 @@
 ## 2.5.5
 
+Splitted the now deprecated function `getNormalizedData()` into two separeted
+functions: `getNuNormData()` and `getLogNormData()`
+
 Fixed minor bugs in functions `GDIPlot()` and `clustersMarkersHeatmapPlot()`
 
 ## 2.5.4

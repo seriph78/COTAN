@@ -145,8 +145,7 @@ test_that("Managed clusterizations and conditions", {
   expect_identical(colnames(getMetadataCells(obj)), c("CL_Test", "nu"))
 
   coexDF <- set_names(
-    as.data.frame(atan(getNormalizedData(obj)[, 1L:2L] - 0.5) / pi * 2.0),
-    (1L:2L))
+    as.data.frame(atan(getNuNormData(obj)[, 1L:2L] - 0.5) / pi * 2.0), 1L:2L)
 
   obj <- addClusterizationCoex(obj, clName = "Test", coexDF)
 
@@ -156,7 +155,7 @@ test_that("Managed clusterizations and conditions", {
 
   clusters2 <- factor(set_names(rep(c("2", "1"), 10L), getCells(obj)))
   coexDF2 <- set_names(
-    as.data.frame(atan(getNormalizedData(obj)[, 1L:2L] - 0.7) / pi * 2.0),
+    as.data.frame(atan(getNuNormData(obj)[, 1L:2L] - 0.7) / pi * 2.0),
     c("1", "2"))
 
   obj <- addClusterization(obj, clName = "Test2",

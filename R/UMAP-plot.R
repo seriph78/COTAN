@@ -278,8 +278,8 @@ seuratHVG <- function(rawData, method, cond) {
 #'   the [UMAPPlot()]. The following methods calculate, for each cell, a
 #'   statistic for each gene based on available data/model. The following
 #'   methods are supported:
-#'   * `"Normalized"` uses the normalized counts
-#'   * `"LogNormalized"` uses the log-normalized counts. The default method
+#'   * `"NuNorm"` uses the \eqn{\nu}*-normalized* counts
+#'   * `"LogNormalized"` uses the *log-normalized* counts. The default method
 #'   * `"Likelyhood"` uses the likelyhood of observed presence/absence of each
 #'     gene
 #'   * `"LogLikelyhood"` uses the likelyhood of observed presence/absence of
@@ -362,10 +362,12 @@ cellsUMAPPlot <- function(objCOTAN,
     cellsMatrix <- calculateLikelihoodOfObserved(objCOTAN)
   } else if (str_equal(method, "LogLikelyhood", ignore_case = TRUE)) {
     cellsMatrix <- log(calculateLikelihoodOfObserved(objCOTAN))
-  } else if (str_equal(method, "Normalized", ignore_case = TRUE)) {
-    cellsMatrix <- getNormalizedData(objCOTAN, retLog = FALSE)
-  } else if (str_equal(method, "LogNormalized", ignore_case = TRUE)) {
-    cellsMatrix <- getNormalizedData(objCOTAN, retLog = TRUE)
+  } else if (str_equal(method, "NuNorm", ignore_case = TRUE) ||
+             str_equal(method, "Normalized", ignore_case = TRUE)) {
+    cellsMatrix <- getNuNormData(objCOTAN)
+  } else if (str_equal(method, "LogNorm", ignore_case = TRUE) ||
+             str_equal(method, "LogNormalized", ignore_case = TRUE)) {
+    cellsMatrix <- getlogNormData(objCOTAN)
   } else {
     stop("Unrecognised `method` passed in: ", method)
   }
