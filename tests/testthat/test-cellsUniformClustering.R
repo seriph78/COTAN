@@ -46,7 +46,8 @@ test_that("Cell Uniform Clustering", {
 
   firstCl <- clusters[[1L]]
   suppressWarnings({
-    c(isUniform, fracAbove, firstPerc, clSize) %<-%
+    c(isUniform, fracAbove, firstPerc,
+      clSize, usedGDIThreshold, usedRatioAbove) %<-%
       checkClusterUniformity(obj, GDIThreshold = GDIThreshold,
                              ratioAboveThreshold = ratioAboveThreshold,
                              clusterName = paste0("Cluster_", firstCl),
@@ -58,6 +59,8 @@ test_that("Cell Uniform Clustering", {
   expect_lte(fracAbove, ratioAboveThreshold)
   expect_lte(firstPerc, GDIThreshold)
   expect_identical(clSize, sum(clusters == firstCl))
+  expect_identical(usedGDIThreshold, GDIThreshold)
+  expect_identical(usedRatioAbove, ratioAboveThreshold)
 
   clusters2 <- factor(clusters, levels = c("-1", levels(clusters)))
   clusters2[1L:50L] <- "-1"

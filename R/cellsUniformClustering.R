@@ -226,12 +226,12 @@ cellsUniformClustering <- function(objCOTAN,
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
   outDirCond <- file.path(outDir, cond)
-  if (!file.exists(outDirCond)) {
+  if (!dir.exists(outDirCond)) {
     dir.create(outDirCond)
   }
 
   splitOutDir <- file.path(outDirCond, "reclustering")
-  if (isTRUE(saveObj) && !file.exists(splitOutDir)) {
+  if (isTRUE(saveObj) && !dir.exists(splitOutDir)) {
     dir.create(splitOutDir)
   }
 
@@ -244,7 +244,9 @@ cellsUniformClustering <- function(objCOTAN,
   srat <- NULL
   allCheckResults <- data.frame()
   errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
-                            "ratioQuantile" = NA, "size" = NA)
+                            "ratioQuantile" = NA, "size" = NA,
+                            "GDIThreshold" = GDIThreshold,
+                            "ratioAboveThreshold" = ratioAboveThreshold)
 
   repeat {
     iter <- iter + 1L

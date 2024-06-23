@@ -5,6 +5,7 @@
 \alias{UniformClusters}
 \alias{GDIPlot}
 \alias{cellsUniformClustering}
+\alias{isClusterUniform}
 \alias{checkClusterUniformity}
 \alias{mergeUniformCellsClusters}
 \title{Uniform Clusters}
@@ -35,6 +36,15 @@ cellsUniformClustering(
   outDir = "."
 )
 
+isClusterUniform(
+  GDIThreshold,
+  ratioAboveThreshold,
+  ratioQuantile,
+  fractionAbove,
+  usedGDIThreshold,
+  usedRatioAbove
+)
+
 checkClusterUniformity(
   objCOTAN,
   clusterName,
@@ -54,7 +64,7 @@ mergeUniformCellsClusters(
   GDIThreshold = 1.43,
   ratioAboveThreshold = 0.01,
   batchSize = 0L,
-  notMergeable = NULL,
+  allCheckResults = data.frame(),
   cores = 1L,
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
@@ -125,6 +135,16 @@ plots to file}
 \item{outDir}{an existing directory for the analysis output. The effective
 output will be paced in a sub-folder.}
 
+\item{ratioQuantile}{the \code{GDI} quantile corresponding to the \code{usedRatioAbove}}
+
+\item{fractionAbove}{the fraction of genes above the \code{usedGDIThreshold}}
+
+\item{usedGDIThreshold}{the threshold level actually used to calculate fourth
+argument}
+
+\item{usedRatioAbove}{the fraction of genes actually used to calculate the
+third argument}
+
 \item{clusterName}{the tag of the \emph{cluster}}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
@@ -136,9 +156,9 @@ significant!}
 \item{batchSize}{Number pairs to test in a single round. If none of them
 succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}}
 
-\item{notMergeable}{An array of names of merged clusters that are already
-known for not being uniform. Useful to restart the \emph{merging} process after
-an interruption.}
+\item{allCheckResults}{An optional \code{data.frame} with the results of previous
+checks about the merging of clusters. Useful to restart the \emph{merging}
+process after an interruption.}
 }
 \value{
 \code{GDIPlot()} returns a \code{ggplot2} object
@@ -149,6 +169,9 @@ an interruption.}
 \item \code{"coex"} the associated \code{COEX} \code{data.frame}
 }
 
+a single \code{Boolean} value when it is possible to decide the answer
+with the given information and \code{NA} otherwise
+
 \code{checkClusterUniformity} returns a list with:
 \itemize{
 \item \code{"isUniform"}: a flag indicating whether the \emph{cluster} is \strong{uniform}
@@ -156,6 +179,9 @@ an interruption.}
 \item \code{"ratioQuantile"}: the quantile associated to the high quantile
 associated to given ratio
 \item \code{"size"}: the number of cells in the cluster
+\item \code{"GDIThreshold"} the used \code{GDI} threshold
+\item \code{"ratioAboveThreshold"} the used fraction of genes above threshold
+allowed in \strong{uniform} \emph{clusters}
 }
 
 a \code{list} with:
@@ -184,6 +210,11 @@ for another iteration of the entire process, until all \emph{clusters} are
 deemed \strong{uniform}. In the case only a few cells are left out (\eqn{\leq
   50}), those are flagged as \code{"-1"} and the process is stopped.
 
+\code{isClusterUniform()} takes in the current thresholds and used them
+to check whether the calculated cluster parameters are sufficient to
+determine whether the cluster is \strong{uniform} and in the positive scenario
+the corresponding answer
+
 \code{checkClusterUniformity()} takes a \code{COTAN} object and a cells'
 \emph{cluster} and checks whether the latter is \strong{uniform} by \code{GDI}. The
 function runs \code{COTAN} to check whether the \code{GDI} is lower than the given
@@ -194,11 +225,15 @@ the \emph{cluster} is deemed
 
 \code{mergeUniformCellsClusters()} takes in a \strong{uniform}
 \emph{clusterization} and iteratively checks whether merging two \emph{near clusters}
-would form a \strong{uniform} \emph{cluster} still. This function uses the \emph{cosine
-distance} to establish the \emph{nearest clusters pairs}. It will use the
-\code{\link[=checkClusterUniformity]{checkClusterUniformity()}} function to check whether the merged \emph{clusters}
-are \strong{uniform}. The function will stop once no \emph{near pairs} of clusters
-are mergeable in a single batch
+would form a \strong{uniform} \emph{cluster} still. Multiple thresholds will be used
+from \eqn{1.37} up to the given one in order to prioritize merge of the
+best fitting pairs.
+
+This function uses the \emph{cosine distance} to establish the \emph{nearest clusters
+pairs}. It will use the \code{\link[=checkClusterUniformity]{checkClusterUniformity()}} function to check
+whether the merged \emph{clusters} are \strong{uniform}. The function will stop once
+no \emph{tested pairs} of clusters are mergeable after testing all pairs in a
+single batch
 }
 \examples{
 data("test.dataset")
@@ -253,7 +288,7 @@ identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 mergedList <- mergeUniformCellsClusters(objCOTAN,
                                         GDIThreshold = 1.43,
                                         ratioAboveThreshold = 0.02,
-                                        batchSize = 5L,
+                                        batchSize = 2L,
                                         clusters = clusters,
                                         cores = 6L,
                                         optimizeForSpeed = TRUE,
