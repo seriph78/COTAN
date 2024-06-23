@@ -1,5 +1,8 @@
 ## 2.5.5
 
+Stopped function `cellsUniformClustering()` from saving the internally created
+`Seurat` object due to possibly long saving times
+
 Splitted the now deprecated function `getNormalizedData()` into two separeted
 functions: `getNuNormData()` and `getLogNormData()`
 

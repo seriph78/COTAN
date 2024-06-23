@@ -235,6 +235,8 @@ cellsUniformClustering <- function(objCOTAN,
     dir.create(splitOutDir)
   }
 
+  saveSeuratObj <- FALSE
+
   outputClusters <- set_names(rep(NA, length = getNumCells(objCOTAN)),
                               getCells(objCOTAN))
 
@@ -263,7 +265,7 @@ cellsUniformClustering <- function(objCOTAN,
                        cond = cond, iter = iter,
                        initialResolution = initialResolution,
                        minNumClusters = minNumClusters,
-                       saveObj = saveObj, outDirCond = splitOutDir)
+                       saveObj = saveSeuratObj, outDirCond = splitOutDir)
 
     if (is_null(objSeurat)) {
       logThis(paste("NO new possible uniform clusters!",
@@ -272,7 +274,7 @@ cellsUniformClustering <- function(objCOTAN,
       break
     }
 
-    if (saveObj && iter == 1L) tryCatch({
+    if (saveSeuratObj && iter == 1L) tryCatch({
       # save the Seurat object to file to be reloaded later
       saveRDS(objSeurat,
               file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
@@ -481,36 +483,39 @@ cellsUniformClustering <- function(objCOTAN,
       outFile <- file.path(outDirCond, "split_check_results.csv")
       write.csv(allCheckResults, file = outFile)
 
-      clusterizationName <-
-        paste0(as.roman(length(getClusterizations(objCOTAN)) + 1L))
+      if (saveSeuratObj) {
+        clusterizationName <-
+          paste0(as.roman(length(getClusterizations(objCOTAN)) + 1L))
 
-      srat <-
-        readRDS(file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
+        srat <-
+          readRDS(file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
 
-      if (!setequal(rownames(srat@meta.data), names(outputClusters))) {
-        warning("List of cells got corrupted")
-        return(outputList)
+        if (!setequal(rownames(srat@meta.data), names(outputClusters))) {
+          warning("List of cells got corrupted")
+          return(outputList)
+        }
+
+        srat@meta.data <-
+          setColumnInDF(srat@meta.data,
+                        colToSet = outputClusters[rownames(srat@meta.data)],
+                        colName = paste0("COTAN_", clusterizationName))
+
+        if (!dim(srat)[[2L]] == getNumCells(objCOTAN)) {
+          warning("Number of cells got wrong")
+          return(outputList)
+        }
+
+        logThis("Cluster, UMAP and Saving the Seurat dataset", logLevel = 2L)
+
+        srat <- FindNeighbors(srat, dims = 1L:25L)
+        srat <- FindClusters(srat, resolution = 0.5, algorithm = 2L)
+        srat <- RunUMAP(srat, umap.method = "uwot",
+                        metric = "cosine", dims = 1L:25L)
+
+        saveRDS(srat, file.path(outDirCond,
+                                "Seurat_obj_with_cotan_clusters.RDS"))
       }
-
-      srat@meta.data <-
-        setColumnInDF(srat@meta.data,
-                      colToSet = outputClusters[rownames(srat@meta.data)],
-                      colName = paste0("COTAN_", clusterizationName))
-
-      if (!dim(srat)[[2L]] == getNumCells(objCOTAN)) {
-        warning("Number of cells got wrong")
-        return(outputList)
-      }
-
-      logThis("Cluster, UMAP and Saving the Seurat dataset", logLevel = 2L)
-
-      srat <- FindNeighbors(srat, dims = 1L:25L)
-      srat <- FindClusters(srat, resolution = 0.5, algorithm = 2L)
-      srat <- RunUMAP(srat, umap.method = "uwot",
-                      metric = "cosine", dims = 1L:25L)
-
-      saveRDS(srat, file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
-    },
+  },
     error = function(err) {
       logThis(paste("While saving seurat object", err), logLevel = 1L)
     }
