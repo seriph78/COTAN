@@ -195,7 +195,7 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 
   numCells <- getNumCells(objCOTAN)
 
-  normData <- getNormalizedData(objCOTAN)
+  normData <- getNuNormData(objCOTAN)
 
   assert_that(!is_empty(getLambda(objCOTAN)),
               msg = "lambda must not be empty, estimate it")
