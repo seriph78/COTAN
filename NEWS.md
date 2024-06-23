@@ -1,5 +1,8 @@
 ## 2.4.4
 
+Split the now deprecated function `getNormalizedData()` into two separated
+functions: `getNuNormData()` and `getLogNormData()`
+
 Fixed minor bugs in function `clustersMarkersHeatmapPlot()`
 
 ## 2.4.3

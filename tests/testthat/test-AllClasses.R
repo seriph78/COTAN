@@ -40,7 +40,7 @@ test_that("'scCOTAN' converters", {
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
   coexDF <- set_names(
-    as.data.frame(atan(getNormalizedData(obj)[, 1L:2L] - 0.5) / pi * 2.0),
+    as.data.frame(atan(getNuNormData(obj)[, 1L:2L] - 0.5) / pi * 2.0),
     c(1L, 2L))
 
   obj <- addClusterization(obj, clName = "clusters",
@@ -52,7 +52,7 @@ test_that("'scCOTAN' converters", {
   obj_sc <- as(obj, "scCOTAN")
 
   expect_identical(obj_sc@raw,      obj@raw)
-  expect_identical(obj_sc@raw.norm, getNormalizedData(obj))
+  expect_identical(obj_sc@raw.norm, getNuNormData(obj))
   expect_identical(obj_sc@coex,     obj@genesCoex)
   expect_identical(obj_sc@nu,       getNu(obj))
   expect_identical(obj_sc@lambda,   getLambda(obj))

@@ -434,33 +434,6 @@ setMethod(
 
 # ------- `COTAN` estimated data accessors ------
 
-#' @aliases getNormalizedData
-#'
-#' @details `getNormalizedData()` extracts the *normalized* count table (i.e.
-#'   divided by `nu`) and returns it or its base-10 logarithm
-#'
-#' @param objCOTAN a `COTAN` object
-#'
-#' @returns `getNormalizedData()` returns the normalized count `data.frame`
-#'
-#' @importFrom rlang is_empty
-#'
-#' @export
-#'
-#' @examples
-#' rawNorm <- getNormalizedData(objCOTAN)
-#'
-#' @rdname ParametersEstimations
-#'
-getNormalizedData <- function(objCOTAN) {
-  if (is_empty(getNu(objCOTAN))) {
-    stop("nu must not be empty, estimate it")
-  }
-
-  return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
-}
-
-
 #' @aliases getNu
 #'
 #' @details `getNu()` extracts the nu array (normalized cells' counts averages)
@@ -580,6 +553,79 @@ estimatorsAreReady <- function(objCOTAN) {
                    length(getDispersion(objCOTAN))), logLevel = 2L)
   }
   return(!anyEmptyArrays)
+}
+
+
+#' @details `getNuNormData()` extracts the \eqn{\nu}*-normalized* count table
+#'   (i.e. where each column is divided by `nu`) and returns it
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getNuNormData()` returns the \eqn{\nu}*-normalized* count
+#'   `data.frame`
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @examples
+#' nuNorm <- getNuNormData(objCOTAN)
+#'
+#' @rdname ParametersEstimations
+#'
+getNuNormData <- function(objCOTAN) {
+  if (is_empty(getNu(objCOTAN))) {
+    stop("nu must not be empty, estimate it")
+  }
+
+  return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
+}
+
+#' @details `getLogNormData()` extracts the *log-normalized* count table (i.e.
+#'   where each column is divided by the [getCellsSize()]), takes its `log10`
+#'   and returns it.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param retLog When `TRUE` returns
+#'
+#' @returns `getLogNormData()` returns a `data.frame` after applying the formula
+#'   \eqn{\log_{10}{(10^4 * x + 1)}} to the raw counts normalized by
+#'   *cells-size*
+#'
+#' @export
+#'
+#' @examples
+#' logNorm <- getLogNormData(objCOTAN)
+#'
+#' @rdname ParametersEstimations
+#'
+getLogNormData <- function(objCOTAN) {
+  normData <- t(t(getRawData(objCOTAN)) * (1.0e4 / getCellsSize(objCOTAN)))
+
+  return(log1p(normData) / log(10.0))
+}
+
+#' @details `getNormalizedData()` is deprecated: please use [getNuNormData()] or
+#'   [getLogNormData()] directly as appropriate
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param retLog When `TRUE` calls [getLogNormData()], calls [getNuNormData()]
+#'
+#' @returns `getNormalizedData()` returns a `data.frame`
+#'
+#' @export
+#'
+#' @examples
+#' logNorm <- getNormalizedData(objCOTAN, retLog = TRUE)
+#'
+#' @rdname ParametersEstimations
+#'
+getNormalizedData <- function(objCOTAN, retLog = FALSE) {
+  if (retLog) {
+    return(getLogNormData(objCOTAN))
+  } else {
+    return(getNuNormData(objCOTAN))
+  }
 }
 
 

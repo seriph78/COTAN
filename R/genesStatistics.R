@@ -136,7 +136,7 @@ calculateGDI <- function(objCOTAN, statType = "S", rowsFraction = 0.05) {
   GDI <- set_names(as.data.frame(GDI), "GDI")
   gc()
 
-  sumRawNorm <- log(rowSums(getNormalizedData(objCOTAN)))
+  sumRawNorm <- log(rowSums(getNuNormData(objCOTAN)))
   GDI <- merge(GDI, as.data.frame(list(sumRawNorm), col.names = "sum.raw.norm"),
                by = "row.names", all.x = TRUE)
   GDI <- column_to_rownames(GDI, var = "Row.names")

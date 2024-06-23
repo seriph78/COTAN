@@ -14,7 +14,6 @@
 \alias{estimateDispersionNuBisection}
 \alias{estimateDispersionNuNlminb,COTAN-method}
 \alias{estimateDispersionNuNlminb}
-\alias{getNormalizedData}
 \alias{getNu,COTAN-method}
 \alias{getNu}
 \alias{getLambda,COTAN-method}
@@ -22,6 +21,9 @@
 \alias{getDispersion,COTAN-method}
 \alias{getDispersion}
 \alias{estimatorsAreReady}
+\alias{getNuNormData}
+\alias{getLogNormData}
+\alias{getNormalizedData}
 \title{Estimation of the \code{COTAN} model's parameters}
 \usage{
 \S4method{estimateLambdaLinear}{COTAN}(objCOTAN)
@@ -61,8 +63,6 @@
   enforceNuAverageToOne = TRUE
 )
 
-getNormalizedData(objCOTAN)
-
 \S4method{getNu}{COTAN}(objCOTAN)
 
 \S4method{getLambda}{COTAN}(objCOTAN)
@@ -70,6 +70,12 @@ getNormalizedData(objCOTAN)
 \S4method{getDispersion}{COTAN}(objCOTAN)
 
 estimatorsAreReady(objCOTAN)
+
+getNuNormData(objCOTAN)
+
+getLogNormData(objCOTAN)
+
+getNormalizedData(objCOTAN, retLog = FALSE)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
@@ -85,6 +91,8 @@ is 1024.}
 
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
+
+\item{retLog}{When \code{TRUE} calls \code{\link[=getLogNormData]{getLogNormData()}}, calls \code{\link[=getNuNormData]{getNuNormData()}}}
 }
 \value{
 \code{estimateLambdaLinear()} returns the updated \code{COTAN} object
@@ -99,8 +107,6 @@ equal to 1}
 
 \code{estimateDispersionNuNlminb()} returns the updated \code{COTAN} object
 
-\code{getNormalizedData()} returns the normalized count \code{data.frame}
-
 \code{getNu()} returns the nu array
 
 \code{getLambda()} returns the lambda array
@@ -109,6 +115,15 @@ equal to 1}
 
 \code{estimatorsAreReady()} returns a boolean specifying whether all
 three arrays are non-empty
+
+\code{getNuNormData()} returns the \eqn{\nu}\emph{-normalized} count
+\code{data.frame}
+
+\code{getLogNormData()} returns a \code{data.frame} after applying the formula
+\eqn{\log_{10}{(10^4 * x + 1)}} to the raw counts normalized by
+\emph{cells-size}
+
+\code{getNormalizedData()} returns a \code{data.frame}
 }
 \description{
 These functions are used to estimate the \code{COTAN} model's
@@ -149,9 +164,6 @@ and expected probability of zero. It uses the \code{\link[stats:nlminb]{stats::n
 but since the joint parameters have too high dimensionality, it converges
 too slowly to be actually useful in real cases.
 
-\code{getNormalizedData()} extracts the \emph{normalized} count table (i.e.
-divided by \code{nu}) and returns it or its base-10 logarithm
-
 \code{getNu()} extracts the nu array (normalized cells' counts averages)
 
 \code{getLambda()} extracts the lambda array (mean expression for each
@@ -161,6 +173,16 @@ gene)
 
 \code{estimatorsAreReady()} checks whether the estimators arrays lambda,
 nu, dispersion are available
+
+\code{getNuNormData()} extracts the \eqn{\nu}\emph{-normalized} count table
+(i.e. where each column is divided by \code{nu}) and returns it
+
+\code{getLogNormData()} extracts the \emph{log-normalized} count table (i.e.
+where each column is divided by the \code{\link[=getCellsSize]{getCellsSize()}}), takes its \code{log10}
+and returns it.
+
+\code{getNormalizedData()} is deprecated: please use \code{\link[=getNuNormData]{getNuNormData()}} or
+\code{\link[=getLogNormData]{getLogNormData()}} directly as appropriate
 }
 \examples{
 data("test.dataset")
@@ -180,6 +202,10 @@ objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L,
 nu <- getNu(objCOTAN)
 dispersion <- getDispersion(objCOTAN)
 
-rawNorm <- getNormalizedData(objCOTAN)
+nuNorm <- getNuNormData(objCOTAN)
+
+logNorm <- getLogNormData(objCOTAN)
+
+logNorm <- getNormalizedData(objCOTAN, retLog = TRUE)
 
 }

@@ -23,7 +23,7 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
   dispersion.test <- getDispersion(obj)[genes.names.test]
   saveRDS(dispersion.test, file.path(testsDir, "dispersion.test.RDS"))
 
-  raw.norm.test <- getNormalizedData(obj)[genes.names.test, cells.names.test]
+  raw.norm.test <- getNuNormData(obj)[genes.names.test, cells.names.test]
   saveRDS(raw.norm.test, file.path(testsDir, "raw.norm.test.RDS"))
 
   coex.test <- getGenesCoex(obj, genes = genes.names.test, zeroDiagonal = FALSE)
