@@ -54,9 +54,6 @@ test_that("Merge Uniform Cells Clusters", {
   expect_equal(coexDF[genes.names.test, ], coexDF_exp, tolerance = 1.0e-12)
   expect_equal(pValDF[genes.names.test, ], pValDF_exp, tolerance = 1.0e-12)
 
-  GDIThreshold <- 1.46
-  ratioAboveThreshold <- 0.01
-
   deltaExpression <- clustersDeltaExpression(obj)
 
   expect_identical(rownames(deltaExpression), getGenes(obj))
@@ -76,11 +73,14 @@ test_that("Merge Uniform Cells Clusters", {
   expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0L)
   expect_equal(e.df[["N. total"]], lengths(groupMarkers), ignore_attr = TRUE)
 
+  GDIThreshold <- 1.46
+  ratioAboveThreshold <- 0.01
+
   suppressWarnings({
     c(mergedClusters, mergedCoexDF) %<-%
       mergeUniformCellsClusters(
         objCOTAN = obj, clusters = clusters,
-        GDIThreshold = GDIThreshold,
+        GDIThreshold = GDIThreshold, batchSize = 2L,
         ratioAboveThreshold = ratioAboveThreshold,
         distance = "cosine", hclustMethod = "ward.D2",
         cores = 6L, saveObj = TRUE, outDir = tm)
@@ -88,9 +88,11 @@ test_that("Merge Uniform Cells Clusters", {
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "merge_clusterization_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
-                                    "non_mergeable_clusters_1.csv")))
+                                    "merge_clusterization_2.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "all_check_results_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "leafs_merge",
+                                    "all_check_results_2.csv")))
   expect_true(file.exists(file.path(tm, "test", "merge_check_results.csv")))
 
   expect_lt(nlevels(mergedClusters), nlevels(clusters))

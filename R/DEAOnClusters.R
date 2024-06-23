@@ -2,12 +2,13 @@
 runSingleDEA <- function(clName, cellsInList,
                          probZero, rowSumsProbZero, zeroOne) {
   logThis("*", appendLF = FALSE, logLevel = 1L)
-  logThis(paste0(" DEA on cluster '", clName, "'"), logLevel = 3L)
 
   cellsIn <- cellsInList[[clName]]
   if (!any(cellsIn)) {
     warning("Cluster '", clName, "' has no cells assigned to it!")
   }
+  logThis(paste0(" DEA on cluster '", clName,
+                 "' with ", sum(cellsIn), " cells"), logLevel = 3L)
 
   numCells <- ncol(zeroOne)
   numCellsIn  <- sum(cellsIn)
