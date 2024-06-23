@@ -75,7 +75,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
   if (isTRUE(includePCA)) {
     logThis("PCA: START", logLevel = 2L)
 
-    rawNorm <- getNormalizedData(objCOTAN)
+    rawNorm <- getNuNormData(objCOTAN)
 
     pcaCells <- pca(mat = rawNorm, rank = 5L,
                     transposed = FALSE, BSPARAM = IrlbaParam())[["rotated"]]

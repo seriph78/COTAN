@@ -682,11 +682,12 @@ mergeClusters <- function(clusters, names, mergedName = "") {
     mergedName <- paste0(paste(effNames, collapse = "_"), "-merge")
   }
 
-  # cannot assign new levels into a factor
-  cclusters <- factorToVector(clusters)
-  cclusters[clusters %in% effNames] <- mergedName
+  # new level must be last!
+  levels(clusters) <- c(levels(clusters), mergedName)
+  clusters[clusters %in% effNames] <- mergedName
+  clusters <- droplevels(clusters)
 
-  return(factor(cclusters))
+  return(clusters)
 }
 
 

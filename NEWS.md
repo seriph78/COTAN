@@ -3,6 +3,14 @@
 Stopped function `cellsUniformClustering()` from saving the internally created
 `Seurat` object due to possibly long saving times
 
+Splitted the now deprecated function `getNormalizedData()` into two separeted
+functions: `getNuNormData()` and `getLogNormData()`
+
+Re-factored function `mergeUniformCellsClusters()` to be more precise:
+now it merges clusters starting from the most similar in latest batch and
+also runs the merging in multiple steps adjusting gradually the *GDI* threshold
+ranging from a very strict up to the user given ones.
+
 Fixed minor bugs in functions `GDIPlot()` and `clustersMarkersHeatmapPlot()`
 
 ## 2.5.4
