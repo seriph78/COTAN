@@ -232,9 +232,9 @@ methods are supported:
 \itemize{
 \item \code{"NuNorm"} uses the \eqn{\nu}\emph{-normalized} counts
 \item \code{"LogNormalized"} uses the \emph{log-normalized} counts. The default method
-\item \code{"Likelyhood"} uses the likelyhood of observed presence/absence of each
+\item \code{"Likelihood"} uses the likelihood of observed presence/absence of each
 gene
-\item \code{"LogLikelyhood"} uses the likelyhood of observed presence/absence of
+\item \code{"LogLikelihood"} uses the likelihood of observed presence/absence of
 each gene
 \item \code{"Binarized"} uses the binarized data matrix
 \item \code{"AdjBinarized"} uses the binarized data matrix where ones and zeros

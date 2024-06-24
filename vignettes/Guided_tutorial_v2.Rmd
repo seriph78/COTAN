@@ -352,8 +352,8 @@ obj <- storeGDI(obj, genesGDI = getColumnFromDF(quantP, "GDI"))
 The next function can either plot the `GDI` for the dataset directly or
 use the pre-computed dataframe.
 
-It marks the given threshold \eqn{1.43} (in red) and
-the \eqn{50\%} and \eqn{75\%} quantiles (in blue).
+It marks the given threshold 1.43 (in red) and
+the 50% and 75% quantiles (in blue).
 We can also specify some gene sets (three in this case) that
 we want to label explicitly in the `GDI` plot.
 

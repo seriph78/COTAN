@@ -281,9 +281,9 @@ seuratHVG <- function(rawData, hvgMethod, cond) {
 #'   methods are supported:
 #'   * `"NuNorm"` uses the \eqn{\nu}*-normalized* counts
 #'   * `"LogNormalized"` uses the *log-normalized* counts. The default method
-#'   * `"Likelyhood"` uses the likelyhood of observed presence/absence of each
+#'   * `"Likelihood"` uses the likelihood of observed presence/absence of each
 #'     gene
-#'   * `"LogLikelyhood"` uses the likelyhood of observed presence/absence of
+#'   * `"LogLikelihood"` uses the likelihood of observed presence/absence of
 #'     each gene
 #'   * `"Binarized"` uses the binarized data matrix
 #'   * `"AdjBinarized"` uses the binarized data matrix where ones and zeros
@@ -360,9 +360,9 @@ cellsUMAPPlot <- function(objCOTAN,
     zeroOne <- getZeroOneProj(objCOTAN)
     rwMns <- rowMeans(zeroOne)
     cellsMatrix <- (zeroOne * (1.0 - rwMns) + (1.0 - zeroOne) * rwMns)
-  } else if (str_equal(dataMethod, "Likelyhood", ignore_case = TRUE)) {
+  } else if (str_equal(dataMethod, "Likelihood", ignore_case = TRUE)) {
     cellsMatrix <- calculateLikelihoodOfObserved(objCOTAN)
-  } else if (str_equal(dataMethod, "LogLikelyhood", ignore_case = TRUE)) {
+  } else if (str_equal(dataMethod, "LogLikelihood", ignore_case = TRUE)) {
     cellsMatrix <- log(calculateLikelihoodOfObserved(objCOTAN))
   } else if (str_equal(dataMethod, "NuNorm", ignore_case = TRUE) ||
              str_equal(dataMethod, "Normalized", ignore_case = TRUE)) {

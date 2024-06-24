@@ -3,7 +3,7 @@
 Stopped function `cellsUniformClustering()` from saving the internally created
 `Seurat` object due to possibly long saving times
 
-Splitted the now deprecated function `getNormalizedData()` into two separeted
+Split the now deprecated function `getNormalizedData()` into two separated
 functions: `getNuNormData()` and `getLogNormData()`
 
 Re-factored function `mergeUniformCellsClusters()` to be more precise:
