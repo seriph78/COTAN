@@ -47,7 +47,7 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
   tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
-    srat <- CreateSeuratObject(counts = as.data.frame(rawData),
+    srat <- CreateSeuratObject(counts = rawData,
                                project = paste0(cond, "_reclustering_", iter),
                                min.cells = if (iter == 1L) 3L else 1L,
                                min.features = if (iter == 1L) 4L else 2L)

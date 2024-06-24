@@ -161,7 +161,10 @@ checks about the merging of clusters. Useful to restart the \emph{merging}
 process after an interruption.}
 }
 \value{
-\code{GDIPlot()} returns a \code{ggplot2} object
+\code{GDIPlot()} returns a \code{ggplot2} object with a point got each gene,
+where on the ordinates are the \code{GDI} levels and on the abscissa are the
+average gene expression (log scaled). Also marked are the given \emph{threshold}
+(in red) and the \eqn{50\%} and \eqn{75\%} quantiles (in blue).
 
 \code{cellsUniformClustering()} returns a \code{list} with 2 elements:
 \itemize{

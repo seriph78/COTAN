@@ -16,7 +16,7 @@
 #'   on the one indicated by `clName`
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
-#' @param method *p-value* multi-test adjustment method. Defaults to
+#' @param adjustmentMethod *p-value* multi-test adjustment method. Defaults to
 #'   `"bonferroni"`; use `"none"` for no adjustment
 #'
 #' @returns `findClustersMarkers()` returns a `data.frame` containing `n` genes
@@ -47,7 +47,7 @@
 findClustersMarkers <- function(
     objCOTAN, n = 10L, markers = NULL,
     clName = "", clusters = NULL,
-    coexDF = NULL, method = "bonferroni") {
+    coexDF = NULL, adjustmentMethod = "bonferroni") {
   logThis("findClustersMarkers - START", logLevel = 2L)
 
   marks <- unlist(markers)
@@ -70,7 +70,7 @@ findClustersMarkers <- function(
   }
 
   adjPValueDF <- pValueFromDEA(coexDF, numCells = getNumCells(objCOTAN),
-                               method = method)
+                               adjustmentMethod = adjustmentMethod)
 
   deltaExp <- clustersDeltaExpression(objCOTAN, clName = clName,
                                       clusters = clusters)

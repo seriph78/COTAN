@@ -293,6 +293,7 @@ c(pcaCellsPlot, pcaCellsData, genesPlot,
 
 plot(pcaCellsPlot)
 ```
+
 ```{r}
 scatterPlot(obj)
 ```
@@ -314,7 +315,7 @@ obj <- proceedToCoex(obj, calcCoex = TRUE,
 
 When `saveObj == TRUE`, in the previous step, this step can be skipped
 as the `COTAN` object has already been saved in the `outDir`.
-```{r eval=FALSE, include=TRUE}
+```{r}
 # saving the structure
 saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
 ```
@@ -351,8 +352,8 @@ obj <- storeGDI(obj, genesGDI = getColumnFromDF(quantP, "GDI"))
 The next function can either plot the `GDI` for the dataset directly or
 use the pre-computed dataframe.
 
-It marks a \eqn{1.43} threshold (in red) and
-the two highest quantiles (in blue) by default.
+It marks the given threshold \eqn{1.43} (in red) and
+the \eqn{50\%} and \eqn{75\%} quantiles (in blue).
 We can also specify some gene sets (three in this case) that
 we want to label explicitly in the `GDI` plot.
 
@@ -387,11 +388,11 @@ We also have to provide an array of the file name prefixes for each condition
 In fact, this function can plot genes relationships across many different
 conditions to get a complete overview.
 
-```{r eval=FALSE}
+```{r}
 print(cond)
 ```
 
-```{r eval=FALSE}
+```{r}
 heatmapPlot(genesLists = genesList, sets = (1L:3L),
             conditions = c(cond), dir = outDir)
 ```
@@ -418,13 +419,10 @@ contingency tables for two specific genes. To get them we can use two functions:
 `contingencyTables()` to produce the observed and expected data
 
 ```{r}
-c(observedCT, expectedCT) %<-% contingencyTables(obj, g1 = "Satb2",
-                                                      g2 = "Bcl11b")
-print("Observed CT")
-observedCT
-print("Expected CT")
-expectedCT
-print("Coex")
+print("Contingency Tables:")
+contingencyTables(obj, g1 = "Satb2", g2 = "Bcl11b")
+
+print("Corresponding Coex")
 getGenesCoex(obj)["Satb2", "Bcl11b"]
 ```
 
@@ -566,7 +564,7 @@ It is possible to plot the clusterization on a UMAP plot
 
 ```{r}
 c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge",
-                                         method = "AdjBinarized",
+                                         dataMethod = "AdjBinarized",
                                          genesSel = "HGDI",
                                          colors = NULL, numNeighbors = 30,
                                          minPointsDist = 0.1)
