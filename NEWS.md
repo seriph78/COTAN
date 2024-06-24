@@ -1,3 +1,8 @@
+## 2.5.6
+
+Solved few minor issues with the vignette and changed a few default parameters
+in `cellsUMAPPlot()`, `pValueFromDEA()` and `findClustersMarkers()`
+
 ## 2.5.5
 
 Stopped function `cellsUniformClustering()` from saving the internally created
