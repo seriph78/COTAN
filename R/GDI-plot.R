@@ -16,7 +16,10 @@
 #' @param GDIIn when the `GDI` data frame was already calculated, it can be put
 #'   here to speed up the process (default is `NULL`)
 #'
-#' @returns `GDIPlot()` returns a `ggplot2` object
+#' @returns `GDIPlot()` returns a `ggplot2` object with a point got each gene,
+#'   where on the ordinates are the `GDI` levels and on the abscissa are the
+#'   average gene expression (log scaled). Also marked are the given *threshold*
+#'   (in red) and the \eqn{50\%} and \eqn{75\%} quantiles (in blue).
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point

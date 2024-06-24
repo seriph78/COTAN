@@ -64,7 +64,7 @@ getClusters(objCOTAN, clName = "")
 
 DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
-pValueFromDEA(coexDF, numCells, method = "none")
+pValueFromDEA(coexDF, numCells, adjustmentMethod = "none")
 
 logFoldChangeOnClusters(
   objCOTAN,
@@ -130,7 +130,7 @@ findClustersMarkers(
   clName = "",
   clusters = NULL,
   coexDF = NULL,
-  method = "bonferroni"
+  adjustmentMethod = "bonferroni"
 )
 
 geneSetEnrichment(clustersCoex, groupMarkers = list())
@@ -172,7 +172,7 @@ data losses}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
-\item{method}{\emph{p-value} multi-test adjustment method. Defaults to
+\item{adjustmentMethod}{\emph{p-value} multi-test adjustment method. Defaults to
 \code{"bonferroni"}; use \code{"none"} for no adjustment}
 
 \item{floorLambdaFraction}{Indicates the lower bound to the average count

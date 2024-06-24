@@ -37,11 +37,12 @@ test_that("Merge Uniform Cells Clusters", {
   expect_lt(max(colMeans(lfcDF)),  0.00)
   expect_gt(min(colMeans(lfcDF)), -0.06)
 
-  method <- "bonferroni"
+  adjustmentMethod <- "bonferroni"
 
-  pValDF <- pValueFromDEA(coexDF, numCells = getNumCells(obj), method = "none")
+  pValDF <- pValueFromDEA(coexDF, numCells = getNumCells(obj),
+                          adjustmentMethod = "none")
   adjPValDF <- pValueFromDEA(coexDF, numCells = getNumCells(obj),
-                             method = method)
+                             adjustmentMethod = adjustmentMethod)
 
   expect_setequal(colnames(pValDF), levels(clusters))
   expect_identical(rownames(pValDF), getGenes(obj))

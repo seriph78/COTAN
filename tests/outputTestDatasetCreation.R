@@ -57,7 +57,7 @@ outputTestDatasetCreation <- function(testsDir = file.path("tests",
   saveRDS(coexDF[genes.names.test, ],
           file.path(testsDir, "coex.test.cluster1.RDS"))
 
-  pvalDF <- pValueFromDEA(coexDF, getNumCells(obj), method = "none")
+  pvalDF <- pValueFromDEA(coexDF, getNumCells(obj), adjustmentMethod = "none")
 
   saveRDS(pvalDF[genes.names.test, ],
           file.path(testsDir, "pval.test.cluster1.RDS"))

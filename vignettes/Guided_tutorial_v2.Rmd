@@ -282,7 +282,11 @@ obj <- clean(obj)
 c(pcaCellsPlot, pcaCellsData, genesPlot, UDEPlot, nuPlot, zoomedNuPlot) %<-%
   cleanPlots(obj)
 
-pcaCellsPlot
+plot(pcaCellsPlot)
+```
+
+```{r}
+scatterPlot(obj)
 ```
 
 ```{r}
@@ -335,8 +339,8 @@ head(quantP)
 
 The next function can either plot the `GDI` for the dataset directly or
 use the pre-computed dataframe.
-It marks a `1.43` threshold (in red) and
-the two highest quantiles (in blue) by default.
+It marks the given threshold 1.43 (in red) and
+the 50% and 75% quantiles (in blue).
 We can also specify some gene sets (three in this case) that
 we want to label explicitly in the `GDI` plot.
 
@@ -402,13 +406,10 @@ contingency tables for two specific genes. To get them we can use two functions:
 `contingencyTables()` to produce the observed and expected data
 
 ```{r}
-c(observedCT, expectedCT) %<-% contingencyTables(obj, g1 = "Satb2",
-                                                      g2 = "Bcl11b")
-print("Observed CT")
-observedCT
-print("Expected CT")
-expectedCT
-print("Coex")
+print("Contingency Tables:")
+contingencyTables(obj, g1 = "Satb2", g2 = "Bcl11b")
+
+print("Corresponding Coex")
 getGenesCoex(obj)["Satb2", "Bcl11b"]
 ```
 
