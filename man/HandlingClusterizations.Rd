@@ -65,7 +65,7 @@ getClusters(objCOTAN, clName = "")
 
 DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
-pValueFromDEA(coexDF, numCells, method = "none")
+pValueFromDEA(coexDF, numCells, adjustmentMethod = "none")
 
 logFoldChangeOnClusters(
   objCOTAN,
@@ -97,8 +97,8 @@ cellsUMAPPlot(
   objCOTAN,
   clName = "",
   clusters = NULL,
-  method = "",
-  genesSel = NULL,
+  dataMethod = "",
+  genesSel = "HVG_Seurat",
   numGenes = 2000L,
   colors = NULL,
   numNeighbors = 0L,
@@ -151,7 +151,7 @@ findClustersMarkers(
   clName = "",
   clusters = NULL,
   coexDF = NULL,
-  method = "bonferroni"
+  adjustmentMethod = "bonferroni"
 )
 
 geneSetEnrichment(clustersCoex, groupMarkers = list())
@@ -193,7 +193,7 @@ data losses}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
-\item{method}{\emph{p-value} multi-test adjustment method. Defaults to
+\item{adjustmentMethod}{\emph{p-value} multi-test adjustment method. Defaults to
 \code{"bonferroni"}; use \code{"none"} for no adjustment}
 
 \item{floorLambdaFraction}{Indicates the lower bound to the average count
@@ -225,14 +225,32 @@ colors are given it will complete the list using colors from
 
 \item{minPointsDist}{Overrides the \code{min_dist} value from \link{umap.defaults}}
 
+\item{dataMethod}{selects the method to use to create the \code{data.frame} to
+pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. The following methods calculate, for each cell, a
+statistic for each gene based on available data/model. The following
+methods are supported:
+\itemize{
+\item \code{"NuNorm"} uses the \eqn{\nu}\emph{-normalized} counts
+\item \code{"LogNormalized"} uses the \emph{log-normalized} counts. The default method
+\item \code{"Likelihood"} uses the likelihood of observed presence/absence of each
+gene
+\item \code{"LogLikelihood"} uses the likelihood of observed presence/absence of
+each gene
+\item \code{"Binarized"} uses the binarized data matrix
+\item \code{"AdjBinarized"} uses the binarized data matrix where ones and zeros
+are replaced by the per-gene estimated probability of zero and its
+complement respectively
+}}
+
 \item{genesSel}{Decides whether and how to perform gene-selection. It can be
 a string indicating one of the following methods or a straight list of
 genes. The following methods are supported:
 \itemize{
-\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}. The default method.
-Since it requires an available \code{COEX} matrix it will fall-back to \code{"HVG"}
-when not available
-\item \code{"HVG"} Will pick-up the genes with the highest variability
+\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}. Since it requires
+an available \code{COEX} matrix it will fall-back to \code{"HVG"} when the matrix
+is not available
+\item \code{"HVG"} Will pick-up the genes with the highest variability. The default
+method.
 \item \code{"None"} Will use all genes
 }}
 
@@ -547,7 +565,7 @@ if (FALSE) {
 clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 stopifnot(length(clusterizations) == 1)
 
-cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "LogNormalized",
+cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, dataMethod = "LogNormalized",
                                     clName = "first_clusterization",
                                     genesSel = "HVG_Seurat")
 plot(cellsUmapPlotAndDF[["plot"]])

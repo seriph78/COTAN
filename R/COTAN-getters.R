@@ -1170,7 +1170,7 @@ setMethod(
 #' clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 #' stopifnot(length(clusterizations) == 1)
 #'
-#' cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, method = "LogNormalized",
+#' cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, dataMethod = "LogNormalized",
 #'                                     clName = "first_clusterization",
 #'                                     genesSel = "HVG_Seurat")
 #' plot(cellsUmapPlotAndDF[["plot"]])
