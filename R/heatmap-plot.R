@@ -6,22 +6,132 @@
 #' @name HeatmapPlots
 NULL
 
-#' @details `heatmapPlot()` creates the `heatmap` of one or more `COTAN` objects
+#' @details `singleHeatmapDF()` creates the `heatmap` `data.frame` of one
+#'   `COTAN` object
 #'
+#' @param objCOTAN a `COTAN` object
 #' @param genesLists A `list` of genes' `array`s. The first `array` defines the
 #'   genes in the columns
 #' @param sets A numeric array indicating which fields in the previous `list`
-#'   should be used
-#' @param conditions An array of prefixes indicating the different files
+#'   should be used. Defaults to all fields
 #' @param pValueThreshold The p-value threshold. Default is 0.01
+#'
+#' @returns `singleHeatmapDF()` returns a `data.frame`
+#'
+#' @importFrom tidyr pivot_longer
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname HeatmapPlots
+#'
+
+singleHeatmapDF <- function(objCOTAN,
+                            genesLists, sets,
+                            pValueThreshold = 0.01) {
+  assert_that(!is_empty(genesLists) && !is_empty(names(genesLists)),
+              msg = "genesLists must be a named list of genes arrays")
+
+  assert_that(!is_empty(sets) && is.integrer(sets) &&
+                max(sets) <= length(genesLists),
+              msg = "sets must be positions in the genes list")
+
+  cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
+
+  logThis(paste("Hangling COTAN object with condition:", cond), logLevel = 2L)
+
+  colGenes <- genesLists[[1L]]
+  genesLists <- genesLists[sets]
+
+  allGenes <- unique(unlist(genesLists))
+
+  assert_that(any(colGenes %in% getGenes(obj)),
+              msg = "none of primary markers are available in the COTAN object")
+
+  #---------------------------------------------------------
+  pValue <- calculatePValue(obj, geneSubsetCol = colGenes,
+                            geneSubsetRow = allGenes)
+  pValue <- as.data.frame(pValue)
+
+  pValue <- setColumnInDF(pValue, colToSet = rownames(pValue), colName = "g2")
+
+  dfValue <- pivot_longer(pValue, cols = seq_len(ncol(pValue)) - 1L,
+                          names_to = "g1", values_to = "pValue")
+  rm(pValue)
+
+  #---------------------------------------------------------
+  coex <- getGenesCoex(obj, genes = getGenes(obj) %in% colGenes)
+  coex <- coex[getGenes(obj) %in% allGenes, , drop = FALSE]
+  coex <- as.data.frame(coex)
+
+  coex <- setColumnInDF(coex, colToSet = rownames(coex), colName = "g2")
+  dfCoex <- pivot_longer(coex, cols = seq_len(ncol(coex)) - 1L,
+                         names_to = "g1", values_to = "coex")
+  rm(coex)
+
+  #---------------------------------------------------------
+  assert_that(identical(colnames(dfValue), colnames(dfCoex)))
+
+  dfMerge <- merge(dfCoex, dfValue)
+
+  dfMerge[["time"]] <- cond
+  dfMerge[["type"]] <- NA
+  dfMerge[["absent"]] <- NA
+
+  rm(dfCoex, dfVal)
+  #---------------------------------------------------------
+
+  dfRet <- data.frame()
+  for (genesType in names(genesLists)) {
+    logThis(paste("Handling genes type:", genesType), logLevel = 3L)
+    rowGenes <- genesLists[[genesType]]
+    for (g1 in colGenes) {
+      genesToUse <- (dfMerge[["g2"]] %in% rowGenes) & (dfMerge[["g1"]] == g1)
+      dfSlice <- dfMerge[genesToUse, , drop = FALSE]
+
+      # control if the subset is smaller than the number of wanted genes
+      numMissingRows <- length(rowGenes) - nrow(dfSlice)
+      if (numMissingRows > 0) {
+        extraRows <- as.data.frame(matrix(nrow = numMissingRows,
+                                          ncol = ncol(dfSlice)))
+        colnames(extraRows) <- colnames(dfSlice)
+        extraRows[, "g1"] <- g1
+        extraRows[, "time"] <- cond
+        extraRows[, "absent"] <- "yes"
+        extraRows[, "pValue"] <- 1.0
+        extraRows[, "g2"] <- rowGenes[!(rowGenes %in% dfSlice[["g2"]])]
+        dfSlice <- rbind(dfSlice, extraRows)
+      }
+      # now dfSlice has the right number of rows
+      assert_that(nrow(dfSlice) == length(rowGenes))
+
+      dfSlice[["type"]] <- genesType
+      dfRet <- rbind(dfRet, dfSlice)
+    }
+  }
+
+  anyGeneIsFE <- (dfRet[["g2"]] %in% getFullyExpressedGenes(obj)) |
+                 (dfRet[["g1"]] %in% getFullyExpressedGenes(obj))
+  dfRet[["t_fe"]] <- ifelse(anyGeneIsFE, "fe", "n")
+
+  dfRet[dfRet[["pValue"]] > pValueThreshold, "coex"] <- 0.0
+
+  return(dfRet)
+}
+
+
+#' @details `heatmapPlot()` creates the `heatmap` of one or more `COTAN` objects
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param genesLists A `list` of genes' `array`s. The first `array` defines the
+#'   genes in the columns
+#' @param sets A numeric array indicating which fields in the previous `list`
+#'   should be used. Defaults to all fields
+#' @param pValueThreshold The \eqn{p}-value threshold. Default is \eqn{0.01}
+#' @param conditions An `array` of prefixes indicating the different files
 #' @param dir The directory in which are all `COTAN` files (corresponding to the
 #'   previous prefixes)
 #'
 #' @returns `heatmapPlot()` returns a `ggplot2` object
-#'
-#' @importFrom Matrix forceSymmetric
-#'
-#' @importFrom tidyr pivot_longer
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
@@ -33,6 +143,8 @@ NULL
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom rlang is_empty
+#'
 #' @export
 #'
 #' @examples
@@ -43,10 +155,6 @@ NULL
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 #'
-#' ## Save the `COTAN` object to file
-#' data_dir <- tempdir()
-#' saveRDS(objCOTAN, file = file.path(data_dir, "test.dataset.cotan.RDS"))
-#'
 #' ## some genes
 #' primaryMarkers <- c("g-000010", "g-000020", "g-000030")
 #'
@@ -56,80 +164,51 @@ NULL
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
 #'                             "g-000570", "g-000590"))
 #'
-#' hPlot <- heatmapPlot(genesLists = groupMarkers, sets = c(2, 3),
-#'                      pValueThreshold = 0.05, conditions = c("test.dataset"),
-#'                      dir = paste0(data_dir, "/"))
+#' hPlot <- heatmapPlot(objCOTAN, pValueThreshold = 0.05,
+#'                      genesLists = groupMarkers, sets = 2L:3L)
 #' plot(hPlot)
 #'
 #' @rdname HeatmapPlots
 #'
-heatmapPlot <- function(genesLists, sets, conditions, dir,
-                        pValueThreshold = 0.01) {
+heatmapPlot <- function(objCOTAN = NULL,
+                        genesLists, sets = NULL,
+                        pValueThreshold = 0.01,
+                        conditions = NULL, dir = ".") {
   logThis("heatmap plot: START", logLevel = 2L)
 
-  colGenes <- genesLists[[1L]]
-  allGenes <- unique(sort(unlist(genesLists[sets])))
+  assert_that(is.null(objCOTAN) != is_empty(conditions),
+              msg = paste("Please pass either a COTAN object",
+                          "or an array of conditions"))
+
+  if (is_empty(sets)) {
+    sets <- seq_along(genesLists)
+  }
 
   dfToPrint <- data.frame()
-  for (cond in conditions) {
-    logThis(paste0("Loading condition '", cond, "'"), logLevel = 3L)
-    obj <- readRDS(file.path(dir, paste0(cond, ".cotan.RDS")))
-
-    assert_that(any(colGenes %in% getGenes(obj)),
-                msg = "primary markers all absent")
-
-    pValue <- calculatePValue(obj, geneSubsetCol = colGenes,
-                              geneSubsetRow = allGenes)
-    pValue <- as.data.frame(pValue)
-
-    pValue[["g2"]] <- rownames(pValue)
-    dfTempVal <- pivot_longer(pValue, cols = seq_along(colnames(pValue)) - 1L,
-                              names_to = "g1", values_to = "pValue")
-
-    #---------------------------------------------------------
-    coex <- getGenesCoex(obj)
-    coex <- coex[getGenes(obj) %in% allGenes, getGenes(obj) %in% colGenes]
-    coex <- as.data.frame(coex)
-
-    coex[["g2"]] <- rownames(coex)
-    dfTempCoex <- pivot_longer(coex, cols = seq_along(colnames(pValue)) - 1L,
-                               names_to = "g1", values_to = "coex")
-
-    dfTemp <- merge(dfTempCoex, dfTempVal)
-    dfTemp[["time"]] <- cond
-    dfTemp[["type"]] <- NA
-    dfTemp[["absent"]] <- NA
-    dfTemp2 <- data.frame()
-    for (type in names(genesLists)[sets]) {
-      for (g1 in colGenes) {
-        tt <- dfTemp[dfTemp[["g2"]] %in% genesLists[[type]] &
-                       dfTemp[["g1"]] == g1, ]
-        # control if the subset is smaller than the number of wanted genes
-        if (dim(tt)[[1L]] < length(genesLists[[type]])) {
-          nRow <- length(genesLists[[type]]) - dim(tt)[[1L]]
-          tRows <- as.data.frame(matrix(nrow = nRow, ncol = 7L))
-          colnames(tRows) <- colnames(tt)
-          tRows[, "g1"] <- g1
-          tRows[, "time"] <- cond
-          tRows[, "absent"] <- "yes"
-          tRows[, "pValue"] <- 1.0
-          tRows[, "g2"] <-
-            genesLists[[type]][!genesLists[[type]] %in% tt[["g2"]]]
-          tt <- rbind(tt, tRows)
-        }
-        tt[["type"]] <- type
-        dfTemp2 <- rbind(dfTemp2, tt)
+  if (!is.null(objCOTAN)) {
+    dfToPrint <- singleHeatmapDF(objCOTAN, genesLists = genesLists,
+                                 sets = sets, pValueThreshold = pValueThreshold)
+  } else {
+    for (cond in conditions) {
+      logThis(paste0("Loading condition '", cond, "'"), logLevel = 3L)
+      obj <- tryCatch({
+          readRDS(file.path(dir, paste0(cond, ".cotan.RDS")))
+        },
+        error = function(err) {
+          logThis(paste("While loading the COTAN object with file name",
+                        paste0(cond, ".cotan.RDS"), "got an error:", err),
+                  logLevel = 0L)
+          return(NULL)
+        })
+      if (is.null(obj)) {
+        next
       }
-      logThis(paste("Done type ", type), logLevel = 3L)
+      dfTemp <- singleHeatmapDF(obj, genesLists = genesLists,
+                                sets = sets, pValueThreshold = pValueThreshold)
+      dfToPrint <- rbind(dfToPrint, dfTemp)
     }
-    dfTemp <- dfTemp2
-    dfTemp[["t_fe"]] <-
-      ifelse((dfTemp[["g2"]] %in% getFullyExpressedGenes(obj)) |
-             (dfTemp[["g1"]] %in% getFullyExpressedGenes(obj)),
-             "fe", "n")
-    dfTemp[dfTemp[["pValue"]] > pValueThreshold, "coex"] <- 0L
-    dfToPrint <- rbind(dfToPrint, dfTemp)
   }
+
   logThis(paste("min coex:", min(dfToPrint[["coex"]], na.rm = TRUE),
                 "max coex:", max(dfToPrint[["coex"]], na.rm = TRUE)),
           logLevel = 2L)
@@ -177,8 +256,6 @@ heatmapPlot <- function(genesLists, sets, conditions, dir,
 #' @importFrom stats quantile
 #'
 #' @importFrom circlize colorRamp2
-#'
-#' @importFrom Matrix forceSymmetric
 #'
 #' @importFrom rlang is_empty
 #'
