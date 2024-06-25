@@ -439,7 +439,7 @@ identical(partialGenesCoex,
 ## G <- calculateG(objCOTAN)
 ## pValue <- calculatePValue(objCOTAN)
 gdiDF <- calculateGDI(objCOTAN)
-objCOTAN <- storeGDI(objCOTAN, genesGDI = getColumnFromDF(gdiDF, "GDI"))
+objCOTAN <- storeGDI(objCOTAN, genesGDI = gdiDF)
 
 ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
 ## matrix and derivatives, so it can be dropped it from the `COTAN` object

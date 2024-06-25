@@ -894,7 +894,7 @@ NULL
 #' ## G <- calculateG(objCOTAN)
 #' ## pValue <- calculatePValue(objCOTAN)
 #' gdiDF <- calculateGDI(objCOTAN)
-#' objCOTAN <- storeGDI(objCOTAN, genesGDI = getColumnFromDF(gdiDF, "GDI"))
+#' objCOTAN <- storeGDI(objCOTAN, genesGDI = gdiDF)
 #'
 #' ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
 #' ## matrix and derivatives, so it can be dropped it from the `COTAN` object
@@ -1077,7 +1077,8 @@ setMethod(
 
 #' @aliases getGDI
 #'
-#' @details `getGDI()` extracts the genes' **GDI** array
+#' @details `getGDI()` extracts the genes' **GDI** array as it was stored by the
+#'   method [storeGDI()]
 #'
 #' @param objCOTAN a `COTAN` object
 #'
