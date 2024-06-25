@@ -197,10 +197,11 @@ setMethod(
 #' @aliases storeGDI
 #'
 #' @details `storeGDI()` stored and already calculated genes' GDI `array` in a
-#'   `COTAN` object
+#'   `COTAN` object. It can be retrieved using the method [getGDI()]
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param genesGDI the genes' GDI `array` to store
+#' @param genesGDI the named genes' GDI `array` to store or the output
+#'   `data.frame` of the function [calculateGDI()]
 #'
 #' @returns `storeGDI()` returns the given `COTAN` object  with updated
 #'   **GDI** genes' information
@@ -215,6 +216,12 @@ setMethod(
   "storeGDI",
   "COTAN",
   function(objCOTAN, genesGDI) {
+    if (isa(genesGDI, "data.frame")) {
+      assert_that("GDI" %in% colnames(genesGDI),
+                  msg = "Passed data.frame has no GDI column")
+      genesGDI <- getColumnFromDF(genesGDI, colName = "GDI")
+    }
+
     allGenes <- getGenes(objCOTAN)
     assert_that(setequal(names(genesGDI), allGenes),
                 msg = paste("Passed GDI array must be named",

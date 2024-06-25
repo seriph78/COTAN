@@ -1,3 +1,8 @@
+## 2.5.6
+
+Now the method `storeGDI()` can take in the output `data.frame` from
+the function `calculateGDI()`
+
 ## 2.5.5
 
 Stopped function `cellsUniformClustering()` from saving the internally created
