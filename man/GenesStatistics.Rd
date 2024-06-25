@@ -54,7 +54,8 @@ calculatePDI(
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{genesGDI}{the genes' GDI \code{array} to store}
+\item{genesGDI}{the named genes' GDI \code{array} to store or the output
+\code{data.frame} of the function \code{\link[=calculateGDI]{calculateGDI()}}}
 
 \item{primaryMarkers}{A vector of primary marker names.}
 
@@ -149,10 +150,11 @@ denote it as \emph{Local Differentiation Index} (\code{LDI}) relative to the sel
 subset.
 }
 \details{
-\code{getGDI()} extracts the genes' \strong{GDI} array
+\code{getGDI()} extracts the genes' \strong{GDI} array as it was stored by the
+method \code{\link[=storeGDI]{storeGDI()}}
 
 \code{storeGDI()} stored and already calculated genes' GDI \code{array} in a
-\code{COTAN} object
+\code{COTAN} object. It can be retrieved using the method \code{\link[=getGDI]{getGDI()}}
 
 \code{genesCoexSpace()} calculates genes groups based on the primary
 markers and uses them to prepare the genes' \code{COEX} space \code{data.frame}.

@@ -342,11 +342,11 @@ obj2 <- automaticCOTANObjectCreation(
 To calculate and store the Global Differentiation Index (`GDI`) we can run:
 
 ```{r}
-quantP <- calculateGDI(obj)
+gdiDF <- calculateGDI(obj)
 
-head(quantP)
+head(gdiDF)
 
-obj <- storeGDI(obj, genesGDI = getColumnFromDF(quantP, "GDI"))
+obj <- storeGDI(obj, genesGDI = gdiDF)
 ```
 
 The next function can either plot the `GDI` for the dataset directly or
@@ -366,11 +366,7 @@ genesList <- list(
              "Tars", "Amacr")
 )
 
-# needs to be recalculated after the changes in nu/dispersion above
-#obj <- calculateCoex(obj, actOnCells = FALSE)
-
-GDIPlot(obj, GDIIn = quantP, cond = cond,
-        genes = genesList, GDIThreshold = 1.43)
+GDIPlot(obj, cond = cond, genes = genesList, GDIThreshold = 1.43)
 ```
 
 The percentage of cells expressing the gene in the third column of this
@@ -392,7 +388,8 @@ conditions to get a complete overview.
 print(cond)
 ```
 
-```{r}
+
+```{r eval=FALSE}
 heatmapPlot(genesLists = genesList, sets = (1L:3L),
             conditions = c(cond), dir = outDir)
 ```

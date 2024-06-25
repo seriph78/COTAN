@@ -1,5 +1,8 @@
 ## 2.5.6
 
+Now the method `storeGDI()` can take in the output `data.frame` from
+the function `calculateGDI()`
+
 Solved few minor issues with the vignette and changed a few default parameters
 in `cellsUMAPPlot()`, `pValueFromDEA()` and `findClustersMarkers()`
 
