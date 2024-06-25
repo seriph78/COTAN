@@ -2,13 +2,23 @@
 % Please edit documentation in R/heatmap-plot.R, R/utilities.R
 \name{HeatmapPlots}
 \alias{HeatmapPlots}
+\alias{singleHeatmapDF}
 \alias{heatmapPlot}
 \alias{genesHeatmapPlot}
 \alias{cellsHeatmapPlot}
 \alias{plotTheme}
 \title{Heatmap Plots}
 \usage{
-heatmapPlot(genesLists, sets, conditions, dir, pValueThreshold = 0.01)
+singleHeatmapDF(objCOTAN, genesLists, sets, pValueThreshold = 0.01)
+
+heatmapPlot(
+  objCOTAN = NULL,
+  genesLists,
+  sets = NULL,
+  pValueThreshold = 0.01,
+  conditions = NULL,
+  dir = "."
+)
 
 genesHeatmapPlot(
   objCOTAN,
@@ -23,20 +33,20 @@ cellsHeatmapPlot(objCOTAN, cells = NULL, clusters = NULL)
 plotTheme(plotKind = "common", textSize = 14L)
 }
 \arguments{
+\item{objCOTAN}{a \code{COTAN} object}
+
 \item{genesLists}{A \code{list} of genes' \code{array}s. The first \code{array} defines the
 genes in the columns}
 
 \item{sets}{A numeric array indicating which fields in the previous \code{list}
-should be used}
-
-\item{conditions}{An array of prefixes indicating the different files}
-
-\item{dir}{The directory in which are all \code{COTAN} files (corresponding to the
-previous prefixes)}
+should be used. Defaults to all fields}
 
 \item{pValueThreshold}{The p-value threshold. Default is 0.01}
 
-\item{objCOTAN}{a \code{COTAN} object}
+\item{conditions}{An \code{array} of prefixes indicating the different files}
+
+\item{dir}{The directory in which are all \code{COTAN} files (corresponding to the
+previous prefixes)}
 
 \item{primaryMarkers}{A set of genes plotted as rows}
 
@@ -55,6 +65,8 @@ genes}
 \item{textSize}{axes and strip text size (default=14)}
 }
 \value{
+\code{singleHeatmapDF()} returns a \code{data.frame}
+
 \code{heatmapPlot()} returns a \code{ggplot2} object
 
 \code{genesHeatmapPlot()} returns a \code{ggplot2} object
@@ -67,6 +79,9 @@ genes}
 These functions create heatmap \code{COEX} plots.
 }
 \details{
+\code{singleHeatmapDF()} creates the \code{heatmap} \code{data.frame} of one
+\code{COTAN} object
+
 \code{heatmapPlot()} creates the \code{heatmap} of one or more \code{COTAN} objects
 
 \code{genesHeatmapPlot()} is used to plot an \emph{heatmap} made using only
@@ -90,10 +105,6 @@ objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 
-## Save the `COTAN` object to file
-data_dir <- tempdir()
-saveRDS(objCOTAN, file = file.path(data_dir, "test.dataset.cotan.RDS"))
-
 ## some genes
 primaryMarkers <- c("g-000010", "g-000020", "g-000030")
 
@@ -103,9 +114,8 @@ groupMarkers <- list(G1 = primaryMarkers,
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
 
-hPlot <- heatmapPlot(genesLists = groupMarkers, sets = c(2, 3),
-                     pValueThreshold = 0.05, conditions = c("test.dataset"),
-                     dir = paste0(data_dir, "/"))
+hPlot <- heatmapPlot(objCOTAN, pValueThreshold = 0.05,
+                     genesLists = groupMarkers, sets = 2L:3L)
 plot(hPlot)
 
 ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,

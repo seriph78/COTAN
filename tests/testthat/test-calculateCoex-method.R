@@ -525,4 +525,25 @@ test_that("Coex with negative dispersion genes", {
   expect_equal(coex1, coex2, tolerance = 1e-7)
   expect_equal(coex1, coex3, tolerance = 1e-7)
   expect_equal(coex2, coex3, tolerance = 5e-7)
+
+  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+                       G2 = c("g-000300", "g-000330", "g-000660"),
+                       G3 = c("g-000510", "g-000530", "g-000550",
+                              "g-000570", "g-000590"))
+
+  hmDF <- singleHeatmapDF(obj, genesLists = groupMarkers, sets = 2L:3L,
+                          pValueThreshold = 0.05)
+
+  numOtherGenes <- sum(lengths(groupMarkers)[2L:3L])
+  expectedColNames <- c("g2", "g1", "coex", "pValue",
+                        "cond", "type", "absent", "fe_genes")
+  expect_identical(nrow(hmDF), numOtherGenes * length(groupMarkers[[1L]]))
+  expect_setequal(hmDF[["g1"]], groupMarkers[[1L]])
+  expect_setequal(hmDF[["g2"]], unlist(groupMarkers[2L:3L]))
+  expect_setequal(hmDF[["type"]], names(groupMarkers)[2L:3L])
+  expect_setequal(hmDF[["cond"]], "test")
+  expect_identical(colnames(hmDF), expectedColNames)
+  expect_identical(hmDF[["absent"]], hmDF[["g2"]] == "g-000660")
+  expect_true(all(hmDF[["pValue"]]> 0.05))
+  expect_true(all(hmDF[["coex"]] == 0.0))
 })

@@ -1,5 +1,11 @@
 ## 2.4.4
 
+Made function `heatmapPlot()` more easy to use and in line with the rest of
+the `COTAN` package
+
+Solved few minor issues with the vignette and changed a few default parameters
+in `pValueFromDEA()` and `findClustersMarkers()`
+
 Stopped function `cellsUniformClustering()` from saving the internally created
 `Seurat` object due to possibly long saving times
 
