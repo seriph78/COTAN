@@ -3,12 +3,15 @@
 Now the method `storeGDI()` can take in the output `data.frame` from
 the function `calculateGDI()`
 
+Solved few minor issues with the vignette and changed a few default parameters
+in `cellsUMAPPlot()`, `pValueFromDEA()` and `findClustersMarkers()`
+
 ## 2.5.5
 
 Stopped function `cellsUniformClustering()` from saving the internally created
 `Seurat` object due to possibly long saving times
 
-Splitted the now deprecated function `getNormalizedData()` into two separeted
+Split the now deprecated function `getNormalizedData()` into two separated
 functions: `getNuNormData()` and `getLogNormData()`
 
 Re-factored function `mergeUniformCellsClusters()` to be more precise:

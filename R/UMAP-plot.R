@@ -179,22 +179,6 @@ UMAPPlot <- function(df,
                  aes(x, y, colour = types),
                  size = pointSize, alpha = 0.3)
   }
-  if (any(labelled)) {
-    plot <- plot +
-      geom_point(data = plotDF[labelled, , drop = FALSE],
-                 aes(x, y, colour = types),
-                 size = 1.2 * pointSize, alpha = 0.8) +
-      geom_label_repel(data = plotDF[labelled, , drop = FALSE],
-                       aes(x, y, fill = types,
-                           label = rownames(plotDF)[labelled]),
-                       label.size = NA, show.legend = FALSE, force = 2.0,
-                       box.padding = 0.25,
-                       max.overlaps = 40L, alpha = 0.8,
-                       direction = "both", na.rm = TRUE, seed = 1234L)
-  } else {
-    plot <- plot +
-      theme(legend.position = "none")
-  }
 
   if (any(clustered | centroids)) {
     plot <- plot +
@@ -212,6 +196,23 @@ UMAPPlot <- function(df,
       scale_fill_manual("Status", values = myColours)
   }
 
+  if (any(labelled)) {
+    plot <- plot +
+      geom_point(data = plotDF[labelled, , drop = FALSE],
+                 aes(x, y, colour = types),
+                 size = 1.2 * pointSize, alpha = 0.8) +
+      geom_label_repel(data = plotDF[labelled, , drop = FALSE],
+                       aes(x, y, fill = types,
+                           label = rownames(plotDF)[labelled]),
+                       label.size = NA, show.legend = FALSE, force = 2.0,
+                       box.padding = 0.25,
+                       max.overlaps = 40L, alpha = 0.8,
+                       direction = "both", na.rm = TRUE, seed = 1234L)
+  } else {
+    plot <- plot +
+      theme(legend.position = "none")
+  }
+
   return(plot)
 }
 
@@ -221,7 +222,7 @@ UMAPPlot <- function(df,
 #'   variable genes given the counts raw data
 #'
 #' @param rawData the raw counts
-#' @param method the HVG method
+#' @param hvgMethod the HVG method
 #' @param cond the sample condition
 #'
 #' @returns a subset of the genes in the dataset
@@ -236,7 +237,7 @@ UMAPPlot <- function(df,
 #'
 #' @noRd
 #'
-seuratHVG <- function(rawData, method, cond) {
+seuratHVG <- function(rawData, hvgMethod, cond) {
   tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
@@ -244,7 +245,7 @@ seuratHVG <- function(rawData, method, cond) {
                                project = paste0(cond, "_UMAP"),
                                min.cells = 3L, min.features = 4L)
     srat <- NormalizeData(srat)
-    srat <- FindVariableFeatures(srat, selection.method = method,
+    srat <- FindVariableFeatures(srat, selection.method = hvgMethod,
                                  nfeatures = 2000L)
 
     hvg <- VariableFeatures(object = srat)
@@ -274,15 +275,15 @@ seuratHVG <- function(rawData, method, cond) {
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName` that will only indicate the relevant
 #'   column name in the returned `data.frame`
-#' @param method selects the method to use to create the `data.frame` to pass to
-#'   the [UMAPPlot()]. The following methods calculate, for each cell, a
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. The following methods calculate, for each cell, a
 #'   statistic for each gene based on available data/model. The following
 #'   methods are supported:
 #'   * `"NuNorm"` uses the \eqn{\nu}*-normalized* counts
 #'   * `"LogNormalized"` uses the *log-normalized* counts. The default method
-#'   * `"Likelyhood"` uses the likelyhood of observed presence/absence of each
+#'   * `"Likelihood"` uses the likelihood of observed presence/absence of each
 #'     gene
-#'   * `"LogLikelyhood"` uses the likelyhood of observed presence/absence of
+#'   * `"LogLikelihood"` uses the likelihood of observed presence/absence of
 #'     each gene
 #'   * `"Binarized"` uses the binarized data matrix
 #'   * `"AdjBinarized"` uses the binarized data matrix where ones and zeros
@@ -291,10 +292,11 @@ seuratHVG <- function(rawData, method, cond) {
 #' @param genesSel Decides whether and how to perform gene-selection. It can be
 #'   a string indicating one of the following methods or a straight list of
 #'   genes. The following methods are supported:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**. The default method.
-#'   Since it requires an available `COEX` matrix it will fall-back to `"HVG"`
-#'   when not available
-#'   * `"HVG"` Will pick-up the genes with the highest variability
+#'   * `"HGDI"` Will pick-up the genes with highest **GDI**. Since it requires
+#'     an available `COEX` matrix it will fall-back to `"HVG"` when the matrix
+#'     is not available
+#'   * `"HVG"` Will pick-up the genes with the highest variability. The default
+#'     method.
 #'   * `"None"` Will use all genes
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when no selection have been asked or when an explicit list of genes
@@ -325,8 +327,8 @@ seuratHVG <- function(rawData, method, cond) {
 cellsUMAPPlot <- function(objCOTAN,
                           clName = "",
                           clusters = NULL,
-                          method = "",
-                          genesSel = NULL,
+                          dataMethod = "",
+                          genesSel = "HVG_Seurat",
                           numGenes = 2000L,
                           colors = NULL,
                           numNeighbors = 0L,
@@ -347,37 +349,36 @@ cellsUMAPPlot <- function(objCOTAN,
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
-  if (isEmptyName(method)) {
-    method <- "LogNormalized"
+  if (isEmptyName(dataMethod)) {
+    dataMethod <- "LogNormalized"
   }
 
   cellsMatrix <- NULL
-  if (str_equal(method, "Binarized", ignore_case = TRUE)) {
+  if (str_equal(dataMethod, "Binarized", ignore_case = TRUE)) {
     cellsMatrix <- getZeroOneProj(objCOTAN)
-  } else if (str_equal(method, "AdjBinarized", ignore_case = TRUE)) {
+  } else if (str_equal(dataMethod, "AdjBinarized", ignore_case = TRUE)) {
     zeroOne <- getZeroOneProj(objCOTAN)
     rwMns <- rowMeans(zeroOne)
     cellsMatrix <- (zeroOne * (1.0 - rwMns) + (1.0 - zeroOne) * rwMns)
-  } else if (str_equal(method, "Likelyhood", ignore_case = TRUE)) {
+  } else if (str_equal(dataMethod, "Likelihood", ignore_case = TRUE)) {
     cellsMatrix <- calculateLikelihoodOfObserved(objCOTAN)
-  } else if (str_equal(method, "LogLikelyhood", ignore_case = TRUE)) {
+  } else if (str_equal(dataMethod, "LogLikelihood", ignore_case = TRUE)) {
     cellsMatrix <- log(calculateLikelihoodOfObserved(objCOTAN))
-  } else if (str_equal(method, "NuNorm", ignore_case = TRUE) ||
-             str_equal(method, "Normalized", ignore_case = TRUE)) {
+  } else if (str_equal(dataMethod, "NuNorm", ignore_case = TRUE) ||
+             str_equal(dataMethod, "Normalized", ignore_case = TRUE)) {
     cellsMatrix <- getNuNormData(objCOTAN)
-  } else if (str_equal(method, "LogNorm", ignore_case = TRUE) ||
-             str_equal(method, "LogNormalized", ignore_case = TRUE)) {
+  } else if (str_equal(dataMethod, "LogNorm", ignore_case = TRUE) ||
+             str_equal(dataMethod, "LogNormalized", ignore_case = TRUE)) {
     cellsMatrix <- getLogNormData(objCOTAN)
   } else {
-    stop("Unrecognised `method` passed in: ", method)
+    stop("Unrecognised `dataMethod` passed in: ", dataMethod)
   }
 
-  if (is_empty(genesSel)) {
-    if (isCoexAvailable(objCOTAN)) {
-      genesSel <- "HGDI"
-    } else {
-      genesSel <- "HVG_Seurat"
-    }
+  if (str_equal(genesSel, "HGDI", ignore_case = TRUE) &&
+      !isCoexAvailable(objCOTAN)) {
+    logThis(paste("The COEX matrix is not available: falling back",
+                  "to HVG_Seurat for genes' selection"), logLevel = 1L)
+    genesSel <- "HVG_Seurat"
   }
 
   genesPos <- rep(TRUE, getNumGenes(objCOTAN))
@@ -399,13 +400,13 @@ cellsUMAPPlot <- function(objCOTAN,
   } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
     condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
     genesPos <- getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
-                                                  method = "vst",
+                                                  hvgMethod = "vst",
                                                   cond = condition)
     rm(condition)
   } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
     condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
     genesPos <- getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
-                                                  method = "mean.var.plot",
+                                                  hvgMethod = "mean.var.plot",
                                                   cond = condition)
     rm(condition)
   } else {
@@ -425,7 +426,7 @@ cellsUMAPPlot <- function(objCOTAN,
   cellsPCA <- as.data.frame(cellsPCA)
   logThis("Elaborating PCA - END", logLevel = 3L)
 
-  umapTitle <- paste("UMAP of clusterization", clName, "using", method,
+  umapTitle <- paste("UMAP of clusterization", clName, "using", dataMethod,
                      "matrix with", genesSel, "genes selector")
   umapPlot <- UMAPPlot(cellsPCA,
                        clusters = clusters,
