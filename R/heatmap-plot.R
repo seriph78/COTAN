@@ -20,6 +20,9 @@ NULL
 #'
 #' @importFrom tidyr pivot_longer
 #'
+#' @importFrom rlang is_empty
+#' @importFrom rlang is_integer
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @rdname HeatmapPlots
@@ -31,7 +34,7 @@ singleHeatmapDF <- function(objCOTAN,
   assert_that(!is_empty(genesLists) && !is_empty(names(genesLists)),
               msg = "genesLists must be a named list of genes arrays")
 
-  assert_that(!is_empty(sets) && is.integrer(sets) &&
+  assert_that(!is_empty(sets) && is_integer(sets) &&
                 max(sets) <= length(genesLists),
               msg = "sets must be positions in the genes list")
 
@@ -39,17 +42,21 @@ singleHeatmapDF <- function(objCOTAN,
 
   logThis(paste("Hangling COTAN object with condition:", cond), logLevel = 2L)
 
+  allGenes <- getGenes(objCOTAN)
+
   colGenes <- genesLists[[1L]]
   genesLists <- genesLists[sets]
 
-  allGenes <- unique(unlist(genesLists))
+  askedGenes <- unique(unlist(genesLists))
 
-  assert_that(any(colGenes %in% getGenes(obj)),
+  assert_that(any(colGenes %in% allGenes),
               msg = "none of primary markers are available in the COTAN object")
 
   #---------------------------------------------------------
-  pValue <- calculatePValue(obj, geneSubsetCol = colGenes,
-                            geneSubsetRow = allGenes)
+  pValue <-
+    calculatePValue(objCOTAN,
+                    geneSubsetCol = allGenes[allGenes %in% colGenes],
+                    geneSubsetRow = allGenes[allGenes %in% askedGenes])
   pValue <- as.data.frame(pValue)
 
   pValue <- setColumnInDF(pValue, colToSet = rownames(pValue), colName = "g2")
@@ -59,8 +66,8 @@ singleHeatmapDF <- function(objCOTAN,
   rm(pValue)
 
   #---------------------------------------------------------
-  coex <- getGenesCoex(obj, genes = getGenes(obj) %in% colGenes)
-  coex <- coex[getGenes(obj) %in% allGenes, , drop = FALSE]
+  coex <- getGenesCoex(objCOTAN, genes = allGenes[allGenes %in% colGenes])
+  coex <- coex[allGenes %in% askedGenes, , drop = FALSE]
   coex <- as.data.frame(coex)
 
   coex <- setColumnInDF(coex, colToSet = rownames(coex), colName = "g2")
@@ -69,15 +76,15 @@ singleHeatmapDF <- function(objCOTAN,
   rm(coex)
 
   #---------------------------------------------------------
-  assert_that(identical(colnames(dfValue), colnames(dfCoex)))
+  assert_that(identical(colnames(dfValue)[-3L], colnames(dfCoex)[-3L]))
 
   dfMerge <- merge(dfCoex, dfValue)
 
-  dfMerge[["time"]] <- cond
+  dfMerge[["cond"]] <- cond
   dfMerge[["type"]] <- NA
-  dfMerge[["absent"]] <- NA
+  dfMerge[["absent"]] <- FALSE
 
-  rm(dfCoex, dfVal)
+  rm(dfCoex, dfValue)
   #---------------------------------------------------------
 
   dfRet <- data.frame()
@@ -95,8 +102,8 @@ singleHeatmapDF <- function(objCOTAN,
                                           ncol = ncol(dfSlice)))
         colnames(extraRows) <- colnames(dfSlice)
         extraRows[, "g1"] <- g1
-        extraRows[, "time"] <- cond
-        extraRows[, "absent"] <- "yes"
+        extraRows[, "cond"] <- cond
+        extraRows[, "absent"] <- TRUE
         extraRows[, "pValue"] <- 1.0
         extraRows[, "g2"] <- rowGenes[!(rowGenes %in% dfSlice[["g2"]])]
         dfSlice <- rbind(dfSlice, extraRows)
@@ -109,9 +116,8 @@ singleHeatmapDF <- function(objCOTAN,
     }
   }
 
-  anyGeneIsFE <- (dfRet[["g2"]] %in% getFullyExpressedGenes(obj)) |
-                 (dfRet[["g1"]] %in% getFullyExpressedGenes(obj))
-  dfRet[["t_fe"]] <- ifelse(anyGeneIsFE, "fe", "n")
+  dfRet[["fe_genes"]] <- (dfRet[["g2"]] %in% getFullyExpressedGenes(objCOTAN)) |
+                         (dfRet[["g1"]] %in% getFullyExpressedGenes(objCOTAN))
 
   dfRet[dfRet[["pValue"]] > pValueThreshold, "coex"] <- 0.0
 
@@ -191,7 +197,7 @@ heatmapPlot <- function(objCOTAN = NULL,
   } else {
     for (cond in conditions) {
       logThis(paste0("Loading condition '", cond, "'"), logLevel = 3L)
-      obj <- tryCatch({
+      tempObj <- tryCatch({
           readRDS(file.path(dir, paste0(cond, ".cotan.RDS")))
         },
         error = function(err) {
@@ -203,8 +209,9 @@ heatmapPlot <- function(objCOTAN = NULL,
       if (is.null(obj)) {
         next
       }
-      dfTemp <- singleHeatmapDF(obj, genesLists = genesLists,
+      dfTemp <- singleHeatmapDF(tempObj, genesLists = genesLists,
                                 sets = sets, pValueThreshold = pValueThreshold)
+      rm(tempObj)
       dfToPrint <- rbind(dfToPrint, dfTemp)
     }
   }
@@ -214,7 +221,7 @@ heatmapPlot <- function(objCOTAN = NULL,
           logLevel = 2L)
 
   heatmap <- ggplot(data = subset(dfToPrint, type %in% names(genesLists)[sets]),
-                    aes(time, factor(g2, levels = rev(levels(factor(g2)))))) +
+                    aes(cond, factor(g2, levels = rev(levels(factor(g2)))))) +
              geom_tile(aes(fill = coex), colour = "black", show.legend = TRUE) +
              facet_grid(type ~ g1, scales = "free", space = "free") +
              scale_fill_gradient2(low = "#E64B35FF", mid = "gray93",

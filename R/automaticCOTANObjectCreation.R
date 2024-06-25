@@ -70,19 +70,19 @@ setMethod(
     objCOTAN <- clean(objCOTAN)
 
     if (isTRUE(saveObj)) {
-      if (!file.exists(outDir)) {
+      if (!dir.exists(outDir)) {
         dir.create(file.path(outDir))
       }
 
       cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
       outDirCond <- file.path(outDir, cond)
-      if (!file.exists(outDirCond)) {
+      if (!dir.exists(outDirCond)) {
         dir.create(outDirCond)
       }
 
       outDirCleaning <- file.path(outDirCond, "cleaning")
-      if (!file.exists(outDirCleaning)) {
+      if (!dir.exists(outDirCleaning)) {
         dir.create(outDirCleaning)
       }
 
