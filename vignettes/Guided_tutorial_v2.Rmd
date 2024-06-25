@@ -315,7 +315,8 @@ obj <- proceedToCoex(obj, calcCoex = TRUE,
 
 When `saveObj == TRUE`, in the previous step, this step can be skipped
 as the `COTAN` object has already been saved in the `outDir`.
-```{r}
+
+```{r eval=FALSE, include=TRUE}
 # saving the structure
 saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
 ```
@@ -385,13 +386,7 @@ In fact, this function can plot genes relationships across many different
 conditions to get a complete overview.
 
 ```{r}
-print(cond)
-```
-
-
-```{r eval=FALSE}
-heatmapPlot(genesLists = genesList, sets = (1L:3L),
-            conditions = c(cond), dir = outDir)
+heatmapPlot(obj, genesLists = genesList)
 ```
 
 We can also plot a general heatmap of `COEX` values based on some markers like

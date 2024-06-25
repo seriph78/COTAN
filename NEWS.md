@@ -1,5 +1,8 @@
 ## 2.5.6
 
+Made function `heatmapPlot()` more easy to use and in line with the rest of
+the `COTAN` package
+
 Now the method `storeGDI()` can take in the output `data.frame` from
 the function `calculateGDI()`
 
