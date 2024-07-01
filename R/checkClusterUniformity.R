@@ -4,16 +4,9 @@
 #'   determine whether the cluster is **uniform** and in the positive scenario
 #'   the corresponding answer
 #'
-#' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
-#' @param ratioQuantile the `GDI` quantile corresponding to the `usedRatioAbove`
-#' @param fractionAbove the fraction of genes above the `usedGDIThreshold`
-#' @param usedGDIThreshold the threshold level actually used to calculate fourth
-#'   argument
-#' @param usedRatioAbove the fraction of genes actually used to calculate the
-#'   third argument
+#' @param GDI_Quantile95 
+#' @param GDITop2ndGDIGene 
+#' @param GDIQuantile98 
 #'
 #' @returns a single `Boolean` value when it is possible to decide the answer
 #'   with the given information and `NA` otherwise
@@ -23,20 +16,30 @@
 #' @rdname UniformClusters
 #'
 
-isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
-                             ratioQuantile, fractionAbove,
-                             usedGDIThreshold, usedRatioAbove) {
-  assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
-              !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
-              GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
-              ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
+isClusterUniform <- function( 
+                             GDI_Quantile95,
+                             GDITop2ndGDIGene,
+                             GDIQuantile98) {
+                             #ratioAboveThreshold,
+                             #ratioQuantile, fractionAbove,
+                             #usedGDIThreshold, usedRatioAbove) {
+  GDIThresholdQuantile95 <-  1.297
+  Top2ndGDIGeneThreshold <-  1.4
+  GDIThresholdQuantile98 <-  1.307
+  
+  assert_that(!is.na(GDI_Quantile95),!is.na(GDITop2ndGDIGene),!is.na(GDIQuantile98),
+              msg = "wrong data passed in")
 
-  if (!is.na(fractionAbove) && GDIThreshold == usedGDIThreshold) {
-    return(fractionAbove <= ratioAboveThreshold)
-  } else if (!is.na(ratioQuantile) && ratioAboveThreshold == usedRatioAbove) {
-    return(ratioQuantile < GDIThreshold)
+  if (GDI_Quantile95 >= GDIThresholdQuantile95) {
+    return(FALSE)
+  } else if (GDITop2ndGDIGene > Top2ndGDIGeneThreshold) {
+      if (GDIQuantile98 < GDIThresholdQuantile98) {
+        return(FALSE)
+      }else {
+        return(TRUE)
+      }
   } else {
-    return(NA)
+    return(TRUE)
   }
 }
 
@@ -54,10 +57,6 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 #' @param objCOTAN a `COTAN` object
 #' @param clusterName the tag of the *cluster*
 #' @param cells the cells belonging to the *cluster*
-#' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
 #' @param cores number of cores to use. Default is 1.
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
@@ -73,14 +72,9 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 #'
 #' @returns `checkClusterUniformity` returns a list with:
 #'   * `"isUniform"`: a flag indicating whether the *cluster* is **uniform**
-#'   * `"fractionAbove"`: the percentage of genes with `GDI` above the threshold
-#'   * `"ratioQuantile"`: the quantile associated to the high quantile
-#'   associated to given ratio
+#'   
 #'   * `"size"`: the number of cells in the cluster
-#'   * `"GDIThreshold"` the used `GDI` threshold
-#'   * `"ratioAboveThreshold"` the used fraction of genes above threshold
-#'     allowed in **uniform** *clusters*
-#'
+#'   
 #' @importFrom utils head
 #'
 #' @importFrom grDevices pdf
@@ -100,8 +94,8 @@ checkClusterUniformity <- function(
     objCOTAN,
     clusterName,
     cells,
-    GDIThreshold = 1.43,
-    ratioAboveThreshold = 0.01,
+    #GDIThreshold = 1.43,
+    #ratioAboveThreshold = 0.01,
     cores = 1L,
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",
@@ -136,7 +130,7 @@ checkClusterUniformity <- function(
       genesToLabel <-
         head(rownames(GDIData[order(GDIData[["GDI"]],
                                     decreasing = TRUE), ]), n = 10L)
-      gdiPlot <- GDIPlot(objCOTAN, GDIIn = GDIData, GDIThreshold = GDIThreshold,
+      gdiPlot <- GDIPlot(objCOTAN, GDIIn = GDIData, GDIThreshold = 1.297,
                          genes = list("top 10 GDI genes" = genesToLabel))
 
       plot(nuPlot)
@@ -159,20 +153,24 @@ checkClusterUniformity <- function(
   # with [GDI > GDIThreshold] is at the most ratioAboveThreshold
   gdi <- getColumnFromDF(GDIData, "GDI")
 
-  quantAboveThr <- quantile(gdi, probs = 1.0 - ratioAboveThreshold)
-  percAboveThr <- sum(gdi >= GDIThreshold) / length(gdi)
+  GDI_Quantile95 <- quantile(gdi, probs = 1.0 - 0.05)
+  posSortedGDIGenes <- order(gdi, decreasing = TRUE)
+  GDITop2ndGDIGene <-  gdi[posSortedGDIGenes[2]]
+  GDIQuantile98 <- quantile(gdi, probs = 1.0 - 0.02)
 
-  clusterIsUniform <- isClusterUniform(GDIThreshold, ratioAboveThreshold,
-                                       quantAboveThr, percAboveThr,
-                                       GDIThreshold, ratioAboveThreshold)
+  clusterIsUniform <- isClusterUniform(GDI_Quantile95,
+                                       GDITop2ndGDIGene,
+                                       GDIQuantile98) 
 
   logThis(paste0(
     "Cluster ", clusterName, ", with size ", clusterSize, ", is ",
     (if (clusterIsUniform) {""} else {"not "}), "uniform\n",
-    round(percAboveThr * 100.0, digits = 2L), "% of the genes is above ",
-    "the given GDI threshold ", GDIThreshold, "\n",
-    "highest ", round(ratioAboveThreshold * 100.0, digits = 2L),
-    "% GDI quantile is at ", round(quantAboveThr, digits = 4L)), logLevel = 3L)
+    #round(percAboveThr * 100.0, digits = 2L), "% of the genes is above ",
+    #"the given GDI threshold ", GDIThreshold, "\n",
+    #"highest ", round(ratioAboveThreshold * 100.0, digits = 2L),
+    #"% GDI quantile is at ", round(quantAboveThr, digits = 4L)
+    )
+    , logLevel = 3L)
 
   if (isTRUE(saveObj)) tryCatch({
       pre <- ""
@@ -190,9 +188,11 @@ checkClusterUniformity <- function(
   )
 
   return(list("isUniform" = clusterIsUniform,
-              "fractionAbove" = percAboveThr,
-              "ratioQuantile" = quantAboveThr[[1L]],
-              "size" = clusterSize,
-              "GDIThreshold" = GDIThreshold,
-              "ratioAboveThreshold" = ratioAboveThreshold))
+              "GDI_Quantile95" = GDI_Quantile95,
+              "GDITop2ndGDIGene" = GDITop2ndGDIGene,
+              "GDIQuantile98" = GDIQuantile98,
+              "size" = clusterSize
+              #"GDIThreshold" = GDIThreshold,
+              #"ratioAboveThreshold" = ratioAboveThreshold)
+              ))
 }

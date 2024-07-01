@@ -93,7 +93,7 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
                          RunUMAP(srat, umap.method = "uwot", metric = "cosine",
                                  dims = 1L:min(c(50L, maxRows))))
 
-    if (isTRUE(saveObj)) {
+    #if (isTRUE(saveObj)) {
       outFile <- file.path(outDirCond, paste0("pdf_umap_", iter, ".pdf"))
       logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
       pdf(outFile)
@@ -110,7 +110,7 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
 
       dev.off()
       gc()
-    }
+    #}
 
     logThis("Creating Seurat object: DONE", logLevel = 2L)
 
@@ -149,10 +149,6 @@ NULL
 #'   50}), those are flagged as `"-1"` and the process is stopped.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
@@ -205,8 +201,8 @@ NULL
 #'
 
 cellsUniformClustering <- function(objCOTAN,
-                                   GDIThreshold = 1.43,
-                                   ratioAboveThreshold = 0.01,
+                                   #GDIThreshold = 1.43,
+                                   #ratioAboveThreshold = 0.01,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    optimizeForSpeed = TRUE,
@@ -245,10 +241,10 @@ cellsUniformClustering <- function(objCOTAN,
   numClustersToRecluster <- 0L
   srat <- NULL
   allCheckResults <- data.frame()
-  errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
-                            "ratioQuantile" = NA, "size" = NA,
-                            "GDIThreshold" = GDIThreshold,
-                            "ratioAboveThreshold" = ratioAboveThreshold)
+  errorCheckResults <- list("isUniform" = FALSE, "GDI_Quantile95" = NA,
+                            "GDITop2ndGDIGene" = NA, "size" = NA,
+                            "GDIQuantile98" = NA
+                            )
 
   repeat {
     iter <- iter + 1L
@@ -336,8 +332,8 @@ cellsUniformClustering <- function(objCOTAN,
           checkClusterUniformity(objCOTAN = objCOTAN,
                                  clusterName = globalClName,
                                  cells = cells,
-                                 GDIThreshold = GDIThreshold,
-                                 ratioAboveThreshold = ratioAboveThreshold,
+                                 #GDIThreshold = GDIThreshold,
+                                 #ratioAboveThreshold = ratioAboveThreshold,
                                  cores = cores,
                                  optimizeForSpeed = optimizeForSpeed,
                                  deviceStr = deviceStr,
