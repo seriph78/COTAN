@@ -601,3 +601,150 @@ setAs("COTAN",
         from
       }
      ) # end setAs
+
+
+#' @title Definition of the **Transcript Uniformity Check** classes
+#'
+#' @description A hierarchy of classes to specify the method for checking
+#'   whether a **cluster** has the *Uniform Transcript* property. It also
+#'   doubles as result object.
+#'
+#' @name UT_Check
+NULL
+
+#' @details `BaseUniformityCheck` is the base class of the check methods
+#'
+#' @slot isUniform Logical. The result of the check execution
+#'
+#' @rdname UT_Check
+#'
+setClass(
+  "BaseUniformityCheck",
+  slots = c(
+    isUniform = "logical"
+  ),
+  prototype = list(
+    isUniform = FALSE
+  ),
+  validity = function(object) {
+    return(TRUE)
+  }
+) # end Base Uniformity Check
+
+
+#' @details `SimpleGDIUniformityCheck` represents the simplified (and legacy)
+#'   mechanism to determine whether a cluster has the *Uniform Transcript*
+#'   property
+#'
+#'   The method is based on checking whether the fraction of the genes' `GDI`
+#'   below the given *threshold* is less than the given *ratio*
+#'
+#' @slot GDIThreshold Numeric.
+#' @slot ratioAbove Numeric.
+#'
+#' @rdname UT_Check
+#'
+setClass(
+  "SimpleGDIUniformityCheck",
+  contains = "BaseUniformityCheck",
+  slots = c(
+    GDIThreshold        = "numeric",
+    ratioAboveThreshold = "numeric"
+  ),
+  prototype = list(
+    GDIThreshold        = 1.43,
+    ratioAboveThreshold = 0.01
+  ),
+  validity = function(object) {
+    if (!is_double(GDIThreshold, n = 1, finite = TRUE) || GDIThreshold <= 1.0) {
+      stop("Input 'GDIThreshold' data must be a finite number above 1.0")
+    }
+    if (!is_double(ratioAboveThreshold, n = 1, finite = TRUE) ||
+       ratioAboveThreshold <= 0.0 || ratioAboveThreshold >= 1.0) {
+      stop("Input 'ratioAboveThreshold' data must be a finite",
+           " number between 0.0 and 1.0")
+    }
+    return(TRUE)
+  }
+) # end class SimpleGDIUniformityCheck
+
+
+#' @details `AdvancedGDIUniformityCheck` represents the more precise and
+#'   advanced mechanism to determine whether a cluster has the *Uniform
+#'   Transcript* property
+#'
+#'   The method is based on checking the genes' `GDI` against three *thresholds*
+#'   A *cluster* is deemed uniform if the ...
+#'
+#' @slot lowCheckThreshold Numeric.
+#' @slot lowCheckQuantile Numeric.
+#' @slot lowCheckRank Integer.
+#' @slot middleCheckThreshold Numeric.
+#' @slot middleCheckQuantile Numeric.
+#' @slot middleCheckRank Integer.
+#' @slot highCheckThreshold Numeric.
+#' @slot highCheckQuantile Numeric.
+#' @slot highCheckRank Integer.
+#'
+#' @rdname UT_Check
+#'
+setClass(
+  "AdvancedGDIUniformityCheck",
+  contains = "BaseUniformityCheck",
+  slots = c(
+    lowCheckThreshold    = "numeric",
+    lowCheckQuantile     = "numeric",
+    lowCheckRank         = "integer",
+    middleCheckThreshold = "numeric",
+    middleCheckQuantile  = "numeric",
+    middleCheckRank      = "integer",
+    highCheckThreshold   = "numeric",
+    highCheckQuantile    = "numeric",
+    highCheckRank        = "integer"
+  ),
+  prototype = list(
+    lowCheckThreshold    = 1.297,
+    lowCheckQuantile     = 0.95,
+    lowCheckRank         = 0L,
+    middleCheckThreshold = 1.400,
+    middleCheckQuantile  = NaN,
+    middleCheckRank      = 2L,
+    highCheckThreshold   = 1.307,
+    highCheckQuantile    = 0.98,
+    highCheckRank        = 0L
+  ),
+  validity = function(object) {
+    allOK <- function(threshold, quantile, rank) {
+      if (!is_double(threshold, n = 1, finite = TRUE) || threshold <= 1.0) {
+        stop("Input check `threshold` must be a finite number above 1.0")
+      }
+      if (!is_double(quantile, n = 1)) {
+        stop("Input check `quantile` must be a double")
+      }
+      if (!is_integer(rank, n = 1)) {
+        stop("Input check `rank` must be an integer")
+      }
+      if (is.nan(quantile) == (rank == 0L)) {
+        stop("Input check `quantile` and `rank` are mutually",
+             " exclusive: only one is allowed")
+      }
+
+      if (!is.nan(quantile)) {
+        if (quantile <= 0.0 || quantile >= 1.0) {
+          stop("Input 'quantile' must be a number between 0.0 and 1.0")
+        }
+      } else {
+        if(rank < 0L) {
+          stop("Input 'rank' must be a positive integer")
+        }
+      }
+      return(TRUE)
+    }
+    return(
+      allOK(lowCheckThreshold,    lowCheckQuantile,    lowCheckRank   ) &&
+      allOK(middleCheckThreshold, middleCheckQuantile, middleCheckRank) &&
+      allOK(highCheckThreshold,   highCheckQuantile,   highCheckRank  ))
+  }
+) # end class AdvancedGDIUniformityCheck
+
+

@@ -265,7 +265,7 @@ cellsUniformClustering <- function(objCOTAN,
                        cond = cond, iter = iter,
                        initialResolution = initialResolution,
                        minNumClusters = minNumClusters,
-                       saveObj = saveSeuratObj, outDirCond = splitOutDir)
+                       saveObj = saveObj, outDirCond = splitOutDir)
 
     if (is_null(objSeurat)) {
       logThis(paste("NO new possible uniform clusters!",

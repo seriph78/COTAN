@@ -1,3 +1,25 @@
+
+setMethod(
+  "checkObjIsUniform",
+  signature(objCOTAN = "COTAN",
+            currentChecker = "SimpleGDIUniformityCheck",
+            usedChecker = "SimpleGDIUniformityCheck"),
+  function(objCOTAN, currentChecker, usedChecker) {
+    invisible(validObject(currentChecker))
+    if(validObject(usedChecker)) {
+
+    } else {
+      GDIData <- calculateGDI(objCOTAN)
+
+      GDIThreshold
+      ratioAboveThreshold
+    }
+
+
+  }
+)
+
+
 #'
 #' @details `isClusterUniform()` takes in the current thresholds and used them
 #'   to check whether the calculated cluster parameters are sufficient to
@@ -100,8 +122,8 @@ checkClusterUniformity <- function(
     objCOTAN,
     clusterName,
     cells,
-    GDIThreshold = 1.43,
-    ratioAboveThreshold = 0.01,
+    checker = NULL,
+    GDIThreshold = NULL,
     cores = 1L,
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",

@@ -288,6 +288,7 @@ setGeneric(
 )
 
 # -------- estimators --------
+
 setGeneric(
   "estimateLambdaLinear",
   function(objCOTAN) standardGeneric("estimateLambdaLinear")
@@ -342,4 +343,14 @@ setGeneric(
 setGeneric(
   "storeGDI",
   function(objCOTAN, genesGDI) standardGeneric("storeGDI")
+)
+
+# -------- Uniform Transcript Checks --------
+
+
+setGeneric(
+  "checkObjIsUniform",
+  function(objCOTAN, currentChecker, usedChecker) {
+    currentChecker = "SimpleGDIUniformityCheck"
+  }
 )
