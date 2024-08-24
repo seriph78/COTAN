@@ -351,6 +351,14 @@ setGeneric(
 setGeneric(
   "checkObjIsUniform",
   function(objCOTAN, currentChecker, usedChecker) {
-    currentChecker = "SimpleGDIUniformityCheck"
+    standardGeneric("checkObjIsUniform")
+    #currentChecker = "SimpleGDIUniformityCheck"
+  }
+)
+
+setGeneric(
+  "asUniformityChecker",
+  function(checkerAsList) {
+    standardGeneric("asUniformityChecker")
   }
 )

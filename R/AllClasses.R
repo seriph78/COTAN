@@ -272,8 +272,6 @@ setClass(
 ) -> scCOTAN
 
 
-#' @title getCOTANSlots
-#'
 #' @description Helper function to be shared by coerce() and replace()
 #'
 #' @param a `scCOTAN` object
@@ -429,10 +427,9 @@ getCOTANSlots <- function(from) {
   return(list(raw, genesCoex, cellsCoex, metaGenes, metaCells, clustersCoex))
 }
 
-#' @title setIs():  `scCOTAN` -> `COTAN`
+#' @aliases is
 #'
-#' @description Automatically converts an object from class `scCOTAN` into
-#'   `COTAN`
+#' @details Automatically converts an object from class `scCOTAN` into `COTAN`
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
@@ -441,6 +438,7 @@ getCOTANSlots <- function(from) {
 #'
 #' @export
 #'
+# #' @rdname COTAN-Legacy
 #' @noRd
 #'
 setIs("scCOTAN",
@@ -475,7 +473,6 @@ setIs("scCOTAN",
      ) # end setIs
 
 
-#' @title getScCOTANSlots
 #'
 #' @description Helper function to be shared by coerce() and replace()
 #'
@@ -549,9 +546,9 @@ getScCOTANSlots <- function(from) {
   return(list(rawNorm, nu, lambda, a, hk, clusters, clusterData))
 }
 
-#' @title setAs(): `COTAN` -> `scCOTAN`
+#' @aliases as
 #'
-#' @description Explicitly converts an object from class `COTAN` into `scCOTAN`
+#' @details Explicitly converts an object from class `COTAN` into `scCOTAN`
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
@@ -561,6 +558,7 @@ getScCOTANSlots <- function(from) {
 #'
 #' @export
 #'
+# #' @rdname COTAN-legacy
 #' @noRd
 #'
 setAs("COTAN",
@@ -747,4 +745,31 @@ setClass(
   }
 ) # end class AdvancedGDIUniformityCheck
 
+#' @title setAs(): `COTAN` -> `scCOTAN`
+#'
+#' @description Explicitly converts an object from class `COTAN` into `scCOTAN`
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @importFrom methods as
+#' @importFrom methods setAs
+#'
+#' @export
+#'
+#' @noRd
+#'
 
+setAs("AdvancedGDIUniformityCheck",
+      "list",
+      function(from) {
+
+        new("list",
+            raw          = from@isUniform)
+      },
+      # 'from' arg-name is convention: it is actually a destination!
+      replace = function(from, value) {
+        from <- list("isUniform" = value@isUniform)
+        from
+      }
+) # end setAs
