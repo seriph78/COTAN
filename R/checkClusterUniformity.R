@@ -1,4 +1,12 @@
-
+#' @aliases checkObjIsUniform
+#'
+#' @details checkObjIsUniform():
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @rdname UT_Check
+#'
 setMethod(
   "checkObjIsUniform",
   signature(objCOTAN = "COTAN",
@@ -18,6 +26,57 @@ setMethod(
 
   }
 )
+
+
+#' @details converts any checker (i.e. any object that derives from
+#'   `BaseUniformityCheck`) into a `list` with the values of the members
+#'
+#' @importFrom rlang set_names
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname UT_Check
+#'
+checketToList <- function(checker) {
+  # check argument is a checker
+  assert_that(is(checker, "BaseUniformityCheck"))
+
+  slot_names <- slotNames(from)
+  return(set_names(lapply(slot_names, function(name) slot(from, name)),
+                   slot_names))
+}
+
+# 'from' arg-name is convention: it is actually a destination!
+# replace = function(from, value) {
+#   slot_names <- slotNames(value)
+#   slot_values <- lapply(slot_names, function(name) slot(value, name))
+#   names(slot_values) <- slot_names
+#   from <- slot_values
+# }
+
+
+#' @details converts a `data.frame` of checkers values into an array of checkers
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @rdname UT_Check
+#'
+dfToCheckerArray<- function(df, checkerClass = NULL) {
+    obj <- new("AdvancedGDIUniformityCheck")
+
+    # Get the slot names of the class
+    slot_names <- slotNames(obj)
+
+    # Assign values from the list to the corresponding slots
+    for (name in slot_names) {
+      if (!is.null(df[[name]])) {
+        slot(obj, name) <- df[[name]]
+      }
+    }
+
+    return(obj)
+}
 
 
 #'
@@ -123,7 +182,7 @@ checkClusterUniformity <- function(
     clusterName,
     cells,
     checker = NULL,
-    GDIThreshold = NULL,
+    GDIThreshold = NULL, # legacy for SimpleGDIUniformityCheck
     cores = 1L,
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",

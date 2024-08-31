@@ -56,7 +56,7 @@
 #'                             deviceStr = "cuda", saveObj = FALSE)
 #' }
 #'
-#' @rdname COTANObjectCreation
+#' @rdname COTAN_ObjectCreation
 #'
 setMethod(
   "proceedToCoex",
@@ -219,7 +219,7 @@ setMethod(
 #'   outDir = tempdir(),
 #'   cores = 6L)
 #'
-#' @rdname COTANObjectCreation
+#' @rdname COTAN_ObjectCreation
 
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,

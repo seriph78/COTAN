@@ -28,6 +28,7 @@ emptySymmetricMatrix <- function() {
                "symmetricMatrix"), "packedMatrix"))
 }
 
+#---------- COTAN class --------------
 
 #' Definition of the `COTAN` class
 #'
@@ -184,10 +185,10 @@ setClass(
 #'
 #' @title `COTAN` shortcuts
 #'
-#' @description These functions create a `COTAN` object and/or also run all
-#'   the necessary steps until the genes' `COEX` matrix is calculated.
+#' @description These functions create a [COTAN-class] object and/or also run
+#'   all the necessary steps until the genes' `COEX` matrix is calculated.
 #'
-#' @name COTANObjectCreation
+#' @name COTAN_ObjectCreation
 NULL
 
 #' @details Constructor of the class `COTAN`
@@ -208,7 +209,7 @@ NULL
 #' data("test.dataset")
 #' obj <- COTAN(raw = test.dataset)
 #'
-#' @name COTANObjectCreation
+#' @rdname COTAN_ObjectCreation
 #'
 COTAN <- function(raw = "ANY") {
   raw <- as(as(raw, "Matrix"), "sparseMatrix")
@@ -226,7 +227,7 @@ COTAN <- function(raw = "ANY") {
 #' @description A class and some functions related to the `V1` version of the
 #'   `COTAN` package
 #'
-#' @name COTAN-Legacy
+#' @name COTAN_Legacy
 NULL
 
 
@@ -251,7 +252,7 @@ NULL
 #'
 #' @export
 #'
-#' @rdname COTAN-Legacy
+#' @rdname COTAN_Legacy
 #'
 setClass(
   "scCOTAN",
@@ -427,8 +428,6 @@ getCOTANSlots <- function(from) {
   return(list(raw, genesCoex, cellsCoex, metaGenes, metaCells, clustersCoex))
 }
 
-#' @aliases is
-#'
 #' @details Automatically converts an object from class `scCOTAN` into `COTAN`
 #'
 #' @importFrom zeallot %<-%
@@ -436,41 +435,42 @@ getCOTANSlots <- function(from) {
 #'
 #' @importFrom methods setIs
 #'
-#' @export
+#' @name scCotan_coerce_to_COTAN
+#' @rdname COTAN_Legacy
 #'
-# #' @rdname COTAN-Legacy
-#' @noRd
-#'
-setIs("scCOTAN",
-      "COTAN",
-      coerce = function(from) {
-        c(raw, genesCoex, cellsCoex,
-          metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(from)
+setIs(
+  "scCOTAN",
+  "COTAN",
+  coerce = function(from) {
+    c(raw, genesCoex, cellsCoex,
+      metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(from)
 
-        new("COTAN",
-            raw          = raw,
-            genesCoex    = genesCoex,
-            cellsCoex    = cellsCoex,
-            metaDataset  = from@meta,
-            metaGenes    = metaGenes,
-            metaCells    = metaCells,
-            clustersCoex = clustersCoex)
-      },
-      # 'from' arg-name is convention: it is actually a destination!
-      replace = function(from, value) {
-        c(raw, genesCoex, cellsCoex,
-          metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(value)
+      new("COTAN",
+          raw          = raw,
+          genesCoex    = genesCoex,
+          cellsCoex    = cellsCoex,
+          metaDataset  = from@meta,
+          metaGenes    = metaGenes,
+          metaCells    = metaCells,
+          clustersCoex = clustersCoex)
+  },
+  # 'from' arg-name is convention: it is actually a destination!
+  replace = function(from, value) {
+    c(raw, genesCoex, cellsCoex,
+      metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(value)
 
-        from@raw          <- raw
-        from@genesCoex    <- genesCoex
-        from@cellsCoex    <- cellsCoex
-        from@metaDataset  <- value@meta
-        from@metaGenes    <- metaGenes
-        from@metaCells    <- metaCells
-        from@clustersCoex <- clustersCoex
-        from
-      }
-     ) # end setIs
+    # Update the existing scCOTAN object in place
+    from@raw          <- raw
+    from@genesCoex    <- genesCoex
+    from@cellsCoex    <- cellsCoex
+    from@metaDataset  <- value@meta
+    from@metaGenes    <- metaGenes
+    from@metaCells    <- metaCells
+    from@clustersCoex <- clustersCoex
+
+    # Return the modified object
+    return(from)
+  })
 
 
 #'
@@ -546,8 +546,6 @@ getScCOTANSlots <- function(from) {
   return(list(rawNorm, nu, lambda, a, hk, clusters, clusterData))
 }
 
-#' @aliases as
-#'
 #' @details Explicitly converts an object from class `COTAN` into `scCOTAN`
 #'
 #' @importFrom zeallot %<-%
@@ -556,50 +554,54 @@ getScCOTANSlots <- function(from) {
 #' @importFrom methods as
 #' @importFrom methods setAs
 #'
-#' @export
+#' @name COTAN_coerce_to_scCOTAN
+#' @rdname COTAN_Legacy
 #'
-# #' @rdname COTAN-legacy
-#' @noRd
-#'
-setAs("COTAN",
-      "scCOTAN",
-      function(from) {
-        c(rawNorm, nu, lambda, a,
-          hk, clusters, clusterData) %<-% getScCOTANSlots(from)
+setAs(
+  "COTAN",
+  "scCOTAN",
+  function(from) {
+    c(rawNorm, nu, lambda, a,
+      hk, clusters, clusterData) %<-% getScCOTANSlots(from)
 
-        new("scCOTAN",
-            raw          = from@raw,
-            raw.norm     = rawNorm,
-            coex         = from@genesCoex,
-            nu           = nu,
-            lambda       = lambda,
-            a            = a,
-            hk           = hk,
-            n_cells      = ncol(from@raw),
-            meta         = from@metaDataset,
-            clusters     = clusters,
-            cluster_data = clusterData)
-      },
-      # 'from' arg-name is convention: it is actually a destination!
-      replace = function(from, value) {
-        c(rawNorm, nu, lambda, a,
-          hk, clusters, clusterData) %<-% getScCOTANSlots(value)
+      new("scCOTAN",
+          raw          = from@raw,
+          raw.norm     = rawNorm,
+          coex         = from@genesCoex,
+          nu           = nu,
+          lambda       = lambda,
+          a            = a,
+          hk           = hk,
+          n_cells      = ncol(from@raw),
+          meta         = from@metaDataset,
+          clusters     = clusters,
+          cluster_data = clusterData)
+  },
+  # 'from' arg-name is convention: it is actually a destination!
+  replace = function(from, value) {
+    # Extract the slots needed for updating the scCOTAN object
+    c(rawNorm, nu, lambda, a,
+      hk, clusters, clusterData) %<-% getScCOTANSlots(value)
 
-        from@raw          <- value@raw
-        from@raw.norm     <- rawNorm
-        from@coex         <- value@genesCoex
-        from@nu           <- nu
-        from@lambda       <- lambda
-        from@a            <- a
-        from@hk           <- hk
-        from@n_cells      <- ncol(value@raw)
-        from@meta         <- value@metaDataset
-        from@clusters     <- clusters
-        from@cluster_data <- clusterData
-        from
-      }
-     ) # end setAs
+    # Update the existing scCOTAN object in place
+    from@raw          <- value@raw
+    from@raw.norm     <- rawNorm
+    from@coex         <- value@genesCoex
+    from@nu           <- nu
+    from@lambda       <- lambda
+    from@a            <- a
+    from@hk           <- hk
+    from@n_cells      <- ncol(value@raw)
+    from@meta         <- value@metaDataset
+    from@clusters     <- clusters
+    from@cluster_data <- clusterData
 
+    # Return the modified object
+    return(from)
+  })
+
+
+#---------- Transcript Uniformity Check --------------
 
 #' @title Definition of the **Transcript Uniformity Check** classes
 #'
@@ -612,7 +614,7 @@ NULL
 
 #' @details `BaseUniformityCheck` is the base class of the check methods
 #'
-#' @slot isUniform Logical. The result of the check execution
+#' @slot isUniform Logical. The result of the check
 #'
 #' @rdname UT_Check
 #'
@@ -637,8 +639,11 @@ setClass(
 #'   The method is based on checking whether the fraction of the genes' `GDI`
 #'   below the given *threshold* is less than the given *ratio*
 #'
-#' @slot GDIThreshold Numeric.
-#' @slot ratioAbove Numeric.
+#' @slot GDIThreshold Numeric. (Simple check only) The level of `GDI` above
+#'   which the **cluster** is deemed not uniform (default is 1.43)
+#' @slot ratioAbove Numeric. (Simple check only) The quantile of the `GDI`
+#'   distribution used to select the gene whose `GDI` must be below the
+#'   threshold (default is 0.01)
 #'
 #' @rdname UT_Check
 #'
@@ -674,15 +679,33 @@ setClass(
 #'   The method is based on checking the genes' `GDI` against three *thresholds*
 #'   A *cluster* is deemed uniform if the ...
 #'
-#' @slot lowCheckThreshold Numeric.
-#' @slot lowCheckQuantile Numeric.
-#' @slot lowCheckRank Integer.
-#' @slot middleCheckThreshold Numeric.
-#' @slot middleCheckQuantile Numeric.
-#' @slot middleCheckRank Integer.
-#' @slot highCheckThreshold Numeric.
-#' @slot highCheckQuantile Numeric.
-#' @slot highCheckRank Integer.
+#' @slot lowCheckThreshold Numeric. (Advanced check only) The level of `GDI`
+#'   above which the
+#'   **cluster** is deemed not uniform (default is 1.297)
+#' @slot lowCheckQuantile Numeric. (Advanced check only) The quantile of the
+#'   `GDI` distribution used to select the gene whose `GDI` must be below the
+#'   low threshold (default is 95%)
+#' @slot lowCheckRank Integer. (Advanced check only) The rank of the `GDI`
+#'   distribution used to select the gene whose `GDI` must be below the low
+#'   threshold (default is `NULL`)
+#' @slot middleCheckThreshold Numeric. (Advanced check only) The level of `GDI`
+#'   below which the
+#'   **cluster** is deemed not uniform
+#' @slot middleCheckQuantile Numeric. (Advanced check only) The quantile of the
+#'   `GDI` distribution used to select the gene whose `GDI` must be below the
+#'   middle threshold (default is 98%)
+#' @slot middleCheckRank Integer. (Advanced check only) The rank of the `GDI`
+#'   distribution used to select the gene whose `GDI` must be below the middle
+#'   threshold (default is `NULL`)
+#' @slot highCheckThreshold Numeric. (Advanced check only) The level of `GDI`
+#'   above which the
+#'   **cluster** is deemed not uniform
+#' @slot highCheckQuantile Numeric. (Advanced check only) The quantile of the
+#'   `GDI` distribution used to select the gene whose `GDI` must be below the
+#'   high threshold (default is `NULL`)
+#' @slot highCheckRank Integer. (Advanced check only) The rank of the `GDI`
+#'   distribution used to select the gene whose `GDI` must be below the high
+#'   threshold (default is 2)
 #'
 #' @rdname UT_Check
 #'
@@ -744,32 +767,3 @@ setClass(
       allOK(highCheckThreshold,   highCheckQuantile,   highCheckRank  ))
   }
 ) # end class AdvancedGDIUniformityCheck
-
-#' @title setAs(): `COTAN` -> `scCOTAN`
-#'
-#' @description Explicitly converts an object from class `COTAN` into `scCOTAN`
-#'
-#' @importFrom zeallot %<-%
-#' @importFrom zeallot %->%
-#'
-#' @importFrom methods as
-#' @importFrom methods setAs
-#'
-#' @export
-#'
-#' @noRd
-#'
-
-setAs("AdvancedGDIUniformityCheck",
-      "list",
-      function(from) {
-
-        new("list",
-            raw          = from@isUniform)
-      },
-      # 'from' arg-name is convention: it is actually a destination!
-      replace = function(from, value) {
-        from <- list("isUniform" = value@isUniform)
-        from
-      }
-) # end setAs
