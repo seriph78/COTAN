@@ -54,16 +54,21 @@ reorderClusterization <- function(objCOTAN,
                                      clusters = clusters, coexDF = coexDF,
                                      useDEA = useDEA, distance = distance)
 
+  dummyList <- list("clusters" = factor(clusters), "coex" = coexDF,
+                    "permMap" = set_names(labels(clDist), labels(clDist)))
+
   minuOnePos <- 0L
   if (keepMinusOne && any(clusters == "-1")) {
     minuOnePos <- which(labels(clDist) == "-1")
     # drop cluster '-1' from the distances
-    clDist <- as.dist(as.matrix(clDist)[-minuOnePos, -minuOnePos])
+    clDist <- as.dist(as.matrix(clDist)[-minuOnePos, -minuOnePos, drop=FALSE])
   }
 
   if (length(labels(clDist)) <= 1L) {
     # too few clusters, nothing to reorder: return input as is
-    return(list("clusters" = factor(clusters), "coex" = coexDF))
+    return(dummyList)
+  } else {
+    rm(dummyList)
   }
 
   hc <- hclust(clDist, method = hclustMethod)
