@@ -93,24 +93,26 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
                          RunUMAP(srat, umap.method = "uwot", metric = "cosine",
                                  dims = 1L:min(c(50L, maxRows))))
 
-    if (isTRUE(saveObj)) {
-      outFile <- file.path(outDirCond, paste0("pdf_umap_", iter, ".pdf"))
-      logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
-      pdf(outFile)
+    if (isTRUE(saveObj)) tryCatch({
+        outFile <- file.path(outDirCond, paste0("pdf_umap_", iter, ".pdf"))
+        logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
+        pdf(outFile)
 
-      if (iter == 1L) {
-        plot(DimPlot(srat, reduction = "umap", label = FALSE,
-                     group.by = "orig.ident"))
-      }
+        if (iter == 1L) {
+          plot(DimPlot(srat, reduction = "umap", label = FALSE,
+                       group.by = "orig.ident"))
+        }
 
-      plot(DimPlot(srat, reduction = "umap", label = TRUE) +
-           annotate(geom = "text", x = 0.0, y = 30.0, color = "black",
-                    label = paste0("Cells number: ", ncol(rawData), "\n",
-                                   "Cl. resolution: ", resolution)))
+        plot(DimPlot(srat, reduction = "umap", label = TRUE) +
+             annotate(geom = "text", x = 0.0, y = 30.0, color = "black",
+                      label = paste0("Cells number: ", ncol(rawData), "\n",
+                                     "Cl. resolution: ", resolution)))
 
-      dev.off()
-      gc()
-    }
+        dev.off()
+      }, error = function(err) {
+        logThis(paste("While saving seurat umpa plot", err), logLevel = 1L)
+      })
+    gc()
 
     logThis("Creating Seurat object: DONE", logLevel = 2L)
 
@@ -225,7 +227,7 @@ cellsUniformClustering <- function(objCOTAN,
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
   outDirCond <- file.path(outDir, cond)
-  if (!file.exists(outDirCond)) {
+  if (isTRUE(saveObj) && !dir.exists(outDirCond)) {
     dir.create(outDirCond)
   }
 
@@ -234,7 +236,7 @@ cellsUniformClustering <- function(objCOTAN,
     dir.create(splitOutDir)
   }
 
-  saveSeuratObj <- FALSE
+  saveSeuratObj <- saveObj && FALSE
 
   outputClusters <- set_names(rep(NA, length = getNumCells(objCOTAN)),
                               getCells(objCOTAN))
@@ -262,7 +264,7 @@ cellsUniformClustering <- function(objCOTAN,
                        cond = cond, iter = iter,
                        initialResolution = initialResolution,
                        minNumClusters = minNumClusters,
-                       saveObj = saveSeuratObj, outDirCond = splitOutDir)
+                       saveObj = saveObj, outDirCond = splitOutDir)
 
     if (is_null(objSeurat)) {
       logThis(paste("NO new possible uniform clusters!",
@@ -510,7 +512,7 @@ cellsUniformClustering <- function(objCOTAN,
         saveRDS(srat, file.path(outDirCond,
                                 "Seurat_obj_with_cotan_clusters.RDS"))
       }
-  },
+    },
     error = function(err) {
       logThis(paste("While saving seurat object", err), logLevel = 1L)
     }
