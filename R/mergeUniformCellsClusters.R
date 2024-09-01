@@ -192,7 +192,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
   outDirCond <- file.path(outDir, cond)
-  if (!dir.exists(outDirCond)) {
+  if (isTRUE(saveObj) && !dir.exists(outDirCond)) {
     dir.create(outDirCond)
   }
 

@@ -124,6 +124,12 @@ checkClusterUniformity <- function(
   GDIData <- calculateGDI(objCOTAN)
 
   # Plots
+  if (isTRUE(saveObj) && !dir.exists(outDir)) {
+    saveObj <- FALSE
+    warning(paste("Asked to save check results,",
+                  "but given output folder does not exist"))
+  }
+
   if (isTRUE(saveObj)) tryCatch({
       # this will be restored to previous value on function exit
       local_options(list(ggrepel.max.overlaps = Inf))
