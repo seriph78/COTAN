@@ -394,7 +394,7 @@ niceFactorLevels <- function(v) {
 #' @rdname HandleMetaData
 #'
 getColumnFromDF <- function(df, colName) {
-  if (is_empty(df)) {
+  if (is_empty(df) || !any(colnames(df) == colName)) {
     return(NULL)
   } else {
     retArray <- df[[colName]]

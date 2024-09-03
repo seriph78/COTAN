@@ -617,6 +617,9 @@ NULL
 #' @slot isUniform Logical. Output. The result of the check
 #' @slot clusterSize Integer. Output. The number of cells in the cluster
 #'
+#' @importFrom rlang is_logical
+#' @importFrom rlang is_integer
+#'
 #' @rdname UT_Check
 #'
 setClass(
@@ -630,7 +633,10 @@ setClass(
     clusterSize = 0L
   ),
   validity = function(object) {
-    if (clusterSize <= 0) {
+    if (!is_logical(object@isUniform, n = 1)) {
+      stop("Given 'isUniform' data must be a Boolean")
+    }
+    if (!is_integer(object@clusterSize, n = 1) || object@clusterSize < 0) {
       stop("Given 'clusterSize' data must be a positive number")
     }
     return(TRUE)
@@ -655,6 +661,8 @@ setClass(
 #' @slot quantileAtRatio Numeric. Output. The `GDI` distribution quantile
 #'   corresponding at the given ratio
 #'
+#' @importFrom rlang is_double
+#'
 #' @rdname UT_Check
 #'
 setClass(
@@ -673,22 +681,27 @@ setClass(
     quantileAtRatio        = NaN
   ),
   validity = function(object) {
-    if (!is_double(GDIThreshold, n = 1, finite = TRUE) || GDIThreshold <= 1.0) {
+    if (!is_double(object@GDIThreshold, n = 1, finite = TRUE) ||
+        object@GDIThreshold <= 1.0) {
       stop("Input 'GDIThreshold' data must be a finite number above 1.0")
     }
-    if (!is_double(ratioAboveThreshold, n = 1, finite = TRUE) ||
-        (ratioAboveThreshold <= 0.0 || ratioAboveThreshold >= 1.0)) {
+    if (!is_double(object@ratioAboveThreshold, n = 1, finite = TRUE) ||
+        (object@ratioAboveThreshold <= 0.0 ||
+         object@ratioAboveThreshold >= 1.0)) {
       stop("Input 'ratioAboveThreshold' data must be a finite",
            " number between 0.0 and 1.0")
     }
-    if (is_double(fractionAboveThreshold, n = 1, finite = TRUE) &&
-        (fractionAboveThreshold <= 0.0 || fractionAboveThreshold >= 1.0)) {
-      stop("Given 'fractionAboveThreshold' data must be NA or a finite",
+    if (!is_double(object@fractionAboveThreshold, n = 1, finite = FALSE) ||
+        (is.finite(object@fractionAboveThreshold) &&
+         (object@fractionAboveThreshold <= 0.0 ||
+          object@fractionAboveThreshold >= 1.0))) {
+      stop("Given 'fractionAboveThreshold' data must be NaN or a finite",
            " number between 0.0 and 1.0")
     }
-    if (is_double(quantileAtRatio, n = 1, finite = TRUE) &&
-        quantileAtRatio <= 0.0) {
-      stop("Given 'quantileAtRatio' data must be NA or a finite",
+    if (!is_double(object@quantileAtRatio, n = 1, finite = FALSE) ||
+        (is.finite(object@fractionAboveThreshold) &&
+         object@quantileAtRatio <= 0.0)) {
+      stop("Given 'quantileAtRatio' data must be NaN or a finite",
            " positive number")
     }
     return(TRUE)
@@ -730,6 +743,9 @@ setClass(
 #' @slot highCheckRank Integer. (Advanced check only) The rank of the `GDI`
 #'   distribution used to select the gene whose `GDI` must be below the high
 #'   threshold (default is 2)
+#'
+#' @importFrom rlang is_integer
+#' @importFrom rlang is_double
 #'
 #' @rdname UT_Check
 #'
@@ -786,8 +802,14 @@ setClass(
       return(TRUE)
     }
     return(
-      allOK(lowCheckThreshold,    lowCheckQuantile,    lowCheckRank   ) &&
-      allOK(middleCheckThreshold, middleCheckQuantile, middleCheckRank) &&
-      allOK(highCheckThreshold,   highCheckQuantile,   highCheckRank  ))
+      allOK(object@lowCheckThreshold,
+            object@lowCheckQuantile,
+            object@lowCheckRank) &&
+      allOK(object@middleCheckThreshold,
+            object@middleCheckQuantile,
+            object@middleCheckRank) &&
+      allOK(object@highCheckThreshold,
+            object@highCheckQuantile,
+            object@highCheckRan))
   }
 ) # end class AdvancedGDIUniformityCheck

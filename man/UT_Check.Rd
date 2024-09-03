@@ -6,14 +6,14 @@
 \alias{BaseUniformityCheck-class}
 \alias{SimpleGDIUniformityCheck-class}
 \alias{AdvancedGDIUniformityCheck-class}
-\alias{checkObjIsUniform,COTAN,SimpleGDIUniformityCheck,SimpleGDIUniformityCheck-method}
+\alias{checkObjIsUniform,COTAN,SimpleGDIUniformityCheck-method}
 \alias{checkObjIsUniform}
 \alias{checkerToList}
 \alias{dfToCheckerList}
 \alias{retrieveMainGDIThreshold}
 \title{Definition of the \strong{Transcript Uniformity Check} classes}
 \usage{
-\S4method{checkObjIsUniform}{COTAN,SimpleGDIUniformityCheck,SimpleGDIUniformityCheck}(objCOTAN, currentC, previousC = NULL)
+\S4method{checkObjIsUniform}{COTAN,SimpleGDIUniformityCheck}(objCOTAN, currentC, previousC = NULL)
 
 checkerToList(checker)
 

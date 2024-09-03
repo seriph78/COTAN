@@ -5,6 +5,8 @@
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
+#' @importFrom rlang is_empty
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @rdname UT_Check
@@ -13,11 +15,12 @@ setMethod(
   "checkObjIsUniform",
   signature(objCOTAN = "COTAN",
             currentC = "SimpleGDIUniformityCheck",
-            previousC = "SimpleGDIUniformityCheck"),
+            previousC = "ANY"),
   function(objCOTAN, currentC, previousC = NULL) {
     invisible(validObject(currentC))
 
     previousCheckIsSufficient <- FALSE
+    currentC@clusterSize <- getNumCells(objCOTAN)
 
     if(!is.null(previousC)) {
       invisible(validObject(previousC))
@@ -25,7 +28,7 @@ setMethod(
       # maybe with different thresholds: if possible we try to avoid using the
       # GDI to determine the check result
 
-      currentC@clusterSize <- previousC@clusterSize
+      assert_that(currentC@clusterSize == previousC@clusterSize)
 
       if (is.finite(previousC@fractionAboveThreshold) &&
           (previousC@GDIThreshold == currentC@GDIThreshold)) {
@@ -45,20 +48,20 @@ setMethod(
 
     # run the check via pre-calculated GDI
     if (!previousCheckIsSufficient) {
-      gdi <- getColumnFromDF(getGDI(objCOTAN), "GDI")
-      if (is.null(gdi)) {
+
+      gdi <- getGDI(objCOTAN)
+      if (is_empty(gdi)) {
         # if GDI was not stored recalculate it now
         gdi <- getColumnFromDF(calculateGDI(objCOTAN), "GDI")
       }
-      assert_that(!is.null(gdi))
 
-      currentC@clusterSize <- length(gdi)
+      assert_that(!is_empty(gdi))
 
       currentC@quantileAtRatio <-
         quantile(gdi, probs = 1.0 - currentC@ratioAboveThreshold)
 
       currentC@fractionAboveThreshold <-
-        sum(gdi >= currentC@GDIThreshold) / currentC@clusterSize
+        sum(gdi >= currentC@GDIThreshold) / length(gdi)
     }
 
     if (is.finite(currentC@fractionAboveThreshold)) {
@@ -88,8 +91,8 @@ checkerToList <- function(checker) {
   # check argument is a checker
   assert_that(is(checker, "BaseUniformityCheck"))
 
-  slot_names <- slotNames(from)
-  return(set_names(lapply(slot_names, function(name) slot(from, name)),
+  slot_names <- slotNames(checker)
+  return(set_names(lapply(slot_names, function(name) slot(checker, name)),
                    slot_names))
 }
 
@@ -199,8 +202,6 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 #' @param checker the object that defines the method and the threshold to
 #'   discriminate whether a *cluster* is *uniform transcript*. See [UT_Check]
 #'   for more details
-#' @param GDIThreshold legacy. The threshold level that will be used to create a
-#'   [SimpleGDIUniformityCheck-class].
 #' @param cores number of cores to use. Default is 1.
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
@@ -239,22 +240,13 @@ checkClusterUniformity <- function(
     objCOTAN,
     clusterName,
     cells,
-    checker = NULL,
-    GDIThreshold = NaN, # legacy for SimpleGDIUniformityCheck
+    checker,
     cores = 1L,
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",
     saveObj = TRUE,
     outDir = ".") {
   # handle legacy usage
-  if (is.null(checker)) {
-    assert_that(is.finite(GDIThreshold),
-                msg = paste("Either a `checker` object or",
-                            "a legacy `GDIThreshold` must be given"))
-    checker <- SimpleGDIUniformityCheck(GDIThreshold = GDIThreshold,
-                                        ratioAboveThreshold = 0.01)
-  }
-
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
@@ -264,10 +256,10 @@ checkClusterUniformity <- function(
                             deviceStr = deviceStr, saveObj = FALSE)
   gc()
 
-  clusterSize <- getNumCells(objCOTAN)
+  checker@clusterSize <- getNumCells(objCOTAN)
 
   logThis(paste0("Checking uniformity for the cluster '", clusterName,
-                 "' with ", clusterSize, " cells"), logLevel = 2L)
+                 "' with ", checker@clusterSize, " cells"), logLevel = 2L)
 
   GDIData <- calculateGDI(objCOTAN)
   objCOTAN <- storeGDI(objCOTAN, GDIData)
@@ -308,35 +300,23 @@ checkClusterUniformity <- function(
     }
   )
 
-  # A cluster is deemed uniform if the number of genes
-  # with [GDI > GDIThreshold] is at the most ratioAboveThreshold
-  gdi <- getColumnFromDF(GDIData, "GDI")
-
-  quantAboveThr <- quantile(gdi, probs = 1.0 - ratioAboveThreshold)
-  percAboveThr <- sum(gdi >= GDIThreshold) / length(gdi)
-
-  clusterIsUniform <- isClusterUniform(GDIThreshold, ratioAboveThreshold,
-                                       quantAboveThr, percAboveThr,
-                                       GDIThreshold, ratioAboveThreshold)
-
+  checker <- checkObjIsUniform(objCOTAN, currentC = checker, previousC = NULL)
   rm(objCOTAN)
   gc()
 
   logThis(paste0(
-    "Cluster ", clusterName, ", with size ", clusterSize, ", is ",
-    (if (clusterIsUniform) {""} else {"not "}), "uniform\n",
-    round(percAboveThr * 100.0, digits = 2L), "% of the genes is above ",
-    "the given GDI threshold ", GDIThreshold, "\n",
-    "highest ", round(ratioAboveThreshold * 100.0, digits = 2L),
-    "% GDI quantile is at ", round(quantAboveThr, digits = 4L)), logLevel = 3L)
+    "Cluster ", clusterName, ", with size ", checker@clusterSize, ", is ",
+    ifelse(checker@isUniform, "", "not "), "uniform"), logLevel = 1)
+
+  dumpList <- checkerToList(checker)
+  logThis(paste0(names(dumpList), " = ", dumpList, collapse = ", "),
+          logLevel = 3L)
+  rm(dumpList)
 
   if (isTRUE(saveObj)) tryCatch({
-      pre <- ""
-      if (!clusterIsUniform) {
-        pre <- "non-"
-      }
       outFile <- file.path(outDir,
-                           paste0(pre, "uniform_cluster_", clusterName, ".csv"))
+                           paste0(ifelse(checker@isUniform, "", "non-"),
+                                  "uniform_cluster_", clusterName, ".csv"))
       write.csv(cells, file = outFile)
     },
     error = function(err) {

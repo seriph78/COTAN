@@ -247,10 +247,12 @@ cellsUniformClustering <- function(objCOTAN,
   numClustersToRecluster <- 0L
   srat <- NULL
   allCheckResults <- data.frame()
-  errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
-                            "ratioQuantile" = NA, "size" = NA,
-                            "GDIThreshold" = GDIThreshold,
-                            "ratioAboveThreshold" = ratioAboveThreshold)
+  assert_that(is.finite(GDIThreshold),
+              msg = paste("Either a `checker` object or",
+                          "a legacy `GDIThreshold` must be given"))
+  checker <- new("SimpleGDIUniformityCheck",
+                 GDIThreshold = GDIThreshold,
+                 ratioAboveThreshold = 0.01)
 
   repeat {
     iter <- iter + 1L
@@ -338,8 +340,7 @@ cellsUniformClustering <- function(objCOTAN,
           checkClusterUniformity(objCOTAN = objCOTAN,
                                  clusterName = globalClName,
                                  cells = cells,
-                                 GDIThreshold = GDIThreshold,
-                                 ratioAboveThreshold = ratioAboveThreshold,
+                                 checker = checker,
                                  cores = cores,
                                  optimizeForSpeed = optimizeForSpeed,
                                  deviceStr = deviceStr,
@@ -349,16 +350,17 @@ cellsUniformClustering <- function(objCOTAN,
             logThis(paste("while checking cluster uniformity", err),
                     logLevel = 0L)
             logThis("marking cluster as not uniform", logLevel = 1L)
-            errorCheckResults[["size"]] <- length(cells)
+            errorCheckResults <- checker
+            errorCheckResults@clusterSize <- length(cells)
             return(errorCheckResults)
           })
 
-        gc()
+        invisible(validObject(checkResults))
 
-        allCheckResults <- rbind(allCheckResults, checkResults)
+        allCheckResults <- rbind(allCheckResults, checkerToList(checkResults))
         rownames(allCheckResults)[[nrow(allCheckResults)]] <- globalClName
 
-        if (!checkResults[["isUniform"]]) {
+        if (!checkResults@isUniform) {
           logThis(paste("cluster", globalClName, "has too high GDI:",
                         "will be reclustered!"), logLevel = 1L)
 
@@ -367,6 +369,9 @@ cellsUniformClustering <- function(objCOTAN,
         } else {
           logThis(paste("cluster", globalClName, "is uniform"), logLevel = 1L)
         }
+
+        rm(checkResults)
+        gc()
       }
     }
 
