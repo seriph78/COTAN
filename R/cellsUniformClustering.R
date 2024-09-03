@@ -246,7 +246,7 @@ cellsUniformClustering <- function(objCOTAN,
   iterReset <- -1L
   numClustersToRecluster <- 0L
   srat <- NULL
-  allCheckResults <- data.frame()
+  allCheckResults <- list()
   assert_that(is.finite(GDIThreshold),
               msg = paste("Either a `checker` object or",
                           "a legacy `GDIThreshold` must be given"))
@@ -357,8 +357,8 @@ cellsUniformClustering <- function(objCOTAN,
 
         invisible(validObject(checkResults))
 
-        allCheckResults <- rbind(allCheckResults, checkerToList(checkResults))
-        rownames(allCheckResults)[[nrow(allCheckResults)]] <- globalClName
+        allCheckResults <- append(allCheckResults, checkResults)
+        names(allCheckResults)[length(allCheckResults)] <- globalClName
 
         if (!checkResults@isUniform) {
           logThis(paste("cluster", globalClName, "has too high GDI:",
@@ -417,7 +417,7 @@ cellsUniformClustering <- function(objCOTAN,
 
         outFile <- file.path(splitOutDir,
                              paste0("all_check_results_", iter, ".csv"))
-        write.csv(allCheckResults, file = outFile)
+        write.csv(checkersToDF(allCheckResults), file = outFile)
     },
       error = function(err) {
         logThis(paste("While saving current clusterization", err),
@@ -457,12 +457,13 @@ cellsUniformClustering <- function(objCOTAN,
     outputClusters[unclusteredCells] <- "-1"
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
-    checksTokeep <- rownames(allCheckResults) %in% clTags
-    allCheckResults <- allCheckResults[checksTokeep, , drop = FALSE]
-    rownames(allCheckResults) <- clTagsMap[rownames(allCheckResults)]
+    checksTokeep <- names(allCheckResults) %in% clTags
+    allCheckResults <- allCheckResults[checksTokeep]
+    names(allCheckResults) <- clTagsMap[names(allCheckResults)]
     if (any(unclusteredCells)) {
-      errorCheckResults[["size"]] <- length(unclusteredCells)
-      allCheckResults <- rbind(allCheckResults, "-1" = errorCheckResults)
+      checker@clusterSize <- length(unclusteredCells)
+      allCheckResults <- append(allCheckResults, checker)
+      names(allCheckResults)[length(allCheckResults)] <- "-1"
     }
   }
 
@@ -482,13 +483,13 @@ cellsUniformClustering <- function(objCOTAN,
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
       return(list(outputClusters, outputCoexDF))
     })
-  rownames(allCheckResults) <- permMap[rownames(allCheckResults)]
+  names(allCheckResults) <- permMap[names(allCheckResults)]
 
   outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
 
   if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(outDirCond, "split_check_results.csv")
-      write.csv(allCheckResults, file = outFile)
+      write.csv(checkersToDF(allCheckResults), file = outFile)
 
       if (saveSeuratObj) {
         clusterizationName <-

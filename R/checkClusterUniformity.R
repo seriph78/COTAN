@@ -78,45 +78,93 @@ setMethod(
 )
 
 
-#' @details converts any checker (i.e. any object that derives from
-#'   `BaseUniformityCheck`) into a `list` with the values of the members
+#' @details `checkersToDF()` converts an arrya of checkers (i.e. objects that
+#'   derive from `BaseUniformityCheck`) into a `data.frame` with the values of
+#'   the members
 #'
-#' @importFrom rlang set_names
+#' @returns a `data.frame` with col-names being the member names and row-names
+#'   the names attached to each checker
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom rlang is_list
+#'
+#' @export
+#'
 #' @rdname UT_Check
 #'
-checkerToList <- function(checker) {
-  # check argument is a checker
-  assert_that(is(checker, "BaseUniformityCheck"))
+checkersToDF <- function(checkers) {
+  if (!is_list(checkers)) {
+    checkers <- list(checkers)
+  }
+  df <- data.frame()
+  for (checker in checkers) {
+    # check argument is a checker
+    assert_that(is(checker, "BaseUniformityCheck"))
 
-  slot_names <- slotNames(checker)
-  return(set_names(lapply(slot_names, function(name) slot(checker, name)),
-                   slot_names))
+    memberNames <- slotNames(checker)
+    checkerAsList <- lapply(memberNames, function(name) slot(checker, name))
+
+    df <- rbind(df, checkerAsList)
+
+    if (nrow(df) == 1L) {
+      colnames(df) <- memberNames
+    } else {
+      assert_that(identical(colnames(df), memberNames))
+    }
+  }
+
+  rownames(df) <- names(checkers)
+
+  return(df)
 }
 
-#' @details converts a `data.frame` of checkers values into an array of checkers
+
+#' @details `dfToCheckers()` converts a `data.frame` of checkers values into an
+#'   array of checkers ensuring given `data.frame` is compatible with member
+#'   types
+#'
+#' @returns `dfToCheckers()` returns a list of checkes of the requested type,
+#'   each created from one of `data.frame` rows
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom rlang is_character
+#'
+#' @export
+#'
 #' @rdname UT_Check
 #'
-dfToCheckerList <- function(df, checkerClass = NULL) {
-    obj <- new("AdvancedGDIUniformityCheck")
+dfToCheckers <- function(df, checkerClass) {
+  assert_that(is_character(checkerClass) && !isEmptyName(checkerClass),
+              msg = "A valid checker type must be given")
 
-    # Get the slot names of the class
-    slot_names <- slotNames(obj)
+  checker <- new(checkerClass)
+  assert_that(is(checker, "BaseUniformityCheck"))
 
-    # Assign values from the list to the corresponding slots
-    for (name in slot_names) {
-      if (!is.null(df[[name]])) {
-        slot(obj, name) <- df[[name]]
-      }
+  memberNames <- slotNames(checker)
+  assert_that(all(memberNames %in% colnames(df)),
+              msg = paste("Given `checkerClass` is inconsistent",
+                          "with `df` column names"))
+
+  checkers <- list()
+  for (r in seq_len(nrow(df))) {
+    checker <- new(checkerClass)
+
+    # Assign values from the data.frame row to the corresponding slots
+    for (name in memberNames) {
+      slot(checker, name) <- df[r, name]
     }
 
-    return(obj)
+    checkers <- append(checkers, checker)
+  }
+
+  names(checkers) <- rownames(df)
+
+  return(checkers)
 }
 
 
@@ -143,51 +191,51 @@ retrieveMainGDIThreshold <- function(checker) {
   }
 }
 
+#
+# #'
+# #' @details `isClusterUniform()` takes in the current thresholds and used them
+# #'   to check whether the calculated cluster parameters are sufficient to
+# #'   determine whether the cluster is **uniform** and in the positive scenario
+# #'   the corresponding answer
+# #'
+# #' @param GDIThreshold the threshold level that discriminates uniform
+# #'   *clusters*. It defaults to \eqn{1.43}
+# #' @param ratioAboveThreshold the fraction of genes allowed to be above the
+# #'   `GDIThreshold`. It defaults to \eqn{1\%}
+# #' @param ratioQuantile the `GDI` quantile corresponding to the `usedRatioAbove`
+# #' @param fractionAbove the fraction of genes above the `usedGDIThreshold`
+# #' @param usedGDIThreshold the threshold level actually used to calculate fourth
+# #'   argument
+# #' @param usedRatioAbove the fraction of genes actually used to calculate the
+# #'   third argument
+# #'
+# #' @returns a single `Boolean` value when it is possible to decide the answer
+# #'   with the given information and `NA` otherwise
+# #'
+# #' @importFrom assertthat assert_that
+# #'
+# #' @rdname UniformClusters
+# #'
+#
+# isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
+#                              ratioQuantile, fractionAbove,
+#                              usedGDIThreshold, usedRatioAbove) {
+#   assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
+#               !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
+#               GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
+#               ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
+#
+#   if (!is.na(fractionAbove) && GDIThreshold == usedGDIThreshold) {
+#     return(fractionAbove <= ratioAboveThreshold)
+#   } else if (!is.na(ratioQuantile) && ratioAboveThreshold == usedRatioAbove) {
+#     return(ratioQuantile < GDIThreshold)
+#   } else {
+#     return(NA)
+#   }
+# }
+#
 
-#'
-#' @details `isClusterUniform()` takes in the current thresholds and used them
-#'   to check whether the calculated cluster parameters are sufficient to
-#'   determine whether the cluster is **uniform** and in the positive scenario
-#'   the corresponding answer
-#'
-#' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
-#' @param ratioQuantile the `GDI` quantile corresponding to the `usedRatioAbove`
-#' @param fractionAbove the fraction of genes above the `usedGDIThreshold`
-#' @param usedGDIThreshold the threshold level actually used to calculate fourth
-#'   argument
-#' @param usedRatioAbove the fraction of genes actually used to calculate the
-#'   third argument
-#'
-#' @returns a single `Boolean` value when it is possible to decide the answer
-#'   with the given information and `NA` otherwise
-#'
-#' @importFrom assertthat assert_that
-#'
-#' @rdname UniformClusters
-#'
 
-isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
-                             ratioQuantile, fractionAbove,
-                             usedGDIThreshold, usedRatioAbove) {
-  assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
-              !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
-              GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
-              ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
-
-  if (!is.na(fractionAbove) && GDIThreshold == usedGDIThreshold) {
-    return(fractionAbove <= ratioAboveThreshold)
-  } else if (!is.na(ratioQuantile) && ratioAboveThreshold == usedRatioAbove) {
-    return(ratioQuantile < GDIThreshold)
-  } else {
-    return(NA)
-  }
-}
-
-
-#'
 #' @details `checkClusterUniformity()` takes a `COTAN` object and a cells'
 #'   *cluster* and checks whether the latter is **uniform** by `GDI`. The
 #'   function runs `COTAN` to check whether the `GDI` is lower than the given
@@ -308,10 +356,12 @@ checkClusterUniformity <- function(
     "Cluster ", clusterName, ", with size ", checker@clusterSize, ", is ",
     ifelse(checker@isUniform, "", "not "), "uniform"), logLevel = 1)
 
-  dumpList <- checkerToList(checker)
-  logThis(paste0(names(dumpList), " = ", dumpList, collapse = ", "),
-          logLevel = 3L)
-  rm(dumpList)
+  if (TRUE) {
+    dumpDF <- checkersToDF(checker)
+    logThis(paste0(colnames(dumpDF), " = ", dumpDF, collapse = ", "),
+            logLevel = 3L)
+    rm(dumpDF)
+  }
 
   if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(outDir,

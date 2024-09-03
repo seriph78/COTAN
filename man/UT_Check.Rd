@@ -8,16 +8,16 @@
 \alias{AdvancedGDIUniformityCheck-class}
 \alias{checkObjIsUniform,COTAN,SimpleGDIUniformityCheck-method}
 \alias{checkObjIsUniform}
-\alias{checkerToList}
-\alias{dfToCheckerList}
+\alias{checkersToDF}
+\alias{dfToCheckers}
 \alias{retrieveMainGDIThreshold}
 \title{Definition of the \strong{Transcript Uniformity Check} classes}
 \usage{
 \S4method{checkObjIsUniform}{COTAN,SimpleGDIUniformityCheck}(objCOTAN, currentC, previousC = NULL)
 
-checkerToList(checker)
+checkersToDF(checkers)
 
-dfToCheckerList(df, checkerClass = NULL)
+dfToCheckers(df, checkerClass)
 
 retrieveMainGDIThreshold(checker)
 }
@@ -26,6 +26,12 @@ retrieveMainGDIThreshold(checker)
 transcript}. It is derived from \linkS4class{BaseUniformityCheck}}
 }
 \value{
+a \code{data.frame} with col-names being the member names and row-names
+the names attached to each checker
+
+\code{dfToCheckers()} returns a list of checkes of the requested type,
+each created from one of \code{data.frame} rows
+
 \code{retrieveMainGDIThreshold()} returns the appropriate member of the
 checker class or falls-back to 1.3
 }
@@ -56,10 +62,13 @@ A \emph{cluster} is deemed uniform if the ...
 
 checkObjIsUniform():
 
-converts any checker (i.e. any object that derives from
-\code{BaseUniformityCheck}) into a \code{list} with the values of the members
+\code{checkersToDF()} converts an arrya of checkers (i.e. objects that
+derive from \code{BaseUniformityCheck}) into a \code{data.frame} with the values of
+the members
 
-converts a \code{data.frame} of checkers values into an array of checkers
+\code{dfToCheckers()} converts a \code{data.frame} of checkers values into an
+array of checkers ensuring given \code{data.frame} is compatible with member
+types
 }
 \section{Slots}{
 
