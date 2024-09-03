@@ -347,18 +347,9 @@ setGeneric(
 
 # -------- Uniform Transcript Checks --------
 
-
 setGeneric(
   "checkObjIsUniform",
-  function(objCOTAN, currentChecker, usedChecker) {
+  function(objCOTAN, currentC, previousC) {
     standardGeneric("checkObjIsUniform")
-    #currentChecker = "SimpleGDIUniformityCheck"
-  }
-)
-
-setGeneric(
-  "asUniformityChecker",
-  function(checkerAsList) {
-    standardGeneric("asUniformityChecker")
   }
 )

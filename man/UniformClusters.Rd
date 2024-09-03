@@ -50,7 +50,7 @@ checkClusterUniformity(
   clusterName,
   cells,
   checker = NULL,
-  GDIThreshold = NULL,
+  GDIThreshold = NaN,
   cores = 1L,
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
@@ -149,6 +149,10 @@ third argument}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
 
+\item{checker}{the object that defines the method and the threshold to
+discriminate whether a \emph{cluster} is \emph{uniform transcript}. See \link{UT_Check}
+for more details}
+
 \item{clusters}{The \emph{clusterization} to merge. If not given the last
 available \emph{clusterization} will be used, as it is probably the most
 significant!}
@@ -175,17 +179,9 @@ average gene expression (log scaled). Also marked are the given \emph{threshold}
 a single \code{Boolean} value when it is possible to decide the answer
 with the given information and \code{NA} otherwise
 
-\code{checkClusterUniformity} returns a list with:
-\itemize{
-\item \code{"isUniform"}: a flag indicating whether the \emph{cluster} is \strong{uniform}
-\item \code{"fractionAbove"}: the percentage of genes with \code{GDI} above the threshold
-\item \code{"ratioQuantile"}: the quantile associated to the high quantile
-associated to given ratio
-\item \code{"size"}: the number of cells in the cluster
-\item \code{"GDIThreshold"} the used \code{GDI} threshold
-\item \code{"ratioAboveThreshold"} the used fraction of genes above threshold
-allowed in \strong{uniform} \emph{clusters}
-}
+\code{checkClusterUniformity} returns a checker object of the same type
+as the input one, that contains both threshold and results of the check:
+see \link{UT_Check} for more details
 
 a \code{list} with:
 \itemize{

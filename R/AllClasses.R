@@ -614,19 +614,25 @@ NULL
 
 #' @details `BaseUniformityCheck` is the base class of the check methods
 #'
-#' @slot isUniform Logical. The result of the check
+#' @slot isUniform Logical. Output. The result of the check
+#' @slot clusterSize Integer. Output. The number of cells in the cluster
 #'
 #' @rdname UT_Check
 #'
 setClass(
   "BaseUniformityCheck",
   slots = c(
-    isUniform = "logical"
+    isUniform = "logical",
+    clusterSize = "integer"
   ),
   prototype = list(
-    isUniform = FALSE
+    isUniform   = FALSE,
+    clusterSize = 0L
   ),
   validity = function(object) {
+    if (clusterSize <= 0) {
+      stop("Given 'clusterSize' data must be a positive number")
+    }
     return(TRUE)
   }
 ) # end Base Uniformity Check
@@ -641,9 +647,13 @@ setClass(
 #'
 #' @slot GDIThreshold Numeric. (Simple check only) The level of `GDI` above
 #'   which the **cluster** is deemed not uniform (default is 1.43)
-#' @slot ratioAbove Numeric. (Simple check only) The quantile of the `GDI`
-#'   distribution used to select the gene whose `GDI` must be below the
+#' @slot ratioAboveThreshold Numeric. (Simple check only) The quantile of the
+#'   `GDI` distribution used to select the gene whose `GDI` must be below the
 #'   threshold (default is 0.01)
+#' @slot fractionAboveThreshold Numeric. Output. The fraction of genes whose
+#'   `GDI` is above the threshold
+#' @slot quantileAtRatio Numeric. Output. The `GDI` distribution quantile
+#'   corresponding at the given ratio
 #'
 #' @rdname UT_Check
 #'
@@ -651,21 +661,35 @@ setClass(
   "SimpleGDIUniformityCheck",
   contains = "BaseUniformityCheck",
   slots = c(
-    GDIThreshold        = "numeric",
-    ratioAboveThreshold = "numeric"
+    GDIThreshold           = "numeric",
+    ratioAboveThreshold    = "numeric",
+    fractionAboveThreshold = "numeric",
+    quantileAtRatio        = "numeric"
   ),
   prototype = list(
-    GDIThreshold        = 1.43,
-    ratioAboveThreshold = 0.01
+    GDIThreshold           = 1.43,
+    ratioAboveThreshold    = 0.01,
+    fractionAboveThreshold = NaN,
+    quantileAtRatio        = NaN
   ),
   validity = function(object) {
     if (!is_double(GDIThreshold, n = 1, finite = TRUE) || GDIThreshold <= 1.0) {
       stop("Input 'GDIThreshold' data must be a finite number above 1.0")
     }
     if (!is_double(ratioAboveThreshold, n = 1, finite = TRUE) ||
-       ratioAboveThreshold <= 0.0 || ratioAboveThreshold >= 1.0) {
+        (ratioAboveThreshold <= 0.0 || ratioAboveThreshold >= 1.0)) {
       stop("Input 'ratioAboveThreshold' data must be a finite",
            " number between 0.0 and 1.0")
+    }
+    if (is_double(fractionAboveThreshold, n = 1, finite = TRUE) &&
+        (fractionAboveThreshold <= 0.0 || fractionAboveThreshold >= 1.0)) {
+      stop("Given 'fractionAboveThreshold' data must be NA or a finite",
+           " number between 0.0 and 1.0")
+    }
+    if (is_double(quantileAtRatio, n = 1, finite = TRUE) &&
+        quantileAtRatio <= 0.0) {
+      stop("Given 'quantileAtRatio' data must be NA or a finite",
+           " positive number")
     }
     return(TRUE)
   }

@@ -8,20 +8,34 @@
 \alias{AdvancedGDIUniformityCheck-class}
 \alias{checkObjIsUniform,COTAN,SimpleGDIUniformityCheck,SimpleGDIUniformityCheck-method}
 \alias{checkObjIsUniform}
-\alias{checketToList}
-\alias{dfToCheckerArray}
+\alias{checkerToList}
+\alias{dfToCheckerList}
+\alias{retrieveMainGDIThreshold}
 \title{Definition of the \strong{Transcript Uniformity Check} classes}
 \usage{
-\S4method{checkObjIsUniform}{COTAN,SimpleGDIUniformityCheck,SimpleGDIUniformityCheck}(objCOTAN, currentChecker, usedChecker)
+\S4method{checkObjIsUniform}{COTAN,SimpleGDIUniformityCheck,SimpleGDIUniformityCheck}(objCOTAN, currentC, previousC = NULL)
 
-checketToList(checker)
+checkerToList(checker)
 
-dfToCheckerArray(df, checkerClass = NULL)
+dfToCheckerList(df, checkerClass = NULL)
+
+retrieveMainGDIThreshold(checker)
+}
+\arguments{
+\item{checker}{An checker object that defines how to check for \emph{uniform
+transcript}. It is derived from \linkS4class{BaseUniformityCheck}}
+}
+\value{
+\code{retrieveMainGDIThreshold()} returns the appropriate member of the
+checker class or falls-back to 1.3
 }
 \description{
 A hierarchy of classes to specify the method for checking
 whether a \strong{cluster} has the \emph{Uniform Transcript} property. It also
 doubles as result object.
+
+\code{retrieveMainGDIThreshold()} extracts the main GDI threshold
+from the given checker class
 }
 \details{
 \code{BaseUniformityCheck} is the base class of the check methods
@@ -50,14 +64,22 @@ converts a \code{data.frame} of checkers values into an array of checkers
 \section{Slots}{
 
 \describe{
-\item{\code{isUniform}}{Logical. The result of the check}
+\item{\code{isUniform}}{Logical. Output. The result of the check}
+
+\item{\code{clusterSize}}{Integer. Output. The number of cells in the cluster}
 
 \item{\code{GDIThreshold}}{Numeric. (Simple check only) The level of \code{GDI} above
 which the \strong{cluster} is deemed not uniform (default is 1.43)}
 
-\item{\code{ratioAbove}}{Numeric. (Simple check only) The quantile of the \code{GDI}
-distribution used to select the gene whose \code{GDI} must be below the
+\item{\code{ratioAboveThreshold}}{Numeric. (Simple check only) The quantile of the
+\code{GDI} distribution used to select the gene whose \code{GDI} must be below the
 threshold (default is 0.01)}
+
+\item{\code{fractionAboveThreshold}}{Numeric. Output. The fraction of genes whose
+\code{GDI} is above the threshold}
+
+\item{\code{quantileAtRatio}}{Numeric. Output. The \code{GDI} distribution quantile
+corresponding at the given ratio}
 
 \item{\code{lowCheckThreshold}}{Numeric. (Advanced check only) The level of \code{GDI}
 above which the

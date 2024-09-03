@@ -5,25 +5,72 @@
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @rdname UT_Check
 #'
 setMethod(
   "checkObjIsUniform",
   signature(objCOTAN = "COTAN",
-            currentChecker = "SimpleGDIUniformityCheck",
-            usedChecker = "SimpleGDIUniformityCheck"),
-  function(objCOTAN, currentChecker, usedChecker) {
-    invisible(validObject(currentChecker))
-    if(validObject(usedChecker)) {
+            currentC = "SimpleGDIUniformityCheck",
+            previousC = "SimpleGDIUniformityCheck"),
+  function(objCOTAN, currentC, previousC = NULL) {
+    invisible(validObject(currentC))
 
-    } else {
-      GDIData <- calculateGDI(objCOTAN)
+    previousCheckIsSufficient <- FALSE
 
-      GDIThreshold
-      ratioAboveThreshold
+    if(!is.null(previousC)) {
+      invisible(validObject(previousC))
+      # in this case we assume previousC is the result of a previous check,
+      # maybe with different thresholds: if possible we try to avoid using the
+      # GDI to determine the check result
+
+      currentC@clusterSize <- previousC@clusterSize
+
+      if (is.finite(previousC@fractionAboveThreshold) &&
+          (previousC@GDIThreshold == currentC@GDIThreshold)) {
+        currentC@fractionAboveThreshold <- previousC@fractionAboveThreshold
+        previousCheckIsSufficient <- TRUE
+      }
+
+      if (is.finite(previousC@quantileAtRatio) &&
+          (previousC@ratioAboveThreshold == currentC@ratioAboveThreshold)) {
+        currentC@quantileAtRatio <- previousC@quantileAtRatio
+        previousCheckIsSufficient <- TRUE
+      }
+
+      # if neither threshold match previous check we cannot avoid re-doing the
+      # check via the GDI, so fall-back from here
     }
 
+    # run the check via pre-calculated GDI
+    if (!previousCheckIsSufficient) {
+      gdi <- getColumnFromDF(getGDI(objCOTAN), "GDI")
+      if (is.null(gdi)) {
+        # if GDI was not stored recalculate it now
+        gdi <- getColumnFromDF(calculateGDI(objCOTAN), "GDI")
+      }
+      assert_that(!is.null(gdi))
 
+      currentC@clusterSize <- length(gdi)
+
+      currentC@quantileAtRatio <-
+        quantile(gdi, probs = 1.0 - currentC@ratioAboveThreshold)
+
+      currentC@fractionAboveThreshold <-
+        sum(gdi >= currentC@GDIThreshold) / currentC@clusterSize
+    }
+
+    if (is.finite(currentC@fractionAboveThreshold)) {
+      currentC@isUniform <-
+        (currentC@fractionAboveThreshold <= currentC@ratioAboveThreshold)
+    } else {
+      assert_that(is.finite(currentC@quantileAtRatio))
+      currentC@isUniform <-
+        (currentC@quatileAtRatio <= currentC@GDIThreshold)
+    }
+
+    return(currentC)
   }
 )
 
@@ -37,7 +84,7 @@ setMethod(
 #'
 #' @rdname UT_Check
 #'
-checketToList <- function(checker) {
+checkerToList <- function(checker) {
   # check argument is a checker
   assert_that(is(checker, "BaseUniformityCheck"))
 
@@ -46,15 +93,6 @@ checketToList <- function(checker) {
                    slot_names))
 }
 
-# 'from' arg-name is convention: it is actually a destination!
-# replace = function(from, value) {
-#   slot_names <- slotNames(value)
-#   slot_values <- lapply(slot_names, function(name) slot(value, name))
-#   names(slot_values) <- slot_names
-#   from <- slot_values
-# }
-
-
 #' @details converts a `data.frame` of checkers values into an array of checkers
 #'
 #' @importFrom zeallot %<-%
@@ -62,7 +100,7 @@ checketToList <- function(checker) {
 #'
 #' @rdname UT_Check
 #'
-dfToCheckerArray<- function(df, checkerClass = NULL) {
+dfToCheckerList <- function(df, checkerClass = NULL) {
     obj <- new("AdvancedGDIUniformityCheck")
 
     # Get the slot names of the class
@@ -76,6 +114,30 @@ dfToCheckerArray<- function(df, checkerClass = NULL) {
     }
 
     return(obj)
+}
+
+
+#' @description `retrieveMainGDIThreshold()` extracts the main GDI threshold
+#'   from the given checker class
+#'
+#' @param checker An checker object that defines how to check for *uniform
+#'   transcript*. It is derived from [BaseUniformityCheck-class]
+#'
+#' @returns `retrieveMainGDIThreshold()` returns the appropriate member of the
+#'   checker class or falls-back to 1.3
+#'
+# #' @export
+#'
+#' @rdname UT_Check
+
+retrieveMainGDIThreshold <- function(checker) {
+  if (is(checker, "SimpleGDIUniformityCheck")) {
+    return(checker@GDIThreshold)
+  } else if (is(checker, "AdvancedGDIUniformityCheck")) {
+    return(checker@lowCheckThreshold)
+  } else {
+    return(1.4)
+  }
 }
 
 
@@ -122,7 +184,6 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 }
 
 
-
 #'
 #' @details `checkClusterUniformity()` takes a `COTAN` object and a cells'
 #'   *cluster* and checks whether the latter is **uniform** by `GDI`. The
@@ -135,10 +196,11 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 #' @param objCOTAN a `COTAN` object
 #' @param clusterName the tag of the *cluster*
 #' @param cells the cells belonging to the *cluster*
-#' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
+#' @param checker the object that defines the method and the threshold to
+#'   discriminate whether a *cluster* is *uniform transcript*. See [UT_Check]
+#'   for more details
+#' @param GDIThreshold legacy. The threshold level that will be used to create a
+#'   [SimpleGDIUniformityCheck-class].
 #' @param cores number of cores to use. Default is 1.
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
@@ -152,15 +214,9 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #'
-#' @returns `checkClusterUniformity` returns a list with:
-#'   * `"isUniform"`: a flag indicating whether the *cluster* is **uniform**
-#'   * `"fractionAbove"`: the percentage of genes with `GDI` above the threshold
-#'   * `"ratioQuantile"`: the quantile associated to the high quantile
-#'   associated to given ratio
-#'   * `"size"`: the number of cells in the cluster
-#'   * `"GDIThreshold"` the used `GDI` threshold
-#'   * `"ratioAboveThreshold"` the used fraction of genes above threshold
-#'     allowed in **uniform** *clusters*
+#' @returns `checkClusterUniformity` returns a checker object of the same type
+#'   as the input one, that contains both threshold and results of the check:
+#'   see [UT_Check] for more details
 #'
 #' @importFrom utils head
 #'
@@ -168,6 +224,8 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 #' @importFrom grDevices dev.off
 #'
 #' @importFrom withr local_options
+#'
+#' @importFrom assertthat assert_that
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
@@ -182,12 +240,21 @@ checkClusterUniformity <- function(
     clusterName,
     cells,
     checker = NULL,
-    GDIThreshold = NULL, # legacy for SimpleGDIUniformityCheck
+    GDIThreshold = NaN, # legacy for SimpleGDIUniformityCheck
     cores = 1L,
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",
     saveObj = TRUE,
     outDir = ".") {
+  # handle legacy usage
+  if (is.null(checker)) {
+    assert_that(is.finite(GDIThreshold),
+                msg = paste("Either a `checker` object or",
+                            "a legacy `GDIThreshold` must be given"))
+    checker <- SimpleGDIUniformityCheck(GDIThreshold = GDIThreshold,
+                                        ratioAboveThreshold = 0.01)
+  }
+
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
@@ -203,6 +270,7 @@ checkClusterUniformity <- function(
                  "' with ", clusterSize, " cells"), logLevel = 2L)
 
   GDIData <- calculateGDI(objCOTAN)
+  objCOTAN <- storeGDI(objCOTAN, GDIData)
 
   # Plots
   if (isTRUE(saveObj) && !dir.exists(outDir)) {
@@ -223,7 +291,8 @@ checkClusterUniformity <- function(
       genesToLabel <-
         head(rownames(GDIData[order(GDIData[["GDI"]],
                                     decreasing = TRUE), ]), n = 10L)
-      gdiPlot <- GDIPlot(objCOTAN, GDIIn = GDIData, GDIThreshold = GDIThreshold,
+      gdiPlot <- GDIPlot(objCOTAN, GDIIn = GDIData,
+                         GDIThreshold = retrieveMainGDIThreshold(checker),
                          genes = list("top 10 GDI genes" = genesToLabel))
 
       plot(nuPlot)
@@ -239,9 +308,6 @@ checkClusterUniformity <- function(
     }
   )
 
-  rm(objCOTAN)
-  gc()
-
   # A cluster is deemed uniform if the number of genes
   # with [GDI > GDIThreshold] is at the most ratioAboveThreshold
   gdi <- getColumnFromDF(GDIData, "GDI")
@@ -252,6 +318,9 @@ checkClusterUniformity <- function(
   clusterIsUniform <- isClusterUniform(GDIThreshold, ratioAboveThreshold,
                                        quantAboveThr, percAboveThr,
                                        GDIThreshold, ratioAboveThreshold)
+
+  rm(objCOTAN)
+  gc()
 
   logThis(paste0(
     "Cluster ", clusterName, ", with size ", clusterSize, ", is ",
@@ -276,10 +345,5 @@ checkClusterUniformity <- function(
     }
   )
 
-  return(list("isUniform" = clusterIsUniform,
-              "fractionAbove" = percAboveThr,
-              "ratioQuantile" = quantAboveThr[[1L]],
-              "size" = clusterSize,
-              "GDIThreshold" = GDIThreshold,
-              "ratioAboveThreshold" = ratioAboveThreshold))
+  return(checker)
 }
