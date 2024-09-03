@@ -20,8 +20,8 @@ GDIPlot(
 
 cellsUniformClustering(
   objCOTAN,
-  GDIThreshold = 1.43,
-  ratioAboveThreshold = 0.01,
+  checker = NULL,
+  GDIThreshold = NaN,
   cores = 1L,
   maxIterations = 25L,
   optimizeForSpeed = TRUE,
@@ -50,8 +50,8 @@ checkClusterUniformity(
 mergeUniformCellsClusters(
   objCOTAN,
   clusters = NULL,
-  GDIThreshold = 1.43,
-  ratioAboveThreshold = 0.01,
+  checker = NULL,
+  GDIThreshold = NaN,
   batchSize = 0L,
   allCheckResults = data.frame(),
   cores = 1L,
@@ -76,14 +76,15 @@ only for the title).}
 \item{statType}{type of statistic to be used. Default is "S": Pearson's
 chi-squared test statistics. "G" is G-test statistics}
 
-\item{GDIThreshold}{the threshold level that discriminates uniform clusters.
-It defaults to \eqn{1.43}}
+\item{GDIThreshold}{legacy. The threshold level that is used in a
+\linkS4class{SimpleGDIUniformityCheck}. It defaults to \eqn{1.40}}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
 
-\item{ratioAboveThreshold}{the fraction of genes allowed to be above the
-\code{GDIThreshold}. It defaults to \eqn{1\%}}
+\item{checker}{the object that defines the method and the threshold to
+discriminate whether a \emph{cluster} is \emph{uniform transcript}. See \link{UT_Check}
+for more details}
 
 \item{cores}{number of cores to use. Default is 1.}
 
@@ -127,10 +128,6 @@ output will be paced in a sub-folder.}
 \item{clusterName}{the tag of the \emph{cluster}}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
-
-\item{checker}{the object that defines the method and the threshold to
-discriminate whether a \emph{cluster} is \emph{uniform transcript}. See \link{UT_Check}
-for more details}
 
 \item{clusters}{The \emph{clusterization} to merge. If not given the last
 available \emph{clusterization} will be used, as it is probably the most

@@ -151,10 +151,11 @@ NULL
 #'   50}), those are flagged as `"-1"` and the process is stopped.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
+#' @param checker the object that defines the method and the threshold to
+#'   discriminate whether a *cluster* is *uniform transcript*. See [UT_Check]
+#'   for more details
+#' @param GDIThreshold legacy. The threshold level that is used in a
+#'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.40}
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
@@ -207,8 +208,8 @@ NULL
 #'
 
 cellsUniformClustering <- function(objCOTAN,
-                                   GDIThreshold = 1.43,
-                                   ratioAboveThreshold = 0.01,
+                                   checker = NULL,
+                                   GDIThreshold = NaN,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    optimizeForSpeed = TRUE,
@@ -247,12 +248,17 @@ cellsUniformClustering <- function(objCOTAN,
   numClustersToRecluster <- 0L
   srat <- NULL
   allCheckResults <- list()
-  assert_that(is.finite(GDIThreshold),
-              msg = paste("Either a `checker` object or",
-                          "a legacy `GDIThreshold` must be given"))
-  checker <- new("SimpleGDIUniformityCheck",
-                 GDIThreshold = GDIThreshold,
-                 ratioAboveThreshold = 0.01)
+
+  if (is.null(checker)) {
+    GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.40)
+    checker <- new("SimpleGDIUniformityCheck",
+                   GDIThreshold = GDIThreshold,
+                   ratioAboveThreshold = 0.01)
+  } else {
+    assert_that(is.finite(GDIThreshold),
+                msg = paste("Either a `checker` object or",
+                            "a legacy `GDIThreshold` must be given"))
+  }
 
   repeat {
     iter <- iter + 1L

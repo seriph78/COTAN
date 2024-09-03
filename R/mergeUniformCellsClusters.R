@@ -17,10 +17,11 @@
 #' @param clusters The *clusterization* to merge. If not given the last
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
-#' @param GDIThreshold the threshold level that discriminates uniform clusters.
-#'   It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
+#' @param checker the object that defines the method and the threshold to
+#'   discriminate whether a *cluster* is *uniform transcript*. See [UT_Check]
+#'   for more details
+#' @param GDIThreshold legacy. The threshold level that is used in a
+#'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.40}
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
 #' @param allCheckResults An optional `data.frame` with the results of previous
@@ -148,8 +149,8 @@
 
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
-                                      GDIThreshold = 1.43,
-                                      ratioAboveThreshold = 0.01,
+                                      checker = NULL,
+                                      GDIThreshold = NaN,
                                       batchSize = 0L,
                                       allCheckResults = data.frame(),
                                       cores = 1L,
@@ -165,6 +166,17 @@ mergeUniformCellsClusters <- function(objCOTAN,
   assert_that(estimatorsAreReady(objCOTAN),
               msg = paste("Estimators lambda, nu, dispersion are not ready:",
                           "Use proceeedToCoex() to prepare them"))
+
+  if (is.null(checker)) {
+    GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.40)
+    checker <- new("SimpleGDIUniformityCheck",
+                   GDIThreshold = GDIThreshold,
+                   ratioAboveThreshold = 0.01)
+  } else {
+    assert_that(is.finite(GDIThreshold),
+                msg = paste("Either a `checker` object or",
+                            "a legacy `GDIThreshold` must be given"))
+  }
 
   assert_that(isa(allCheckResults, "data.frame"),
               (is_empty(allCheckResults) ||
