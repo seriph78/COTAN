@@ -686,19 +686,19 @@ setClass(
       stop("Input 'GDIThreshold' data must be a finite number above 1.0")
     }
     if (!is_double(object@ratioAboveThreshold, n = 1, finite = TRUE) ||
-        (object@ratioAboveThreshold <= 0.0 ||
-         object@ratioAboveThreshold >= 1.0)) {
+        (object@ratioAboveThreshold < 0.0 ||
+         object@ratioAboveThreshold > 1.0)) {
       stop("Input 'ratioAboveThreshold' data must be a finite",
            " number between 0.0 and 1.0")
     }
-    if (!is_double(object@fractionAboveThreshold, n = 1, finite = FALSE) ||
+    if (!is_double(object@fractionAboveThreshold, n = 1) ||
         (is.finite(object@fractionAboveThreshold) &&
-         (object@fractionAboveThreshold <= 0.0 ||
-          object@fractionAboveThreshold >= 1.0))) {
+         (object@fractionAboveThreshold < 0.0 ||
+          object@fractionAboveThreshold > 1.0))) {
       stop("Given 'fractionAboveThreshold' data must be NaN or a finite",
            " number between 0.0 and 1.0")
     }
-    if (!is_double(object@quantileAtRatio, n = 1, finite = FALSE) ||
+    if (!is_double(object@quantileAtRatio, n = 1) ||
         (is.finite(object@fractionAboveThreshold) &&
          object@quantileAtRatio <= 0.0)) {
       stop("Given 'quantileAtRatio' data must be NaN or a finite",
@@ -795,7 +795,7 @@ setClass(
           stop("Input 'quantile' must be a number between 0.0 and 1.0")
         }
       } else {
-        if(rank < 0L) {
+        if(rank < 1L) {
           stop("Input 'rank' must be a positive integer")
         }
       }

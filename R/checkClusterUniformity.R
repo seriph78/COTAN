@@ -58,7 +58,7 @@ setMethod(
       assert_that(!is_empty(gdi))
 
       currentC@quantileAtRatio <-
-        quantile(gdi, probs = 1.0 - currentC@ratioAboveThreshold)
+        quantile(gdi, probs = 1.0 - currentC@ratioAboveThreshold, names = FALSE)
 
       currentC@fractionAboveThreshold <-
         sum(gdi >= currentC@GDIThreshold) / length(gdi)
