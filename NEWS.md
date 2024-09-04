@@ -1,3 +1,11 @@
+## 2.4.5
+
+Avoided issue with pdf file creation: file handle was not closed
+in case of errors
+
+Solved minor issue with with clusterization functions in cases when only one
+cluster was created
+
 ## 2.4.4
 
 Made function `heatmapPlot()` more easy to use and in line with the rest of
