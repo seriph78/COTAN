@@ -224,6 +224,7 @@ UMAPPlot <- function(df,
 #' @param rawData the raw counts
 #' @param hvgMethod the HVG method
 #' @param cond the sample condition
+#' @param numFeatures the number of genes to select. It defaults to 2000
 #'
 #' @returns a subset of the genes in the dataset
 #'
@@ -237,7 +238,7 @@ UMAPPlot <- function(df,
 #'
 #' @noRd
 #'
-seuratHVG <- function(rawData, hvgMethod, cond) {
+seuratHVG <- function(rawData, hvgMethod, cond, numFeatures = 2000L) {
   tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
@@ -246,7 +247,7 @@ seuratHVG <- function(rawData, hvgMethod, cond) {
                                min.cells = 3L, min.features = 4L)
     srat <- NormalizeData(srat)
     srat <- FindVariableFeatures(srat, selection.method = hvgMethod,
-                                 nfeatures = 2000L)
+                                 nfeatures = numFeatures)
 
     hvg <- VariableFeatures(object = srat)
 
@@ -401,13 +402,15 @@ cellsUMAPPlot <- function(objCOTAN,
     condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
     genesPos <- getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
                                                   hvgMethod = "vst",
-                                                  cond = condition)
+                                                  cond = condition,
+                                                  numFeatures = numGenes)
     rm(condition)
   } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
     condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
     genesPos <- getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
                                                   hvgMethod = "mean.var.plot",
-                                                  cond = condition)
+                                                  cond = condition,
+                                                  numFeatures = numGenes)
     rm(condition)
   } else {
     stop("Unrecognised `genesSel` passed in: ", genesSel)
