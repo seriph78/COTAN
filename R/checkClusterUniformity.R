@@ -151,10 +151,9 @@ checkClusterUniformity <- function(
 
       rm(nuPlot, zoomedNuPlot, gdiPlot)
       dev.off()
-    },
-    error = function(err) {
-      logThis(paste("While saving cluster plots", err),
-              logLevel = 0L)
+    }, error = function(err) {
+      logThis(paste("While saving cluster plots", err), logLevel = 0L)
+      dev.off()
     }
   )
 
