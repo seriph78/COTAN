@@ -82,7 +82,6 @@ test_that("Merge Uniform Cells Clusters", {
       mergeUniformCellsClusters(
         objCOTAN = obj, clusters = clusters,
         GDIThreshold = GDIThreshold, batchSize = 2L,
-        ratioAboveThreshold = ratioAboveThreshold,
         distance = "cosine", hclustMethod = "ward.D2",
         cores = 6L, saveObj = TRUE, outDir = tm)
   })
