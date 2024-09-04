@@ -110,7 +110,8 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
 
         dev.off()
       }, error = function(err) {
-        logThis(paste("While saving seurat umpa plot", err), logLevel = 1L)
+        logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)
+        dev.off()
       })
     gc()
 
