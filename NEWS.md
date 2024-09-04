@@ -1,3 +1,13 @@
+## 2.5.7
+
+Avoided issue with pdf file creation: file handle was not closed
+in case of errors
+
+Added possibility of choosing number of features in `seuratHVG()`
+
+Solved minor issue with with clusterization functions in cases when only one
+cluster was created
+
 ## 2.5.6
 
 Made function `heatmapPlot()` more easy to use and in line with the rest of
