@@ -281,11 +281,10 @@ mergeUniformCellsClusters <- function(objCOTAN,
         plot(as.dendrogram(hcNorm))
 
         dev.off()
-      },
-      error = function(err) {
+      }, error = function(err) {
         logThis(paste("While saving dendogram plot", err), logLevel = 0L)
-      }
-    )
+        dev.off()
+      })
 
     # We will check whether it is possible to merge a list of cluster pairs.
     # These pairs correspond to N lowest distances as calculated before

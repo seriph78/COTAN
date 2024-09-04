@@ -65,7 +65,7 @@ setMethod(
 
     objCOTAN <- clean(objCOTAN)
 
-    if (isTRUE(saveObj)) {
+    if (isTRUE(saveObj)) tryCatch({
       if (!dir.exists(outDir)) {
         dir.create(file.path(outDir))
       }
@@ -84,7 +84,7 @@ setMethod(
 
       plots <- cleanPlots(objCOTAN)
 
-      {
+      if (TRUE) {
         numIter <- 1L
         pdf(file.path(outDirCleaning,
                       paste0(cond, "_", numIter,
@@ -94,14 +94,14 @@ setMethod(
         dev.off()
       }
 
-      {
+      if (TRUE) {
         pdf(file.path(outDirCleaning,
                       paste0(cond, "_plots_PCA_efficiency_colored.pdf")))
         plot(plots[["UDE"]])
         dev.off()
       }
 
-      {
+      if (TRUE) {
         pdf(file.path(outDirCleaning,
                       paste0(cond, "_plots_efficiency.pdf")))
         plot(plots[["nu"]] +
@@ -111,8 +111,11 @@ setMethod(
       }
 
       rm(plots)
-      gc()
-    }
+    }, error = function(err) {
+      logThis(paste("While saving the clean plots", err), logLevel = 1L)
+      dev.off()
+    })
+    gc()
 
     analysisTime <- Sys.time()
 
