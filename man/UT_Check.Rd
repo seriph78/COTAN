@@ -29,7 +29,7 @@ transcript}. It is derived from \linkS4class{BaseUniformityCheck}}
 a \code{data.frame} with col-names being the member names and row-names
 the names attached to each checker
 
-\code{dfToCheckers()} returns a list of checkes of the requested type,
+\code{dfToCheckers()} returns a \code{list} of checkers of the requested type,
 each created from one of \code{data.frame} rows
 
 \code{retrieveMainGDIThreshold()} returns the appropriate member of the
@@ -60,9 +60,10 @@ Transcript} property
 The method is based on checking the genes' \code{GDI} against three \emph{thresholds}
 A \emph{cluster} is deemed uniform if the ...
 
-checkObjIsUniform():
+\code{checkObjIsUniform()} performs the check whether the given object is
+uniform according to the given checker
 
-\code{checkersToDF()} converts an arrya of checkers (i.e. objects that
+\code{checkersToDF()} converts a \code{list} of checkers (i.e. objects that
 derive from \code{BaseUniformityCheck}) into a \code{data.frame} with the values of
 the members
 

@@ -75,7 +75,6 @@ test_that("Merge Uniform Cells Clusters", {
   expect_equal(e.df[["N. total"]], lengths(groupMarkers), ignore_attr = TRUE)
 
   GDIThreshold <- 1.46
-  ratioAboveThreshold <- 0.01
 
   suppressWarnings({
     c(mergedClusters, mergedCoexDF) %<-%

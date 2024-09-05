@@ -1,6 +1,7 @@
 #' @aliases checkObjIsUniform
 #'
-#' @details checkObjIsUniform():
+#' @details `checkObjIsUniform()` performs the check whether the given object is
+#'   uniform according to the given checker
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
@@ -38,6 +39,7 @@ setMethod(
 
       if (is.finite(previousC@quantileAtRatio) &&
           (previousC@ratioAboveThreshold == currentC@ratioAboveThreshold)) {
+
         currentC@quantileAtRatio <- previousC@quantileAtRatio
         previousCheckIsSufficient <- TRUE
       }
@@ -78,7 +80,7 @@ setMethod(
 )
 
 
-#' @details `checkersToDF()` converts an arrya of checkers (i.e. objects that
+#' @details `checkersToDF()` converts a `list` of checkers (i.e. objects that
 #'   derive from `BaseUniformityCheck`) into a `data.frame` with the values of
 #'   the members
 #'
@@ -124,7 +126,7 @@ checkersToDF <- function(checkers) {
 #'   array of checkers ensuring given `data.frame` is compatible with member
 #'   types
 #'
-#' @returns `dfToCheckers()` returns a list of checkes of the requested type,
+#' @returns `dfToCheckers()` returns a `list` of checkers of the requested type,
 #'   each created from one of `data.frame` rows
 #'
 #' @importFrom zeallot %<-%
@@ -139,6 +141,12 @@ checkersToDF <- function(checkers) {
 #' @rdname UT_Check
 #'
 dfToCheckers <- function(df, checkerClass) {
+  checkers <- list()
+
+  if (is_empty(df)) {
+    return(checkers)
+  }
+
   assert_that(is_character(checkerClass) && !isEmptyName(checkerClass),
               msg = "A valid checker type must be given")
 
@@ -147,10 +155,9 @@ dfToCheckers <- function(df, checkerClass) {
 
   memberNames <- slotNames(checker)
   assert_that(all(memberNames %in% colnames(df)),
-              msg = paste("Given `checkerClass` is inconsistent",
-                          "with `df` column names"))
+              msg = paste0("Given checkerClass [", class(checker), "] is ",
+                           "inconsistent with the data.frame column names"))
 
-  checkers <- list()
   for (r in seq_len(nrow(df))) {
     checker <- new(checkerClass)
 
