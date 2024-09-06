@@ -357,9 +357,7 @@ cellsUniformClustering <- function(objCOTAN,
             logThis(paste("while checking cluster uniformity", err),
                     logLevel = 0L)
             logThis("marking cluster as not uniform", logLevel = 1L)
-            errorCheckResults <- checker
-            errorCheckResults@clusterSize <- length(cells)
-            return(errorCheckResults)
+            return(checker)
           })
 
         invisible(validObject(checkResults))

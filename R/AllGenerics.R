@@ -349,7 +349,7 @@ setGeneric(
 
 setGeneric(
   "checkObjIsUniform",
-  function(objCOTAN, currentC, previousC) {
+  function(currentC, previousC = NULL, objCOTAN = NULL) {
     standardGeneric("checkObjIsUniform")
   }
 )

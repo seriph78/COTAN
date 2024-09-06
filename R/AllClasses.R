@@ -615,7 +615,8 @@ NULL
 #' @details `BaseUniformityCheck` is the base class of the check methods
 #'
 #' @slot isUniform Logical. Output. The result of the check
-#' @slot clusterSize Integer. Output. The number of cells in the cluster
+#' @slot clusterSize Integer. Output. The number of cells in the checked
+#'   cluster. When zero implies no check has been run yet
 #'
 #' @importFrom rlang is_logical
 #' @importFrom rlang is_integer

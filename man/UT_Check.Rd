@@ -6,14 +6,14 @@
 \alias{BaseUniformityCheck-class}
 \alias{SimpleGDIUniformityCheck-class}
 \alias{AdvancedGDIUniformityCheck-class}
-\alias{checkObjIsUniform,COTAN,SimpleGDIUniformityCheck-method}
+\alias{checkObjIsUniform,SimpleGDIUniformityCheck-method}
 \alias{checkObjIsUniform}
 \alias{checkersToDF}
 \alias{dfToCheckers}
 \alias{retrieveMainGDIThreshold}
 \title{Definition of the \strong{Transcript Uniformity Check} classes}
 \usage{
-\S4method{checkObjIsUniform}{COTAN,SimpleGDIUniformityCheck}(objCOTAN, currentC, previousC = NULL)
+\S4method{checkObjIsUniform}{SimpleGDIUniformityCheck}(currentC, previousC = NULL, objCOTAN = NULL)
 
 checkersToDF(checkers)
 
@@ -76,7 +76,8 @@ types
 \describe{
 \item{\code{isUniform}}{Logical. Output. The result of the check}
 
-\item{\code{clusterSize}}{Integer. Output. The number of cells in the cluster}
+\item{\code{clusterSize}}{Integer. Output. The number of cells in the checked
+cluster. When zero implies no check has been run yet}
 
 \item{\code{GDIThreshold}}{Numeric. (Simple check only) The level of \code{GDI} above
 which the \strong{cluster} is deemed not uniform (default is 1.43)}

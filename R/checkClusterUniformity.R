@@ -14,17 +14,21 @@
 #'
 setMethod(
   "checkObjIsUniform",
-  signature(objCOTAN = "COTAN",
-            currentC = "SimpleGDIUniformityCheck",
-            previousC = "ANY"),
-  function(objCOTAN, currentC, previousC = NULL) {
+  signature(currentC  = "SimpleGDIUniformityCheck",
+            previousC = "ANY",
+            objCOTAN  = "ANY"),
+  function(currentC, previousC = NULL, objCOTAN = NULL) {
     invisible(validObject(currentC))
+    assert_that(is.null(previousC) ||
+                  class(previousC) == "SimpleGDIUniformityCheck")
+    assert_that(is.null(objCOTAN) || class(objCOTAN) == "COTAN")
 
     previousCheckIsSufficient <- FALSE
     currentC@clusterSize <- getNumCells(objCOTAN)
 
     if(!is.null(previousC)) {
       invisible(validObject(previousC))
+
       # in this case we assume previousC is the result of a previous check,
       # maybe with different thresholds: if possible we try to avoid using the
       # GDI to determine the check result
@@ -48,13 +52,14 @@ setMethod(
       # check via the GDI, so fall-back from here
     }
 
-    # run the check via pre-calculated GDI
-    if (!previousCheckIsSufficient) {
-
+    # run the check via pre-calculated GDI if possible
+    if (!previousCheckIsSufficient && !is.null(objCOTAN)
+        && getNumCells(objCOTAN) == currentC@clusterSize
+        && isCoexAvailable(objCOTAN)) {
       gdi <- getGDI(objCOTAN)
       if (is_empty(gdi)) {
         # if GDI was not stored recalculate it now
-        gdi <- getColumnFromDF(calculateGDI(objCOTAN), "GDI")
+        gdi <- getColumnFromDF(calculateGDI(objCOTAN), colName = "GDI")
       }
 
       assert_that(!is_empty(gdi))
@@ -69,10 +74,12 @@ setMethod(
     if (is.finite(currentC@fractionAboveThreshold)) {
       currentC@isUniform <-
         (currentC@fractionAboveThreshold <= currentC@ratioAboveThreshold)
-    } else {
-      assert_that(is.finite(currentC@quantileAtRatio))
+    } else if (is.finite(currentC@quantileAtRatio)) {
       currentC@isUniform <-
         (currentC@quatileAtRatio <= currentC@GDIThreshold)
+    } else {
+      # signal no check result can be established
+      currentC@clusterSize <- 0L
     }
 
     return(currentC)
@@ -354,7 +361,8 @@ checkClusterUniformity <- function(
     }
   )
 
-  checker <- checkObjIsUniform(objCOTAN, currentC = checker, previousC = NULL)
+  checker <- checkObjIsUniform(currentC = checker, previousC = NULL,
+                               objCOTAN = objCOTAN)
   rm(objCOTAN)
   gc()
 
