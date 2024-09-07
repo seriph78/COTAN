@@ -253,8 +253,9 @@ cellsUniformClustering <- function(objCOTAN,
   if (is.null(checker)) {
     GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.40)
     checker <- new("SimpleGDIUniformityCheck",
-                   GDIThreshold = GDIThreshold,
-                   ratioAboveThreshold = 0.01)
+                   check = new("GDICheck",
+                               GDIThreshold = GDIThreshold,
+                               maxRatioBeyond = 0.01))
   } else {
     assert_that(is.finite(GDIThreshold),
                 msg = paste("Either a `checker` object or",

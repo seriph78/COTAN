@@ -123,7 +123,7 @@ test_that("Merge Uniform Cells Clusters", {
     GDIData <- calculateGDI(clObj)
 
     expect_lte(sum(GDIData[["GDI"]] >= GDIThreshold),
-               ratioAboveThreshold * nrow(GDIData))
+               checker@check@maxRatioBeyond * nrow(GDIData))
 
     gc()
   }

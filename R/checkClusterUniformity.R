@@ -1,11 +1,8 @@
 
 #' @details `checkClusterUniformity()` takes a `COTAN` object and a cells'
-#'   *cluster* and checks whether the latter is **uniform** by `GDI`. The
-#'   function runs `COTAN` to check whether the `GDI` is lower than the given
-#'   `GDIThreshold` (1.43) for all but at the most `ratioAboveThreshold`
-#'   (\eqn{1\%}) genes. If the `GDI` results to be too high for too many genes,
-#'   the *cluster* is deemed
-#'   **non-uniform**.
+#'   *cluster* and checks whether the latter is **uniform** by looking at the
+#'   genes' `GDI` distribution. The function runs [checkObjIsUniform()] on the
+#'   given input checker
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clusterName the tag of the *cluster*

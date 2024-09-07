@@ -717,8 +717,7 @@ setClass(
     # deal with output parameters
     if (!is_double(object@fractionBeyond, n = 1) ||
         (is.finite(object@fractionBeyond) &&
-         (object@fractionAboveThreshold < 0.0 ||
-          object@fractionAboveThreshold > 1.0))) {
+         (object@fractionBeyond < 0.0 || object@fractionBeyond > 1.0))) {
       stop("Output 'fractionBeyond' must be a finite number",
            " between 0.0 and 1.0 if given")
     }
@@ -761,8 +760,11 @@ setClass(
     check = new("GDICheck")
   ),
   validity = function(object) {
-    invisible(validObject(check))
-    if (check@maxRankBeyond > 0L) {
+    invisible(validObject(object@check))
+    if (object@check@isCheckAbove) {
+      stop("Given check direction must be below")
+    }
+    if (object@check@maxRankBeyond > 0L) {
       stop("Input check `rank` not supported for this case")
     }
     return(TRUE)
@@ -819,12 +821,12 @@ setClass(
                       maxRankBeyond  = 2L)
   ),
   validity = function(object) {
-    invisible(validObject(firstCheck))
-    invisible(validObject(secondCheck))
-    invisible(validObject(thirdCheck))
-    if (firstCheck@isCheckAbove   ||
-        !secondCheck@isCheckAbove ||
-        thirdCheck@isCheckAbove) {
+    invisible(validObject(object@firstCheck))
+    invisible(validObject(object@secondCheck))
+    invisible(validObject(object@thirdCheck))
+    if (object@firstCheck@isCheckAbove   ||
+        !object@secondCheck@isCheckAbove ||
+        object@thirdCheck@isCheckAbove) {
       stop("Given check directions must be below, above, below")
     }
     return(TRUE)

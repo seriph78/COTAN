@@ -43,7 +43,11 @@ test_that("Cell Uniform Clustering", {
   expect_identical(reorderClusterization(obj)[["clusters"]], clusters)
 
   firstCl <- clusters[[1L]]
-  checker <- new("SimpleGDIUniformityCheck", GDIThreshold = GDIThreshold)
+  checker <- new("SimpleGDIUniformityCheck",
+                 check = new("GDICheck",
+                             GDIThreshold = GDIThreshold,
+                             maxRatioBeyond = 0.01))
+
   suppressWarnings({
       checkerRes <- checkClusterUniformity(
         obj, checker = checker,
@@ -53,12 +57,16 @@ test_that("Cell Uniform Clustering", {
         saveObj = TRUE, outDir = tm)
   })
 
+  print(checkersToDF(checkerRes))
+
   expect_true(checkerRes@isUniform)
-  expect_lte(checkerRes@fractionAboveThreshold, checker@ratioAboveThreshold)
-  expect_lte(checkerRes@quantileAtRatio, checker@GDIThreshold)
+  expect_lte(checkerRes@check@fractionBeyond,  checkerRes@check@maxRatioBeyond)
+  expect_lte(checkerRes@check@quantileAtRatio, checkerRes@check@GDIThreshold)
   expect_identical(checkerRes@clusterSize, sum(clusters == firstCl))
-  expect_identical(checkerRes@GDIThreshold, checker@GDIThreshold)
-  expect_identical(checkerRes@ratioAboveThreshold, checker@ratioAboveThreshold)
+  expect_identical(checkerRes@check@GDIThreshold, checker@check@GDIThreshold)
+  expect_identical(checkerRes@check@maxRatioBeyond,
+                   checker@check@maxRatioBeyond)
+  expect_identical(checkerRes@check@maxRankBeyond, checker@check@maxRankBeyond)
 
   clusters2 <- factor(clusters, levels = c("-1", levels(clusters)))
   clusters2[1L:50L] <- "-1"
@@ -150,6 +158,6 @@ test_that("Cell Uniform Clustering", {
     GDI_data <- calculateGDI(temp.obj)
 
     expect_lte(nrow(GDI_data[GDI_data[["GDI"]] >= GDIThreshold, ]),
-               checker@ratioAboveThreshold * nrow(GDI_data))
+               checker@check@maxRatioBeyond * nrow(GDI_data))
   }
 })

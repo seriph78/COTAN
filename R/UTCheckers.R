@@ -1,3 +1,5 @@
+# ---- checkObjIsUniform ----
+
 #' @aliases checkObjIsUniform
 #'
 #' @details `checkObjIsUniform()` performs the check whether the given object is
@@ -19,6 +21,7 @@ setMethod(
             objCOTAN  = "ANY"),
   function(currentC, previousC = NULL, objCOTAN = NULL) {
     invisible(validObject(currentC))
+    assert_that(!currentC@check@isCheckAbove)
     assert_that(currentC@check@maxRankBeyond == 0L)
     assert_that(is.null(previousC) ||
                   class(previousC) == "SimpleGDIUniformityCheck")
@@ -31,6 +34,7 @@ setMethod(
 
     if(!is.null(previousC)) {
       invisible(validObject(previousC))
+      assert_that(!previousC@check@isCheckAbove)
       assert_that(previousC@check@maxRankBeyond == 0L)
 
       # in this case we assume previousC is the result of a previous check,
@@ -48,7 +52,7 @@ setMethod(
       }
 
       if (is.finite(pCheck@quantileAtRatio) &&
-          (pCheck@ratioAboveThreshold == cCheck@ratioAboveThreshold)) {
+          (pCheck@maxRatioBeyond == cCheck@maxRatioBeyond)) {
         cCheck@quantileAtRatio <- pCheck@quantileAtRatio
         previousCheckIsSufficient <- TRUE
       }
@@ -70,15 +74,15 @@ setMethod(
       assert_that(!is_empty(gdi))
 
       cCheck@quantileAtRatio <-
-        quantile(gdi, probs = 1.0 - cCheck@ratioAboveThreshold, names = FALSE)
+        quantile(gdi, probs = 1.0 - cCheck@maxRatioBeyond, names = FALSE)
 
-      cCheck@fractionAboveThreshold <-
+      cCheck@fractionBeyond <-
         sum(gdi >= cCheck@GDIThreshold) / length(gdi)
     }
 
-    if (is.finite(cCheck@fractionAboveThreshold)) {
+    if (is.finite(cCheck@fractionBeyond)) {
       currentC@isUniform <-
-        (cCheck@fractionAboveThreshold <= cCheck@ratioAboveThreshold)
+        (cCheck@fractionBeyond <= cCheck@maxRatioBeyond)
     } else if (is.finite(cCheck@quantileAtRatio)) {
       currentC@isUniform <-
         (cCheck@quatileAtRatio <= cCheck@GDIThreshold)
@@ -87,10 +91,13 @@ setMethod(
       currentC@clusterSize <- 0L
     }
 
+    currentC@check <- cCheck
+
     return(currentC)
   }
 )
 
+# ------  serialization ------
 
 #' @details `checkersToDF()` converts a `list` of checkers (i.e. objects that
 #'   derive from `BaseUniformityCheck`) into a `data.frame` with the values of
@@ -123,11 +130,11 @@ checkersToDF <- function(checkers) {
       membersList <- list()
       if (class(member) == "GDICheck") {
         membersList <- lapply(slotNames(member),
-                              function(name) slot(member, name))
+                              function(subName) slot(member, subName))
         names(membersList) <- paste0(name, ".", slotNames(member))
       } else {
         membersList <- list(member)
-        names(membersList)[[1]] <- memberName
+        names(membersList)[[1]] <- name
       }
       checkerAsList <- append(checkerAsList, membersList)
     }
@@ -199,6 +206,9 @@ dfToCheckers <- function(df, checkerClass) {
   return(checkers)
 }
 
+
+# ------  getCheckerThreshold ------
+
 #' @aliases getCheckerThreshold
 #'
 #' @description `getCheckerThreshold()` extracts the main `GDI` threshold
@@ -219,7 +229,7 @@ setMethod(
   signature(checker = "SimpleGDIUniformityCheck"),
   function(checker) {
     invisible(validObject(checker))
-    return(checker@GDIThreshold)
+    return(checker@check@GDIThreshold)
   })
 
 setMethod(
@@ -227,9 +237,11 @@ setMethod(
   signature(checker = "AdvancedGDIUniformityCheck"),
   function(checker) {
     invisible(validObject(checker))
-    return(checker@lowCheckThreshold)
+    return(checker@firstCheck@GDIThreshold)
   })
 
+
+# ------  calculateThresholdShiftToUniformity ------
 
 #' @aliases calculateThresholdShiftToUniformity
 #'
@@ -276,3 +288,4 @@ setMethod(
 #     # return(delta2)
 #   })
 
+# ------  shiftCheckerThresholds ------

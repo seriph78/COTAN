@@ -110,7 +110,6 @@
 #' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
 #' firstClusterIsUniform <-
 #'   checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
-#'                          ratioAboveThreshold = 0.01,
 #'                          cluster = clusters[[1L]], cells = firstCluster,
 #'                          cores = 6L, optimizeForSpeed = TRUE,
 #'                          deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
@@ -127,7 +126,6 @@
 #'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
 #'                                         GDIThreshold = 1.43,
-#'                                         ratioAboveThreshold = 0.02,
 #'                                         batchSize = 2L,
 #'                                         clusters = clusters,
 #'                                         cores = 6L,
@@ -273,8 +271,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
   if (is.null(checker)) {
     GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.40)
     checker <- new("SimpleGDIUniformityCheck",
-                   GDIThreshold = GDIThreshold,
-                   ratioAboveThreshold = 0.01)
+                   check = new("GDICheck",
+                               GDIThreshold = GDIThreshold,
+                               maxRatioBeyond = 0.01))
   } else {
     assert_that(is.finite(GDIThreshold),
                 msg = paste("Either a `checker` object or",

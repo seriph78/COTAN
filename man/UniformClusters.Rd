@@ -183,12 +183,9 @@ deemed \strong{uniform}. In the case only a few cells are left out (\eqn{\leq
   50}), those are flagged as \code{"-1"} and the process is stopped.
 
 \code{checkClusterUniformity()} takes a \code{COTAN} object and a cells'
-\emph{cluster} and checks whether the latter is \strong{uniform} by \code{GDI}. The
-function runs \code{COTAN} to check whether the \code{GDI} is lower than the given
-\code{GDIThreshold} (1.43) for all but at the most \code{ratioAboveThreshold}
-(\eqn{1\%}) genes. If the \code{GDI} results to be too high for too many genes,
-the \emph{cluster} is deemed
-\strong{non-uniform}.
+\emph{cluster} and checks whether the latter is \strong{uniform} by looking at the
+genes' \code{GDI} distribution. The function runs \code{\link[=checkObjIsUniform]{checkObjIsUniform()}} on the
+given input checker
 
 \code{mergeUniformCellsClusters()} takes in a \strong{uniform}
 \emph{clusterization} and iteratively checks whether merging two \emph{near clusters}
@@ -237,7 +234,6 @@ clusters <- splitList[["clusters"]]
 firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
 firstClusterIsUniform <-
   checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
-                         ratioAboveThreshold = 0.01,
                          cluster = clusters[[1L]], cells = firstCluster,
                          cores = 6L, optimizeForSpeed = TRUE,
                          deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
@@ -254,7 +250,6 @@ identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 
 mergedList <- mergeUniformCellsClusters(objCOTAN,
                                         GDIThreshold = 1.43,
-                                        ratioAboveThreshold = 0.02,
                                         batchSize = 2L,
                                         clusters = clusters,
                                         cores = 6L,
