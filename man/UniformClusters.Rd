@@ -232,8 +232,13 @@ splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
 clusters <- splitList[["clusters"]]
 
 firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
-firstClusterIsUniform <-
-  checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
+
+checker <- new("SimpleGDIUniformityCheck",
+               check = new("GDICheck",
+                           GDIThreshold = 1.46))
+
+checkerRes <-
+  checkClusterUniformity(objCOTAN, checker = checker,
                          cluster = clusters[[1L]], cells = firstCluster,
                          cores = 6L, optimizeForSpeed = TRUE,
                          deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]

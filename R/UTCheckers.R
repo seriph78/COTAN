@@ -28,7 +28,7 @@ setMethod(
     assert_that(is.null(objCOTAN) || class(objCOTAN) == "COTAN")
 
     previousCheckIsSufficient <- FALSE
-    currentC@clusterSize <- getNumCells(objCOTAN)
+    currentC@clusterSize <- ifelse(is.null(objCOTAN), 0L, getNumCells(objCOTAN))
 
     cCheck <- currentC@check
 
@@ -41,7 +41,11 @@ setMethod(
       # maybe with different thresholds: if possible we try to avoid using the
       # GDI to determine the check result
 
-      assert_that(currentC@clusterSize == previousC@clusterSize)
+      if (currentC@clusterSize == 0L) {
+        currentC@clusterSize <- previousC@clusterSize
+      } else {
+        assert_that(currentC@clusterSize == previousC@clusterSize)
+      }
 
       pCheck <- previousC@check
 
