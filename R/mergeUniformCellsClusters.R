@@ -18,8 +18,8 @@
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
 #' @param checker the object that defines the method and the threshold to
-#'   discriminate whether a *cluster* is *uniform transcript*. See [UT_Check]
-#'   for more details
+#'   discriminate whether a *cluster* is *uniform transcript*. See
+#'   [UniformTranscriptCheckers] for more details
 #' @param GDIThreshold legacy. The threshold level that is used in a
 #'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.40}
 #' @param batchSize Number pairs to test in a single round. If none of them
@@ -352,14 +352,16 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     # filter out non uniform pairs
     posToKeep <-
-      vapply(seq_len(nrow(checkRes)),
+      vapply(seq_along(checkRes),
              function(r) {
-               mergedName <- rownames(checkRes)[r]
-               return(pairIsUniform(mergedName, checker, checkRes))
+               checkObjIsUniform(currentC = checker, previousC = checkRes[r],
+                                 objCOTAN = NULL)@isUniform
              }, logical(1L))
     checkRes <- checkRes[posToKeep]
 
     perm <- seq_along(checkRes)
+
+    #retrieveMainGDIThreshold
     if (length(unique(checkRes[, "GDIThreshold", drop = TRUE])) == 1L) {
       # order results by least fraction
       perm <- order(checkRes[, "fractionAbove", drop = TRUE])

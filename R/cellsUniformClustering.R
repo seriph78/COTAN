@@ -153,8 +153,8 @@ NULL
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param checker the object that defines the method and the threshold to
-#'   discriminate whether a *cluster* is *uniform transcript*. See [UT_Check]
-#'   for more details
+#'   discriminate whether a *cluster* is *uniform transcript*. See
+#'   [UniformTranscriptCheckers] for more details
 #' @param GDIThreshold legacy. The threshold level that is used in a
 #'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.40}
 #' @param cores number of cores to use. Default is 1.

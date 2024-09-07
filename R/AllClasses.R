@@ -603,13 +603,13 @@ setAs(
 
 #---------- Transcript Uniformity Check --------------
 
-#' @title Definition of the **Transcript Uniformity Check** classes
+#' @title Definition of the **Transcript Uniformity Checker** classes
 #'
 #' @description A hierarchy of classes to specify the method for checking
 #'   whether a **cluster** has the *Uniform Transcript* property. It also
 #'   doubles as result object.
 #'
-#' @name UT_Check
+#' @name UniformTranscriptCheckers
 NULL
 
 #' @details `BaseUniformityCheck` is the base class of the check methods
@@ -621,7 +621,7 @@ NULL
 #' @importFrom rlang is_logical
 #' @importFrom rlang is_integer
 #'
-#' @rdname UT_Check
+#' @rdname UniformTranscriptCheckers
 #'
 setClass(
   "BaseUniformityCheck",
@@ -645,6 +645,100 @@ setClass(
 ) # end Base Uniformity Check
 
 
+#' @details `GDICheck` represents a single unit check using `GDI` data. It
+#'   defaults to an *above* check with threshold \eqn{1.4} and ratio \eqn{1\%}
+#'
+#' @slot isCheckAbove Logical. Determines how to compare quantiles against given
+#'   thresholds. It is deemed passed if the relevant quantile is above/below the
+#'   given threshold
+#' @slot GDIThreshold Numeric. The level of `GDI` beyond which the **cluster**
+#'   is deemed not uniform. Defaults
+#' @slot maxRatioBeyond Numeric. The maximum fraction of the empirical `GDI`
+#'   distribution that sits beyond the `GDI` threshold
+#' @slot maxRankBeyond Integer. The minimum rank in the empirical `GDI`
+#'   distribution for the `GDI` threshold
+#' @slot fractionBeyond Numeric. Output. The fraction of genes whose `GDI` is
+#'   above the threshold
+#' @slot thresholdRank Integer. Output. The rank that the `GDI` threshold would
+#'   have in the genes' `GDI` `vector`
+#' @slot quantileAtRatio Numeric. Output. The quantile in the genes' `GDI`
+#'   corresponding at the given ratio
+#' @slot quantileAtRatio Numeric. Output. The quantile in the genes' `GDI`
+#'   corresponding at the given rank
+#'
+#' @importFrom rlang is_logical
+#' @importFrom rlang is_integer
+#' @importFrom rlang is_double
+#'
+#' @rdname UniformTranscriptCheckers
+#'
+
+setClass(
+  "GDICheck",
+  slots = c(
+    isCheckAbove    = "logical",
+    GDIThreshold    = "numeric",
+    maxRatioBeyond  = "numeric",
+    maxRankBeyond   = "integer",
+    fractionBeyond  = "numeric",
+    thresholdRank   = "integer",
+    quantileAtRatio = "numeric",
+    quantileAtRank  = "numeric"
+  ),
+  prototype = list(
+    isCheckAbove    = FALSE,
+    GDIThreshold    = 1.4,
+    maxRatioBeyond  = 0.01,
+    maxRankBeyond   = 0L,
+    fractionBeyond  = NaN,
+    thresholdRank   = 0L,
+    quantileAtRatio = NaN,
+    quantileAtRank  = NaN
+  ),
+  validity = function(object) {
+    # deal with input parameters
+    if (!is_double(object@GDIThreshold, n = 1, finite = TRUE) ||
+        object@GDIThreshold <= 1.0) {
+      stop("Input 'GDIThreshold' must be a finite number above 1.0")
+    }
+    if (!is_double(object@maxRatioBeyond, n = 1) ||
+        (is.finite(object@maxRatioBeyond) &&
+         (object@maxRatioBeyond <= 0.0 || object@maxRatioBeyond >= 1.0))) {
+      stop("Input 'maxRatioBeyond' must be a finite number",
+           " between 0.0 and 1.0 if given")
+    }
+    if (!is_integer(object@maxRankBeyond, n = 1) || object@maxRankBeyond < 0L) {
+      stop("Input check `rank` must be a non-negative integer")
+    }
+    if (is.finite(object@maxRatioBeyond) && object@maxRankBeyond > 0L) {
+      stop("Cannot specify both a 'max ratio' and a 'max rank'")
+    }
+
+    # deal with output parameters
+    if (!is_double(object@fractionBeyond, n = 1) ||
+        (is.finite(object@fractionBeyond) &&
+         (object@fractionAboveThreshold < 0.0 ||
+          object@fractionAboveThreshold > 1.0))) {
+      stop("Output 'fractionBeyond' must be a finite number",
+           " between 0.0 and 1.0 if given")
+    }
+    if (!is_integer(object@thresholdRank, n = 1) || object@thresholdRank < 0L) {
+      stop("Output check `rank` must be a non-negative integer")
+    }
+    if (!is_double(object@quantileAtRatio, n = 1) ||
+        (is.finite(object@quantileAtRatio) && object@quantileAtRatio <= 0.0)) {
+      stop("Output 'quantileAtRatio' must be a finite positive number",
+           " if given")
+    }
+    if (!is_double(object@quantileAtRank, n = 1) ||
+        (is.finite(object@quantileAtRank) && object@quantileAtRank <= 0.0)) {
+      stop("Output 'quantileAtRank' must be a finite positive number",
+           " if given")
+    }
+    return(TRUE)
+  }
+)
+
 #' @details `SimpleGDIUniformityCheck` represents the simplified (and legacy)
 #'   mechanism to determine whether a cluster has the *Uniform Transcript*
 #'   property
@@ -652,58 +746,24 @@ setClass(
 #'   The method is based on checking whether the fraction of the genes' `GDI`
 #'   below the given *threshold* is less than the given *ratio*
 #'
-#' @slot GDIThreshold Numeric. (Simple check only) The level of `GDI` above
-#'   which the **cluster** is deemed not uniform (default is 1.43)
-#' @slot ratioAboveThreshold Numeric. (Simple check only) The quantile of the
-#'   `GDI` distribution used to select the gene whose `GDI` must be below the
-#'   threshold (default is 0.01)
-#' @slot fractionAboveThreshold Numeric. Output. The fraction of genes whose
-#'   `GDI` is above the threshold
-#' @slot quantileAtRatio Numeric. Output. The `GDI` distribution quantile
-#'   corresponding at the given ratio
+#' @slot check `GDICheck`. The single threshold check used to determine whether
+#'   the **cluster** is deemed not uniform
 #'
-#' @importFrom rlang is_double
-#'
-#' @rdname UT_Check
+#' @rdname UniformTranscriptCheckers
 #'
 setClass(
   "SimpleGDIUniformityCheck",
   contains = "BaseUniformityCheck",
   slots = c(
-    GDIThreshold           = "numeric",
-    ratioAboveThreshold    = "numeric",
-    fractionAboveThreshold = "numeric",
-    quantileAtRatio        = "numeric"
+    check = "GDICheck"
   ),
   prototype = list(
-    GDIThreshold           = 1.43,
-    ratioAboveThreshold    = 0.01,
-    fractionAboveThreshold = NaN,
-    quantileAtRatio        = NaN
+    check = new("GDICheck")
   ),
   validity = function(object) {
-    if (!is_double(object@GDIThreshold, n = 1, finite = TRUE) ||
-        object@GDIThreshold <= 1.0) {
-      stop("Input 'GDIThreshold' data must be a finite number above 1.0")
-    }
-    if (!is_double(object@ratioAboveThreshold, n = 1, finite = TRUE) ||
-        (object@ratioAboveThreshold < 0.0 ||
-         object@ratioAboveThreshold > 1.0)) {
-      stop("Input 'ratioAboveThreshold' data must be a finite",
-           " number between 0.0 and 1.0")
-    }
-    if (!is_double(object@fractionAboveThreshold, n = 1) ||
-        (is.finite(object@fractionAboveThreshold) &&
-         (object@fractionAboveThreshold < 0.0 ||
-          object@fractionAboveThreshold > 1.0))) {
-      stop("Given 'fractionAboveThreshold' data must be NaN or a finite",
-           " number between 0.0 and 1.0")
-    }
-    if (!is_double(object@quantileAtRatio, n = 1) ||
-        (is.finite(object@fractionAboveThreshold) &&
-         object@quantileAtRatio <= 0.0)) {
-      stop("Given 'quantileAtRatio' data must be NaN or a finite",
-           " positive number")
+    invisible(validObject(check))
+    if (check@maxRankBeyond > 0L) {
+      stop("Input check `rank` not supported for this case")
     }
     return(TRUE)
   }
@@ -714,103 +774,59 @@ setClass(
 #'   advanced mechanism to determine whether a cluster has the *Uniform
 #'   Transcript* property
 #'
-#'   The method is based on checking the genes' `GDI` against three *thresholds*
-#'   A *cluster* is deemed uniform if the ...
+#'   The method is based on checking the genes' `GDI` against three
+#'   *thresholds*: if a cluster fails the first **below** check is deemed not
+#'   *uniform*. Otherwise if it passes either of the other two checks (one above
+#'   and one below) it is deemed *uniform*.
 #'
-#' @slot lowCheckThreshold Numeric. (Advanced check only) The level of `GDI`
-#'   above which the
-#'   **cluster** is deemed not uniform (default is 1.297)
-#' @slot lowCheckQuantile Numeric. (Advanced check only) The quantile of the
-#'   `GDI` distribution used to select the gene whose `GDI` must be below the
-#'   low threshold (default is 95%)
-#' @slot lowCheckRank Integer. (Advanced check only) The rank of the `GDI`
-#'   distribution used to select the gene whose `GDI` must be below the low
-#'   threshold (default is `NULL`)
-#' @slot middleCheckThreshold Numeric. (Advanced check only) The level of `GDI`
-#'   below which the
-#'   **cluster** is deemed not uniform
-#' @slot middleCheckQuantile Numeric. (Advanced check only) The quantile of the
-#'   `GDI` distribution used to select the gene whose `GDI` must be below the
-#'   middle threshold (default is 98%)
-#' @slot middleCheckRank Integer. (Advanced check only) The rank of the `GDI`
-#'   distribution used to select the gene whose `GDI` must be below the middle
-#'   threshold (default is `NULL`)
-#' @slot highCheckThreshold Numeric. (Advanced check only) The level of `GDI`
-#'   above which the
-#'   **cluster** is deemed not uniform
-#' @slot highCheckQuantile Numeric. (Advanced check only) The quantile of the
-#'   `GDI` distribution used to select the gene whose `GDI` must be below the
-#'   high threshold (default is `NULL`)
-#' @slot highCheckRank Integer. (Advanced check only) The rank of the `GDI`
-#'   distribution used to select the gene whose `GDI` must be below the high
-#'   threshold (default is 2)
+#' @slot check `GDICheck`. The single threshold check used to determine whether
+#'   the **cluster** is deemed not uniform
+#' @slot firstCheck `GDICheck`. Single threshold below check used to determine
+#'   whether the **cluster** is deemed not *uniform*. Threshold defaults to
+#'   \eqn{1.297}, maxRatioBeyond to \eqn{5\%}
+#' @slot secondCheck `GDICheck`. Single threshold above check used to determine
+#'   whether the **cluster** is deemed *uniform*. Threshold defaults to
+#'   \eqn{1.307}, maxRatioBeyond to \eqn{2\%}
+#' @slot thirdCheck `GDICheck`. Single threshold below check used to determine
+#'   whether the **cluster** is deemed *uniform*. Threshold defaults to
+#'   \eqn{1.4}, maxRankBeyond to \eqn{2}
 #'
-#' @importFrom rlang is_integer
-#' @importFrom rlang is_double
-#'
-#' @rdname UT_Check
+#' @rdname UniformTranscriptCheckers
 #'
 setClass(
   "AdvancedGDIUniformityCheck",
   contains = "BaseUniformityCheck",
   slots = c(
-    lowCheckThreshold    = "numeric",
-    lowCheckQuantile     = "numeric",
-    lowCheckRank         = "integer",
-    middleCheckThreshold = "numeric",
-    middleCheckQuantile  = "numeric",
-    middleCheckRank      = "integer",
-    highCheckThreshold   = "numeric",
-    highCheckQuantile    = "numeric",
-    highCheckRank        = "integer"
+    firstCheck  = "GDICheck",
+    secondCheck = "GDICheck",
+    thirdCheck  = "GDICheck"
   ),
   prototype = list(
-    lowCheckThreshold    = 1.297,
-    lowCheckQuantile     = 0.95,
-    lowCheckRank         = 0L,
-    middleCheckThreshold = 1.400,
-    middleCheckQuantile  = NaN,
-    middleCheckRank      = 2L,
-    highCheckThreshold   = 1.307,
-    highCheckQuantile    = 0.98,
-    highCheckRank        = 0L
+    firstCheck  = new("GDICheck",
+                      isCheckAbove   = FALSE,
+                      GDIThreshold   = 1.297,
+                      maxRatioBeyond = 0.05,
+                      maxRankBeyond  = 0L),
+    secondCheck = new("GDICheck",
+                      isCheckAbove   = TRUE,
+                      GDIThreshold   = 1.307,
+                      maxRatioBeyond = 0.02,
+                      maxRankBeyond  = 0L),
+    thirdCheck  = new("GDICheck",
+                      isCheckAbove   = FALSE,
+                      GDIThreshold   = 1.4,
+                      maxRatioBeyond = NaN,
+                      maxRankBeyond  = 2L)
   ),
   validity = function(object) {
-    allOK <- function(threshold, quantile, rank) {
-      if (!is_double(threshold, n = 1, finite = TRUE) || threshold <= 1.0) {
-        stop("Input check `threshold` must be a finite number above 1.0")
-      }
-      if (!is_double(quantile, n = 1)) {
-        stop("Input check `quantile` must be a double")
-      }
-      if (!is_integer(rank, n = 1)) {
-        stop("Input check `rank` must be an integer")
-      }
-      if (is.nan(quantile) == (rank == 0L)) {
-        stop("Input check `quantile` and `rank` are mutually",
-             " exclusive: only one is allowed")
-      }
-
-      if (!is.nan(quantile)) {
-        if (quantile <= 0.0 || quantile >= 1.0) {
-          stop("Input 'quantile' must be a number between 0.0 and 1.0")
-        }
-      } else {
-        if(rank < 1L) {
-          stop("Input 'rank' must be a positive integer")
-        }
-      }
-      return(TRUE)
+    invisible(validObject(firstCheck))
+    invisible(validObject(secondCheck))
+    invisible(validObject(thirdCheck))
+    if (firstCheck@isCheckAbove   ||
+        !secondCheck@isCheckAbove ||
+        thirdCheck@isCheckAbove) {
+      stop("Given check directions must be below, above, below")
     }
-    return(
-      allOK(object@lowCheckThreshold,
-            object@lowCheckQuantile,
-            object@lowCheckRank) &&
-      allOK(object@middleCheckThreshold,
-            object@middleCheckQuantile,
-            object@middleCheckRank) &&
-      allOK(object@highCheckThreshold,
-            object@highCheckQuantile,
-            object@highCheckRan))
+    return(TRUE)
   }
 ) # end class AdvancedGDIUniformityCheck

@@ -83,8 +83,8 @@ chi-squared test statistics. "G" is G-test statistics}
 here to speed up the process (default is \code{NULL})}
 
 \item{checker}{the object that defines the method and the threshold to
-discriminate whether a \emph{cluster} is \emph{uniform transcript}. See \link{UT_Check}
-for more details}
+discriminate whether a \emph{cluster} is \emph{uniform transcript}. See
+\link{UniformTranscriptCheckers} for more details}
 
 \item{cores}{number of cores to use. Default is 1.}
 
@@ -154,7 +154,7 @@ average gene expression (log scaled). Also marked are the given \emph{threshold}
 
 \code{checkClusterUniformity} returns a checker object of the same type
 as the input one, that contains both threshold and results of the check:
-see \link{UT_Check} for more details
+see \link{UniformTranscriptCheckers} for more details
 
 a \code{list} with:
 \itemize{

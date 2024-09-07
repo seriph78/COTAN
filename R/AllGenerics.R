@@ -255,9 +255,7 @@ setGeneric(
 
 setGeneric(
   "addClusterizationCoex",
-  function(objCOTAN, clName, coexDF) {
-    standardGeneric("addClusterizationCoex")
-  }
+  function(objCOTAN, clName, coexDF) standardGeneric("addClusterizationCoex")
 )
 
 setGeneric(
@@ -352,4 +350,19 @@ setGeneric(
   function(currentC, previousC = NULL, objCOTAN = NULL) {
     standardGeneric("checkObjIsUniform")
   }
+)
+
+setGeneric(
+  "getCheckerThreshold",
+  function(checker) standardGeneric("getCheckerThreshold")
+)
+
+setGeneric(
+  "calculateThresholdShiftToUniformity",
+  function(checker) standardGeneric("calculateThresholdShiftToUniformity")
+)
+
+setGeneric(
+  "shiftCheckerThresholds",
+  function(checker, shift) standardGeneric("shiftCheckerThresholds")
 )
