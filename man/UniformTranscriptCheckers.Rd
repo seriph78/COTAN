@@ -9,15 +9,22 @@
 \alias{AdvancedGDIUniformityCheck-class}
 \alias{checkObjIsUniform,SimpleGDIUniformityCheck-method}
 \alias{checkObjIsUniform}
+\alias{checkObjIsUniform,AdvancedGDIUniformityCheck-method}
 \alias{checkersToDF}
 \alias{dfToCheckers}
 \alias{getCheckerThreshold,SimpleGDIUniformityCheck-method}
 \alias{getCheckerThreshold}
+\alias{getCheckerThreshold,AdvancedGDIUniformityCheck-method}
 \alias{calculateThresholdShiftToUniformity,SimpleGDIUniformityCheck-method}
 \alias{calculateThresholdShiftToUniformity}
+\alias{shiftCheckerThresholds,SimpleGDIUniformityCheck,numeric-method}
+\alias{shiftCheckerThresholds}
+\alias{shiftCheckerThresholds,AdvancedGDIUniformityCheck,numeric-method}
 \title{Definition of the \strong{Transcript Uniformity Checker} classes}
 \usage{
 \S4method{checkObjIsUniform}{SimpleGDIUniformityCheck}(currentC, previousC = NULL, objCOTAN = NULL)
+
+\S4method{checkObjIsUniform}{AdvancedGDIUniformityCheck}(currentC, previousC = NULL, objCOTAN = NULL)
 
 checkersToDF(checkers)
 
@@ -25,11 +32,19 @@ dfToCheckers(df, checkerClass)
 
 \S4method{getCheckerThreshold}{SimpleGDIUniformityCheck}(checker)
 
+\S4method{getCheckerThreshold}{AdvancedGDIUniformityCheck}(checker)
+
 \S4method{calculateThresholdShiftToUniformity}{SimpleGDIUniformityCheck}(checker)
+
+\S4method{shiftCheckerThresholds}{SimpleGDIUniformityCheck,numeric}(checker, shift)
+
+\S4method{shiftCheckerThresholds}{AdvancedGDIUniformityCheck,numeric}(checker, shift)
 }
 \arguments{
 \item{checker}{An checker object that defines how to check for \emph{uniform
 transcript}. It is derived from \linkS4class{BaseUniformityCheck}}
+
+\item{shift}{The amount by which to shift the \code{GDI} thresholds in the checker}
 }
 \value{
 a \code{data.frame} with col-names being the member names and row-names
@@ -45,6 +60,10 @@ checker object representing the main \code{GDI} threshold
 that would make the \verb{@isUniform} slot \code{TRUE} in the checker. It returns
 zero if the result is already \code{TRUE} and \code{NaN} in case no such shift can
 exist (e.g. the check have been not done yet)
+
+\code{shiftCheckerThresholds()} returns a copy of the checker object
+where all \code{GDI} thresholds have been shifted by the same given \code{shift}
+amount
 }
 \description{
 A hierarchy of classes to specify the method for checking
@@ -57,6 +76,10 @@ from the given checker object
 \code{calculateThresholdShiftToUniformity()} calculates by how much
 the \code{GDI} thresholds in the given checker must be increased in order to
 have that the relevant cluster is deemed \strong{uniform transcript}
+
+\code{shiftCheckerThresholds()} returns a new checker object where
+the \code{GDI} thresholds where increased in order to \emph{relax} the conditions to
+achieve \strong{uniform transcript}
 }
 \details{
 \code{BaseUniformityCheck} is the base class of the check methods

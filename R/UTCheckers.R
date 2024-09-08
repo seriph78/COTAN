@@ -13,7 +13,7 @@
 #' @importFrom assertthat assert_that
 #'
 #' @rdname UniformTranscriptCheckers
-#'
+
 setMethod(
   "checkObjIsUniform",
   signature(currentC  = "SimpleGDIUniformityCheck",
@@ -98,8 +98,159 @@ setMethod(
     currentC@check <- cCheck
 
     return(currentC)
-  }
-)
+  })
+
+#' @export
+#'
+#' @rdname UniformTranscriptCheckers
+
+setMethod(
+  "checkObjIsUniform",
+  signature(currentC  = "AdvancedGDIUniformityCheck",
+            previousC = "ANY",
+            objCOTAN  = "ANY"),
+  function(currentC, previousC = NULL, objCOTAN = NULL) {
+    invisible(validObject(currentC))
+    assert_that(!currentC@check@isCheckAbove)
+    assert_that(currentC@check@maxRankBeyond == 0L)
+    assert_that(is.null(previousC) ||
+                  class(previousC) == "AdvancedGDIUniformityCheck")
+    assert_that(is.null(objCOTAN) || class(objCOTAN) == "COTAN")
+
+    previousCheckIsSufficient <- FALSE
+    currentC@clusterSize <- ifelse(is.null(objCOTAN), 0L, getNumCells(objCOTAN))
+
+    cCheck1 <- currentC@firstCheck
+    cCheck2 <- currentC@secondCheck
+    cCheck3 <- currentC@thirdCheck
+
+    if(!is.null(previousC)) {
+      invisible(validObject(previousC))
+      assert_that(!previousC@firstCheck@isCheckAbove  &&
+                   previousC@secondCheck@isCheckAbove &&
+                  !previousC@thirdCheck@isCheckAbove)
+      assert_that(previousC@firstCheck@maxRankBeyond  == 0L &&
+                  previousC@secondCheck@maxRankBeyond == 0L &&
+                  !is.finite(previousC@thirdCheck@maxRatioBeyond))
+
+      # in this case we assume previousC is the result of a previous check,
+      # maybe with different thresholds: if possible we try to avoid using the
+      # GDI to determine the check result
+
+      if (currentC@clusterSize == 0L) {
+        currentC@clusterSize <- previousC@clusterSize
+      } else {
+        assert_that(currentC@clusterSize == previousC@clusterSize)
+      }
+
+      pCheck1 <- previousC@firstCheck
+      pCheck2 <- previousC@secondCheck
+      pCheck3 <- previousC@thirdCheck
+
+      if (is.finite(pCheck1@fractionBeyond) &&
+          is.finite(pCheck2@fractionBeyond) &&
+          pCheck3@thresholdRank > 0L &&
+          pCheck1@GDIThreshold == cCheck1@GDIThreshold &&
+          pCheck2@GDIThreshold == cCheck2@GDIThreshold &&
+          pCheck3@GDIThreshold == cCheck3@GDIThreshold) {
+        cCheck1@fractionBeyond <- pCheck1@fractionBeyond
+        cCheck2@fractionBeyond <- pCheck2@fractionBeyond
+        cCheck3@thresholdRank  <- pCheck3@thresholdRank
+
+        previousCheckIsSufficient <- TRUE
+      }
+
+      if (is.finite(pCheck1@quantileAtRatio) &&
+          is.finite(pCheck2@quantileAtRatio) &&
+          is.finite(pCheck3@quantileAtRank)  &&
+          pCheck1@maxRatioBeyond == cCheck1@maxRatioBeyond &&
+          pCheck2@maxRatioBeyond == cCheck2@maxRatioBeyond &&
+          pCheck3@maxRankBeyond  == cCheck1@maxRankBeyond) {
+        cCheck1@quantileAtRatio <- pCheck1@quantileAtRatio
+        cCheck2@quantileAtRatio <- pCheck2@quantileAtRatio
+        cCheck3@quantileAtRank  <- pCheck3@quantileAtRank
+
+        previousCheckIsSufficient <- TRUE
+      }
+
+      # if neither threshold match previous check we cannot avoid re-doing the
+      # check via the GDI, so fall-back from here
+    }
+
+    # run the check via pre-calculated GDI if possible
+    if (!previousCheckIsSufficient && !is.null(objCOTAN)
+        && getNumCells(objCOTAN) == currentC@clusterSize
+        && isCoexAvailable(objCOTAN)) {
+      gdi <- getGDI(objCOTAN)
+      if (is_empty(gdi)) {
+        # if GDI was not stored recalculate it now
+        gdi <- getColumnFromDF(calculateGDI(objCOTAN), colName = "GDI")
+      }
+
+      assert_that(!is_empty(gdi))
+
+      cCheck1@quantileAtRatio <-
+        quantile(gdi, probs = 1.0 - cCheck1@maxRatioBeyond, names = FALSE)
+
+      cCheck1@fractionBeyond <-
+        sum(gdi >= cCheck1@GDIThreshold) / length(gdi)
+
+      cCheck2@quantileAtRatio <-
+        quantile(gdi, probs = 1.0 - cCheck2@maxRatioBeyond, names = FALSE)
+
+      cCheck2@fractionBeyond <-
+        sum(gdi >= cCheck2@GDIThreshold) / length(gdi)
+
+      cCheck3@quantileAtRank <- gdi[order(gdi)][cCheck2@maxRankBeyond]
+
+      cCheck3@thresholdRank <- sum(gdi >= cCheck3@GDIThreshold)
+    }
+
+    firstCheckOK <- FALSE
+    if (is.finite(cCheck1@fractionBeyond)) {
+      firstCheckOK <-
+        (cCheck1@fractionBeyond <= cCheck1@maxRatioBeyond)
+    } else if (is.finite(cCheck1@quantileAtRatio)) {
+      firstCheckOK <-
+        (cCheck1@quantileAtRatio <= cCheck1@GDIThreshold)
+    } else {
+      # signal no check result can be established
+      currentC@clusterSize <- 0L
+    }
+
+    secondCheckOK <- FALSE
+    if (is.finite(cCheck2@fractionBeyond)) {
+      secondCheckOK <-
+        (cCheck2@fractionBeyond >= cCheck2@maxRatioBeyond)
+    } else if (is.finite(cCheck2@quantileAtRatio)) {
+      secondCheckOK <-
+        (cCheck2@quantileAtRatio >= cCheck2@GDIThreshold)
+    } else {
+      # signal no check result can be established
+      currentC@clusterSize <- 0L
+    }
+
+    thirdCheckOK <- FALSE
+    if (is.finite(cCheck3@thresholdRank)) {
+      thirdCheckOK <-
+        (cCheck3@thresholdRank <= cCheck3@maxRankBeyond)
+    } else if (is.finite(cCheck3@quantileAtRank)) {
+      thirdCheckOK <-
+        (cCheck3@quantileAtRank <= cCheck3@GDIThreshold)
+    } else {
+      # signal no check result can be established
+      currentC@clusterSize <- 0L
+    }
+
+    currentC@isUniform <- firstCheckOK && secondCheckOK && thirdCheckOK
+
+    currentC@firstCheck  <- cCheck1
+    currentC@secondCheck <- cCheck2
+    currentC@thirdCheck  <- cCheck3
+
+    return(currentC)
+  })
+
 
 # ------  serialization ------
 
@@ -190,7 +341,10 @@ dfToCheckers <- function(df, checkerClass) {
   assert_that(is(checker, "BaseUniformityCheck"))
 
   memberNames <- slotNames(checker)
-  assert_that(all(memberNames %in% colnames(df)),
+  dfRootNames <- vapply(str_split(colnames(df), "[.]"),
+                        function(a) { return(a[[1]]) },
+                        character(1L))
+  assert_that(all(memberNames %in% dfRootNames),
               msg = paste0("Given checkerClass [", class(checker), "] is ",
                            "inconsistent with the data.frame column names"))
 
@@ -199,7 +353,28 @@ dfToCheckers <- function(df, checkerClass) {
 
     # Assign values from the data.frame row to the corresponding slots
     for (name in memberNames) {
-      slot(checker, name) <- df[r, name]
+      member <- slot(checker, name)
+      if (class(member) == "GDICheck") {
+        subNames <- slotNames(member)
+        if (TRUE) {
+          relCols <- dfRootNames == name
+          dfSubNames <- vapply(str_split(colnames(df)[relCols], "[.]"),
+                               function(a) { return(a[[2]]) },
+                               character(1L))
+          assert_that(all(subNames %in% dfSubNames),
+                      msg = paste0("Given checkerClass [", class(checker),
+                                   "] is inconsistent with the data.frame",
+                                   "column names"))
+          rm(relCols, dfSubNames)
+        }
+        for (subName in subNames) {
+          slot(member, subName) <- df[r, paste0(name, ".", subName)]
+        }
+      } else {
+        member <- df[r, name]
+      }
+
+      slot(checker, name) <- member
     }
 
     checkers <- append(checkers, checker)
@@ -235,6 +410,10 @@ setMethod(
     invisible(validObject(checker))
     return(checker@check@GDIThreshold)
   })
+
+#' @export
+#'
+#' @rdname UniformTranscriptCheckers
 
 setMethod(
   "getCheckerThreshold",
@@ -293,9 +472,6 @@ setMethod(
 #     # return(delta2)
 #   })
 
-# ------  shiftCheckerThresholds ------
-
-
 # equivFractionAbove <- function(GDIThreshold, ratioAboveThreshold,
 #                                ratioQuantile, fractionAbove,
 #                                usedGDIThreshold, usedRatioAbove) {
@@ -318,3 +494,77 @@ setMethod(
 #     return(NA)
 #   }
 # }
+
+# ------  shiftCheckerThresholds ------
+
+#' @aliases shiftCheckerThresholds
+#'
+#' @description `shiftCheckerThresholds()` returns a new checker object where
+#'   the `GDI` thresholds where increased in order to *relax* the conditions to
+#'   achieve **uniform transcript**
+#'
+#' @param checker An checker object that defines how to check for *uniform
+#'   transcript*. It is derived from [BaseUniformityCheck-class]
+#'
+#' @param shift The amount by which to shift the `GDI` thresholds in the checker
+#'
+#' @returns `shiftCheckerThresholds()` returns a copy of the checker object
+#'   where all `GDI` thresholds have been shifted by the same given `shift`
+#'   amount
+#'
+#' @export
+#'
+#' @rdname UniformTranscriptCheckers
+
+setMethod(
+  "shiftCheckerThresholds",
+  signature(checker = "SimpleGDIUniformityCheck",
+            shift = "numeric"),
+  function(checker, shift) {
+    invisible(validObject(checker))
+    assert_that(is.finite(shift) && shift >= 0.0,
+                msg = "Given shift must be a non negative number")
+
+    return(new("SimpleGDIUniformityCheck",
+               check = new("GDICheck",
+                           isCheckAbove   = checker@check@isCheckAbove,
+                           GDIThreshold   = checker@check@GDIThreshold + shift,
+                           maxRatioBeyond = checker@check@maxRatioBeyond,
+                           maxRankBeyond  = checker@check@maxRankBeyond)))
+  })
+
+#' @export
+#'
+#' @rdname UniformTranscriptCheckers
+
+setMethod(
+  "shiftCheckerThresholds",
+  signature(checker = "AdvancedGDIUniformityCheck",
+            shift = "numeric"),
+  function(checker, shift) {
+    invisible(validObject(checker))
+    assert_that(is.finite(shift) && shift >= 0.0,
+                msg = "Given shift must be a non negative number")
+
+    return(new("AdvancedGDIUniformityCheck",
+               firstCheck =
+                 new("GDICheck",
+                     isCheckAbove   = checker@firstCheck@isCheckAbove,
+                     GDIThreshold   = checker@firstCheck@GDIThreshold + shift,
+                     maxRatioBeyond = checker@firstCheck@maxRatioBeyond,
+                     maxRankBeyond  = checker@firstCheck@maxRankBeyond),
+               secondCheck =
+                 new("GDICheck",
+                     isCheckAbove   = checker@secondCheck@isCheckAbove,
+                     GDIThreshold   = checker@secondCheck@GDIThreshold + shift,
+                     maxRatioBeyond = checker@secondCheck@maxRatioBeyond,
+                     maxRankBeyond  = checker@secondCheck@maxRankBeyond),
+               thirdCheck =
+                 new("GDICheck",
+                     isCheckAbove   = checker@thirdCheckk@isCheckAbove,
+                     GDIThreshold   = checker@thirdCheckk@GDIThreshold + shift,
+                     maxRatioBeyond = checker@thirdCheckk@maxRatioBeyond,
+                     maxRankBeyond  = checker@thirdCheckk@maxRankBeyond)))
+  })
+
+

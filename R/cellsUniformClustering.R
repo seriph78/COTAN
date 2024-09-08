@@ -425,7 +425,7 @@ cellsUniformClustering <- function(objCOTAN,
 
         outFile <- file.path(splitOutDir,
                              paste0("all_check_results_", iter, ".csv"))
-        write.csv(checkersToDF(allCheckResults), file = outFile)
+        write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
     },
       error = function(err) {
         logThis(paste("While saving current clusterization", err),
@@ -497,7 +497,7 @@ cellsUniformClustering <- function(objCOTAN,
 
   if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(outDirCond, "split_check_results.csv")
-      write.csv(checkersToDF(allCheckResults), file = outFile)
+      write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
 
       if (saveSeuratObj) {
         clusterizationName <-

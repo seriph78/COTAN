@@ -497,7 +497,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
           outFile <- file.path(mergeOutDir,
                                paste0("all_check_results_", iter, ".csv"))
-          write.csv(checkersToDF(allCheckResults), file = outFile)
+          write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
         },
         error = function(err) {
           logThis(paste("While saving current clusterization", err),
@@ -562,7 +562,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   if (isTRUE(saveObj)) tryCatch({
     outFile <- file.path(outDirCond, "merge_check_results.csv")
-    write.csv(checkersToDF(allCheckResults), file = outFile)
+    write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
   })
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
