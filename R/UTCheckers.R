@@ -5,6 +5,15 @@
 #' @details `checkObjIsUniform()` performs the check whether the given object is
 #'   uniform according to the given checker
 #'
+#' @param currentC the object that defines the method and the threshold to
+#'   discriminate whether a *cluster* is *uniform transcript*.
+#' @param previousC the optional result object of an already done check
+#' @param objCOTAN an optional `COTAN` object
+#'
+#' @returns a copy of `currentC` with the results of the check. Note that the
+#'   slot `clusterSize` will be set to zero if it is not possible to get the
+#'   result of the check
+#'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
@@ -100,6 +109,13 @@ setMethod(
     return(currentC)
   })
 
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom assertthat assert_that
+#'
 #' @export
 #'
 #' @rdname UniformTranscriptCheckers
@@ -258,6 +274,10 @@ setMethod(
 #'   derive from `BaseUniformityCheck`) into a `data.frame` with the values of
 #'   the members
 #'
+#' @param checkers a `list` of objects that defines the method, the thresholds
+#'   and the results of the checks to discriminate whether a *cluster* is deemed
+#'   *uniform transcript*.
+#'
 #' @returns a `data.frame` with col-names being the member names and row-names
 #'   the names attached to each checker
 #'
@@ -312,6 +332,11 @@ checkersToDF <- function(checkers) {
 #' @details `dfToCheckers()` converts a `data.frame` of checkers values into an
 #'   array of checkers ensuring given `data.frame` is compatible with member
 #'   types
+#'
+#' @param df a `data.frame` with col-names being the member names and row-names
+#'   the names attached to each checker
+#' @param checkerClass the type of the checker to be reconstructed from the
+#'   given `data.frame`
 #'
 #' @returns `dfToCheckers()` returns a `list` of checkers of the requested type,
 #'   each created from one of `data.frame` rows

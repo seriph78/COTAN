@@ -17,11 +17,12 @@
 #' @param clusters The *clusterization* to merge. If not given the last
 #'   available *clusterization* will be used, as it is probably the most
 #'   significant!
-#' @param checker the object that defines the method and the threshold to
-#'   discriminate whether a *cluster* is *uniform transcript*. See
-#'   [UniformTranscriptCheckers] for more details
+#' @param checkers a `list` of objects that defines the method and the
+#'   *increasing* thresholds to discriminate whether to merge two *clusters* if
+#'   deemed *uniform transcript*. See [UniformTranscriptCheckers] for more
+#'   details
 #' @param GDIThreshold legacy. The threshold level that is used in a
-#'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.40}
+#'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.43}
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
 #' @param allCheckResults An optional `data.frame` with the results of previous
@@ -119,7 +120,7 @@
 #'   checkClusterUniformity(objCOTAN, checker = checker,
 #'                          cluster = clusters[[1L]], cells = firstCluster,
 #'                          cores = 6L, optimizeForSpeed = TRUE,
-#'                          deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
+#'                          deviceStr = "cuda", saveObj = FALSE)
 #'
 #' objCOTAN <- addClusterization(objCOTAN,
 #'                               clName = "split",

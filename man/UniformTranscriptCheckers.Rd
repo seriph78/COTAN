@@ -41,12 +41,33 @@ dfToCheckers(df, checkerClass)
 \S4method{shiftCheckerThresholds}{AdvancedGDIUniformityCheck,numeric}(checker, shift)
 }
 \arguments{
+\item{currentC}{the object that defines the method and the threshold to
+discriminate whether a \emph{cluster} is \emph{uniform transcript}.}
+
+\item{previousC}{the optional result object of an already done check}
+
+\item{objCOTAN}{an optional \code{COTAN} object}
+
+\item{checkers}{a \code{list} of objects that defines the method, the thresholds
+and the results of the checks to discriminate whether a \emph{cluster} is deemed
+\emph{uniform transcript}.}
+
+\item{df}{a \code{data.frame} with col-names being the member names and row-names
+the names attached to each checker}
+
+\item{checkerClass}{the type of the checker to be reconstructed from the
+given \code{data.frame}}
+
 \item{checker}{An checker object that defines how to check for \emph{uniform
 transcript}. It is derived from \linkS4class{BaseUniformityCheck}}
 
 \item{shift}{The amount by which to shift the \code{GDI} thresholds in the checker}
 }
 \value{
+a copy of \code{currentC} with the results of the check. Note that the
+slot \code{clusterSize} will be set to zero if it is not possible to get the
+result of the check
+
 a \code{data.frame} with col-names being the member names and row-names
 the names attached to each checker
 

@@ -77,7 +77,7 @@ only for the title).}
 chi-squared test statistics. "G" is G-test statistics}
 
 \item{GDIThreshold}{legacy. The threshold level that is used in a
-\linkS4class{SimpleGDIUniformityCheck}. It defaults to \eqn{1.40}}
+\linkS4class{SimpleGDIUniformityCheck}. It defaults to \eqn{1.43}}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
@@ -132,6 +132,11 @@ output will be paced in a sub-folder.}
 \item{clusters}{The \emph{clusterization} to merge. If not given the last
 available \emph{clusterization} will be used, as it is probably the most
 significant!}
+
+\item{checkers}{a \code{list} of objects that defines the method and the
+\emph{increasing} thresholds to discriminate whether to merge two \emph{clusters} if
+deemed \emph{uniform transcript}. See \link{UniformTranscriptCheckers} for more
+details}
 
 \item{batchSize}{Number pairs to test in a single round. If none of them
 succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}}
@@ -241,7 +246,7 @@ checkerRes <-
   checkClusterUniformity(objCOTAN, checker = checker,
                          cluster = clusters[[1L]], cells = firstCluster,
                          cores = 6L, optimizeForSpeed = TRUE,
-                         deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
+                         deviceStr = "cuda", saveObj = FALSE)
 
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "split",

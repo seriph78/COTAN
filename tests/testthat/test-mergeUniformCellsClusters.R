@@ -2,6 +2,7 @@ tm <- tempdir()
 stopifnot(file.exists(tm))
 
 library(zeallot)
+library(stringr)
 
 
 test_that("Merge Uniform Cells Clusters", {
@@ -97,8 +98,8 @@ test_that("Merge Uniform Cells Clusters", {
   allCheckDF <- read.csv(file.path(tm, "test", "leafs_merge",
                                    "all_check_results_7.csv"),
                          header = TRUE, row.names = 1L)
-  expect_identical(nrow(allCheckRes),  9L)
-  expect_identical(ncol(allCheckRes), 10L)
+  expect_identical(nrow(allCheckDF),  9L)
+  expect_identical(ncol(allCheckDF), 10L)
 
   allCheckRes <- dfToCheckers(allCheckDF, "SimpleGDIUniformityCheck")
 
@@ -140,7 +141,7 @@ test_that("Merge Uniform Cells Clusters", {
     GDIData <- calculateGDI(clObj)
 
     expect_lte(sum(GDIData[["GDI"]] >= GDIThreshold),
-               checker@check@maxRatioBeyond * nrow(GDIData))
+               allCheckRes[[1]]@check@maxRatioBeyond * nrow(GDIData))
 
     gc()
   }
