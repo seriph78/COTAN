@@ -787,13 +787,13 @@ setClass(
 #'   the **cluster** is deemed not uniform
 #' @slot firstCheck `GDICheck`. Single threshold below check used to determine
 #'   whether the **cluster** is deemed not *uniform*. Threshold defaults to
-#'   \eqn{1.297}, maxRatioBeyond to \eqn{5\%}
+#'   \eqn{1.297}, `maxRatioBeyond` to \eqn{5\%}
 #' @slot secondCheck `GDICheck`. Single threshold above check used to determine
 #'   whether the **cluster** is deemed *uniform*. Threshold defaults to
-#'   \eqn{1.307}, maxRatioBeyond to \eqn{2\%}
+#'   \eqn{1.307}, `maxRatioBeyond` to \eqn{2\%}
 #' @slot thirdCheck `GDICheck`. Single threshold below check used to determine
 #'   whether the **cluster** is deemed *uniform*. Threshold defaults to
-#'   \eqn{1.4}, maxRankBeyond to \eqn{2}
+#'   \eqn{1.4}, `maxRankBeyond` to \eqn{2}
 #'
 #' @rdname UniformTranscriptCheckers
 #'

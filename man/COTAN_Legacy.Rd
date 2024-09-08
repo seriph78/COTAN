@@ -4,7 +4,6 @@
 \name{COTAN_Legacy}
 \alias{COTAN_Legacy}
 \alias{scCOTAN-class}
-\alias{scCOTAN}
 \alias{scCotan_coerce_to_COTAN}
 \alias{COTAN_coerce_to_scCOTAN}
 \alias{vec2mat_rfast}

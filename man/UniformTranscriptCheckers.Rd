@@ -155,14 +155,14 @@ the \strong{cluster} is deemed not uniform}
 
 \item{\code{firstCheck}}{\code{GDICheck}. Single threshold below check used to determine
 whether the \strong{cluster} is deemed not \emph{uniform}. Threshold defaults to
-\eqn{1.297}, maxRatioBeyond to \eqn{5\%}}
+\eqn{1.297}, \code{maxRatioBeyond} to \eqn{5\%}}
 
 \item{\code{secondCheck}}{\code{GDICheck}. Single threshold above check used to determine
 whether the \strong{cluster} is deemed \emph{uniform}. Threshold defaults to
-\eqn{1.307}, maxRatioBeyond to \eqn{2\%}}
+\eqn{1.307}, \code{maxRatioBeyond} to \eqn{2\%}}
 
 \item{\code{thirdCheck}}{\code{GDICheck}. Single threshold below check used to determine
 whether the \strong{cluster} is deemed \emph{uniform}. Threshold defaults to
-\eqn{1.4}, maxRankBeyond to \eqn{2}}
+\eqn{1.4}, \code{maxRankBeyond} to \eqn{2}}
 }}
 
