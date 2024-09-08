@@ -117,8 +117,13 @@ setMethod(
       rm(plots)
     }, error = function(err) {
       logThis(paste("While saving the clean plots", err), logLevel = 1L)
-      dev.off()
+    }, finally = {
+      # Check for active device
+      if (dev.cur() > 1L) {
+        dev.off()
+      }
     })
+
     gc()
 
     analysisTime <- Sys.time()

@@ -50,7 +50,7 @@ checkClusterUniformity(
 mergeUniformCellsClusters(
   objCOTAN,
   clusters = NULL,
-  checker = NULL,
+  checkers = NULL,
   GDIThreshold = NaN,
   batchSize = 0L,
   allCheckResults = data.frame(),

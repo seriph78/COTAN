@@ -89,7 +89,7 @@ setMethod(
         (cCheck@fractionBeyond <= cCheck@maxRatioBeyond)
     } else if (is.finite(cCheck@quantileAtRatio)) {
       currentC@isUniform <-
-        (cCheck@quatileAtRatio <= cCheck@GDIThreshold)
+        (cCheck@quantileAtRatio <= cCheck@GDIThreshold)
     } else {
       # signal no check result can be established
       currentC@clusterSize <- 0L
@@ -265,18 +265,19 @@ setMethod(
 #'
 #' @rdname UniformTranscriptCheckers
 
-# setGeneric(
-#   "calculateThresholdShiftToUniformity",
-#   signature(checker = "SimpleGDIUniformityCheck"),
-#   function(checker) {
-#     invisible(validObject(checker))
-#     if (checker@clusterSize == 0L || !is.finite(checker@quantileAtRatio)) {
-#       return(NaN)
-#     }
-#     return(checker@quantileAtRatio - checker@GDIThreshold)
-#   })
+setMethod(
+  "calculateThresholdShiftToUniformity",
+  signature(checker = "SimpleGDIUniformityCheck"),
+  function(checker) {
+    invisible(validObject(checker))
+    if (checker@clusterSize == 0L ||
+        !is.finite(checker@check@quantileAtRatio)) {
+      return(NaN)
+    }
+    return(checker@check@quantileAtRatio - checker@check@GDIThreshold)
+  })
 
-# setGeneric(
+# setMethod(
 #   "calculateThresholdShiftToUniformity",
 #   signature(checker = "AdvancedGDIUniformityCheck"),
 #   function(checker) {
@@ -293,3 +294,27 @@ setMethod(
 #   })
 
 # ------  shiftCheckerThresholds ------
+
+
+# equivFractionAbove <- function(GDIThreshold, ratioAboveThreshold,
+#                                ratioQuantile, fractionAbove,
+#                                usedGDIThreshold, usedRatioAbove) {
+#   assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
+#               !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
+#               GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
+#               ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
+#   if (GDIThreshold == usedGDIThreshold) {
+#     return(fractionAbove)
+#   } else if (ratioAboveThreshold == usedRatioAbove) {
+#     # here we assume exponential taper
+#     fractionAbove <- max(fractionAbove, 1.0e-4)
+#     if (abs(usedGDIThreshold - ratioQuantile) <= 1e-4) {
+#       return(NA)
+#     }
+#     exponent <- (GDIThreshold - usedGDIThreshold) /
+#                   (usedGDIThreshold - ratioQuantile)
+#     return(fractionAbove * (fractionAbove/usedRatioAbove)^exponent)
+#   } else {
+#     return(NA)
+#   }
+# }

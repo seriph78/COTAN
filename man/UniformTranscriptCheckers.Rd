@@ -13,6 +13,8 @@
 \alias{dfToCheckers}
 \alias{getCheckerThreshold,SimpleGDIUniformityCheck-method}
 \alias{getCheckerThreshold}
+\alias{calculateThresholdShiftToUniformity,SimpleGDIUniformityCheck-method}
+\alias{calculateThresholdShiftToUniformity}
 \title{Definition of the \strong{Transcript Uniformity Checker} classes}
 \usage{
 \S4method{checkObjIsUniform}{SimpleGDIUniformityCheck}(currentC, previousC = NULL, objCOTAN = NULL)
@@ -22,6 +24,8 @@ checkersToDF(checkers)
 dfToCheckers(df, checkerClass)
 
 \S4method{getCheckerThreshold}{SimpleGDIUniformityCheck}(checker)
+
+\S4method{calculateThresholdShiftToUniformity}{SimpleGDIUniformityCheck}(checker)
 }
 \arguments{
 \item{checker}{An checker object that defines how to check for \emph{uniform
@@ -36,6 +40,11 @@ each created from one of \code{data.frame} rows
 
 \code{getCheckerThreshold()} returns the appropriate member of the
 checker object representing the main \code{GDI} threshold
+
+\code{calculateThresholdShiftToUniformity()} returns the positive shift
+that would make the \verb{@isUniform} slot \code{TRUE} in the checker. It returns
+zero if the result is already \code{TRUE} and \code{NaN} in case no such shift can
+exist (e.g. the check have been not done yet)
 }
 \description{
 A hierarchy of classes to specify the method for checking
@@ -44,6 +53,10 @@ doubles as result object.
 
 \code{getCheckerThreshold()} extracts the main \code{GDI} threshold
 from the given checker object
+
+\code{calculateThresholdShiftToUniformity()} calculates by how much
+the \code{GDI} thresholds in the given checker must be increased in order to
+have that the relevant cluster is deemed \strong{uniform transcript}
 }
 \details{
 \code{BaseUniformityCheck} is the base class of the check methods

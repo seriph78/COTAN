@@ -56,6 +56,7 @@
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
+#' @importFrom rlang is_named2
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -153,7 +154,7 @@
 
 mergeUniformCellsClusters <- function(objCOTAN,
                                       clusters = NULL,
-                                      checker = NULL,
+                                      checkers = NULL,
                                       GDIThreshold = NaN,
                                       batchSize = 0L,
                                       allCheckResults = data.frame(),
@@ -165,20 +166,26 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       hclustMethod = "ward.D2",
                                       saveObj = TRUE,
                                       outDir = ".") {
+  # returns merged name given underlying names
   toMergedName <- function(clName1, clName2) {
     return(paste0(min(clName1, clName2), "_", max(clName1, clName2), "-merge"))
   }
 
+  # returns underlying names given merged name
   fromMergedName <- function(mergedClName, currentClNames) {
     partialMatch <- vapply(currentClNames, function(clName, mergedName) {
       return(str_detect(mergedName, clName))
     }, FUN.VAL = logical(1L), mergedClName)
-    assert_that(sum(partialMatch) == 2L)
 
-    c(clName1, clName2) %<-% currentClNames[partialMatch]
+    c(clName1, clName2) %<-% c("", "")
+    if (sum(partialMatch) == 2L) {
+      c(clName1, clName2) %<-% currentClNames[partialMatch]
+    }
+
     return(c("clName1" = clName1, "clName2" = clName2))
   }
 
+  # updates checker results with thresholds from current checker
   updateChecker <- function(mergedClName, checker, allCheckResults) {
     if (all(names(allCheckResults) != mergedClName)) {
       return(checker)
@@ -189,12 +196,15 @@ mergeUniformCellsClusters <- function(objCOTAN,
     }
   }
 
+  # select all clusters pairings to be checked for this batch
   selectPairsList <- function(pList, batchSize, checker, allCheckResults) {
     # drop the already tested pairs
     pNamesList <- lapply(pList, function(p) toMergedName(p[[1L]], p[[2L]]))
 
     untestedPairs <-
       vapply(pNamesList, function(pName, check, allRes) {
+        # we exploit the convention that a non-avalable result is marked by a
+        # zero clusterSize
         updateChecker(pName, check, allRes)@clusterSize == 0L
       }, FUN.VALUE = logical(1L), checker, allCheckResults)
 
@@ -205,9 +215,25 @@ mergeUniformCellsClusters <- function(objCOTAN,
     return(pList[seq_len(numPairsToTest)])
   }
 
-
+  # runs the UT check on all pairings of the batch
   testPairListMerge <- function(pList, outputClusters,
                                 checker, allCheckResults) {
+    logThis(paste("Updating check results for the ", length(allCheckResults),
+                  "already tested pairs to align to new checker"),
+            logLevel = 2L)
+
+    if (TRUE) {
+      allNames <- names(allCheckResults)
+      allCheckResults <-
+        lapply(
+          seq_along(allCheckResults),
+          function(r, check, allRes) {
+            updateChecker(names(allCheckResults)[[r]], check, allRes)
+          }, checker, allCheckResults)
+      names(allCheckResults) <- allNames
+      rm(allNames)
+    }
+
     logThis(paste0(length(pList), " new clusters pairs to be tested for",
                    " merging:\n", paste(pList, collapse = " ")), logLevel = 1L)
 
@@ -227,14 +253,10 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
       logThis(mergedClName, logLevel = 3L)
 
-      pairWasSeen <- mergedClName %in% names(allCheckResults)
-
       checkResults <- updateChecker(mergedClName, checker, allCheckResults)
       if (checkResults@clusterSize != 0L) {
         logThis(paste("Clusters", cl1, "and", cl2, "already analyzed: skip"),
                 logLevel = 3L)
-        assert_that(pairWasSeen)
-        allCheckResults[[mergedClName]] <- checkResults
         next
       }
       # else we have insufficient information about the pair [re]calculate
@@ -260,7 +282,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
       gc()
 
-      if (pairWasSeen) {
+      if (mergedClName %in% names(allCheckResults)) {
+        # can happen if previous check information is insufficient to update the
+        # result
         allCheckResults[[mergedClName]] <- checkResults
       } else {
         allCheckResults <- append(allCheckResults, checkResults)
@@ -275,16 +299,20 @@ mergeUniformCellsClusters <- function(objCOTAN,
     return(allCheckResults)
   }
 
-  mergeAllClusters <- function(outputClusters, checker, allCheckResults) {
-    #filter out missing clusters
+  # sorts all results by significance then merge all possible pairings in order
+  mergeAllClusters <- function(outputClusters, allCheckResults) {
+    # filters out missing clusters
+    allClNames <- unique(outputClusters)
+    assert_that(!any(sapply(allClNames, isEmptyName)))
+
+    assert_that(is_named2(allCheckResults))
     posToKeep <-
       vapply(seq_along(allCheckResults),
              function(r) {
                c(clName1, clName2) %<-%
                  fromMergedName(names(allCheckResults)[r],
-                                unique(outputClusters))
-               return(any(outputClusters == clName1) &&
-                        any(outputClusters == clName2))
+                                allClNames)
+               return(clName1 %in% allClNames && clName2 %in% allClNames)
              }, logical(1L))
     checkRes <- allCheckResults[posToKeep]
 
@@ -292,27 +320,29 @@ mergeUniformCellsClusters <- function(objCOTAN,
     # it is assumed that the checkRes have been already
     # updated to align to current checker
     posToKeep <- vapply(seq_along(checkRes),
-                        function(r) { return(checkRes[r]@isUniform) },
+                        function(r) { return(checkRes[[r]]@isUniform) },
                         logical(1L))
     checkRes <- checkRes[posToKeep]
 
-    shifts <- sapply(checkRes, calculateThresholdShiftToUniformity, double(1L))
+    shifts <- vapply(checkRes, calculateThresholdShiftToUniformity, double(1L))
     checkRes <- checkRes[order(shifts)]
 
     #operate the merges
-    for (r in seq_along(checkRes)) {
-      c(clName1, clName2) %<-% fromMergedName(names(checkRes)[r])
-      if (!(any(outputClusters %in% clName1) &&
-            any(outputClusters %in% clName2))) {
+    for (mergedName in names(checkRes)) {
+      allClNames <- unique(outputClusters)
+      c(clName1, clName2) %<-%
+        fromMergedName(mergedName, allClNames)
+      if (!(clName1 %in% allClNames && clName2 %in% allClNames)) {
         logThis(paste0("One or both of the clusters ", clName1, ", ", clName2,
                        " is no more in the clusterization"), logLevel = 3L)
         next
       }
       logThis(paste("Clusters", clName1, "and", clName2, "will be merged"),
               logLevel = 2L)
-      outputClusters <- mergeClusters(outputClusters,
-                                      names = c(clName1, clName2),
-                                      mergedName = mergedName(clName1, clName2))
+      outputClusters <-
+        mergeClusters(outputClusters,
+                      names = c(clName1, clName2),
+                      mergedName = toMergedName(clName1, clName2))
       outputClusters <- factorToVector(outputClusters)
     }
     return(outputClusters)
@@ -326,17 +356,36 @@ mergeUniformCellsClusters <- function(objCOTAN,
               msg = paste("Estimators lambda, nu, dispersion are not ready:",
                           "Use proceeedToCoex() to prepare them"))
 
-  if (is.null(checker)) {
-    GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.40)
-    checker <- new("SimpleGDIUniformityCheck",
+  if (is_empty(checkers)) {
+    GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.43)
+
+    # keep old behaviour
+    thresholdGap <- max(GDIThreshold - 1.37, 0.0)
+    numThresholds <- ceiling(thresholdGap / 0.03)
+    allThresholds <- 1.37 +
+      c(0L, seq_len(numThresholds)) * thresholdGap / numThresholds
+
+    checkers <-
+      lapply(allThresholds,
+             function(threshold) {
+               new("SimpleGDIUniformityCheck",
                    check = new("GDICheck",
-                               GDIThreshold = GDIThreshold,
+                               GDIThreshold = threshold,
                                maxRatioBeyond = 0.01))
+             })
+
+    rm(GDIThreshold, thresholdGap, numThresholds, allThresholds)
   } else {
-    assert_that(is.finite(GDIThreshold),
+    assert_that(!is.finite(GDIThreshold),
                 msg = paste("Either a `checker` object or",
                             "a legacy `GDIThreshold` must be given"))
+    if (!is(checkers, "list")) {
+      checkers <- list(checkers)
+    }
+    assert_that(all(vapply(checkers, is, logical(1L), "BaseUniformityCheck")))
   }
+  logThis(paste("The merge algorithm will use", length(checkers), "passes"),
+          logLevel = 1L)
 
   assert_that(isa(allCheckResults, "data.frame"),
               (is_empty(allCheckResults) ||
@@ -372,44 +421,11 @@ mergeUniformCellsClusters <- function(objCOTAN,
     dir.create(mergeOutDir)
   }
 
-  # equivFractionAbove <- function(GDIThreshold, ratioAboveThreshold,
-  #                                ratioQuantile, fractionAbove,
-  #                                usedGDIThreshold, usedRatioAbove) {
-  #   assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
-  #               !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
-  #               GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
-  #               ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
-  #   if (GDIThreshold == usedGDIThreshold) {
-  #     return(fractionAbove)
-  #   } else if (ratioAboveThreshold == usedRatioAbove) {
-  #     # here we assume exponential taper
-  #     fractionAbove <- max(fractionAbove, 1.0e-4)
-  #     if (abs(usedGDIThreshold - ratioQuantile) <= 1e-4) {
-  #       return(NA)
-  #     }
-  #     exponent <- (GDIThreshold - usedGDIThreshold) /
-  #                   (usedGDIThreshold - ratioQuantile)
-  #     return(fractionAbove * (fractionAbove/usedRatioAbove)^exponent)
-  #   } else {
-  #     return(NA)
-  #   }
-  # }
-
-
   iter <- 0L
-  # errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
-  #                           "ratioQuantile" = NA, "size" = NA,
-  #                           "GDIThreshold" = GDIThreshold,
-  #                           "ratioAboveThreshold" = ratioAboveThreshold,
-  #                           "cluster_1" = NA, "cluster_2" = NA)
 
-  thresholdGap <- max(GDIThreshold - 1.37, 0.0)
-  numThresholds <- ceiling(thresholdGap / 0.03)
-  allThresholds <- 1.37 +
-    c(0L, seq_len(numThresholds)) * thresholdGap / numThresholds
-
-  for (threshold in allThresholds) {
-    logThis(paste0("Start merging nearest clusters: threshold ", threshold),
+  for (checker in checkers) {
+    logThis(paste0("Start merging nearest clusters - the main threshold is: ",
+                   getCheckerThreshold(checker)),
             logLevel = 2L)
     repeat {
       iter <- iter + 1L
@@ -424,16 +440,19 @@ mergeUniformCellsClusters <- function(objCOTAN,
       gc()
 
       if (isTRUE(saveObj)) tryCatch({
-          pdf(file.path(mergeOutDir, paste0("dend_iter_", iter, "_tau_",
-                                            threshold, "_plot.pdf")))
+          pdf(file.path(mergeOutDir,
+                        paste0("dend_iter_", iter, "_tau_",
+                               getCheckerThreshold(checker), "_plot.pdf")))
 
           hcNorm <- hclust(clDist, method = hclustMethod)
           plot(as.dendrogram(hcNorm))
-
-          dev.off()
         }, error = function(err) {
           logThis(paste("While saving dendogram plot", err), logLevel = 0L)
-          dev.off()
+        }, finally = {
+          # Check for active device
+          if (dev.cur() > 1L) {
+            dev.off()
+          }
         })
 
       # We will check whether it is possible to merge a list of cluster pairs.
@@ -462,8 +481,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
         testPairListMerge(pList, outputClusters, checker, allCheckResults)
 
       if (!firstBatch) {
-        outputClusters <-
-          mergeAllClusters(outputClusters, checker, allCheckResults)
+        outputClusters <- mergeAllClusters(outputClusters, allCheckResults)
       }
 
       newNumClusters <- length(unique(outputClusters))
@@ -500,8 +518,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
                 logLevel = 3L)
       }
     }
-    logThis(paste("Executed all merges for threshold ", threshold),
-            logLevel = 3L)
+    logThis(paste0("Executed all merges for threshold ",
+                   getCheckerThreshold(checker)), logLevel = 3L)
   }
 
   logThis(paste0("The final merged clusterization contains [",

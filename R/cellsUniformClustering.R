@@ -107,11 +107,13 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
              annotate(geom = "text", x = 0.0, y = 30.0, color = "black",
                       label = paste0("Cells number: ", ncol(rawData), "\n",
                                      "Cl. resolution: ", resolution)))
-
-        dev.off()
       }, error = function(err) {
         logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)
-        dev.off()
+      }, finally = {
+        # Check for active device
+        if (dev.cur() > 1L) {
+          dev.off()
+        }
       })
     gc()
 

@@ -100,12 +100,14 @@ checkClusterUniformity <- function(
       plot(gdiPlot)
 
       rm(nuPlot, zoomedNuPlot, gdiPlot)
-      dev.off()
     }, error = function(err) {
       logThis(paste("While saving cluster plots", err), logLevel = 0L)
-      dev.off()
-    }
-  )
+    }, finally = {
+      # Check for active device
+      if (dev.cur() > 1L) {
+        dev.off()
+      }
+    })
 
   checker <- checkObjIsUniform(currentC = checker, previousC = NULL,
                                objCOTAN = objCOTAN)
