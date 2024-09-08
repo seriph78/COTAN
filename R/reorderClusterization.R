@@ -61,7 +61,7 @@ reorderClusterization <- function(objCOTAN,
   if (keepMinusOne && any(clusters == "-1")) {
     minuOnePos <- which(labels(clDist) == "-1")
     # drop cluster '-1' from the distances
-    clDist <- as.dist(as.matrix(clDist)[-minuOnePos, -minuOnePos, drop=FALSE])
+    clDist <- as.dist(as.matrix(clDist)[-minuOnePos, -minuOnePos, drop = FALSE])
   }
 
   if (length(labels(clDist)) <= 1L) {

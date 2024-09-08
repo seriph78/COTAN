@@ -457,11 +457,12 @@ plot(treePlot)
 ```
 
 ```{r eval=TRUE, include=TRUE}
-genesUmapPl <- UMAPPlot(pcaGenesClDF[, sapply(pcaGenesClDF, is.numeric)],
+colSelection <- vapply(pcaGenesClDF, is.numeric, logical(1L))
+genesUmapPl <- UMAPPlot(pcaGenesClDF[, colSelection, drop = FALSE],
                         clusters = getColumnFromDF(pcaGenesClDF, "hclust"),
                         elements = layersGenes,
                         title = "Genes' clusters UMAP Plot",
-                        numNeighbors = 32, minPointsDist = 0.25)
+                        numNeighbors = 32L, minPointsDist = 0.25)
 
 plot(genesUmapPl)
 ```
@@ -503,8 +504,8 @@ obj <- addClusterization(obj, clName = "split", clusters = splitClusters,
 
 
 ```{r eval=TRUE, include=TRUE}
-c(.,scoreDF) %<-% clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                                             clName = "split", kCuts = 5L)
+c(., scoreDF) %<-% clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
+                                              clName = "split", kCuts = 5L)
 ```
 
 
@@ -558,7 +559,7 @@ It is possible to plot the clusterization on a UMAP plot
 c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge",
                                          dataMethod = "AdjBinarized",
                                          genesSel = "HGDI",
-                                         colors = NULL, numNeighbors = 30,
+                                         colors = NULL, numNeighbors = 30L,
                                          minPointsDist = 0.1)
 
 plot(umapPlot)

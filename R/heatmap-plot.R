@@ -31,11 +31,11 @@ NULL
 singleHeatmapDF <- function(objCOTAN,
                             genesLists, sets,
                             pValueThreshold = 0.01) {
-  assert_that(!is_empty(genesLists) && !is_empty(names(genesLists)),
+  assert_that(!is_empty(genesLists), !is_empty(names(genesLists)),
               msg = "genesLists must be a named list of genes arrays")
 
-  assert_that(!is_empty(sets) && is_integer(sets) &&
-                max(sets) <= length(genesLists),
+  assert_that(!is_empty(sets), is_integer(sets),
+              max(sets) <= length(genesLists),
               msg = "sets must be positions in the genes list")
 
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
@@ -97,7 +97,7 @@ singleHeatmapDF <- function(objCOTAN,
 
       # control if the subset is smaller than the number of wanted genes
       numMissingRows <- length(rowGenes) - nrow(dfSlice)
-      if (numMissingRows > 0) {
+      if (numMissingRows > 0L) {
         extraRows <- as.data.frame(matrix(nrow = numMissingRows,
                                           ncol = ncol(dfSlice)))
         colnames(extraRows) <- colnames(dfSlice)
@@ -177,9 +177,11 @@ singleHeatmapDF <- function(objCOTAN,
 #' @rdname HeatmapPlots
 #'
 heatmapPlot <- function(objCOTAN = NULL,
-                        genesLists, sets = NULL,
+                        genesLists,
+                        sets = NULL,
                         pValueThreshold = 0.01,
-                        conditions = NULL, dir = ".") {
+                        conditions = NULL,
+                        dir = ".") {
   logThis("heatmap plot: START", logLevel = 2L)
 
   assert_that(is.null(objCOTAN) != is_empty(conditions),

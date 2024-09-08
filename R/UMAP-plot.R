@@ -99,12 +99,12 @@ UMAPPlot <- function(df,
 
   umapConfig <- umap.defaults
   if (numNeighbors != 0L) {
-    umapConfig$n_neighbors <- numNeighbors
+    umapConfig[["n_neighbors"]] <- numNeighbors
   }
   if (!is.na(minPointsDist)) {
-    umapConfig$min_dist <- minPointsDist
+    umapConfig[["min_dist"]] <- minPointsDist
   }
-  umapConfig$verbose <- TRUE
+  umapConfig[["verbose"]] <- TRUE
 
   logThis("Calculating UMAP: START", logLevel = 3L)
 
@@ -392,7 +392,7 @@ cellsUMAPPlot <- function(objCOTAN,
       gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
                                           rowsFraction = 0.05), "GDI")
     }
-    if(sum(gdi >= 1.5) > numGenes) {
+    if (sum(gdi >= 1.5) > numGenes) {
       genesPos <- seq_along(gdi) %in% order(gdi, decreasing = TRUE)[1L:numGenes]
     } else {
       genesPos <- gdi >= 1.4

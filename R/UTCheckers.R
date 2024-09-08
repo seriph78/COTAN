@@ -21,21 +21,21 @@ setMethod(
             objCOTAN  = "ANY"),
   function(currentC, previousC = NULL, objCOTAN = NULL) {
     invisible(validObject(currentC))
-    assert_that(!currentC@check@isCheckAbove)
-    assert_that(currentC@check@maxRankBeyond == 0L)
+    assert_that(!currentC@check@isCheckAbove,
+                currentC@check@maxRankBeyond == 0L)
     assert_that(is.null(previousC) ||
-                  class(previousC) == "SimpleGDIUniformityCheck")
-    assert_that(is.null(objCOTAN) || class(objCOTAN) == "COTAN")
+                  is(previousC, "SimpleGDIUniformityCheck"))
+    assert_that(is.null(objCOTAN) || is(objCOTAN, "COTAN"))
 
     previousCheckIsSufficient <- FALSE
     currentC@clusterSize <- ifelse(is.null(objCOTAN), 0L, getNumCells(objCOTAN))
 
     cCheck <- currentC@check
 
-    if(!is.null(previousC)) {
+    if (!is.null(previousC)) {
       invisible(validObject(previousC))
-      assert_that(!previousC@check@isCheckAbove)
-      assert_that(previousC@check@maxRankBeyond == 0L)
+      assert_that(!previousC@check@isCheckAbove,
+                  previousC@check@maxRankBeyond == 0L)
 
       # in this case we assume previousC is the result of a previous check,
       # maybe with different thresholds: if possible we try to avoid using the
@@ -111,11 +111,11 @@ setMethod(
             objCOTAN  = "ANY"),
   function(currentC, previousC = NULL, objCOTAN = NULL) {
     invisible(validObject(currentC))
-    assert_that(!currentC@check@isCheckAbove)
-    assert_that(currentC@check@maxRankBeyond == 0L)
+    assert_that(!currentC@check@isCheckAbove,
+                currentC@check@maxRankBeyond == 0L)
     assert_that(is.null(previousC) ||
-                  class(previousC) == "AdvancedGDIUniformityCheck")
-    assert_that(is.null(objCOTAN) || class(objCOTAN) == "COTAN")
+                  is(previousC, "AdvancedGDIUniformityCheck"))
+    assert_that(is.null(objCOTAN) || is(objCOTAN, "COTAN"))
 
     previousCheckIsSufficient <- FALSE
     currentC@clusterSize <- ifelse(is.null(objCOTAN), 0L, getNumCells(objCOTAN))
@@ -124,13 +124,13 @@ setMethod(
     cCheck2 <- currentC@secondCheck
     cCheck3 <- currentC@thirdCheck
 
-    if(!is.null(previousC)) {
+    if (!is.null(previousC)) {
       invisible(validObject(previousC))
-      assert_that(!previousC@firstCheck@isCheckAbove  &&
-                   previousC@secondCheck@isCheckAbove &&
+      assert_that(!previousC@firstCheck@isCheckAbove,
+                   previousC@secondCheck@isCheckAbove,
                   !previousC@thirdCheck@isCheckAbove)
-      assert_that(previousC@firstCheck@maxRankBeyond  == 0L &&
-                  previousC@secondCheck@maxRankBeyond == 0L &&
+      assert_that(previousC@firstCheck@maxRankBeyond  == 0L,
+                  previousC@secondCheck@maxRankBeyond == 0L,
                   !is.finite(previousC@thirdCheck@maxRatioBeyond))
 
       # in this case we assume previousC is the result of a previous check,
@@ -201,7 +201,7 @@ setMethod(
       cCheck2@fractionBeyond <-
         sum(gdi >= cCheck2@GDIThreshold) / length(gdi)
 
-      cCheck3@quantileAtRank <- gdi[order(gdi)][cCheck2@maxRankBeyond]
+      cCheck3@quantileAtRank <- sort(gdi)[cCheck2@maxRankBeyond]
 
       cCheck3@thresholdRank <- sum(gdi >= cCheck3@GDIThreshold)
     }
@@ -283,13 +283,13 @@ checkersToDF <- function(checkers) {
     for (name in memberNames) {
       member <- slot(checker, name)
       membersList <- list()
-      if (class(member) == "GDICheck") {
+      if (is(member, "GDICheck")) {
         membersList <- lapply(slotNames(member),
                               function(subName) slot(member, subName))
         names(membersList) <- paste0(name, ".", slotNames(member))
       } else {
         membersList <- list(member)
-        names(membersList)[[1]] <- name
+        names(membersList)[[1L]] <- name
       }
       checkerAsList <- append(checkerAsList, membersList)
     }
@@ -323,6 +323,9 @@ checkersToDF <- function(checkers) {
 #'
 #' @importFrom rlang is_character
 #'
+#' @importFrom stringr str_split
+#' @importFrom stringr fixed
+#'
 #' @export
 #'
 #' @rdname UniformTranscriptCheckers
@@ -334,15 +337,15 @@ dfToCheckers <- function(df, checkerClass) {
     return(checkers)
   }
 
-  assert_that(is_character(checkerClass) && !isEmptyName(checkerClass),
+  assert_that(is_character(checkerClass), !isEmptyName(checkerClass),
               msg = "A valid checker type must be given")
 
   checker <- new(checkerClass)
   assert_that(is(checker, "BaseUniformityCheck"))
 
   memberNames <- slotNames(checker)
-  dfRootNames <- vapply(str_split(colnames(df), "[.]"),
-                        function(a) { return(a[[1]]) },
+  dfRootNames <- vapply(str_split(colnames(df), fixed(".")),
+                        function(a) return(a[[1L]]),
                         character(1L))
   assert_that(all(memberNames %in% dfRootNames),
               msg = paste0("Given checkerClass [", class(checker), "] is ",
@@ -354,12 +357,12 @@ dfToCheckers <- function(df, checkerClass) {
     # Assign values from the data.frame row to the corresponding slots
     for (name in memberNames) {
       member <- slot(checker, name)
-      if (class(member) == "GDICheck") {
+      if (is(member, "GDICheck")) {
         subNames <- slotNames(member)
         if (TRUE) {
           relCols <- dfRootNames == name
-          dfSubNames <- vapply(str_split(colnames(df)[relCols], "[.]"),
-                               function(a) { return(a[[2]]) },
+          dfSubNames <- vapply(str_split(colnames(df)[relCols], fixed(".")),
+                               function(a) return(a[[2L]]),
                                character(1L))
           assert_that(all(subNames %in% dfSubNames),
                       msg = paste0("Given checkerClass [", class(checker),
@@ -522,7 +525,7 @@ setMethod(
             shift = "numeric"),
   function(checker, shift) {
     invisible(validObject(checker))
-    assert_that(is.finite(shift) && shift >= 0.0,
+    assert_that(is.finite(shift), shift >= 0.0,
                 msg = "Given shift must be a non negative number")
 
     return(new("SimpleGDIUniformityCheck",
@@ -543,7 +546,7 @@ setMethod(
             shift = "numeric"),
   function(checker, shift) {
     invisible(validObject(checker))
-    assert_that(is.finite(shift) && shift >= 0.0,
+    assert_that(is.finite(shift), shift >= 0.0,
                 msg = "Given shift must be a non negative number")
 
     return(new("AdvancedGDIUniformityCheck",
@@ -561,10 +564,8 @@ setMethod(
                      maxRankBeyond  = checker@secondCheck@maxRankBeyond),
                thirdCheck =
                  new("GDICheck",
-                     isCheckAbove   = checker@thirdCheckk@isCheckAbove,
-                     GDIThreshold   = checker@thirdCheckk@GDIThreshold + shift,
-                     maxRatioBeyond = checker@thirdCheckk@maxRatioBeyond,
-                     maxRankBeyond  = checker@thirdCheckk@maxRankBeyond)))
+                     isCheckAbove   = checker@thirdCheck@isCheckAbove,
+                     GDIThreshold   = checker@thirdCheck@GDIThreshold + shift,
+                     maxRatioBeyond = checker@thirdCheck@maxRatioBeyond,
+                     maxRankBeyond  = checker@thirdCheck@maxRankBeyond)))
   })
-
-

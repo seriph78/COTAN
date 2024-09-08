@@ -480,7 +480,7 @@ cellsUniformClustering <- function(objCOTAN,
              error = function(err) {
                logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
                return(NULL)
-               })
+             })
 
   c(outputClusters, outputCoexDF, permMap) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,

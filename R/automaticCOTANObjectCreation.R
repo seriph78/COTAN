@@ -234,16 +234,16 @@ automaticCOTANObjectCreation <-
            calcCoex = TRUE, optimizeForSpeed = TRUE, deviceStr = "cuda",
            cores = 1L, saveObj = TRUE, outDir = ".") {
 
-  objCOTAN <- COTAN(raw = raw)
-  objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
-                                    sequencingMethod = sequencingMethod,
-                                    sampleCondition = sampleCondition)
+    objCOTAN <- COTAN(raw = raw)
+    objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
+                                      sequencingMethod = sequencingMethod,
+                                      sampleCondition = sampleCondition)
 
-  logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
-  logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)
+    logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
+    logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)
 
-  return(proceedToCoex(objCOTAN, calcCoex = calcCoex,
-                       optimizeForSpeed = optimizeForSpeed,
-                       deviceStr = deviceStr, cores = cores,
-                       saveObj = saveObj, outDir = outDir))
-}
+    return(proceedToCoex(objCOTAN, calcCoex = calcCoex,
+                         optimizeForSpeed = optimizeForSpeed,
+                         deviceStr = deviceStr, cores = cores,
+                         saveObj = saveObj, outDir = outDir))
+  }

@@ -37,7 +37,7 @@ test_that("Establish genes clusters", {
                            hclustMethod = "ward.D2")
 
   pcaExtraCols <- c("highlight", "hclust", "sec_markers",
-                     "colors", "col_branches", "groupLabels")
+                    "colors", "col_branches", "groupLabels")
 
   expect_s3_class(pcaClusters, "data.frame")
   expect_identical(ncol(pcaClusters), 16L)

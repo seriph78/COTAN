@@ -207,7 +207,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
     if (any(resError)) {
-      stop(paste(res[which(resError)[[1L]]]), call. = FALSE)
+      stop(res[[which(resError)[[1L]]]], call. = FALSE)
     }
     return(res)
   } else {
@@ -370,7 +370,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
     if (any(resError)) {
-      stop(paste(res[[which(resError)[[1L]]]]), call. = FALSE)
+      stop(res[[which(resError)[[1L]]]], call. = FALSE)
     }
     return(res)
   } else {
@@ -500,14 +500,12 @@ setMethod(
     logThis("Estimate nu: DONE", logLevel = 2L)
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
-    if (TRUE) {
-      if (!identical(nu, initialGuess)) {
-        # flag the coex slots are out of sync (if any)!
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["gsync"]], FALSE)
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["csync"]], FALSE)
-      }
+    if (!identical(nu, initialGuess)) {
+      # flag the coex slots are out of sync (if any)!
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["gsync"]], FALSE)
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["csync"]], FALSE)
     }
 
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,

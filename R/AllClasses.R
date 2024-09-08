@@ -270,7 +270,7 @@ setClass(
     clusters = "vector",
     cluster_data = "data.frame"
   )
-) -> scCOTAN
+)
 
 
 #' @description Helper function to be shared by coerce() and replace()
@@ -366,7 +366,7 @@ getCOTANSlots <- function(from) {
                                "CL_clusters", colnames(from@raw))
   }
 
-  {
+  if (TRUE) {
     clusterData <- from@cluster_data
 
     if (!hasClusters && !is_empty(clusterData)) {
@@ -634,10 +634,10 @@ setClass(
     clusterSize = 0L
   ),
   validity = function(object) {
-    if (!is_logical(object@isUniform, n = 1)) {
+    if (!is_logical(object@isUniform, n = 1L)) {
       stop("Given 'isUniform' data must be a Boolean")
     }
-    if (!is_integer(object@clusterSize, n = 1) || object@clusterSize < 0) {
+    if (!is_integer(object@clusterSize, n = 1L) || object@clusterSize < 0L) {
       stop("Given 'clusterSize' data must be a positive number")
     }
     return(TRUE)
@@ -697,17 +697,18 @@ setClass(
   ),
   validity = function(object) {
     # deal with input parameters
-    if (!is_double(object@GDIThreshold, n = 1, finite = TRUE) ||
+    if (!is_double(object@GDIThreshold, n = 1L, finite = TRUE) ||
         object@GDIThreshold <= 1.0) {
       stop("Input 'GDIThreshold' must be a finite number above 1.0")
     }
-    if (!is_double(object@maxRatioBeyond, n = 1) ||
+    if (!is_double(object@maxRatioBeyond, n = 1L) ||
         (is.finite(object@maxRatioBeyond) &&
          (object@maxRatioBeyond <= 0.0 || object@maxRatioBeyond >= 1.0))) {
       stop("Input 'maxRatioBeyond' must be a finite number",
            " between 0.0 and 1.0 if given")
     }
-    if (!is_integer(object@maxRankBeyond, n = 1) || object@maxRankBeyond < 0L) {
+    if (!is_integer(object@maxRankBeyond, n = 1L)
+        || object@maxRankBeyond < 0L) {
       stop("Input check `rank` must be a non-negative integer")
     }
     if (is.finite(object@maxRatioBeyond) && object@maxRankBeyond > 0L) {
@@ -715,21 +716,22 @@ setClass(
     }
 
     # deal with output parameters
-    if (!is_double(object@fractionBeyond, n = 1) ||
+    if (!is_double(object@fractionBeyond, n = 1L) ||
         (is.finite(object@fractionBeyond) &&
          (object@fractionBeyond < 0.0 || object@fractionBeyond > 1.0))) {
       stop("Output 'fractionBeyond' must be a finite number",
            " between 0.0 and 1.0 if given")
     }
-    if (!is_integer(object@thresholdRank, n = 1) || object@thresholdRank < 0L) {
+    if (!is_integer(object@thresholdRank, n = 1L)
+        || object@thresholdRank < 0L) {
       stop("Output check `rank` must be a non-negative integer")
     }
-    if (!is_double(object@quantileAtRatio, n = 1) ||
+    if (!is_double(object@quantileAtRatio, n = 1L) ||
         (is.finite(object@quantileAtRatio) && object@quantileAtRatio <= 0.0)) {
       stop("Output 'quantileAtRatio' must be a finite positive number",
            " if given")
     }
-    if (!is_double(object@quantileAtRank, n = 1) ||
+    if (!is_double(object@quantileAtRank, n = 1L) ||
         (is.finite(object@quantileAtRank) && object@quantileAtRank <= 0.0)) {
       stop("Output 'quantileAtRank' must be a finite positive number",
            " if given")
@@ -830,5 +832,4 @@ setClass(
       stop("Given check directions must be below, above, below")
     }
     return(TRUE)
-  }
-) # end class AdvancedGDIUniformityCheck
+  }) # end class AdvancedGDIUniformityCheck

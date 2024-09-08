@@ -75,8 +75,8 @@ checkClusterUniformity <- function(
   # Plots
   if (isTRUE(saveObj) && !dir.exists(outDir)) {
     saveObj <- FALSE
-    warning(paste("Asked to save check results,",
-                  "but given output folder does not exist"))
+    warning("Asked to save check results,",
+            " but given output folder does not exist")
   }
 
   if (isTRUE(saveObj)) tryCatch({
@@ -116,7 +116,7 @@ checkClusterUniformity <- function(
 
   logThis(paste0(
     "Cluster ", clusterName, ", with size ", checker@clusterSize, ", is ",
-    ifelse(checker@isUniform, "", "not "), "uniform"), logLevel = 1)
+    ifelse(checker@isUniform, "", "not "), "uniform"), logLevel = 1L)
 
   if (TRUE) {
     dumpDF <- checkersToDF(checker)
