@@ -17,6 +17,7 @@
 \alias{getCheckerThreshold,AdvancedGDIUniformityCheck-method}
 \alias{calculateThresholdShiftToUniformity,SimpleGDIUniformityCheck-method}
 \alias{calculateThresholdShiftToUniformity}
+\alias{calculateThresholdShiftToUniformity,AdvancedGDIUniformityCheck-method}
 \alias{shiftCheckerThresholds,SimpleGDIUniformityCheck,numeric-method}
 \alias{shiftCheckerThresholds}
 \alias{shiftCheckerThresholds,AdvancedGDIUniformityCheck,numeric-method}
@@ -35,6 +36,8 @@ dfToCheckers(df, checkerClass)
 \S4method{getCheckerThreshold}{AdvancedGDIUniformityCheck}(checker)
 
 \S4method{calculateThresholdShiftToUniformity}{SimpleGDIUniformityCheck}(checker)
+
+\S4method{calculateThresholdShiftToUniformity}{AdvancedGDIUniformityCheck}(checker)
 
 \S4method{shiftCheckerThresholds}{SimpleGDIUniformityCheck,numeric}(checker, shift)
 

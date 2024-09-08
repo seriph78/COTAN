@@ -346,6 +346,7 @@ checkersToDF <- function(checkers) {
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom rlang is_empty
 #' @importFrom rlang is_character
 #'
 #' @importFrom stringr str_split
@@ -484,44 +485,31 @@ setMethod(
     return(checker@check@quantileAtRatio - checker@check@GDIThreshold)
   })
 
-# setMethod(
-#   "calculateThresholdShiftToUniformity",
-#   signature(checker = "AdvancedGDIUniformityCheck"),
-#   function(checker) {
-#     invisible(validObject(checker))
-#     if (checker@clusterSize == 0L || TRUE) {
-#       return(NaN)
-#     }
-#     # delta1 <- GDI_q95 - 1.297
-#     # if (GDI_q98 > 1.307 + max(0.0, delta1)) {
-#     #   return(delta1)
-#     # }
-#     # delta2 <- max(delta1, GDI_2nd - 1.4)
-#     # return(delta2)
-#   })
+#' @export
+#'
+#' @rdname UniformTranscriptCheckers
 
-# equivFractionAbove <- function(GDIThreshold, ratioAboveThreshold,
-#                                ratioQuantile, fractionAbove,
-#                                usedGDIThreshold, usedRatioAbove) {
-#   assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
-#               !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
-#               GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
-#               ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
-#   if (GDIThreshold == usedGDIThreshold) {
-#     return(fractionAbove)
-#   } else if (ratioAboveThreshold == usedRatioAbove) {
-#     # here we assume exponential taper
-#     fractionAbove <- max(fractionAbove, 1.0e-4)
-#     if (abs(usedGDIThreshold - ratioQuantile) <= 1e-4) {
-#       return(NA)
-#     }
-#     exponent <- (GDIThreshold - usedGDIThreshold) /
-#                   (usedGDIThreshold - ratioQuantile)
-#     return(fractionAbove * (fractionAbove/usedRatioAbove)^exponent)
-#   } else {
-#     return(NA)
-#   }
-# }
+setMethod(
+  "calculateThresholdShiftToUniformity",
+  signature(checker = "AdvancedGDIUniformityCheck"),
+  function(checker) {
+    invisible(validObject(checker))
+    if (checker@clusterSize == 0L ||
+        !is.finite(checker@firstCheck@quantileAtRatio)  ||
+        !is.finite(checker@secondCheck@quantileAtRatio) ||
+        !is.finite(checker@thirdCheck@quantileAtRank)) {
+      return(NaN)
+    }
+    delta1 <- checker@firstCheck@quantileAtRatio -
+               checker@firstCheck@GDIThreshold
+    if (checker@secondCheck@quantileAtRatio >
+       (checker@secondCheck@GDIThreshold + max(0.0, delta1))) {
+     return(delta1)
+    }
+    delta2 <- max(delta1, checker@thirdCheck@quantileAtRank -
+                           checker@thirdCheck@GDIThreshold)
+    return(delta2)
+  })
 
 # ------  shiftCheckerThresholds ------
 
