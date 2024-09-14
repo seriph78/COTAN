@@ -29,9 +29,13 @@ setMethod(
             previousC = "ANY",
             objCOTAN  = "ANY"),
   function(currentC, previousC = NULL, objCOTAN = NULL) {
-    invisible(validObject(currentC))
-    assert_that(!currentC@check@isCheckAbove,
-                currentC@check@maxRankBeyond == 0L)
+    checkerIsOK <- function(checker) {
+      invisible(validObject(checker))
+      return(!checker@check@isCheckAbove &&
+              checker@check@maxRankBeyond  == 0L)
+    }
+
+    assert_that(checkerIsOK(currentC))
     assert_that(is.null(previousC) ||
                   is(previousC, "SimpleGDIUniformityCheck"))
     assert_that(is.null(objCOTAN) || is(objCOTAN, "COTAN"))
@@ -42,9 +46,7 @@ setMethod(
     cCheck <- currentC@check
 
     if (!is.null(previousC)) {
-      invisible(validObject(previousC))
-      assert_that(!previousC@check@isCheckAbove,
-                  previousC@check@maxRankBeyond == 0L)
+      assert_that(checkerIsOK(previousC))
 
       # in this case we assume previousC is the result of a previous check,
       # maybe with different thresholds: if possible we try to avoid using the
@@ -126,9 +128,16 @@ setMethod(
             previousC = "ANY",
             objCOTAN  = "ANY"),
   function(currentC, previousC = NULL, objCOTAN = NULL) {
-    invisible(validObject(currentC))
-    assert_that(!currentC@check@isCheckAbove,
-                currentC@check@maxRankBeyond == 0L)
+    checkerIsOK <- function(checker) {
+      invisible(validObject(checker))
+      return(!checker@firstCheck@isCheckAbove &&
+              checker@secondCheck@isCheckAbove &&
+             !checker@thirdCheck@isCheckAbove &&
+             checker@firstCheck@maxRankBeyond  == 0L &&
+             checker@secondCheck@maxRankBeyond == 0L &&
+             !is.finite(checker@thirdCheck@maxRatioBeyond))
+    }
+    assert_that(checkerIsOK(currentC))
     assert_that(is.null(previousC) ||
                   is(previousC, "AdvancedGDIUniformityCheck"))
     assert_that(is.null(objCOTAN) || is(objCOTAN, "COTAN"))
@@ -141,13 +150,7 @@ setMethod(
     cCheck3 <- currentC@thirdCheck
 
     if (!is.null(previousC)) {
-      invisible(validObject(previousC))
-      assert_that(!previousC@firstCheck@isCheckAbove,
-                   previousC@secondCheck@isCheckAbove,
-                  !previousC@thirdCheck@isCheckAbove)
-      assert_that(previousC@firstCheck@maxRankBeyond  == 0L,
-                  previousC@secondCheck@maxRankBeyond == 0L,
-                  !is.finite(previousC@thirdCheck@maxRatioBeyond))
+      assert_that(checkerIsOK(previousC))
 
       # in this case we assume previousC is the result of a previous check,
       # maybe with different thresholds: if possible we try to avoid using the
@@ -194,9 +197,9 @@ setMethod(
     }
 
     # run the check via pre-calculated GDI if possible
-    if (!previousCheckIsSufficient && !is.null(objCOTAN)
-        && getNumCells(objCOTAN) == currentC@clusterSize
-        && isCoexAvailable(objCOTAN)) {
+    if (!previousCheckIsSufficient && !is.null(objCOTAN) &&
+        getNumCells(objCOTAN) == currentC@clusterSize &&
+        isCoexAvailable(objCOTAN)) {
       gdi <- getGDI(objCOTAN)
       if (is_empty(gdi)) {
         # if GDI was not stored recalculate it now
@@ -217,7 +220,8 @@ setMethod(
       cCheck2@fractionBeyond <-
         sum(gdi >= cCheck2@GDIThreshold) / length(gdi)
 
-      cCheck3@quantileAtRank <- sort(gdi)[cCheck2@maxRankBeyond]
+      cCheck3@quantileAtRank <-
+        sort(gdi, decreasing = TRUE)[[cCheck3@maxRankBeyond]]
 
       cCheck3@thresholdRank <- sum(gdi >= cCheck3@GDIThreshold)
     }
@@ -258,7 +262,7 @@ setMethod(
       currentC@clusterSize <- 0L
     }
 
-    currentC@isUniform <- firstCheckOK && secondCheckOK && thirdCheckOK
+    currentC@isUniform <- firstCheckOK && (secondCheckOK || thirdCheckOK)
 
     currentC@firstCheck  <- cCheck1
     currentC@secondCheck <- cCheck2
@@ -314,12 +318,15 @@ checkersToDF <- function(checkers) {
       checkerAsList <- append(checkerAsList, membersList)
     }
 
-    df <- rbind(df, checkerAsList)
+    # Convert checkerAsList to a data frame row
+    checkerDF <- as.data.frame(checkerAsList)
 
-    if (nrow(df) == 1L) {
-      colnames(df) <- names(checkerAsList)
+    # Bind the data frame row to the main data frame
+    if (is_empty(df)) {
+      df <- checkerDF
     } else {
-      assert_that(identical(colnames(df), names(checkerAsList)))
+      assert_that(identical(colnames(df), colnames(checkerDF)))
+      df <- rbind(df, checkerDF)
     }
   }
 

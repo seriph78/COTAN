@@ -259,7 +259,7 @@ cellsUniformClustering <- function(objCOTAN,
                                GDIThreshold = GDIThreshold,
                                maxRatioBeyond = 0.01))
   } else {
-    assert_that(is.finite(GDIThreshold),
+    assert_that(!is.finite(GDIThreshold),
                 msg = paste("Either a `checker` object or",
                             "a legacy `GDIThreshold` must be given"))
   }
@@ -341,7 +341,7 @@ cellsUniformClustering <- function(objCOTAN,
       cells <- testClList[[clName]]
       if (length(cells) < 20L) {
         logThis(paste("cluster", globalClName, "has too few cells:",
-                      "will be reclustered!"), logLevel = 1L)
+                      "will be reclustered!"), logLevel = 2L)
 
         numClustersToRecluster <- numClustersToRecluster + 1L
         cellsToRecluster <- c(cellsToRecluster, cells)
@@ -359,7 +359,7 @@ cellsUniformClustering <- function(objCOTAN,
           error = function(err) {
             logThis(paste("while checking cluster uniformity", err),
                     logLevel = 0L)
-            logThis("marking cluster as not uniform", logLevel = 1L)
+            logThis("marking cluster as not uniform", logLevel = 2L)
             return(checker)
           })
 
@@ -370,13 +370,14 @@ cellsUniformClustering <- function(objCOTAN,
 
         if (!checkResults@isUniform) {
           logThis(paste("cluster", globalClName, "has too high GDI:",
-                        "will be reclustered!"), logLevel = 1L)
+                        "will be reclustered!"), logLevel = 2L)
 
           numClustersToRecluster <- numClustersToRecluster + 1L
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
-          logThis(paste("cluster", globalClName, "is uniform"), logLevel = 1L)
+          logThis(paste("cluster", globalClName, "is uniform"), logLevel = 2L)
         }
+        logThis("", logLevel = 2L)
 
         rm(checkResults)
         gc()
@@ -469,7 +470,7 @@ cellsUniformClustering <- function(objCOTAN,
     allCheckResults <- allCheckResults[checksTokeep]
     names(allCheckResults) <- clTagsMap[names(allCheckResults)]
     if (any(unclusteredCells)) {
-      checker@clusterSize <- length(unclusteredCells)
+      checker@clusterSize <- sum(unclusteredCells)
       allCheckResults <- append(allCheckResults, checker)
       names(allCheckResults)[length(allCheckResults)] <- "-1"
     }

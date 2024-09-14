@@ -77,12 +77,15 @@ test_that("Merge Uniform Cells Clusters", {
 
   GDIThreshold <- 1.46
 
+  advChecker <- new("AdvancedGDIUniformityCheck")
+  checkers <- list(advChecker, shiftCheckerThresholds(advChecker, 0.1))
+
   suppressWarnings({
     c(mergedClusters, mergedCoexDF) %<-%
       mergeUniformCellsClusters(
         objCOTAN = obj, clusters = clusters,
-        GDIThreshold = GDIThreshold, batchSize = 2L,
-        distance = "cosine", hclustMethod = "ward.D2",
+        checkers = checkers, # GDIThreshold = GDIThreshold,
+        batchSize = 2L, distance = "cosine", hclustMethod = "ward.D2",
         cores = 6L, saveObj = TRUE, outDir = tm)
   })
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
@@ -92,16 +95,16 @@ test_that("Merge Uniform Cells Clusters", {
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "all_check_results_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
-                                    "all_check_results_7.csv")))
+                                    "all_check_results_4.csv")))
   expect_true(file.exists(file.path(tm, "test", "merge_check_results.csv")))
 
   allCheckDF <- read.csv(file.path(tm, "test", "leafs_merge",
-                                   "all_check_results_7.csv"),
+                                   "all_check_results_4.csv"),
                          header = TRUE, row.names = 1L)
-  expect_identical(nrow(allCheckDF),  9L)
-  expect_identical(ncol(allCheckDF), 10L)
+  expect_identical(nrow(allCheckDF),  5L)
+  expect_identical(ncol(allCheckDF), 26L)
 
-  allCheckRes <- dfToCheckers(allCheckDF, "SimpleGDIUniformityCheck")
+  allCheckRes <- dfToCheckers(allCheckDF, "AdvancedGDIUniformityCheck")
 
   expect_length(allCheckRes, nrow(allCheckDF))
   expect_named(allCheckRes)

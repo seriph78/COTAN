@@ -120,8 +120,8 @@ checkClusterUniformity <- function(
 
   if (TRUE) {
     dumpDF <- checkersToDF(checker)
-    logThis(paste0(colnames(dumpDF), " = ", dumpDF, collapse = ", "),
-            logLevel = 3L)
+    logThis(paste0(colnames(dumpDF), " = ", unlist(dumpDF[1, ]),
+                   collapse = ", "), logLevel = 3L)
     rm(dumpDF)
   }
 
