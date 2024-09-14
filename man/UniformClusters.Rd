@@ -218,48 +218,54 @@ groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                      G2 = c("g-000300", "g-000330"),
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
+
 gdiPlot <- GDIPlot(objCOTAN, genes = groupMarkers, cond = "test")
 plot(gdiPlot)
 
-## Here we override the default GDI threshold as a way to speed-up
-## calculations as higher threshold implies less stringent uniformity
-## It real applications it might be appropriate to change the threshold
-## in cases of relatively low genes/cells number, or in cases when an
-## rough clusterization is needed in the early satges of the analysis
+## Here we override the default checker as a way to reduce the number of
+## clusters as higher thresholds imply less stringent uniformity checks
 ##
+## In real applications it might be appropriate to do so in the cases when
+## the wanted resolution is lower such as in the early stages of the analysis
+##
+
+checker <- new("AdvancedGDIUniformityCheck")
+identical(checker@firstCheck@GDIThreshold, 1.297)
+
+checker2 <- shiftCheckerThresholds(checker, 0.1)
+identical(checker2@firstCheck@GDIThreshold, 1.397)
 
 splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
                                     optimizeForSpeed = TRUE,
                                     deviceStr = "cuda",
                                     initialResolution = 0.8,
-                                    GDIThreshold = 1.46, saveObj = FALSE)
+                                    checker = checker2, saveObj = FALSE)
 
 clusters <- splitList[["clusters"]]
 
 firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
 
-checker <- new("SimpleGDIUniformityCheck",
-               check = new("GDICheck",
-                           GDIThreshold = 1.46))
-
 checkerRes <-
-  checkClusterUniformity(objCOTAN, checker = checker,
+  checkClusterUniformity(objCOTAN, checker = checker2,
                          cluster = clusters[[1L]], cells = firstCluster,
                          cores = 6L, optimizeForSpeed = TRUE,
                          deviceStr = "cuda", saveObj = FALSE)
 
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "split",
-                              clusters = clusters)
-
-objCOTAN <- addClusterizationCoex(objCOTAN,
-                                  clName = "split",
-                                  coexDF = splitList[["coex"]])
+                              clusters = clusters,
+                              coexDF = splitList[["coex"]],
+                              override = FALSE)
 
 identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 
+## It is possible to pass a list of checkers tot the merge function that will
+## be applied each to the *resulting* merged *clusterization* obtained using
+## the previous checker. This ensures that the most similar clusters are
+## merged first improving the overall performance
+
 mergedList <- mergeUniformCellsClusters(objCOTAN,
-                                        GDIThreshold = 1.43,
+                                        checkers = c(checker, checker2),
                                         batchSize = 2L,
                                         clusters = clusters,
                                         cores = 6L,
@@ -272,8 +278,9 @@ mergedList <- mergeUniformCellsClusters(objCOTAN,
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "merged",
                               clusters = mergedList[["clusters"]],
-                              coexDF = mergedList[["coex"]])
+                              coexDF = mergedList[["coex"]],
+                              override = TRUE)
 
-identical(reorderClusterization(objCOTAN), mergedList)
+identical(reorderClusterization(objCOTAN), mergedList[["clusters"]])
 
 }

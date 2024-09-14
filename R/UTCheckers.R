@@ -251,7 +251,7 @@ setMethod(
     }
 
     thirdCheckOK <- FALSE
-    if (is.finite(cCheck3@thresholdRank)) {
+    if (cCheck3@thresholdRank > 0L) {
       thirdCheckOK <-
         (cCheck3@thresholdRank <= cCheck3@maxRankBeyond)
     } else if (is.finite(cCheck3@quantileAtRank)) {

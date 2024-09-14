@@ -1,3 +1,16 @@
+## 2.5.8
+
+Introduced new way to check for the **Uniform-Transcript** property of the 
+*clusters* based on multiple thresholds calibrated so that the new method is
+more effective at describing really **statistically uniform** *clusters*
+
+Functions `cellsUniformClustering()` and `mergeUniformCellsClusters()` have been
+re-factored so to support new class hierarchy for **UT** checkers.
+This allows user to select which method to use for the checks;
+as of now the following methods are supported:
+* `"SimpleGDIUniformityCheck"`
+* `"AdvancedGDIUniformityCheck"`
+
 ## 2.5.7
 
 Avoided issue with pdf file creation: file handle was not closed
