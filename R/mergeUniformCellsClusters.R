@@ -324,6 +324,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
                         logical(1L))
     checkRes <- checkRes[posToKeep]
 
+    if (is_empty(checkRes)) {
+      logThis(paste("No clusters will be merged"), logLevel = 2L)
+
+      return(outputClusters)
+    }
+
     shifts <- vapply(checkRes, calculateThresholdShiftToUniformity, double(1L))
     checkRes <- checkRes[order(shifts)]
 
@@ -374,16 +380,17 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                maxRatioBeyond = 0.01))
              })
 
-    rm(GDIThreshold, thresholdGap, numThresholds, allThresholds)
+    rm(thresholdGap, numThresholds, allThresholds)
   } else {
     assert_that(!is.finite(GDIThreshold),
-                msg = paste("Either a `checker` object or",
+                msg = paste("Either `checker` object[s] or",
                             "a legacy `GDIThreshold` must be given"))
     if (!is(checkers, "list")) {
       checkers <- list(checkers)
     }
     assert_that(all(vapply(checkers, is, logical(1L), "BaseUniformityCheck")))
   }
+  rm(GDIThreshold)
   logThis(paste("The merge algorithm will use", length(checkers), "passes"),
           logLevel = 1L)
 
@@ -507,19 +514,19 @@ mergeUniformCellsClusters <- function(objCOTAN,
         logThis("Finished the first batch - no merges were executed",
                 logLevel = 3L)
       } else if (newNumClusters == oldNumClusters) {
-        logThis(paste("None of the", length(allCheckResults),
-                      "tested cluster pairs could be merged"), logLevel = 3L)
+        logThis(paste("None of the remaining tested",
+                      "cluster pairs could be merged"), logLevel = 3L)
 
         # No merges happened -> too low probability of new merges...
         break
       } else {
-        logThis(paste("Executed", (oldNumClusters - newNumClusters),
-                      "merges out of potentially", length(allCheckResults)),
+        logThis(paste("Executed", (oldNumClusters - newNumClusters), "merges"),
                 logLevel = 3L)
       }
     }
     logThis(paste0("Executed all merges for threshold ",
-                   getCheckerThreshold(checker)), logLevel = 3L)
+                   getCheckerThreshold(checker), " out of ",
+                   length(allCheckResults), " checks"), logLevel = 3L)
   }
 
   logThis(paste0("The final merged clusterization contains [",

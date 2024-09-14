@@ -184,7 +184,7 @@ setMethod(
           is.finite(pCheck3@quantileAtRank)  &&
           pCheck1@maxRatioBeyond == cCheck1@maxRatioBeyond &&
           pCheck2@maxRatioBeyond == cCheck2@maxRatioBeyond &&
-          pCheck3@maxRankBeyond  == cCheck1@maxRankBeyond) {
+          pCheck3@maxRankBeyond  == cCheck3@maxRankBeyond) {
         cCheck1@quantileAtRatio <- pCheck1@quantileAtRatio
         cCheck2@quantileAtRatio <- pCheck2@quantileAtRatio
         cCheck3@quantileAtRank  <- pCheck3@quantileAtRank
