@@ -102,7 +102,7 @@ test_that("Merge Uniform Cells Clusters", {
   allCheckDF <- read.csv(file.path(tm, "test", "leafs_merge",
                                    "all_check_results_4.csv"),
                          header = TRUE, row.names = 1L)
-  expect_identical(nrow(allCheckDF),  5L)
+  expect_identical(nrow(allCheckDF),  7L)
   expect_identical(ncol(allCheckDF), 26L)
 
   allCheckRes <- dfToCheckers(allCheckDF, "AdvancedGDIUniformityCheck")
@@ -115,6 +115,10 @@ test_that("Merge Uniform Cells Clusters", {
                          logical(1L))))
   expect_true(allCheckRes[[1L]]@isUniform)
   expect_true(allCheckRes[[2L]]@isUniform)
+  expect_false(is.finite(allCheckRes[[1L]]@firstCheck@fractionBeyond))
+  expect_true(is.finite(allCheckRes[[7L]]@firstCheck@fractionBeyond))
+  expect_true(is.finite(allCheckRes[[1L]]@firstCheck@quantileAtRatio))
+  expect_true(is.finite(allCheckRes[[7L]]@firstCheck@quantileAtRatio))
 
   expect_lt(nlevels(mergedClusters), nlevels(clusters))
   expect_setequal(colnames(mergedCoexDF), mergedClusters)
