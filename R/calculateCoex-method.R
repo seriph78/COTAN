@@ -75,7 +75,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN) {
   probZero <- getProbabilityOfZero(objCOTAN)
 
   # estimate the likelihood of observed result
-  return((1 - zeroOne) * probZero + zeroOne * (1 - probZero))
+  return((1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero))
 }
 
 
@@ -893,8 +893,8 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
             thresholdForPP) / length(expectedYY@x)
 
     logThis(paste("Fraction of", kind, "with very low",
-                   "expected contingency tables:",
-                   problematicPairsFraction), logLevel = 3L)
+                  "expected contingency tables:",
+                  problematicPairsFraction), logLevel = 3L)
   }
 
   coex <- normFact * sqrt(1.0 / pmax(1.0, expectedYY@x) +
@@ -919,7 +919,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
 
   observedTime <- Sys.time()
   logThis(paste("Observed", kind, "contingency table elapsed time:",
-                 difftime(observedTime, sqrtTime, units = "secs")),
+                difftime(observedTime, sqrtTime, units = "secs")),
           logLevel = 3L)
 
   # coex estimation
@@ -937,7 +937,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
 
   endTime <- Sys.time()
   logThis(paste("Calculate", kind, "coex elapsed time:",
-                 difftime(endTime, observedTime, units = "secs")),
+                difftime(endTime, observedTime, units = "secs")),
           logLevel = 3L)
 
   logThis(paste("Total calculations elapsed time:",
@@ -1120,7 +1120,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
           logLevel = 2L)
 
   logThis(paste0("Calculate genes coex (torch) on device ", deviceStr,
-                ": DONE"), logLevel = 1L)
+                 ": DONE"), logLevel = 1L)
 
   return(list("coex" = ret, "ppf" = problematicPairsFraction))
 }

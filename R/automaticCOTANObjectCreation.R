@@ -56,7 +56,7 @@
 #'                             deviceStr = "cuda", saveObj = FALSE)
 #' }
 #'
-#' @rdname COTANObjectCreation
+#' @rdname COTAN_ObjectCreation
 #'
 setMethod(
   "proceedToCoex",
@@ -117,8 +117,13 @@ setMethod(
       rm(plots)
     }, error = function(err) {
       logThis(paste("While saving the clean plots", err), logLevel = 1L)
-      dev.off()
+    }, finally = {
+      # Check for active device
+      if (dev.cur() > 1L) {
+        dev.off()
+      }
     })
+
     gc()
 
     analysisTime <- Sys.time()
@@ -222,23 +227,23 @@ setMethod(
 #'   outDir = tempdir(),
 #'   cores = 6L)
 #'
-#' @rdname COTANObjectCreation
+#' @rdname COTAN_ObjectCreation
 
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,
            calcCoex = TRUE, optimizeForSpeed = TRUE, deviceStr = "cuda",
            cores = 1L, saveObj = TRUE, outDir = ".") {
 
-  objCOTAN <- COTAN(raw = raw)
-  objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
-                                    sequencingMethod = sequencingMethod,
-                                    sampleCondition = sampleCondition)
+    objCOTAN <- COTAN(raw = raw)
+    objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
+                                      sequencingMethod = sequencingMethod,
+                                      sampleCondition = sampleCondition)
 
-  logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
-  logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)
+    logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
+    logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)
 
-  return(proceedToCoex(objCOTAN, calcCoex = calcCoex,
-                       optimizeForSpeed = optimizeForSpeed,
-                       deviceStr = deviceStr, cores = cores,
-                       saveObj = saveObj, outDir = outDir))
-}
+    return(proceedToCoex(objCOTAN, calcCoex = calcCoex,
+                         optimizeForSpeed = optimizeForSpeed,
+                         deviceStr = deviceStr, cores = cores,
+                         saveObj = saveObj, outDir = outDir))
+  }

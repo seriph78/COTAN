@@ -28,6 +28,7 @@ emptySymmetricMatrix <- function() {
                "symmetricMatrix"), "packedMatrix"))
 }
 
+#---------- COTAN class --------------
 
 #' Definition of the `COTAN` class
 #'
@@ -184,10 +185,10 @@ setClass(
 #'
 #' @title `COTAN` shortcuts
 #'
-#' @description These functions create a `COTAN` object and/or also run all
-#'   the necessary steps until the genes' `COEX` matrix is calculated.
+#' @description These functions create a [COTAN-class] object and/or also run
+#'   all the necessary steps until the genes' `COEX` matrix is calculated.
 #'
-#' @name COTANObjectCreation
+#' @name COTAN_ObjectCreation
 NULL
 
 #' @details Constructor of the class `COTAN`
@@ -208,7 +209,7 @@ NULL
 #' data("test.dataset")
 #' obj <- COTAN(raw = test.dataset)
 #'
-#' @name COTANObjectCreation
+#' @rdname COTAN_ObjectCreation
 #'
 COTAN <- function(raw = "ANY") {
   raw <- as(as(raw, "Matrix"), "sparseMatrix")
@@ -226,7 +227,7 @@ COTAN <- function(raw = "ANY") {
 #' @description A class and some functions related to the `V1` version of the
 #'   `COTAN` package
 #'
-#' @name COTAN-Legacy
+#' @name COTAN_Legacy
 NULL
 
 
@@ -251,7 +252,7 @@ NULL
 #'
 #' @export
 #'
-#' @rdname COTAN-Legacy
+#' @rdname COTAN_Legacy
 #'
 setClass(
   "scCOTAN",
@@ -269,11 +270,9 @@ setClass(
     clusters = "vector",
     cluster_data = "data.frame"
   )
-) -> scCOTAN
+)
 
 
-#' @title getCOTANSlots
-#'
 #' @description Helper function to be shared by coerce() and replace()
 #'
 #' @param a `scCOTAN` object
@@ -367,7 +366,7 @@ getCOTANSlots <- function(from) {
                                "CL_clusters", colnames(from@raw))
   }
 
-  {
+  if (TRUE) {
     clusterData <- from@cluster_data
 
     if (!hasClusters && !is_empty(clusterData)) {
@@ -429,53 +428,51 @@ getCOTANSlots <- function(from) {
   return(list(raw, genesCoex, cellsCoex, metaGenes, metaCells, clustersCoex))
 }
 
-#' @title setIs():  `scCOTAN` -> `COTAN`
-#'
-#' @description Automatically converts an object from class `scCOTAN` into
-#'   `COTAN`
+#' @details Automatically converts an object from class `scCOTAN` into `COTAN`
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
 #' @importFrom methods setIs
 #'
-#' @export
+#' @name scCotan_coerce_to_COTAN
+#' @rdname COTAN_Legacy
 #'
-#' @noRd
-#'
-setIs("scCOTAN",
-      "COTAN",
-      coerce = function(from) {
-        c(raw, genesCoex, cellsCoex,
-          metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(from)
+setIs(
+  "scCOTAN",
+  "COTAN",
+  coerce = function(from) {
+    c(raw, genesCoex, cellsCoex,
+      metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(from)
 
-        new("COTAN",
-            raw          = raw,
-            genesCoex    = genesCoex,
-            cellsCoex    = cellsCoex,
-            metaDataset  = from@meta,
-            metaGenes    = metaGenes,
-            metaCells    = metaCells,
-            clustersCoex = clustersCoex)
-      },
-      # 'from' arg-name is convention: it is actually a destination!
-      replace = function(from, value) {
-        c(raw, genesCoex, cellsCoex,
-          metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(value)
+      new("COTAN",
+          raw          = raw,
+          genesCoex    = genesCoex,
+          cellsCoex    = cellsCoex,
+          metaDataset  = from@meta,
+          metaGenes    = metaGenes,
+          metaCells    = metaCells,
+          clustersCoex = clustersCoex)
+  },
+  # 'from' arg-name is convention: it is actually a destination!
+  replace = function(from, value) {
+    c(raw, genesCoex, cellsCoex,
+      metaGenes, metaCells, clustersCoex) %<-% getCOTANSlots(value)
 
-        from@raw          <- raw
-        from@genesCoex    <- genesCoex
-        from@cellsCoex    <- cellsCoex
-        from@metaDataset  <- value@meta
-        from@metaGenes    <- metaGenes
-        from@metaCells    <- metaCells
-        from@clustersCoex <- clustersCoex
-        from
-      }
-     ) # end setIs
+    # Update the existing scCOTAN object in place
+    from@raw          <- raw
+    from@genesCoex    <- genesCoex
+    from@cellsCoex    <- cellsCoex
+    from@metaDataset  <- value@meta
+    from@metaGenes    <- metaGenes
+    from@metaCells    <- metaCells
+    from@clustersCoex <- clustersCoex
+
+    # Return the modified object
+    return(from)
+  })
 
 
-#' @title getScCOTANSlots
 #'
 #' @description Helper function to be shared by coerce() and replace()
 #'
@@ -549,9 +546,7 @@ getScCOTANSlots <- function(from) {
   return(list(rawNorm, nu, lambda, a, hk, clusters, clusterData))
 }
 
-#' @title setAs(): `COTAN` -> `scCOTAN`
-#'
-#' @description Explicitly converts an object from class `COTAN` into `scCOTAN`
+#' @details Explicitly converts an object from class `COTAN` into `scCOTAN`
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
@@ -559,45 +554,282 @@ getScCOTANSlots <- function(from) {
 #' @importFrom methods as
 #' @importFrom methods setAs
 #'
-#' @export
+#' @name COTAN_coerce_to_scCOTAN
+#' @rdname COTAN_Legacy
 #'
-#' @noRd
+setAs(
+  "COTAN",
+  "scCOTAN",
+  function(from) {
+    c(rawNorm, nu, lambda, a,
+      hk, clusters, clusterData) %<-% getScCOTANSlots(from)
+
+      new("scCOTAN",
+          raw          = from@raw,
+          raw.norm     = rawNorm,
+          coex         = from@genesCoex,
+          nu           = nu,
+          lambda       = lambda,
+          a            = a,
+          hk           = hk,
+          n_cells      = ncol(from@raw),
+          meta         = from@metaDataset,
+          clusters     = clusters,
+          cluster_data = clusterData)
+  },
+  # 'from' arg-name is convention: it is actually a destination!
+  replace = function(from, value) {
+    # Extract the slots needed for updating the scCOTAN object
+    c(rawNorm, nu, lambda, a,
+      hk, clusters, clusterData) %<-% getScCOTANSlots(value)
+
+    # Update the existing scCOTAN object in place
+    from@raw          <- value@raw
+    from@raw.norm     <- rawNorm
+    from@coex         <- value@genesCoex
+    from@nu           <- nu
+    from@lambda       <- lambda
+    from@a            <- a
+    from@hk           <- hk
+    from@n_cells      <- ncol(value@raw)
+    from@meta         <- value@metaDataset
+    from@clusters     <- clusters
+    from@cluster_data <- clusterData
+
+    # Return the modified object
+    return(from)
+  })
+
+
+#---------- Transcript Uniformity Check --------------
+
+#' @title Definition of the **Transcript Uniformity Checker** classes
 #'
-setAs("COTAN",
-      "scCOTAN",
-      function(from) {
-        c(rawNorm, nu, lambda, a,
-          hk, clusters, clusterData) %<-% getScCOTANSlots(from)
+#' @description A hierarchy of classes to specify the method for checking
+#'   whether a **cluster** has the *Uniform Transcript* property. It also
+#'   doubles as result object.
+#'
+#' @name UniformTranscriptCheckers
+NULL
 
-        new("scCOTAN",
-            raw          = from@raw,
-            raw.norm     = rawNorm,
-            coex         = from@genesCoex,
-            nu           = nu,
-            lambda       = lambda,
-            a            = a,
-            hk           = hk,
-            n_cells      = ncol(from@raw),
-            meta         = from@metaDataset,
-            clusters     = clusters,
-            cluster_data = clusterData)
-      },
-      # 'from' arg-name is convention: it is actually a destination!
-      replace = function(from, value) {
-        c(rawNorm, nu, lambda, a,
-          hk, clusters, clusterData) %<-% getScCOTANSlots(value)
+#' @details `BaseUniformityCheck` is the base class of the check methods
+#'
+#' @slot isUniform Logical. Output. The result of the check
+#' @slot clusterSize Integer. Output. The number of cells in the checked
+#'   cluster. When zero implies no check has been run yet
+#'
+#' @importFrom rlang is_logical
+#' @importFrom rlang is_integer
+#'
+#' @rdname UniformTranscriptCheckers
+#'
+setClass(
+  "BaseUniformityCheck",
+  slots = c(
+    isUniform = "logical",
+    clusterSize = "integer"
+  ),
+  prototype = list(
+    isUniform   = FALSE,
+    clusterSize = 0L
+  ),
+  validity = function(object) {
+    if (!is_logical(object@isUniform, n = 1L)) {
+      stop("Given 'isUniform' data must be a Boolean")
+    }
+    if (!is_integer(object@clusterSize, n = 1L) || object@clusterSize < 0L) {
+      stop("Given 'clusterSize' data must be a positive number")
+    }
+    return(TRUE)
+  }
+) # end Base Uniformity Check
 
-        from@raw          <- value@raw
-        from@raw.norm     <- rawNorm
-        from@coex         <- value@genesCoex
-        from@nu           <- nu
-        from@lambda       <- lambda
-        from@a            <- a
-        from@hk           <- hk
-        from@n_cells      <- ncol(value@raw)
-        from@meta         <- value@metaDataset
-        from@clusters     <- clusters
-        from@cluster_data <- clusterData
-        from
-      }
-     ) # end setAs
+
+#' @details `GDICheck` represents a single unit check using `GDI` data. It
+#'   defaults to an *above* check with threshold \eqn{1.4} and ratio \eqn{1\%}
+#'
+#' @slot isCheckAbove Logical. Determines how to compare quantiles against given
+#'   thresholds. It is deemed passed if the relevant quantile is above/below the
+#'   given threshold
+#' @slot GDIThreshold Numeric. The level of `GDI` beyond which the **cluster**
+#'   is deemed not uniform. Defaults
+#' @slot maxRatioBeyond Numeric. The maximum fraction of the empirical `GDI`
+#'   distribution that sits beyond the `GDI` threshold
+#' @slot maxRankBeyond Integer. The minimum rank in the empirical `GDI`
+#'   distribution for the `GDI` threshold
+#' @slot fractionBeyond Numeric. Output. The fraction of genes whose `GDI` is
+#'   above the threshold
+#' @slot thresholdRank Integer. Output. The rank that the `GDI` threshold would
+#'   have in the genes' `GDI` `vector`
+#' @slot quantileAtRatio Numeric. Output. The quantile in the genes' `GDI`
+#'   corresponding at the given ratio
+#' @slot quantileAtRatio Numeric. Output. The quantile in the genes' `GDI`
+#'   corresponding at the given rank
+#'
+#' @importFrom rlang is_logical
+#' @importFrom rlang is_integer
+#' @importFrom rlang is_double
+#'
+#' @rdname UniformTranscriptCheckers
+#'
+
+setClass(
+  "GDICheck",
+  slots = c(
+    isCheckAbove    = "logical",
+    GDIThreshold    = "numeric",
+    maxRatioBeyond  = "numeric",
+    maxRankBeyond   = "integer",
+    fractionBeyond  = "numeric",
+    thresholdRank   = "integer",
+    quantileAtRatio = "numeric",
+    quantileAtRank  = "numeric"
+  ),
+  prototype = list(
+    isCheckAbove    = FALSE,
+    GDIThreshold    = 1.4,
+    maxRatioBeyond  = 0.01,
+    maxRankBeyond   = 0L,
+    fractionBeyond  = NaN,
+    thresholdRank   = 0L,
+    quantileAtRatio = NaN,
+    quantileAtRank  = NaN
+  ),
+  validity = function(object) {
+    # deal with input parameters
+    if (!is_double(object@GDIThreshold, n = 1L, finite = TRUE) ||
+        object@GDIThreshold <= 1.0) {
+      stop("Input 'GDIThreshold' must be a finite number above 1.0")
+    }
+    if (!is_double(object@maxRatioBeyond, n = 1L) ||
+        (is.finite(object@maxRatioBeyond) &&
+         (object@maxRatioBeyond <= 0.0 || object@maxRatioBeyond >= 1.0))) {
+      stop("Input 'maxRatioBeyond' must be a finite number",
+           " between 0.0 and 1.0 if given")
+    }
+    if (!is_integer(object@maxRankBeyond, n = 1L)
+        || object@maxRankBeyond < 0L) {
+      stop("Input check `rank` must be a non-negative integer")
+    }
+    if (is.finite(object@maxRatioBeyond) && object@maxRankBeyond > 0L) {
+      stop("Cannot specify both a 'max ratio' and a 'max rank'")
+    }
+
+    # deal with output parameters
+    if (!is_double(object@fractionBeyond, n = 1L) ||
+        (is.finite(object@fractionBeyond) &&
+         (object@fractionBeyond < 0.0 || object@fractionBeyond > 1.0))) {
+      stop("Output 'fractionBeyond' must be a finite number",
+           " between 0.0 and 1.0 if given")
+    }
+    if (!is_integer(object@thresholdRank, n = 1L)
+        || object@thresholdRank < 0L) {
+      stop("Output check `rank` must be a non-negative integer")
+    }
+    if (!is_double(object@quantileAtRatio, n = 1L) ||
+        (is.finite(object@quantileAtRatio) && object@quantileAtRatio <= 0.0)) {
+      stop("Output 'quantileAtRatio' must be a finite positive number",
+           " if given")
+    }
+    if (!is_double(object@quantileAtRank, n = 1L) ||
+        (is.finite(object@quantileAtRank) && object@quantileAtRank <= 0.0)) {
+      stop("Output 'quantileAtRank' must be a finite positive number",
+           " if given")
+    }
+    return(TRUE)
+  }
+)
+
+#' @details `SimpleGDIUniformityCheck` represents the simplified (and legacy)
+#'   mechanism to determine whether a cluster has the *Uniform Transcript*
+#'   property
+#'
+#'   The method is based on checking whether the fraction of the genes' `GDI`
+#'   below the given *threshold* is less than the given *ratio*
+#'
+#' @slot check `GDICheck`. The single threshold check used to determine whether
+#'   the **cluster** is deemed not uniform
+#'
+#' @rdname UniformTranscriptCheckers
+#'
+setClass(
+  "SimpleGDIUniformityCheck",
+  contains = "BaseUniformityCheck",
+  slots = c(
+    check = "GDICheck"
+  ),
+  prototype = list(
+    check = new("GDICheck")
+  ),
+  validity = function(object) {
+    invisible(validObject(object@check))
+    if (object@check@isCheckAbove) {
+      stop("Given check direction must be below")
+    }
+    if (object@check@maxRankBeyond > 0L) {
+      stop("Input check `rank` not supported for this case")
+    }
+    return(TRUE)
+  }
+) # end class SimpleGDIUniformityCheck
+
+
+#' @details `AdvancedGDIUniformityCheck` represents the more precise and
+#'   advanced mechanism to determine whether a cluster has the *Uniform
+#'   Transcript* property
+#'
+#'   The method is based on checking the genes' `GDI` against three
+#'   *thresholds*: if a cluster fails the first **below** check is deemed not
+#'   *uniform*. Otherwise if it passes either of the other two checks (one above
+#'   and one below) it is deemed *uniform*.
+#'
+#' @slot check `GDICheck`. The single threshold check used to determine whether
+#'   the **cluster** is deemed not uniform
+#' @slot firstCheck `GDICheck`. Single threshold below check used to determine
+#'   whether the **cluster** is deemed not *uniform*. Threshold defaults to
+#'   \eqn{1.297}, `maxRatioBeyond` to \eqn{5\%}
+#' @slot secondCheck `GDICheck`. Single threshold above check used to determine
+#'   whether the **cluster** is deemed *uniform*. Threshold defaults to
+#'   \eqn{1.307}, `maxRatioBeyond` to \eqn{2\%}
+#' @slot thirdCheck `GDICheck`. Single threshold below check used to determine
+#'   whether the **cluster** is deemed *uniform*. Threshold defaults to
+#'   \eqn{1.4}, `maxRankBeyond` to \eqn{2}
+#'
+#' @rdname UniformTranscriptCheckers
+#'
+setClass(
+  "AdvancedGDIUniformityCheck",
+  contains = "BaseUniformityCheck",
+  slots = c(
+    firstCheck  = "GDICheck",
+    secondCheck = "GDICheck",
+    thirdCheck  = "GDICheck"
+  ),
+  prototype = list(
+    firstCheck  = new("GDICheck",
+                      isCheckAbove   = FALSE,
+                      GDIThreshold   = 1.297,
+                      maxRatioBeyond = 0.05,
+                      maxRankBeyond  = 0L),
+    secondCheck = new("GDICheck",
+                      isCheckAbove   = TRUE,
+                      GDIThreshold   = 1.307,
+                      maxRatioBeyond = 0.02,
+                      maxRankBeyond  = 0L),
+    thirdCheck  = new("GDICheck",
+                      isCheckAbove   = FALSE,
+                      GDIThreshold   = 1.4,
+                      maxRatioBeyond = NaN,
+                      maxRankBeyond  = 2L)
+  ),
+  validity = function(object) {
+    invisible(validObject(object@firstCheck))
+    invisible(validObject(object@secondCheck))
+    invisible(validObject(object@thirdCheck))
+    if (object@firstCheck@isCheckAbove   ||
+        !object@secondCheck@isCheckAbove ||
+        object@thirdCheck@isCheckAbove) {
+      stop("Given check directions must be below, above, below")
+    }
+    return(TRUE)
+  }) # end class AdvancedGDIUniformityCheck

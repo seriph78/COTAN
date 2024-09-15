@@ -552,6 +552,6 @@ test_that("Coex with negative dispersion genes", {
   expect_setequal(hmDF[["cond"]], "test")
   expect_identical(colnames(hmDF), expectedColNames)
   expect_identical(hmDF[["absent"]], hmDF[["g2"]] == "g-000660")
-  expect_true(all(hmDF[["pValue"]]> 0.05))
+  expect_true(all(hmDF[["pValue"]] > 0.05))
   expect_true(all(hmDF[["coex"]] == 0.0))
 })

@@ -5,7 +5,6 @@
 \alias{UniformClusters}
 \alias{GDIPlot}
 \alias{cellsUniformClustering}
-\alias{isClusterUniform}
 \alias{checkClusterUniformity}
 \alias{mergeUniformCellsClusters}
 \title{Uniform Clusters}
@@ -21,8 +20,8 @@ GDIPlot(
 
 cellsUniformClustering(
   objCOTAN,
-  GDIThreshold = 1.43,
-  ratioAboveThreshold = 0.01,
+  checker = NULL,
+  GDIThreshold = NaN,
   cores = 1L,
   maxIterations = 25L,
   optimizeForSpeed = TRUE,
@@ -36,21 +35,11 @@ cellsUniformClustering(
   outDir = "."
 )
 
-isClusterUniform(
-  GDIThreshold,
-  ratioAboveThreshold,
-  ratioQuantile,
-  fractionAbove,
-  usedGDIThreshold,
-  usedRatioAbove
-)
-
 checkClusterUniformity(
   objCOTAN,
   clusterName,
   cells,
-  GDIThreshold = 1.43,
-  ratioAboveThreshold = 0.01,
+  checker,
   cores = 1L,
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
@@ -61,8 +50,8 @@ checkClusterUniformity(
 mergeUniformCellsClusters(
   objCOTAN,
   clusters = NULL,
-  GDIThreshold = 1.43,
-  ratioAboveThreshold = 0.01,
+  checkers = NULL,
+  GDIThreshold = NaN,
   batchSize = 0L,
   allCheckResults = data.frame(),
   cores = 1L,
@@ -87,14 +76,15 @@ only for the title).}
 \item{statType}{type of statistic to be used. Default is "S": Pearson's
 chi-squared test statistics. "G" is G-test statistics}
 
-\item{GDIThreshold}{the threshold level that discriminates uniform clusters.
-It defaults to \eqn{1.43}}
+\item{GDIThreshold}{legacy. The threshold level that is used in a
+\linkS4class{SimpleGDIUniformityCheck}. It defaults to \eqn{1.43}}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
 
-\item{ratioAboveThreshold}{the fraction of genes allowed to be above the
-\code{GDIThreshold}. It defaults to \eqn{1\%}}
+\item{checker}{the object that defines the method and the threshold to
+discriminate whether a \emph{cluster} is \emph{uniform transcript}. See
+\link{UniformTranscriptCheckers} for more details}
 
 \item{cores}{number of cores to use. Default is 1.}
 
@@ -135,16 +125,6 @@ plots to file}
 \item{outDir}{an existing directory for the analysis output. The effective
 output will be paced in a sub-folder.}
 
-\item{ratioQuantile}{the \code{GDI} quantile corresponding to the \code{usedRatioAbove}}
-
-\item{fractionAbove}{the fraction of genes above the \code{usedGDIThreshold}}
-
-\item{usedGDIThreshold}{the threshold level actually used to calculate fourth
-argument}
-
-\item{usedRatioAbove}{the fraction of genes actually used to calculate the
-third argument}
-
 \item{clusterName}{the tag of the \emph{cluster}}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
@@ -152,6 +132,11 @@ third argument}
 \item{clusters}{The \emph{clusterization} to merge. If not given the last
 available \emph{clusterization} will be used, as it is probably the most
 significant!}
+
+\item{checkers}{a \code{list} of objects that defines the method and the
+\emph{increasing} thresholds to discriminate whether to merge two \emph{clusters} if
+deemed \emph{uniform transcript}. See \link{UniformTranscriptCheckers} for more
+details}
 
 \item{batchSize}{Number pairs to test in a single round. If none of them
 succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}}
@@ -172,20 +157,9 @@ average gene expression (log scaled). Also marked are the given \emph{threshold}
 \item \code{"coex"} the associated \code{COEX} \code{data.frame}
 }
 
-a single \code{Boolean} value when it is possible to decide the answer
-with the given information and \code{NA} otherwise
-
-\code{checkClusterUniformity} returns a list with:
-\itemize{
-\item \code{"isUniform"}: a flag indicating whether the \emph{cluster} is \strong{uniform}
-\item \code{"fractionAbove"}: the percentage of genes with \code{GDI} above the threshold
-\item \code{"ratioQuantile"}: the quantile associated to the high quantile
-associated to given ratio
-\item \code{"size"}: the number of cells in the cluster
-\item \code{"GDIThreshold"} the used \code{GDI} threshold
-\item \code{"ratioAboveThreshold"} the used fraction of genes above threshold
-allowed in \strong{uniform} \emph{clusters}
-}
+\code{checkClusterUniformity} returns a checker object of the same type
+as the input one, that contains both threshold and results of the check:
+see \link{UniformTranscriptCheckers} for more details
 
 a \code{list} with:
 \itemize{
@@ -213,18 +187,10 @@ for another iteration of the entire process, until all \emph{clusters} are
 deemed \strong{uniform}. In the case only a few cells are left out (\eqn{\leq
   50}), those are flagged as \code{"-1"} and the process is stopped.
 
-\code{isClusterUniform()} takes in the current thresholds and used them
-to check whether the calculated cluster parameters are sufficient to
-determine whether the cluster is \strong{uniform} and in the positive scenario
-the corresponding answer
-
 \code{checkClusterUniformity()} takes a \code{COTAN} object and a cells'
-\emph{cluster} and checks whether the latter is \strong{uniform} by \code{GDI}. The
-function runs \code{COTAN} to check whether the \code{GDI} is lower than the given
-\code{GDIThreshold} (1.43) for all but at the most \code{ratioAboveThreshold}
-(\eqn{1\%}) genes. If the \code{GDI} results to be too high for too many genes,
-the \emph{cluster} is deemed
-\strong{non-uniform}.
+\emph{cluster} and checks whether the latter is \strong{uniform} by looking at the
+genes' \code{GDI} distribution. The function runs \code{\link[=checkObjIsUniform]{checkObjIsUniform()}} on the
+given input checker
 
 \code{mergeUniformCellsClusters()} takes in a \strong{uniform}
 \emph{clusterization} and iteratively checks whether merging two \emph{near clusters}
@@ -252,45 +218,54 @@ groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                      G2 = c("g-000300", "g-000330"),
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
+
 gdiPlot <- GDIPlot(objCOTAN, genes = groupMarkers, cond = "test")
 plot(gdiPlot)
 
-## Here we override the default GDI threshold as a way to speed-up
-## calculations as higher threshold implies less stringent uniformity
-## It real applications it might be appropriate to change the threshold
-## in cases of relatively low genes/cells number, or in cases when an
-## rough clusterization is needed in the early satges of the analysis
+## Here we override the default checker as a way to reduce the number of
+## clusters as higher thresholds imply less stringent uniformity checks
 ##
+## In real applications it might be appropriate to do so in the cases when
+## the wanted resolution is lower such as in the early stages of the analysis
+##
+
+checker <- new("AdvancedGDIUniformityCheck")
+identical(checker@firstCheck@GDIThreshold, 1.297)
+
+checker2 <- shiftCheckerThresholds(checker, 0.1)
+identical(checker2@firstCheck@GDIThreshold, 1.397)
 
 splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
                                     optimizeForSpeed = TRUE,
                                     deviceStr = "cuda",
                                     initialResolution = 0.8,
-                                    GDIThreshold = 1.46, saveObj = FALSE)
+                                    checker = checker2, saveObj = FALSE)
 
 clusters <- splitList[["clusters"]]
 
 firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
-firstClusterIsUniform <-
-  checkClusterUniformity(objCOTAN, GDIThreshold = 1.46,
-                         ratioAboveThreshold = 0.01,
+
+checkerRes <-
+  checkClusterUniformity(objCOTAN, checker = checker2,
                          cluster = clusters[[1L]], cells = firstCluster,
                          cores = 6L, optimizeForSpeed = TRUE,
-                         deviceStr = "cuda", saveObj = FALSE)[["isUniform"]]
+                         deviceStr = "cuda", saveObj = FALSE)
 
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "split",
-                              clusters = clusters)
-
-objCOTAN <- addClusterizationCoex(objCOTAN,
-                                  clName = "split",
-                                  coexDF = splitList[["coex"]])
+                              clusters = clusters,
+                              coexDF = splitList[["coex"]],
+                              override = FALSE)
 
 identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
 
+## It is possible to pass a list of checkers tot the merge function that will
+## be applied each to the *resulting* merged *clusterization* obtained using
+## the previous checker. This ensures that the most similar clusters are
+## merged first improving the overall performance
+
 mergedList <- mergeUniformCellsClusters(objCOTAN,
-                                        GDIThreshold = 1.43,
-                                        ratioAboveThreshold = 0.02,
+                                        checkers = c(checker, checker2),
                                         batchSize = 2L,
                                         clusters = clusters,
                                         cores = 6L,
@@ -303,8 +278,9 @@ mergedList <- mergeUniformCellsClusters(objCOTAN,
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "merged",
                               clusters = mergedList[["clusters"]],
-                              coexDF = mergedList[["coex"]])
+                              coexDF = mergedList[["coex"]],
+                              override = TRUE)
 
-identical(reorderClusterization(objCOTAN), mergedList)
+identical(reorderClusterization(objCOTAN), mergedList[["clusters"]])
 
 }

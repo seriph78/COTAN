@@ -108,8 +108,8 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
   if (!is.null(currentFile)) {
     tryCatch({
       tsMsg <- paste0(format(Sys.time(), "[%Y-%m-%d %H:%M:%S] "), msg)
-      if (isTRUE(appendLF)) { sep <- "\n" } else { sep <- "" }
-      writeLines(tsMsg, currentFile, sep = sep)
+      writeLines(tsMsg, currentFile,
+                 sep = ifelse(isTRUE(appendLF), "\n", ""))
       flush(currentFile)
     }, error = function(e) {
       setLoggingFile("")
@@ -394,7 +394,7 @@ niceFactorLevels <- function(v) {
 #' @rdname HandleMetaData
 #'
 getColumnFromDF <- function(df, colName) {
-  if (is_empty(df)) {
+  if (is_empty(df) || !any(colnames(df) == colName)) {
     return(NULL)
   } else {
     retArray <- df[[colName]]

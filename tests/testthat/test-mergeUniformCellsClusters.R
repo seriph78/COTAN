@@ -2,6 +2,7 @@ tm <- tempdir()
 stopifnot(file.exists(tm))
 
 library(zeallot)
+library(stringr)
 
 
 test_that("Merge Uniform Cells Clusters", {
@@ -75,16 +76,18 @@ test_that("Merge Uniform Cells Clusters", {
   expect_equal(e.df[["N. total"]], lengths(groupMarkers), ignore_attr = TRUE)
 
   GDIThreshold <- 1.46
-  ratioAboveThreshold <- 0.01
+
+  advChecker <- new("AdvancedGDIUniformityCheck")
+  checkers <- list(advChecker, shiftCheckerThresholds(advChecker, 0.1))
 
   suppressWarnings({
     c(mergedClusters, mergedCoexDF) %<-%
       mergeUniformCellsClusters(
         objCOTAN = obj, clusters = clusters,
-        GDIThreshold = GDIThreshold, batchSize = 2L,
-        ratioAboveThreshold = ratioAboveThreshold,
-        distance = "cosine", hclustMethod = "ward.D2",
-        cores = 6L, saveObj = TRUE, outDir = tm)
+        checkers = checkers, allCheckResults = data.frame(),
+        batchSize = 2L, distance = "cosine", hclustMethod = "ward.D2",
+        cores = 6L, optimizeForSpeed = TRUE, deviceStr = "cuda",
+        saveObj = TRUE, outDir = tm)
   })
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "merge_clusterization_1.csv")))
@@ -93,8 +96,29 @@ test_that("Merge Uniform Cells Clusters", {
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "all_check_results_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
-                                    "all_check_results_2.csv")))
+                                    "all_check_results_4.csv")))
   expect_true(file.exists(file.path(tm, "test", "merge_check_results.csv")))
+
+  allCheckDF <- read.csv(file.path(tm, "test", "leafs_merge",
+                                   "all_check_results_4.csv"),
+                         header = TRUE, row.names = 1L)
+  expect_identical(nrow(allCheckDF),  7L)
+  expect_identical(ncol(allCheckDF), 26L)
+
+  allCheckRes <- dfToCheckers(allCheckDF, "AdvancedGDIUniformityCheck")
+
+  expect_length(allCheckRes, nrow(allCheckDF))
+  expect_named(allCheckRes)
+  expect_true(all(stringr::str_ends(names(allCheckRes), fixed("-merge"))))
+  expect_true(all(vapply(allCheckRes,
+                         function(x) is(x, "AdvancedGDIUniformityCheck"),
+                         logical(1L))))
+  expect_true(allCheckRes[[1L]]@isUniform)
+  expect_true(allCheckRes[[2L]]@isUniform)
+  expect_false(is.finite(allCheckRes[[1L]]@firstCheck@fractionBeyond))
+  expect_true(is.finite(allCheckRes[[7L]]@firstCheck@fractionBeyond))
+  expect_true(is.finite(allCheckRes[[1L]]@firstCheck@quantileAtRatio))
+  expect_true(is.finite(allCheckRes[[7L]]@firstCheck@quantileAtRatio))
 
   expect_lt(nlevels(mergedClusters), nlevels(clusters))
   expect_setequal(colnames(mergedCoexDF), mergedClusters)
@@ -125,7 +149,7 @@ test_that("Merge Uniform Cells Clusters", {
     GDIData <- calculateGDI(clObj)
 
     expect_lte(sum(GDIData[["GDI"]] >= GDIThreshold),
-               ratioAboveThreshold * nrow(GDIData))
+               allCheckRes[[1]]@firstCheck@maxRatioBeyond * nrow(GDIData))
 
     gc()
   }

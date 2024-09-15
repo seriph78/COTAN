@@ -107,11 +107,13 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
              annotate(geom = "text", x = 0.0, y = 30.0, color = "black",
                       label = paste0("Cells number: ", ncol(rawData), "\n",
                                      "Cl. resolution: ", resolution)))
-
-        dev.off()
       }, error = function(err) {
         logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)
-        dev.off()
+      }, finally = {
+        # Check for active device
+        if (dev.cur() > 1L) {
+          dev.off()
+        }
       })
     gc()
 
@@ -152,10 +154,11 @@ NULL
 #'   50}), those are flagged as `"-1"` and the process is stopped.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
+#' @param checker the object that defines the method and the threshold to
+#'   discriminate whether a *cluster* is *uniform transcript*. See
+#'   [UniformTranscriptCheckers] for more details
+#' @param GDIThreshold legacy. The threshold level that is used in a
+#'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.40}
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of re-clustering iterations. It defaults to
 #'   \eqn{25}
@@ -208,8 +211,8 @@ NULL
 #'
 
 cellsUniformClustering <- function(objCOTAN,
-                                   GDIThreshold = 1.43,
-                                   ratioAboveThreshold = 0.01,
+                                   checker = NULL,
+                                   GDIThreshold = NaN,
                                    cores = 1L,
                                    maxIterations = 25L,
                                    optimizeForSpeed = TRUE,
@@ -247,11 +250,19 @@ cellsUniformClustering <- function(objCOTAN,
   iterReset <- -1L
   numClustersToRecluster <- 0L
   srat <- NULL
-  allCheckResults <- data.frame()
-  errorCheckResults <- list("isUniform" = FALSE, "fractionAbove" = NA,
-                            "ratioQuantile" = NA, "size" = NA,
-                            "GDIThreshold" = GDIThreshold,
-                            "ratioAboveThreshold" = ratioAboveThreshold)
+  allCheckResults <- list()
+
+  if (is.null(checker)) {
+    GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.40)
+    checker <- new("SimpleGDIUniformityCheck",
+                   check = new("GDICheck",
+                               GDIThreshold = GDIThreshold,
+                               maxRatioBeyond = 0.01))
+  } else {
+    assert_that(!is.finite(GDIThreshold),
+                msg = paste("Either a `checker` object or",
+                            "a legacy `GDIThreshold` must be given"))
+  }
 
   repeat {
     iter <- iter + 1L
@@ -330,7 +341,7 @@ cellsUniformClustering <- function(objCOTAN,
       cells <- testClList[[clName]]
       if (length(cells) < 20L) {
         logThis(paste("cluster", globalClName, "has too few cells:",
-                      "will be reclustered!"), logLevel = 1L)
+                      "will be reclustered!"), logLevel = 2L)
 
         numClustersToRecluster <- numClustersToRecluster + 1L
         cellsToRecluster <- c(cellsToRecluster, cells)
@@ -339,8 +350,7 @@ cellsUniformClustering <- function(objCOTAN,
           checkClusterUniformity(objCOTAN = objCOTAN,
                                  clusterName = globalClName,
                                  cells = cells,
-                                 GDIThreshold = GDIThreshold,
-                                 ratioAboveThreshold = ratioAboveThreshold,
+                                 checker = checker,
                                  cores = cores,
                                  optimizeForSpeed = optimizeForSpeed,
                                  deviceStr = deviceStr,
@@ -349,25 +359,28 @@ cellsUniformClustering <- function(objCOTAN,
           error = function(err) {
             logThis(paste("while checking cluster uniformity", err),
                     logLevel = 0L)
-            logThis("marking cluster as not uniform", logLevel = 1L)
-            errorCheckResults[["size"]] <- length(cells)
-            return(errorCheckResults)
+            logThis("marking cluster as not uniform", logLevel = 2L)
+            return(checker)
           })
 
-        gc()
+        invisible(validObject(checkResults))
 
-        allCheckResults <- rbind(allCheckResults, checkResults)
-        rownames(allCheckResults)[[nrow(allCheckResults)]] <- globalClName
+        allCheckResults <- append(allCheckResults, checkResults)
+        names(allCheckResults)[length(allCheckResults)] <- globalClName
 
-        if (!checkResults[["isUniform"]]) {
+        if (!checkResults@isUniform) {
           logThis(paste("cluster", globalClName, "has too high GDI:",
-                        "will be reclustered!"), logLevel = 1L)
+                        "will be reclustered!"), logLevel = 2L)
 
           numClustersToRecluster <- numClustersToRecluster + 1L
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
-          logThis(paste("cluster", globalClName, "is uniform"), logLevel = 1L)
+          logThis(paste("cluster", globalClName, "is uniform"), logLevel = 2L)
         }
+        logThis("", logLevel = 2L)
+
+        rm(checkResults)
+        gc()
       }
     }
 
@@ -413,7 +426,7 @@ cellsUniformClustering <- function(objCOTAN,
 
         outFile <- file.path(splitOutDir,
                              paste0("all_check_results_", iter, ".csv"))
-        write.csv(allCheckResults, file = outFile)
+        write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
     },
       error = function(err) {
         logThis(paste("While saving current clusterization", err),
@@ -453,12 +466,13 @@ cellsUniformClustering <- function(objCOTAN,
     outputClusters[unclusteredCells] <- "-1"
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
-    checksTokeep <- rownames(allCheckResults) %in% clTags
-    allCheckResults <- allCheckResults[checksTokeep, , drop = FALSE]
-    rownames(allCheckResults) <- clTagsMap[rownames(allCheckResults)]
+    checksTokeep <- names(allCheckResults) %in% clTags
+    allCheckResults <- allCheckResults[checksTokeep]
+    names(allCheckResults) <- clTagsMap[names(allCheckResults)]
     if (any(unclusteredCells)) {
-      errorCheckResults[["size"]] <- length(unclusteredCells)
-      allCheckResults <- rbind(allCheckResults, "-1" = errorCheckResults)
+      checker@clusterSize <- sum(unclusteredCells)
+      allCheckResults <- append(allCheckResults, checker)
+      names(allCheckResults)[length(allCheckResults)] <- "-1"
     }
   }
 
@@ -467,7 +481,7 @@ cellsUniformClustering <- function(objCOTAN,
              error = function(err) {
                logThis(paste("Calling DEAOnClusters", err), logLevel = 0L)
                return(NULL)
-               })
+             })
 
   c(outputClusters, outputCoexDF, permMap) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
@@ -478,13 +492,13 @@ cellsUniformClustering <- function(objCOTAN,
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
       return(list(outputClusters, outputCoexDF))
     })
-  rownames(allCheckResults) <- permMap[rownames(allCheckResults)]
+  names(allCheckResults) <- permMap[names(allCheckResults)]
 
   outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
 
   if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(outDirCond, "split_check_results.csv")
-      write.csv(allCheckResults, file = outFile)
+      write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
 
       if (saveSeuratObj) {
         clusterizationName <-

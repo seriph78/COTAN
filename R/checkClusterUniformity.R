@@ -1,63 +1,15 @@
-#'
-#' @details `isClusterUniform()` takes in the current thresholds and used them
-#'   to check whether the calculated cluster parameters are sufficient to
-#'   determine whether the cluster is **uniform** and in the positive scenario
-#'   the corresponding answer
-#'
-#' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
-#' @param ratioQuantile the `GDI` quantile corresponding to the `usedRatioAbove`
-#' @param fractionAbove the fraction of genes above the `usedGDIThreshold`
-#' @param usedGDIThreshold the threshold level actually used to calculate fourth
-#'   argument
-#' @param usedRatioAbove the fraction of genes actually used to calculate the
-#'   third argument
-#'
-#' @returns a single `Boolean` value when it is possible to decide the answer
-#'   with the given information and `NA` otherwise
-#'
-#' @importFrom assertthat assert_that
-#'
-#' @rdname UniformClusters
-#'
 
-isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
-                             ratioQuantile, fractionAbove,
-                             usedGDIThreshold, usedRatioAbove) {
-  assert_that(!is.na(GDIThreshold), !is.na(ratioAboveThreshold),
-              !is.na(usedGDIThreshold), !is.na(usedRatioAbove),
-              GDIThreshold >= 0.0, ratioAboveThreshold >= 0.0,
-              ratioAboveThreshold <= 1.0, msg = "wrong thresholds passed in")
-
-  if (!is.na(fractionAbove) && GDIThreshold == usedGDIThreshold) {
-    return(fractionAbove <= ratioAboveThreshold)
-  } else if (!is.na(ratioQuantile) && ratioAboveThreshold == usedRatioAbove) {
-    return(ratioQuantile < GDIThreshold)
-  } else {
-    return(NA)
-  }
-}
-
-
-
-#'
 #' @details `checkClusterUniformity()` takes a `COTAN` object and a cells'
-#'   *cluster* and checks whether the latter is **uniform** by `GDI`. The
-#'   function runs `COTAN` to check whether the `GDI` is lower than the given
-#'   `GDIThreshold` (1.43) for all but at the most `ratioAboveThreshold`
-#'   (\eqn{1\%}) genes. If the `GDI` results to be too high for too many genes,
-#'   the *cluster* is deemed
-#'   **non-uniform**.
+#'   *cluster* and checks whether the latter is **uniform** by looking at the
+#'   genes' `GDI` distribution. The function runs [checkObjIsUniform()] on the
+#'   given input checker
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clusterName the tag of the *cluster*
 #' @param cells the cells belonging to the *cluster*
-#' @param GDIThreshold the threshold level that discriminates uniform
-#'   *clusters*. It defaults to \eqn{1.43}
-#' @param ratioAboveThreshold the fraction of genes allowed to be above the
-#'   `GDIThreshold`. It defaults to \eqn{1\%}
+#' @param checker the object that defines the method and the threshold to
+#'   discriminate whether a *cluster* is *uniform transcript*. See
+#'   [UniformTranscriptCheckers] for more details
 #' @param cores number of cores to use. Default is 1.
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
@@ -71,15 +23,9 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #'
-#' @returns `checkClusterUniformity` returns a list with:
-#'   * `"isUniform"`: a flag indicating whether the *cluster* is **uniform**
-#'   * `"fractionAbove"`: the percentage of genes with `GDI` above the threshold
-#'   * `"ratioQuantile"`: the quantile associated to the high quantile
-#'   associated to given ratio
-#'   * `"size"`: the number of cells in the cluster
-#'   * `"GDIThreshold"` the used `GDI` threshold
-#'   * `"ratioAboveThreshold"` the used fraction of genes above threshold
-#'     allowed in **uniform** *clusters*
+#' @returns `checkClusterUniformity` returns a checker object of the same type
+#'   as the input one, that contains both threshold and results of the check:
+#'   see [UniformTranscriptCheckers] for more details
 #'
 #' @importFrom utils head
 #'
@@ -87,6 +33,8 @@ isClusterUniform <- function(GDIThreshold, ratioAboveThreshold,
 #' @importFrom grDevices dev.off
 #'
 #' @importFrom withr local_options
+#'
+#' @importFrom assertthat assert_that
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
@@ -100,13 +48,13 @@ checkClusterUniformity <- function(
     objCOTAN,
     clusterName,
     cells,
-    GDIThreshold = 1.43,
-    ratioAboveThreshold = 0.01,
+    checker,
     cores = 1L,
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",
     saveObj = TRUE,
     outDir = ".") {
+  # handle legacy usage
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
@@ -116,18 +64,19 @@ checkClusterUniformity <- function(
                             deviceStr = deviceStr, saveObj = FALSE)
   gc()
 
-  clusterSize <- getNumCells(objCOTAN)
+  checker@clusterSize <- getNumCells(objCOTAN)
 
   logThis(paste0("Checking uniformity for the cluster '", clusterName,
-                 "' with ", clusterSize, " cells"), logLevel = 2L)
+                 "' with ", checker@clusterSize, " cells"), logLevel = 2L)
 
   GDIData <- calculateGDI(objCOTAN)
+  objCOTAN <- storeGDI(objCOTAN, GDIData)
 
   # Plots
   if (isTRUE(saveObj) && !dir.exists(outDir)) {
     saveObj <- FALSE
-    warning(paste("Asked to save check results,",
-                  "but given output folder does not exist"))
+    warning("Asked to save check results,",
+            " but given output folder does not exist")
   }
 
   if (isTRUE(saveObj)) tryCatch({
@@ -142,7 +91,8 @@ checkClusterUniformity <- function(
       genesToLabel <-
         head(rownames(GDIData[order(GDIData[["GDI"]],
                                     decreasing = TRUE), ]), n = 10L)
-      gdiPlot <- GDIPlot(objCOTAN, GDIIn = GDIData, GDIThreshold = GDIThreshold,
+      gdiPlot <- GDIPlot(objCOTAN, GDIIn = GDIData,
+                         GDIThreshold = getCheckerThreshold(checker),
                          genes = list("top 10 GDI genes" = genesToLabel))
 
       plot(nuPlot)
@@ -150,42 +100,35 @@ checkClusterUniformity <- function(
       plot(gdiPlot)
 
       rm(nuPlot, zoomedNuPlot, gdiPlot)
-      dev.off()
     }, error = function(err) {
       logThis(paste("While saving cluster plots", err), logLevel = 0L)
-      dev.off()
-    }
-  )
+    }, finally = {
+      # Check for active device
+      if (dev.cur() > 1L) {
+        dev.off()
+      }
+    })
 
+  checker <- checkObjIsUniform(currentC = checker, previousC = NULL,
+                               objCOTAN = objCOTAN)
   rm(objCOTAN)
   gc()
 
-  # A cluster is deemed uniform if the number of genes
-  # with [GDI > GDIThreshold] is at the most ratioAboveThreshold
-  gdi <- getColumnFromDF(GDIData, "GDI")
-
-  quantAboveThr <- quantile(gdi, probs = 1.0 - ratioAboveThreshold)
-  percAboveThr <- sum(gdi >= GDIThreshold) / length(gdi)
-
-  clusterIsUniform <- isClusterUniform(GDIThreshold, ratioAboveThreshold,
-                                       quantAboveThr, percAboveThr,
-                                       GDIThreshold, ratioAboveThreshold)
-
   logThis(paste0(
-    "Cluster ", clusterName, ", with size ", clusterSize, ", is ",
-    (if (clusterIsUniform) {""} else {"not "}), "uniform\n",
-    round(percAboveThr * 100.0, digits = 2L), "% of the genes is above ",
-    "the given GDI threshold ", GDIThreshold, "\n",
-    "highest ", round(ratioAboveThreshold * 100.0, digits = 2L),
-    "% GDI quantile is at ", round(quantAboveThr, digits = 4L)), logLevel = 3L)
+    "Cluster ", clusterName, ", with size ", checker@clusterSize, ", is ",
+    ifelse(checker@isUniform, "", "not "), "uniform"), logLevel = 1L)
+
+  if (TRUE) {
+    dumpDF <- checkersToDF(checker)
+    logThis(paste0(colnames(dumpDF), " = ", unlist(dumpDF[1, ]),
+                   collapse = ", "), logLevel = 3L)
+    rm(dumpDF)
+  }
 
   if (isTRUE(saveObj)) tryCatch({
-      pre <- ""
-      if (!clusterIsUniform) {
-        pre <- "non-"
-      }
       outFile <- file.path(outDir,
-                           paste0(pre, "uniform_cluster_", clusterName, ".csv"))
+                           paste0(ifelse(checker@isUniform, "", "non-"),
+                                  "uniform_cluster_", clusterName, ".csv"))
       write.csv(cells, file = outFile)
     },
     error = function(err) {
@@ -194,10 +137,5 @@ checkClusterUniformity <- function(
     }
   )
 
-  return(list("isUniform" = clusterIsUniform,
-              "fractionAbove" = percAboveThr,
-              "ratioQuantile" = quantAboveThr[[1L]],
-              "size" = clusterSize,
-              "GDIThreshold" = GDIThreshold,
-              "ratioAboveThreshold" = ratioAboveThreshold))
+  return(checker)
 }

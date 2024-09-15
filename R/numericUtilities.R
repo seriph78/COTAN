@@ -501,7 +501,7 @@ parallelNuBisection <-
 #'
 #' @export
 #'
-#' @rdname COTAN-Legacy
+#' @rdname COTAN_Legacy
 #'
 vec2mat_rfast <- function(x, genes = "all") {
   if (!isa(x, "list") || !identical(names(x), c("genes", "values"))) {
@@ -574,7 +574,7 @@ vec2mat_rfast <- function(x, genes = "all") {
 #'
 #' @export
 #'
-#' @rdname COTAN-Legacy
+#' @rdname COTAN_Legacy
 #'
 mat2vec_rfast <- function(mat) {
   mat <- as.matrix(mat)

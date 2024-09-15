@@ -16,12 +16,10 @@ test_that("Cell Uniform Clustering", {
                        cores = 6L, saveObj = TRUE, outDir = tm)
 
   GDIThreshold <- 1.46
-  ratioAboveThreshold <- 0.01
   initialResolution <- 0.8
   suppressWarnings({
     c(clusters, coexDF) %<-%
       cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
-                             ratioAboveThreshold = ratioAboveThreshold,
                              initialResolution = initialResolution,
                              cores = 6L, optimizeForSpeed = TRUE,
                              deviceStr = "cuda", saveObj = TRUE, outDir = tm)
@@ -45,22 +43,37 @@ test_that("Cell Uniform Clustering", {
   expect_identical(reorderClusterization(obj)[["clusters"]], clusters)
 
   firstCl <- clusters[[1L]]
+  advChecker <- new("AdvancedGDIUniformityCheck")
+
   suppressWarnings({
-    c(isUniform, fracAbove, firstPerc,
-      clSize, usedGDIThreshold, usedRatioAbove) %<-%
-      checkClusterUniformity(obj, GDIThreshold = GDIThreshold,
-                             ratioAboveThreshold = ratioAboveThreshold,
-                             clusterName = paste0("Cluster_", firstCl),
-                             cells = names(clusters)[clusters == firstCl],
-                             optimizeForSpeed = TRUE, deviceStr = "cpu",
-                             saveObj = TRUE, outDir = tm)
+      checkerRes <- checkClusterUniformity(
+        objCOTAN = obj, checker = advChecker,
+        clusterName = paste0("Cluster_", firstCl),
+        cells = names(clusters)[clusters == firstCl],
+        optimizeForSpeed = TRUE, deviceStr = "cuda",
+        saveObj = TRUE, outDir = tm)
   })
-  expect_true(isUniform)
-  expect_lte(fracAbove, ratioAboveThreshold)
-  expect_lte(firstPerc, GDIThreshold)
-  expect_identical(clSize, sum(clusters == firstCl))
-  expect_identical(usedGDIThreshold, GDIThreshold)
-  expect_identical(usedRatioAbove, ratioAboveThreshold)
+
+  expect_true(checkerRes@isUniform)
+  expect_lte(checkerRes@firstCheck@fractionBeyond,
+             checkerRes@firstCheck@maxRatioBeyond)
+  expect_lte(checkerRes@firstCheck@quantileAtRatio,
+             checkerRes@firstCheck@GDIThreshold)
+  expect_true((checkerRes@secondCheck@fractionBeyond >=
+                 checkerRes@secondCheck@maxRatioBeyond) ||
+              (checkerRes@thirdCheck@thresholdRank <=
+                 checkerRes@thirdCheck@maxRankBeyond))
+  expect_true((checkerRes@secondCheck@quantileAtRatio >=
+                 checkerRes@secondCheck@GDIThreshold) ||
+              (checkerRes@thirdCheck@quantileAtRank <=
+                 checkerRes@thirdCheck@GDIThreshold))
+  expect_identical(checkerRes@clusterSize, sum(clusters == firstCl))
+  expect_identical(checkerRes@firstCheck@GDIThreshold,
+                   advChecker@firstCheck@GDIThreshold)
+  expect_identical(checkerRes@secondCheck@maxRatioBeyond,
+                   advChecker@secondCheck@maxRatioBeyond)
+  expect_identical(checkerRes@thirdCheck@maxRankBeyond,
+                   advChecker@thirdCheck@maxRankBeyond)
 
   clusters2 <- factor(clusters, levels = c("-1", levels(clusters)))
   clusters2[1L:50L] <- "-1"
@@ -96,8 +109,7 @@ test_that("Cell Uniform Clustering", {
 
   suppressWarnings({
     splitList <- cellsUniformClustering(
-      obj, GDIThreshold = GDIThreshold,
-      ratioAboveThreshold = ratioAboveThreshold,
+      obj, checker = shiftCheckerThresholds(advChecker, 0.1),
       initialResolution = initialResolution,
       initialClusters = exactClusters,
       cores = 6L, optimizeForSpeed = FALSE,
@@ -138,7 +150,7 @@ test_that("Cell Uniform Clustering", {
   # Test the low GDI (homogeneity) for each defined clusters
 
   for (cl in sample(unique(clusters[!is.na(clusters)]), size = 2L)) {
-    print(cl)
+    print(paste("Tested cluster:", cl))
 
     cellsToDrop <- which(clusters != cl)
 
@@ -153,6 +165,6 @@ test_that("Cell Uniform Clustering", {
     GDI_data <- calculateGDI(temp.obj)
 
     expect_lte(nrow(GDI_data[GDI_data[["GDI"]] >= GDIThreshold, ]),
-               ratioAboveThreshold * nrow(GDI_data))
+               0.01 * nrow(GDI_data))
   }
 })
