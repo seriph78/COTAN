@@ -10,6 +10,7 @@
 \alias{test.dataset.clusters2}
 \alias{vignette.split.clusters}
 \alias{vignette.merge.clusters}
+\alias{vignette.merge2.clusters}
 \title{Data-sets}
 \format{
 \code{raw.dataset} is a data frame with \eqn{2000} genes and \eqn{815}
@@ -27,6 +28,8 @@ cells
 \code{vignette.split.clusters} is a \code{factor}
 
 \code{vignette.merge.clusters} is a \code{factor}
+
+\code{vignette.merge2.clusters} is a \code{factor}
 }
 \source{
 GEO GSM2861514
@@ -47,6 +50,8 @@ data(test.dataset.clusters2)
 data(vignette.split.clusters)
 
 data(vignette.merge.clusters)
+
+data(vignette.merge2.clusters)
 }
 \description{
 Simple data-sets included in the package
@@ -76,5 +81,10 @@ GEO: GSM2861514)
 \code{vignette.merge.clusters} is the clusterization obtained running
 \code{mergeUniformCellsClusters()} on the vignette dataset (mouse cortex E17.5,
 GEO: GSM2861514) using the previous \emph{clusterization}
+
+\code{vignette.merge2.clusters} is the clusterization obtained re-running
+\code{mergeUniformCellsClusters()} on the vignette dataset (mouse cortex E17.5,
+GEO: GSM2861514) using the \code{vignette.split.clusters} \emph{clusterization}, but
+with a sequence of progressively relaxed checks
 }
 \keyword{datasets}

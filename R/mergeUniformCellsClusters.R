@@ -61,6 +61,10 @@
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom grDevices pdf
+#' @importFrom grDevices dev.off
+#' @importFrom grDevices dev.cur
+#'
 #' @importFrom Matrix t
 #'
 #' @importFrom parallelDist parDist
@@ -403,10 +407,11 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   assert_that(isa(allCheckResults, "data.frame"),
               (is_empty(allCheckResults) ||
-                 setequal(colnames(allCheckResults), slotNames(checker))),
+                 identical(colnames(allCheckResults),
+                           colnames(checkersToDF(checkers[[1L]])))),
               msg = "Previous results passed in are of wrong type or columns")
 
-  allCheckResults <- dfToCheckers(allCheckResults, class(checker))
+  allCheckResults <- dfToCheckers(allCheckResults, class(checkers[[1L]]))
 
   outputClusters <- clusters
   if (is_empty(outputClusters)) {

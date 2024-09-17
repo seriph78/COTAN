@@ -35,6 +35,7 @@
 #'
 #' @importFrom grDevices pdf
 #' @importFrom grDevices dev.off
+#' @importFrom grDevices dev.cur
 #'
 #' @importFrom ggplot2 annotate
 #'

@@ -1,4 +1,4 @@
-## 2.5.8
+## 2.5.7
 
 Introduced new way to check for the **Uniform-Transcript** property of the 
 *clusters* based on multiple thresholds calibrated so that the new method is
@@ -10,8 +10,6 @@ This allows user to select which method to use for the checks;
 as of now the following methods are supported:
 * `"SimpleGDIUniformityCheck"`
 * `"AdvancedGDIUniformityCheck"`
-
-## 2.5.7
 
 Avoided issue with pdf file creation: file handle was not closed
 in case of errors

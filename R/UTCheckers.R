@@ -19,6 +19,8 @@
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom methods is
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @rdname UniformTranscriptCheckers
@@ -116,6 +118,8 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom methods is
+
 #' @importFrom assertthat assert_that
 #'
 #' @export
@@ -288,6 +292,11 @@ setMethod(
 #' @importFrom assertthat assert_that
 #'
 #' @importFrom rlang is_list
+#'
+#' @importFrom methods is
+#' @importFrom methods slot
+#' @importFrom methods slot<-
+#' @importFrom methods slotNames
 #'
 #' @export
 #'

@@ -116,6 +116,21 @@ NULL
 "vignette.merge.clusters"
 
 
+#' @details `vignette.merge2.clusters` is the clusterization obtained re-running
+#'   `mergeUniformCellsClusters()` on the vignette dataset (mouse cortex E17.5,
+#'   GEO: GSM2861514) using the `vignette.split.clusters` *clusterization*, but
+#'   with a sequence of progressively relaxed checks
+#'
+#' @format `vignette.merge2.clusters` is a `factor`
+#'
+#' @docType data
+#'
+#' @usage data(vignette.merge2.clusters)
+#'
+#' @rdname Datasets
+#'
+"vignette.merge2.clusters"
+
 # ---------- Torch library section ----------
 
 #' @title Installing torch R library (on Linux)

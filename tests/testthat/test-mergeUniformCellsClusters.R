@@ -111,7 +111,9 @@ test_that("Merge Uniform Cells Clusters", {
   expect_named(allCheckRes)
   expect_true(all(stringr::str_ends(names(allCheckRes), fixed("-merge"))))
   expect_true(all(vapply(allCheckRes,
-                         function(x) is(x, "AdvancedGDIUniformityCheck"),
+                         function(x) {
+                           methods::is(x, "AdvancedGDIUniformityCheck")
+                         },
                          logical(1L))))
   expect_true(allCheckRes[[1L]]@isUniform)
   expect_true(allCheckRes[[2L]]@isUniform)

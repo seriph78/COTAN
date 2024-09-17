@@ -31,6 +31,7 @@
 #'
 #' @importFrom grDevices pdf
 #' @importFrom grDevices dev.off
+#' @importFrom grDevices dev.cur
 #'
 #' @importFrom withr local_options
 #'
@@ -85,7 +86,7 @@ checkClusterUniformity <- function(
 
       pdf(file.path(outDir, paste0("cluster_", clusterName, "_plots.pdf")))
 
-      c(..., nuPlot, zoomedNuPlot) %<-%
+      c(pcaCellsPlot, ., bGroupGenesPlot, UDEPLot, nuPlot, zoomedNuPlot) %<-%
         cleanPlots(objCOTAN, includePCA = FALSE)
 
       genesToLabel <-
