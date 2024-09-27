@@ -56,6 +56,8 @@ UMAPPlot <- function(df,
   assert_that(is_empty(clusters) || length(clusters) == nrow(df),
               msg = paste("UMAPPlot - clusters vector must have size equal to",
                           "the number of rows in the data.frame"))
+  assert_that(!is_empty(rownames(df)),
+              msg = "UMAPPlot - data.frame must have proper row-names")
 
   # empty title
   if (isEmptyName(title)) {
@@ -84,7 +86,6 @@ UMAPPlot <- function(df,
   # assign a different color to each cluster
   for (cl in levels(clusters)) {
     selec <- !labelled & clusters == cl
-    min
     if (any(selec)) {
       entryType[selec] <- cl
     } else {
