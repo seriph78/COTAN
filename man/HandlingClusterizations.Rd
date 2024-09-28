@@ -90,7 +90,7 @@ UMAPPlot(
   title = "",
   colors = NULL,
   numNeighbors = 0L,
-  minPointsDist = NA
+  minPointsDist = NaN
 )
 
 cellsUMAPPlot(

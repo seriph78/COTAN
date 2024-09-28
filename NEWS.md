@@ -1,3 +1,9 @@
+Hardened arguments' checks for function `UMAPPlot()`
+
+Solved issue with the function `establishGenesClusters()`: it was throwing an
+error when one of the sub-lists in the `groupMarkers` argument did contain
+only one element
+
 ## 2.5.7
 
 Introduced new way to check for the **Uniform-Transcript** property of the 
