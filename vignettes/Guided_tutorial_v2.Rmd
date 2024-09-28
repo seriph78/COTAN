@@ -514,6 +514,21 @@ obj <- addClusterization(obj, clName = "split", clusters = splitClusters,
                          coexDF = splitCoexDF, override = FALSE)
 ```
 
+It is possible to have some statistics about the *clusterization*
+```{r eval=TRUE, include=TRUE}
+c(summaryData, summaryPlot) %<-%
+  clustersSummaryPlot(obj, clName = "split", plotTitle = "split summary")
+
+summaryData
+```
+
+The `ExpGenes` column contains the number of genes that are expressed in any
+cell of the relevant *cluster*, while the `ExpGenes25` column contains the number of genes expressed in at the least 25% of the cells of the relevant *cluster*
+```{r eval=TRUE, include=TRUE}
+plot(summaryPlot)
+```
+
+
 It is possible to visualize how relevant are the *marker genes'* `lists` with
 respect to the given *clusterization*
 ```{r eval=TRUE, include=TRUE}
@@ -685,6 +700,13 @@ setLoggingFile("")
 file.remove(file.path(outDir, "vignette_v2.log"))
 
 options(parallelly.fork.enable = FALSE)
+```
 
+```{r}
+Sys.time()
+```
+
+
+```{r}
 sessionInfo()
 ```

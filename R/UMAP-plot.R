@@ -50,20 +50,19 @@ UMAPPlot <- function(df,
                      title = "",
                      colors = NULL,
                      numNeighbors = 0L,
-                     minPointsDist = NA) {
+                     minPointsDist = NaN) {
   logThis("UMAP plot", logLevel = 2L)
 
-  assert_that(is_empty(clusters) || length(clusters) == nrow(df),
+  assert_that(!is_empty(rownames(df)),
+              msg = "UMAPPlot - data.frame must have proper row-names")
+
+  assert_that(is_empty(clusters) || identical(names(clusters), rownames(df)),
               msg = paste("UMAPPlot - clusters vector must have size equal to",
                           "the number of rows in the data.frame"))
 
   # empty title
   if (isEmptyName(title)) {
     title <- "UMAP Plot"
-  }
-
-  if (!is_empty(clusters)) {
-    clusters <- factor(clusters)
   }
 
   entryType <- rep_len("none", nrow(df))
@@ -82,9 +81,9 @@ UMAPPlot <- function(df,
   labelled <- entryType != "none"
 
   # assign a different color to each cluster
+  clusters <- factor(clusters)
   for (cl in levels(clusters)) {
     selec <- !labelled & clusters == cl
-    min
     if (any(selec)) {
       entryType[selec] <- cl
     } else {
@@ -98,10 +97,10 @@ UMAPPlot <- function(df,
   clustered <- !labelled & entryType != "none"
 
   umapConfig <- umap.defaults
-  if (numNeighbors != 0L) {
+  if (numNeighbors > 0L) {
     umapConfig[["n_neighbors"]] <- numNeighbors
   }
-  if (!is.na(minPointsDist)) {
+  if (is.finite(minPointsDist)) {
     umapConfig[["min_dist"]] <- minPointsDist
   }
   umapConfig[["verbose"]] <- TRUE
