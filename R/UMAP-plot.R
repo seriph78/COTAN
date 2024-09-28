@@ -40,8 +40,11 @@
 UMAPPlot <- function(df, clusters = NULL, elements = NULL, title = "") {
   logThis("UMAP plot", logLevel = 2L)
 
-  assert_that(is_empty(clusters) || length(clusters) == nrow(df),
-              msg = paste("Clusters vector must have size equal to",
+  assert_that(!is_empty(rownames(df)),
+              msg = "UMAPPlot - data.frame must have proper row-names")
+
+  assert_that(is_empty(clusters) || identical(names(clusters), rownames(df)),
+              msg = paste("UMAPPlot - clusters vector must have size equal to",
                           "the number of rows in the data.frame"))
 
   # empty title

@@ -1,3 +1,8 @@
+
+Solved issue with the function `establishGenesClusters()`: it was throwing an
+error when one of the sub-lists in the `groupMarkers` argument did contain
+only one element
+
 ## 2.4.5
 
 Avoided issue with pdf file creation: file handle was not closed

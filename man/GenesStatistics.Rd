@@ -171,7 +171,7 @@ GCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
                       numGenesPerMarker = 15)
 
 groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-                     G2 = c("g-000300", "g-000330"),
+                     G2 = c("g-000300"),
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
 

@@ -172,7 +172,7 @@ genesCoexSpace <-
 #'
 #' @examples
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-#'                      G2 = c("g-000300", "g-000330"),
+#'                      G2 = c("g-000300"),
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
 #'                             "g-000570", "g-000590"))
 #'
@@ -221,10 +221,12 @@ establishGenesClusters <-
     SMRelevance[groupMarkers[[name]], name] <- 1L
   }
 
-  tempCoex <- getGenesCoex(objCOTAN, genes = primaryMarkers)[secondaryMarkers, ]
+  tempCoex <-
+    getGenesCoex(objCOTAN, genes = primaryMarkers)[secondaryMarkers, ,
+                                                   drop = FALSE]
 
   for (name in names(groupMarkers)) {
-    antiCorrelated <- tempCoex[, groupMarkers[[name]]] < 0.0
+    antiCorrelated <- tempCoex[, groupMarkers[[name]], drop = FALSE] < 0.0
     toChange <- rownames(tempCoex)[rowSums(antiCorrelated) > 0L]
     SMRelevance[toChange, name] <- 100000.0
   }
