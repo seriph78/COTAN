@@ -35,20 +35,20 @@ data classes used by the \code{BioConductor} analysis packages
 \code{convertToSingleCellExperiment()} converts a \linkS4class{COTAN} object
 into a \linkS4class{SingleCellExperiment} object. Stores the raw counts in the
 \code{"counts"} \linkS4class{Assays}, the metadata for genes and cells as \code{rowData}
-and \code{colData} slots respectively and finally the genes' and cells' coex
+and \code{colData} slots respectively and finally the genes' and cells' \emph{coex}
 along the dataset metadata into the \code{metadata} slot.
 
 The function performs the following steps:
 \itemize{
 \item Extracts the raw counts matrix, gene metadata, cell metadata, gene
-co-expression matrix, and cell co-expression matrix from the \code{COTAN}
+and cell \emph{co-expression} matrix from the \code{COTAN}
 object; the \code{clustersCoex} slot is not converted
 \item Identifies \emph{clusterizations} and \emph{conditions} in the cell metadata by the
 prefixes \code{"CL_"} and \code{"COND_"}
 \item Renames \emph{clusterization} columns with the prefix \code{"COTAN_clusters_"} and
 \emph{condition} columns with the prefix \code{"COTAN_conditions_"}
 \item Constructs a \code{SingleCellExperiment} object with the counts matrix, gene
-metadata, updated cell metadata, and stores the co-expression matrices
+metadata, updated cell metadata, and stores the \emph{co-expression} matrices
 in the \code{metadata} slot.
 }
 
@@ -59,7 +59,7 @@ analysis packages and workflows within the Bioconductor ecosystem
 \linkS4class{SingleCellExperiment} object back into a \linkS4class{COTAN} object. It
 supports \code{SCE} objects that were originally created from either a \code{COTAN}
 object or a \code{Seurat} object. The function extracts the \code{"counts"} matrix,
-genes' metadata, cells' metadata, CO-EXpression matrices (if available),
+genes' metadata, cells' metadata, \emph{co-expression} matrices (if available),
 and reconstructs the \code{COTAN} object accordingly.
 
 The function performs the following steps:
@@ -68,7 +68,7 @@ The function performs the following steps:
 \item Extracts gene metadata from \code{rowData}
 \item Extracts cell metadata from \code{colData}, excluding any \emph{clusterizations} or
 \emph{conditions} present
-\item Attempts to retrieve CO-EXpression matrices from the \code{metadata} slot if
+\item Attempts to retrieve \emph{co-expression} matrices from the \code{metadata} slot if
 they exist
 \item Constructs a \code{COTAN} object using the extracted data
 \item Adds back the \emph{clusterizations} and \emph{conditions} using \code{COTAN} methods
@@ -76,6 +76,18 @@ If the COEX is not present (e.g., in \code{SCE} objects created from \code{Seura
 the \code{genesCoex} and \code{cellsCoex} slots in the resulting \code{COTAN} object will
 be empty matrices
 }
+}
+\examples{
+  data("test.dataset")
+  obj <- COTAN(raw = test.dataset)
+  obj <- proceedToCoex(obj, calcCoex = FALSE, saveObj = FALSE)
+
+  sce <- convertToSingleCellExperiment(objCOTAN = obj)
+
+  newObj <- convertFromSingleCellExperiment(sce)
+
+  identical(getDims(newObj), getDims(obj))
+
 }
 \seealso{
 \linkS4class{COTAN}, \link{SingleCellExperiment}

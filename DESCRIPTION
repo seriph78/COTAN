@@ -62,7 +62,10 @@ Imports:
     dendextend,
     zeallot,
     assertthat,
-    withr
+    withr,
+    SingleCellExperiment,
+    SummarizedExperiment,
+    S4Vectors
 Suggests: 
     testthat (>= 3.2.0),
     proto,

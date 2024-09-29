@@ -7,6 +7,17 @@
 #'
 #' @name Conversions
 #'
+#' @examples
+#'   data("test.dataset")
+#'   obj <- COTAN(raw = test.dataset)
+#'   obj <- proceedToCoex(obj, calcCoex = FALSE, saveObj = FALSE)
+#'
+#'   sce <- convertToSingleCellExperiment(objCOTAN = obj)
+#'
+#'   newObj <- convertFromSingleCellExperiment(sce)
+#'
+#'   identical(getDims(newObj), getDims(obj))
+#'
 NULL
 
 # convertToSingleCellExperiment
@@ -17,19 +28,19 @@ NULL
 #' @details `convertToSingleCellExperiment()` converts a [COTAN-class] object
 #'   into a [SingleCellExperiment-class] object. Stores the raw counts in the
 #'   `"counts"` [Assays-class], the metadata for genes and cells as `rowData`
-#'   and `colData` slots respectively and finally the genes' and cells' coex
+#'   and `colData` slots respectively and finally the genes' and cells' *coex*
 #'   along the dataset metadata into the `metadata` slot.
 #'
 #'   The function performs the following steps:
 #'   * Extracts the raw counts matrix, gene metadata, cell metadata, gene
-#'     co-expression matrix, and cell co-expression matrix from the `COTAN`
+#'     and cell *co-expression* matrix from the `COTAN`
 #'     object; the `clustersCoex` slot is not converted
 #'   * Identifies *clusterizations* and *conditions* in the cell metadata by the
 #'     prefixes `"CL_"` and `"COND_"`
 #'   * Renames *clusterization* columns with the prefix `"COTAN_clusters_"` and
 #'     *condition* columns with the prefix `"COTAN_conditions_"`
 #'   * Constructs a `SingleCellExperiment` object with the counts matrix, gene
-#'     metadata, updated cell metadata, and stores the co-expression matrices
+#'     metadata, updated cell metadata, and stores the *co-expression* matrices
 #'     in the `metadata` slot.
 #'
 #'   The resulting `SingleCellExperiment` object is compatible with downstream
@@ -41,8 +52,6 @@ NULL
 #'   input [COTAN-class] object, with clusterizations and conditions
 #'   appropriately prefixed and stored in the cell metadata.
 #'
-#' @export
-#'
 #' @importFrom methods is
 #'
 #' @importFrom assertthat assert_that
@@ -50,6 +59,8 @@ NULL
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #'
 #' @importFrom S4Vectors DataFrame
+#'
+#' @export
 #'
 #' @seealso [COTAN-class], [SingleCellExperiment]
 #'
@@ -75,16 +86,16 @@ convertToSingleCellExperiment <- function(objCOTAN) {
     paste0("COTAN_conditions_", sub("^COND_", "", names(cellsMeta)[condCols]))
 
   # retrieves the genes' COEX if available
-  genesCoex <-
-    ifelse(isCoexAvailable(objCOTAN, actOnCells = FALSE, ignoreSync = TRUE),
-           getGenesCoex(objCOTAN, zeroDiagonal = FALSE, ignoreSync = TRUE),
-           emptySymmetricMatrix())
+  genesCoex <- emptySymmetricMatrix()
+  if (isCoexAvailable(objCOTAN, actOnCells = FALSE, ignoreSync = TRUE)) {
+    genesCoex <- getGenesCoex(objCOTAN, zeroDiagonal = FALSE, ignoreSync = TRUE)
+  }
 
   # retrieves the cells' COEX if available
-  cellsCoex <-
-    ifelse(isCoexAvailable(objCOTAN, actOnCells = TRUE, ignoreSync = TRUE),
-           getCellsCoex(objCOTAN, zeroDiagonal = FALSE, ignoreSync = TRUE),
-           emptySymmetricMatrix())
+  cellsCoex <- emptySymmetricMatrix()
+  if (isCoexAvailable(objCOTAN, actOnCells = TRUE, ignoreSync = TRUE)) {
+    cellsCoex <- getCellsCoex(objCOTAN, zeroDiagonal = FALSE, ignoreSync = TRUE)
+  }
 
   # Create the SingleCellExperiment object
   objSCE <- SingleCellExperiment(
@@ -98,7 +109,8 @@ convertToSingleCellExperiment <- function(objCOTAN) {
     )
   )
 
-  assert_that(dim(objSCE), c(getNumGenes(objCOTAN), getNumCells(objCOTAN)))
+  assert_that(identical(dim(objSCE),
+                        c(getNumGenes(objCOTAN), getNumCells(objCOTAN))))
 
   return(objSCE)
 }
@@ -110,7 +122,7 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #'   [SingleCellExperiment-class] object back into a [COTAN-class] object. It
 #'   supports `SCE` objects that were originally created from either a `COTAN`
 #'   object or a `Seurat` object. The function extracts the `"counts"` matrix,
-#'   genes' metadata, cells' metadata, CO-EXpression matrices (if available),
+#'   genes' metadata, cells' metadata, *co-expression* matrices (if available),
 #'   and reconstructs the `COTAN` object accordingly.
 #'
 #'   The function performs the following steps:
@@ -118,7 +130,7 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #'   * Extracts gene metadata from `rowData`
 #'   * Extracts cell metadata from `colData`, excluding any *clusterizations* or
 #'     *conditions* present
-#'   * Attempts to retrieve CO-EXpression matrices from the `metadata` slot if
+#'   * Attempts to retrieve *co-expression* matrices from the `metadata` slot if
 #'     they exist
 #'   * Constructs a `COTAN` object using the extracted data
 #'   * Adds back the *clusterizations* and *conditions* using `COTAN` methods
@@ -174,26 +186,31 @@ convertFromSingleCellExperiment <- function(objSCE,
   # Identify clustering columns according to given pattern
   # (e.g., 'COTAN_clusters_', 'seurat_clusters', ...)
 
-  if (is_empty(clNamesPattern)) {
+  if (isEmptyName(clNamesPattern)) {
     clNamesPattern <- "^(COTAN_clusters_|seurat_clusters$|.*_snn_res\\..*|wsnn_res\\..*|leiden_res\\..*)"
   }
   clCols <- grep(clNamesPattern, names(cellsMetaSCE), value = FALSE)
 
-  # Identify condition columns (e.g., 'COTAN_conditions_', 'condition', 'orig.ident', etc.)
+  # Identify condition columns
+  # (e.g., 'COTAN_conditions_', 'condition', 'orig.ident', etc.)
   condCols <- grep("^(COTAN_conditions_|condition$|orig.ident$)",
                    names(cellsMetaSCE), value = FALSE)
 
-  cellsMeta <- cellsMetaSCE[, -union(clCols, condCols), drop = FALSE]
+  colsToKeep <- !(seq_len(ncol(cellsMetaSCE)) %in% union(clCols, condCols))
+  cellsMeta <- cellsMetaSCE[, colsToKeep, drop = FALSE]
 
   # Attempt to retrieve co-expression matrices from metadata
   sceMetadataList <- metadata(objSCE)
 
-  genesCoex <- ifelse("genesCoex" %in% names(sceMetadataList),
-                      sceMetadataList$genesCoex,
-                      emptySymmetricMatrix())
-  cellsCoex <- ifelse("cellsCoex" %in% names(sceMetadataList),
-                      sceMetadataList$cellsCoex,
-                      emptySymmetricMatrix())
+  genesCoex <- emptySymmetricMatrix()
+  if ("genesCoex" %in% names(sceMetadataList)) {
+    genesCoex <- sceMetadataList$genesCoex
+  }
+
+  cellsCoex <- emptySymmetricMatrix()
+  if ("cellsCoex" %in% names(sceMetadataList)) {
+    cellsCoex <- sceMetadataList$cellsCoex
+  }
 
   # Extract dataset metadata if available
   datasetMeta <- data.frame()
@@ -212,40 +229,52 @@ convertFromSingleCellExperiment <- function(objSCE,
     genesCoex = genesCoex,
     cellsCoex = cellsCoex,
     metaDataset = as.data.frame(datasetMeta),
-    metaGenes = as.data.frame(gene_metadata),
-    metaCells = as.data.frame(cell_metadata),
+    metaGenes = as.data.frame(genesMeta),
+    metaCells = as.data.frame(cellsMeta),
     clustersCoex = list()
   )
 
   # Validate the COTAN object
   validObject(objCOTAN)
 
-  # Add clusterizations to the COTAN object
-  for (col in names(cellsMetaSCE)[clCol]) {
-    clusters <- cellsMetaSCE[[col]]
-    # Determine the clusterization name
-    if (startsWith(col, "COTAN_clusters_")) {
-      clName <- sub("^COTAN_clusters_", "", col)
-    } else {
-      clName <- col
+  if (!is_empty(clCols)) {
+    logThis(paste("Clusterizations found:",
+                  paste0(names(cellsMetaSCE)[clCols],
+                  collapse = ", ")), logLevel = 2L)
+
+    # Add clusterizations to the COTAN object
+    for (col in names(cellsMetaSCE)[clCols]) {
+      clusters <- getColumnFromDF(cellsMetaSCE, col)
+      # Determine the clusterization name
+      if (startsWith(col, "COTAN_clusters_")) {
+        clName <- sub("^COTAN_clusters_", "", col)
+      } else {
+        clName <- col
+      }
+      # Add the clusterization using the method
+      objCOTAN <- addClusterization(objCOTAN, clName = clName,
+                                    clusters = clusters, override = FALSE)
     }
-    # Add the clusterization using the method
-    objCOTAN <- addClusterization(objCOTAN, clName = clName,
-                                  clusters = clusters, override = FALSE)
   }
 
-  # Add conditions to the COTAN object
-  for (col in names(cellsMetaSCE)[condCol]) {
-    conditions <- cellsMetaSCE[[col]]
-    # Determine the condition name
-    if (startsWith(col, "COTAN_conditions_")) {
-      condName <- sub("^COTAN_conditions_", "", col)
-    } else {
-      condName <- col
+  if (!is_empty(condCols)) {
+    logThis(paste("Conditions found:",
+                  paste0(names(cellsMetaSCE)[condCols],
+                  collapse = ", ")), logLevel = 2L)
+
+    # Add conditions to the COTAN object
+    for (col in names(cellsMetaSCE)[condCols]) {
+      conditions <- getColumnFromDF(cellsMetaSCE, col)
+      # Determine the condition name
+      if (startsWith(col, "COTAN_conditions_")) {
+        condName <- sub("^COTAN_conditions_", "", col)
+      } else {
+        condName <- col
+      }
+      # Add the conditions using the method
+      objCOTAN <- addCondition(objCOTAN, condName = condName,
+                               conditions = conditions, override = FALSE)
     }
-    # Add the conditions using the method
-    objCOTAN <- addConditions(objCOTAN, condName = condName,
-                              conditions = conditions, override = FALSE)
   }
 
   return(objCOTAN)
