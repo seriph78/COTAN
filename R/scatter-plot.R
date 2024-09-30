@@ -28,8 +28,6 @@
 #' @importFrom scales math_format
 #' @importFrom scales trans_format
 #'
-#' @importFrom stringr str_split
-#'
 #' @export
 #'
 #' @examples
