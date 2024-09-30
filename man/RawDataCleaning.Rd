@@ -46,7 +46,7 @@
   cells = vector(mode = "character")
 )
 
-ECDPlot(objCOTAN, yCut)
+ECDPlot(objCOTAN, yCut = NaN, condName = "", conditions = NULL)
 
 \S4method{clean}{COTAN}(
   objCOTAN,
@@ -58,18 +58,18 @@ ECDPlot(objCOTAN, yCut)
 
 cleanPlots(objCOTAN, includePCA = TRUE)
 
-cellSizePlot(objCOTAN, splitPattern = " ", numCol = 2L)
+cellSizePlot(objCOTAN, condName = "", conditions = NULL)
 
-genesSizePlot(objCOTAN, splitPattern = " ", numCol = 2L)
+genesSizePlot(objCOTAN, condName = "", conditions = NULL)
 
 mitochondrialPercentagePlot(
   objCOTAN,
-  splitPattern = " ",
-  numCol = 2L,
-  genePrefix = "^MT-"
+  genePrefix = "^MT-",
+  condName = "",
+  conditions = NULL
 )
 
-scatterPlot(objCOTAN, splitPattern = " ", numCol = 2L, splitSamples = FALSE)
+scatterPlot(objCOTAN, condName = "", conditions = NULL, splitSamples = TRUE)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
@@ -86,7 +86,15 @@ Default threshold is \eqn{0.99 \; (99.0\%)}}
 
 \item{cells}{an array of cell names}
 
-\item{yCut}{y threshold of library size to drop}
+\item{yCut}{y threshold of library size to drop. Default is \code{NaN}}
+
+\item{condName}{The name of a condition in the \code{COTAN} object to further
+separate the cells in more sub-groups. When no condition is given it is
+assumed to be the same for all cells (no further sub-divisions)}
+
+\item{conditions}{The \emph{conditions} to use. If given it will take precedence
+on the one indicated by \code{condName} that will only indicate the relevant
+column name in the returned \code{data.frame}}
 
 \item{cellsCutoff}{\code{clean()} will delete from the \code{raw} data any gene that is
 expressed in less cells than threshold times the total number of cells.
@@ -99,12 +107,6 @@ Default cutoff is \eqn{0.002 \; (0.2\%)}}
 \item{includePCA}{a \code{Boolean} flag to determine whether to calculate the
 \emph{PCA} associated with the normalized matrix. When \code{TRUE} the first four
 elements of the returned list will be \code{NULL}}
-
-\item{splitPattern}{Pattern used to extract, from the column names, the
-sample field (default " ")}
-
-\item{numCol}{Once the column names are split by splitPattern, the column
-number with the sample name (default 2)}
 
 \item{genePrefix}{Prefix for the mitochondrial genes (default "^MT-" for
 Human, mouse "^mt-")}
@@ -248,7 +250,7 @@ feGenes <- getFullyExpressedGenes(objCOTAN)
 feCells <- getFullyExpressingCells(objCOTAN)
 
 ## These plots might help to identify genes/cells that need to be dropped
-ecdPlot <- ECDPlot(objCOTAN, yCut = 100)
+ecdPlot <- ECDPlot(objCOTAN, yCut = 100.0)
 plot(ecdPlot)
 
 # This creates many infomative plots useful to determine whether

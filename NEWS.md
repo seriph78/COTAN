@@ -1,3 +1,8 @@
+Now the following plot functions take in conditions explicitly, instead of just
+instructions to determine them from the cells' names. The changes involved:
+`cellSizePlot()`,  `ECDPlot()`, `genesSizePlot()`,
+`mitochondrialPercentagePlot()`, `scatterPlot()`
+
 Hardened arguments' checks for function `UMAPPlot()`
 
 Solved issue with the function `establishGenesClusters()`: it was throwing an

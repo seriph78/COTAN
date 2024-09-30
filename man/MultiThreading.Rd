@@ -4,7 +4,7 @@
 \alias{MultiThreading}
 \alias{handleMultiCore}
 \alias{canUseTorch}
-\title{Handling Multi-Core and GPU enviroments}
+\title{Handling Multi-Core and GPU environments}
 \usage{
 handleMultiCore(cores)
 
@@ -38,12 +38,16 @@ and utilities about their activation
 supports multi-core evaluation. Provides an effective upper bound to the
 number of cores.
 
-\code{canUseTorch()} is an internal function to handle the \link{torch}
-library: it returns whether the torch library is ready to be used. It obeys
-the opt-out flag set via the \code{COTAN.UseTorch} option
+\code{canUseTorch()} is an internal function to handle the torch library:
+it returns whether \pkg{torch} is ready to be used. It obeys the opt-out
+flag set via the \code{COTAN.UseTorch} option
 }
 \seealso{
 the help page of \code{\link[parallelly:supportsMulticore]{parallelly::supportsMulticore()}} about the flags
 influencing the multi-core support; e.g. the usage of \code{R} option
 \code{parallelly.fork.enable}.
+
+\code{\link[torch:install_torch]{torch::install_torch()}} and \code{\link[torch:torch_is_installed]{torch::torch_is_installed()}} for
+installation. Note the \code{\link[torch:threads]{torch::torch_set_num_threads()}} has effect also on
+the \pkg{Rfast} package methods
 }

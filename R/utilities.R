@@ -129,7 +129,7 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
 
 #----------------- multi-threading --------------------
 
-#' @title Handling Multi-Core and GPU enviroments
+#' @title Handling Multi-Core and GPU environments
 #'
 #' @description Check whether session supports multi-core and/or GPU evaluation
 #'   and utilities about their activation
@@ -179,9 +179,9 @@ handleMultiCore <- function(cores) {
 }
 
 
-#' @details `canUseTorch()` is an internal function to handle the [torch]
-#'   library: it returns whether the torch library is ready to be used. It obeys
-#'   the opt-out flag set via the `COTAN.UseTorch` option
+#' @details `canUseTorch()` is an internal function to handle the torch library:
+#'   it returns whether \pkg{torch} is ready to be used. It obeys the opt-out
+#'   flag set via the `COTAN.UseTorch` option
 #'
 #' @param optimizeForSpeed A Boolean to indicate whether to try to use the
 #'   faster torch library
@@ -191,6 +191,10 @@ handleMultiCore <- function(cores) {
 #' * `"useTorch"`: a Boolean indicating whether the torch library can be used
 #' * `"deviceStr"`: the updated name of the device to be used: if no `cuda` GPU
 #'   is available it will fallback to CPU calculations
+#'
+#' @seealso [torch::install_torch()] and [torch::torch_is_installed()] for
+#'   installation. Note the [torch::torch_set_num_threads()] has effect also on
+#'   the \pkg{Rfast} package methods
 #'
 #' @rdname MultiThreading
 #'

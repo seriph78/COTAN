@@ -3,12 +3,15 @@
 #'   cell and sample.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param splitPattern a pattern used to extract, from the column names, the
-#'   sample field (default " ")
-#' @param numCol Once the column names are split by splitPattern, the column
-#'   number with the sample name (default 2)
 #' @param genePrefix Prefix for the mitochondrial genes (default "^MT-" for
 #'   Human, mouse "^mt-")
+#' @param condName The name of a condition in the `COTAN` object to further
+#'   separate the cells in more sub-groups. When no condition is given it is
+#'   assumed to be the same for all cells (no further sub-divisions)
+#' @param conditions The *conditions* to use. If given it will take precedence
+#'   on the one indicated by `condName` that will only indicate the relevant
+#'   column name in the returned `data.frame`
+
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point
@@ -22,7 +25,6 @@
 #'
 #' @importFrom rlang is_empty
 #'
-#' @importFrom stringr str_split
 #' @importFrom stringr str_detect
 #'
 #' @returns `mitochondrialPercentagePlot()` returns a `list` with:
@@ -38,22 +40,19 @@
 #'
 #' @rdname RawDataCleaning
 #'
-mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
-                                        numCol = 2L, genePrefix = "^MT-") {
+mitochondrialPercentagePlot <- function(objCOTAN, genePrefix = "^MT-",
+                                        condName = "", conditions = NULL) {
   sizes <- getCellsSize(objCOTAN)
   sizes <- as.data.frame(sizes)
+
   sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
-  if (TRUE) {
-    splitNames <- str_split(rownames(sizes),
-                            pattern = splitPattern, simplify = TRUE)
-    if (ncol(splitNames) < numCol) {
-      # no splits found take all as a single group
-      sampleCol <- rep("1", nrow(splitNames))
-    } else {
-      sampleCol <- splitNames[, numCol]
-    }
-    sizes <- setColumnInDF(sizes, sampleCol, colName = "sample")
-  }
+
+  c(., conditions) %<-%
+    normalizeNameAndLabels(objCOTAN, name = condName,
+                           labels = conditions, isCond = TRUE)
+  assert_that(!is_empty(conditions))
+
+  sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
 
   mitGenes <- getGenes(objCOTAN)[str_detect(getGenes(objCOTAN),
                                             pattern = genePrefix)]
@@ -61,7 +60,8 @@ mitochondrialPercentagePlot <- function(objCOTAN, splitPattern = " ",
     stop("gene prefix resulted in no matches")
   }
 
-  mitGenesData <- getRawData(objCOTAN)[getGenes(objCOTAN) %in% mitGenes, ]
+  mitGenesData <-
+    getRawData(objCOTAN)[getGenes(objCOTAN) %in% mitGenes, , drop = FALSE]
   if (!identical(colnames(mitGenesData), rownames(sizes))) {
     warning("Problem with cells' order!")
   }
