@@ -43,7 +43,8 @@ ECDPlot <- function(objCOTAN, yCut = NaN,
 
   sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
 
-  plot <- ggplot(sizes, aes(x = log(n), y = log(libSize), fill = sample)) +
+  plot <- ggplot(sizes, aes(x = log(n), y = log(libSize),
+                            fill = sample, colour = sample)) +
     geom_point()
 
   if (!is.nan(yCut)) {
