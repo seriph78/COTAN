@@ -208,6 +208,9 @@ NULL
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom methods new
+#' @importFrom methods validObject
+#'
 #' @rdname UniformClusters
 #'
 

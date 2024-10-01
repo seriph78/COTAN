@@ -1158,6 +1158,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
+#' @importFrom methods new
+#'
 #' @export
 #'
 #' @rdname CalculatingCOEX

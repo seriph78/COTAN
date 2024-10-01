@@ -1124,6 +1124,8 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom methods validObject
+#'
 #' @export
 #'
 #' @examples
@@ -1387,6 +1389,8 @@ NULL
 #'   usually without the `COND_` prefix
 #'
 #' @importFrom rlang is_empty
+#'
+#' @importFrom methods validObject
 #'
 #' @export
 #'

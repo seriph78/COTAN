@@ -1,3 +1,6 @@
+Added possibility to convert `COTAN` objects to/from `SingleCellExperiment`
+objects. `SCE` objects created by the `Seurat` package are supported
+
 Hardened arguments' checks for function `UMAPPlot()`
 
 Solved issue with the function `establishGenesClusters()`: it was throwing an
