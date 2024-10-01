@@ -1,3 +1,4 @@
+## 2.4.6
 
 Solved issue with the function `establishGenesClusters()`: it was throwing an
 error when one of the sub-lists in the `groupMarkers` argument did contain
