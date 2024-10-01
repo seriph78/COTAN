@@ -1,3 +1,5 @@
+## 2.5.8
+
 feature/add_condition_arguments_to_plot_functions
 Now the following plot functions take in conditions explicitly, instead of just
 instructions to determine them from the cells' names. The changes involved:

@@ -57,8 +57,8 @@ UMAPPlot <- function(df,
               msg = "UMAPPlot - data.frame must have proper row-names")
 
   assert_that(is_empty(clusters) || identical(names(clusters), rownames(df)),
-              msg = paste("UMAPPlot - clusters vector must have size equal to",
-                          "the number of rows in the data.frame"))
+              msg = paste("UMAPPlot - clusters' names must be the same",
+                          "as the row-names of the data.frame"))
 
   # empty title
   if (isEmptyName(title)) {
