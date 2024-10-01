@@ -1,3 +1,9 @@
+feature/add_condition_arguments_to_plot_functions
+Now the following plot functions take in conditions explicitly, instead of just
+instructions to determine them from the cells' names. The changes involved:
+`cellSizePlot()`,  `ECDPlot()`, `genesSizePlot()`,
+`mitochondrialPercentagePlot()`, `scatterPlot()`
+
 Added possibility to convert `COTAN` objects to/from `SingleCellExperiment`
 objects. `SCE` objects created by the `Seurat` package are supported
 

@@ -163,8 +163,6 @@ genesCoexSpace <-
 #' @importFrom PCAtools screeplot
 #' @importFrom BiocSingular IrlbaParam
 #'
-#' @importFrom stringr str_split
-#'
 #' @importFrom assertthat assert_that
 #'
 #' @importFrom zeallot %<-%

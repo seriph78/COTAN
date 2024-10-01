@@ -129,17 +129,22 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
 
 #----------------- multi-threading --------------------
 
-#' @title Handling Multi-Core Enviroments
+#' @title Handling Multi-Core and GPU environments
 #'
-#' @description Check whether session supports multi-core evaluation and
-#'   provides an effective upper bound to the number of cores.
+#' @description Check whether session supports multi-core and/or GPU evaluation
+#'   and utilities about their activation
 #'
-#' @details It uses [supportsMulticore()] and [availableCores()] from the
-#'   package `parallelly` to actually check whether the session supports
-#'   multi-core evaluation.
+#' @name MultiThreading
 #'
-#' @seealso the help page of [supportsMulticore()] about the flags influencing
-#'   the multi-core support; e.g. the usage of `R` option
+NULL
+
+#' @details `handleMultiCore()` uses [parallelly::supportsMulticore()] and
+#'   [parallelly::availableCores()] to actually check whether the session
+#'   supports multi-core evaluation. Provides an effective upper bound to the
+#'   number of cores.
+#'
+#' @seealso the help page of [parallelly::supportsMulticore()] about the flags
+#'   influencing the multi-core support; e.g. the usage of `R` option
 #'   `parallelly.fork.enable`.
 #'
 #' @param cores the number of cores asked for
@@ -149,7 +154,7 @@ logThis <- function(msg, logLevel = 2L, appendLF = TRUE) {
 #' @importFrom parallelly availableCores
 #' @importFrom parallelly supportsMulticore
 #'
-#' @noRd
+#' @rdname MultiThreading
 #'
 handleMultiCore <- function(cores) {
   cores <- max(1L, cores)
@@ -174,10 +179,9 @@ handleMultiCore <- function(cores) {
 }
 
 
-#' @title Internal function to handle the [torch] library
-#'
-#' @description Returns whether the torch library is ready to be used:
-#'   it obeys the opt-out flag set via the `COTAN.UseTorch` option
+#' @details `canUseTorch()` is an internal function to handle the torch library:
+#'   it returns whether \pkg{torch} is ready to be used. It obeys the opt-out
+#'   flag set via the `COTAN.UseTorch` option
 #'
 #' @param optimizeForSpeed A Boolean to indicate whether to try to use the
 #'   faster torch library
@@ -188,7 +192,11 @@ handleMultiCore <- function(cores) {
 #' * `"deviceStr"`: the updated name of the device to be used: if no `cuda` GPU
 #'   is available it will fallback to CPU calculations
 #'
-#' @noRd
+#' @seealso [torch::install_torch()] and [torch::torch_is_installed()] for
+#'   installation. Note the [torch::torch_set_num_threads()] has effect also on
+#'   the \pkg{Rfast} package methods
+#'
+#' @rdname MultiThreading
 #'
 canUseTorch <- function(optimizeForSpeed, deviceStr) {
   warnedAboutTorch <- !is.null(getOption("COTAN.TorchWarning"))
@@ -274,24 +282,31 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
 }
 
 
-#----------------- miscellanea --------------------
+#----------------- string related utilities --------------------
 
-#' @title Internal function to handle names subset...
+#' @title Handle names and factors' levels
 #'
-#' @description Returns the given subset or the full list of names if none were
-#'   specified
+#' @description Internal functions dedicated to solve string related simple
+#'   tasks
 #'
-#' @param names The full list of the genes
+#' @name HandleStrings
+#'
+NULL
+
+#' @details `handleNamesSubsets()` returns the given subset or the full `list`
+#'   of names if none were specified
+#'
+#' @param names The full `list` of the names to handle
 #' @param subset The names' subset. When empty all names are returned instead!
 #'
-#' @returns The updated list of names' subset, reordered according to the given
-#'   names' list
+#' @returns `handleNamesSubsets()` returns the updated list of names' subset,
+#'   reordered according to the given names' list
 #'
 #' @importFrom rlang is_empty
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @noRd
+#' @rdname HandleStrings
 #'
 handleNamesSubsets <- function(names, subset = vector(mode = "character")) {
   if (is_empty(subset)) {
@@ -306,58 +321,64 @@ handleNamesSubsets <- function(names, subset = vector(mode = "character")) {
 }
 
 
-#' @title Internal function to check if a name is empty...
+#' @details `conditionsFromNames()` retrieves a condition from the given names
+#'   by picking the asked fragment after having them split according to the
+#'   given pattern
 #'
-#' @description Returns whether the passed name is not null and has non-zero
-#'   characters
+#' @param names The full `list` of the names to handle
+#' @param splitPattern the pattern to use to split the names
+#' @param fragmentNum the string fragment to use as condition from the split
+#'   names
+#'
+#' @returns `conditionsFromNames()` returns the extracted conditions
+#'
+#' @importFrom stringr str_split_i
+#'
+#' @rdname HandleStrings
+#'
+conditionsFromNames <-
+  function(names, splitPattern = " ", fragmentNum = 2L) {
+  numNames <- length(names)
+  conditions <- str_split_i(names, pattern = splitPattern, fragmentNum)
+  if (any(is.na(conditions)) ||
+      length(unique(conditions)) == numNames) {
+    warning(paste("conditionsFromNames: no proper pattern has been recognized",
+            "or given column number was too high"))
+    conditions <- rep("1", numNames)
+  }
+  names(conditions) <- names
+  return(conditions)
+}
+
+
+#' @description `isEmptyName()` returns whether the passed name is not null and
+#'   has non-zero characters
 #'
 #' @param name the name to check
 #'
-#' @returns whether the passed name is not equivalent to an empty string
+#' @returns `isEmptyName()` returns whether the passed name is equivalent to an
+#'   empty string
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @noRd
+#' @rdname HandleStrings
 #'
 isEmptyName <- function(name) {
   return(!(length(name) && any(nzchar(name))))
 }
 
 
-#' @title Internal function to convert a named factor to a character vector
+#' @details `niceFactorLevels()` provides **nicer** `factor` labels that have
+#'   all the same number of characters
 #'
-#' @description Returns the factor cast to a vector along its names
+#' @param v an `array` or `factor` object
 #'
-#' @param a `factor` object
+#' @returns a `factor` that is preserving the *names* of the input with the new
+#'   nicer levels
 #'
-#' @returns a character vector that is preserving the names of the input
+#' @importFrom stringr str_pad
 #'
-#' @importFrom rlang set_names
-#'
-#' @importFrom assertthat assert_that
-#'
-#' @noRd
-#'
-factorToVector <- function(v) {
-  assert_that(inherits(v, "factor"), msg = "Passed object is not a factor")
-  return(set_names(levels(v)[v], names(v)))
-}
-
-
-#' @title Internal function to have nicer factor labels that have all the same
-#'   number of characters
-#'
-#' @description Returns the factor with the new labels
-#'
-#' @param an `array` or `factor` object
-#'
-#' @returns a character vector that is preserving the names of the input
-#'
-#' @importFrom rlang set_names
-#'
-#' @importFrom assertthat assert_that
-#'
-#' @noRd
+#' @rdname HandleStrings
 #'
 niceFactorLevels <- function(v) {
   names <- names(v)
@@ -374,6 +395,27 @@ niceFactorLevels <- function(v) {
   }
   names(v) <- names
   return(factor(v))
+}
+
+
+#-------------- metadata handling -----------
+
+#' @details `factorToVector()` is an internal function to convert a *named* `factor`
+#'   to a *named* `character vector`.
+#'
+#' @param f a `factor` object
+#'
+#' @returns a `character vector` that preserves the *names* of the input factor
+#'
+#' @importFrom rlang set_names
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname HandleMetaData
+#'
+factorToVector <- function(f) {
+  assert_that(inherits(f, "factor"), msg = "Passed object is not a factor")
+  return(set_names(levels(f)[f], names(f)))
 }
 
 

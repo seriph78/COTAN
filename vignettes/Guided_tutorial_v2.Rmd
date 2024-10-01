@@ -13,6 +13,8 @@ vignette: >
   %\VignetteEncoding{UTF-8} 
 ---
 
+## Preamble
+
 ```{r, include = FALSE}
 knitr::opts_chunk[["set"]](
   collapse = TRUE,
@@ -125,7 +127,7 @@ We can check the library size (UMI number) with an empirical cumulative
 distribution function
 
 ```{r}
-plot(ECDPlot(obj, yCut = 700L))
+plot(ECDPlot(obj))
 ```
 
 ```{r}

@@ -73,7 +73,6 @@
 #' @importFrom stats as.dendrogram
 #' @importFrom stats cophenetic
 #'
-#' @importFrom stringr str_split
 #' @importFrom stringr str_detect
 #' @importFrom stringr fixed
 #'

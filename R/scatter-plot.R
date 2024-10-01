@@ -5,10 +5,12 @@
 #'   library size and the number of genes detected.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param splitPattern Pattern used to extract, from the column names, the
-#'   sample field (default " ")
-#' @param numCol Once the column names are split by splitPattern, the column
-#'   number with the sample name (default 2)
+#' @param condName The name of a condition in the `COTAN` object to further
+#'   separate the cells in more sub-groups. When no condition is given it is
+#'   assumed to be the same for all cells (no further sub-divisions)
+#' @param conditions The *conditions* to use. If given it will take precedence
+#'   on the one indicated by `condName` that will only indicate the relevant
+#'   column name in the returned `data.frame`
 #' @param splitSamples Boolean. Whether to plot each sample in a different panel
 #'   (default `FALSE`)
 #'
@@ -26,8 +28,6 @@
 #' @importFrom scales math_format
 #' @importFrom scales trans_format
 #'
-#' @importFrom stringr str_split
-#'
 #' @export
 #'
 #' @examples
@@ -36,27 +36,22 @@
 #'
 #' @rdname RawDataCleaning
 #'
-scatterPlot <- function(objCOTAN, splitPattern = " ",
-                        numCol = 2L, splitSamples = FALSE) {
+scatterPlot <-
+  function(objCOTAN, condName = "", conditions = NULL, splitSamples = TRUE) {
   cellsSize <- getCellsSize(objCOTAN)
   genesSize <- getNumExpressedGenes(objCOTAN)
 
-  toPlot <- cbind(cellsSize, genesSize)
-  toPlot <- as.data.frame(toPlot)
+  sizes <- cbind(cellsSize, genesSize)
+  sizes <- as.data.frame(sizes)
 
-  if (TRUE) {
-    splitNames <- str_split(rownames(toPlot),
-                            pattern = splitPattern, simplify = TRUE)
-    if (ncol(splitNames) < numCol) {
-      # no splits found take all as a single group
-      sampleCol <- rep("1", nrow(splitNames))
-    } else {
-      sampleCol <- splitNames[, numCol]
-    }
-    toPlot <- setColumnInDF(toPlot, sampleCol, colName = "sample")
-  }
+  c(., conditions) %<-%
+    normalizeNameAndLabels(objCOTAN, name = condName,
+                           labels = conditions, isCond = TRUE)
+  assert_that(!is_empty(conditions))
 
-  plot <- ggplot(toPlot, aes(x = cellsSize, y = genesSize, color = sample)) +
+  sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
+
+  plot <- ggplot(sizes, aes(x = cellsSize, y = genesSize, color = sample)) +
     geom_point(size = 0.5, alpha = 0.8) +
     labs(title = "Scatter plot of library size VS gene detected for each cell",
          y = "Gene number",

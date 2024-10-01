@@ -367,7 +367,7 @@ checkersToDF <- function(checkers) {
 #' @importFrom rlang is_empty
 #' @importFrom rlang is_character
 #'
-#' @importFrom stringr str_split
+#' @importFrom stringr str_split_i
 #' @importFrom stringr fixed
 #'
 #' @importFrom methods new
@@ -390,9 +390,7 @@ dfToCheckers <- function(df, checkerClass) {
   assert_that(is(checker, "BaseUniformityCheck"))
 
   memberNames <- slotNames(checker)
-  dfRootNames <- vapply(str_split(colnames(df), fixed(".")),
-                        function(a) return(a[[1L]]),
-                        character(1L))
+  dfRootNames <- str_split_i(colnames(df), fixed("."), 1L)
   assert_that(all(memberNames %in% dfRootNames),
               msg = paste0("Given checkerClass [", class(checker), "] is ",
                            "inconsistent with the data.frame column names"))
@@ -407,9 +405,7 @@ dfToCheckers <- function(df, checkerClass) {
         subNames <- slotNames(member)
         if (TRUE) {
           relCols <- dfRootNames == name
-          dfSubNames <- vapply(str_split(colnames(df)[relCols], fixed(".")),
-                               function(a) return(a[[2L]]),
-                               character(1L))
+          dfSubNames <- str_split_i(colnames(df)[relCols], fixed("."), 2L)
           assert_that(all(subNames %in% dfSubNames),
                       msg = paste0("Given checkerClass [", class(checker),
                                    "] is inconsistent with the data.frame",

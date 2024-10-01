@@ -94,10 +94,12 @@ geom_flat_violin <- function(
 #'   sample.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param splitPattern Pattern used to extract, from the column names, the
-#'   sample field (default " ")
-#' @param numCol Once the column names are split by splitPattern, the column
-#'   number with the sample name (default 2)
+#' @param condName The name of a condition in the `COTAN` object to further
+#'   separate the cells in more sub-groups. When no condition is given it is
+#'   assumed to be the same for all cells (no further sub-divisions)
+#' @param conditions The *conditions* to use. If given it will take precedence
+#'   on the one indicated by `condName` that will only indicate the relevant
+#'   column name in the returned `data.frame`
 #'
 #' @returns `cellSizePlot()` returns the `violin-boxplot` plot
 #'
@@ -109,8 +111,6 @@ geom_flat_violin <- function(
 #' @importFrom ggplot2 scale_y_continuous
 #' @importFrom ggplot2 ylim
 #'
-#' @importFrom stringr str_split
-#'
 #' @export
 #'
 #' @examples
@@ -119,21 +119,18 @@ geom_flat_violin <- function(
 #'
 #' @rdname RawDataCleaning
 #'
-cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
+cellSizePlot <- function(objCOTAN, condName = "", conditions = NULL) {
   sizes <- sort(getCellsSize(objCOTAN))
   sizes <- as.data.frame(sizes)
+
   sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
-  if (TRUE) {
-    splitNames <- str_split(rownames(sizes),
-                            pattern = splitPattern, simplify = TRUE)
-    if (ncol(splitNames) < numCol) {
-      # no splits found take all as a single group
-      sampleCol <- rep("1", nrow(splitNames))
-    } else {
-      sampleCol <- splitNames[, numCol]
-    }
-    sizes <- setColumnInDF(sizes, sampleCol, colName = "sample")
-  }
+
+  c(., conditions) %<-%
+    normalizeNameAndLabels(objCOTAN, name = condName,
+                           labels = conditions, isCond = TRUE)
+  assert_that(!is_empty(conditions))
+
+  sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
 
   plot <-
     sizes %>%
@@ -161,10 +158,12 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #'   cell and sample
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param splitPattern Pattern used to extract, from the column names, the
-#'   sample field (default " ")
-#' @param numCol Once the column names are split by splitPattern, the column
-#'   number with the sample name (default 2)
+#' @param condName The name of a condition in the `COTAN` object to further
+#'   separate the cells in more sub-groups. When no condition is given it is
+#'   assumed to be the same for all cells (no further sub-divisions)
+#' @param conditions The *conditions* to use. If given it will take precedence
+#'   on the one indicated by `condName` that will only indicate the relevant
+#'   column name in the returned `data.frame`
 #'
 #' @returns `genesSizePlot()` returns the `violin-boxplot` plot
 #'
@@ -178,8 +177,6 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #' @importFrom ggplot2 scale_y_continuous
 #' @importFrom ggplot2 ylim
 #'
-#' @importFrom stringr str_split
-#'
 #' @export
 #'
 #' @examples
@@ -188,21 +185,18 @@ cellSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
 #'
 #' @rdname RawDataCleaning
 #'
-genesSizePlot <- function(objCOTAN, splitPattern = " ", numCol = 2L) {
+genesSizePlot <- function(objCOTAN, condName = "", conditions = NULL) {
   sizes <- sort(getNumExpressedGenes(objCOTAN))
   sizes <- as.data.frame(sizes)
+
   sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
-  if (TRUE) {
-    splitNames <- str_split(rownames(sizes),
-                            pattern = splitPattern, simplify = TRUE)
-    if (ncol(splitNames) < numCol) {
-      # no splits found take all as a single group
-      sampleCol <- rep("1", nrow(splitNames))
-    } else {
-      sampleCol <- splitNames[, numCol]
-    }
-    sizes <- setColumnInDF(sizes, sampleCol, colName = "sample")
-  }
+
+  c(., conditions) %<-%
+    normalizeNameAndLabels(objCOTAN, name = condName,
+                           labels = conditions, isCond = TRUE)
+  assert_that(!is_empty(conditions))
+
+  sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
 
   plot <-
     sizes %>%
