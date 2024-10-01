@@ -20,6 +20,7 @@
 #' @importFrom rlang is_empty
 #'
 #' @importFrom methods is
+#' @importFrom methods validObject
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -119,7 +120,8 @@ setMethod(
 #' @importFrom rlang is_empty
 #'
 #' @importFrom methods is
-
+#' @importFrom methods validObject
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @export
@@ -368,6 +370,8 @@ checkersToDF <- function(checkers) {
 #' @importFrom stringr str_split_i
 #' @importFrom stringr fixed
 #'
+#' @importFrom methods new
+#'
 #' @export
 #'
 #' @rdname UniformTranscriptCheckers
@@ -442,8 +446,10 @@ dfToCheckers <- function(df, checkerClass) {
 #'
 #' @export
 #'
+#' @importFrom methods validObject
+#'
 #' @rdname UniformTranscriptCheckers
-
+#'
 setMethod(
   "getCheckerThreshold",
   signature(checker = "SimpleGDIUniformityCheck"),
@@ -454,8 +460,10 @@ setMethod(
 
 #' @export
 #'
+#' @importFrom methods validObject
+#'
 #' @rdname UniformTranscriptCheckers
-
+#'
 setMethod(
   "getCheckerThreshold",
   signature(checker = "AdvancedGDIUniformityCheck"),
@@ -483,8 +491,10 @@ setMethod(
 #'
 #' @export
 #'
+#' @importFrom methods validObject
+#'
 #' @rdname UniformTranscriptCheckers
-
+#'
 setMethod(
   "calculateThresholdShiftToUniformity",
   signature(checker = "SimpleGDIUniformityCheck"),
@@ -499,8 +509,10 @@ setMethod(
 
 #' @export
 #'
+#' @importFrom methods validObject
+#'
 #' @rdname UniformTranscriptCheckers
-
+#'
 setMethod(
   "calculateThresholdShiftToUniformity",
   signature(checker = "AdvancedGDIUniformityCheck"),
@@ -542,8 +554,11 @@ setMethod(
 #'
 #' @export
 #'
+#' @importFrom methods new
+#' @importFrom methods validObject
+#'
 #' @rdname UniformTranscriptCheckers
-
+#'
 setMethod(
   "shiftCheckerThresholds",
   signature(checker = "SimpleGDIUniformityCheck",
@@ -563,8 +578,11 @@ setMethod(
 
 #' @export
 #'
+#' @importFrom methods new
+#' @importFrom methods validObject
+#'
 #' @rdname UniformTranscriptCheckers
-
+#'
 setMethod(
   "shiftCheckerThresholds",
   signature(checker = "AdvancedGDIUniformityCheck",

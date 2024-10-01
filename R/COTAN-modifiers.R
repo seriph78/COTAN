@@ -257,6 +257,8 @@ setMethod(
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom methods validObject
+#'
 #' @rdname RawDataCleaning
 #'
 setMethod(
@@ -340,6 +342,8 @@ setMethod(
 #' @importFrom rlang is_empty
 #'
 #' @importFrom assertthat assert_that
+#'
+#' @importFrom methods validObject
 #'
 #' @export
 #'
@@ -491,7 +495,7 @@ setMethod(
 
 #' @aliases addCondition
 #'
-#' @details `addCcondition()` adds a *condition* to the current `COTAN` object,
+#' @details `addCondition()` adds a *condition* to the current `COTAN` object,
 #'   by adding a new column in the `metaCells` `data.frame`
 #'
 #' @param objCOTAN a `COTAN` object
@@ -507,6 +511,8 @@ setMethod(
 #' @importFrom rlang is_empty
 #'
 #' @importFrom assertthat assert_that
+#'
+#' @importFrom methods validObject
 #'
 #' @export
 #'

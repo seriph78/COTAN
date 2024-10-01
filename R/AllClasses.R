@@ -199,6 +199,7 @@ NULL
 #' @returns a `COTAN` object
 #'
 #' @importFrom methods new
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @importClassesFrom Matrix dgCMatrix
@@ -434,6 +435,7 @@ getCOTANSlots <- function(from) {
 #' @importFrom zeallot %->%
 #'
 #' @importFrom methods setIs
+#' @importFrom methods new
 #'
 #' @name scCotan_coerce_to_COTAN
 #' @rdname COTAN_Legacy
@@ -553,6 +555,7 @@ getScCOTANSlots <- function(from) {
 #'
 #' @importFrom methods as
 #' @importFrom methods setAs
+#' @importFrom methods new
 #'
 #' @name COTAN_coerce_to_scCOTAN
 #' @rdname COTAN_Legacy
@@ -750,6 +753,9 @@ setClass(
 #' @slot check `GDICheck`. The single threshold check used to determine whether
 #'   the **cluster** is deemed not uniform
 #'
+#' @importFrom methods new
+#' @importFrom methods validObject
+#'
 #' @rdname UniformTranscriptCheckers
 #'
 setClass(
@@ -794,6 +800,9 @@ setClass(
 #' @slot thirdCheck `GDICheck`. Single threshold below check used to determine
 #'   whether the **cluster** is deemed *uniform*. Threshold defaults to
 #'   \eqn{1.4}, `maxRankBeyond` to \eqn{2}
+#'
+#' @importFrom methods new
+#' @importFrom methods validObject
 #'
 #' @rdname UniformTranscriptCheckers
 #'

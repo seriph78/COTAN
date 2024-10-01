@@ -81,6 +81,8 @@
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
+#' @importFrom methods new
+#'
 #' @examples
 #' data("test.dataset")
 #'

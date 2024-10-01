@@ -90,7 +90,7 @@ object
 \code{normalizeNameAndLabels()} takes a pair of name/labels and
 normalize them based on the available information in the \code{COTAN} object
 
-\code{addCcondition()} adds a \emph{condition} to the current \code{COTAN} object,
+\code{addCondition()} adds a \emph{condition} to the current \code{COTAN} object,
 by adding a new column in the \code{metaCells} \code{data.frame}
 
 \code{dropCondition()} drops a \emph{condition} from the current \code{COTAN}
