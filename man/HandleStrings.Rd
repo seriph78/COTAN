@@ -6,6 +6,7 @@
 \alias{conditionsFromNames}
 \alias{isEmptyName}
 \alias{niceFactorLevels}
+\alias{factorToVector}
 \title{Handle names and factors' levels}
 \usage{
 handleNamesSubsets(names, subset = vector(mode = "character"))
@@ -15,6 +16,8 @@ conditionsFromNames(names, splitPattern = " ", fragmentNum = 2L)
 isEmptyName(name)
 
 niceFactorLevels(v)
+
+factorToVector(f)
 }
 \arguments{
 \item{names}{The full \code{list} of the names to handle}
@@ -29,6 +32,8 @@ names}
 \item{name}{the name to check}
 
 \item{v}{an \code{array} or \code{factor} object}
+
+\item{f}{a \code{factor} object}
 }
 \value{
 \code{handleNamesSubsets()} returns the updated list of names' subset,
@@ -39,15 +44,15 @@ reordered according to the given names' list
 \code{isEmptyName()} returns whether the passed name is equivalent to an
 empty string
 
-a \code{factor} that is preserving the \emph{names} of the input with the new
-nicer levels
+\code{niceFactorLevels()} returns a \code{factor} that is preserving the
+\emph{names} of the input with the new nicer levels
+
+\code{factorToVector()} returns a \verb{character vector} that preserves the
+\emph{names} of the input factor
 }
 \description{
-Internal functions dedicated to solve string related simple
-tasks
-
-\code{isEmptyName()} returns whether the passed name is not null and
-has non-zero characters
+Internal functions dedicated to solve strings or factors related
+simple tasks
 }
 \details{
 \code{handleNamesSubsets()} returns the given subset or the full \code{list}
@@ -57,6 +62,12 @@ of names if none were specified
 by picking the asked fragment after having them split according to the
 given pattern
 
+\code{isEmptyName()} returns whether the passed name is not null and has
+non-zero characters
+
 \code{niceFactorLevels()} provides \strong{nicer} \code{factor} labels that have
 all the same number of characters
+
+\code{factorToVector()} converts a \emph{named} \code{factor} to a \emph{named}
+\verb{character vector}
 }

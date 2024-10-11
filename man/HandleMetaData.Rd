@@ -18,7 +18,6 @@
 \alias{initializeMetaDataset}
 \alias{addElementToMetaDataset,COTAN-method}
 \alias{addElementToMetaDataset}
-\alias{factorToVector}
 \alias{getColumnFromDF}
 \alias{setColumnInDF}
 \title{Handling \emph{meta-data} in \code{COTAN} objects}
@@ -39,8 +38,6 @@ datasetTags()
 
 \S4method{addElementToMetaDataset}{COTAN}(objCOTAN, tag, value)
 
-factorToVector(f)
-
 getColumnFromDF(df, colName)
 
 setColumnInDF(df, colToSet, colName, rowNames = vector(mode = "character"))
@@ -59,8 +56,6 @@ code}
 time point}
 
 \item{value}{a value (or an array) containing the information}
-
-\item{f}{a \code{factor} object}
 
 \item{df}{the \code{data.frame}}
 
@@ -89,8 +84,6 @@ used in the \code{metaDataset} of the \code{COTAN} objects
 updated \code{metaDataset}
 
 \code{addElementToMetaDataset()} returns the updated \code{COTAN} object
-
-a \verb{character vector} that preserves the \emph{names} of the input factor
 
 \code{getColumnFromDF()} returns the column in the \code{data.frame} as named
 \code{array}, \code{NULL} if the wanted column is not available
@@ -132,9 +125,6 @@ meta-data
 \code{addElementToMetaDataset()} is used to add a line of information to
 the meta-data \code{data.frame}. If the tag was already used it will update the
 associated value(s) instead
-
-\code{factorToVector()} is an internal function to convert a \emph{named} \code{factor}
-to a \emph{named} \verb{character vector}.
 
 \code{getColumnFromDF()} is a function to extract a column from a
 \code{data.frame}, while keeping the \code{rowNames} as \code{vector} names

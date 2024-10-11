@@ -21,6 +21,7 @@ NULL
 #'
 #' @returns `setLoggingLevel()` returns the old logging level or default level
 #'   if not set yet.
+#'
 #' @export
 #'
 #' @examples
@@ -149,7 +150,8 @@ NULL
 #'
 #' @param cores the number of cores asked for
 #'
-#' @returns the maximum sensible number of cores to use
+#' @returns `handleMultiCore()` returns the maximum sensible number of cores to
+#'   use
 #'
 #' @importFrom parallelly availableCores
 #' @importFrom parallelly supportsMulticore
@@ -187,7 +189,7 @@ handleMultiCore <- function(cores) {
 #'   faster torch library
 #' @param deviceStr The name of the device to be used by torch
 #'
-#' @returns A list with 2 elements:
+#' @returns `canUseTorch()` returns a list with 2 elements:
 #' * `"useTorch"`: a Boolean indicating whether the torch library can be used
 #' * `"deviceStr"`: the updated name of the device to be used: if no `cuda` GPU
 #'   is available it will fallback to CPU calculations
@@ -286,8 +288,8 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
 
 #' @title Handle names and factors' levels
 #'
-#' @description Internal functions dedicated to solve string related simple
-#'   tasks
+#' @description Internal functions dedicated to solve strings or factors related
+#'   simple tasks
 #'
 #' @name HandleStrings
 #'
@@ -332,6 +334,8 @@ handleNamesSubsets <- function(names, subset = vector(mode = "character")) {
 #'
 #' @returns `conditionsFromNames()` returns the extracted conditions
 #'
+#' @export
+#'
 #' @importFrom stringr str_split_i
 #'
 #' @rdname HandleStrings
@@ -351,8 +355,8 @@ conditionsFromNames <-
 }
 
 
-#' @description `isEmptyName()` returns whether the passed name is not null and
-#'   has non-zero characters
+#' @details `isEmptyName()` returns whether the passed name is not null and has
+#'   non-zero characters
 #'
 #' @param name the name to check
 #'
@@ -373,8 +377,10 @@ isEmptyName <- function(name) {
 #'
 #' @param v an `array` or `factor` object
 #'
-#' @returns a `factor` that is preserving the *names* of the input with the new
-#'   nicer levels
+#' @returns `niceFactorLevels()` returns a `factor` that is preserving the
+#'   *names* of the input with the new nicer levels
+#'
+#' @export
 #'
 #' @importFrom stringr str_pad
 #'
@@ -398,26 +404,29 @@ niceFactorLevels <- function(v) {
 }
 
 
-#-------------- metadata handling -----------
-
-#' @details `factorToVector()` is an internal function to convert a *named* `factor`
-#'   to a *named* `character vector`.
+#' @details `factorToVector()` converts a *named* `factor` to a *named*
+#'   `character vector`
 #'
 #' @param f a `factor` object
 #'
-#' @returns a `character vector` that preserves the *names* of the input factor
+#' @returns `factorToVector()` returns a `character vector` that preserves the
+#'   *names* of the input factor
+#'
+#' @export
 #'
 #' @importFrom rlang set_names
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @rdname HandleMetaData
+#' @rdname HandleStrings
 #'
 factorToVector <- function(f) {
   assert_that(inherits(f, "factor"), msg = "Passed object is not a factor")
   return(set_names(levels(f)[f], names(f)))
 }
 
+
+#-------------- metadata handling -----------
 
 #' @details `getColumnFromDF()` is a function to extract a column from a
 #'   `data.frame`, while keeping the `rowNames` as `vector` names
