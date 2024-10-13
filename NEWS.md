@@ -1,3 +1,5 @@
+## 2.5.9
+
 Exported utility functions about names arrays: `conditionsFromNames()`,
 `niceFactorLevels()`, `factorToVector()`
 
