@@ -1,3 +1,6 @@
+Exported utility functions about names arrays: `conditionsFromNames()`,
+`niceFactorLevels()`, `factorToVector()`
+
 ## 2.5.8
 
 feature/add_condition_arguments_to_plot_functions

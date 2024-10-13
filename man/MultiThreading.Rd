@@ -19,9 +19,10 @@ faster torch library}
 \item{deviceStr}{The name of the device to be used by torch}
 }
 \value{
-the maximum sensible number of cores to use
+\code{handleMultiCore()} returns the maximum sensible number of cores to
+use
 
-A list with 2 elements:
+\code{canUseTorch()} returns a list with 2 elements:
 \itemize{
 \item \code{"useTorch"}: a Boolean indicating whether the torch library can be used
 \item \code{"deviceStr"}: the updated name of the device to be used: if no \code{cuda} GPU
