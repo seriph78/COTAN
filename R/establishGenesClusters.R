@@ -56,7 +56,6 @@ NULL
 #'
 genesCoexSpace <-
   function(objCOTAN, primaryMarkers, numGenesPerMarker = 25L) {
-  # TODO: output tanh of reduced coex matrix
   logThis("Calculating gene co-expression space - START", logLevel = 2L)
 
   if (TRUE) {
@@ -74,7 +73,8 @@ genesCoexSpace <-
   secondaryMarkers <- primaryMarkers
 
   for (marker in primaryMarkers) {
-    lowestPValueGenesPos <- order(pValue[, marker])[1L:numGenesPerMarker]
+    lowestPValueGenesPos <-
+      order(pValue[, marker, drop = TRUE])[1L:numGenesPerMarker]
     secondaryMarkers <- c(secondaryMarkers,
                           getGenes(objCOTAN)[lowestPValueGenesPos])
   }
@@ -86,12 +86,12 @@ genesCoexSpace <-
   logThis(paste("Number of selected secondary markers:",
                 length(secondaryMarkers)), logLevel = 1L)
 
-  pValue <- pValue[secondaryMarkers, ]
+  pValue <- pValue[secondaryMarkers, , drop = FALSE]
 
   rankGenes <- data.frame()
   for (marker in primaryMarkers) {
     rankGenes <- setColumnInDF(rankGenes,
-                               colToSet = rank(pValue[, marker],
+                               colToSet = rank(pValue[, marker, drop = TRUE],
                                                ties.method = "first"),
                                colName = marker,
                                rowNames = secondaryMarkers)
