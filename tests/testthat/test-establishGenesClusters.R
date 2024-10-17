@@ -6,6 +6,18 @@ test_that("Establish genes clusters", {
   objCOTAN <- proceedToCoex(objCOTAN, cores = 6L,
                             optimizeForSpeed = FALSE, saveObj = FALSE)
 
+  c(secondaryMarkers, GCS, rankGenes) %<-%
+    genesCoexSpace(objCOTAN = objCOTAN,
+                   primaryMarkers = c("g-000300"),
+                   numGenesPerMarker = 5L)
+
+  expect_gt(length(secondaryMarkers), 1L)
+  expect_equal(colnames(rankGenes), c("g-000300"), ignore_attr = TRUE)
+  expect_identical(rownames(rankGenes), secondaryMarkers)
+
+  expect_identical(colnames(GCS), secondaryMarkers)
+  expect_lte(max(abs(GCS)), 1L)
+
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                        G2 = c("g-000300", "g-000330"),
                        G3 = c("g-000510", "g-000530", "g-000550",

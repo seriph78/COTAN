@@ -1,3 +1,6 @@
+Fixed bug in function `genesCoexSpace()`: now `primaryMarkers` can have only a
+single gene
+
 ## 2.5.9
 
 Exported utility functions about names arrays: `conditionsFromNames()`,
