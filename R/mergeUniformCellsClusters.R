@@ -233,7 +233,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                 checker, allCheckResults) {
     logThis(paste("Updating check results for the", length(allCheckResults),
                   "already tested pairs to align to new checker"),
-            logLevel = 2L)
+            logLevel = 1L)
 
     if (TRUE) {
       allNames <- names(allCheckResults)
@@ -372,7 +372,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   assert_that(estimatorsAreReady(objCOTAN),
               msg = paste("Estimators lambda, nu, dispersion are not ready:",
-                          "Use proceeedToCoex() to prepare them"))
+                          "Use proceedToCoex() to prepare them"))
 
   if (is_empty(checkers)) {
     GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.43)

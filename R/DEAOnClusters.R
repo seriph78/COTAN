@@ -72,7 +72,7 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 
   assert_that(estimatorsAreReady(objCOTAN),
               msg = paste("Estimators lambda, nu, dispersion are not ready:",
-                          "Use proceeedToCoex() to prepare them"))
+                          "Use proceedToCoex() to prepare them"))
 
   clustersList <- toClustersList(clusters)
 
