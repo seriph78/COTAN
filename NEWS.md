@@ -1,3 +1,7 @@
+## 2.5.10
+
+Fixed typo in error message
+
 Fixed bug in function `genesCoexSpace()`: now `primaryMarkers` can have only a
 single gene
 
