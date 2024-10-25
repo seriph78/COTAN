@@ -226,9 +226,8 @@ colors are given it will complete the list using colors from
 \item{minPointsDist}{Overrides the \code{min_dist} value from \link{umap.defaults}}
 
 \item{dataMethod}{selects the method to use to create the \code{data.frame} to
-pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. The following methods calculate, for each cell, a
-statistic for each gene based on available data/model. The following
-methods are supported:
+pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. To calculate, for each cell, a statistic for each
+gene based on available data/model, the following methods are supported:
 \itemize{
 \item \code{"NuNorm"} uses the \eqn{\nu}\emph{-normalized} counts
 \item \code{"LogNormalized"} uses the \emph{log-normalized} counts. The default method
@@ -243,15 +242,16 @@ complement respectively
 }}
 
 \item{genesSel}{Decides whether and how to perform gene-selection. It can be
-a string indicating one of the following methods or a straight list of
-genes. The following methods are supported:
+a straight list of genes or a string indicating one of the following
+selection methods:
 \itemize{
 \item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}. Since it requires
-an available \code{COEX} matrix it will fall-back to \code{"HVG"} when the matrix
-is not available
-\item \code{"HVG"} Will pick-up the genes with the highest variability. The default
-method.
-\item \code{"None"} Will use all genes
+an available \code{COEX} matrix it will fall-back to \code{"HVG_Seurat"} when the
+matrix is not available
+\item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
+via the \pkg{Seurat} package (the default method)
+\item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability
+according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
 }}
 
 \item{numGenes}{the number of genes to select using the above method. Will be

@@ -276,9 +276,8 @@ seuratHVG <- function(rawData, hvgMethod, cond, numFeatures = 2000L) {
 #'   on the one indicated by `clName` that will only indicate the relevant
 #'   column name in the returned `data.frame`
 #' @param dataMethod selects the method to use to create the `data.frame` to
-#'   pass to the [UMAPPlot()]. The following methods calculate, for each cell, a
-#'   statistic for each gene based on available data/model. The following
-#'   methods are supported:
+#'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
+#'   gene based on available data/model, the following methods are supported:
 #'   * `"NuNorm"` uses the \eqn{\nu}*-normalized* counts
 #'   * `"LogNormalized"` uses the *log-normalized* counts. The default method
 #'   * `"Likelihood"` uses the likelihood of observed presence/absence of each
@@ -290,14 +289,15 @@ seuratHVG <- function(rawData, hvgMethod, cond, numFeatures = 2000L) {
 #'     are replaced by the per-gene estimated probability of zero and its
 #'     complement respectively
 #' @param genesSel Decides whether and how to perform gene-selection. It can be
-#'   a string indicating one of the following methods or a straight list of
-#'   genes. The following methods are supported:
+#'   a straight list of genes or a string indicating one of the following
+#'   selection methods:
 #'   * `"HGDI"` Will pick-up the genes with highest **GDI**. Since it requires
-#'     an available `COEX` matrix it will fall-back to `"HVG"` when the matrix
-#'     is not available
-#'   * `"HVG"` Will pick-up the genes with the highest variability. The default
-#'     method.
-#'   * `"None"` Will use all genes
+#'     an available `COEX` matrix it will fall-back to `"HVG_Seurat"` when the
+#'     matrix is not available
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'     via the \pkg{Seurat} package (the default method)
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when no selection have been asked or when an explicit list of genes
 #'   was passed in
@@ -374,48 +374,53 @@ cellsUMAPPlot <- function(objCOTAN,
     stop("Unrecognised `dataMethod` passed in: ", dataMethod)
   }
 
-  if (str_equal(genesSel, "HGDI", ignore_case = TRUE) &&
-      !isCoexAvailable(objCOTAN)) {
-    logThis(paste("The COEX matrix is not available: falling back",
-                  "to HVG_Seurat for genes' selection"), logLevel = 1L)
-    genesSel <- "HVG_Seurat"
-  }
-
   genesPos <- rep(TRUE, getNumGenes(objCOTAN))
   if (length(genesSel) > 1L) {
     genesPos <- getGenes(objCOTAN) %in% genesSel
     logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
-  } else if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-    gdi <- getGDI(objCOTAN)
-    if (is_empty(gdi)) {
-      gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
-                                          rowsFraction = 0.05), "GDI")
-    }
-    if (sum(gdi >= 1.5) > numGenes) {
-      genesPos <- seq_along(gdi) %in% order(gdi, decreasing = TRUE)[1L:numGenes]
-    } else {
-      genesPos <- gdi >= 1.4
-    }
-    rm(gdi)
-  } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
-    condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
-    genesPos <- getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
-                                                  hvgMethod = "vst",
-                                                  cond = condition,
-                                                  numFeatures = numGenes)
-    rm(condition)
-  } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
-    condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
-    genesPos <- getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
-                                                  hvgMethod = "mean.var.plot",
-                                                  cond = condition,
-                                                  numFeatures = numGenes)
-    rm(condition)
   } else {
-    stop("Unrecognised `genesSel` passed in: ", genesSel)
+    if (str_equal(genesSel, "HGDI", ignore_case = TRUE) &&
+        !isCoexAvailable(objCOTAN)) {
+      logThis(paste("The COEX matrix is not available: falling back",
+                    "to HVG_Seurat for genes' selection"), logLevel = 1L)
+      genesSel <- "HVG_Seurat"
+    }
+
+    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
+      gdi <- getGDI(objCOTAN)
+      if (is_empty(gdi)) {
+        gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
+                                            rowsFraction = 0.05), "GDI")
+      }
+      if (sum(gdi >= 1.5) > numGenes) {
+        genesPos <-
+          seq_along(gdi) %in% order(gdi, decreasing = TRUE)[1L:numGenes]
+      } else {
+        genesPos <- gdi >= 1.4
+      }
+      rm(gdi)
+    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
+      condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
+      genesPos <-
+        getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
+                                          hvgMethod = "vst",
+                                          cond = condition,
+                                          numFeatures = numGenes)
+      rm(condition)
+    } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
+      condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
+      genesPos <-
+        getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
+                                          hvgMethod = "mean.var.plot",
+                                          cond = condition,
+                                          numFeatures = numGenes)
+      rm(condition)
+    } else {
+      stop("Unrecognised `genesSel` passed in: ", genesSel)
+    }
+    logThis(paste("Selected", sum(genesPos), "genes using",
+                  genesSel, "selector"), logLevel = 2L)
   }
-  logThis(paste("Selected", sum(genesPos), "genes using", genesSel, "selector"),
-          logLevel = 2L)
 
   cellsMatrix <- cellsMatrix[genesPos, ]
 
