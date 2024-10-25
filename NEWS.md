@@ -1,3 +1,5 @@
+## 2.5.11
+
 Fixed bug in the function `cellsUMAPPlot()`: restored possibility of passing a
 genes `vector` as `genesSel` parameter. Also updated the documentation about the
 available genes selection methods
