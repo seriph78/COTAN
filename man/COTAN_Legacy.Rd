@@ -111,9 +111,6 @@ only}
 }}
 
 \examples{
-
-deltaExpression <- clustersDeltaExpression(objCOTAN, clusters = clusters)
-
 v <- list("genes" = paste0("gene_", c(1:9)), "values" = c(1:45))
 
 M <- vec2mat_rfast(v)

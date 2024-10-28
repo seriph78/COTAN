@@ -25,10 +25,6 @@
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @examples
-#'
-#' deltaExpression <- clustersDeltaExpression(objCOTAN, clusters = clusters)
-#'
 #' @rdname COTAN_Legacy
 #'
 clustersDeltaExpression <- function(objCOTAN, clName = "", clusters = NULL) {
