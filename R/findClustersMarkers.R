@@ -72,20 +72,15 @@ findClustersMarkers <- function(
   adjPValueDF <- pValueFromDEA(coexDF, numCells = getNumCells(objCOTAN),
                                adjustmentMethod = adjustmentMethod)
 
-  deltaExp <- clustersDeltaExpression(objCOTAN, clName = clName,
-                                      clusters = clusters)
-
   lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
 
-  assert_that(all(rownames(deltaExp)    == rownames(coexDF) &
-                  rownames(adjPValueDF) == rownames(coexDF) &
-                  getGenes(objCOTAN)    == rownames(coexDF)),
+  assert_that(identical(rownames(adjPValueDF), rownames(coexDF)),
+              identical(getGenes(objCOTAN),    rownames(coexDF)),
               msg = paste("Inconsistent data-frames passed in",
-                          "for 'coex', 'p-value' or 'delta expression'"))
+                          "for 'coex' or 'p-value'"))
 
-  retDF <- as.data.frame(matrix(data = NA, nrow = 0L, ncol = 7L))
-  colnames(retDF) <- c("CL", "Gene", "Score", "adjPVal",
-                       "DEA", "IsMarker", "logFoldCh")
+  retDF <- as.data.frame(matrix(data = NA, nrow = 0L, ncol = 6L))
+  colnames(retDF) <- c("CL", "Gene", "DEA", "adjPVal", "IsMarker", "logFoldCh")
 
   for (cl in unique(colnames(coexDF))) {
     for (type in c("min", "max")) {
@@ -97,9 +92,8 @@ findClustersMarkers <- function(
 
       tmpDF[["CL"]]        <- cl
       tmpDF[["Gene"]]      <- rownames(coexDF)[sortedPos]
-      tmpDF[["Score"]]     <- coexDF[sortedPos, cl]
+      tmpDF[["DEA"]]       <- coexDF[sortedPos, cl]
       tmpDF[["adjPVal"]]   <- adjPValueDF[sortedPos, cl]
-      tmpDF[["DEA"]]       <- deltaExp[sortedPos, cl]
       tmpDF[["IsMarker"]]  <- as.integer(tmpDF[["Gene"]] %in% marks)
       tmpDF[["logFoldCh"]] <- lfcDF[sortedPos, cl]
 

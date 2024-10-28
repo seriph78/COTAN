@@ -16,6 +16,8 @@
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName` that, in such a case, will only indicate
 #'   the relevant column name in the returned `data.frame`
+#' @param coexDF a `data.frame` where each column indicates the `COEX` for each
+#'   of the *clusters* of the *clusterization*
 #' @param kCuts the number of estimated *cluster* (this defines the height for
 #'   the tree cut and the associated colors)
 #' @param condNameList a `list` of *conditions*' names to be used for additional
@@ -64,7 +66,7 @@
 #'
 clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
                                        clName = "", clusters = NULL,
-                                       kCuts = 3L,
+                                       coexDF = NULL, kCuts = 3L,
                                        condNameList = NULL,
                                        conditionsList = NULL) {
   assert_that(is_empty(conditionsList) ||
@@ -76,10 +78,17 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)
 
-  expressionCl <- clustersDeltaExpression(objCOTAN, clusters = clusters,
-                                          clName = clName)
+  if (is_empty(coexDF)) {
+    if (clName %in% getClusterizations(objCOTAN)) {
+      coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
+    }
+    if (is_empty(coexDF)) {
+      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+    }
+  }
+
   scoreDF <- geneSetEnrichment(groupMarkers = groupMarkers,
-                               clustersCoex = expressionCl)
+                               clustersCoex = coexDF)
 
   scoreDFT <- t(scoreDF[, 1L:(ncol(scoreDF) - 2L), drop = FALSE])
   dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
