@@ -259,7 +259,7 @@ setMethod(
     thirdCheckOK <- FALSE
     if (cCheck3@thresholdRank > 0L) {
       thirdCheckOK <-
-        (cCheck3@thresholdRank <= cCheck3@maxRankBeyond)
+        (cCheck3@thresholdRank < cCheck3@maxRankBeyond)
     } else if (is.finite(cCheck3@quantileAtRank)) {
       thirdCheckOK <-
         (cCheck3@quantileAtRank <= cCheck3@GDIThreshold)
