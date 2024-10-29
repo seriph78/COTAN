@@ -1,3 +1,9 @@
+Marked the function `clustersDeltaExpression()` as legacy: it has been replaced\
+with the function `DEAOnClusters()` in the package
+
+Fixed minor bug in class `AdvancedGDIUniformityCheck` regarding third check:
+was testing third highest GID value instead of second
+
 ## 2.5.11
 
 Fixed bug in the function `cellsUMAPPlot()`: restored possibility of passing a
