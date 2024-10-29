@@ -1,16 +1,4 @@
-*.pdf
-.Rproj.user
 .Rhistory
-.rhistory
 .RData
-.Ruserdata
+.Rproj.user
 COTAN.Rproj
-COTAN.rproj
-*.tar.gz
-*.Rproj
-.rhistory
-/inst/doc
-/inst/docs
-/doc/
-/docs/
-/Meta/
