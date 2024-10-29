@@ -1,8 +1,8 @@
 
 #'
-#' @details `clustersDeltaExpression()` estimates the change in genes'
-#'   expression inside the *cluster* compared to the average situation in the
-#'   data set.
+#' @details `clustersDeltaExpression()` is a legacy function now superseded by
+#'   [DEAOnClusters()]. It estimates the change in genes' expression inside the
+#'   *cluster* compared to the average situation in the data set.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName The name of the *clusterization*. If not given the last
@@ -11,9 +11,9 @@
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName`
 #'
-#' @returns `clustersDeltaExpression()` returns a `data.frame` with the weighted
-#'   discrepancy of the expression of each gene within the *cluster* against
-#'   model expectations
+#' @returns `clustersDeltaExpression()` returns a `data.frame` with the
+#'   \eqn{\nu} weighted discrepancy of the expression of each gene within the
+#'   *cluster* against the corresponding model expectations
 #'
 #' @export
 #'
@@ -25,11 +25,7 @@
 #'
 #' @importFrom assertthat assert_that
 #'
-#' @examples
-#'
-#' deltaExpression <- clustersDeltaExpression(objCOTAN, clusters = clusters)
-#'
-#' @rdname HandlingClusterizations
+#' @rdname COTAN_Legacy
 #'
 clustersDeltaExpression <- function(objCOTAN, clName = "", clusters = NULL) {
   logThis("clustersDeltaExpression - START", logLevel = 2L)
