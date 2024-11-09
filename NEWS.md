@@ -1,8 +1,6 @@
 Improved function `clustersMarkersHeatmapPlot()`: now its shows a column for
 each marker gene and the shown content is more expressive
 
-## 2.7.0
-
 Marked the function `clustersDeltaExpression()` as legacy: it has been replaced
 with the function `DEAOnClusters()` in the package
 
