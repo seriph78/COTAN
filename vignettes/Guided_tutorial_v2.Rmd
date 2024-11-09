@@ -534,9 +534,10 @@ plot(summaryPlot)
 It is possible to visualize how relevant are the *marker genes'* `lists` with
 respect to the given *clusterization*
 ```{r eval=TRUE, include=TRUE}
-c(splitHeatmap, scoreDF) %<-%
+c(splitHeatmap, scoreDF, pValueDF) %<-%
   clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                             clName = "split", kCuts = 5L)
+                             clName = "split", kCuts = 5L,
+                             adjustmentMethod = "holm")
 
 draw(splitHeatmap)
 ```

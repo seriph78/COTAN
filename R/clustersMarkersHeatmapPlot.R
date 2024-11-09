@@ -1,11 +1,13 @@
 
 #' @details `clustersMarkersHeatmapPlot()` returns the heatmap plot of a summary
-#'   score for each *cluster* and each gene marker list in the given
+#'   score for each *cluster* and each gene marker in the given
 #'   *clusterization*. It also returns the numerosity and percentage of each
-#'   *cluster* on the right and a gene *clusterization* dendogram on the left
-#'   (as returned by the function [geneSetEnrichment()]) that allows to estimate
-#'   which markers groups are more or less expressed in each *cluster* so it is
-#'   easier to derive the *clusters*' cell types.
+#'   *cluster* on the right and a *clusterization* dendogram on the left, as
+#'   returned by the function [clustersTreePlot()]. The heatmap cells' colors
+#'   express the **DEA**, that is whether a gene is enriched or depleted in the
+#'   cluster, while the stars are aligned to the corresponding adjusted
+#'   \eqn{p-}value: `***` for \eqn{p < 0.1\%}, `**` for \eqn{p < 1\%}, `*` for
+#'   \eqn{p < 5\%}, `.` for \eqn{p < 10\%}
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param groupMarkers an optional named `list` with an element for each group
@@ -31,6 +33,8 @@
 #' @returns `clustersMarkersHeatmapPlot()` returns a list with:
 #'  * `"heatmapPlot"` the complete heatmap plot
 #'  * `"dataScore"` the `data.frame` with the score values
+#'  * `"pValueDF"`  the `data.frame` with the corresponding adjusted
+#'   \eqn{p-}values
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
@@ -39,6 +43,8 @@
 #' @importFrom utils tail
 #'
 #' @importFrom assertthat assert_that
+#'
+#' @importFrom stats symnum
 #'
 #' @importFrom dendextend set
 #'
@@ -100,12 +106,11 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     genesGroupMap <- factor(genesGroupsMap, levels = names(groupMarkers))
   }
 
-  genesAsList <- set_names(as.list(unlist(groupMarkers)), unlist(groupMarkers))
-  scoreDF <-
-    geneSetEnrichment(groupMarkers = genesAsList,
-                      clustersCoex = coexDF)
+  scoreDF <- coexDF[unlist(groupMarkers), , drop = FALSE]
 
-  scoreDFT <- t(scoreDF[, 1L:(ncol(scoreDF) - 2L), drop = FALSE])
+  pValueDF <- pValueFromDEA(coexDF = coexDF, numCells = getNumCells(objCOTAN),
+                            adjustmentMethod = adjustmentMethod)
+  pValueDF <- pValueDF[unlist(groupMarkers), , drop = FALSE]
 
   dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
   dend <- set(dend, "branches_lwd", 2L)
@@ -137,7 +142,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
 
       condDF <- as.data.frame(condDF)
       rownames(condDF) <- condDF[[1L]]
-      condDF <- condDF[rownames(scoreDFT), ]
+      condDF <- condDF[colnames(scoreDF), ]
       condDF[is.na(condDF)] <- 0L
 
       conds <- colnames(condDF)[2L:nCols]
@@ -164,7 +169,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
 
   clustDF <- clustersSummaryData(objCOTAN, clName = clName, clusters = clusters)
   rownames(clustDF) <- clustDF[[1L]]
-  clustDF <- clustDF[rownames(scoreDFT), ]
+  clustDF <- clustDF[colnames(scoreDF), ]
 
   freq1 <- set_names(clustDF[["CellNumber"]], rownames(clustDF))
 
@@ -188,17 +193,27 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
   )
 
   # Define the color function for the heatmap
-  colorFunc <- colorRamp2(c(0.0, 1.0), #c(min(scoreDFT), max(scoreDFT)),
-                          c("lightblue", "red"))
+  colExtr <- max(-min(scoreDF), max(scoreDF))
+  colorFunc <- colorRamp2(c(-colExtr, 0.0, colExtr),
+                          c("blue", "white", "red"))
 
-  # Define the function to annotate each cell with its score
+  cutpoints <- c(0.0,        0.001,       0.01,      0.05,      0.1,     1.0)
+  symbols   <- c(     "***",        "**",       "*",       ".",      " ")
+
+  # Define the function to annotate each cell with its significance
   cellFunc <- function(j, i, x, y, width, height, fill) {
-    grid.text(formatC(scoreDFT[i, j], digits = 1L, format = "f"),
-              x, y, gp = gpar(fontsize = 9L))
+    p_value <- pValueDF[j, i]
+
+    # Use symnum() to get the significance stars
+    stars <- symnum(p_value, corr = FALSE, na = FALSE,
+                    cutpoints = cutpoints, symbols = symbols)
+
+    # Display the stars in the cell
+    grid.text(stars, x, y, gp = gpar(fontsize = 12L, fontface = "bold"))
   }
 
   heatmap <- Heatmap(
-    scoreDFT,
+    t(scoreDF),
     name = "Score",
     rect_gp = gpar(col = "white", lwd = 1L),
     cluster_rows = dend,
@@ -216,23 +231,11 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     heatmap_legend_param = list(title = "Score")
   )
 
-#  heatmap <- Heatmap(scoreDFT,
-#                     rect_gp = gpar(col = "white", lwd = 1L),
-#                     cluster_rows = dend,
-#                     cluster_columns = FALSE,
-#                     col = colorFunc,
-##                     row_dend_width = unit(8.0, "cm"),
-#                     column_names_gp = gpar(fontsize = 11L),
-#                     row_names_gp = gpar(fontsize = 11L),
-#                     cell_fun = cellFunc,
-#                     right_annotation = haList,
-#                     left_annotation = hbList,
-#                     heatmap_legend_param = list(title = "score"))
-
   # If there are additional legends, add them
   if (!is.null(lgdList)) {
     heatmap <- heatmap + lgdList
   }
 
-  return(list("heatmapPlot" = heatmap, "dataScore" = scoreDF))
+  return(list("heatmapPlot" = heatmap,
+              "dataScore" = scoreDF, "pValues" = pValueDF))
 }
