@@ -534,8 +534,11 @@ plot(summaryPlot)
 It is possible to visualize how relevant are the *marker genes'* `lists` with
 respect to the given *clusterization*
 ```{r eval=TRUE, include=TRUE}
-c(., scoreDF) %<-% clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                                              clName = "split", kCuts = 5L)
+c(splitHeatmap, scoreDF) %<-%
+  clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
+                             clName = "split", kCuts = 5L)
+
+draw(splitHeatmap)
 ```
 
 
@@ -652,13 +655,15 @@ Here is possible to visualize how the `split` clusters are merged in to
 `merge` and `merge2`
 
 ```{r eval=TRUE, include=TRUE}
-invisible(
+c(mergeHeatmap, .) %<-%
   clustersMarkersHeatmapPlot(obj, clName = "merge", condNameList = "split",
-                             conditionsList = list(splitClusters)))
+                             conditionsList = list(splitClusters))
+draw(mergeHeatmap)
 
-invisible(
+c(mergeHeatmap2, .) %<-%
   clustersMarkersHeatmapPlot(obj, clName = "merge2", condNameList = "split",
-                             conditionsList = list(splitClusters)))
+                             conditionsList = list(splitClusters))
+draw(mergeHeatmap2)
 ```
 
 In the following graph, it is possible to check that the found clusters align

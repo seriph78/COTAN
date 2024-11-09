@@ -110,6 +110,7 @@ clustersMarkersHeatmapPlot(
   clusters = NULL,
   coexDF = NULL,
   kCuts = 3L,
+  adjustmentMethod = "bonferroni",
   condNameList = NULL,
   conditionsList = NULL
 )

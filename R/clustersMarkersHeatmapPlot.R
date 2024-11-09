@@ -20,6 +20,8 @@
 #'   of the *clusters* of the *clusterization*
 #' @param kCuts the number of estimated *cluster* (this defines the height for
 #'   the tree cut and the associated colors)
+#' @param adjustmentMethod *p-value* multi-test adjustment method. Defaults to
+#'   `"bonferroni"`; use `"none"` for no adjustment
 #' @param condNameList a `list` of *conditions*' names to be used for additional
 #'   columns in the final plot. When none are given no new columns will be added
 #'   using data extracted via the function [clustersSummaryData()]
@@ -67,6 +69,7 @@
 clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
                                        clName = "", clusters = NULL,
                                        coexDF = NULL, kCuts = 3L,
+                                       adjustmentMethod = "bonferroni",
                                        condNameList = NULL,
                                        conditionsList = NULL) {
   assert_that(is_empty(conditionsList) ||
@@ -87,13 +90,25 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     }
   }
 
-  scoreDF <- geneSetEnrichment(groupMarkers = groupMarkers,
-                               clustersCoex = coexDF)
+  genesGroupMap <- NULL
+  if (!is_empty(groupMarkers)) {
+    genesGroupsMap <- unlist(lapply(names(groupMarkers), function(group) {
+      genes <- groupMarkers[[group]]
+      set_names(rep_len(group, length(genes)), genes)
+    }))
+
+    genesGroupMap <- factor(genesGroupsMap, levels = names(groupMarkers))
+  }
+
+  genesAsList <- set_names(as.list(unlist(groupMarkers)), unlist(groupMarkers))
+  scoreDF <-
+    geneSetEnrichment(groupMarkers = genesAsList,
+                      clustersCoex = coexDF)
 
   scoreDFT <- t(scoreDF[, 1L:(ncol(scoreDF) - 2L), drop = FALSE])
-  dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
 
-  dend <- set(dend = dend, "branches_lwd", 2L)
+  dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
+  dend <- set(dend, "branches_lwd", 2L)
 
   hbList <- NULL
   lgdList <- list()
@@ -172,29 +187,52 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
       annotation_name_rot = 0.0)
   )
 
-  colorFunc <- colorRamp2(c(0.0, 1.0), c("lightblue", "red"))
+  # Define the color function for the heatmap
+  colorFunc <- colorRamp2(c(0.0, 1.0), #c(min(scoreDFT), max(scoreDFT)),
+                          c("lightblue", "red"))
+
+  # Define the function to annotate each cell with its score
   cellFunc <- function(j, i, x, y, width, height, fill) {
     grid.text(formatC(scoreDFT[i, j], digits = 1L, format = "f"),
               x, y, gp = gpar(fontsize = 9L))
   }
 
-  heatmap <- Heatmap(scoreDFT,
-                     rect_gp = gpar(col = "white", lwd = 1L),
-                     cluster_rows = dend,
-                     cluster_columns = FALSE,
-                     col = colorFunc,
-#                     row_dend_width = unit(8.0, "cm"),
-#                     width = unit(10, "cm"),
-#                     height = unit(10, "cm")
-                     column_names_gp = gpar(fontsize = 11L),
-                     row_names_gp = gpar(fontsize = 11L),
-                     cell_fun = cellFunc,
-                     right_annotation = haList,
-                     left_annotation = hbList,
-                     heatmap_legend_param = list(title = "score"))
+  heatmap <- Heatmap(
+    scoreDFT,
+    name = "Score",
+    rect_gp = gpar(col = "white", lwd = 1L),
+    cluster_rows = dend,
+    row_dend_width = unit(2.0, "cm"),
+    cluster_columns = FALSE,  # Columns are not clustered but grouped
+    col = colorFunc,
+    column_split = genesGroupMap,      # Group columns by gene groups
+    column_gap = unit(1, "mm"),        # Gap between gene groups
+    column_names_gp = gpar(fontsize = 10L, angle = 45, hjust = 1),
+    row_names_gp = gpar(fontsize = 10L),
+    cell_fun = cellFunc,
+    top_annotation = NULL,
+    right_annotation = haList,
+    left_annotation = hbList,
+    heatmap_legend_param = list(title = "Score")
+  )
 
-  # TODO: avoid using the draw command here...
-  heatmap <- draw(heatmap, annotation_legend_list = lgdList)
+#  heatmap <- Heatmap(scoreDFT,
+#                     rect_gp = gpar(col = "white", lwd = 1L),
+#                     cluster_rows = dend,
+#                     cluster_columns = FALSE,
+#                     col = colorFunc,
+##                     row_dend_width = unit(8.0, "cm"),
+#                     column_names_gp = gpar(fontsize = 11L),
+#                     row_names_gp = gpar(fontsize = 11L),
+#                     cell_fun = cellFunc,
+#                     right_annotation = haList,
+#                     left_annotation = hbList,
+#                     heatmap_legend_param = list(title = "score"))
+
+  # If there are additional legends, add them
+  if (!is.null(lgdList)) {
+    heatmap <- heatmap + lgdList
+  }
 
   return(list("heatmapPlot" = heatmap, "dataScore" = scoreDF))
 }
