@@ -193,7 +193,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
   )
 
   # Define the color function for the heatmap
-  colExtr <- max(-min(scoreDF), max(scoreDF))
+  colExtr <- suppressWarnings(max(-min(scoreDF), max(scoreDF)))
   colorFunc <- colorRamp2(c(-colExtr, 0.0, colExtr),
                           c("blue", "white", "red"))
 

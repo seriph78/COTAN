@@ -33,6 +33,7 @@ library(data.table)
 library(Rtsne)
 library(qpdf)
 library(GEOquery)
+library(ComplexHeatmap)
 
 options(parallelly.fork.enable = TRUE)
 ```
