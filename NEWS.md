@@ -1,3 +1,5 @@
+## 2.6.1
+
 Improved function `clustersMarkersHeatmapPlot()`: now its shows a column for
 each marker gene and the shown content is more expressive
 
