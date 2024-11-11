@@ -110,6 +110,7 @@ clustersMarkersHeatmapPlot(
   clusters = NULL,
   coexDF = NULL,
   kCuts = 3L,
+  adjustmentMethod = "bonferroni",
   condNameList = NULL,
   conditionsList = NULL
 )
@@ -343,6 +344,8 @@ corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 \itemize{
 \item \code{"heatmapPlot"} the complete heatmap plot
 \item \code{"dataScore"} the \code{data.frame} with the score values
+\item \code{"pValueDF"}  the \code{data.frame} with the corresponding adjusted
+\eqn{p-}values
 }
 
 \code{clustersSummaryData()} returns a \code{data.frame}  with the following
@@ -475,12 +478,14 @@ transformation
 needed calculates and stores the \code{DEA} of the relevant \emph{clusterization}.
 
 \code{clustersMarkersHeatmapPlot()} returns the heatmap plot of a summary
-score for each \emph{cluster} and each gene marker list in the given
+score for each \emph{cluster} and each gene marker in the given
 \emph{clusterization}. It also returns the numerosity and percentage of each
-\emph{cluster} on the right and a gene \emph{clusterization} dendogram on the left
-(as returned by the function \code{\link[=geneSetEnrichment]{geneSetEnrichment()}}) that allows to estimate
-which markers groups are more or less expressed in each \emph{cluster} so it is
-easier to derive the \emph{clusters}' cell types.
+\emph{cluster} on the right and a \emph{clusterization} dendogram on the left, as
+returned by the function \code{\link[=clustersTreePlot]{clustersTreePlot()}}. The heatmap cells' colors
+express the \strong{DEA}, that is whether a gene is enriched or depleted in the
+cluster, while the stars are aligned to the corresponding adjusted
+\eqn{p-}value: \verb{***} for \eqn{p < 0.1\%}, \verb{**} for \eqn{p < 1\%}, \code{*} for
+\eqn{p < 5\%}, \code{.} for \eqn{p < 10\%}
 
 \code{clustersSummaryData()} calculates various statistics about each
 cluster (with an optional further \code{condition} to separate the cells).

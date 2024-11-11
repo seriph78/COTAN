@@ -1,8 +1,11 @@
-Marked the function `clustersDeltaExpression()` as legacy: it has been replaced\
+Improved function `clustersMarkersHeatmapPlot()`: now its shows a column for
+each marker gene and the shown content is more expressive
+
+Marked the function `clustersDeltaExpression()` as legacy: it has been replaced
 with the function `DEAOnClusters()` in the package
 
 Fixed minor bug in class `AdvancedGDIUniformityCheck` regarding third check:
-was testing third highest GID value instead of second
+was testing third highest GDI value instead of second
 
 ## 2.5.11
 
