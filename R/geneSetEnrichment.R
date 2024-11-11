@@ -39,7 +39,7 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers = list()) {
   rownames(df) <- names(groupMarkers)
 
   # TODO: add comment on this constant in the @details above!
-  theta <- -1.0 / 0.1 * log(0.25)
+  theta <- -1.0 / 0.1 * log(0.25) # ~ 13.86294
 
   # not_assigned_clusters <- NA
   for (groupName in names(groupMarkers)) {
@@ -49,7 +49,7 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers = list()) {
     numDetected <- nrow(ex)
 
     logThis(paste0("In group ", groupName, " there are ", numDetected,
-                   " detected over ", length(genes), " genes"), logLevel = 3L)
+                   " detected over ", length(genes), " genes"), logLevel = 2L)
 
     # drop reductions
     ex[ex < 0.0 & !is.na(ex)] <- 0.0
@@ -57,7 +57,7 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers = list()) {
 
     for (cl in clustersTags) {
       df[groupName, cl] <-
-        sum(ex[, clTagsMap[cl]], na.rm = TRUE) / length(genes)
+        sum(ex[, clTagsMap[cl], drop = TRUE], na.rm = TRUE) / length(genes)
     }
 
     df[groupName, "N. detected"] <- numDetected
