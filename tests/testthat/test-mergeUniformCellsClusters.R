@@ -103,7 +103,7 @@ test_that("Merge Uniform Cells Clusters", {
                                    "all_check_results_4.csv"),
                          header = TRUE, row.names = 1L)
   expect_identical(nrow(allCheckDF),  7L)
-  expect_identical(ncol(allCheckDF), 26L)
+  expect_identical(ncol(allCheckDF), 34L)
 
   allCheckRes <- dfToCheckers(allCheckDF, "AdvancedGDIUniformityCheck")
 

@@ -1,3 +1,5 @@
+Improved `"AdvancedGDIUniformityCheck"` by adding a new check about 99% quantile
+
 ## 2.7.1
 
 Improved function `clustersMarkersHeatmapPlot()`: now its shows a column for

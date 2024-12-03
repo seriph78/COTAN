@@ -55,7 +55,8 @@ checkClusterUniformity <- function(
     deviceStr = "cuda",
     saveObj = TRUE,
     outDir = ".") {
-  # handle legacy usage
+  assert_that(is(checker, "BaseUniformityCheck"))
+
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)

@@ -566,12 +566,12 @@ c(mergedClusters, mergedCoexDF) %<-%
 # merges are:
 #  1 <- 06 + 07
 #  2 <- '-1' + 08 + 11
-#  3 <- 09 + 10
+#  3 <- 09
 #  4 <- 01
 #  5 <- 02
-#  6 <- 12 + 13
-#  7 <- 03 + 05
-#  8 <- 04
+#  6 <- 12
+#  7 <- 03 + 04 + 10 + 13
+#  8 <- 05
 
 obj <- addClusterization(obj, clName = "merge", override = TRUE,
                          clusters = mergedClusters, coexDF = mergedCoexDF)
@@ -620,10 +620,10 @@ c(mergedClusters2, mergedCoexDF2) %<-%
 # merges are:
 #  1 <- '-1' + 06 + 09
 #  2 <- 07
-#  3 <- 03  + 04 + 05 + 10 + 13
+#  3 <- 03  + 04 + 10 + 13
 #  4 <- 12
 #  5 <- 01 + 08 + 11
-#  6 <- 02
+#  6 <- 02 + 05
 
 obj <- addClusterization(obj, clName = "merge2", override = TRUE,
                          clusters = mergedClusters2, coexDF = mergedCoexDF2)
@@ -650,6 +650,8 @@ mergedCoexDF2 <- DEAOnClusters(obj, clusters = mergedClusters2)
 
 obj <- addClusterization(obj, clName = "merge2", clusters = mergedClusters2,
                          coexDF = mergedCoexDF2, override = FALSE)
+
+table(mergedClusters2, mergedClusters)
 ```
 
 
