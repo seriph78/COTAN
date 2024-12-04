@@ -172,10 +172,8 @@ corresponding at the given ratio}
 corresponding at the given rank}
 
 \item{\code{check}}{\code{GDICheck}. The single threshold check used to determine whether
-the \strong{cluster} is deemed not uniform}
-
-\item{\code{check}}{\code{GDICheck}. The single threshold check used to determine whether
-the \strong{cluster} is deemed not uniform}
+the \strong{cluster} is deemed not \emph{uniform}. Threshold defaults to \eqn{1.4},
+\code{maxRatioBeyond} to \eqn{1\%}}
 
 \item{\code{firstCheck}}{\code{GDICheck}. Single threshold below check used to determine
 whether the \strong{cluster} is deemed not \emph{uniform}. Threshold defaults to
@@ -187,6 +185,10 @@ whether the \strong{cluster} is deemed \emph{uniform}. Threshold defaults to
 
 \item{\code{thirdCheck}}{\code{GDICheck}. Single threshold below check used to determine
 whether the \strong{cluster} is deemed \emph{uniform}. Threshold defaults to
-\eqn{1.4}, \code{maxRankBeyond} to \eqn{2}}
+\eqn{1.4},   \code{maxRatioBeyond} to \eqn{1\%}}
+
+\item{\code{fourthCheck}}{\code{GDICheck}. Single threshold below check used to determine
+whether the \strong{cluster} is deemed \emph{uniform}. Threshold defaults to
+\eqn{1.4},   \code{maxRankBeyond} to \eqn{2}}
 }}
 

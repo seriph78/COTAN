@@ -59,21 +59,27 @@ test_that("Cell Uniform Clustering", {
              checkerRes@firstCheck@maxRatioBeyond)
   expect_lte(checkerRes@firstCheck@quantileAtRatio,
              checkerRes@firstCheck@GDIThreshold)
-  expect_true((checkerRes@secondCheck@fractionBeyond >=
-                 checkerRes@secondCheck@maxRatioBeyond) ||
-              (checkerRes@thirdCheck@thresholdRank <=
-                 checkerRes@thirdCheck@maxRankBeyond))
-  expect_true((checkerRes@secondCheck@quantileAtRatio >=
-                 checkerRes@secondCheck@GDIThreshold) ||
-              (checkerRes@thirdCheck@quantileAtRank <=
-                 checkerRes@thirdCheck@GDIThreshold))
+  expect_true(((checkerRes@secondCheck@fractionBeyond >=
+                  checkerRes@secondCheck@maxRatioBeyond) &&
+               (checkerRes@thirdCheck@fractionBeyond <=
+                  checkerRes@thirdCheck@maxRatioBeyond)) ||
+              (checkerRes@fourthCheck@thresholdRank <=
+                 checkerRes@fourthCheck@maxRankBeyond))
+  expect_true(((checkerRes@secondCheck@quantileAtRatio >=
+                 checkerRes@secondCheck@GDIThreshold) &&
+               (checkerRes@thirdCheck@quantileAtRatio <=
+                 checkerRes@thirdCheck@GDIThreshold)) ||
+              (checkerRes@fourthCheck@quantileAtRank <=
+                 checkerRes@fourthCheck@GDIThreshold))
   expect_identical(checkerRes@clusterSize, sum(clusters == firstCl))
   expect_identical(checkerRes@firstCheck@GDIThreshold,
                    advChecker@firstCheck@GDIThreshold)
   expect_identical(checkerRes@secondCheck@maxRatioBeyond,
                    advChecker@secondCheck@maxRatioBeyond)
-  expect_identical(checkerRes@thirdCheck@maxRankBeyond,
-                   advChecker@thirdCheck@maxRankBeyond)
+  expect_identical(checkerRes@thirdCheck@maxRatioBeyond,
+                   advChecker@thirdCheck@maxRatioBeyond)
+  expect_identical(checkerRes@fourthCheck@maxRankBeyond,
+                   advChecker@fourthCheck@maxRankBeyond)
 
   clusters2 <- factor(clusters, levels = c("-1", levels(clusters)))
   clusters2[1L:50L] <- "-1"
