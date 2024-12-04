@@ -16,6 +16,18 @@
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
 #' @param cores number of cores to use. Default is 1.
+#' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
+#'   expressed in less cells than threshold times the total number of cells.
+#'   Default cutoff is \eqn{0.003 \; (0.3\%)}
+#' @param genesCutoff `clean()` will delete from the `raw` data any cell that is
+#'   expressing less genes than threshold times the total number of genes.
+#'   Default cutoff is \eqn{0.002 \; (0.2\%)}
+#' @param cellsThreshold any gene that is expressed in more cells than threshold
+#'   times the total number of cells will be marked as **fully-expressed**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
+#' @param genesThreshold any cell that is expressing more genes than threshold
+#'   times the total number of genes will be marked as **fully-expressing**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.
@@ -63,12 +75,16 @@ setMethod(
   "proceedToCoex",
   "COTAN",
   function(objCOTAN, calcCoex = TRUE, optimizeForSpeed = TRUE,
-           deviceStr = "cuda", cores = 1L, saveObj = TRUE, outDir = ".") {
+           deviceStr = "cuda", cores = 1L,
+           cellsCutoff = 0.003, genesCutoff = 0.002,
+           cellsThreshold = 0.99, genesThreshold = 0.99,
+           saveObj = TRUE, outDir = ".") {
     startTimeAll <- Sys.time()
 
     logThis("Cotan analysis functions started", logLevel = 1L)
 
-    objCOTAN <- clean(objCOTAN)
+    objCOTAN <- clean(objCOTAN, cellsCutoff, genesCutoff,
+                      cellsThreshold, genesThreshold)
 
     if (isTRUE(saveObj)) tryCatch({
       if (!dir.exists(outDir)) {
@@ -205,6 +221,18 @@ setMethod(
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
 #' @param cores number of cores to use. Default is 1.
+#' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
+#'   expressed in less cells than threshold times the total number of cells.
+#'   Default cutoff is \eqn{0.003 \; (0.3\%)}
+#' @param genesCutoff `clean()` will delete from the `raw` data any cell that is
+#'   expressing less genes than threshold times the total number of genes.
+#'   Default cutoff is \eqn{0.002 \; (0.2\%)}
+#' @param cellsThreshold any gene that is expressed in more cells than threshold
+#'   times the total number of cells will be marked as **fully-expressed**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
+#' @param genesThreshold any cell that is expressing more genes than threshold
+#'   times the total number of genes will be marked as **fully-expressing**.
+#'   Default threshold is \eqn{0.99 \; (99.0\%)}
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.
@@ -232,8 +260,11 @@ setMethod(
 
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,
-           calcCoex = TRUE, optimizeForSpeed = TRUE, deviceStr = "cuda",
-           cores = 1L, saveObj = TRUE, outDir = ".") {
+           calcCoex = TRUE, optimizeForSpeed = TRUE,
+           deviceStr = "cuda", cores = 1L,
+           cellsCutoff = 0.003, genesCutoff = 0.002,
+           cellsThreshold = 0.99, genesThreshold = 0.99,
+           saveObj = TRUE, outDir = ".") {
 
     objCOTAN <- COTAN(raw = raw)
     objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
@@ -246,5 +277,7 @@ automaticCOTANObjectCreation <-
     return(proceedToCoex(objCOTAN, calcCoex = calcCoex,
                          optimizeForSpeed = optimizeForSpeed,
                          deviceStr = deviceStr, cores = cores,
+                         cellsCutoff, genesCutoff,
+                         cellsThreshold, genesThreshold,
                          saveObj = saveObj, outDir = outDir))
   }
