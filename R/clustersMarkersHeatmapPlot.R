@@ -98,19 +98,22 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
 
   genesGroupMap <- NULL
   if (!is_empty(groupMarkers)) {
-    genesGroupsMap <- unlist(lapply(names(groupMarkers), function(group) {
+    genesGroupMap <- unlist(lapply(names(groupMarkers), function(group) {
       genes <- groupMarkers[[group]]
       set_names(rep_len(group, length(genes)), genes)
     }))
 
-    genesGroupMap <- factor(genesGroupsMap, levels = names(groupMarkers))
+    genesGroupMap <- factor(genesGroupMap, levels = names(groupMarkers))
   }
 
-  scoreDF <- coexDF[unlist(groupMarkers), , drop = FALSE]
+  scoreDF <- coexDF[names(genesGroupMap), , drop = FALSE]
+  rownames(scoreDF) <- names(genesGroupMap)
 
   pValueDF <- pValueFromDEA(coexDF = coexDF, numCells = getNumCells(objCOTAN),
                             adjustmentMethod = adjustmentMethod)
-  pValueDF <- pValueDF[unlist(groupMarkers), , drop = FALSE]
+  pValueDF <- pValueDF[names(genesGroupMap), , drop = FALSE]
+  rownames(pValueDF) <- names(genesGroupMap)
+
 
   dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
   dend <- set(dend, "branches_lwd", 2L)
@@ -193,7 +196,8 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
   )
 
   # Define the color function for the heatmap
-  colExtr <- suppressWarnings(max(-min(scoreDF), max(scoreDF)))
+  colExtr <- suppressWarnings(max(-min(scoreDF, na.rm = TRUE),
+                                   max(scoreDF, na.rm = TRUE)))
   colorFunc <- colorRamp2(c(-colExtr, 0.0, colExtr),
                           c("blue", "white", "red"))
 

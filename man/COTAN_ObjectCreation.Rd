@@ -16,6 +16,10 @@ COTAN(raw = "ANY")
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   cores = 1L,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99,
   saveObj = TRUE,
   outDir = "."
 )
@@ -29,6 +33,10 @@ automaticCOTANObjectCreation(
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   cores = 1L,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99,
   saveObj = TRUE,
   outDir = "."
 )
@@ -51,6 +59,22 @@ the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
 to a specific device}
 
 \item{cores}{number of cores to use. Default is 1.}
+
+\item{cellsCutoff}{\code{clean()} will delete from the \code{raw} data any gene that is
+expressed in less cells than threshold times the total number of cells.
+Default cutoff is \eqn{0.003 \; (0.3\%)}}
+
+\item{genesCutoff}{\code{clean()} will delete from the \code{raw} data any cell that is
+expressing less genes than threshold times the total number of genes.
+Default cutoff is \eqn{0.002 \; (0.2\%)}}
+
+\item{cellsThreshold}{any gene that is expressed in more cells than threshold
+times the total number of cells will be marked as \strong{fully-expressed}.
+Default threshold is \eqn{0.99 \; (99.0\%)}}
+
+\item{genesThreshold}{any cell that is expressing more genes than threshold
+times the total number of genes will be marked as \strong{fully-expressing}.
+Default threshold is \eqn{0.99 \; (99.0\%)}}
 
 \item{saveObj}{Boolean flag; when \code{TRUE} saves intermediate analyses and
 plots to file}

@@ -1,4 +1,11 @@
+
 Improved `"AdvancedGDIUniformityCheck"` by adding a new check about 99% quantile
+
+Solved issue in `clustersMarkersHeatmapPlot()`: now passing in a genes not in
+the dataset will result in a corresponding gray column instead of an error
+
+Added possibility to specify `clean()` thresholds in the functions
+`proceedToCoex()` and `automaticCOTANObjectCreation()`
 
 ## 2.7.1
 
