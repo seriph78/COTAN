@@ -1,3 +1,6 @@
+Added possibility to specify `clean()` thresholds in the functions
+`proceedToCoex()` and `automaticCOTANObjectCreation()`
+
 ## 2.6.1
 
 Improved function `clustersMarkersHeatmapPlot()`: now its shows a column for
