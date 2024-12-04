@@ -447,7 +447,7 @@ layersGenes <- list(
   "L2/3" = c("Satb2",  "Cux1"),
   "L4"   = c("Rorb",   "Sox5"),
   "L5/6" = c("Bcl11b", "Fezf2"),
-  "Prog" = c("Vim",    "Hes1")
+  "Prog" = c("Vim",    "Hes1", "Dummy")
 )
 c(gSpace, eigPlot, pcaGenesClDF, treePlot) %<-%
   establishGenesClusters(obj, groupMarkers = layersGenes,
