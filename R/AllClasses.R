@@ -751,7 +751,8 @@ setClass(
 #'   below the given *threshold* is less than the given *ratio*
 #'
 #' @slot check `GDICheck`. The single threshold check used to determine whether
-#'   the **cluster** is deemed not uniform
+#'   the **cluster** is deemed not *uniform*. Threshold defaults to \eqn{1.4},
+#'   `maxRatioBeyond` to \eqn{1\%}
 #'
 #' @importFrom methods new
 #' @importFrom methods validObject
@@ -789,8 +790,6 @@ setClass(
 #'   *uniform*. Otherwise if it passes either of the other two checks (one above
 #'   and one below) it is deemed *uniform*.
 #'
-#' @slot check `GDICheck`. The single threshold check used to determine whether
-#'   the **cluster** is deemed not uniform
 #' @slot firstCheck `GDICheck`. Single threshold below check used to determine
 #'   whether the **cluster** is deemed not *uniform*. Threshold defaults to
 #'   \eqn{1.297}, `maxRatioBeyond` to \eqn{5\%}
@@ -799,7 +798,10 @@ setClass(
 #'   \eqn{1.307}, `maxRatioBeyond` to \eqn{2\%}
 #' @slot thirdCheck `GDICheck`. Single threshold below check used to determine
 #'   whether the **cluster** is deemed *uniform*. Threshold defaults to
-#'   \eqn{1.4}, `maxRankBeyond` to \eqn{2}
+#'   \eqn{1.4},   `maxRatioBeyond` to \eqn{1\%}
+#' @slot fourthCheck `GDICheck`. Single threshold below check used to determine
+#'   whether the **cluster** is deemed *uniform*. Threshold defaults to
+#'   \eqn{1.4},   `maxRankBeyond` to \eqn{2}
 #'
 #' @importFrom methods new
 #' @importFrom methods validObject
@@ -812,7 +814,8 @@ setClass(
   slots = c(
     firstCheck  = "GDICheck",
     secondCheck = "GDICheck",
-    thirdCheck  = "GDICheck"
+    thirdCheck  = "GDICheck",
+    fourthCheck = "GDICheck"
   ),
   prototype = list(
     firstCheck  = new("GDICheck",
@@ -828,6 +831,11 @@ setClass(
     thirdCheck  = new("GDICheck",
                       isCheckAbove   = FALSE,
                       GDIThreshold   = 1.4,
+                      maxRatioBeyond = 0.01,
+                      maxRankBeyond  = 0L),
+    fourthCheck = new("GDICheck",
+                      isCheckAbove   = FALSE,
+                      GDIThreshold   = 1.4,
                       maxRatioBeyond = NaN,
                       maxRankBeyond  = 2L)
   ),
@@ -835,10 +843,12 @@ setClass(
     invisible(validObject(object@firstCheck))
     invisible(validObject(object@secondCheck))
     invisible(validObject(object@thirdCheck))
+    invisible(validObject(object@fourthCheck))
     if (object@firstCheck@isCheckAbove   ||
         !object@secondCheck@isCheckAbove ||
-        object@thirdCheck@isCheckAbove) {
-      stop("Given check directions must be below, above, below")
+        object@thirdCheck@isCheckAbove   ||
+        object@fourthCheck@isCheckAbove) {
+      stop("The given checks' directions must be 'below, above, below, below'")
     }
     return(TRUE)
   }) # end class AdvancedGDIUniformityCheck

@@ -136,12 +136,14 @@ setMethod(
   function(currentC, previousC = NULL, objCOTAN = NULL) {
     checkerIsOK <- function(checker) {
       invisible(validObject(checker))
-      return(!checker@firstCheck@isCheckAbove &&
+      return(!checker@firstCheck@isCheckAbove  &&
               checker@secondCheck@isCheckAbove &&
-             !checker@thirdCheck@isCheckAbove &&
+             !checker@thirdCheck@isCheckAbove  &&
+             !checker@fourthCheck@isCheckAbove &&
              checker@firstCheck@maxRankBeyond  == 0L &&
              checker@secondCheck@maxRankBeyond == 0L &&
-             !is.finite(checker@thirdCheck@maxRatioBeyond))
+             checker@thirdCheck@maxRankBeyond  == 0L &&
+             !is.finite(checker@fourthCheck@maxRatioBeyond))
     }
     assert_that(checkerIsOK(currentC))
     assert_that(is.null(previousC) ||
@@ -154,6 +156,7 @@ setMethod(
     cCheck1 <- currentC@firstCheck
     cCheck2 <- currentC@secondCheck
     cCheck3 <- currentC@thirdCheck
+    cCheck4 <- currentC@fourthCheck
 
     if (!is.null(previousC)) {
       assert_that(checkerIsOK(previousC))
@@ -171,29 +174,36 @@ setMethod(
       pCheck1 <- previousC@firstCheck
       pCheck2 <- previousC@secondCheck
       pCheck3 <- previousC@thirdCheck
+      pCheck4 <- previousC@fourthCheck
 
       if (is.finite(pCheck1@fractionBeyond) &&
           is.finite(pCheck2@fractionBeyond) &&
-          pCheck3@thresholdRank > 0L &&
+          is.finite(pCheck3@fractionBeyond) &&
+          pCheck4@thresholdRank > 0L &&
           pCheck1@GDIThreshold == cCheck1@GDIThreshold &&
           pCheck2@GDIThreshold == cCheck2@GDIThreshold &&
-          pCheck3@GDIThreshold == cCheck3@GDIThreshold) {
+          pCheck3@GDIThreshold == cCheck3@GDIThreshold &&
+          pCheck4@GDIThreshold == cCheck4@GDIThreshold) {
         cCheck1@fractionBeyond <- pCheck1@fractionBeyond
         cCheck2@fractionBeyond <- pCheck2@fractionBeyond
-        cCheck3@thresholdRank  <- pCheck3@thresholdRank
+        cCheck3@fractionBeyond <- pCheck3@fractionBeyond
+        cCheck4@thresholdRank  <- pCheck4@thresholdRank
 
         previousCheckIsSufficient <- TRUE
       }
 
       if (is.finite(pCheck1@quantileAtRatio) &&
           is.finite(pCheck2@quantileAtRatio) &&
-          is.finite(pCheck3@quantileAtRank)  &&
+          is.finite(pCheck3@quantileAtRatio) &&
+          is.finite(pCheck4@quantileAtRank)  &&
           pCheck1@maxRatioBeyond == cCheck1@maxRatioBeyond &&
           pCheck2@maxRatioBeyond == cCheck2@maxRatioBeyond &&
-          pCheck3@maxRankBeyond  == cCheck3@maxRankBeyond) {
+          pCheck3@maxRatioBeyond == cCheck3@maxRatioBeyond &&
+          pCheck4@maxRankBeyond  == cCheck4@maxRankBeyond) {
         cCheck1@quantileAtRatio <- pCheck1@quantileAtRatio
         cCheck2@quantileAtRatio <- pCheck2@quantileAtRatio
-        cCheck3@quantileAtRank  <- pCheck3@quantileAtRank
+        cCheck3@quantileAtRatio <- pCheck3@quantileAtRatio
+        cCheck4@quantileAtRank  <- pCheck4@quantileAtRank
 
         previousCheckIsSufficient <- TRUE
       }
@@ -201,7 +211,6 @@ setMethod(
       # if neither threshold match previous check we cannot avoid re-doing the
       # check via the GDI, so fall-back from here
     }
-
     # run the check via pre-calculated GDI if possible
     if (!previousCheckIsSufficient && !is.null(objCOTAN) &&
         getNumCells(objCOTAN) == currentC@clusterSize &&
@@ -226,10 +235,16 @@ setMethod(
       cCheck2@fractionBeyond <-
         sum(gdi >= cCheck2@GDIThreshold) / length(gdi)
 
-      cCheck3@quantileAtRank <-
-        sort(gdi, decreasing = TRUE)[[cCheck3@maxRankBeyond]]
+      cCheck3@quantileAtRatio <-
+        quantile(gdi, probs = 1.0 - cCheck3@maxRatioBeyond, names = FALSE)
 
-      cCheck3@thresholdRank <- sum(gdi >= cCheck3@GDIThreshold)
+      cCheck3@fractionBeyond <-
+        sum(gdi >= cCheck3@GDIThreshold) / length(gdi)
+
+      cCheck4@quantileAtRank <-
+        sort(gdi, decreasing = TRUE)[[cCheck4@maxRankBeyond]]
+
+      cCheck4@thresholdRank <- sum(gdi >= cCheck4@GDIThreshold)
     }
 
     firstCheckOK <- FALSE
@@ -257,22 +272,36 @@ setMethod(
     }
 
     thirdCheckOK <- FALSE
-    if (cCheck3@thresholdRank > 0L) {
+    if (is.finite(cCheck3@fractionBeyond)) {
       thirdCheckOK <-
-        (cCheck3@thresholdRank < cCheck3@maxRankBeyond)
-    } else if (is.finite(cCheck3@quantileAtRank)) {
+        (cCheck3@fractionBeyond <= cCheck3@maxRatioBeyond)
+    } else if (is.finite(cCheck3@quantileAtRatio)) {
       thirdCheckOK <-
-        (cCheck3@quantileAtRank <= cCheck3@GDIThreshold)
+        (cCheck3@quantileAtRatio <= cCheck3@GDIThreshold)
     } else {
       # signal no check result can be established
       currentC@clusterSize <- 0L
     }
 
-    currentC@isUniform <- firstCheckOK && (secondCheckOK || thirdCheckOK)
+    fourthCheckOK <- FALSE
+    if (cCheck4@thresholdRank > 0L) {
+      fourthCheckOK <-
+        (cCheck4@thresholdRank < cCheck4@maxRankBeyond)
+    } else if (is.finite(cCheck4@quantileAtRank)) {
+      fourthCheckOK <-
+        (cCheck4@quantileAtRank <= cCheck4@GDIThreshold)
+    } else {
+      # signal no check result can be established
+      currentC@clusterSize <- 0L
+    }
+
+    currentC@isUniform <- firstCheckOK &&
+      ((secondCheckOK && thirdCheckOK) || fourthCheckOK)
 
     currentC@firstCheck  <- cCheck1
     currentC@secondCheck <- cCheck2
     currentC@thirdCheck  <- cCheck3
+    currentC@fourthCheck <- cCheck4
 
     return(currentC)
   })
@@ -521,18 +550,32 @@ setMethod(
     if (checker@clusterSize == 0L ||
         !is.finite(checker@firstCheck@quantileAtRatio)  ||
         !is.finite(checker@secondCheck@quantileAtRatio) ||
-        !is.finite(checker@thirdCheck@quantileAtRank)) {
+        !is.finite(checker@thirdCheck@quantileAtRatio) ||
+        !is.finite(checker@fourthCheck@quantileAtRank)) {
       return(NaN)
     }
     delta1 <- checker@firstCheck@quantileAtRatio -
-               checker@firstCheck@GDIThreshold
-    if (checker@secondCheck@quantileAtRatio >
-       (checker@secondCheck@GDIThreshold + max(0.0, delta1))) {
-     return(delta1)
+                checker@firstCheck@GDIThreshold
+    delta2 <- checker@secondCheck@quantileAtRatio -
+                checker@secondCheck@GDIThreshold
+    delta3 <- checker@thirdCheck@quantileAtRatio -
+                checker@thirdCheck@GDIThreshold
+    delta4 <- checker@fourthCheck@quantileAtRank -
+                checker@fourthCheck@GDIThreshold
+
+    # delta14 is always sufficient to make the cluster UT,
+    # if delta13 is lower and delta2 collaborates then delta13 can be used.
+    # We use delta13^+ against delta2 as we never lower
+    # the secondCheck@GDIThreshold!
+
+    delta13 <- max(delta1, delta3)
+    delta14 <- max(delta1, delta4)
+
+    if (delta13 < delta14 && delta2 > max(0.0, delta13)) {
+      return(delta13)
+    } else {
+      return(delta14)
     }
-    delta2 <- max(delta1, checker@thirdCheck@quantileAtRank -
-                           checker@thirdCheck@GDIThreshold)
-    return(delta2)
   })
 
 # ------  shiftCheckerThresholds ------
@@ -610,5 +653,11 @@ setMethod(
                      isCheckAbove   = checker@thirdCheck@isCheckAbove,
                      GDIThreshold   = checker@thirdCheck@GDIThreshold + shift,
                      maxRatioBeyond = checker@thirdCheck@maxRatioBeyond,
-                     maxRankBeyond  = checker@thirdCheck@maxRankBeyond)))
+                     maxRankBeyond  = checker@thirdCheck@maxRankBeyond),
+               fourthCheck =
+                 new("GDICheck",
+                     isCheckAbove   = checker@fourthCheck@isCheckAbove,
+                     GDIThreshold   = checker@fourthCheck@GDIThreshold + shift,
+                     maxRatioBeyond = checker@fourthCheck@maxRatioBeyond,
+                     maxRankBeyond  = checker@fourthCheck@maxRankBeyond)))
   })
