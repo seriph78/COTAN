@@ -14,7 +14,8 @@
 #'   *clusterization* algorithm
 #' @param minNumClusters The minimum number of *clusters* expected from this
 #'   *clusterization*. In cases it is not reached, it will increase the
-#'   resolution of the *clusterization*.
+#'   resolution of the *clusterization*
+#' @param hvgMethod the HVG method
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDirCond an existing directory for the analysis output.
@@ -44,7 +45,7 @@
 #' @noRd
 #'
 seuratClustering <- function(rawData, cond, iter, initialResolution,
-                             minNumClusters, saveObj, outDirCond) {
+                             minNumClusters, hvgMethod, saveObj, outDirCond) {
   tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
@@ -53,8 +54,12 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
                                min.cells = if (iter == 1L) 3L else 1L,
                                min.features = if (iter == 1L) 4L else 2L)
     srat <- NormalizeData(srat)
-    srat <- FindVariableFeatures(srat, selection.method = "vst",
-                                 nfeatures = 2000L)
+    if (length(genesSel) > 1L) {
+      VariableFeatures(srat, method = "hgdi") <- genesSel
+    } else {
+      srat <- FindVariableFeatures(srat, selection.method = hvgMethod,
+                                   nfeatures = 2000L)
+    }
     srat <- ScaleData(srat, features = rownames(srat))
 
     maxRows <- nrow(srat@meta.data) - 1L
@@ -178,10 +183,20 @@ NULL
 #'   normal
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
-#'   faster but less precise.
+#'   faster but less precise
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param genesSel Decides whether and how to perform gene-selection. It can be
+#'   a straight list of genes or a string indicating one of the following
+#'   selection methods:
+#'   * `"HGDI"` Will pick-up the genes with highest **GDI**. Since it requires
+#'     an available `COEX` matrix it will fall-back to `"HVG_Seurat"` when the
+#'     matrix is not available
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'     via the \pkg{Seurat} package (the default method)
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
@@ -225,6 +240,7 @@ cellsUniformClustering <- function(objCOTAN,
                                    initialResolution = 0.8,
                                    useDEA = TRUE,
                                    distance = NULL,
+                                   genesSel = "HVG_Seurat",
                                    hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
@@ -268,6 +284,33 @@ cellsUniformClustering <- function(objCOTAN,
                             "a legacy `GDIThreshold` must be given"))
   }
 
+  if (length(genesSel) > 1L) {
+    hvgMethod <- genesSel[genesSel %in% getGenes(objCOTAN)]
+  } else {
+    if (str_equal(genesSel, "HGDI", ignore_case = TRUE) &&
+        !isCoexAvailable(objCOTAN)) {
+      logThis(paste("The COEX matrix is not available: falling back",
+                    "to HVG_Seurat for genes' selection"), logLevel = 1L)
+      genesSel <- "HVG_Seurat"
+    }
+
+    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
+      gdi <- getGDI(objCOTAN)
+      if (is_empty(gdi)) {
+        gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
+                                            rowsFraction = 0.05), "GDI")
+      }
+      hvgMethod <- names(gdi)[order(gdi, decreasing = TRUE)][1L:2000L]
+      rm(gdi)
+    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
+      hvgMethod <- "vst"
+    } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
+      hvgMethod <- "mean.var.plot"
+    } else {
+      stop("Unrecognised `genesSel` passed in: ", genesSel)
+    }
+  }
+
   repeat {
     iter <- iter + 1L
 
@@ -282,7 +325,7 @@ cellsUniformClustering <- function(objCOTAN,
       seuratClustering(rawData = getRawData(objCOTAN)[, is.na(outputClusters)],
                        cond = cond, iter = iter,
                        initialResolution = initialResolution,
-                       minNumClusters = minNumClusters,
+                       minNumClusters = minNumClusters, hvgMethod = hvgMethod,
                        saveObj = saveObj, outDirCond = splitOutDir)
 
     if (is_null(objSeurat)) {
