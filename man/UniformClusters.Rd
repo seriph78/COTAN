@@ -117,13 +117,11 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
-\item{genesSel}{Decides whether and how to perform gene-selection. It can be
-a straight list of genes or a string indicating one of the following
+\item{genesSel}{Decides whether and how to perform the gene-selection. used
+for the clustering. It is a string indicating one of the following
 selection methods:
 \itemize{
-\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}. Since it requires
-an available \code{COEX} matrix it will fall-back to \code{"HVG_Seurat"} when the
-matrix is not available
+\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}
 \item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
 via the \pkg{Seurat} package (the default method)
 \item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability

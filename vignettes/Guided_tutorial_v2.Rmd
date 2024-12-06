@@ -497,7 +497,8 @@ advChecker <- new("AdvancedGDIUniformityCheck")
 c(splitClusters, splitCoexDF) %<-%
   cellsUniformClustering(obj, initialResolution = 0.8, checker = advChecker,
                          optimizeForSpeed = TRUE, deviceStr = "cuda",
-                         cores = 6L, saveObj = TRUE, outDir = outDir)
+                         cores = 6L, genesSel = "HGDI",
+                         saveObj = TRUE, outDir = outDir)
 
 obj <- addClusterization(obj, clName = "split",
                          clusters = splitClusters, coexDF = splitCoexDF)
@@ -677,7 +678,7 @@ It is possible to plot the *clusterization* on a `UMAP` plot
 
 ```{r}
 c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge2",
-                                         dataMethod = "AdjBinarized",
+                                         dataMethod = "LogLikelihood",
                                          genesSel = "HGDI",
                                          colors = NULL, numNeighbors = 15L,
                                          minPointsDist = 0.2)
