@@ -1,6 +1,6 @@
 ## 2.6.2
 
-Added possibility to specify genes' selctino method used in the
+Added possibility to specify genes' selection method used in the
 `cellsUniformClustering()` function
 
 Improved `"AdvancedGDIUniformityCheck"` by adding a new check about 99% quantile
