@@ -30,6 +30,7 @@ cellsUniformClustering(
   initialResolution = 0.8,
   useDEA = TRUE,
   distance = NULL,
+  genesSel = "HVG_Seurat",
   hclustMethod = "ward.D2",
   saveObj = TRUE,
   outDir = "."
@@ -115,6 +116,17 @@ faster but less precise.}
 \item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+
+\item{genesSel}{Decides whether and how to perform the gene-selection. used
+for the clustering. It is a string indicating one of the following
+selection methods:
+\itemize{
+\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}
+\item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
+via the \pkg{Seurat} package (the default method)
+\item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability
+according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
+}}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}

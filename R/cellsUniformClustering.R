@@ -14,7 +14,23 @@
 #'   *clusterization* algorithm
 #' @param minNumClusters The minimum number of *clusters* expected from this
 #'   *clusterization*. In cases it is not reached, it will increase the
-#'   resolution of the *clusterization*.
+#'   resolution of the *clusterization*
+#' @param genesSel Decides whether and how to perform the gene-selection. used
+#'   for the clustering. It is a string indicating one of the following
+#'   selection methods:
+#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'     via the \pkg{Seurat} package (the default method)
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param cores number of cores to use. Default is 1.
+#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
+#'   library to run the matrix calculations. Otherwise, or when the library is
+#'   not available will run the slower legacy code
+#' @param deviceStr On the `torch` library enforces which device to use to run
+#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
+#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
+#'   to a specific device
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDirCond an existing directory for the analysis output.
@@ -27,6 +43,7 @@
 #' @importFrom Seurat FindVariableFeatures
 #' @importFrom Seurat ScaleData
 #' @importFrom Seurat VariableFeatures
+#' @importFrom Seurat `VariableFeatures<-`
 #' @importFrom Seurat RunPCA
 #' @importFrom Seurat FindNeighbors
 #' @importFrom Seurat FindClusters
@@ -43,8 +60,10 @@
 #'
 #' @noRd
 #'
-seuratClustering <- function(rawData, cond, iter, initialResolution,
-                             minNumClusters, saveObj, outDirCond) {
+seuratClustering <- function(rawData, cond, iter,
+                             initialResolution, minNumClusters, genesSel,
+                             cores, optimizeForSpeed, deviceStr,
+                             saveObj, outDirCond) {
   tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
@@ -53,15 +72,36 @@ seuratClustering <- function(rawData, cond, iter, initialResolution,
                                min.cells = if (iter == 1L) 3L else 1L,
                                min.features = if (iter == 1L) 4L else 2L)
     srat <- NormalizeData(srat)
-    srat <- FindVariableFeatures(srat, selection.method = "vst",
-                                 nfeatures = 2000L)
+
+    numFeatures <- min(2000L, nrow(rawData))
+    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
+      obj <- COTAN(rawData)
+      obj <- proceedToCoex(obj, calcCoex = TRUE, cores = cores,
+                           optimizeForSpeed = optimizeForSpeed,
+                           deviceStr = deviceStr,
+                           saveObj = saveObj, outDir = outDirCond)
+      gdi <- getColumnFromDF(calculateGDI(obj, statType = "S",
+                                          rowsFraction = 0.05), "GDI")
+      VariableFeatures(object = srat) <-
+        names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numFeatures)]
+      rm(gdi, obj)
+    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)){
+      srat <- FindVariableFeatures(srat, nfeatures = numFeatures,
+                                   selection.method = "vst")
+    } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
+      srat <- FindVariableFeatures(srat, nfeatures = numFeatures,
+                                   selection.method = "mean.var.plot")
+    } else {
+      stop("Unrecognised `genesSel` passed in: ", genesSel)
+    }
+
     srat <- ScaleData(srat, features = rownames(srat))
 
     maxRows <- nrow(srat@meta.data) - 1L
     srat <- RunPCA(srat, features = VariableFeatures(object = srat),
                    npcs = min(50L, maxRows))
 
-    srat <- FindNeighbors(srat, dims = 1L:min(25L, maxRows))
+    srat <- FindNeighbors(srat, dims = seq_len(min(25L, maxRows)))
 
     resolution <- initialResolution
     resolutionStep <- 0.5
@@ -178,10 +218,18 @@ NULL
 #'   normal
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
-#'   faster but less precise.
+#'   faster but less precise
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param genesSel Decides whether and how to perform the gene-selection. used
+#'   for the clustering. It is a string indicating one of the following
+#'   selection methods:
+#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'     via the \pkg{Seurat} package (the default method)
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
@@ -225,6 +273,7 @@ cellsUniformClustering <- function(objCOTAN,
                                    initialResolution = 0.8,
                                    useDEA = TRUE,
                                    distance = NULL,
+                                   genesSel = "HVG_Seurat",
                                    hclustMethod = "ward.D2",
                                    saveObj = TRUE, outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
@@ -282,7 +331,9 @@ cellsUniformClustering <- function(objCOTAN,
       seuratClustering(rawData = getRawData(objCOTAN)[, is.na(outputClusters)],
                        cond = cond, iter = iter,
                        initialResolution = initialResolution,
-                       minNumClusters = minNumClusters,
+                       minNumClusters = minNumClusters, genesSel = genesSel,
+                       cores = cores, optimizeForSpeed = optimizeForSpeed,
+                       deviceStr = deviceStr,
                        saveObj = saveObj, outDirCond = splitOutDir)
 
     if (is_null(objSeurat)) {
