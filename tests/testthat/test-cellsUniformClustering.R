@@ -118,8 +118,8 @@ test_that("Cell Uniform Clustering", {
       obj, checker = shiftCheckerThresholds(advChecker, 0.1),
       initialResolution = initialResolution,
       initialClusters = exactClusters,
-      cores = 6L, optimizeForSpeed = FALSE,
-      deviceStr = "cpu", saveObj = TRUE, outDir = tm)
+      cores = 6L, optimizeForSpeed = FALSE, deviceStr = "cpu",
+      genesSel = "HGDI", saveObj = TRUE, outDir = tm)
   })
 
   expect_identical(splitList[["clusters"]], factor(exactClusters))

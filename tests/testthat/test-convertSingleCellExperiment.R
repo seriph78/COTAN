@@ -73,6 +73,8 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
   sratObj <-
     seuratClustering(rawData = rawData, cond = "Test", iter = 1L,
                      initialResolution = 0.8, minNumClusters = 0L,
+                     genesSel = "HVG_Seurat", cores = 6L,
+                     optimizeForSpeed = TRUE, deviceStr = "cuda",
                      saveObj = FALSE, outDirCond = "")[["SeuratObj"]]
 
   sceObj <- Seurat::as.SingleCellExperiment(sratObj)
