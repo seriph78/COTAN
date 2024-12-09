@@ -6,7 +6,7 @@ Added possibility to specify genes' selection method used in the
 Improved `"AdvancedGDIUniformityCheck"` by adding a new check about 99% quantile
 
 Solved issue in `clustersMarkersHeatmapPlot()`: now passing in a genes not in
-the dataset will result in a corresponding gray column instead of an error
+the data-set will result in a corresponding gray column instead of an error
 
 Added possibility to specify `clean()` thresholds in the functions
 `proceedToCoex()` and `automaticCOTANObjectCreation()`
