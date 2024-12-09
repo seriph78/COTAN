@@ -79,7 +79,7 @@ seuratClustering <- function(rawData, cond, iter,
       obj <- proceedToCoex(obj, calcCoex = TRUE, cores = cores,
                            optimizeForSpeed = optimizeForSpeed,
                            deviceStr = deviceStr,
-                           saveObj = saveObj, outDir = outDirCond)
+                           saveObj = FALSE, outDir = outDirCond)
       gdi <- getColumnFromDF(calculateGDI(obj, statType = "S",
                                           rowsFraction = 0.05), "GDI")
       VariableFeatures(object = srat) <-
