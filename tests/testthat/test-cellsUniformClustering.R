@@ -154,14 +154,24 @@ test_that("Cell Uniform Clustering", {
 
   # Test cluster/gene contingency tables
   c(observedCT, expectedCT) %<-%
-    clusterGeneContingencyTables(objCOTAN = obj, gene = "g-000300",
+    clusterGeneContingencyTables(objCOTAN = obj, gene = "g-000200",
                                  cells = toClustersList(exactClusters)[[1L]])
 
   expect_identical(rownames(observedCT), rownames(expectedCT))
-  expect_identical(rownames(observedCT), c("g-000300.yes", "g-000300.no"))
-  expect_identical(colnames(observedCT), colnames(expectedCT))
-  expect_identical(colnames(observedCT), c("cells.in", "cells.out"))
-
+  expect_identical(rownames(observedCT), c("g-000200.yes", "g-000200.no"))
+  expect_identical(colSums(observedCT),
+                   set_names(c(600, 600), c("cells.in", "cells.out")))
+  expect_identical(colSums(expectedCT),
+                   set_names(c(600, 600), c("cells.in", "cells.out")))
+  expect_equal(rowSums(observedCT), rowSums(expectedCT), tolerance = 5e-6)
+  expect_identical(observedCT < expectedCT,
+                   matrix(c(TRUE, FALSE, FALSE, TRUE), nrow = 2,
+                          dimnames = dimnames(observedCT)))
+  expect_identical(observedCT[1, 1],
+                   sum(getZeroOneProj(obj)["g-000200", 1L:600L]))
+  expect_equal(expectedCT[2, 1],
+               sum(getProbabilityOfZero(obj)["g-000200", 1L:600L]),
+               tolerance = 5e-6)
 
   # Test the low GDI (homogeneity) for each defined clusters
 
