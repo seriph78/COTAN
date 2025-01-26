@@ -65,7 +65,8 @@ Imports:
     withr,
     SingleCellExperiment,
     SummarizedExperiment,
-    S4Vectors
+    S4Vectors,
+    proj4
 Suggests: 
     testthat (>= 3.2.0),
     proto,

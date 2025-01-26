@@ -152,6 +152,17 @@ test_that("Cell Uniform Clustering", {
 
   expect_identical(clMarkersDF3, clMarkersDF)
 
+  # Test cluster/gene contingency tables
+  c(observedCT, expectedCT) %<-%
+    clusterGeneContingencyTables(objCOTAN = obj, gene = "g-000300",
+                                 cells = toClustersList(exactClusters)[[1L]])
+
+  expect_identical(rownames(observedCT), rownames(expectedCT))
+  expect_identical(rownames(observedCT), c("g-000300.yes", "g-000300.no"))
+  expect_identical(colnames(observedCT), colnames(expectedCT))
+  expect_identical(colnames(observedCT), c("cells.in", "cells.out"))
+
+
   # Test the low GDI (homogeneity) for each defined clusters
 
   for (cl in sample(unique(clusters[!is.na(clusters)]), size = 2L)) {
