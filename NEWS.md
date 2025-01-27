@@ -1,3 +1,6 @@
+Added new function `clusterGeneContingencyTables()`: it returns observed and
+expected contingency tables for a given gene and group of cells (cluster)
+
 ## 2.7.2
 
 Added possibility to specify genes' selection method used in the

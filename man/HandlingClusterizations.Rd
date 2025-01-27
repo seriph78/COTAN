@@ -23,6 +23,7 @@
 \alias{dropClusterization,COTAN-method}
 \alias{dropClusterization}
 \alias{DEAOnClusters}
+\alias{clusterGeneContingencyTables}
 \alias{pValueFromDEA}
 \alias{logFoldChangeOnClusters}
 \alias{distancesBetweenClusters}
@@ -62,6 +63,8 @@ getClusters(objCOTAN, clName = "")
 \S4method{dropClusterization}{COTAN}(objCOTAN, clName)
 
 DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
+
+clusterGeneContingencyTables(objCOTAN, gene, cells)
 
 pValueFromDEA(coexDF, numCells, adjustmentMethod = "none")
 
@@ -188,6 +191,10 @@ of the \emph{clusters} of the \emph{clusterization}}
 \item{override}{When \code{TRUE} silently allows overriding data for an existing
 \emph{clusterization} name. Otherwise the default behavior will avoid potential
 data losses}
+
+\item{gene}{a gene}
+
+\item{cells}{a sub-set of the cells}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
@@ -324,6 +331,9 @@ column for each \emph{cluster}.
 \code{DEAOnClusters()} returns the co-expression \code{data.frame} for the
 genes in each \emph{cluster}
 
+\code{clusterGeneContingencyTables()} returns a list containing the
+observed and expected contingency tables
+
 \code{pValueFromDEA()} returns a \code{data.frame} containing the \emph{p-values}
 corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 
@@ -456,6 +466,12 @@ new element in the \code{clustersCoex} \code{list} using the passed in \code{COE
 \code{DEAOnClusters()} is used to run the Differential Expression
 analysis using the \code{COTAN} contingency tables on each \emph{cluster} in the
 given \emph{clusterization}
+
+\code{clusterGeneContingencyTables()} returns the observed and expected
+contingency tables for a given gene and a given set of cells (a cluster).
+The implementation runs the same algorithms used to calculate the full
+observed/expected contingency tables used for DEA, but restricted to only
+the relevant gene and cluster, thus much faster and less memory intensive
 
 \code{pValueFromDEA()} is used to convert to \emph{p-value} the Differential
 Expression analysis using the \code{COTAN} contingency tables on each \emph{cluster}

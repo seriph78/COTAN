@@ -12,14 +12,13 @@ runSingleDEA <- function(clName, cellsInList,
 
   numCells <- ncol(zeroOne)
   numCellsIn  <- sum(cellsIn)
-  numCellsOut <- numCells - numCellsIn
 
-  observedYI <- rowSums(zeroOne[, cellsIn, drop = FALSE])
+  observedYI <- rowSums(zeroOne[ ,  cellsIn, drop = FALSE])
 
-  expectedNI <- rowsums(probZero[,  cellsIn, drop = FALSE], parallel = TRUE)
+  expectedNI <- rowsums(probZero[ , cellsIn, drop = FALSE], parallel = TRUE)
   expectedNO <- rowSumsProbZero - expectedNI
   expectedYI <- numCellsIn  - expectedNI
-  expectedYO <- numCellsOut - expectedNO
+  expectedYO <- (numCells - numCellsIn) - expectedNO
 
   clCoex <- (observedYI  - expectedYI) / sqrt(numCells) *
     sqrt(1.0 / pmax(1.0, expectedNI) +
@@ -97,6 +96,82 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
   logThis("Differential Expression Analysis - DONE", logLevel = 2L)
 
   return(coexDF)
+}
+
+#' @details `clusterGeneContingencyTables()` returns the observed and expected
+#'   contingency tables for a given gene and a given set of cells (a cluster).
+#'   The implementation runs the same algorithms used to calculate the full
+#'   observed/expected contingency tables used for DEA, but restricted to only
+#'   the relevant gene and cluster, thus much faster and less memory intensive
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param gene a gene
+#' @param cells a sub-set of the cells
+#'
+#' @return `clusterGeneContingencyTables()` returns a list containing the
+#'   observed and expected contingency tables
+#'
+#' @importFrom Matrix rowSums
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+#'
+#' @rdname HandlingClusterizations
+#'
+clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
+  allGenes <- getGenes(objCOTAN)
+  allCells <- getCells(objCOTAN)
+
+  assert_that(c(gene) %in% allGenes, msg = "the given gene is unknown")
+  assert_that(all(cells %in% allCells),
+              msg = "some of the given cells are unknown")
+
+  dimnames <- list(c(paste(gene, "yes", sep = "."),
+                     paste(gene, "no", sep = ".")),
+                   c("cells.in", "cells.out"))
+
+  # reorder and standardize cells list
+  cellsIn <- allCells %in% cells
+
+  # observed
+
+  zeroOne <- sign(getRawData(objCOTAN)[gene, ])
+
+  numCells    <- length(zeroOne)
+  numCellsIn  <- sum(cellsIn)
+  numCellsOut <- numCells - numCellsIn
+
+  observedY  <- sum(zeroOne)
+
+  observedYI <- sum(zeroOne[cellsIn])
+  observedYO <- observedY   - observedYI
+  observedNI <- numCellsIn  - observedYI
+  observedNO <- numCellsOut - observedYO
+
+  observedCT <- matrix(c(observedYI, observedNI, observedYO, observedNO),
+                       ncol = 2L, nrow = 2L, dimnames = dimnames)
+
+  # estimated
+
+  probZero <- funProbZero(getDispersion(objCOTAN)[gene],
+                          getLambda(objCOTAN)[gene] * getNu(objCOTAN))
+
+  if (anyNA(probZero)) {
+    warning("Some NA in estimated probability of zero matrix")
+  }
+
+  expectedN  <- sum(probZero)
+
+  expectedNI <- sum(probZero[cellsIn])
+  expectedNO <- expectedN   - expectedNI
+  expectedYI <- numCellsIn  - expectedNI
+  expectedYO <- numCellsOut - expectedNO
+
+  expectedCT <- matrix(c(expectedYI, expectedNI, expectedYO, expectedNO),
+                       ncol = 2L, nrow = 2L, dimnames = dimnames)
+
+  return(list("observed" = observedCT, "expected" = expectedCT))
 }
 
 
