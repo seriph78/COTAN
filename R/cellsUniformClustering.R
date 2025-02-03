@@ -213,9 +213,6 @@ NULL
 #' @param initialResolution a number indicating how refined are the clusters
 #'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
 #'   [Seurat::FindClusters()]
-#' @param initialClusters an existing *clusterization* to use as starting point:
-#'   the *clusters* deemed **uniform** will be kept and the rest processed as
-#'   normal
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise
@@ -227,11 +224,16 @@ NULL
 #'   selection methods:
 #'   * `"HGDI"` Will pick-up the genes with highest **GDI**
 #'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'     via the \pkg{Seurat} package (the default method)
+#'   via the \pkg{Seurat} package (the default method)
 #'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
+#' @param initialClusters an existing *clusterization* to use as starting point:
+#'   the *clusters* deemed **uniform** will be kept and the remaining cells will
+#'   be processed as normal
+#' @param initialIteration the number associated tot he first iteration; it
+#'   defaults to 1. Useful in case of restart with non-trivial `initialClusters`
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output. The effective
@@ -265,17 +267,19 @@ NULL
 cellsUniformClustering <- function(objCOTAN,
                                    checker = NULL,
                                    GDIThreshold = NaN,
-                                   cores = 1L,
+                                   initialResolution = 0.8,
                                    maxIterations = 25L,
+                                   cores = 1L,
                                    optimizeForSpeed = TRUE,
                                    deviceStr = "cuda",
-                                   initialClusters = NULL,
-                                   initialResolution = 0.8,
                                    useDEA = TRUE,
                                    distance = NULL,
                                    genesSel = "HVG_Seurat",
                                    hclustMethod = "ward.D2",
-                                   saveObj = TRUE, outDir = ".") {
+                                   initialClusters = NULL,
+                                   initialIteration = 1L,
+                                   saveObj = TRUE,
+                                   outDir = ".") {
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
 
   assert_that(estimatorsAreReady(objCOTAN),
@@ -299,7 +303,11 @@ cellsUniformClustering <- function(objCOTAN,
   outputClusters <- set_names(rep(NA, length = getNumCells(objCOTAN)),
                               getCells(objCOTAN))
 
-  iter <- 0L
+  if (!is.integer(initialIteration)) {
+    initialIteration <- 1L
+  }
+
+  iter <- initialIteration - 1L
   iterReset <- -1L
   numClustersToRecluster <- 0L
   srat <- NULL
@@ -369,11 +377,9 @@ cellsUniformClustering <- function(objCOTAN,
     allCells <- rownames(metaData)
     names(testClusters) <- allCells
     if (iter == 1L && !is_null(initialClusters)) {
-      assert_that(setequal(names(initialClusters), getCells(objCOTAN)),
-                  msg = "Given clusterization has the wrong set of cells")
       logThis("Using passed in clusterization", logLevel = 3L)
-      testClusters <- factor(initialClusters)
-      allCells <- names(initialClusters)
+      testClusters <- asClusterization(initialClusters, getCells(objCOTAN))
+      allCells <- names(testClusters)
     }
     testClList <- toClustersList(testClusters)
 

@@ -414,13 +414,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   allCheckResults <- dfToCheckers(allCheckResults, class(checkers[[1L]]))
 
-  outputClusters <- clusters
-  if (is_empty(outputClusters)) {
+  if (is_empty(clusters)) {
     # pick the last clusterization
-    outputClusters <- getClusters(objCOTAN)
+    clusters <- getClusters(objCOTAN)
   }
-
-  outputClusters <- factorToVector(outputClusters)
+  outputClusters <-
+    factorToVector(asClusterization(clusters, getCells(objCOTAN)))
 
   if (batchSize == 0L) {
     # default is twice the (2/3) power of the number of clusters

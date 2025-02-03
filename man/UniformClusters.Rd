@@ -22,16 +22,17 @@ cellsUniformClustering(
   objCOTAN,
   checker = NULL,
   GDIThreshold = NaN,
-  cores = 1L,
+  initialResolution = 0.8,
   maxIterations = 25L,
+  cores = 1L,
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
-  initialClusters = NULL,
-  initialResolution = 0.8,
   useDEA = TRUE,
   distance = NULL,
   genesSel = "HVG_Seurat",
   hclustMethod = "ward.D2",
+  initialClusters = NULL,
+  initialIteration = 1L,
   saveObj = TRUE,
   outDir = "."
 )
@@ -87,10 +88,14 @@ here to speed up the process (default is \code{NULL})}
 discriminate whether a \emph{cluster} is \emph{uniform transcript}. See
 \link{UniformTranscriptCheckers} for more details}
 
-\item{cores}{number of cores to use. Default is 1.}
+\item{initialResolution}{a number indicating how refined are the clusters
+before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as
+\code{\link[Seurat:FindClusters]{Seurat::FindClusters()}}}
 
 \item{maxIterations}{max number of re-clustering iterations. It defaults to
 \eqn{25}}
+
+\item{cores}{number of cores to use. Default is 1.}
 
 \item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
 library to run the matrix calculations. Otherwise, or when the library is
@@ -100,14 +105,6 @@ not available will run the slower legacy code}
 the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
 \code{"cuda"} to use the system \emph{GPUs} or something like \code{"cuda:0"} to restrict
 to a specific device}
-
-\item{initialClusters}{an existing \emph{clusterization} to use as starting point:
-the \emph{clusters} deemed \strong{uniform} will be kept and the rest processed as
-normal}
-
-\item{initialResolution}{a number indicating how refined are the clusters
-before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as
-\code{\link[Seurat:FindClusters]{Seurat::FindClusters()}}}
 
 \item{useDEA}{Boolean indicating whether to use the \emph{DEA} to define the
 distance; alternatively it will use the average \emph{Zero-One} counts, that is
@@ -130,6 +127,13 @@ according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
+
+\item{initialClusters}{an existing \emph{clusterization} to use as starting point:
+the \emph{clusters} deemed \strong{uniform} will be kept and the rest processed as
+normal}
+
+\item{initialIteration}{the number associated tot he first iteration; it
+defaults to 1. Useful in case of restart with non-trivial \code{initialClusters}}
 
 \item{saveObj}{Boolean flag; when \code{TRUE} saves intermediate analyses and
 plots to file}
