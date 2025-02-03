@@ -25,9 +25,6 @@
 #'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.43}
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
-#' @param allCheckResults An optional `data.frame` with the results of previous
-#'   checks about the merging of clusters. Useful to restart the *merging*
-#'   process after an interruption.
 #' @param cores number of cores to use. Default is 1.
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
@@ -44,6 +41,12 @@
 #'   [parallelDist::parDist()]
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
+#' @param allCheckResults An optional `data.frame` with the results of previous
+#'   checks about the merging of clusters. Useful to restart the *merging*
+#'   process after an interruption.
+#' @param initialIteration the number associated tot he first iteration; it
+#'   defaults to 1. Useful in case of restart of the procedure to avoid
+#'   intermediate data override
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output. The effective
@@ -118,7 +121,8 @@
 #'                                     optimizeForSpeed = TRUE,
 #'                                     deviceStr = "cuda",
 #'                                     initialResolution = 0.8,
-#'                                     checker = checker2, saveObj = FALSE)
+#'                                     checker = checker2,
+#'                                     saveObj = FALSE)
 #'
 #' clusters <- splitList[["clusters"]]
 #'
@@ -170,13 +174,14 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       checkers = NULL,
                                       GDIThreshold = NaN,
                                       batchSize = 0L,
-                                      allCheckResults = data.frame(),
                                       cores = 1L,
                                       optimizeForSpeed = TRUE,
                                       deviceStr = "cuda",
                                       useDEA = TRUE,
                                       distance = NULL,
                                       hclustMethod = "ward.D2",
+                                      allCheckResults = data.frame(),
+                                      initialIteration = 1L,
                                       saveObj = TRUE,
                                       outDir = ".") {
   # returns merged name given underlying names
@@ -440,7 +445,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
     dir.create(mergeOutDir)
   }
 
-  iter <- 0L
+  iter <- initialIteration - 1L
 
   for (checker in checkers) {
     logThis(paste0("Start merging nearest clusters - the main threshold is: ",

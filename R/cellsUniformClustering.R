@@ -200,9 +200,11 @@ NULL
 #'   [UniformTranscriptCheckers] for more details
 #' @param GDIThreshold legacy. The threshold level that is used in a
 #'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.40}
-#' @param cores number of cores to use. Default is 1.
+#' @param initialResolution a number indicating how refined are the clusters
+#'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
+#'   [Seurat::FindClusters()]
 #' @param maxIterations max number of re-clustering iterations. It defaults to
-#'   \eqn{25}
+#' @param cores number of cores to use. Default is 1. \eqn{25}
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
 #'   not available will run the slower legacy code
@@ -210,9 +212,6 @@ NULL
 #'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
-#' @param initialResolution a number indicating how refined are the clusters
-#'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
-#'   [Seurat::FindClusters()]
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
 #'   faster but less precise
@@ -233,7 +232,8 @@ NULL
 #'   the *clusters* deemed **uniform** will be kept and the remaining cells will
 #'   be processed as normal
 #' @param initialIteration the number associated tot he first iteration; it
-#'   defaults to 1. Useful in case of restart with non-trivial `initialClusters`
+#'   defaults to 1. Useful in case of restart of the procedure to avoid
+#'   intermediate data override
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output. The effective
@@ -376,7 +376,7 @@ cellsUniformClustering <- function(objCOTAN,
     testClusters <- factor(metaData[["seurat_clusters"]])
     allCells <- rownames(metaData)
     names(testClusters) <- allCells
-    if (iter == 1L && !is_null(initialClusters)) {
+    if (iter == initialIteration && !is_null(initialClusters)) {
       logThis("Using passed in clusterization", logLevel = 3L)
       testClusters <- asClusterization(initialClusters, getCells(objCOTAN))
       allCells <- names(testClusters)
@@ -500,7 +500,8 @@ cellsUniformClustering <- function(objCOTAN,
       break
     }
 
-    if (length(cellsToRecluster) < 40L || iter >= maxIterations) {
+    if (length(cellsToRecluster) < 40L
+        || iter > maxIterations + initialIteration) {
       logThis(paste("NO new possible uniform clusters!",
                     "Unclustered cell left:", length(cellsToRecluster)),
               logLevel = 1L)

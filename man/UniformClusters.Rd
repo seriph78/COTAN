@@ -55,13 +55,14 @@ mergeUniformCellsClusters(
   checkers = NULL,
   GDIThreshold = NaN,
   batchSize = 0L,
-  allCheckResults = data.frame(),
   cores = 1L,
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
   hclustMethod = "ward.D2",
+  allCheckResults = data.frame(),
+  initialIteration = 1L,
   saveObj = TRUE,
   outDir = "."
 )
@@ -92,8 +93,7 @@ discriminate whether a \emph{cluster} is \emph{uniform transcript}. See
 before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as
 \code{\link[Seurat:FindClusters]{Seurat::FindClusters()}}}
 
-\item{maxIterations}{max number of re-clustering iterations. It defaults to
-\eqn{25}}
+\item{maxIterations}{max number of re-clustering iterations. It defaults to}
 
 \item{cores}{number of cores to use. Default is 1.}
 
@@ -129,11 +129,12 @@ according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
 
 \item{initialClusters}{an existing \emph{clusterization} to use as starting point:
-the \emph{clusters} deemed \strong{uniform} will be kept and the rest processed as
-normal}
+the \emph{clusters} deemed \strong{uniform} will be kept and the remaining cells will
+be processed as normal}
 
 \item{initialIteration}{the number associated tot he first iteration; it
-defaults to 1. Useful in case of restart with non-trivial \code{initialClusters}}
+defaults to 1. Useful in case of restart of the procedure to avoid
+intermediate data override}
 
 \item{saveObj}{Boolean flag; when \code{TRUE} saves intermediate analyses and
 plots to file}
@@ -255,7 +256,8 @@ splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
                                     optimizeForSpeed = TRUE,
                                     deviceStr = "cuda",
                                     initialResolution = 0.8,
-                                    checker = checker2, saveObj = FALSE)
+                                    checker = checker2,
+                                    saveObj = FALSE)
 
 clusters <- splitList[["clusters"]]
 

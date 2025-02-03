@@ -388,7 +388,7 @@ isEmptyName <- function(name) {
 #'
 niceFactorLevels <- function(v) {
   names <- names(v)
-  if (inherits(v, "factor")) {
+  if (is.factor(v)) {
     v <- factorToVector(v)
   }
   nv <- suppressWarnings(as.numeric(v))
