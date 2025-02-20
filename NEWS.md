@@ -1,3 +1,11 @@
+Added new utility function `asClusterization()` that takes any input
+representing a *clusterization* (`factor`, `vector` or `data.frame`)
+and makes it into a `factor`. This function is now used in all functions taking
+in a *clusterization* to standardize the given input
+
+Added `initialIteration` as input parameter to *clusterization* functions so
+to avoid override of partial data when the functions are being restarted
+
 ## 2.7.3
 
 Added new function `clusterGeneContingencyTables()`: it returns observed and
