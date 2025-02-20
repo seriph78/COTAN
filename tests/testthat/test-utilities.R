@@ -44,10 +44,15 @@ test_that("Logging", {
 
 test_that("Clusterizations manipulations", {
   set.seed(1675787192L)
-  clusters <- paste0("", as.roman(sample(7L, 100L, replace = TRUE)))
-
+  elemValues <- paste0("", as.roman(sample(7L, 100L, replace = TRUE)))
   elemNames <- paste0("el_", 1L:100L)
-  clusters <- set_names(clusters, elemNames)
+
+  clusters <- as.data.frame(list("a" = elemNames, "b" = elemValues))
+  clusters <- asClusterization(clusters, elemNames)
+
+  expect_s3_class(clusters, "factor")
+  expect_setequal(levels(clusters), paste0("", as.roman(1L:7L)))
+  expect_identical(names(clusters), elemNames)
 
   clustersList <- toClustersList(clusters)
 
@@ -56,7 +61,7 @@ test_that("Clusterizations manipulations", {
 
   clusters2 <- fromClustersList(clustersList, elemNames)
 
-  expect_identical(clusters2, factor(clusters))
+  expect_identical(clusters2, clusters)
 
   clusters3 <- fromClustersList(clustersList, elemNames = NULL)
   expect_equal(table(clusters2), table(clusters3), ignore_attr = TRUE)
@@ -93,7 +98,8 @@ test_that("Clusterizations manipulations", {
   niceClusters <- niceFactorLevels(clusters)
   expect_identical(max(nchar(factorToVector(niceClusters))), 3L)
   expect_identical(min(nchar(factorToVector(niceClusters))), 3L)
-  expect_true(all(endsWith(factorToVector(niceClusters), clusters)))
+  expect_true(all(endsWith(factorToVector(niceClusters),
+                           factorToVector(clusters))))
 
   levels(niceClusters) <- c(1L:3L, 11L:13L, 100L)
   niceClusters <- niceFactorLevels(niceClusters)
@@ -116,6 +122,8 @@ test_that("Adding/extracting columns to/from data.frames", {
   expect_identical(colnames(df), c("constant", "sequence"))
   expect_identical(getColumnFromDF(df, "constant"),
                    rlang::set_names(rep(1L, 10L), LETTERS[1L:10L]))
+  expect_identical(getColumnFromDF(df, 2L),
+                   rlang::set_names(seq_len(10L), LETTERS[1L:10L]))
 
   df <- setColumnInDF(df, colName = "constant", colToSet = rep(2L, 10L))
   expect_identical(colnames(df), c("constant", "sequence"))

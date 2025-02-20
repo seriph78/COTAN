@@ -388,7 +388,7 @@ isEmptyName <- function(name) {
 #'
 niceFactorLevels <- function(v) {
   names <- names(v)
-  if (inherits(v, "factor")) {
+  if (is.factor(v)) {
     v <- factorToVector(v)
   }
   nv <- suppressWarnings(as.numeric(v))
@@ -432,7 +432,8 @@ factorToVector <- function(f) {
 #'   `data.frame`, while keeping the `rowNames` as `vector` names
 #'
 #' @param df the `data.frame`
-#' @param colName the name of the new or existing column in the `data.frame`
+#' @param colName the name of the new or existing column in the `data.frame`. It
+#'   can also be a column number
 #'
 #' @returns `getColumnFromDF()` returns the column in the `data.frame` as named
 #'   `array`, `NULL` if the wanted column is not available
@@ -440,20 +441,26 @@ factorToVector <- function(f) {
 #' @export
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang is_string
 #' @importFrom rlang set_names
 #'
 #' @rdname HandleMetaData
 #'
 getColumnFromDF <- function(df, colName) {
-  if (is_empty(df) || !any(colnames(df) == colName)) {
+  if (is_empty(df)) {
     return(NULL)
-  } else {
-    retArray <- df[[colName]]
-    if (!is_empty(retArray)) {
-      names(retArray) <- rownames(df)
-    }
-    return(retArray)
   }
+  if ((is_string(colName) && !(colName %in% colnames(df)))
+       || (is.numeric(colName) && colName > ncol(df))) {
+    return(NULL)
+  }
+
+  # if colName is a number it can be used as such
+  retArray <- df[[colName]]
+  if (!is_empty(retArray)) {
+    names(retArray) <- rownames(df)
+  }
+  return(retArray)
 }
 
 
@@ -550,10 +557,61 @@ setColumnInDF <- function(df, colToSet, colName,
 #'
 NULL
 
+#' @details `asClusterization()` given a *clusterization* in the form of a
+#'   `data.frame` or a `vector` or a `factor`, returns a named `factor`
+#'
+#' @param clusters A named `vector` or `factor` or `data.frame` that defines the
+#'   *clusters*
+#' @param allCells A `vector` of cells' names that should list the same names in
+#'   the `clusters` in any order
+#'
+#' @returns `asClusterization()` returns the *clusterization* as a named
+#'   `factor`
+#'
+#' @export
+#'
+#' @importFrom rlang is_null
+#' @importFrom rlang is_vector
+#' @importFrom rlang set_names
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname ClustersList
+#'
+asClusterization <- function(clusters, allCells = NULL) {
+  assert_that(!is_null(clusters), msg = "Given empty clusterization")
+
+  if (is.data.frame(clusters)) {
+    # allow 2 data.frame kind: 2 columns with names and clusters or a single
+    # column with row names
+    numCols <- ncol(clusters)
+    assert_that(numCols >= 1L && numCols <= 2L,
+                msg = "Given a data.frame with unsupported number of columns")
+    if (numCols == 2L) {
+      clusters <- set_names(clusters[, 2L, drop = TRUE],
+                            nm = clusters[, 1L, drop = TRUE])
+    } else {
+      clusters <- getColumnFromDF(clusters, colName = 1L)
+    }
+  }
+  if (is_vector(clusters)) {
+    clusters <- factor(clusters)
+  }
+
+  if (!is_null(allCells)) {
+    assert_that(setequal(names(clusters), allCells),
+                msg = "Given clusterization has the wrong set of cells")
+  }
+
+  return(clusters)
+}
+
+
 #' @details `toClustersList()` given a *clusterization*, creates a `list` of
 #'   *clusters* (i.e. for each *cluster*, which elements compose the *cluster*)
 #'
-#' @param clusters A named `vector` or `factor` that defines the *clusters*
+#' @param clusters A named `vector` or `factor` or `data.frame` that defines the
+#'   *clusters*
 #'
 #' @returns `toClustersList()` returns a `list` of clusters
 #'
@@ -570,7 +628,8 @@ toClustersList <- function(clusters) {
   assert_that(!is_empty(names(clusters)),
               msg = "passed clusterization has no names")
 
-  clustersNames <- levels(factor(clusters))
+  clusters <- asClusterization(clusters)
+  clustersNames <- levels(clusters)
 
   getCl <- function(cl, clusters) {
     names(clusters)[clusters %in% cl]
@@ -631,7 +690,7 @@ fromClustersList <- function(clustersList,
     clusters[cluster] <- clName
   }
 
-  return(factor(clusters))
+  return(asClusterization(clusters))
 }
 
 #' @details `groupByClusters()` given a *clusterization* returns a permutation,
@@ -716,16 +775,14 @@ groupByClusters <- function(clusters) {
 #' @rdname ClustersList
 #'
 mergeClusters <- function(clusters, names, mergedName = "") {
-  if (!inherits(clusters, "factor")) {
-    clusters <- factor(clusters)
-  }
+  clusters <- asClusterization(clusters)
 
   effNames <- names[names %in% levels(clusters)]
   if (is_empty(effNames) || length(effNames) < 2L) {
     warning("Passed a list of clusters to merge with less than 2 elements",
             " actually present in the clusterization")
     # nothing to do...
-    return(factor(clusters))
+    return(clusters)
   }
 
   if (isEmptyName(mergedName)) {

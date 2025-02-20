@@ -2,6 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{ClustersList}
 \alias{ClustersList}
+\alias{asClusterization}
 \alias{toClustersList}
 \alias{fromClustersList}
 \alias{groupByClustersList}
@@ -10,6 +11,8 @@
 \alias{multiMergeClusters}
 \title{\emph{Clusters} utilities}
 \usage{
+asClusterization(clusters, allCells = NULL)
+
 toClustersList(clusters)
 
 fromClustersList(
@@ -28,6 +31,9 @@ multiMergeClusters(clusters, namesList, mergedNames = NULL)
 }
 \arguments{
 \item{clusters}{A named \code{vector} or \code{factor} that defines the \emph{clusters}}
+
+\item{allCells}{A \code{vector} of cells' names that should list the same names in
+the \code{clusters} in any order}
 
 \item{clustersList}{A named \code{list} whose elements define the various clusters}
 
@@ -50,6 +56,9 @@ merged}
 \item{mergedNames}{The names of the new merged \emph{clusters}}
 }
 \value{
+\code{asClusterization()} returns the \emph{clusterization} as a named
+\code{factor}
+
 \code{toClustersList()} returns a \code{list} of clusters
 
 \code{fromClustersList()} returns a clusterization. If the given
@@ -74,6 +83,9 @@ Handle \emph{clusterization} <-> \emph{clusters} \code{list} conversions,
 \emph{clusters} grouping and merge
 }
 \details{
+\code{asClusterization()} given a \emph{clusterization} in the form of a
+\code{data.frame} or a \code{vector} or a \code{factor}, returns a named \code{factor}
+
 \code{toClustersList()} given a \emph{clusterization}, creates a \code{list} of
 \emph{clusters} (i.e. for each \emph{cluster}, which elements compose the \emph{cluster})
 
