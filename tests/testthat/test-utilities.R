@@ -246,7 +246,7 @@ test_that("parallelDist - cosine dissimilarity", {
 test_that("pca usage", {
   utils::data("test.dataset", package = "COTAN")
 
-  pcaRaw <- runPCA(x = as.matrix(test.dataset), rank = 5,
+  pcaRaw <- runPCA(x = as.matrix(test.dataset), rank = 5L,
                    BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
   colnames(pcaRaw) <- paste0("PC_", seq_len(ncol(pcaRaw)))
 

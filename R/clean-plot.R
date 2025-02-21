@@ -256,7 +256,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
 screePlot <- function(pcaStdDev) {
   # Extract variance explained
-  varExplained <- pcaStdDev^2 / sum(pcaStdDev^2)
+  varExplained <- pcaStdDev^2L / sum(pcaStdDev^2L)
 
   # Convert to data frame for ggplot
   screeDF <- data.frame(PC = seq_along(varExplained), Variance = varExplained)
@@ -264,11 +264,10 @@ screePlot <- function(pcaStdDev) {
   # Create ggplot scree plot
   ggplot(screeDF, aes(x = PC, y = Variance)) +
     geom_bar(stat = "identity", fill = "steelblue") +
-    geom_point(color = "red", size = 3) +
-    geom_line(group = 1, color = "red") +
+    geom_point(color = "red", size = 3L) +
+    geom_line(group = 1L, color = "red") +
     labs(title = "Scree Plot", x = "Principal Component",
          y = "Explained Variance") +
     plotTheme("pca")
-  #theme_minimal()
 }
 
