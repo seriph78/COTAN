@@ -1,5 +1,6 @@
 ANalysis
 BioConductor
+BioSingular
 Bioc
 COEX
 COexpression
@@ -32,6 +33,6 @@ numerosity
 pValue
 pca
 pre
+runPCA
 scRNA
-splitPattern
 uri
