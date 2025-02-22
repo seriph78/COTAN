@@ -1,3 +1,7 @@
+Ensure the drop out cluster from `cellsUnifromClustersing()` [`-1`]
+keeps its name if it has not been merged at the end of 
+the function `mergeUniformCellsClusters()`
+
 Added new utility function `asClusterization()` that takes any input
 representing a *clusterization* (`factor`, `vector` or `data.frame`)
 and makes it into a `factor`. This function is now used in all functions taking

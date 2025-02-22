@@ -558,6 +558,11 @@ mergeUniformCellsClusters <- function(objCOTAN,
     clTagsMap <- factorToVector(niceFactorLevels(clTagsMap))
     clTagsMap <- set_names(clTagsMap, clTags)
 
+    # keep `-1` tag if it has not been merged
+    if ("-1" %in% clTags) {
+      clTagsMap["-1"] <- "-1"
+    }
+
     outputClusters <- clTagsMap[outputClusters]
     outputClusters <- set_names(outputClusters, getCells(objCOTAN))
 
