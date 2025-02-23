@@ -13,7 +13,7 @@ runSingleDEA <- function(clName, cellsInList,
   numCells <- ncol(zeroOne)
   numCellsIn  <- sum(cellsIn)
 
-  observedYI <- rowSums(zeroOne[ ,  cellsIn, drop = FALSE])
+  observedYI <- rowSums(zeroOne [ , cellsIn, drop = FALSE])
 
   expectedNI <- rowsums(probZero[ , cellsIn, drop = FALSE], parallel = TRUE)
   expectedNO <- rowSumsProbZero - expectedNI
@@ -81,7 +81,7 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 
   rowSumsProbZero <- rowsums(probZero, parallel = TRUE)
 
-  cellsInList <- lapply(clustersList, function(cl) {getCells(objCOTAN) %in% cl})
+  cellsInList <- lapply(clustersList, function(cl) getCells(objCOTAN) %in% cl)
 
   coexCls <- lapply(names(cellsInList), runSingleDEA,
                     cellsInList = cellsInList,

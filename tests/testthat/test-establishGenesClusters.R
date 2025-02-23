@@ -8,11 +8,11 @@ test_that("Establish genes clusters", {
 
   c(secondaryMarkers, GCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN = objCOTAN,
-                   primaryMarkers = c("g-000300"),
+                   primaryMarkers = "g-000300",
                    numGenesPerMarker = 5L)
 
   expect_gt(length(secondaryMarkers), 1L)
-  expect_equal(colnames(rankGenes), c("g-000300"), ignore_attr = TRUE)
+  expect_equal(colnames(rankGenes), "g-000300", ignore_attr = TRUE)
   expect_identical(rownames(rankGenes), secondaryMarkers)
 
   expect_identical(colnames(GCS), secondaryMarkers)

@@ -560,7 +560,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     # keep `-1` tag if it has not been merged
     if ("-1" %in% clTags) {
-      clTagsMap["-1"] <- "-1"
+      clTagsMap[["-1"]] <- "-1"
     }
 
     outputClusters <- clTagsMap[outputClusters]
