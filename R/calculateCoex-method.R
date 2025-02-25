@@ -958,15 +958,18 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   startTime <- Sys.time()
 
   gc()
-  torch::cuda_empty_cache()
 
-  # TODO: 16 bits are OK here?
-  if (deviceStr == "cpu") {
-    dtypeForCalc <- torch::torch_float32()
-    halfDtypeForCalc <- torch::torch_float32()
-  } else {
-    dtypeForCalc <- torch::torch_float32()
+  useCuda <- startsWith(deviceStr, "cuda")
+
+  dtypeForCalc <- torch::torch_float32()
+
+  if (useCuda) {
+    torch::cuda_empty_cache()
+
+    # TODO: 16 bits are OK here?
     halfDtypeForCalc <- torch::torch_float16()
+  } else {
+    halfDtypeForCalc <- torch::torch_float32()
   }
 
   device <- torch::torch_device(deviceStr)
@@ -1006,7 +1009,10 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     torch::torch_tensor(getDispersion(objCOTAN),
                         dtype = torch::torch_float64(), device = device)),
     device = device, dtype = dtypeForCalc)
-  torch::cuda_empty_cache()
+
+  if (useCuda) {
+    torch::cuda_empty_cache()
+  }
 
   expectedY <- torch::torch_sum(expectedYY, 1L, dtype = dtypeForCalc)
 
@@ -1036,8 +1042,11 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
   }
   invisible(coex$add_(tmp$sub_(one)$relu_()$add_(one)$reciprocal_()))
+
   rm(tmp)
-  torch::cuda_empty_cache()
+  if (useCuda) {
+    torch::cuda_empty_cache()
+  }
 
   # expectedNY
   tmp <- expectedY$view(c(1L, -1L)) - expectedYY
@@ -1045,8 +1054,11 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
   }
   invisible(coex$add_(tmp$sub_(one)$relu_()$add_(one)$reciprocal_()))
+
   rm(tmp)
-  torch::cuda_empty_cache()
+  if (useCuda) {
+    torch::cuda_empty_cache()
+  }
 
   # expectedNN
   tmp <- expectedYY - expectedY$view(c(-1L, 1L))
@@ -1056,9 +1068,12 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     invisible(problematicPairs$bitwise_or_(tmp < thresholdForPP))
   }
   invisible(coex$add_(tmp$sub_(one)$relu_()$add_(one)$reciprocal_()))
+
   rm(tmp, expectedY)
   gc()
-  torch::cuda_empty_cache()
+  if (useCuda) {
+    torch::cuda_empty_cache()
+  }
 
   invisible(coex$divide_(m)$sqrt_())
 
@@ -1075,7 +1090,9 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
                   problematicPairsFraction), logLevel = 3L)
 
     rm(problematicPairs)
-    torch::cuda_empty_cache()
+    if (useCuda) {
+      torch::cuda_empty_cache()
+    }
   }
 
   sqrtTime <- Sys.time()
@@ -1102,14 +1119,18 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   invisible(coex$multiply_(expectedYY$neg()))
 
   rm(expectedYY, observedYY)
-  torch::cuda_empty_cache()
+  if (useCuda) {
+    torch::cuda_empty_cache()
+  }
 
   ret <- pack(forceSymmetric(as(as.matrix(coex$cpu()), "denseMatrix")))
   rownames(ret) <- colnames(ret) <- getGenes(objCOTAN)
 
   rm(coex, device)
   gc()
-  torch::cuda_empty_cache()
+  if (useCuda) {
+    torch::cuda_empty_cache()
+  }
 
   endTime <- Sys.time()
   logThis(paste("Calculate genes coex elapsed time:",
