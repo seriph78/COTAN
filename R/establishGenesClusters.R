@@ -159,8 +159,7 @@ genesCoexSpace <-
 #'
 #' @importFrom parallelDist parDist
 #'
-#' @importFrom PCAtools pca
-#' @importFrom PCAtools screeplot
+#' @importFrom BiocSingular runPCA
 #' @importFrom BiocSingular IrlbaParam
 #'
 #' @importFrom assertthat assert_that
@@ -203,11 +202,10 @@ establishGenesClusters <-
                    numGenesPerMarker = numGenesPerMarker,
                    primaryMarkers = primaryMarkers)
 
-  GCSPca <- pca(mat = GCS, rank = 10L,
-                transposed = TRUE, BSPARAM = IrlbaParam())
-  assert_that(identical(rownames(GCSPca[["rotated"]]), rownames(GCS)),
-              (ncol(GCSPca[["rotated"]]) == 10L),
-              msg = "Issues with pca output")
+  GCSPca <- runPCA(x = GCS, rank = 10L,
+                   BSPARAM = IrlbaParam(), get.rotation = FALSE)
+  assert_that(identical(rownames(GCSPca[["x"]]), rownames(GCS)),
+              (ncol(GCSPca[["x"]]) == 10L), msg = "Issues with pca output")
 
   SMRelevance <- matrix(nrow = length(secondaryMarkers),
                         ncol = length(groupMarkers),
@@ -240,7 +238,7 @@ establishGenesClusters <-
     posLink[[w]] <- c(posLink[[w]], g)
   }
 
-  plotEigen <- screeplot(GCSPca)
+  plotEigen <- screePlot(GCSPca[["sdev"]])
 
   coexDist <- parDist(as.matrix(GCS), method = distance)
 
@@ -248,7 +246,7 @@ establishGenesClusters <-
 
   dend <- as.dendrogram(hcNorm)
 
-  pca1 <- as.data.frame(GCSPca[["rotated"]])
+  pca1 <- as.data.frame(GCSPca[["x"]])
   pca1 <- pca1[order.dendrogram(dend), ]
 
   highlight <- rep("not_marked", nrow(pca1))
