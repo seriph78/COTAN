@@ -1,3 +1,5 @@
+Solved bug causing errors while using `torch` with a `CPU` device
+
 Added new utility function `asClusterization()` that takes any input
 representing a *clusterization* (`factor`, `vector` or `data.frame`)
 and makes it into a `factor`. This function is now used in all functions taking
