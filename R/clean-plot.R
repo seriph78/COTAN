@@ -33,7 +33,7 @@
 #' @importFrom Matrix rowMeans
 #' @importFrom Matrix colMeans
 #'
-#' @importFrom PCAtools pca
+#' @importFrom BiocSingular runPCA
 #' @importFrom BiocSingular IrlbaParam
 #'
 #' @importFrom ggplot2 ggplot
@@ -77,8 +77,8 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     rawNorm <- getNuNormData(objCOTAN)
 
-    pcaCells <- pca(mat = rawNorm, rank = 5L,
-                    transposed = FALSE, BSPARAM = IrlbaParam())[["rotated"]]
+    pcaCells <- runPCA(x = t(rawNorm), rank = 5L,
+                       BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
     assert_that(identical(rownames(pcaCells), getCells(objCOTAN)),
                 msg = "Issues with pca output")
 
@@ -232,3 +232,42 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
               "genes" = genesPlot, "UDE" = UDEPlot,
               "nu" = nuPlot, "zoomedNu" = zNuPlot))
 }
+
+
+#' @details `screePlot()` creates a plots showing the explained variance of the
+#'   components of a PCA
+#'
+#' @param pcaStdDev a `vector` with the standard deviations of the various
+#'  components
+#'
+#' @returns `screePlot()` returns a `ggplot2` plot for the explained variances
+#'
+#' @export
+#'
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_bar
+#' @importFrom ggplot2 geom_point
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 labs
+#'
+#' @rdname RawDataCleaning
+#'
+
+screePlot <- function(pcaStdDev) {
+  # Extract variance explained
+  varExplained <- pcaStdDev^2L / sum(pcaStdDev^2L)
+
+  # Convert to data frame for ggplot
+  screeDF <- data.frame(PC = seq_along(varExplained), Variance = varExplained)
+
+  # Create ggplot scree plot
+  ggplot(screeDF, aes(x = PC, y = Variance)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    geom_point(color = "red", size = 3L) +
+    geom_line(group = 1L, color = "red") +
+    labs(title = "Scree Plot", x = "Principal Component",
+         y = "Explained Variance") +
+    plotTheme("pca")
+}
+

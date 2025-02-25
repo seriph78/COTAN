@@ -22,6 +22,7 @@
 \alias{clean,COTAN-method}
 \alias{clean}
 \alias{cleanPlots}
+\alias{screePlot}
 \alias{cellSizePlot}
 \alias{genesSizePlot}
 \alias{mitochondrialPercentagePlot}
@@ -57,6 +58,8 @@ ECDPlot(objCOTAN, yCut = NaN, condName = "", conditions = NULL)
 )
 
 cleanPlots(objCOTAN, includePCA = TRUE)
+
+screePlot(pcaStdDev)
 
 cellSizePlot(objCOTAN, condName = "", conditions = NULL)
 
@@ -108,6 +111,9 @@ Default cutoff is \eqn{0.002 \; (0.2\%)}}
 \emph{PCA} associated with the normalized matrix. When \code{TRUE} the first four
 elements of the returned list will be \code{NULL}}
 
+\item{pcaStdDev}{a \code{vector} with the standard deviations of the various
+components}
+
 \item{genePrefix}{Prefix for the mitochondrial genes (default "^MT-" for
 Human, mouse "^mt-")}
 
@@ -158,6 +164,8 @@ dropped too
 \item \code{"zoomedNu"} is the same but zoomed on the left and with an estimate
 for the low \emph{nu} threshold that defines problematic cells
 }
+
+\code{screePlot()} returns a \code{ggplot2} plot for the explained variances
 
 \code{cellSizePlot()} returns the \code{violin-boxplot} plot
 
@@ -214,6 +222,9 @@ also produces and stores the estimators for nu and lambda
 
 \code{cleanPlots()} creates the plots associated to the output of the
 \code{\link[=clean]{clean()}} method.
+
+\code{screePlot()} creates a plots showing the explained variance of the
+components of a PCA
 
 \code{cellSizePlot()} plots the raw library size for each cell and
 sample.
