@@ -39,9 +39,9 @@ test_that("'scCOTAN' converters", {
   obj <- estimateDispersionBisection(obj)
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
-  coexDF <- set_names(
-    as.data.frame(atan(getNuNormData(obj)[, 1L:2L] - 0.5) / pi * 2.0),
-    c(1L, 2L))
+  coexDF <-
+    set_names(as.data.frame(atan(getNuNormData(obj)[, 1L:2L] - 0.5) / pi * 2.0),
+              c(1L, 2L))
 
   obj <- addClusterization(obj, clName = "clusters",
                            clusters = set_names(rep(colnames(coexDF), 10L),

@@ -15,8 +15,8 @@ test_that("Convert COTAN to and from SCE on test dataset", {
     mm <- cbind(m, m, m, m, m)
     return(cbind(mm, mm, mm))
   }
-  coex <- cbind(fold15(coex_test[,  1:10]), fold15(coex_test[, 11:20]),
-                fold15(coex_test[, 21:30]), fold15(coex_test[, 31:40]))
+  coex <- cbind(fold15(coex_test[,  1L:10L]), fold15(coex_test[, 11L:20L]),
+                fold15(coex_test[, 21L:30L]), fold15(coex_test[, 31L:40L]))
   colnames(coex) <- rownames(coex)
   coex <- pack(forceSymmetric(coex, uplo = "U"))
 
@@ -29,11 +29,12 @@ test_that("Convert COTAN to and from SCE on test dataset", {
   expect_identical(counts(objSCE), getRawData(obj))
   expect_identical(rowData(objSCE), DataFrame(getMetadataGenes(obj)))
   expect_identical(colData(objSCE), DataFrame(getMetadataCells(obj)))
-  expect_identical(names(metadata(objSCE)),
-                   c("genesCoex", "cellsCoex", "datasetMetadata"))
-  expect_identical(metadata(objSCE)$datasetMetadata, getMetadataDataset(obj))
-  expect_identical(metadata(objSCE)$genesCoex, coex)
-  expect_identical(metadata(objSCE)$cellsCoex, emptySymmetricMatrix())
+  expect_named(metadata(objSCE),
+               c("genesCoex", "cellsCoex", "datasetMetadata"))
+  expect_identical(metadata(objSCE)[["datasetMetadata"]],
+                   getMetadataDataset(obj))
+  expect_identical(metadata(objSCE)[["genesCoex"]], coex)
+  expect_identical(metadata(objSCE)[["cellsCoex"]], emptySymmetricMatrix())
 
   newObj <- convertFromSingleCellExperiment(objSCE = objSCE)
 
@@ -58,7 +59,7 @@ test_that("Convert COTAN to and from SCE on test dataset", {
   expect_equal(getLambda(newObj)[genes.names.test],
                lambda, tolerance = 1.0e-14, ignore_attr = FALSE)
   expect_equal(getNu(newObj)[cells.names.test],
-              nu, tolerance = 1.0e-14, ignore_attr = FALSE)
+               nu, tolerance = 1.0e-14, ignore_attr = FALSE)
   expect_equal(getDispersion(newObj)[genes.names.test],
                dispersion, tolerance = 1.0e-14, ignore_attr = FALSE)
   expect_identical(getGenesCoex(newObj, zeroDiagonal = FALSE), coex)
@@ -103,5 +104,3 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
                      "CL_RNA_snn_res.0.8", "CL_seurat_clusters",
                      "COND_orig.ident", "feCells", "nu"))
 })
-
-

@@ -1,3 +1,8 @@
+
+Ensure the drop out cluster from `cellsUnifromClustersing()` [`-1`]
+keeps its name if it has not been merged at the end of 
+the function `mergeUniformCellsClusters()`
+
 Stopped using broken BioConductor PCAtools::pca:
 using BioSingular::runPCA() instead
 

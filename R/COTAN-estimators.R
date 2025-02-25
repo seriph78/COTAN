@@ -596,17 +596,16 @@ setMethod(
       logThis(paste("Nu mean:", meanNu), logLevel = 2L)
 
       if (isTRUE(enforceNuAverageToOne)) {
-        if (!is.finite(meanNu)) {
+        if (is.finite(meanNu)) {
+          objCOTAN@metaCells <-
+            setColumnInDF(objCOTAN@metaCells, getNu(objCOTAN) / meanNu, "nu")
+        } else {
           assert_that(iter == 1L,
                       msg = paste("It can happen to have infinite mean 'nu'",
                                   "only after the first loop"))
           warning("Infinite 'nu' found: one of the cells expressed all genes\n",
                   " Setting 'enforceNuAverageToOne <- FALSE'")
           enforceNuAverageToOne <- FALSE
-        } else {
-          objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells,
-                                              getNu(objCOTAN) / meanNu,
-                                              "nu")
         }
       }
 
