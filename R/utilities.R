@@ -344,10 +344,10 @@ conditionsFromNames <-
   function(names, splitPattern = " ", fragmentNum = 2L) {
   numNames <- length(names)
   conditions <- str_split_i(names, pattern = splitPattern, fragmentNum)
-  if (any(is.na(conditions)) ||
+  if (anyNA(conditions) ||
       length(unique(conditions)) == numNames) {
-    warning(paste("conditionsFromNames: no proper pattern has been recognized",
-            "or given column number was too high"))
+    warning("conditionsFromNames: no proper pattern has been recognized",
+            "or given column number was too high")
     conditions <- rep("1", numNames)
   }
   names(conditions) <- names
@@ -585,7 +585,7 @@ asClusterization <- function(clusters, allCells = NULL) {
     # allow 2 data.frame kind: 2 columns with names and clusters or a single
     # column with row names
     numCols <- ncol(clusters)
-    assert_that(numCols >= 1L && numCols <= 2L,
+    assert_that(numCols >= 1L, numCols <= 2L,
                 msg = "Given a data.frame with unsupported number of columns")
     if (numCols == 2L) {
       clusters <- set_names(clusters[, 2L, drop = TRUE],

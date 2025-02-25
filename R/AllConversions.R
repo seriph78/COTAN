@@ -173,7 +173,8 @@ convertFromSingleCellExperiment <- function(objSCE,
 
   # Extract counts matrix
   assert_that("counts" %in% assayNames(objSCE),
-    msg = "The 'counts' assay is missing in the SingleCellExperiment object.")
+              msg = paste("The 'counts' assay is missing",
+                          "in the SingleCellExperiment object."))
 
   rawMatrix <- counts(objSCE)
 
@@ -187,7 +188,8 @@ convertFromSingleCellExperiment <- function(objSCE,
   # (e.g., 'COTAN_clusters_', 'seurat_clusters', ...)
 
   if (isEmptyName(clNamesPattern)) {
-    clNamesPattern <- "^(COTAN_clusters_|seurat_clusters$|.*_snn_res\\..*|wsnn_res\\..*|leiden_res\\..*)"
+    clNamesPattern <- paste0("^(COTAN_clusters_|seurat_clusters$|",
+                             ".*_snn_res\\..*|wsnn_res\\..*|leiden_res\\..*)")
   }
   clCols <- grep(clNamesPattern, names(cellsMetaSCE), value = FALSE)
 
@@ -204,21 +206,21 @@ convertFromSingleCellExperiment <- function(objSCE,
 
   genesCoex <- emptySymmetricMatrix()
   if ("genesCoex" %in% names(sceMetadataList)) {
-    genesCoex <- sceMetadataList$genesCoex
+    genesCoex <- sceMetadataList[["genesCoex"]]
   }
 
   cellsCoex <- emptySymmetricMatrix()
   if ("cellsCoex" %in% names(sceMetadataList)) {
-    cellsCoex <- sceMetadataList$cellsCoex
+    cellsCoex <- sceMetadataList[["cellsCoex"]]
   }
 
   # Extract dataset metadata if available
   datasetMeta <- data.frame()
   if ("datasetMetadata" %in% names(sceMetadataList)) {
-    datasetMeta <- sceMetadataList$datasetMetadata
+    datasetMeta <- sceMetadataList[["datasetMetadata"]]
   } else if ("project.name" %in% names(sceMetadataList)) {
     # If the project name is stored directly in metadata
-    datasetMeta <- data.frame(project.name = sceMetadataList$project.name,
+    datasetMeta <- data.frame(project.name = sceMetadataList[["project.name"]],
                               stringsAsFactors = FALSE)
   }
 
@@ -239,8 +241,7 @@ convertFromSingleCellExperiment <- function(objSCE,
 
   if (!is_empty(clCols)) {
     logThis(paste("Clusterizations found:",
-                  paste0(names(cellsMetaSCE)[clCols],
-                  collapse = ", ")), logLevel = 2L)
+                  toString(names(cellsMetaSCE)[clCols])), logLevel = 2L)
 
     # Add clusterizations to the COTAN object
     for (col in names(cellsMetaSCE)[clCols]) {
@@ -259,8 +260,7 @@ convertFromSingleCellExperiment <- function(objSCE,
 
   if (!is_empty(condCols)) {
     logThis(paste("Conditions found:",
-                  paste0(names(cellsMetaSCE)[condCols],
-                  collapse = ", ")), logLevel = 2L)
+                  toString(names(cellsMetaSCE)[condCols])), logLevel = 2L)
 
     # Add conditions to the COTAN object
     for (col in names(cellsMetaSCE)[condCols]) {
@@ -279,4 +279,3 @@ convertFromSingleCellExperiment <- function(objSCE,
 
   return(objCOTAN)
 }
-

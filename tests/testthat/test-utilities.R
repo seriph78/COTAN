@@ -52,7 +52,7 @@ test_that("Clusterizations manipulations", {
 
   expect_s3_class(clusters, "factor")
   expect_setequal(levels(clusters), paste0("", as.roman(1L:7L)))
-  expect_identical(names(clusters), elemNames)
+  expect_named(clusters, elemNames)
 
   clustersList <- toClustersList(clusters)
 

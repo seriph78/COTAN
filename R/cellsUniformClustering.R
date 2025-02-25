@@ -85,7 +85,7 @@ seuratClustering <- function(rawData, cond, iter,
       VariableFeatures(object = srat) <-
         names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numFeatures)]
       rm(gdi, obj)
-    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)){
+    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
       srat <- FindVariableFeatures(srat, nfeatures = numFeatures,
                                    selection.method = "vst")
     } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
