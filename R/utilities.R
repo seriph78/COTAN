@@ -207,8 +207,8 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
     requireNamespace("torch", quietly = TRUE)
 
   if (useTorch) {
-    # if torch is not explicitly opted-in, we avoid using it as
-    # there is no clean way to check if it is usable
+    # if torch is not explicitly opted-out, we try using it as
+    # there is a clean way to check if it is usable
     useTorchOpt <- getOption("COTAN.UseTorch")
     if (is.null(useTorchOpt)) {
       # default case: explicit opt-out only!
@@ -222,7 +222,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
 
     if (!useTorch && !warnedAboutTorch) {
       warning("The `torch` library is installed,",
-              " but has not been opted in yet")
+              " but has been explicitly opted out")
       warning("In case you might try 'options(COTAN.UseTorch = TRUE)'",
               " to enable it")
       warnedAboutTorch <- TRUE
@@ -235,7 +235,9 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
         stop("The `torch` library is installed but the required",
              " additional libraries are not avalable yet")
       }
-      library("torch", character.only = TRUE)
+      if (!require("torch", character.only = TRUE)) {
+        stop("The `torch` library is installed but cannot be loaded")
+      }
       # Call a simple torch function to check if it's working
       if (is.null(torch::torch_tensor(1L))) {
         stop("The `torch` library is installed but not working correctly")

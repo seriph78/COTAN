@@ -1,3 +1,4 @@
+Solved bug causing errors while using `torch` with a `CPU` device
 
 Ensure the drop out cluster from `cellsUnifromClustersing()` [`-1`]
 keeps its name if it has not been merged at the end of 
