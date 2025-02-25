@@ -1,3 +1,5 @@
+## 2.7.4
+
 Solved bug causing errors while using `torch` with a `CPU` device
 
 Ensure the drop out cluster from `cellsUnifromClustersing()` [`-1`]
