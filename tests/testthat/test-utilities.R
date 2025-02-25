@@ -52,7 +52,7 @@ test_that("Clusterizations manipulations", {
 
   expect_s3_class(clusters, "factor")
   expect_setequal(levels(clusters), paste0("", as.roman(1L:7L)))
-  expect_identical(names(clusters), elemNames)
+  expect_named(clusters, elemNames)
 
   clustersList <- toClustersList(clusters)
 
@@ -246,8 +246,8 @@ test_that("parallelDist - cosine dissimilarity", {
 test_that("pca usage", {
   utils::data("test.dataset", package = "COTAN")
 
-  pcaRaw <- pca(mat = test.dataset, rank = 5L,
-                transposed = TRUE, BSPARAM = IrlbaParam())[["rotated"]]
+  pcaRaw <- runPCA(x = as.matrix(test.dataset), rank = 5L,
+                   BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
   colnames(pcaRaw) <- paste0("PC_", seq_len(ncol(pcaRaw)))
 
   expect_identical(rownames(pcaRaw), rownames(test.dataset))

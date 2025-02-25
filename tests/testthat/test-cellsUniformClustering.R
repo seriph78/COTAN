@@ -160,16 +160,16 @@ test_that("Cell Uniform Clustering", {
   expect_identical(rownames(observedCT), rownames(expectedCT))
   expect_identical(rownames(observedCT), c("g-000200.yes", "g-000200.no"))
   expect_identical(colSums(observedCT),
-                   set_names(c(600, 600), c("cells.in", "cells.out")))
+                   set_names(c(600.0, 600.0), c("cells.in", "cells.out")))
   expect_identical(colSums(expectedCT),
-                   set_names(c(600, 600), c("cells.in", "cells.out")))
+                   set_names(c(600.0, 600.0), c("cells.in", "cells.out")))
   expect_equal(rowSums(observedCT), rowSums(expectedCT), tolerance = 5e-6)
   expect_identical(observedCT < expectedCT,
-                   matrix(c(TRUE, FALSE, FALSE, TRUE), nrow = 2,
+                   matrix(c(TRUE, FALSE, FALSE, TRUE), nrow = 2L,
                           dimnames = dimnames(observedCT)))
-  expect_identical(observedCT[1, 1],
+  expect_identical(observedCT[1L, 1L],
                    sum(getZeroOneProj(obj)["g-000200", 1L:600L]))
-  expect_equal(expectedCT[2, 1],
+  expect_equal(expectedCT[2L, 1L],
                sum(getProbabilityOfZero(obj)["g-000200", 1L:600L]),
                tolerance = 5e-6)
 

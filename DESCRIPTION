@@ -46,7 +46,6 @@ Imports:
     tibble,
     tidyr,
     BiocSingular,
-    PCAtools,
     parallelDist,
     ComplexHeatmap,
     circlize,
@@ -65,8 +64,7 @@ Imports:
     withr,
     SingleCellExperiment,
     SummarizedExperiment,
-    S4Vectors,
-    proj4
+    S4Vectors
 Suggests: 
     testthat (>= 3.2.0),
     proto,

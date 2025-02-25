@@ -110,11 +110,8 @@ test_that("Merge Uniform Cells Clusters", {
   expect_length(allCheckRes, nrow(allCheckDF))
   expect_named(allCheckRes)
   expect_true(all(stringr::str_ends(names(allCheckRes), fixed("-merge"))))
-  expect_true(all(vapply(allCheckRes,
-                         function(x) {
-                           methods::is(x, "AdvancedGDIUniformityCheck")
-                         },
-                         logical(1L))))
+  expect_true(all(vapply(allCheckRes, methods::is,
+                         logical(1L), "AdvancedGDIUniformityCheck")))
   expect_true(allCheckRes[[1L]]@isUniform)
   expect_true(allCheckRes[[2L]]@isUniform)
   expect_false(is.finite(allCheckRes[[1L]]@firstCheck@fractionBeyond))
@@ -151,7 +148,7 @@ test_that("Merge Uniform Cells Clusters", {
     GDIData <- calculateGDI(clObj)
 
     expect_lte(sum(GDIData[["GDI"]] >= GDIThreshold),
-               allCheckRes[[1]]@firstCheck@maxRatioBeyond * nrow(GDIData))
+               allCheckRes[[1L]]@firstCheck@maxRatioBeyond * nrow(GDIData))
 
     gc()
   }

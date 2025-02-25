@@ -19,8 +19,8 @@ vignette: >
 knitr::opts_chunk[["set"]](
   collapse = TRUE,
   comment = "#>"
-#  fig.width = 5L,
-#  fig.height = 5L
+  # fig.width = 5L,
+  # fig.height = 5L
 )
 
 ```
@@ -161,7 +161,8 @@ To drop cells by gene number: high genes count might also indicate doublets...
 
 ```{r}
 genesSizeHighThr <- 3000L
-obj <- addElementToMetaDataset(obj, "Num genes high threshold", genesSizeHighThr)
+obj <- addElementToMetaDataset(obj, "Num genes high threshold",
+                               genesSizeHighThr)
 
 cells_to_rem <- getCells(obj)[getNumExpressedGenes(obj) > genesSizeHighThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
@@ -223,7 +224,7 @@ logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
 The `clean()` function estimates all the parameters for the data. Therefore, we have to run it again every time we remove any genes or cells from the data.
 
 ```{r}
-obj <- addElementToMetaDataset(obj, "Num drop B group", 0)
+obj <- addElementToMetaDataset(obj, "Num drop B group", 0L)
 
 obj <- clean(obj)
 
@@ -243,7 +244,7 @@ We can observe here that the red cells are really enriched in hemoglobin genes s
 cells_to_rem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
-obj <- addElementToMetaDataset(obj, "Num drop B group", 1)
+obj <- addElementToMetaDataset(obj, "Num drop B group", 1L)
 
 obj <- clean(obj)
 
@@ -280,7 +281,7 @@ We also save the defined threshold in the metadata and re-run the estimation
 UDELowThr <- 0.30
 obj <- addElementToMetaDataset(obj, "Low UDE cells' threshold", UDELowThr)
 
-obj <- addElementToMetaDataset(obj, "Num drop B group", 2)
+obj <- addElementToMetaDataset(obj, "Num drop B group", 2L)
 
 cells_to_rem <- getCells(obj)[getNu(obj) < UDELowThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
@@ -600,7 +601,7 @@ prevCheckRes <- data.frame()
 # Se we reload them from the output files. This, along a similar facility for
 # the split method, is also useful in the cases the execution is interrupted
 # prematurely...
-# 
+#
 if (TRUE) {
   # read from the last file among those named all_check_results_XX.csv
   mergeDir <- file.path(outDir, cond, "leafs_merge")
