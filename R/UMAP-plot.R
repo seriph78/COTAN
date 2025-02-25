@@ -318,7 +318,7 @@ seuratHVG <- function(rawData, hvgMethod, cond, numFeatures = 2000L) {
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
-#' @importFrom PCAtools pca
+#' @importFrom BiocSingular runPCA
 #'
 #' @export
 #'
@@ -425,8 +425,8 @@ cellsUMAPPlot <- function(objCOTAN,
   cellsMatrix <- cellsMatrix[genesPos, ]
 
   logThis("Elaborating PCA - START", logLevel = 3L)
-  cellsPCA <- pca(mat = cellsMatrix, rank = 50L,
-                  transposed = FALSE, BSPARAM = IrlbaParam())[["rotated"]]
+  cellsPCA <- runPCA(x = t(cellsMatrix), rank = 50L,
+                     BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
 
   gc()
 
