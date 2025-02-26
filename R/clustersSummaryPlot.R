@@ -215,8 +215,6 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @importFrom stats cutree
 #' @importFrom stats as.dendrogram
 #'
-#' @importFrom parallelDist parDist
-#'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'

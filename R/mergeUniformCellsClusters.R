@@ -70,8 +70,6 @@
 #'
 #' @importFrom Matrix t
 #'
-#' @importFrom parallelDist parDist
-#'
 #' @importFrom stats hclust
 #' @importFrom stats as.dendrogram
 #' @importFrom stats cophenetic
