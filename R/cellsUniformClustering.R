@@ -204,7 +204,8 @@ NULL
 #'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
 #'   [Seurat::FindClusters()]
 #' @param maxIterations max number of re-clustering iterations. It defaults to
-#' @param cores number of cores to use. Default is 1. \eqn{25}
+#'   \eqn{25}
+#' @param cores number of cores to use. Default is 1.
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
 #'   not available will run the slower legacy code
@@ -223,9 +224,9 @@ NULL
 #'   selection methods:
 #'   * `"HGDI"` Will pick-up the genes with highest **GDI**
 #'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'   via the \pkg{Seurat} package (the default method)
+#'     via the \pkg{Seurat} package (the default method)
 #'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param initialClusters an existing *clusterization* to use as starting point:

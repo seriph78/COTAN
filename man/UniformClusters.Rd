@@ -93,7 +93,8 @@ discriminate whether a \emph{cluster} is \emph{uniform transcript}. See
 before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as
 \code{\link[Seurat:FindClusters]{Seurat::FindClusters()}}}
 
-\item{maxIterations}{max number of re-clustering iterations. It defaults to}
+\item{maxIterations}{max number of re-clustering iterations. It defaults to
+\eqn{25}}
 
 \item{cores}{number of cores to use. Default is 1.}
 

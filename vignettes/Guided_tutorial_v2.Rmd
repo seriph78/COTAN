@@ -18,9 +18,11 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk[["set"]](
   collapse = TRUE,
-  comment = "#>"
-  # fig.width = 5L,
-  # fig.height = 5L
+  comment = "#>",
+  dev = "png",
+  fig.width = 6L,
+  fig.height = 4L,
+  dpi = 72
 )
 
 ```
@@ -397,15 +399,17 @@ plot(heatmapPlot(obj, genesLists = genesList))
 We can also plot a general heatmap of `COEX` values based on some markers like
 the following one.
 
-```{r}
-plot(genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Vim", "Hes1"),
-                      pValueThreshold = 0.001, symmetric = TRUE))
+```{r, eval=TRUE, include=TRUE}
+invisible(
+  genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Vim", "Hes1"),
+                   pValueThreshold = 0.001, symmetric = TRUE))
 ```
 
-```{r eval=FALSE, include=TRUE}
-plot(genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
-                      secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
-                      pValueThreshold = 0.001, symmetric = FALSE))
+```{r, eval=FALSE, include=TRUE}
+invisible(
+  genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
+                   secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
+                   pValueThreshold = 0.001, symmetric = FALSE))
 ```
 
 ## Get data tables

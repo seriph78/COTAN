@@ -349,7 +349,7 @@ conditionsFromNames <-
   if (anyNA(conditions) ||
       length(unique(conditions)) == numNames) {
     warning("conditionsFromNames: no proper pattern has been recognized",
-            "or given column number was too high")
+            " or given column number was too high")
     conditions <- rep("1", numNames)
   }
   names(conditions) <- names
