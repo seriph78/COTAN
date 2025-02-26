@@ -1,3 +1,7 @@
+Solved issue with use of `parallelDist::parDist()` by allowing a fall-back to
+`stats::dist()`. This was needed to address failures running `parDist()` 
+on Linux-aarch64 machines
+
 ## 2.7.4
 
 Solved bug causing errors while using `torch` with a `CPU` device

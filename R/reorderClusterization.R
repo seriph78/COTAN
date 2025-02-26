@@ -32,8 +32,6 @@
 #' @importFrom rlang set_names
 #' @importFrom rlang is_null
 #'
-#' @importFrom parallelDist parDist
-#'
 #' @importFrom stats hclust
 #' @importFrom stats as.dist
 #'

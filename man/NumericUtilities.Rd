@@ -7,6 +7,7 @@
 \alias{parallelDispersionBisection}
 \alias{nuBisection}
 \alias{parallelNuBisection}
+\alias{calcDist}
 \title{Numeric Utilities}
 \usage{
 funProbZero(dispersion, mu)
@@ -46,6 +47,8 @@ parallelNuBisection(
   threshold = 0.001,
   maxIterations = 100L
 )
+
+calcDist(data, method, diag = FALSE, upper = FALSE)
 }
 \arguments{
 \item{dispersion}{the estimated \code{dispersion} (a \eqn{n}-sized vector)}
@@ -68,6 +71,18 @@ parallelNuBisection(
 \item{initialGuess}{the initial guess for \code{nu}  (a \eqn{m}-sized vector)}
 
 \item{cells}{names of the relevant cells}
+
+\item{data}{a matrix or a data.frame of which we want to calculate the
+distance between columns}
+
+\item{method}{type of distance to use. Can be chosen among those supported by
+\code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+
+\item{diag}{logical value indicating whether the diagonal of the distance
+matrix should be printed by print.dist.upper}
+
+\item{upper}{logical value indicating whether the upper triangle of the
+distance matrix should be printed by print.dist}
 }
 \value{
 the probability \code{matrix} that a \emph{read count} is identically zero
@@ -79,6 +94,8 @@ the dispersion values
 the nu value
 
 the dispersion values
+
+a \code{dist} object with all distances
 }
 \description{
 A set of function helper related to the statistical model
@@ -124,4 +141,8 @@ via a parallel bisection solver
 
 The goal is to find a \verb{nu array} that reduces to zero the difference
 between the number of estimated and counted zeros
+
+\code{calcDist} is a wrapper function that invokes
+\code{\link[parallelDist:parDist]{parallelDist::parDist()}}: the main goal is to recover and finish the
+calculations via a fallback when there is a problem with the main algorithm
 }
