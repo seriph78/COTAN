@@ -25,8 +25,6 @@
 #' @importFrom stats hclust
 #' @importFrom stats cutree
 #'
-#' @importFrom parallelDist parDist
-#'
 #' @importFrom utils head
 #'
 #' @importFrom Matrix t
@@ -82,7 +80,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     assert_that(identical(rownames(pcaCells), getCells(objCOTAN)),
                 msg = "Issues with pca output")
 
-    distCells <- parDist(scale(pcaCells), method = "euclidean") # mahlanobis
+    distCells <- calcDist(scale(pcaCells), method = "euclidean") # mahlanobis
 
     pcaCells <- as.data.frame(pcaCells)
 

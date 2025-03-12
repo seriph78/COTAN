@@ -347,8 +347,6 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @importFrom Matrix rowSums
 #'
-#' @importFrom parallelDist parDist
-#'
 #' @importFrom assertthat assert_that
 #'
 #' @importFrom rlang is_empty
@@ -386,8 +384,8 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
     }
 
     # merge small cluster based on distances
-    return(parDist(t(as.matrix(coexDF)), method = distance,
-                   diag = TRUE, upper = TRUE))
+    return(calcDist(t(as.matrix(coexDF)), method = distance,
+                    diag = TRUE, upper = TRUE))
   } else {
     if (is.null(distance)) {
       distance <- "euclidean"
@@ -404,7 +402,7 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
     zeroOneClAvg[zeroOneClAvg == 0.0] <- 1.0e-6
     colnames(zeroOneClAvg) <- names(clList)
 
-    return(parDist(t(zeroOneClAvg), method = distance,
-                   diag = TRUE, upper = TRUE))
+    return(calcDist(t(zeroOneClAvg), method = distance,
+                    diag = TRUE, upper = TRUE))
   }
 }

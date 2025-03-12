@@ -234,12 +234,15 @@ test_that("parallelDist - cosine dissimilarity", {
   rownames(raw) <- LETTERS[1L:10L]
   colnames(raw) <- letters[1L:20L]
 
-  cd <- as.matrix(parallelDist::parDist(t(raw), method = "cosine"))
+  cd <- as.matrix(calcDist(t(raw), method = "cosine"))
 
   expect_equal(cd[(row(cd) + col(cd)) %% 2L == 1L], rep(cd[2L, 1L], 200L),
                tolerance = 1.0e-15)
   expect_equal(cd[(row(cd) + col(cd)) %% 2L == 0L], rep(cd[3L, 1L], 200L),
                tolerance = 1.0e-15)
+
+  expect_error(expect_message(expect_message(calcDist(t(raw),
+                                                      method = "dummy"))))
 })
 
 

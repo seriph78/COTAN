@@ -463,6 +463,49 @@ parallelNuBisection <-
   }
 
 
+#----------------- distance functions --------------------
+
+
+#' @details `calcDist` is a wrapper function that invokes
+#'   [parallelDist::parDist()]: the main goal is to recover and finish the
+#'   calculations via a fallback when there is a problem with the main algorithm
+#'
+#' @param data a matrix or a data.frame of which we want to calculate the
+#'   distance between columns
+#' @param method type of distance to use. Can be chosen among those supported by
+#'   [parallelDist::parDist()]
+#' @param diag logical value indicating whether the diagonal of the distance
+#'   matrix should be printed by print.dist.upper
+#' @param upper logical value indicating whether the upper triangle of the
+#'   distance matrix should be printed by print.dist
+#'
+#' @returns a `dist` object with all distances
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom parallelDist parDist
+#'
+#' @importFrom stats dist
+#'
+#' @rdname NumericUtilities
+#'
+
+calcDist <- function(data, method, diag = FALSE, upper = FALSE) {
+  data <- as.matrix(data)
+  ret <- tryCatch(parDist(data, method = method,
+                          diag = diag, upper = upper),
+                  error = function(err) {
+                    logThis(paste("While calculating distance", err),
+                            logLevel = 1L)
+                    logThis("Falling back to single threaded algo",
+                            logLevel = 1L)
+                    return(dist(data, method = method,
+                                diag = diag, upper = upper))
+                  })
+  return(ret)
+}
+
+
 #----------------- legacy functions --------------------
 
 #' @details This is a legacy function related to old `scCOTAN` objects. Use the
