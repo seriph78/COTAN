@@ -157,8 +157,6 @@ genesCoexSpace <-
 #' @importFrom stats as.dendrogram
 #' @importFrom stats order.dendrogram
 #'
-#' @importFrom parallelDist parDist
-#'
 #' @importFrom BiocSingular runPCA
 #' @importFrom BiocSingular IrlbaParam
 #'
@@ -240,7 +238,7 @@ establishGenesClusters <-
 
   plotEigen <- screePlot(GCSPca[["sdev"]])
 
-  coexDist <- parDist(as.matrix(GCS), method = distance)
+  coexDist <- calcDist(GCS, method = distance)
 
   hcNorm <- hclust(coexDist, method = hclustMethod)
 
