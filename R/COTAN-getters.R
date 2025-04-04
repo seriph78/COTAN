@@ -505,8 +505,11 @@ setMethod(
 setMethod(
   "getLambda",
   "COTAN",
-  function(objCOTAN) {
-    lambda <- getMetadataGenes(objCOTAN)[["lambda"]]
+  function(objCOTAN, batchName = "NoCond") {
+    assert_that(batchName %in% levels(getBatches(objCOTAN)))
+
+    currName <- paste0("lambda_", batchName)
+    lambda <- getMetadataGenes(objCOTAN)[[currName]]
 
     if (is_empty(lambda)) {
       warning("lambda is empty")
@@ -536,8 +539,11 @@ setMethod(
 setMethod(
   "getDispersion",
   "COTAN",
-  function(objCOTAN) {
-    dispersion <- getMetadataGenes(objCOTAN)[["dispersion"]]
+  function(objCOTAN, batchName = "NoCond") {
+    assert_that(batchName %in% levels(getBatches(objCOTAN)))
+
+    currName <- paste0("dispersion_", batchName)
+    dispersion <- getMetadataGenes(objCOTAN)[[currName]]
 
     if (is_empty(dispersion)) {
       warning("dispersion is empty")

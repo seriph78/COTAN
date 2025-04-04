@@ -47,9 +47,9 @@
 
 \S4method{findFullyExpressingCells}{COTAN}(objCOTAN, genesThreshold = 0.99)
 
-\S4method{setLambda}{COTAN}(objCOTAN, lambda, batchName = "All")
+\S4method{setLambda}{COTAN}(objCOTAN, lambda, batchName = "NoCond")
 
-\S4method{setDispersion}{COTAN}(objCOTAN, dispersion, batchName = "All")
+\S4method{setDispersion}{COTAN}(objCOTAN, dispersion, batchName = "NoCond")
 
 \S4method{setNu}{COTAN}(objCOTAN, nu)
 

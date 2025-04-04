@@ -45,7 +45,7 @@ setMethod(
   function(objCOTAN) {
     lambda <- rowMeans(getRawData(objCOTAN), dims = 1L)
 
-    setLambda(objCOTAN, lambda = lambda)
+    objCOTAN <- setLambda(objCOTAN, lambda = lambda)
 
     return(objCOTAN)
   }

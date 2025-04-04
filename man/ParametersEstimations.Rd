@@ -66,9 +66,9 @@
 
 \S4method{getNu}{COTAN}(objCOTAN)
 
-\S4method{getLambda}{COTAN}(objCOTAN)
+\S4method{getLambda}{COTAN}(objCOTAN, batchName = "NoCond")
 
-\S4method{getDispersion}{COTAN}(objCOTAN)
+\S4method{getDispersion}{COTAN}(objCOTAN, batchName = "NoCond")
 
 estimatorsAreReady(objCOTAN)
 

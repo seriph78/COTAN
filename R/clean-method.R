@@ -71,24 +71,9 @@ setMethod(
     objCOTAN <- findFullyExpressingCells(objCOTAN,
                                          genesThreshold = genesThreshold)
 
-    if (isEmptyName(condName)) {
-      batches <- set_names(rep_len("All", getNumCells(objCOTAN)),
-                           getCells(objCOTAN))
-      batches <- as.factor(batches)
-
-      logThis(paste0("Using a single batch"), logLevel = 3L)
-    } else {
-      batches <- getCondition(objCOTAN, condName = condName)
-      assert_that(!is_empty(batches))
-
-      logThis(paste0("calibrating the model separately on the given ",
-                     nlevels(batches), " batches"), logLevel = 1L)
-    }
-    objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                           datasetTags()[["batch"]], condName)
-
     nu <- set_names(rep_len(NA, getNumCells(objCOTAN)), getCells(objCOTAN))
 
+    batches <- getBatches(objCOTAN)
     for (batch in levels(batches)) {
       cellsToDrop <- names(batches)[batches != batch]
       subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)

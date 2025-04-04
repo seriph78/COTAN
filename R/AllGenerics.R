@@ -79,12 +79,12 @@ setGeneric(
 
 setGeneric(
   "getLambda",
-  function(objCOTAN) standardGeneric("getLambda")
+  function(objCOTAN, batchName = "NoCond") standardGeneric("getLambda")
 )
 
 setGeneric(
   "getDispersion",
-  function(objCOTAN) standardGeneric("getDispersion")
+  function(objCOTAN, batchName = "NoCond") standardGeneric("getDispersion")
 )
 
 setGeneric(
@@ -233,12 +233,14 @@ setGeneric(
 
 setGeneric(
   "setLambda",
-  function(objCOTAN, lambda, batchName = "All") standardGeneric("setLambda")
+  function(objCOTAN, lambda, batchName = "NoCond") {
+    standardGeneric("setLambda")
+  }
 )
 
 setGeneric(
   "setDispersion",
-  function(objCOTAN, dispersion, batchName = "All") {
+  function(objCOTAN, dispersion, batchName = "NoCond") {
     standardGeneric("setDispersion")
   }
 )

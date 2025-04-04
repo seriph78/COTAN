@@ -226,13 +226,10 @@ setMethod(
 setMethod(
   "setLambda",
   "COTAN",
-  function(objCOTAN, lambda, batchName = "All") {
+  function(objCOTAN, lambda, batchName = "NoCond") {
     assert_that(length(lambda) == getNumGenes(objCOTAN))
 
-    condName <- getMetadataElement(objCOTAN, datasetTags()[["batch"]])
-    assert_that(condName %in% getAllConditions(objCOTAN))
-
-    allBatchNames <- levels(getCondition(objCOTAN, condName = condName))
+    allBatchNames <- levels(getBatches(objCOTAN))
     assert_that(batchName %in% allBatchNames)
 
     currName <- paste0("lambda_", batchName)
@@ -277,13 +274,10 @@ setMethod(
 setMethod(
   "setDispersion",
   "COTAN",
-  function(objCOTAN, dispersion, batchName = "All") {
+  function(objCOTAN, dispersion, batchName = "NoCond") {
     assert_that(length(dispersion) == getNumGenes(objCOTAN))
 
-    condName <- getMetadataElement(objCOTAN, datasetTags()[["batch"]])
-    assert_that(condName %in% getAllConditions(objCOTAN))
-
-    allBatchNames <- levels(getCondition(objCOTAN, condName = condName))
+    allBatchNames <- levels(getBatches(objCOTAN))
     assert_that(batchName %in% allBatchNames)
 
     currName <- paste0("dispersion_", batchName)
