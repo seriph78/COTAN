@@ -55,7 +55,7 @@ test_that("COTAN getters", {
   expect_identical(getLogNormData(obj),
                    log1p(t(t(getRawData(obj)) * (1.0e4 / getCellsSize(obj)))) /
                      log(10.0))
-  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[1L:8L],
+  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[1L:9L],
                ignore_attr = TRUE)
   expect_identical(getMetadataDataset(obj)[[2L]], metaInfo)
   expect_setequal(colnames(getMetadataGenes(obj)),

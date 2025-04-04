@@ -401,6 +401,26 @@ setMethod(
   }
 )
 
+#' @details `getBatches()` extracts the with the condition uses to define the
+#'   batches that are needed to refine the model
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getBatches()` returns a named `list` with the batches if any or a
+#'   constant condition otherwise
+#'
+#' @export
+#'
+#' @examples
+#' batches <- getBatches(objCOTAN)
+#'
+#' @rdname HandleMetaData
+#'
+getBatches <- function(objCOTAN) {
+  return(getCondition(objCOTAN,
+                      condName = getMetadataElement(objCOTAN,
+                                                    datasetTags()[["batch"]])))
+}
 
 #' @aliases getDims
 #'
@@ -421,7 +441,9 @@ setMethod(
   "getDims",
   "COTAN",
   function(objCOTAN) {
+
     return(list("raw"          = dim(objCOTAN@raw),
+                "numBatches"   = nlevels(batches),
                 "genesCoex"    = dim(objCOTAN@genesCoex),
                 "cellsCoex"    = dim(objCOTAN@cellsCoex),
                 "metaDataset"  = nrow(objCOTAN@metaDataset),
@@ -1106,6 +1128,30 @@ setMethod(
     return(gdi)
   }
 )
+
+# ------- `COTAN` clusterization data accessors ------
+
+#' @title Handling cells' *clusterization* and related functions
+#'
+#' @description These functions manage the *clusterizations* and their
+#'   associated *cluster* `COEX` `data.frame`s.
+#'
+#'   A *clusterization* is any partition of the cells where to each cell it is
+#'   assigned a **label**; a group of cells with the same label is called
+#'   *cluster*.
+#'
+#'   For each *cluster* is also possible to define a `COEX` value for each gene,
+#'   indicating its increased or decreased expression in the *cluster* compared
+#'   to the whole background. A `data.frame` with these values listed in a
+#'   column for each *cluster* is stored separately for each *clusterization* in
+#'   the `clustersCoex` member.
+#'
+#'   The formulae for this *In/Out* `COEX` are similar to those used in the
+#'   [calculateCoex()] method, with the **role** of the second gene taken by the
+#'   *In/Out* status of the cells with respect to each *cluster*.
+#'
+#' @name HandlingClusterizations
+NULL
 
 
 #' @aliases getClusterizations

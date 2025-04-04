@@ -23,6 +23,7 @@ datasetTags <- function() {
          , "csync" = "cells' coex is in sync:"                          # 6
          , "gbad"  = "genes' pairs fraction with small expected count:" # 7
          , "cbad"  = "cells' pairs fraction with small expected count:" # 8
+         , "batch" = "condition name indicating the separate batches:"  # 9
          ))
 }
 
@@ -79,7 +80,7 @@ updateMetaInfo <- function(meta, tag, value) {
 setMethod(
   "initializeMetaDataset",
   "COTAN",
-  function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
+  function(objCOTAN, GEO, sequencingMethod, sampleCondition, batches = NULL) {
     logThis("Initializing `COTAN` meta-data", logLevel = 2L)
 
     tags <- datasetTags()
@@ -95,6 +96,16 @@ setMethod(
 
     objCOTAN@metaDataset <- meta
 
+    if (!is_null(batches)) {
+      assert_that(names(batches) == getCells(objCOTAN))
+
+      objCOTAN <- addCondition(objCOTAN, condName = "batches",
+                               conditions = batches, override = TRUE)
+
+      objCOTAN <- addElementToMetaDataset(objCOTAN,
+                                          tag = datasetTags()[["batch"]],
+                                          value = "batches")
+    }
     return(objCOTAN)
   }
 )
@@ -188,6 +199,147 @@ setMethod(
 
     objCOTAN@metaCells <-
       setColumnInDF(objCOTAN@metaCells, feCells, "feCells", getCells(objCOTAN))
+
+    return(objCOTAN)
+  }
+)
+
+#' @aliases setLambda
+#'
+#' @details `setLambda()` adds a column to the genes' metadata with the lambda
+#'   (genes' counts averages) for the given batch
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param lambda a named array that gives the values for lambda on the given
+#'   batch
+#' @param batchName the name of the batch the lambdas refer to. It must be one
+#'   of the levels of the **condition** used to discriminate between batches
+#'
+#' @returns `setLambda()` returns the updated `COTAN` object
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+#'
+#' @rdname RawDataCleaning
+#'
+setMethod(
+  "setLambda",
+  "COTAN",
+  function(objCOTAN, lambda, batchName = "All") {
+    assert_that(length(lambda) == getNumGenes(objCOTAN))
+
+    condName <- getMetadataElement(objCOTAN, datasetTags()[["batch"]])
+    assert_that(condName %in% getAllConditions(objCOTAN))
+
+    allBatchNames <- levels(getCondition(objCOTAN, condName = condName))
+    assert_that(batchName %in% allBatchNames)
+
+    currName <- paste0("lambda_", batchName)
+    if (TRUE) {
+      oldLambda <- getMetadataGenes(objCOTAN)[[currName]]
+      if (!identical(lambda[getGenes(objCOTAN)], oldLambda)) {
+        # flag the coex slots are out of sync (if any)!
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["gsync"]], FALSE)
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["csync"]], FALSE)
+      }
+    }
+
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, lambda,
+                                        currName, getGenes(objCOTAN))
+
+    return(objCOTAN)
+  }
+)
+
+
+#' @aliases setDispersion
+#'
+#' @details `setDispersion()` adds a column to the genes' metadata with the
+#'   negative binomial dispersion factor for the given batch
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param dispersion a named array that gives the values for lambda on the given
+#'   batch
+#' @param batchName the name of the batch the lambdas refer to. It must be one
+#'   of the levels of the **condition** used to discriminate between batches
+#'
+#' @returns `setDispersion()` returns the updated `COTAN` object
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+#'
+#' @rdname RawDataCleaning
+#'
+setMethod(
+  "setDispersion",
+  "COTAN",
+  function(objCOTAN, dispersion, batchName = "All") {
+    assert_that(length(dispersion) == getNumGenes(objCOTAN))
+
+    condName <- getMetadataElement(objCOTAN, datasetTags()[["batch"]])
+    assert_that(condName %in% getAllConditions(objCOTAN))
+
+    allBatchNames <- levels(getCondition(objCOTAN, condName = condName))
+    assert_that(batchName %in% allBatchNames)
+
+    currName <- paste0("dispersion_", batchName)
+
+    if (TRUE) {
+      oldDispersion <-  getMetadataGenes(objCOTAN)[[currName]]
+      if (!identical(dispersion, oldDispersion)) {
+        # flag the coex slots are out of sync (if any)!
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["gsync"]], FALSE)
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["csync"]], FALSE)
+      }
+    }
+
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
+                                        currName, genes)
+
+    return(objCOTAN)
+  }
+)
+
+#' @aliases setNu
+#'
+#' @details `setNu()`
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param nu A named array that gives
+#'
+#' @returns `setNu()` returns the updated `COTAN` object
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+#'
+#' @rdname RawDataCleaning
+#'
+setMethod(
+  "setNu",
+  "COTAN",
+  function(objCOTAN, nu) {
+    assert_that(length(nu) == getNumCells(objCOTAN))
+
+    if (TRUE) {
+      oldNu <- getMetadataCells(objCOTAN)[["nu"]]
+      if (!identical(nu[getCells(objCOTAN)], oldNu)) {
+        # flag the coex slots are out of sync (if any)!
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["gsync"]], FALSE)
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["csync"]], FALSE)
+      }
+    }
+
+    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
+                                        "nu", getCells(objCOTAN))
 
     return(objCOTAN)
   }

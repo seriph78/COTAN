@@ -11,6 +11,7 @@
 \alias{getMetadataGenes}
 \alias{getMetadataCells,COTAN-method}
 \alias{getMetadataCells}
+\alias{getBatches}
 \alias{getDims,COTAN-method}
 \alias{getDims}
 \alias{datasetTags}
@@ -30,11 +31,19 @@
 
 \S4method{getMetadataCells}{COTAN}(objCOTAN)
 
+getBatches(objCOTAN)
+
 \S4method{getDims}{COTAN}(objCOTAN)
 
 datasetTags()
 
-\S4method{initializeMetaDataset}{COTAN}(objCOTAN, GEO, sequencingMethod, sampleCondition)
+\S4method{initializeMetaDataset}{COTAN}(
+  objCOTAN,
+  GEO,
+  sequencingMethod,
+  sampleCondition,
+  batches = NULL
+)
 
 \S4method{addElementToMetaDataset}{COTAN}(objCOTAN, tag, value)
 
@@ -75,6 +84,9 @@ names, the new row names of the resulting \code{data.frame}}
 
 \code{getMetadataCells()} returns the cells' meta-data \code{data.frame}
 
+\code{getBatches()} returns a named \code{list} with the batches if any or a
+constant condition otherwise
+
 \code{getDims()} returns a named \code{list} with the sizes of the slots
 
 \code{datasetTags()} a named \verb{character array} with the standard labels
@@ -113,6 +125,9 @@ given tag if present or an empty string otherwise.
 \code{getMetadataGenes()} extracts the meta-data stored for the genes
 
 \code{getMetadataCells()} extracts the meta-data stored for the cells
+
+\code{getBatches()} extracts the with the condition uses to define the
+batches that are needed to refine the model
 
 \code{getDims()} extracts the sizes of all slots of the \code{COTAN} object
 
@@ -153,6 +168,8 @@ numInitialCells <- getMetadataElement(objCOTAN, "cells")
 metaGenes <- getMetadataGenes(objCOTAN)
 
 metaCells <- getMetadataCells(objCOTAN)
+
+batches <- getBatches(objCOTAN)
 
 allSizes <- getDims(objCOTAN)
 

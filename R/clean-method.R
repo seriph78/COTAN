@@ -6,6 +6,9 @@
 #'   also produces and stores the estimators for nu and lambda
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param condName A condition name that indicates the separate batches to
+#'   operate on separately. When equal to `"All"` (default) it is assumed datset
+#'   is a single batch.
 #' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
 #'   expressed in less cells than threshold times the total number of cells.
 #'   Default cutoff is \eqn{0.003 \; (0.3\%)}
@@ -22,6 +25,7 @@
 #' @returns `clean()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang is_null
 #'
 #' @export
 #'
@@ -30,8 +34,7 @@
 setMethod(
   "clean",
   "COTAN",
-  function(objCOTAN,
-           cellsCutoff = 0.003, genesCutoff = 0.002,
+  function(objCOTAN, cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99) {
 
     # We want to discard genes having less than given cutoff
@@ -68,10 +71,44 @@ setMethod(
     objCOTAN <- findFullyExpressingCells(objCOTAN,
                                          genesThreshold = genesThreshold)
 
-    objCOTAN <- estimateLambdaLinear(objCOTAN)
-    objCOTAN <- estimateNuLinear(objCOTAN)
+    if (isEmptyName(condName)) {
+      batches <- set_names(rep_len("All", getNumCells(objCOTAN)),
+                           getCells(objCOTAN))
+      batches <- as.factor(batches)
 
-    gc()
+      logThis(paste0("Using a single batch"), logLevel = 3L)
+    } else {
+      batches <- getCondition(objCOTAN, condName = condName)
+      assert_that(!is_empty(batches))
+
+      logThis(paste0("calibrating the model separately on the given ",
+                     nlevels(batches), " batches"), logLevel = 1L)
+    }
+    objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                           datasetTags()[["batch"]], condName)
+
+    nu <- set_names(rep_len(NA, getNumCells(objCOTAN)), getCells(objCOTAN))
+
+    for (batch in levels(batches)) {
+      cellsToDrop <- names(batches)[batches != batch]
+      subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
+
+      subObj <- estimateLambdaLinear(subObj)
+      subObj <- estimateNuLinear(subObj)
+
+      # store a separate lambda for each batch
+      objCOTAN <- setLambda(objCOTAN, lambda = getLambda(subObj),
+                            batchName = as.character(batch))
+
+      # store the relevant sub-set of `nu` in the global `nu`
+      # note that mean(`nu`) == 1.0 in each batch and thus globally!
+      nu[getCells(subObj)] <- getNu(subObj)
+
+      rm(subObj)
+      gc()
+    }
+
+    objCOTAN <- setNu(objCOTAN, nu)
 
     return(objCOTAN)
   }
