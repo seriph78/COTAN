@@ -623,14 +623,22 @@ setMethod(
 #' @rdname ParametersEstimations
 #'
 estimatorsAreReady <- function(objCOTAN) {
-  anyEmptyArrays <- is_empty(getLambda(objCOTAN)) ||
-                    is_empty(getNu(objCOTAN)) ||
-                    is_empty(getDispersion(objCOTAN))
-  if (anyEmptyArrays) {
-    logThis(paste0("Estimators are not ready - array sizes: lambda ",
-                   length(getLambda(objCOTAN)), ", nu ",
-                   length(getNu(objCOTAN)), ", dispersion ",
-                   length(getDispersion(objCOTAN))), logLevel = 2L)
+
+  lambdaLength <- getNumGenes(objCOTAN)
+  dispersionLength <- getNumGenes(objCOTAN)
+  for (batch in getBatches(objCOTAN)) {
+    lambdaLength <- min(lambdaLength,
+                        length(getLambda(objCOTAN, batchName = batch)))
+    dispersionLength <- min(dispersionLength,
+                            length(getDispersion(objCOTAN, batchName = batch)))
+  }
+  nuLength <- length(getNu(objCOTAN))
+
+  if (min(lambdaLength, dispersionLength, nuLength) < getNumGenes(objCOTAN)) {
+    logThis(paste0("Estimators are not ready - array sizes:",
+                   " lambda ", lambdaLength,
+                   ", dispersion ", dispersionLength,
+                   ", nu ", nuLength), logLevel = 2L)
   }
   return(!anyEmptyArrays)
 }
