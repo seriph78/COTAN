@@ -1195,8 +1195,8 @@ setMethod(
 
     if (isTRUE(actOnCells)) {
       if (isTRUE(optimizeForSpeed)) {
-        warning("The 'torch' package is not supported yet for cells' COEX",
-                " Falling back to legacy code.")
+        warning("The 'torch' package is not supported yet for cells' COEX:",
+                " falling back to legacy code")
       }
       c(coex, problematicPairsFraction) %<-%
         calculateCoex_Legacy(objCOTAN, actOnCells = TRUE,
@@ -1210,6 +1210,14 @@ setMethod(
                                              problematicPairsFraction)
     } else {
       c(useTorch, deviceStr) %<-% canUseTorch(optimizeForSpeed, deviceStr)
+      if (!isEmptyName(getMetadataElement(objCOTAN,
+                                          datasetTags()[["batch"]]))) {
+        if (isTRUE(useTorch)) {
+          warning("The 'torch' package is not supported yet for",
+                  " multi-batch COEX: falling back to legacy code")
+          useTorch <- FALSE
+        }
+      }
 
       if (useTorch) {
         c(coex, problematicPairsFraction) %<-%

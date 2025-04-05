@@ -441,9 +441,8 @@ setMethod(
   "getDims",
   "COTAN",
   function(objCOTAN) {
-
     return(list("raw"          = dim(objCOTAN@raw),
-                "numBatches"   = nlevels(batches),
+                "numBatches"   = nlevels(getBatches(objCOTAN)),
                 "genesCoex"    = dim(objCOTAN@genesCoex),
                 "cellsCoex"    = dim(objCOTAN@cellsCoex),
                 "metaDataset"  = nrow(objCOTAN@metaDataset),
@@ -493,10 +492,15 @@ setMethod(
 #'   gene)
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param batchName the name of a batch to return the corresponding lambda. If
+#'   no batches are present default value will return the global lambda `array`.
+#'   If the passed name is `"All"` and batches are in use the function will
+#'   return a `matrix` with the approriate lambda for each cell
 #'
-#' @returns `getLambda()` returns the lambda array
+#' @returns `getLambda()` returns the lambda `array` or `matrix` as appropriate
 #'
 #' @importFrom rlang is_empty
+#' @importFrom stringr str_equal
 #'
 #' @export
 #'
@@ -506,8 +510,27 @@ setMethod(
   "getLambda",
   "COTAN",
   function(objCOTAN, batchName = "NoCond") {
-    assert_that(batchName %in% levels(getBatches(objCOTAN)))
+    # matrix for batches
+    if (str_equal(batchName, "All", ignore_case = TRUE)) {
+      batches <- getBatches(objCOTAN)
+      if (any(batches != "NoCond")) {
+        lambdaM <- matrix(data = NaN,
+                          nrow = getNumGenes(objCOTAN),
+                          ncol = getNumCells(objCOTAN),
+                          dimnames = list(getGenes(objCOTAN),
+                                          getCells(objCOTAN)))
+        for (batch in levels(batches)) {
+          lambdaM[ , names(batches)[batches == batch]] <-
+            getLambda(objCOTAN, batchName = batch)
+        }
 
+        return(lambdaM)
+      }
+    } else {
+      assert_that(batchName %in% levels(getBatches(objCOTAN)))
+    }
+
+    # default case
     currName <- paste0("lambda_", batchName)
     lambda <- getMetadataGenes(objCOTAN)[[currName]]
 
@@ -527,8 +550,13 @@ setMethod(
 #' @details `getDispersion()` extracts the dispersion array
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param batchName the name of a batch to return the corresponding lambda. If
+#'   no batches are present default value will return the global lambda `array`.
+#'   If the passed name is `"All"` and batches are in use the function will
+#'   return a `matrix` with the approriate lambda for each cell
 #'
-#' @returns `getDispersion()` returns the dispersion array
+#' @returns `getDispersion()` returns the dispersion `array` or `matrix` as
+#'   appropriate
 #'
 #' @importFrom rlang is_empty
 #'
@@ -540,6 +568,28 @@ setMethod(
   "getDispersion",
   "COTAN",
   function(objCOTAN, batchName = "NoCond") {
+    # matrix for batches
+    if (str_equal(batchName, "All", ignore_case = TRUE)) {
+      batches <- getBatches(objCOTAN)
+      if (any(batches != "NoCond")) {
+        dispersionM <- matrix(data = NaN,
+                              nrow = getNumGenes(objCOTAN),
+                              ncol = getNumCells(objCOTAN),
+                              dimnames = list(getGenes(objCOTAN),
+                                              getCells(objCOTAN)))
+
+        for (batch in levels(batches)) {
+          dispersionM[ , names(batches)[batches == batch]] <-
+            getDispersion(objCOTAN, batchName = batch)
+        }
+
+        return(dispersionM)
+      }
+    } else {
+      assert_that(batchName %in% levels(getBatches(objCOTAN)))
+    }
+
+    # default case
     assert_that(batchName %in% levels(getBatches(objCOTAN)))
 
     currName <- paste0("dispersion_", batchName)
@@ -601,15 +651,19 @@ estimatorsAreReady <- function(objCOTAN) {
 #' @rdname CalculatingCOEX
 #'
 getMu <- function(objCOTAN) {
-  if (is_empty(getLambda(objCOTAN))) {
+  lambda <- getLambda(objCOTAN, "All")
+  if (is_empty(lambda)) {
     stop("lambda must not be empty, estimate it")
   }
-
-  if (is_empty(getNu(objCOTAN))) {
+  nu <- getNu(objCOTAN)
+  if (is_empty(nu)) {
     stop("nu must not be empty, estimate it")
   }
-
-  return(getLambda(objCOTAN) %o% getNu(objCOTAN))
+  if (is.matrix(lambda)) {
+    return(t(t(lambda) * nu))
+  } else {
+    return(getLambda(objCOTAN) %o% getNu(objCOTAN))
+  }
 }
 
 
@@ -704,12 +758,14 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 #' @rdname ParametersEstimations
 #'
 getProbabilityOfZero <- function(objCOTAN) {
-  if (is_empty(getDispersion(objCOTAN))) {
+  dispersion <- getDispersion(objCOTAN, "All")
+
+  if (is_empty(dispersion)) {
     stop("dispersion must not be empty, estimate it")
   }
 
   # estimate Probabilities of 0 with internal function funProbZero
-  return(funProbZero(getDispersion(objCOTAN), getMu(objCOTAN)))
+  return(funProbZero(dispersion, getMu(objCOTAN)))
 }
 
 

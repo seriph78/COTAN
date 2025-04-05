@@ -145,7 +145,26 @@ setMethod(
 
     analysisTime <- Sys.time()
 
-    objCOTAN <- estimateDispersionBisection(objCOTAN, cores = cores)
+    batches <- getBatches(objCOTAN)
+    for (batch in levels(batches)) {
+      logThis(paste("Handling batch", batch), logLevel = 3L)
+
+      cellsToDrop <- names(batches)[batches != batch]
+      subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
+      subObj <- resetBatches(subObj)
+
+      subObj <- setLambda(subObj, lambda = getLambda(objCOTAN, batch))
+      subObj <- setNu(subObj, nu = getNu(objCOTAN)[getCells(subObj)])
+
+      subObj <- estimateDispersionBisection(subObj, cores = cores)
+
+      # store a separate lambda for each batch
+      objCOTAN <- setDispersion(objCOTAN, dispersion = getDispersion(subObj),
+                                batchName = paste0(batch))
+
+      rm(subObj)
+    }
+
 
     gc()
 

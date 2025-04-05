@@ -43,6 +43,8 @@ setMethod(
   "estimateLambdaLinear",
   "COTAN",
   function(objCOTAN) {
+    assert_that(isEmptyName(getMetadataElement(objCOTAN,
+                                               datasetTags()[["batch"]])))
     lambda <- rowMeans(getRawData(objCOTAN), dims = 1L)
 
     objCOTAN <- setLambda(objCOTAN, lambda = lambda)
@@ -160,6 +162,8 @@ setMethod(
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
+    assert_that(isEmptyName(getMetadataElement(objCOTAN,
+                                               datasetTags()[["batch"]])))
     logThis("Estimate dispersion: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
@@ -551,6 +555,8 @@ setMethod(
   function(objCOTAN, threshold = 0.001,
            maxIterations = 50L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
+    assert_that(isEmptyName(getMetadataElement(objCOTAN,
+                                               datasetTags()[["batch"]])))
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2L)
 
     # getNu() would show a warning when no 'nu' present

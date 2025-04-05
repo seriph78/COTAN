@@ -21,9 +21,9 @@ datasetTags <- function() {
          , "cells" = "starting n. of cells:"                            # 4
          , "gsync" = "genes' coex is in sync:"                          # 5
          , "csync" = "cells' coex is in sync:"                          # 6
-         , "gbad"  = "genes' pairs fraction with small expected count:" # 7
-         , "cbad"  = "cells' pairs fraction with small expected count:" # 8
-         , "batch" = "condition name indicating the separate batches:"  # 9
+         , "batch" = "condition name indicating the separate batches:"  # 7
+         , "gbad"  = "genes' pairs fraction with small expected count:" # 8
+         , "cbad"  = "cells' pairs fraction with small expected count:" # 9
          ))
 }
 
@@ -97,7 +97,7 @@ setMethod(
     objCOTAN@metaDataset <- meta
 
     if (!is_null(batches)) {
-      assert_that(names(batches) == getCells(objCOTAN))
+      assert_that(identical(names(batches), getCells(objCOTAN)))
 
       objCOTAN <- addCondition(objCOTAN, condName = "batches",
                                conditions = batches, override = TRUE)
@@ -135,6 +135,42 @@ setMethod(
     return(objCOTAN)
   }
 )
+
+
+#' @aliases resetBatches
+#'
+#' @details `resetBatches()` is used to change the condition to use as driver
+#'   for the batches.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param conditionToUse the name of the *condition* to be used as batches
+#'   discriminator. If no name is given behaviour will return to standard
+#'   no-batches
+#'
+#' @returns `resetBatches()` returns the updated `COTAN` object
+#'
+#' @export
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname HandleMetaData
+#'
+setMethod(
+  "resetBatches",
+  "COTAN",
+  function(objCOTAN, conditionToUse = "") {
+    assert_that(isEmptyName(conditionToUse) ||
+                  conditionToUse %in% getAllConditions(objCOTAN))
+
+    objCOTAN <- addElementToMetaDataset(objCOTAN,
+                                        tag = datasetTags()[["batch"]],
+                                        value = conditionToUse)
+
+    return(objCOTAN)
+  }
+)
+
+
 
 
 # ------------ Raw data cleaning --------------
@@ -198,7 +234,8 @@ setMethod(
     feCells <- getNumExpressedGenes(objCOTAN) >= threshold
 
     objCOTAN@metaCells <-
-      setColumnInDF(objCOTAN@metaCells, feCells, "feCells", getCells(objCOTAN))
+      setColumnInDF(objCOTAN@metaCells, feCells,
+                    "feCells", getCells(objCOTAN))
 
     return(objCOTAN)
   }
@@ -228,9 +265,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, lambda, batchName = "NoCond") {
     assert_that(length(lambda) == getNumGenes(objCOTAN))
-
-    allBatchNames <- levels(getBatches(objCOTAN))
-    assert_that(batchName %in% allBatchNames)
+    assert_that(batchName %in% levels(getBatches(objCOTAN)))
 
     currName <- paste0("lambda_", batchName)
     if (TRUE) {
@@ -244,8 +279,9 @@ setMethod(
       }
     }
 
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, lambda,
-                                        currName, getGenes(objCOTAN))
+    objCOTAN@metaGenes <-
+      setColumnInDF(objCOTAN@metaGenes, lambda,
+                    currName, getGenes(objCOTAN))
 
     return(objCOTAN)
   }
@@ -276,9 +312,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, dispersion, batchName = "NoCond") {
     assert_that(length(dispersion) == getNumGenes(objCOTAN))
-
-    allBatchNames <- levels(getBatches(objCOTAN))
-    assert_that(batchName %in% allBatchNames)
+    assert_that(batchName %in% levels(getBatches(objCOTAN)))
 
     currName <- paste0("dispersion_", batchName)
 
@@ -293,8 +327,9 @@ setMethod(
       }
     }
 
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
-                                        currName, genes)
+    objCOTAN@metaGenes <-
+      setColumnInDF(objCOTAN@metaGenes, dispersion,
+                    currName, getGenes(objCOTAN))
 
     return(objCOTAN)
   }
@@ -436,17 +471,20 @@ setMethod(
     # Copy the meta data for the data-set
     output@metaDataset <- getMetadataDataset(objCOTAN)
 
+    # TODO: change!!
+    # unlist(lapply(lapply(c("lambda_NoCond", "disp", "feGenes"), startsWith, c("lambda", "feGenes")), any))
+    # apply(vapply(c("lambda_NoCond", "disp", "feGenes"), startsWith, logical(2L), c("lambda", "feGenes")), 2, any)
     # Filter the meta data for genes keeping those not related to estimates
     colsToKeep <- !(names(getMetadataGenes(objCOTAN)) %in%
                       c("feGenes", "lambda", "dispersion", "GDI"))
+
     if (any(colsToKeep)) {
       output@metaGenes <-
         getMetadataGenes(objCOTAN)[genesPosToKeep, colsToKeep, drop = FALSE]
     }
 
     # Filter the meta data for cells keeping those not related to estimates
-    colsToKeep <- !(names(getMetadataCells(objCOTAN)) %in%
-                      c("feCells", "nu"))
+    colsToKeep <- !(names(getMetadataCells(objCOTAN)) %in% c("feCells", "nu"))
     if (any(colsToKeep)) {
       output@metaCells <-
         getMetadataCells(objCOTAN)[cellsPosToKeep, colsToKeep, drop = FALSE]

@@ -218,6 +218,13 @@ setGeneric(
 )
 
 setGeneric(
+  "resetBatches",
+  function(objCOTAN, conditionToUse = "") {
+    standardGeneric("resetBatches")
+  }
+)
+
+setGeneric(
   "findFullyExpressedGenes",
   function(objCOTAN, cellsThreshold = 0.99) {
     standardGeneric("findFullyExpressedGenes")
