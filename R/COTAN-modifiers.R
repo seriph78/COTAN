@@ -21,9 +21,9 @@ datasetTags <- function() {
          , "cells" = "starting n. of cells:"                            # 4
          , "gsync" = "genes' coex is in sync:"                          # 5
          , "csync" = "cells' coex is in sync:"                          # 6
-         , "batch" = "condition name indicating the separate batches:"  # 7
-         , "gbad"  = "genes' pairs fraction with small expected count:" # 8
-         , "cbad"  = "cells' pairs fraction with small expected count:" # 9
+         , "gbad"  = "genes' pairs fraction with small expected count:" # 7
+         , "cbad"  = "cells' pairs fraction with small expected count:" # 8
+         , "batch" = "condition name indicating the separate batches:"  # 9
          ))
 }
 

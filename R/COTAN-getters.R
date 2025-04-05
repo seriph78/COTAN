@@ -525,6 +525,8 @@ setMethod(
         }
 
         return(lambdaM)
+      } else {
+        batchName <- "NoCond"
       }
     } else {
       assert_that(batchName %in% levels(getBatches(objCOTAN)))
@@ -584,14 +586,14 @@ setMethod(
         }
 
         return(dispersionM)
+      } else {
+        batchName <- "NoCond"
       }
     } else {
       assert_that(batchName %in% levels(getBatches(objCOTAN)))
     }
 
     # default case
-    assert_that(batchName %in% levels(getBatches(objCOTAN)))
-
     currName <- paste0("dispersion_", batchName)
     dispersion <- getMetadataGenes(objCOTAN)[[currName]]
 

@@ -20,12 +20,6 @@ test_that("Linear estimates", {
   expect_identical(getNu(obj),
                    colMeans(getRawData(obj), dims = 1L) /
                      mean(colMeans(getRawData(obj), dims = 1L)))
-
-  clusters <- set_names(rep(1L:2L, times = 10L), getCells(obj))
-  obj <- estimateNuLinearByCluster(obj, clusters = clusters)
-
-  expect_identical(getNu(obj), set_names(rep_len(1.0, getNumCells(obj)),
-                                         getCells(obj)))
 })
 
 

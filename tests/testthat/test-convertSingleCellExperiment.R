@@ -82,9 +82,9 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
 
   obj <- convertFromSingleCellExperiment(sceObj)
 
-  allDims <- set_names(c(600L, 1200L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),
-    c("raw1", "raw2", "genesCoex1", "genesCoex2", "cellsCoex1", "cellsCoex2",
-      "metaDataset", "metaGenes", "metaCells", "clustersCoex"))
+  allDims <- set_names(c(600L, 1200L, 1L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),
+    c("raw1", "raw2", "numBatches", "genesCoex1", "genesCoex2", "cellsCoex1",
+      "cellsCoex2", "metaDataset", "metaGenes", "metaCells", "clustersCoex"))
   expect_identical(unlist(getDims(obj)), allDims)
   expect_identical(getRawData(obj), rawData)
   expect_identical(getClusterizations(obj),
@@ -98,7 +98,7 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
   obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 6L, saveObj = FALSE)
 
   expect_identical(colnames(getMetadataGenes(obj)),
-                   c("feGenes", "lambda", "dispersion"))
+                   c("feGenes", "lambda_NoCond", "dispersion_NoCond"))
   expect_identical(colnames(getMetadataCells(obj)),
                    c("nCount_RNA", "nFeature_RNA", "ident",
                      "CL_RNA_snn_res.0.8", "CL_seurat_clusters",
