@@ -278,7 +278,7 @@ setMethod(
 #' @rdname COTAN_ObjectCreation
 
 automaticCOTANObjectCreation <-
-  function(raw, GEO, sequencingMethod, sampleCondition,
+  function(raw, GEO, sequencingMethod, sampleCondition, batches = NULL,
            calcCoex = TRUE, optimizeForSpeed = TRUE,
            deviceStr = "cuda", cores = 1L,
            cellsCutoff = 0.003, genesCutoff = 0.002,
@@ -288,7 +288,8 @@ automaticCOTANObjectCreation <-
     objCOTAN <- COTAN(raw = raw)
     objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
                                       sequencingMethod = sequencingMethod,
-                                      sampleCondition = sampleCondition)
+                                      sampleCondition = sampleCondition,
+                                      batches = batches)
 
     logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
     logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)

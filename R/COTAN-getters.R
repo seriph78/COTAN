@@ -632,15 +632,17 @@ estimatorsAreReady <- function(objCOTAN) {
     dispersionLength <- min(dispersionLength,
                             length(getDispersion(objCOTAN, batchName = batch)))
   }
-  nuLength <- length(getNu(objCOTAN))
 
-  if (min(lambdaLength, dispersionLength, nuLength) < getNumGenes(objCOTAN)) {
+
+  anyTrouble <- length(getNu(objCOTAN)) < getNumCells(objCOTAN) ||
+    min(lambdaLength, dispersionLength) < getNumGenes(objCOTAN)
+  if (anyTrouble) {
     logThis(paste0("Estimators are not ready - array sizes:",
                    " lambda ", lambdaLength,
                    ", dispersion ", dispersionLength,
                    ", nu ", nuLength), logLevel = 2L)
   }
-  return(!anyEmptyArrays)
+  return(!anyTrouble)
 }
 
 

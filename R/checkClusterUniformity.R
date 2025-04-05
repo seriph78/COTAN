@@ -60,7 +60,6 @@ checkClusterUniformity <- function(
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
-  objCOTAN <- resetBatches(objCOTAN)
 
   objCOTAN <- proceedToCoex(objCOTAN, cores = cores,
                             optimizeForSpeed = optimizeForSpeed,

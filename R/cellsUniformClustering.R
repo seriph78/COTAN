@@ -61,7 +61,8 @@
 #' @noRd
 #'
 seuratClustering <- function(rawData, cond, iter,
-                             initialResolution, minNumClusters, genesSel,
+                             initialResolution, minNumClusters,
+                             genesSel, batches,
                              cores, optimizeForSpeed, deviceStr,
                              saveObj, outDirCond) {
   tryCatch({
@@ -75,11 +76,18 @@ seuratClustering <- function(rawData, cond, iter,
 
     numFeatures <- min(2000L, nrow(rawData))
     if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-      obj <- COTAN(rawData)
-      obj <- proceedToCoex(obj, calcCoex = TRUE, cores = cores,
-                           optimizeForSpeed = optimizeForSpeed,
-                           deviceStr = deviceStr,
-                           saveObj = FALSE, outDir = outDirCond)
+      obj <- automaticCOTANObjectCreation(
+        rawData,
+        GEO = "test",
+        sequencingMethod = "",
+        sampleCondition = "HGDI_Selector",
+        batches = batches,
+        calcCoex = TRUE,
+        cores = cores,
+        optimizeForSpeed = optimizeForSpeed,
+        deviceStr = deviceStr,
+        saveObj = FALSE,
+        outDir = outDirCond)
       gdi <- getColumnFromDF(calculateGDI(obj, statType = "S",
                                           rowsFraction = 0.05), "GDI")
       VariableFeatures(object = srat) <-
@@ -329,25 +337,30 @@ cellsUniformClustering <- function(objCOTAN,
   repeat {
     iter <- iter + 1L
 
+    unassignedCells <- is.na(outputClusters)
+
     logThis(paste0("In iteration ", iter, " "), logLevel = 1L, appendLF = FALSE)
     logThis(paste("the number of cells to re-cluster is",
-                  sum(is.na(outputClusters)), "cells belonging to",
+                  sum(unassignedCells), "cells belonging to",
                   numClustersToRecluster, "clusters"), logLevel = 2L)
 
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
     c(objSeurat, usedMaxResolution) %<-%
-      seuratClustering(rawData = getRawData(objCOTAN)[, is.na(outputClusters)],
+      seuratClustering(rawData = getRawData(objCOTAN)[ , unassignedCells,
+                                                       drop = FALSE],
                        cond = cond, iter = iter,
                        initialResolution = initialResolution,
-                       minNumClusters = minNumClusters, genesSel = genesSel,
+                       minNumClusters = minNumClusters,
+                       genesSel = genesSel,
+                       batches = getBatches(objCOTAN)[unassignedCells],
                        cores = cores, optimizeForSpeed = optimizeForSpeed,
                        deviceStr = deviceStr,
                        saveObj = saveObj, outDirCond = splitOutDir)
 
     if (is_null(objSeurat)) {
       logThis(paste("NO new possible uniform clusters!",
-                    "Unclustered cell left:", sum(is.na(outputClusters))),
+                    "Unclustered cell left:", sum(unassignedCells)),
               logLevel = 1L)
       break
     }
