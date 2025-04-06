@@ -467,6 +467,12 @@ setMethod(
                 length(cellsPosToKeep) != 0L,
                 msg = "Asked to drop all genes and/or cells")
 
+    if (length(genesPosToKeep) == getNumGenes(objCOTAN) &&
+        length(cellsPosToKeep) == getNumCells(objCOTAN)) {
+      # asked to drop no genes or cells: return original
+      return(objCOTAN)
+    }
+
     # As all estimates would be wrong, a completely new object is created
     output <- COTAN(objCOTAN@raw[genesPosToKeep, cellsPosToKeep, drop = FALSE])
 
@@ -474,22 +480,27 @@ setMethod(
     output@metaDataset <- getMetadataDataset(objCOTAN)
 
     # Filter the meta data for genes keeping those not related to estimates
-    colNames <- names(getMetadataGenes(objCOTAN))
-    colsToKeep <-
-      (colNames != "feGenes") &
-      (!vapply(colNames, startsWith, logical(1L), "lambda")) &
-      (!vapply(colNames, startsWith, logical(1L), "dispersion"))
+    if (TRUE) {
+      colNames <- names(getMetadataGenes(objCOTAN))
+      colsToKeep <-
+        (colNames != "feGenes") & (colNames != "GDI") &
+        (!vapply(colNames, startsWith, logical(1L), "lambda")) &
+        (!vapply(colNames, startsWith, logical(1L), "dispersion"))
 
-    if (any(colsToKeep)) {
-      output@metaGenes <-
-        getMetadataGenes(objCOTAN)[genesPosToKeep, colsToKeep, drop = FALSE]
+      if (any(colsToKeep)) {
+        output@metaGenes <-
+          getMetadataGenes(objCOTAN)[genesPosToKeep, colsToKeep, drop = FALSE]
+      }
     }
 
     # Filter the meta data for cells keeping those not related to estimates
-    colsToKeep <- !(names(getMetadataCells(objCOTAN)) %in% c("feCells", "nu"))
-    if (any(colsToKeep)) {
-      output@metaCells <-
-        getMetadataCells(objCOTAN)[cellsPosToKeep, colsToKeep, drop = FALSE]
+    if (TRUE) {
+      colNames <- names(getMetadataCells(objCOTAN))
+      colsToKeep <- (colNames != "feCells") & (colNames != "nu")
+      if (any(colsToKeep)) {
+        output@metaCells <-
+          getMetadataCells(objCOTAN)[cellsPosToKeep, colsToKeep, drop = FALSE]
+      }
     }
 
     # Drop all clusterizations' data.frames, but ensure object validity
