@@ -344,12 +344,12 @@ getCOTANSlots <- function(from) {
 
   if (!is_empty(from@lambda)) {
     metaGenes <- setColumnInDF(metaGenes, from@lambda,
-                               "lambda_NoCond", rownames(from@raw))
+                               "lambda", rownames(from@raw))
   }
 
   if (!is_empty(from@a)) {
     metaGenes <- setColumnInDF(metaGenes, from@a,
-                               "dispersion_NoCond", rownames(from@raw))
+                               "dispersion", rownames(from@raw))
   }
 
   metaCells <- data.frame()
@@ -496,14 +496,14 @@ setIs(
 #'
 getScCOTANSlots <- function(from) {
   lambda <- vector(mode = "numeric")
-  if (!is_empty(from@metaGenes[["lambda_NoCond"]])) {
-    lambda <- set_names(from@metaGenes[["lambda_NoCond"]],
+  if (!is_empty(from@metaGenes[["lambda"]])) {
+    lambda <- set_names(from@metaGenes[["lambda"]],
                         rownames(from@metaGenes))
   }
 
   a <- vector(mode = "numeric")
-  if (!is_empty(from@metaGenes[["dispersion_NoCond"]])) {
-    a <- set_names(from@metaGenes[["dispersion_NoCond"]],
+  if (!is_empty(from@metaGenes[["dispersion"]])) {
+    a <- set_names(from@metaGenes[["dispersion"]],
                    rownames(from@metaGenes))
   }
 

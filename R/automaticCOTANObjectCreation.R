@@ -149,20 +149,26 @@ setMethod(
     for (batch in levels(batches)) {
       logThis(paste("Handling batch", batch), logLevel = 3L)
 
+      dispersion = rep_len(NaN, getNumGenes(objCOTAN))
+
       cellsToDrop <- names(batches)[batches != batch]
-      subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
-      subObj <- resetBatches(subObj)
+      if (length(cellsToDrop) != getNumCells(objCOTAN)) {
+        subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
+        subObj <- resetBatches(subObj)
 
-      subObj <- setLambda(subObj, lambda = getLambda(objCOTAN, batch))
-      subObj <- setNu(subObj, nu = getNu(objCOTAN)[getCells(subObj)])
+        subObj <- setLambda(subObj, lambda = getLambda(objCOTAN, batch))
+        subObj <- setNu(subObj, nu = getNu(objCOTAN)[getCells(subObj)])
 
-      subObj <- estimateDispersionBisection(subObj, cores = cores)
+        subObj <- estimateDispersionBisection(subObj, cores = cores)
 
-      # store a separate lambda for each batch
-      objCOTAN <- setDispersion(objCOTAN, dispersion = getDispersion(subObj),
+        dispersion <- getDispersion(subObj)
+
+        rm(subObj)
+      }
+
+      # store a separate dispersion for each batch
+      objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion,
                                 batchName = paste0(batch))
-
-      rm(subObj)
     }
 
 
@@ -230,6 +236,7 @@ setMethod(
 #' @param sequencingMethod a string reporting the method used for the sequencing
 #' @param sampleCondition a string reporting the specific sample condition or
 #'   time point.
+#' @param batches ...
 #' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
 #'   or stop just before at the [estimateDispersionBisection()] step
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`

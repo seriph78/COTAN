@@ -14,7 +14,7 @@ test_that("clean COTAN object", {
   expect_identical(colnames(getMetadataCells(obj)),
                    c("feCells", "nu"))
   expect_identical(colnames(getMetadataGenes(obj)),
-                   c("feGenes", "lambda_NoCond"))
+                   c("feGenes", "lambda"))
 })
 
 test_that("Clean on test dataset", {

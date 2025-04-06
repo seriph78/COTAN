@@ -29,6 +29,7 @@ automaticCOTANObjectCreation(
   GEO,
   sequencingMethod,
   sampleCondition,
+  batches = NULL,
   calcCoex = TRUE,
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
@@ -88,6 +89,8 @@ code}
 
 \item{sampleCondition}{a string reporting the specific sample condition or
 time point.}
+
+\item{batches}{...}
 }
 \value{
 a \code{COTAN} object

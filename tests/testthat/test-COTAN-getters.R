@@ -58,7 +58,7 @@ test_that("COTAN getters", {
                    c("V", "10X", "Test", "20", "TRUE",
                      "TRUE", paste0(10.0 / 55.0), paste0(0L)))
   expect_setequal(colnames(getMetadataGenes(obj)),
-                  c("lambda_NoCond", "feGenes", "dispersion_NoCond"))
+                  c("lambda", "feGenes", "dispersion"))
   expect_identical(rownames(getMetadataGenes(obj)), getGenes(obj))
   expect_setequal(colnames(getMetadataCells(obj)),
                   c("nu", "feCells", names(getClustersCoex(obj)),
@@ -69,9 +69,9 @@ test_that("COTAN getters", {
   expect_identical(getClustersCoex(obj)[["CL_Test"]], data.frame())
   expect_equal(getNu(obj), getMetadataCells(obj)[["nu"]],
                ignore_attr = TRUE)
-  expect_equal(getLambda(obj), getMetadataGenes(obj)[["lambda_NoCond"]],
+  expect_equal(getLambda(obj), getMetadataGenes(obj)[["lambda"]],
                ignore_attr = TRUE)
-  expect_equal(getDispersion(obj), getMetadataGenes(obj)[["dispersion_NoCond"]],
+  expect_equal(getDispersion(obj), getMetadataGenes(obj)[["dispersion"]],
                ignore_attr = TRUE)
   expect_identical(flagNotFullyExpressedGenes(obj),
                    c(FALSE, rep(TRUE, getNumGenes(obj) - 1L)))

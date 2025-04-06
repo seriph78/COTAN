@@ -7,8 +7,7 @@
 #' @details The parameter resolution is set at 0.5 initially, but in case of too
 #'   few clusters it can be raised up to 2.5.
 #'
-#' @param rawData The raw counts
-#' @param cond The sample condition
+#' @param objCOTAN a `COTAN` object
 #' @param iter The current iteration
 #' @param initialResolution The resolution to use at first in the
 #'   *clusterization* algorithm
@@ -60,39 +59,38 @@
 #'
 #' @noRd
 #'
-seuratClustering <- function(rawData, cond, iter,
-                             initialResolution, minNumClusters,
-                             genesSel, batches,
+seuratClustering <- function(objCOTAN, iter,
+                             initialResolution, minNumClusters, genesSel,
                              cores, optimizeForSpeed, deviceStr,
                              saveObj, outDirCond) {
   tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
-    srat <- CreateSeuratObject(counts = rawData,
-                               project = paste0(cond, "_reclustering_", iter),
-                               min.cells = if (iter == 1L) 3L else 1L,
-                               min.features = if (iter == 1L) 4L else 2L)
+    cond <- paste0(getMetadataElement(objCOTAN, datasetTags()[["cond"]]),
+                   "_reclustering_", iter)
+
+    srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
+                               project = cond,
+                               min.cells = ifelse(iter == 1L, 3L, 1L),
+                               min.features = ifelse(iter == 1L, 4L, 2L))
     srat <- NormalizeData(srat)
 
-    numFeatures <- min(2000L, nrow(rawData))
+    numFeatures <- min(2000L, getNumGenes(objCOTAN))
     if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-      obj <- automaticCOTANObjectCreation(
-        rawData,
-        GEO = "test",
-        sequencingMethod = "",
-        sampleCondition = "HGDI_Selector",
-        batches = batches,
-        calcCoex = TRUE,
-        cores = cores,
-        optimizeForSpeed = optimizeForSpeed,
-        deviceStr = deviceStr,
-        saveObj = FALSE,
-        outDir = outDirCond)
-      gdi <- getColumnFromDF(calculateGDI(obj, statType = "S",
-                                          rowsFraction = 0.05), "GDI")
+      gdi <- suppressWarnings(getGDI(objCOTAN))
+      if (is_empty(gdi)) {
+        if (!isCoexAvailable(objCOTAN)) {
+          objCOTAN <- proceedToCoex(objCOTAN, calcCoex = TRUE,
+                                    optimizeForSpeed = optimizeForSpeed,
+                                    deviceStr = deviceStr, cores = cores,
+                                    saveObj = FALSE, outDir = outDirCond)
+        }
+        gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
+                                            rowsFraction = 0.05), "GDI")
+      }
       VariableFeatures(object = srat) <-
         names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numFeatures)]
-      rm(gdi, obj)
+      rm(gdi)
     } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
       srat <- FindVariableFeatures(srat, nfeatures = numFeatures,
                                    selection.method = "vst")
@@ -154,8 +152,8 @@ seuratClustering <- function(rawData, cond, iter,
 
         plot(DimPlot(srat, reduction = "umap", label = TRUE) +
              annotate(geom = "text", x = 0.0, y = 30.0, color = "black",
-                      label = paste0("Cells number: ", ncol(rawData), "\n",
-                                     "Cl. resolution: ", resolution)))
+                      label = paste0("Cells number: ", getNumCells(objCOTAN),
+                                     "\nCl. resolution: ", resolution)))
       }, error = function(err) {
         logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)
       }, finally = {
@@ -172,7 +170,8 @@ seuratClustering <- function(rawData, cond, iter,
     return(list("SeuratObj" = srat, "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
-    logThis(msg = paste("Seurat clusterization failed with", ncol(rawData),
+    logThis(msg = paste("Seurat clusterization failed with",
+                        getNumCells(objCOTAN),
                         "cells with the following error:"), logLevel = 1L)
     logThis(msg = conditionMessage(e), logLevel = 1L)
     return(list("SeuratObj" = NULL, "UsedMaxResolution" = FALSE))
@@ -346,15 +345,16 @@ cellsUniformClustering <- function(objCOTAN,
 
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
+
+    subObj <- dropGenesCells(objCOTAN,
+                             cells = getCells(objCOTAN)[!unassignedCells])
     c(objSeurat, usedMaxResolution) %<-%
-      seuratClustering(rawData = getRawData(objCOTAN)[ , unassignedCells,
-                                                       drop = FALSE],
-                       cond = cond, iter = iter,
+      seuratClustering(objCOTAN = subObj, iter = iter,
                        initialResolution = initialResolution,
                        minNumClusters = minNumClusters,
                        genesSel = genesSel,
-                       batches = getBatches(objCOTAN)[unassignedCells],
-                       cores = cores, optimizeForSpeed = optimizeForSpeed,
+                       cores = cores,
+                       optimizeForSpeed = optimizeForSpeed,
                        deviceStr = deviceStr,
                        saveObj = saveObj, outDirCond = splitOutDir)
 

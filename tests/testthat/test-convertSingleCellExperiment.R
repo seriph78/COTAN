@@ -71,8 +71,13 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
 
   rawData <- as(as.matrix(test.dataset), "dgCMatrix")
 
+  obj <- COTAN(rawData)
+  obj <- initializeMetaDataset(obj, GEO = "Test",
+                               sequencingMethod = "10X",
+                               sampleCondition = "Test")
+
   sratObj <-
-    seuratClustering(rawData = rawData, cond = "Test", iter = 1L,
+    seuratClustering(obj, iter = 1L,
                      initialResolution = 0.8, minNumClusters = 0L,
                      genesSel = "HVG_Seurat", cores = 6L,
                      optimizeForSpeed = TRUE, deviceStr = "cuda",
@@ -98,7 +103,7 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
   obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 6L, saveObj = FALSE)
 
   expect_identical(colnames(getMetadataGenes(obj)),
-                   c("feGenes", "lambda_NoCond", "dispersion_NoCond"))
+                   c("feGenes", "lambda", "dispersion"))
   expect_identical(colnames(getMetadataCells(obj)),
                    c("nCount_RNA", "nFeature_RNA", "ident",
                      "CL_RNA_snn_res.0.8", "CL_seurat_clusters",

@@ -495,7 +495,7 @@ setMethod(
 #' @param batchName the name of a batch to return the corresponding lambda. If
 #'   no batches are present default value will return the global lambda `array`.
 #'   If the passed name is `"All"` and batches are in use the function will
-#'   return a `matrix` with the approriate lambda for each cell
+#'   return a `matrix` with the appropriate lambda for each cell
 #'
 #' @returns `getLambda()` returns the lambda `array` or `matrix` as appropriate
 #'
@@ -533,7 +533,8 @@ setMethod(
     }
 
     # default case
-    currName <- paste0("lambda_", batchName)
+    currName <- ifelse(batchName == "NoCond", "lambda",
+                       paste0("lambda_", batchName))
     lambda <- getMetadataGenes(objCOTAN)[[currName]]
 
     if (is_empty(lambda)) {
@@ -555,7 +556,7 @@ setMethod(
 #' @param batchName the name of a batch to return the corresponding lambda. If
 #'   no batches are present default value will return the global lambda `array`.
 #'   If the passed name is `"All"` and batches are in use the function will
-#'   return a `matrix` with the approriate lambda for each cell
+#'   return a `matrix` with the appropriate lambda for each cell
 #'
 #' @returns `getDispersion()` returns the dispersion `array` or `matrix` as
 #'   appropriate
@@ -594,7 +595,8 @@ setMethod(
     }
 
     # default case
-    currName <- paste0("dispersion_", batchName)
+    currName <- ifelse(batchName == "NoCond", "dispersion",
+                       paste0("dispersion_", batchName))
     dispersion <- getMetadataGenes(objCOTAN)[[currName]]
 
     if (is_empty(dispersion)) {

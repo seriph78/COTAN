@@ -68,10 +68,12 @@ code}
 \item{sampleCondition}{a string reporting the specific sample condition or
 time point}
 
+\item{batches}{...}
+
 \item{value}{a value (or an array) containing the information}
 
 \item{conditionToUse}{the name of the \emph{condition} to be used as batches
-discriminator. If no name is given behaviour will return to standard
+discriminator. If no name is given behavior will return to standard
 no-batches}
 
 \item{df}{the \code{data.frame}}

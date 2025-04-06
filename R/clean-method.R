@@ -74,25 +74,32 @@ setMethod(
     nu <- set_names(rep_len(NA, getNumCells(objCOTAN)), getCells(objCOTAN))
 
     batches <- getBatches(objCOTAN)
+
     for (batch in levels(batches)) {
       logThis(paste("Handling batch", batch), logLevel = 3L)
 
-      cellsToDrop <- names(batches)[batches != batch]
-      subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
-      subObj <- resetBatches(subObj)
+      lambda = rep_len(NaN, getNumGenes(objCOTAN))
 
-      subObj <- estimateLambdaLinear(subObj)
-      subObj <- estimateNuLinear(subObj)
+      cellsToDrop <- names(batches)[batches != batch]
+      if (length(cellsToDrop) != getNumCells(objCOTAN)) {
+        subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
+        subObj <- resetBatches(subObj)
+
+        subObj <- estimateLambdaLinear(subObj)
+        subObj <- estimateNuLinear(subObj)
+
+        lambda <- getLambda(subObj)
+
+        # store the relevant sub-set of `nu` in the global `nu`
+        # note that mean(`nu`) == 1.0 in each batch and thus globally!
+        nu[getCells(subObj)] <- getNu(subObj)
+
+        rm(subObj)
+      }
 
       # store a separate lambda for each batch
-      objCOTAN <- setLambda(objCOTAN, lambda = getLambda(subObj),
+      objCOTAN <- setLambda(objCOTAN, lambda = lambda,
                             batchName = paste0(batch))
-
-      # store the relevant sub-set of `nu` in the global `nu`
-      # note that mean(`nu`) == 1.0 in each batch and thus globally!
-      nu[getCells(subObj)] <- getNu(subObj)
-
-      rm(subObj)
     }
     gc()
 

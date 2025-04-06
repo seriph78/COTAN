@@ -69,6 +69,7 @@ updateMetaInfo <- function(meta, tag, value) {
 #' @param sequencingMethod a string reporting the method used for the sequencing
 #' @param sampleCondition a string reporting the specific sample condition or
 #'   time point
+#' @param batches ...
 #'
 #' @returns `initializeMetaDataset()` returns the given `COTAN` object with the
 #'   updated `metaDataset`
@@ -144,7 +145,7 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param conditionToUse the name of the *condition* to be used as batches
-#'   discriminator. If no name is given behaviour will return to standard
+#'   discriminator. If no name is given behavior will return to standard
 #'   no-batches
 #'
 #' @returns `resetBatches()` returns the updated `COTAN` object
@@ -267,7 +268,8 @@ setMethod(
     assert_that(length(lambda) == getNumGenes(objCOTAN))
     assert_that(batchName %in% levels(getBatches(objCOTAN)))
 
-    currName <- paste0("lambda_", batchName)
+    currName <- ifelse(batchName == "NoCond", "lambda",
+                       paste0("lambda_", batchName))
     if (TRUE) {
       oldLambda <- getMetadataGenes(objCOTAN)[[currName]]
       if (!identical(lambda[getGenes(objCOTAN)], oldLambda)) {
@@ -314,8 +316,8 @@ setMethod(
     assert_that(length(dispersion) == getNumGenes(objCOTAN))
     assert_that(batchName %in% levels(getBatches(objCOTAN)))
 
-    currName <- paste0("dispersion_", batchName)
-
+    currName <- ifelse(batchName == "NoCond", "dispersion",
+                       paste0("dispersion_", batchName))
     if (TRUE) {
       oldDispersion <-  getMetadataGenes(objCOTAN)[[currName]]
       if (!identical(dispersion, oldDispersion)) {
@@ -471,12 +473,12 @@ setMethod(
     # Copy the meta data for the data-set
     output@metaDataset <- getMetadataDataset(objCOTAN)
 
-    # TODO: change!!
-    # unlist(lapply(lapply(c("lambda_NoCond", "disp", "feGenes"), startsWith, c("lambda", "feGenes")), any))
-    # apply(vapply(c("lambda_NoCond", "disp", "feGenes"), startsWith, logical(2L), c("lambda", "feGenes")), 2, any)
     # Filter the meta data for genes keeping those not related to estimates
-    colsToKeep <- !(names(getMetadataGenes(objCOTAN)) %in%
-                      c("feGenes", "lambda", "dispersion", "GDI"))
+    colNames <- names(getMetadataGenes(objCOTAN))
+    colsToKeep <-
+      (colNames != "feGenes") &
+      (!vapply(colNames, startsWith, logical(1L), "lambda")) &
+      (!vapply(colNames, startsWith, logical(1L), "dispersion"))
 
     if (any(colsToKeep)) {
       output@metaGenes <-
