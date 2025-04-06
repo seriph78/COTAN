@@ -270,13 +270,6 @@ setMethod(
                 msg = paste0("Asked to drop genes and/or cells",
                              " that were not present in the 'COTAN' object"))
 
-    if (length(genes) == 0L && length(cells) == 0L) {
-      logThis("Asked to drop no genes or cells", logLevel = 2L)
-    } else {
-      logThis(paste("Asked to drop", length(genes), "genes and",
-                    length(cells), "cells"), logLevel = 3L)
-    }
-
     genesPosToKeep <- which(!(getGenes(objCOTAN) %in% genes))
     cellsPosToKeep <- which(!(getCells(objCOTAN) %in% cells))
 
@@ -284,11 +277,23 @@ setMethod(
                 length(cellsPosToKeep) != 0L,
                 msg = "Asked to drop all genes and/or cells")
 
+    if (length(genesPosToKeep) == getNumGenes(objCOTAN) &&
+        length(cellsPosToKeep) == getNumCells(objCOTAN)) {
+      logThis("Asked to drop no genes or cells", logLevel = 2L)
+      # return original object
+      return(objCOTAN)
+    }
+
+    logThis(paste("Asked to drop", length(genes), "genes and",
+                  length(cells), "cells"), logLevel = 3L)
+
     # As all estimates would be wrong, a completely new object is created
     output <- COTAN(objCOTAN@raw[genesPosToKeep, cellsPosToKeep, drop = FALSE])
 
-    # Copy the meta data for the data-set
+    # Copy the meta data for the data-set thus erasing the sync bits
     output@metaDataset <- getMetadataDataset(objCOTAN)
+    output <- addElementToMetaDataset(output, tags[["gsync"]], FALSE)
+    output <- addElementToMetaDataset(output, tags[["csync"]], FALSE)
 
     # Filter the meta data for genes keeping those not related to estimates
     colsToKeep <- !(names(getMetadataGenes(objCOTAN)) %in%
