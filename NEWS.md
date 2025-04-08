@@ -1,3 +1,6 @@
+Solved issue with reordering of merged *clusterization*:
+flag `keepMinusOne` was off and label "-1" was moved around
+
 ## 2.7.5
 
 Solved issue with use of `parallelDist::parDist()` by allowing a fall-back to
