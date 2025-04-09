@@ -342,9 +342,11 @@ checkersToDF <- function(checkers) {
     # check argument is a checker
     assert_that(is(checker, "BaseUniformityCheck"))
 
-    memberNames <- slotNames(checker)
-    checkerAsList <- list()
-    for (name in memberNames) {
+
+    checkerAsList <- list(class(checker)[[1L]])
+    names(checkerAsList)[[1L]] <- "class"
+
+    for (name in slotNames(checker)) {
       member <- slot(checker, name)
       membersList <- list()
       if (is(member, "GDICheck")) {
@@ -405,22 +407,33 @@ checkersToDF <- function(checkers) {
 #'
 #' @rdname UniformTranscriptCheckers
 #'
-dfToCheckers <- function(df, checkerClass) {
+dfToCheckers <- function(df, checkerClass = "") {
   checkers <- list()
 
   if (is_empty(df)) {
     return(checkers)
   }
 
-  assert_that(is_character(checkerClass), !isEmptyName(checkerClass),
+  assert_that(is_character(checkerClass),
               msg = "A valid checker type must be given")
+
+  if (isEmptyName(checkerClass)) {
+    assert_that(nrow(df) != 0,
+                "class" %in% colnames(df),
+                msg = paste("Cannot recover checker type: not present",
+                            "in data.frame and not given by user"))
+
+    checkerClass <- df[1, "class"]
+
+    assert_that(all(df[["class"]] == checkerClass),
+                msg = "All checks in the data.frame must be of the same type")
+  }
 
   checker <- new(checkerClass)
   assert_that(is(checker, "BaseUniformityCheck"))
 
-  memberNames <- slotNames(checker)
   dfRootNames <- str_split_i(colnames(df), fixed("."), 1L)
-  assert_that(all(memberNames %in% dfRootNames),
+  assert_that(all(slotNames(checker) %in% dfRootNames),
               msg = paste0("Given checkerClass [", class(checker), "] is ",
                            "inconsistent with the data.frame column names"))
 
@@ -428,7 +441,7 @@ dfToCheckers <- function(df, checkerClass) {
     checker <- new(checkerClass)
 
     # Assign values from the data.frame row to the corresponding slots
-    for (name in memberNames) {
+    for (name in slotNames(checker)) {
       member <- slot(checker, name)
       if (is(member, "GDICheck")) {
         subNames <- slotNames(member)

@@ -80,7 +80,8 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     assert_that(identical(rownames(pcaCells), getCells(objCOTAN)),
                 msg = "Issues with pca output")
 
-    distCells <- calcDist(scale(pcaCells), method = "euclidean") # mahlanobis
+    distCells <- scale(pcaCells)
+    distCells <- calcDist(distCells, method = "euclidean") # mahlanobis
 
     pcaCells <- as.data.frame(pcaCells)
 
