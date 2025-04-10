@@ -547,9 +547,9 @@ estimatorsAreReady <- function(objCOTAN) {
                     is_empty(getNu(objCOTAN)) ||
                     is_empty(getDispersion(objCOTAN))
   if (anyEmptyArrays) {
-    logThis(paste0("Estimators are not ready - array sizes: lambda ",
-                   length(getLambda(objCOTAN)), ", nu ",
-                   length(getNu(objCOTAN)), ", dispersion ",
+    logThis(paste0("Estimators are not ready - array sizes: `lambda` ",
+                   length(getLambda(objCOTAN)), ", `nu` ",
+                   length(getNu(objCOTAN)), ", `dispersion` ",
                    length(getDispersion(objCOTAN))), logLevel = 2L)
   }
   return(!anyEmptyArrays)
@@ -573,15 +573,15 @@ estimatorsAreReady <- function(objCOTAN) {
 #' @rdname CalculatingCOEX
 #'
 getMu <- function(objCOTAN) {
-  if (is_empty(getLambda(objCOTAN))) {
-    stop("lambda must not be empty, estimate it")
-  }
+  lambda <- suppressWarnings(getLambda(objCOTAN))
+  assert_that(!is_empty(lambda),
+              msg = "`lambda` must not be empty, estimate it")
 
-  if (is_empty(getNu(objCOTAN))) {
-    stop("nu must not be empty, estimate it")
-  }
+  nu <- suppressWarnings(getNu(objCOTAN))
+  assert_that(!is_empty(nu),
+              msg = "`nu` must not be empty, estimate it")
 
-  return(getLambda(objCOTAN) %o% getNu(objCOTAN))
+  return(lambda %o% nu)
 }
 
 
@@ -603,11 +603,11 @@ getMu <- function(objCOTAN) {
 #' @rdname ParametersEstimations
 #'
 getNuNormData <- function(objCOTAN) {
-  if (is_empty(getNu(objCOTAN))) {
-    stop("nu must not be empty, estimate it")
-  }
+  nu <- suppressWarnings(getNu(objCOTAN))
+  assert_that(!is_empty(nu),
+              msg = "`nu` must not be empty, estimate it")
 
-  return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
+  return(t(t(getRawData(objCOTAN)) * (1.0 / nu)))
 }
 
 #' @details `getLogNormData()` extracts the *log-normalized* count table (i.e.
