@@ -12,6 +12,9 @@ test_that("COTAN getters", {
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X",
                                sampleCondition = "Test")
   obj <- clean(obj)
+
+  obj <- estimateLambdaLinear(obj)
+  obj <- estimateNuLinear(obj)
   obj <- estimateDispersionBisection(obj)
 
   suppressWarnings({

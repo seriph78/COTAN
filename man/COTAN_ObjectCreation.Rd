@@ -47,7 +47,7 @@ automaticCOTANObjectCreation(
 \item{objCOTAN}{a newly created \code{COTAN} object}
 
 \item{calcCoex}{a Boolean to determine whether to calculate the genes' \code{COEX}
-or stop just before at the \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} step}
+or stop just after the \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} step}
 
 \item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
 library to run the matrix calculations. Otherwise, or when the library is

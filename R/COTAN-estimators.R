@@ -240,6 +240,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 #' @returns `estimateDispersionBisection()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_null
+#' @importFrom rlang is_empty
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -274,6 +275,8 @@ setMethod(
 
     lambda <- getLambda(objCOTAN)
     nu <- getNu(objCOTAN)
+    assert_that(!is_empty(lambda), !is_empty(nu),
+                msg = "Model parameters `lambda` or `nu` are not ready")
 
     dispList <- list()
 

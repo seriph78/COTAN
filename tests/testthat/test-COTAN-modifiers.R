@@ -72,6 +72,9 @@ test_that("dropGenesCells", {
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X",
                                sampleCondition = "Test")
   obj <- clean(obj)
+
+  obj <- estimateLambdaLinear(obj)
+  obj <- estimateNuLinear(obj)
   obj <- estimateDispersionNuBisection(obj, cores = 4L,
                                        enforceNuAverageToOne = TRUE)
   suppressWarnings({

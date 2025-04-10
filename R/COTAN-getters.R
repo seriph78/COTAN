@@ -868,6 +868,8 @@ NULL
 #'                                   sampleCondition = "reconstructed_dataset")
 #' objCOTAN <- clean(objCOTAN)
 #'
+#' objCOTAN <- estimateLambdaLinear(objCOTAN)
+#' objCOTAN <- estimateNuLinear(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 #'
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
