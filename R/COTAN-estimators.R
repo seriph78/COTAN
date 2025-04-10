@@ -273,10 +273,13 @@ setMethod(
     genes <- getGenes(objCOTAN)
     sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)[genes]
 
-    lambda <- getLambda(objCOTAN)
-    nu <- getNu(objCOTAN)
-    assert_that(!is_empty(lambda), !is_empty(nu),
-                msg = "Model parameters `lambda` or `nu` are not ready")
+    lambda <- suppressWarnings(getLambda(objCOTAN))
+    assert_that(!is_empty(lambda),
+                msg = "`lambda` must not be empty, estimate it")
+
+    nu <- suppressWarnings(getNu(objCOTAN))
+    assert_that(!is_empty(nu),
+                msg = "nu must not be empty, estimate it")
 
     dispList <- list()
 
@@ -407,8 +410,8 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
 #'
 #' @returns `estimateNuBisection()` returns the updated `COTAN` object
 #'
-#' @importFrom rlang is_empty
 #' @importFrom rlang is_null
+#' @importFrom rlang is_empty
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -435,20 +438,24 @@ setMethod(
     cores <- handleMultiCore(cores)
 
     # parameters estimation
-    if (is_empty(getNu(objCOTAN))) {
-      stop("nu must not be empty, estimate it")
-    }
 
-    if (is_empty(getDispersion(objCOTAN))) {
-      stop("dispersion must not be empty, estimate it")
-    }
 
     cells <- getCells(objCOTAN)
     sumZeros <- getNumGenes(objCOTAN) - getNumExpressedGenes(objCOTAN)
 
-    lambda <- getLambda(objCOTAN)
-    dispersion <- getDispersion(objCOTAN)
-    initialGuess <- getNu(objCOTAN)
+    lambda <- suppressWarnings(getLambda(objCOTAN))
+    assert_that(!is_empty(lambda),
+                msg = "`lambda` must not be empty, estimate it")
+
+    nu <- suppressWarnings(getNu(objCOTAN))
+    assert_that(!is_empty(nu),
+                msg = "nu must not be empty, estimate it")
+
+    dispersion <- suppressWarnings(getDispersion(objCOTAN))
+    assert_that(!is_empty(dispersion),
+                msg = "dispersion must not be empty, estimate it")
+
+    initialGuess <- nu
 
     nuList <- list()
 
@@ -661,14 +668,15 @@ setMethod(
 #'
 #' @returns `estimateDispersionNuNlminb()` returns the updated `COTAN` object
 #'
+#' @importFrom rlang is_null
 #' @importFrom rlang is_empty
+#'
+#' @importFrom assertthat assert_that
 #'
 #' @importFrom Rfast rowsums
 #' @importFrom Rfast colsums
 #'
 #' @importFrom stats nlminb
-#'
-#' @importFrom assertthat assert_that
 #'
 #' @rdname ParametersEstimations
 #'
@@ -680,12 +688,15 @@ setMethod(
            enforceNuAverageToOne = TRUE) {
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2L)
 
-    # getNu() would show a warning when no 'nu' present
-    if (is_empty(getMetadataCells(objCOTAN)[["nu"]])) {
-      objCOTAN <- estimateNuLinear(objCOTAN)
-    }
+    lambda <- suppressWarnings(getLambda(objCOTAN))
+    assert_that(!is_empty(lambda),
+                msg = "`lambda` must not be empty, estimate it")
 
-    lambda <- getLambda(objCOTAN)
+    nu <- suppressWarnings(getNu(objCOTAN))
+    if (is_empty(nu)) {
+      objCOTAN <- estimateNuLinear(objCOTAN)
+      nu <- getNu(objCOTAN)
+    }
 
     zeroGenes <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)
     zeroCells <- getNumGenes(objCOTAN) - getNumExpressedGenes(objCOTAN)
