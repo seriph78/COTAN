@@ -57,6 +57,9 @@ test_that("Calculations on genes", {
   obj <- COTAN(raw = raw)
   obj <- clean(obj)
 
+  obj <- estimateLambdaLinear(obj)
+  obj <- estimateNuLinear(obj)
+
   mu <- getMu(obj)
 
   expect_identical(dim(mu), dim(getRawData(obj)))
@@ -246,6 +249,8 @@ test_that("Calculations on cells", {
                       ncol = getNumCells(obj)),
                ignore_attr = TRUE)
 
+  obj <- estimateLambdaLinear(obj)
+  obj <- estimateNuLinear(obj)
   obj <- estimateDispersionNuBisection(obj, cores = 4L, chunkSize = 4L,
                                        enforceNuAverageToOne = FALSE)
 
@@ -332,6 +337,8 @@ test_that("Coex", {
   obj <- COTAN(raw = raw)
   obj <- clean(obj)
 
+  obj <- estimateLambdaLinear(obj)
+  obj <- estimateNuLinear(obj)
   obj <- estimateDispersionNuBisection(obj, cores = 4L, chunkSize = 4L,
                                        enforceNuAverageToOne = FALSE)
 

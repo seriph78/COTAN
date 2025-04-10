@@ -11,8 +11,8 @@ test_that("clean COTAN object", {
 
   expect_true(validObject(obj))
 
-  expect_identical(colnames(getMetadataCells(obj)), c("feCells", "nu"))
-  expect_identical(colnames(getMetadataGenes(obj)), c("feGenes", "lambda"))
+  expect_identical(colnames(getMetadataCells(obj)), c("feCells"))
+  expect_identical(colnames(getMetadataGenes(obj)), c("feGenes"))
 })
 
 test_that("Clean on test dataset", {
@@ -25,6 +25,8 @@ test_that("Clean on test dataset", {
 
   obj <- clean(obj)
 
+  obj <- estimateLambdaLinear(obj)
+  obj <- estimateNuLinear(obj)
   obj <- estimateDispersionBisection(obj, cores = 6L)
 
   raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))

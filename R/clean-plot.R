@@ -73,6 +73,11 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
   if (isTRUE(includePCA)) {
     logThis("PCA: START", logLevel = 2L)
 
+    # getNu() would show a warning when no 'nu' present
+    if (is_empty(getMetadataCells(objCOTAN)[["nu"]])) {
+      objCOTAN <- estimateNuLinear(objCOTAN)
+    }
+
     rawNorm <- getNuNormData(objCOTAN)
 
     pcaCells <- runPCA(x = t(rawNorm), rank = 5L,
