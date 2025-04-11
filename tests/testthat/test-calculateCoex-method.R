@@ -58,18 +58,18 @@ test_that("Calculations on genes", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateNuLinear(obj)
 
+  lambda <- getLambda(obj)
   mu <- getMu(obj)
 
   expect_identical(dim(mu), dim(getRawData(obj)))
-  expect_equal(mu[ 1L,  1L], getLambda(obj)[[ 1L]] * getNu(obj)[[ 1L]],
+  expect_equal(mu[ 1L,  1L], lambda[[ 1L]] * getNu(obj)[[ 1L]],
                ignore_attr = TRUE)
-  expect_equal(mu[10L,  1L], getLambda(obj)[[10L]] * getNu(obj)[[ 1L]],
+  expect_equal(mu[10L,  1L], lambda[[10L]] * getNu(obj)[[ 1L]],
                ignore_attr = TRUE)
-  expect_equal(mu[ 1L, 20L], getLambda(obj)[[ 1L]] * getNu(obj)[[20L]],
+  expect_equal(mu[ 1L, 20L], lambda[[ 1L]] * getNu(obj)[[20L]],
                ignore_attr = TRUE)
-  expect_equal(mu[10L, 10L], getLambda(obj)[[10L]] * getNu(obj)[[10L]],
+  expect_equal(mu[10L, 10L], lambda[[10L]] * getNu(obj)[[10L]],
                ignore_attr = TRUE)
 
   c(observedYY, observedY) %<-%
@@ -250,7 +250,6 @@ test_that("Calculations on cells", {
                ignore_attr = TRUE)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateNuLinear(obj)
   obj <- estimateDispersionNuBisection(obj, cores = 4L, chunkSize = 4L,
                                        enforceNuAverageToOne = FALSE)
 
@@ -338,7 +337,6 @@ test_that("Coex", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateNuLinear(obj)
   obj <- estimateDispersionNuBisection(obj, cores = 4L, chunkSize = 4L,
                                        enforceNuAverageToOne = FALSE)
 

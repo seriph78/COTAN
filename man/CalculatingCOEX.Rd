@@ -414,7 +414,6 @@ objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
 objCOTAN <- clean(objCOTAN)
 
 objCOTAN <- estimateLambdaLinear(objCOTAN)
-objCOTAN <- estimateNuLinear(objCOTAN)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 
 ## Now the `COTAN` object is ready to calculate the genes' `COEX`

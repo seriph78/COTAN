@@ -146,7 +146,6 @@ setMethod(
     analysisTime <- Sys.time()
 
     objCOTAN <- estimateLambdaLinear(objCOTAN)
-    objCOTAN <- estimateNuLinear(objCOTAN)
     objCOTAN <- estimateDispersionBisection(objCOTAN, cores = cores)
 
     gc()

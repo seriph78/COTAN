@@ -73,12 +73,6 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
   if (isTRUE(includePCA)) {
     logThis("PCA: START", logLevel = 2L)
 
-    nu <- suppressWarnings(getNu(objCOTAN))
-    if (is_empty(nu)) {
-      objCOTAN <- estimateNuLinear(objCOTAN)
-      nu <- getNu(objCOTAN)
-    }
-
     rawNorm <- getNuNormData(objCOTAN)
 
     pcaCells <- runPCA(x = t(rawNorm), rank = 5L,
@@ -188,7 +182,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     theme(plot.title = element_text(hjust = 1.0),
           plot.subtitle = element_text(hjust = 0.95, vjust = -25.0))
 
-    nuEst <- round(nu, digits = 7L)
+    nuEst <- round(getNu(objCOTAN), digits = 7L)
     UDEPlot <- ggplot(pcaCells, aes(x = PC1, y = PC2, colour = log(nuEst))) +
                geom_point(size = 1L, alpha = 0.8) +
                scale_color_gradient2(low = "#E64B35B2", mid = "#4DBBD5B2",
@@ -204,7 +198,8 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     UDEPlot <- NULL
   }
 
-  nuDf <- data.frame("nu" = sort(nu), "n" = seq_along(nu))
+  nuDf <- data.frame("nu" = sort(getNu(objCOTAN)),
+                     "n" = seq_len(getNumCells(objCOTAN)))
   nuPlot <- ggplot(nuDf, aes(x = n, y = nu)) +
             geom_point(colour = "#8491B4B2", size = 1L) +
             plotTheme("common")
