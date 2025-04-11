@@ -1280,8 +1280,6 @@ NULL
 #' umapPlot2 <- UMAPPlot(lfcDF, clusters = geneClusters)
 #' plot(umapPlot2)
 #'
-#' objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
-#'
 #' clSummaryPlotAndData <-
 #'   clustersSummaryPlot(objCOTAN, clName = "first_clusterization",
 #'                       plotTitle = "first clusterization")
