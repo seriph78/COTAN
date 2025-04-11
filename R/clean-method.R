@@ -71,25 +71,22 @@ setMethod(
     objCOTAN <- findFullyExpressingCells(objCOTAN,
                                          genesThreshold = genesThreshold)
 
-    nu <- set_names(rep_len(NA, getNumCells(objCOTAN)), getCells(objCOTAN))
+    objCOTAN <- estimateNuLinear(objCOTAN)
+
+    nu <- getNu(objCOTAN)
 
     batches <- getBatches(objCOTAN)
 
-    for (batch in levels(batches)) {
-      logThis(paste("Handling batch", batch), logLevel = 3L)
+    if (any(batches != "NoCond")) {
+      for (batch in levels(batches)) {
+        logThis(paste("Handling batch", batch), logLevel = 3L)
 
-      cellsToDrop <- names(batches)[batches != batch]
-      if (length(cellsToDrop) != getNumCells(objCOTAN)) {
-        subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
-        subObj <- resetBatches(subObj)
-
-        subObj <- estimateNuLinear(subObj)
-
-        # store the relevant sub-set of `nu` in the global `nu`
-        # note that mean(`nu`) == 1.0 in each batch and thus globally!
-        nu[getCells(subObj)] <- getNu(subObj)
-
-        rm(subObj)
+        c <- names(batches)[batches == batch]
+        if (!is_empty(c)) {
+          # store the relevant sub-set of `nu` in the global `nu`
+          # note that mean(`nu`) == 1.0 in each batch and thus globally!
+          nu[c] <- nu[c] / mean(nu[c])
+        }
       }
     }
 
