@@ -625,7 +625,6 @@ setMethod(
 #' @rdname ParametersEstimations
 #'
 estimatorsAreReady <- function(objCOTAN) {
-
   lambdaLength <- getNumGenes(objCOTAN)
   dispersionLength <- getNumGenes(objCOTAN)
   for (batch in getBatches(objCOTAN)) {
@@ -634,7 +633,6 @@ estimatorsAreReady <- function(objCOTAN) {
     dispersionLength <- min(dispersionLength,
                             length(getDispersion(objCOTAN, batchName = batch)))
   }
-
 
   anyTrouble <- length(getNu(objCOTAN)) < getNumCells(objCOTAN) ||
     min(lambdaLength, dispersionLength) < getNumGenes(objCOTAN)
@@ -665,14 +663,14 @@ estimatorsAreReady <- function(objCOTAN) {
 #' @rdname CalculatingCOEX
 #'
 getMu <- function(objCOTAN) {
-  lambda <- getLambda(objCOTAN, "All")
-  if (is_empty(lambda)) {
-    stop("lambda must not be empty, estimate it")
-  }
-  nu <- getNu(objCOTAN)
-  if (is_empty(nu)) {
-    stop("nu must not be empty, estimate it")
-  }
+  lambda <- suppressWarnings(getLambda(objCOTAN, "All"))
+  assert_that(!is_empty(lambda),
+              msg = "`lambda` must not be empty, estimate it")
+
+  nu <- suppressWarnings(getNu(objCOTAN))
+  assert_that(!is_empty(nu),
+              msg = "`nu` must not be empty, estimate it")
+
   if (is.matrix(lambda)) {
     return(t(t(lambda) * nu))
   } else {
@@ -699,11 +697,11 @@ getMu <- function(objCOTAN) {
 #' @rdname ParametersEstimations
 #'
 getNuNormData <- function(objCOTAN) {
-  if (is_empty(getNu(objCOTAN))) {
-    stop("nu must not be empty, estimate it")
-  }
+  nu <- suppressWarnings(getNu(objCOTAN))
+  assert_that(!is_empty(nu),
+              msg = "`nu` must not be empty, estimate it")
 
-  return(t(t(getRawData(objCOTAN)) * (1.0 / getNu(objCOTAN))))
+  return(t(t(getRawData(objCOTAN)) * (1.0 / nu)))
 }
 
 #' @details `getLogNormData()` extracts the *log-normalized* count table (i.e.
@@ -966,6 +964,7 @@ NULL
 #'                                   sampleCondition = "reconstructed_dataset")
 #' objCOTAN <- clean(objCOTAN)
 #'
+#' objCOTAN <- estimateLambdaLinear(objCOTAN)
 #' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 #'
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`

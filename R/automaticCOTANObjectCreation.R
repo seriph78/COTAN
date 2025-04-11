@@ -149,6 +149,7 @@ setMethod(
     for (batch in levels(batches)) {
       logThis(paste("Handling batch", batch), logLevel = 3L)
 
+      lambda     = rep_len(NaN, getNumGenes(objCOTAN))
       dispersion = rep_len(NaN, getNumGenes(objCOTAN))
 
       cellsToDrop <- names(batches)[batches != batch]
@@ -156,21 +157,23 @@ setMethod(
         subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
         subObj <- resetBatches(subObj)
 
-        subObj <- setLambda(subObj, lambda = getLambda(objCOTAN, batch))
         subObj <- setNu(subObj, nu = getNu(objCOTAN)[getCells(subObj)])
 
+        subObj <- estimateLambdaLinear(subObj)
         subObj <- estimateDispersionBisection(subObj, cores = cores)
 
+        lambda <- getLambda(subObj)
         dispersion <- getDispersion(subObj)
 
         rm(subObj)
       }
 
       # store a separate dispersion for each batch
+      objCOTAN <- setLambda(objCOTAN, lambda = lambda,
+                            batchName = paste0(batch))
       objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion,
                                 batchName = paste0(batch))
     }
-
 
     gc()
 
@@ -238,7 +241,7 @@ setMethod(
 #'   time point.
 #' @param batches ...
 #' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
-#'   or stop just before at the [estimateDispersionBisection()] step
+#'   or stop just after the [estimateDispersionBisection()] step
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
 #'   not available will run the slower legacy code

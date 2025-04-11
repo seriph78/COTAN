@@ -101,6 +101,7 @@ kind. Supported kinds are:  \code{"common"}, \code{"pca"}, \code{"genes"}, \code
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- clean(objCOTAN)
+objCOTAN <- estimateLambdaLinear(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
