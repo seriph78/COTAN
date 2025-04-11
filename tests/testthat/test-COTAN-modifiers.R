@@ -74,7 +74,6 @@ test_that("dropGenesCells", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateNuLinear(obj)
   obj <- estimateDispersionNuBisection(obj, cores = 4L,
                                        enforceNuAverageToOne = TRUE)
   suppressWarnings({

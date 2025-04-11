@@ -14,7 +14,6 @@ test_that("COTAN getters", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateNuLinear(obj)
   obj <- estimateDispersionBisection(obj)
 
   suppressWarnings({

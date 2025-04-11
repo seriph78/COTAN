@@ -285,6 +285,8 @@ obj <- addElementToMetaDataset(obj, "Low UDE cells' threshold", UDELowThr)
 
 obj <- addElementToMetaDataset(obj, "Num drop B group", 2L)
 
+obj <- estimateNuLinear(obj)
+
 cells_to_rem <- getCells(obj)[getNu(obj) < UDELowThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 ```

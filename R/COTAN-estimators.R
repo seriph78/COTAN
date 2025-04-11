@@ -577,7 +577,7 @@ setMethod(
     logThis("Estimate 'dispersion'/'nu': START", logLevel = 2L)
 
     # getNu() would show a warning when no 'nu' present
-    if (is_empty(getMetadataCells(objCOTAN)[["nu"]])) {
+    if (is_empty(suppressWarnings(getNu(objCOTAN)))) {
       objCOTAN <- estimateNuLinear(objCOTAN)
     }
 
