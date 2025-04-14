@@ -7,12 +7,12 @@
 #' @name NumericUtilities
 NULL
 
-#------------------- negative binomial ----------
+#------------------- UMI count models ----------
 
 #'
 #' @details `funProbZeroNegBin` is a private function that gives the probability
 #'   that a sample gene's reads are zero, given the `dispersion` and `mu`
-#'   parameters.
+#'   parameters of a *Negative Binomial* model
 #'
 #' @details Using \eqn{d}{`disp`} for `disp` and \eqn{\mu}{`mu`} for `mu`,
 #'   it returns:
@@ -23,7 +23,7 @@ NULL
 #'   increasing in \eqn{d}{`disp`} and decreasing in \eqn{\mu}{`mu`}.
 #'   It returns 0 when \eqn{d = -\infty}{`disp = -Inf`} or
 #'   \eqn{\mu = \infty}{`mu = Inf`}.
-#'   It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
+#'   It returns \eqn{1.0} when \eqn{\mu = 0}{`mu = 0`}.
 #'
 #' @param dispersion the estimated `dispersion` (a \eqn{n}-sized vector)
 #' @param mu the `lambda` times `nu` values (a \eqn{n \times m} matrix)
@@ -38,6 +38,29 @@ funProbZeroNegBin <- function(dispersion, mu) {
   ad <- abs(dispersion)
   return(( neg) * (exp(-(1.0 + ad) * mu)) +
          (!neg) * (1.0 + ad * mu)^(-1.0 / ad))
+}
+
+
+#'
+#' @details `funProbZeroMixPoi` is a private function that gives the probability
+#'   that a sample gene's reads are zero, given the `pi` and `mu` parameters of
+#'   a *Mixture with Poisson* model
+#'
+#' @details Using \eqn{\pi}{`pi`} for `pi` and \eqn{\mu}{`mu`} for `mu`, it
+#'   returns: \eqn{\pi + (1 - \pi) e^{-\mu}}
+#'   It returns \eqn{1.0} when \eqn{\mu = 0}{`mu = 0`}.
+
+#' @param pi the estimated `probability` that a cell does not express a given
+#'   gene (a \eqn{n}-sized vector)
+#' @param mu the `lambda` times `nu` values (a \eqn{n \times m} matrix)
+#'
+#' @returns `funProbZeroMixPoi()` returns the probability `matrix` that a *read
+#'   count* is identically zero
+#'
+#' @rdname NumericUtilities
+#'
+funProbZeroMixPoi <- function(pi, mu) {
+  return(pi + (1 - pi) * exp(-mu))
 }
 
 

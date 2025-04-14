@@ -3,6 +3,7 @@
 \name{NumericUtilities}
 \alias{NumericUtilities}
 \alias{funProbZeroNegBin}
+\alias{funProbZeroMixPoi}
 \alias{dispersionBisection}
 \alias{parallelDispersionBisection}
 \alias{nuBisection}
@@ -11,6 +12,8 @@
 \title{Numeric Utilities}
 \usage{
 funProbZeroNegBin(dispersion, mu)
+
+funProbZeroMixPoi(pi, mu)
 
 dispersionBisection(
   sumZeros,
@@ -55,6 +58,9 @@ calcDist(data, method, diag = FALSE, upper = FALSE)
 
 \item{mu}{the \code{lambda} times \code{nu} values (a \eqn{n \times m} matrix)}
 
+\item{pi}{the estimated \code{probability} that a cell does not express a given
+gene (a \eqn{n}-sized vector)}
+
 \item{sumZeros}{the number of genes not expressed in the relevant cell (a
 \eqn{m}-sized vector)}
 
@@ -88,6 +94,9 @@ distance matrix should be printed by print.dist}
 \code{funProbZeroNegBin()} returns the probability \code{matrix} that a \emph{read
 count} is identically zero
 
+\code{funProbZeroMixPoi()} returns the probability \code{matrix} that a \emph{read
+count} is identically zero
+
 the dispersion value
 
 the dispersion values
@@ -105,7 +114,7 @@ underlying the \code{COTAN} package
 \details{
 \code{funProbZeroNegBin} is a private function that gives the probability
 that a sample gene's reads are zero, given the \code{dispersion} and \code{mu}
-parameters.
+parameters of a \emph{Negative Binomial} model
 
 Using \eqn{d}{`disp`} for \code{disp} and \eqn{\mu}{`mu`} for \code{mu},
 it returns:
@@ -116,7 +125,15 @@ The function is continuous in \eqn{d = 0}{`disp = 0`},
 increasing in \eqn{d}{`disp`} and decreasing in \eqn{\mu}{`mu`}.
 It returns 0 when \eqn{d = -\infty}{`disp = -Inf`} or
 \eqn{\mu = \infty}{`mu = Inf`}.
-It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
+It returns \eqn{1.0} when \eqn{\mu = 0}{`mu = 0`}.
+
+\code{funProbZeroMixPoi} is a private function that gives the probability
+that a sample gene's reads are zero, given the \code{pi} and \code{mu} parameters of
+a \emph{Mixture with Poisson} model
+
+Using \eqn{\pi}{`pi`} for \code{pi} and \eqn{\mu}{`mu`} for \code{mu}, it
+returns: \eqn{\pi + (1 - \pi) e^{-\mu}}
+It returns \eqn{1.0} when \eqn{\mu = 0}{`mu = 0`}.
 
 \code{dispersionBisection} is a private function for the estimation of
 \emph{dispersion} slot of a \code{COTAN} object via a bisection solver

@@ -8,6 +8,8 @@
 \alias{estimateNuLinear}
 \alias{estimateDispersionBisection,COTAN-method}
 \alias{estimateDispersionBisection}
+\alias{estimateLambdaPiNewton,COTAN-method}
+\alias{estimateLambdaPiNewton}
 \alias{estimateNuBisection,COTAN-method}
 \alias{estimateNuBisection}
 \alias{estimateDispersionNuBisection,COTAN-method}
@@ -20,6 +22,8 @@
 \alias{getLambda}
 \alias{getDispersion,COTAN-method}
 \alias{getDispersion}
+\alias{getPi,COTAN-method}
+\alias{getPi}
 \alias{estimatorsAreReady}
 \alias{getNuNormData}
 \alias{getLogNormData}
@@ -32,6 +36,14 @@
 \S4method{estimateNuLinear}{COTAN}(objCOTAN)
 
 \S4method{estimateDispersionBisection}{COTAN}(
+  objCOTAN,
+  threshold = 0.001,
+  cores = 1L,
+  maxIterations = 100L,
+  chunkSize = 1024L
+)
+
+\S4method{estimateLambdaPiNewton}{COTAN}(
   objCOTAN,
   threshold = 0.001,
   cores = 1L,
@@ -70,6 +82,8 @@
 
 \S4method{getDispersion}{COTAN}(objCOTAN)
 
+\S4method{getPi}{COTAN}(objCOTAN)
+
 estimatorsAreReady(objCOTAN)
 
 getNuNormData(objCOTAN)
@@ -104,6 +118,8 @@ equal to 1}
 
 \code{estimateDispersionBisection()} returns the updated \code{COTAN} object
 
+\code{estimateLambdaPiNewton()} returns the updated \code{COTAN} object
+
 \code{estimateNuBisection()} returns the updated \code{COTAN} object
 
 \code{estimateDispersionNuBisection()} returns the updated \code{COTAN} object
@@ -115,6 +131,8 @@ equal to 1}
 \code{getLambda()} returns the lambda array
 
 \code{getDispersion()} returns the dispersion array
+
+\code{getPi()} returns the mixture probability array
 
 \code{estimatorsAreReady()} returns a boolean specifying whether all
 three arrays are non-empty
@@ -153,6 +171,12 @@ dispersion factor for each gene (a). Determines the \code{dispersion} such that,
 for each gene, the probability of zero count matches the number of observed
 zeros. It assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being already run.
 
+\code{estimateLambdaPiNewton()} estimates the mixture Poisson model
+\code{lambda} and \code{pi} factor for each gene (a). Determines the \code{lambda} and
+\code{pi} such that, for each gene, the probability of zero count matches the
+number of observed zeros, while also matching the observed average. It
+assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being already run.
+
 \code{estimateNuBisection()} estimates the \code{nu} vector of a \code{COTAN}
 object by bisection. It determines the \code{nu} parameters such that, for each
 cell, the probability of zero counts matches the number of observed zeros.
@@ -176,6 +200,8 @@ too slowly to be actually useful in real cases.
 gene)
 
 \code{getDispersion()} extracts the dispersion array
+
+\code{getPi()} extracts the mixture probability array
 
 \code{estimatorsAreReady()} checks whether the estimators arrays lambda,
 nu, dispersion are available
@@ -205,6 +231,10 @@ nu <- getNu(objCOTAN)
 
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 dispersion <- getDispersion(objCOTAN)
+
+objCOTAN <- estimateLambdaPiNewton(objCOTAN, cores = 6L)
+lambda <- getLambda(objCOTAN)
+pi <- getPi(objCOTAN)
 
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L,
                                           enforceNuAverageToOne = TRUE)

@@ -455,7 +455,7 @@ setMethod(
     nu <- getMetadataCells(objCOTAN)[["nu"]]
 
     if (is_empty(nu)) {
-      warning("nu is empty")
+      warning("`nu` is empty")
     } else {
       names(nu) <- getCells(objCOTAN)
     }
@@ -487,7 +487,7 @@ setMethod(
     lambda <- getMetadataGenes(objCOTAN)[["lambda"]]
 
     if (is_empty(lambda)) {
-      warning("lambda is empty")
+      warning("`lambda` is empty")
     } else {
       names(lambda) <- getGenes(objCOTAN)
     }
@@ -518,12 +518,43 @@ setMethod(
     dispersion <- getMetadataGenes(objCOTAN)[["dispersion"]]
 
     if (is_empty(dispersion)) {
-      warning("dispersion is empty")
+      warning("`dispersion` is empty")
     } else {
       names(dispersion) <- getGenes(objCOTAN)
     }
 
     return(dispersion)
+  }
+)
+
+
+#' @aliases getPi
+#'
+#' @details `getPi()` extracts the mixture probability array
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getPi()` returns the mixture probability array
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @rdname ParametersEstimations
+#'
+setMethod(
+  "getPi",
+  "COTAN",
+  function(objCOTAN) {
+    pi <- getMetadataGenes(objCOTAN)[["pi"]]
+
+    if (is_empty(pi)) {
+      warning("`pi` is empty")
+    } else {
+      names(pi) <- getGenes(objCOTAN)
+    }
+
+    return(pi)
   }
 )
 
@@ -545,12 +576,14 @@ setMethod(
 estimatorsAreReady <- function(objCOTAN) {
   anyEmptyArrays <- is_empty(getLambda(objCOTAN)) ||
                     is_empty(getNu(objCOTAN)) ||
-                    is_empty(getDispersion(objCOTAN))
+                    (is_empty(getDispersion(objCOTAN)) &&
+                       is_empty(getPi(objCOTAN)))
   if (anyEmptyArrays) {
     logThis(paste0("Estimators are not ready - array sizes: `lambda` ",
                    length(getLambda(objCOTAN)), ", `nu` ",
-                   length(getNu(objCOTAN)), ", `dispersion` ",
-                   length(getDispersion(objCOTAN))), logLevel = 2L)
+                   length(getNu(objCOTAN)), ", `dispersion`/`pi` ",
+                   min(length(getDispersion(objCOTAN)),
+                       length(getDispersion(objCOTAN)))), logLevel = 2L)
   }
   return(!anyEmptyArrays)
 }
@@ -679,12 +712,21 @@ getProbabilityOfZero <- function(objCOTAN) {
   negBin <- function(objCOTAN) {
     dispersion <- suppressWarnings(getDispersion(objCOTAN))
     assert_that(!is_empty(dispersion),
-                msg = "dispersion must not be empty, estimate it")
+                msg = "`dispersion` must not be empty, estimate it")
 
     return(funProbZeroNegBin(dispersion, getMu(objCOTAN)))
   }
 
+  mixPoi <- function(objCOTAN) {
+    pi <- suppressWarnings(getPi(objCOTAN))
+    assert_that(!is_empty(pi),
+                msg = "`pi` must not be empty, estimate it")
+
+    return(funProbZeroMixPoi(pi, getMu(objCOTAN)))
+  }
+
   ret <- switch (getMetadataElement(objCOTAN, datasetTags()[["model"]]),
+                 MixedPoisson = mixPoi(objCOTAN),
                  NegativeBinomial = ,
                  negBin(objCOTAN))
   return(ret)

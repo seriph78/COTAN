@@ -88,6 +88,11 @@ setGeneric(
 )
 
 setGeneric(
+  "getPi",
+  function(objCOTAN) standardGeneric("getPi")
+)
+
+setGeneric(
   "getGDI",
   function(objCOTAN) standardGeneric("getGDI")
 )

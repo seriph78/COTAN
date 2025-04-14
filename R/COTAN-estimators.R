@@ -191,6 +191,7 @@ setMethod(
   }
 )
 
+
 # local utility wrapper for parallel estimation of dispersion
 runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
                           threshold, maxIterations, cores) {
@@ -273,13 +274,13 @@ setMethod(
     genes <- getGenes(objCOTAN)
     sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)[genes]
 
-    lambda <- suppressWarnings(getLambda(objCOTAN))
-    assert_that(!is_empty(lambda),
-                msg = "`lambda` must not be empty, estimate it")
-
     nu <- suppressWarnings(getNu(objCOTAN))
     assert_that(!is_empty(nu),
                 msg = "nu must not be empty, estimate it")
+
+    lambda <- suppressWarnings(getLambda(objCOTAN))
+    assert_that(!is_empty(lambda),
+                msg = "`lambda` must not be empty, estimate it")
 
     dispList <- list()
 
@@ -361,6 +362,188 @@ setMethod(
     return(objCOTAN)
   }
 )
+
+
+
+# local utility wrapper for parallel estimation of lambda in the mixture model
+runLambdaSolver <- function(genesBatches, ratios, lambda, nu,
+                            threshold, maxIterations, cores) {
+  if (cores != 1L) {
+    res <- parallel::mclapply(
+      genesBatches,
+      parallelLambdaNewton,
+      ratios = ratios,
+      lambda = lambda,
+      nu = nu,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      mc.cores = cores)
+    # spawned errors are stored as try-error classes
+    resError <- unlist(lapply(res, inherits, "try-error"))
+    if (any(resError)) {
+      stop(res[[which(resError)[[1L]]]], call. = FALSE)
+    }
+    return(res)
+  } else {
+    return(lapply(
+      genesBatches,
+      parallelLambdaNewton,
+      ratios = ratios,
+      lambda = lambda,
+      nu = nu,
+      threshold = threshold,
+      maxIterations = maxIterations))
+  }
+}
+
+
+#' @aliases estimateLambdaPiNewton
+#'
+#' @details `estimateLambdaPiNewton()` estimates the mixture Poisson model
+#'   `lambda` and `pi` factor for each gene (a). Determines the `lambda` and
+#'   `pi` such that, for each gene, the probability of zero count matches the
+#'   number of observed zeros, while also matching the observed average. It
+#'   assumes [estimateNuLinear()] being already run.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param threshold minimal solution precision
+#' @param cores number of cores to use. Default is 1.
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#' @param chunkSize number of genes to solve in batch in a single core. Default
+#'   is 1024.
+#'
+#' @returns `estimateLambdaPiNewton()` returns the updated `COTAN` object
+#'
+#' @importFrom rlang is_null
+#' @importFrom rlang is_empty
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom parallel mclapply
+#' @importFrom parallel splitIndices
+#'
+#' @importFrom parallelly supportsMulticore
+#' @importFrom parallelly availableCores
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @export
+#'
+#' @examples
+#' objCOTAN <- estimateLambdaPiNewton(objCOTAN, cores = 6L)
+#' lambda <- getLambda(objCOTAN)
+#' pi <- getPi(objCOTAN)
+#'
+#' @rdname ParametersEstimations
+#'
+setMethod(
+  "estimateLambdaPiNewton",
+  "COTAN",
+  function(objCOTAN, threshold = 0.001, cores = 1L,
+           maxIterations = 100L, chunkSize = 1024L) {
+    logThis("Estimate `lambda`: START", logLevel = 2L)
+
+    cores <- handleMultiCore(cores)
+
+    genes <- getGenes(objCOTAN)
+
+    nu <- suppressWarnings(getNu(objCOTAN))
+    assert_that(!is_empty(nu),
+                msg = "`nu` must not be empty, estimate it")
+
+    #oldLambda <- suppressWarnings(getLambda(objCOTAN))
+
+    # use this to retrieve the average count and the initial guesses
+    # by overriding the current lambda
+    # TODO: avoid coex async
+    objCOTAN <- estimateLambdaLinear(objCOTAN)
+    lambda <- getLambda(objCOTAN)
+
+    ratios <- getNumOfExpressingCells(objCOTAN)[genes] / lambda
+
+    lambdaList <- list()
+
+    spIdx <- parallel::splitIndices(length(genes),
+                                    ceiling(length(genes) / chunkSize))
+
+    spGenes <- lapply(spIdx, function(x) genes[x])
+
+    numSplits <- length(spGenes)
+    splitStep <- max(4L, cores * 2L)
+
+    gc()
+
+    pBegin <- 1L
+    while (pBegin <= numSplits) {
+      pEnd <- min(pBegin + splitStep - 1L, numSplits)
+
+      logThis(paste0("Executing ", (pEnd - pBegin + 1L), " genes batches from",
+                     " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
+              logLevel = 3L)
+
+      # as the runSolver() might trow, we force up to 5 reruns
+      res <- NULL
+      resError <- "No errors"
+      failCount <- 0L
+      while (!is_null(resError) && failCount < 5L) {
+        failCount <- failCount + 1L
+        c(res, resError) %<-%
+          tryCatch(list(runLambdaSolver(genesBatches = spGenes[pBegin:pEnd],
+                                        ratios = ratios,
+                                        lambda = lambda,
+                                        nu = nu,
+                                        threshold = threshold,
+                                        maxIterations = maxIterations,
+                                        cores = cores), NULL),
+                   error = function(e) {
+                     logThis(paste("In genes batches -", e), logLevel = 2L)
+                     list(NULL, e) })
+      }
+
+      assert_that(is_null(resError),
+                  msg = paste("Genes batches failed", failCount,
+                              "times with", resError))
+      lambdaList <- append(lambdaList, res)
+      rm(res)
+
+      pBegin <- pEnd + 1L
+    }
+    logThis("Estimate `lambda`: DONE", logLevel = 2L)
+
+    gc()
+
+    newLambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
+    newPi <- set_names(1.0 - (lambda / newLambda), getGenes(objCOTAN))
+    if (TRUE) {
+      if (!identical(newLambda, lambda)) {
+        # flag the coex slots are out of sync (if any)!
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["gsync"]], FALSE)
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["csync"]], FALSE)
+      }
+    }
+
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, newLambda,
+                                        "lambda", genes)
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, newPi,
+                                        "pi", genes)
+    objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                           datasetTags()[["model"]],
+                                           "MixturePoisson")
+
+    goodPos <- getPi(objCOTAN) != 0.0
+    logThis(paste("pi",
+                  "| min:", min(getPi(objCOTAN)[goodPos]),
+                  "| max:", max(getPi(objCOTAN)[goodPos]),
+                  "| % zeros:", sum(goodPos)),
+            logLevel = 1L)
+
+    return(objCOTAN)
+  }
+)
+
 
 # local utility wrapper for parallel estimation of nu
 runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
