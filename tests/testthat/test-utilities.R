@@ -131,49 +131,49 @@ test_that("Adding/extracting columns to/from data.frames", {
 })
 
 
-test_that("funProbZero", {
+test_that("funProbZeroNegBin", {
   # Cases with mu = 0 are not actually in use
-  expect_identical(funProbZero(-Inf, 0.0), NaN)
-  expect_identical(funProbZero(-1.0, 0.0), 1.0)
-  expect_identical(funProbZero( 0.0, 0.0), 1.0)
-  expect_identical(funProbZero( 1.0, 0.0), 1.0)
-  expect_identical(funProbZero(10.0, 0.0), 1.0)
-  expect_identical(funProbZero( Inf, 0.0), NaN)
+  expect_identical(funProbZeroNegBin(-Inf, 0.0), NaN)
+  expect_identical(funProbZeroNegBin(-1.0, 0.0), 1.0)
+  expect_identical(funProbZeroNegBin( 0.0, 0.0), 1.0)
+  expect_identical(funProbZeroNegBin( 1.0, 0.0), 1.0)
+  expect_identical(funProbZeroNegBin(10.0, 0.0), 1.0)
+  expect_identical(funProbZeroNegBin( Inf, 0.0), NaN)
 
   # Cases with infinite disp can happen
-  expect_identical(funProbZero(-Inf, 1.0),                0.0)
-  expect_identical(funProbZero(-1.0, 1.0),          exp(-2.0))
-  expect_identical(funProbZero( 0.0, 1.0),          exp(-1.0))
-  expect_identical(funProbZero( 1.0, 1.0),          1.0 / 2.0)
-  expect_identical(funProbZero(10.0, 1.0), 11.0^(-1.0 / 10.0))
-  expect_identical(funProbZero( Inf, 1.0),                1.0)
+  expect_identical(funProbZeroNegBin(-Inf, 1.0),                0.0)
+  expect_identical(funProbZeroNegBin(-1.0, 1.0),          exp(-2.0))
+  expect_identical(funProbZeroNegBin( 0.0, 1.0),          exp(-1.0))
+  expect_identical(funProbZeroNegBin( 1.0, 1.0),          1.0 / 2.0)
+  expect_identical(funProbZeroNegBin(10.0, 1.0), 11.0^(-1.0 / 10.0))
+  expect_identical(funProbZeroNegBin( Inf, 1.0),                1.0)
 
   # Cases with mu = Inf are not actually in use
-  expect_identical(funProbZero(-Inf, Inf), 0.0)
-  expect_identical(funProbZero(-1.0, Inf), 0.0)
-  expect_identical(funProbZero( 0.0, Inf), NaN)
-  expect_identical(funProbZero( 1.0, Inf), 0.0)
-  expect_identical(funProbZero(10.0, Inf), 0.0)
-  expect_identical(funProbZero( Inf, Inf), 1.0)
+  expect_identical(funProbZeroNegBin(-Inf, Inf), 0.0)
+  expect_identical(funProbZeroNegBin(-1.0, Inf), 0.0)
+  expect_identical(funProbZeroNegBin( 0.0, Inf), NaN)
+  expect_identical(funProbZeroNegBin( 1.0, Inf), 0.0)
+  expect_identical(funProbZeroNegBin(10.0, Inf), 0.0)
+  expect_identical(funProbZeroNegBin( Inf, Inf), 1.0)
 })
 
 
-test_that("funProbZero with matrices", {
+test_that("funProbZeroNegBin with matrices", {
   mu <- matrix((1L:25L) / 7.0, nrow = 10L, ncol = 10L)
   disp <- (-1L:8L) / 3.0
 
-  p <- funProbZero(disp, mu)
+  p <- funProbZeroNegBin(disp, mu)
 
   expect_identical(dim(p), dim(mu))
 
-  expect_identical(p[ 1L,  1L], funProbZero(disp[[ 1L]], mu[ 1L,  1L]))
-  expect_identical(p[ 1L, 10L], funProbZero(disp[[ 1L]], mu[ 1L, 10L]))
+  expect_identical(p[ 1L,  1L], funProbZeroNegBin(disp[[ 1L]], mu[ 1L,  1L]))
+  expect_identical(p[ 1L, 10L], funProbZeroNegBin(disp[[ 1L]], mu[ 1L, 10L]))
 
-  expect_identical(p[ 3L,  7L], funProbZero(disp[[ 3L]], mu[ 3L,  7L]))
-  expect_identical(p[ 6L,  4L], funProbZero(disp[[ 6L]], mu[ 6L,  4L]))
+  expect_identical(p[ 3L,  7L], funProbZeroNegBin(disp[[ 3L]], mu[ 3L,  7L]))
+  expect_identical(p[ 6L,  4L], funProbZeroNegBin(disp[[ 6L]], mu[ 6L,  4L]))
 
-  expect_identical(p[10L,  1L], funProbZero(disp[[10L]], mu[10L,  1L]))
-  expect_identical(p[10L, 10L], funProbZero(disp[[10L]], mu[10L, 10L]))
+  expect_identical(p[10L,  1L], funProbZeroNegBin(disp[[10L]], mu[10L,  1L]))
+  expect_identical(p[10L, 10L], funProbZeroNegBin(disp[[10L]], mu[10L, 10L]))
 })
 
 

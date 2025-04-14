@@ -170,7 +170,7 @@ test_that("Calculations on genes", {
                           getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 7L)],
+  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 9L, 7L)],
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
                    paste0(10.0 / 55.0))
@@ -192,7 +192,7 @@ test_that("Calculations on genes", {
                           getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 7L)],
+  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 9L, 7L)],
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
                    paste0(NA))
@@ -303,7 +303,7 @@ test_that("Calculations on cells", {
                           getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 8L)],
+  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 9L, 8L)],
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["cbad"]]), paste0(0L))
 

@@ -165,7 +165,7 @@ clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
   assert_that(!is_empty(dispersion),
               msg = "`dispersion` must not be empty, estimate it")
 
-  probZero <- funProbZero(dispersion[gene], lambda[gene] * nu)
+  probZero <- funProbZeroNegBin(dispersion[gene], lambda[gene] * nu)
 
   if (anyNA(probZero)) {
     warning("Some NA in estimated probability of zero matrix")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/numericUtilities.R
 \name{NumericUtilities}
 \alias{NumericUtilities}
-\alias{funProbZero}
+\alias{funProbZeroNegBin}
 \alias{dispersionBisection}
 \alias{parallelDispersionBisection}
 \alias{nuBisection}
@@ -10,7 +10,7 @@
 \alias{calcDist}
 \title{Numeric Utilities}
 \usage{
-funProbZero(dispersion, mu)
+funProbZeroNegBin(dispersion, mu)
 
 dispersionBisection(
   sumZeros,
@@ -85,7 +85,8 @@ matrix should be printed by print.dist.upper}
 distance matrix should be printed by print.dist}
 }
 \value{
-the probability \code{matrix} that a \emph{read count} is identically zero
+\code{funProbZeroNegBin()} returns the probability \code{matrix} that a \emph{read
+count} is identically zero
 
 the dispersion value
 
@@ -102,8 +103,9 @@ A set of function helper related to the statistical model
 underlying the \code{COTAN} package
 }
 \details{
-\code{funProbZero} is a private function that gives the probability that
-a sample gene's reads are zero, given the \code{dispersion} and \code{mu} parameters.
+\code{funProbZeroNegBin} is a private function that gives the probability
+that a sample gene's reads are zero, given the \code{dispersion} and \code{mu}
+parameters.
 
 Using \eqn{d}{`disp`} for \code{disp} and \eqn{\mu}{`mu`} for \code{mu},
 it returns:

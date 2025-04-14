@@ -676,12 +676,18 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 #' @rdname ParametersEstimations
 #'
 getProbabilityOfZero <- function(objCOTAN) {
-  if (is_empty(getDispersion(objCOTAN))) {
-    stop("dispersion must not be empty, estimate it")
+  negBin <- function(objCOTAN) {
+    dispersion <- suppressWarnings(getDispersion(objCOTAN))
+    assert_that(!is_empty(dispersion),
+                msg = "dispersion must not be empty, estimate it")
+
+    return(funProbZeroNegBin(dispersion, getMu(objCOTAN)))
   }
 
-  # estimate Probabilities of 0 with internal function funProbZero
-  return(funProbZero(getDispersion(objCOTAN), getMu(objCOTAN)))
+  ret <- switch (getMetadataElement(objCOTAN, datasetTags()[["model"]]),
+                 NegativeBinomial = ,
+                 negBin(objCOTAN))
+  return(ret)
 }
 
 

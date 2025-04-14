@@ -346,6 +346,9 @@ setMethod(
 
     objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
                                         "dispersion", genes)
+    objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                           datasetTags()[["model"]],
+                                           "NegativeBinomial")
 
     goodPos <- is.finite(getDispersion(objCOTAN))
     logThis(paste("dispersion",
@@ -712,7 +715,7 @@ setMethod(
       dispersion <- params[1L:numGenes]
       nu <- exp(params[(numGenes + 1L):length(params)])
 
-      probZero <- funProbZero(dispersion, lambda %o% nu)
+      probZero <- funProbZeroNegBin(dispersion, lambda %o% nu)
 
       diffGenes <- rowsums(probZero, parallel = TRUE) - zeroGenes
       diffCells <- colsums(probZero, parallel = TRUE) - zeroCells
@@ -744,6 +747,9 @@ setMethod(
 
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
                                         "nu", getCells(objCOTAN))
+    objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                           datasetTags()[["model"]],
+                                           "NegativeBinomial")
 
     logThis("Estimate 'dispersion'/'nu': DONE", logLevel = 2L)
 

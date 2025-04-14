@@ -442,7 +442,6 @@ expectedContingencyTablesNN <- function(objCOTAN,
                                         optimizeForSpeed = TRUE) {
   logThis("calculating NN..", logLevel = 3L, appendLF = FALSE)
 
-  # estimate Probabilities of 0 with internal function funProbZero
   probZero <- getProbabilityOfZero(objCOTAN)
   gc()
 
@@ -512,7 +511,6 @@ expectedPartialContingencyTablesNN <-
   logThis("calculating partial NN..", logLevel = 3L, appendLF = FALSE)
 
   if (is_empty(probZero)) {
-    # estimate Probabilities of 0 with internal function funProbZero
     probZero <- getProbabilityOfZero(objCOTAN)
   }
   assert_that(identical(dim(probZero), dim(getRawData(objCOTAN))))
@@ -829,7 +827,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
   assert_that(!is_empty(dispersion),
               msg = "`dispersion` must not be empty, estimate it")
 
-  probZero <- funProbZero(dispersion[c(g1, g2)], lambda[c(g1, g2)] %o% nu)
+  probZero <- funProbZeroNegBin(dispersion[c(g1, g2)], lambda[c(g1, g2)] %o% nu)
   rownames(probZero) <- c(g1, g2)
 
   if (anyNA(probZero)) {

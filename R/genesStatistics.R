@@ -17,7 +17,6 @@
 #' @rdname GenesStatistics
 #'
 calculateGenesCE <- function(objCOTAN) {
-  # estimate Probabilities of 0 with internal function funProbZero
   probZero <- getProbabilityOfZero(objCOTAN)
 
   zeroOne <- as.matrix(getZeroOneProj(objCOTAN))

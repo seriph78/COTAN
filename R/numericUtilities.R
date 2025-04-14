@@ -10,8 +10,9 @@ NULL
 #------------------- negative binomial ----------
 
 #'
-#' @details `funProbZero` is a private function that gives the probability that
-#'   a sample gene's reads are zero, given the `dispersion` and `mu` parameters.
+#' @details `funProbZeroNegBin` is a private function that gives the probability
+#'   that a sample gene's reads are zero, given the `dispersion` and `mu`
+#'   parameters.
 #'
 #' @details Using \eqn{d}{`disp`} for `disp` and \eqn{\mu}{`mu`} for `mu`,
 #'   it returns:
@@ -27,11 +28,12 @@ NULL
 #' @param dispersion the estimated `dispersion` (a \eqn{n}-sized vector)
 #' @param mu the `lambda` times `nu` values (a \eqn{n \times m} matrix)
 #'
-#' @returns the probability `matrix` that a *read count* is identically zero
+#' @returns `funProbZeroNegBin()` returns the probability `matrix` that a *read
+#'   count* is identically zero
 #'
 #' @rdname NumericUtilities
 #'
-funProbZero <- function(dispersion, mu) {
+funProbZeroNegBin <- function(dispersion, mu) {
   neg <- (dispersion <= 0.0)
   ad <- abs(dispersion)
   return(( neg) * (exp(-(1.0 + ad) * mu)) +
@@ -75,7 +77,7 @@ dispersionBisection <-
     # we look for two dispersion values where the first leads to a
     # diffZeros negative and the second positive
     disp1 <- 0.0
-    diff1 <- sum(funProbZero(disp1, mu)) - sumZeros
+    diff1 <- sum(funProbZeroNegBin(disp1, mu)) - sumZeros
     if (abs(diff1) <= threshold) {
       return(disp1)
     }
@@ -84,7 +86,7 @@ dispersionBisection <-
     disp2 <- -1.0 * sign(diff1)
     iter <- 1L
     repeat {
-      diff2 <- sum(funProbZero(disp2, mu)) - sumZeros
+      diff2 <- sum(funProbZeroNegBin(disp2, mu)) - sumZeros
 
       if (diff2 * diff1 < 0.0) {
         break
@@ -106,7 +108,7 @@ dispersionBisection <-
     repeat {
       disp <- (disp1 + disp2) / 2.0
 
-      diff <- sum(funProbZero(disp, mu)) - sumZeros
+      diff <- sum(funProbZeroNegBin(disp, mu)) - sumZeros
 
       if (abs(diff) <= threshold) {
         return(disp)
@@ -181,7 +183,7 @@ parallelDispersionBisection <-
     # we look for two dispersion values where the first leads to a
     # diffZeros negative and the second positive
     disps1 <- rep(0.0, length(sumZeros))
-    diffs1 <- rowsums(funProbZero(disps1, mu)) - sumZeros
+    diffs1 <- rowsums(funProbZeroNegBin(disps1, mu)) - sumZeros
     if (all(abs(diffs1) <= threshold)) {
       output[goodPos] <- disps1
       return(output)
@@ -193,9 +195,10 @@ parallelDispersionBisection <-
     runPos <- rep(TRUE, length(diffs1))
     iter <- 1L
     repeat {
-      diffs2[runPos] <- (rowsums(funProbZero(disps2[runPos],
-                                             mu[runPos, , drop = FALSE])) -
-                           sumZeros[runPos])
+      diffs2[runPos] <-
+        (rowsums(funProbZeroNegBin(disps2[runPos],
+                                   mu[runPos, , drop = FALSE])) -
+           sumZeros[runPos])
 
       runPos <- (diffs2 * diffs1 >= 0.0)
 
@@ -223,9 +226,10 @@ parallelDispersionBisection <-
     repeat {
       disps[runPos] <- (disps1[runPos] + disps2[runPos]) / 2.0
 
-      diffs[runPos] <- (rowsums(funProbZero(disps[runPos],
-                                            mu[runPos, , drop = FALSE])) -
-                          sumZeros[runPos])
+      diffs[runPos] <-
+        (rowsums(funProbZeroNegBin(disps[runPos],
+                                   mu[runPos, , drop = FALSE])) -
+           sumZeros[runPos])
 
       runPos <- abs(diffs) > threshold
       if (!any(runPos)) {
@@ -284,7 +288,7 @@ nuBisection <-
     # we look for two dispersion values where the first leads to a
     # diffZeros negative and the second positive
     nu1 <- initialGuess
-    diff1 <- sum(funProbZero(dispersion, nu1 * lambda)) - sumZeros
+    diff1 <- sum(funProbZeroNegBin(dispersion, nu1 * lambda)) - sumZeros
     if (abs(diff1) <= threshold) {
       return(nu1)
     }
@@ -293,7 +297,7 @@ nuBisection <-
     nu2 <- nu1 * factor # we assume error is an decreasing function of nu
     iter <- 1L
     repeat {
-      diff2 <- sum(funProbZero(dispersion, nu2 * lambda)) - sumZeros
+      diff2 <- sum(funProbZeroNegBin(dispersion, nu2 * lambda)) - sumZeros
 
       if (diff2 * diff1 < 0.0) {
         break
@@ -315,7 +319,7 @@ nuBisection <-
     repeat {
       nu <- (nu1 + nu2) / 2.0
 
-      diff <- sum(funProbZero(dispersion, nu * lambda)) - sumZeros
+      diff <- sum(funProbZeroNegBin(dispersion, nu * lambda)) - sumZeros
 
       if (abs(diff) <= threshold) {
         return(nu)
@@ -390,7 +394,7 @@ parallelNuBisection <-
     # diffZeros negative and the second positive
     nus1 <- initialGuess[goodPos]
 
-    diffs1 <- colsums(funProbZero(dispersion, lambda %o% nus1)) - sumZeros
+    diffs1 <- colsums(funProbZeroNegBin(dispersion, lambda %o% nus1)) - sumZeros
     if (all(abs(diffs1) <= threshold)) {
       output[goodPos] <- nus1
       return(output)
@@ -403,9 +407,10 @@ parallelNuBisection <-
     runPos <- rep(TRUE, length(diffs1))
     iter <- 1L
     repeat {
-      diffs2[runPos] <- (colsums(funProbZero(dispersion,
-                                             lambda %o% nus2[runPos])) -
-                           sumZeros[runPos])
+      diffs2[runPos] <-
+        (colsums(funProbZeroNegBin(dispersion,
+                                   lambda %o% nus2[runPos])) -
+           sumZeros[runPos])
 
       runPos <- (diffs2 * diffs1 >= 0.0)
 
@@ -436,9 +441,10 @@ parallelNuBisection <-
     repeat {
       nus[runPos] <- (nus1[runPos] + nus2[runPos]) / 2.0
 
-      diffs[runPos] <- (colsums(funProbZero(dispersion,
-                                            lambda %o% nus[runPos])) -
-                          sumZeros[runPos])
+      diffs[runPos] <-
+        (colsums(funProbZeroNegBin(dispersion,
+                                   lambda %o% nus[runPos])) -
+           sumZeros[runPos])
 
       runPos <- (abs(diffs) > threshold)
       if (!any(runPos)) {
