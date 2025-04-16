@@ -64,13 +64,14 @@ funProbZeroMixPoi <- function(pi, mu) {
 }
 
 
-#--------------------- dispersion solvers ----------------
+#---------------- dispersion solvers negative binomial model ------------
 
-#' @details `dispersionBisection` is a private function for the estimation of
+#' @details `dispersionBisection()` is a private function for the estimation of
 #'   *dispersion* slot of a `COTAN` object via a bisection solver
 #'
-#' @details The goal is to find a `dispersion` value that reduces to zero the
-#'   difference between the number of estimated and counted zeros
+#' @details The goal of `dispersionBisection()` is to find a `dispersion` value
+#'   that reduces to zero the difference between the number of estimated and
+#'   counted zeros
 #'
 #' @param sumZeros the number of cells that didn't express the gene
 #' @param lambda the estimated `lambda` (a \eqn{n}-sized vector)
@@ -78,7 +79,7 @@ funProbZeroMixPoi <- function(pi, mu) {
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
-#' @returns the dispersion value
+#' @returns `dispersionBisection()` returns the dispersion value
 #'
 #' @rdname NumericUtilities
 #'
@@ -153,12 +154,13 @@ dispersionBisection <-
   }
 
 
-#' @details `parallelDispersionBisection` is a private function invoked by
+#' @details `parallelDispersionBisection()` is a private function invoked by
 #'   [estimateDispersionBisection()] for the estimation of the `dispersion` slot
 #'   of a `COTAN` object via a parallel bisection solver
 #'
-#' @details The goal is to find a `dispersion array` that reduces to zero the
-#'   difference between the number of estimated and counted zeros
+#' @details The goal of `parallelDispersionBisection()` is to find a `dispersion
+#'   array` that reduces to zero the difference between the number of estimated
+#'   and counted zeros
 #'
 #' @param genes names of the relevant genes
 #' @param sumZeros the number of cells that didn't express the relevant gene (a
@@ -168,7 +170,7 @@ dispersionBisection <-
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
-#' @returns the dispersion values
+#' @returns `parallelDispersionBisection()` returns the dispersion values
 #'
 #' @importFrom Rfast rowsums
 #'
@@ -277,7 +279,201 @@ parallelDispersionBisection <-
   }
 
 
-#------------------------- nu solvers ---------------------
+
+#--------------------- lambda solvers mixture model ----------------
+
+#' @details `lambdaNewton()` is a private function for the estimation of
+#'   *lambda* slot of a `COTAN` object via a Newton-Raphson solver
+#'
+#' @details The goal of `lambdaNewton()` is to find a `lambda` value by which
+#'   the equation \eqn{\frac{1 - e^{-\lambda}}{\lambda} = \frac{1 - z}{m}},
+#'   coming from the mixture model, so to match contemporaneously both average
+#'   and number of zero in the model. The formula is actually \eqn{\nu} weighted
+#'
+#' @param avgNumNonZero the average number of cells that express the gene
+#' @param mean the average expression of the gene
+#' @param nu the estimated `nu` (a \eqn{m}-sized vector)
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#'
+#' @returns `lambdaNewton()` returns the lambda value
+#'
+#' @rdname NumericUtilities
+#'
+lambdaNewton <-
+  function(avgNumNonZero,
+           mean,
+           nu,
+           threshold = 0.0001,
+           maxIterations = 20L) {
+    if (avgNumNonZero == 1.0 || avgNumNonZero == mean) {
+      # no zero counts or only counts with 0L and 1L
+      return(mean)
+    }
+
+    #initial guess
+    ratio <- avgNumNonZero / mean
+    lambda <- 1.0 / ratio
+
+    # once we have found the two bounds to the dispersion value we use bisection
+    iter <- 1L
+    repeat {
+      mu <- lambda * nu
+      expMu <- exp(-mu)
+
+      avgExpMu <- mean(expMu)
+
+
+      diff <- (1.0 - avgExpMu - lambda * ratio)
+
+      pi <- max(0.0, 1.0 - mean / lambda) # max here is not strictly necessary
+      print(paste0(iter, ": diff ", diff/lambda, ", lambda ", lambda,
+                   ", mean error ", (1.0 - pi) * lambda - mean,
+                   ", prob zero error ",
+                   (1.0 - pi) * (1 - avgExpMu) - avgNumNonZero))
+
+      if (abs(diff / lambda) <= threshold) {
+        return(lambda)
+      }
+
+      if (iter >= maxIterations) {
+        stop("Max number of iterations reached ",
+             "while finding the solution straddling intervals")
+      }
+      iter <- iter + 1L
+
+      #update lambda
+      lambda <- lambda * (1.0 + diff / (1.0 - avgExpMu - mean(mu * expMu)))
+    }
+  }
+
+
+#' @details `parallelLambdaNewton()` is a private function invoked by
+#'   [estimateLambdaPiNewton()] for the estimation of the `lambda` slot of a
+#'   `COTAN` object via a Newton-Raphson solver
+#'
+#' @details The goal of `parallelLambdaNewton()` is to find a `lambda array`
+#'   that reduces to zero the difference between the number of estimated and
+#'   counted zeros
+#'
+#' @param genes names of the relevant genes
+#' @param sumZeros the number of cells that didn't express the relevant gene (a
+#'   \eqn{n}-sized vector)
+#' @param lambda the estimated `lambda` (a \eqn{n}-sized vector)
+#' @param nu the estimated `nu` (a \eqn{m}-sized vector)
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#'
+#' @returns `parallelLambdaNewton()` returns the dispersion values
+#'
+#' @importFrom Rfast rowsums
+#'
+#' @rdname NumericUtilities
+#'
+parallelLambdaNewton <-
+  function(genes,
+           sumZeros,
+           lambda,
+           nu,
+           threshold = 0.001,
+           maxIterations = 100L) {
+    sumZeros <- sumZeros[genes]
+    lambda <- lambda[genes]
+
+    # cannot match exactly zero prob of zeros with finite values
+    # so we ignore the rows with no zeros from the solver and return -Inf
+    output <- rep(-Inf, length(sumZeros))
+
+    # in case of zero lambda dispersion is irrelevant. We return 1.0
+    goodPos <- sumZeros != length(nu)
+    output[!goodPos] <- 1.0
+
+    goodPos <- goodPos & sumZeros != 0L
+
+    if (sum(goodPos) == 0L) {
+      return(output)
+    }
+
+    sumZeros <- sumZeros[goodPos]
+    lambda <- lambda[goodPos]
+
+    mu <- lambda %o% nu
+
+    # we look for two dispersion values where the first leads to a
+    # diffZeros negative and the second positive
+    disps1 <- rep(0.0, length(sumZeros))
+    diffs1 <- rowsums(funProbZeroNegBin(disps1, mu)) - sumZeros
+    if (all(abs(diffs1) <= threshold)) {
+      output[goodPos] <- disps1
+      return(output)
+    }
+
+    # we assume error is an increasing function of the dispersion
+    disps2 <- -1.0 * sign(diffs1)
+    diffs2 <- diffs1
+    runPos <- rep(TRUE, length(diffs1))
+    iter <- 1L
+    repeat {
+      diffs2[runPos] <-
+        (rowsums(funProbZeroNegBin(disps2[runPos],
+                                   mu[runPos, , drop = FALSE])) -
+           sumZeros[runPos])
+
+      runPos <- (diffs2 * diffs1 >= 0.0)
+
+      if (!any(runPos)) {
+        break
+      }
+
+      if (iter >= maxIterations) {
+        stop("Max number of iterations reached while finding",
+             " the solution straddling intervals")
+      }
+      iter <- iter + 1L
+
+      disps1[runPos] <- disps2[runPos] # disps2 are closer to producing 0
+
+      disps2[runPos] <- 2.0 * disps2[runPos] # we double at each step
+    }
+
+    # once we have found the two bounds to the dispersion value we use bisection
+    runNum <- length(diffs1)
+    runPos <- rep(TRUE, runNum)
+    disps <- disps1
+    diffs <- diffs1
+    iter <- 1L
+    repeat {
+      disps[runPos] <- (disps1[runPos] + disps2[runPos]) / 2.0
+
+      diffs[runPos] <-
+        (rowsums(funProbZeroNegBin(disps[runPos],
+                                   mu[runPos, , drop = FALSE])) -
+           sumZeros[runPos])
+
+      runPos <- abs(diffs) > threshold
+      if (!any(runPos)) {
+        break
+      }
+
+      if (iter >= maxIterations) {
+        stop("Max number of iterations reached while finding the solutions")
+      }
+      iter <- iter + 1L
+
+      # drop same sign diff point
+      pPos <- runPos & (diffs * diffs2 > 0.0)
+      disps2[pPos] <- disps[pPos]
+
+      nPos <- runPos & !pPos
+      disps1[nPos] <- disps[nPos]
+    }
+
+    output[goodPos] <- disps
+    return(output)
+  }
+
+
+#------------------ nu solvers negative binomial model -------------------
 
 #' @details `nuBisection` is a private function for the estimation of `nu` slot
 #'   of a `COTAN` object via a bisection solver

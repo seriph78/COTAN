@@ -6,6 +6,8 @@
 \alias{funProbZeroMixPoi}
 \alias{dispersionBisection}
 \alias{parallelDispersionBisection}
+\alias{lambdaNewton}
+\alias{parallelLambdaNewton}
 \alias{nuBisection}
 \alias{parallelNuBisection}
 \alias{calcDist}
@@ -24,6 +26,17 @@ dispersionBisection(
 )
 
 parallelDispersionBisection(
+  genes,
+  sumZeros,
+  lambda,
+  nu,
+  threshold = 0.001,
+  maxIterations = 100L
+)
+
+lambdaNewton(avgNumNonZero, mean, nu, threshold = 1e-04, maxIterations = 20L)
+
+parallelLambdaNewton(
   genes,
   sumZeros,
   lambda,
@@ -74,6 +87,10 @@ gene (a \eqn{n}-sized vector)}
 
 \item{genes}{names of the relevant genes}
 
+\item{avgNumNonZero}{the average number of cells that express the gene}
+
+\item{mean}{the average expression of the gene}
+
 \item{initialGuess}{the initial guess for \code{nu}  (a \eqn{m}-sized vector)}
 
 \item{cells}{names of the relevant cells}
@@ -97,9 +114,13 @@ count} is identically zero
 \code{funProbZeroMixPoi()} returns the probability \code{matrix} that a \emph{read
 count} is identically zero
 
-the dispersion value
+\code{dispersionBisection()} returns the dispersion value
 
-the dispersion values
+\code{parallelDispersionBisection()} returns the dispersion values
+
+\code{lambdaNewton()} returns the lambda value
+
+\code{parallelLambdaNewton()} returns the dispersion values
 
 the nu value
 
@@ -135,18 +156,35 @@ Using \eqn{\pi}{`pi`} for \code{pi} and \eqn{\mu}{`mu`} for \code{mu}, it
 returns: \eqn{\pi + (1 - \pi) e^{-\mu}}
 It returns \eqn{1.0} when \eqn{\mu = 0}{`mu = 0`}.
 
-\code{dispersionBisection} is a private function for the estimation of
+\code{dispersionBisection()} is a private function for the estimation of
 \emph{dispersion} slot of a \code{COTAN} object via a bisection solver
 
-The goal is to find a \code{dispersion} value that reduces to zero the
-difference between the number of estimated and counted zeros
+The goal of \code{dispersionBisection()} is to find a \code{dispersion} value
+that reduces to zero the difference between the number of estimated and
+counted zeros
 
-\code{parallelDispersionBisection} is a private function invoked by
+\code{parallelDispersionBisection()} is a private function invoked by
 \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} for the estimation of the \code{dispersion} slot
 of a \code{COTAN} object via a parallel bisection solver
 
-The goal is to find a \verb{dispersion array} that reduces to zero the
-difference between the number of estimated and counted zeros
+The goal of \code{parallelDispersionBisection()} is to find a \verb{dispersion array} that reduces to zero the difference between the number of estimated
+and counted zeros
+
+\code{lambdaNewton()} is a private function for the estimation of
+\emph{lambda} slot of a \code{COTAN} object via a Newton-Raphson solver
+
+The goal of \code{lambdaNewton()} is to find a \code{lambda} value by which
+the equation \eqn{\frac{1 - e^{-\lambda}}{\lambda} = \frac{1 - z}{m}},
+coming from the mixture model, so to match contemporaneously both average
+and number of zero in the model. The formula is actually \eqn{\nu} weighted
+
+\code{parallelLambdaNewton()} is a private function invoked by
+\code{\link[=estimateLambdaPiNewton]{estimateLambdaPiNewton()}} for the estimation of the \code{lambda} slot of a
+\code{COTAN} object via a Newton-Raphson solver
+
+The goal of \code{parallelLambdaNewton()} is to find a \verb{lambda array}
+that reduces to zero the difference between the number of estimated and
+counted zeros
 
 \code{nuBisection} is a private function for the estimation of \code{nu} slot
 of a \code{COTAN} object via a bisection solver

@@ -366,14 +366,14 @@ setMethod(
 
 
 # local utility wrapper for parallel estimation of lambda in the mixture model
-runLambdaSolver <- function(genesBatches, ratios, lambda, nu,
+runLambdaSolver <- function(genesBatches, avgNonZeros, means, nu,
                             threshold, maxIterations, cores) {
   if (cores != 1L) {
     res <- parallel::mclapply(
       genesBatches,
       parallelLambdaNewton,
-      ratios = ratios,
-      lambda = lambda,
+      avgNonZeros = avgNonZeros,
+      means = means,
       nu = nu,
       threshold = threshold,
       maxIterations = maxIterations,
@@ -388,8 +388,8 @@ runLambdaSolver <- function(genesBatches, ratios, lambda, nu,
     return(lapply(
       genesBatches,
       parallelLambdaNewton,
-      ratios = ratios,
-      lambda = lambda,
+      avgNonZeros = avgNonZeros,
+      means = means,
       nu = nu,
       threshold = threshold,
       maxIterations = maxIterations))
@@ -446,23 +446,21 @@ setMethod(
 
     cores <- handleMultiCore(cores)
 
-    genes <- getGenes(objCOTAN)
 
     nu <- suppressWarnings(getNu(objCOTAN))
     assert_that(!is_empty(nu),
                 msg = "`nu` must not be empty, estimate it")
 
-    #oldLambda <- suppressWarnings(getLambda(objCOTAN))
+    means <- rowMeans(getRawData(objCOTAN), dims = 1L)
 
-    # use this to retrieve the average count and the initial guesses
-    # by overriding the current lambda
-    # TODO: avoid coex async
-    objCOTAN <- estimateLambdaLinear(objCOTAN)
-    lambda <- getLambda(objCOTAN)
-
-    ratios <- getNumOfExpressingCells(objCOTAN)[genes] / lambda
+    avgNonZeros <- getNumOfExpressingCells(objCOTAN) / getNumCells(objCOTAN)
 
     lambdaList <- list()
+
+    genes <- getGenes(objCOTAN)
+
+    # TODO: drop the simple solutio genes for which pi := 0 and lambda := mean
+
 
     spIdx <- parallel::splitIndices(length(genes),
                                     ceiling(length(genes) / chunkSize))
@@ -490,8 +488,8 @@ setMethod(
         failCount <- failCount + 1L
         c(res, resError) %<-%
           tryCatch(list(runLambdaSolver(genesBatches = spGenes[pBegin:pEnd],
-                                        ratios = ratios,
-                                        lambda = lambda,
+                                        avgNonZeros = avgNonZeros,
+                                        means = means,
                                         nu = nu,
                                         threshold = threshold,
                                         maxIterations = maxIterations,
@@ -513,10 +511,10 @@ setMethod(
 
     gc()
 
-    newLambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
-    newPi <- set_names(1.0 - (lambda / newLambda), getGenes(objCOTAN))
+    lambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
+    pi <- set_names(1.0 - (means / lambda), getGenes(objCOTAN))
     if (TRUE) {
-      if (!identical(newLambda, lambda)) {
+      if (!identical(lambda, suppressWarnings(getLambda(objCOTAN)))) {
         # flag the coex slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                                datasetTags()[["gsync"]], FALSE)
@@ -525,9 +523,9 @@ setMethod(
       }
     }
 
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, newLambda,
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, lambda,
                                         "lambda", genes)
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, newPi,
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, pi,
                                         "pi", genes)
     objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                            datasetTags()[["model"]],
