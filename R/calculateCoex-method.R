@@ -823,11 +823,20 @@ contingencyTables <- function(objCOTAN, g1, g2) {
   assert_that(!is_empty(nu),
               msg = "`nu` must not be empty, estimate it")
 
-  dispersion <- suppressWarnings(getDispersion(objCOTAN))
-  assert_that(!is_empty(dispersion),
-              msg = "`dispersion` must not be empty, estimate it")
+  modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
+  if (str_equal(modelUsed, "MixturePoisson")) {
+    pi <- suppressWarnings(getPi(objCOTAN))
+    assert_that(!is_empty(pi),
+                msg = "`pi` must not be empty, estimate it")
 
-  probZero <- funProbZeroNegBin(dispersion[c(g1, g2)], lambda[c(g1, g2)] %o% nu)
+    probZero <- funProbZeroMixPoi(pi[c(g1, g2)], lambda[c(g1, g2)] %o% nu)
+  } else {
+    dispersion <- suppressWarnings(getDispersion(objCOTAN))
+    assert_that(!is_empty(dispersion),
+                msg = "`dispersion` must not be empty, estimate it")
+
+    probZero <- funProbZeroNegBin(dispersion[c(g1, g2)], lambda[c(g1, g2)] %o% nu)
+  }
   rownames(probZero) <- c(g1, g2)
 
   if (anyNA(probZero)) {
@@ -1044,11 +1053,12 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   assert_that(!is_empty(nu),
               msg = "`nu` must not be empty, estimate it")
 
-  dispersion <- suppressWarnings(getDispersion(objCOTAN))
-  pi <- suppressWarnings(getPi(objCOTAN))
-
   modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
   if (str_equal(modelUsed, "MixedPoisson")) {
+    pi <- suppressWarnings(getPi(objCOTAN))
+    assert_that(!is_empty(pi),
+                msg = "`pi` must not be empty, estimate it")
+
     expectedYY <- torch::torch_tensor(
       probOneMixPoi(
         torch::torch_tensor(nu, dtype = torch::torch_float64(),
@@ -1059,6 +1069,10 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
                             device = device)),
       device = device, dtype = dtypeForCalc)
   } else {
+    dispersion <- suppressWarnings(getDispersion(objCOTAN))
+    assert_that(!is_empty(dispersion),
+                msg = "`dispersion` must not be empty, estimate it")
+
     expectedYY <- torch::torch_tensor(
       probOneNegBin(
         torch::torch_tensor(nu, dtype = torch::torch_float64(),
@@ -1272,11 +1286,9 @@ setMethod(
       c(useTorch, deviceStr) %<-% canUseTorch(optimizeForSpeed, deviceStr)
 
       # TODO: finish torch support: write probOneMixPoi() function
-      modelOK <-
-        str_equal(getMetadataElement(objCOTAN, datasetTags()[["model"]]),
-                  "NegativeBinomial")
+      modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
 
-      if (useTorch && modelOK) {
+      if (useTorch && !str_equal(modelUsed, "MixturePoisson")) {
         c(coex, problematicPairsFraction) %<-%
           calculateCoex_Torch(objCOTAN, deviceStr = deviceStr,
                               returnPPFract = returnPPFract)

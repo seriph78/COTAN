@@ -127,23 +127,23 @@ obj <- COTAN(raw = test.dataset)
 # In case one needs to run more steps to clean the datatset
 # the following might apply
 if (FALSE) {
-  objCOTAN <- initializeMetaDataset(objCOTAN,
-                                    GEO = "test",
-                                    sequencingMethod = "artificial",
-                                    sampleCondition = "test dataset")
+  obj <- initializeMetaDataset(obj,
+                               GEO = "test",
+                               sequencingMethod = "artificial",
+                               sampleCondition = "test dataset")
 #
 # doing all the cleaning...
 #
 # in case the genes' `COEX` is not needed it can be skipped
 # (e.g. when calling [cellsUniformClustering()])
-  objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE, cores = 6L,
-                            optimizeForSpeed = TRUE, deviceStr = "cuda",
-                            modelToUse = "NegBin", saveObj = FALSE)
+  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 6L,
+                       optimizeForSpeed = TRUE, deviceStr = "cuda",
+                       modelToUse = "NegBin", saveObj = FALSE)
 }
 
 
 ## Otherwise it is possible to run all at once.
-objCOTAN <- automaticCOTANObjectCreation(
+obj <- automaticCOTANObjectCreation(
   raw = test.dataset,
   GEO = "code",
   sequencingMethod = "10X",

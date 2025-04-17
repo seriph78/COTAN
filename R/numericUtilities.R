@@ -397,9 +397,9 @@ parallelLambdaNewton <-
     # match exactly the prob of zero so we return the mean
     output <- avgCounts
 
-    goodPos <- (avgNumNonZeros != 1.0 & abs(avgNumNonZeros - avgCounts) < 1e-6)
+    goodPos <- (avgNumNonZeros != 1.0 & abs(avgNumNonZeros - avgCounts) > 1e-6)
 
-    if (sum(goodPos) == 0L) {
+    if (all(!goodPos)) {
       # only exceptional cases
       return(output)
     }
@@ -424,7 +424,7 @@ parallelLambdaNewton <-
       diff[runPos] <- tmp / lambda1
 
       runPos <- abs(diff) > threshold
-      if (!any(runPos)) {
+      if (all(!runPos)) {
         break
       }
 

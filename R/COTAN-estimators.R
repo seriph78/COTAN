@@ -362,7 +362,7 @@ setMethod(
                                            "NegativeBinomial")
 
     goodPos <- is.finite(getDispersion(objCOTAN))
-    logThis(paste("dispersion",
+    logThis(paste("`dispersion`",
                   "| min:", min(getDispersion(objCOTAN)[goodPos]),
                   "| max:", max(getDispersion(objCOTAN)[goodPos]),
                   "| % negative:", mean(getDispersion(objCOTAN) < 0.0) * 100.0),
@@ -450,7 +450,7 @@ runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts, nu,
 setMethod(
   "estimateLambdaPiNewton",
   "COTAN",
-  function(objCOTAN, threshold = 0.001, cores = 1L,
+  function(objCOTAN, threshold = 0.0001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
     logThis("Estimate `lambda`: START", logLevel = 2L)
 
@@ -541,10 +541,10 @@ setMethod(
                                            "MixturePoisson")
 
     goodPos <- getPi(objCOTAN) != 0.0
-    logThis(paste("pi",
+    logThis(paste("`pi`",
                   "| min:", min(getPi(objCOTAN)[goodPos]),
                   "| max:", max(getPi(objCOTAN)[goodPos]),
-                  "| % zeros:", mean(goodPos) * 100.0),
+                  "| % zeros:", mean(!goodPos) * 100.0),
             logLevel = 1L)
 
     return(objCOTAN)
@@ -718,7 +718,7 @@ setMethod(
 
     if (TRUE) {
       nuChange <- abs(nu - initialGuess)
-      logThis(paste("nu change (abs)",
+      logThis(paste("`nu` change (abs)",
                     "| max:",     max(nuChange),
                     "| median: ", median(nuChange),
                     "| mean: ",   mean(nuChange)),

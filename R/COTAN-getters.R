@@ -763,27 +763,21 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 #' @rdname ParametersEstimations
 #'
 getProbabilityOfZero <- function(objCOTAN) {
-  negBin <- function(objCOTAN) {
+  modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
+
+  if (str_equal(modelUsed, "MixturePoisson")) {
+    pi <- suppressWarnings(getPi(objCOTAN))
+    assert_that(!is_empty(pi),
+                msg = "`pi` must not be empty, estimate it")
+
+    return(funProbZeroMixPoi(pi, getMu(objCOTAN)))
+  } else {
     dispersion <- suppressWarnings(getDispersion(objCOTAN))
     assert_that(!is_empty(dispersion),
                 msg = "`dispersion` must not be empty, estimate it")
 
     return(funProbZeroNegBin(dispersion, getMu(objCOTAN)))
   }
-
-  mixPoi <- function(objCOTAN) {
-    pi <- suppressWarnings(getPi(objCOTAN))
-    assert_that(!is_empty(pi),
-                msg = "`pi` must not be empty, estimate it")
-
-    return(funProbZeroMixPoi(pi, getMu(objCOTAN)))
-  }
-
-  ret <- switch(getMetadataElement(objCOTAN, datasetTags()[["model"]]),
-                MixedPoisson = mixPoi(objCOTAN),
-                NegativeBinomial = ,
-                negBin(objCOTAN))
-  return(ret)
 }
 
 

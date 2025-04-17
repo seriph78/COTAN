@@ -45,7 +45,7 @@
 
 \S4method{estimateLambdaPiNewton}{COTAN}(
   objCOTAN,
-  threshold = 0.001,
+  threshold = 1e-04,
   cores = 1L,
   maxIterations = 100L,
   chunkSize = 1024L
