@@ -22,6 +22,7 @@ NULL
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang is_integer
+#' @importFrom rlang na_chr
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -81,7 +82,7 @@ singleHeatmapDF <- function(objCOTAN,
   dfMerge <- merge(dfCoex, dfValue)
 
   dfMerge[["cond"]] <- cond
-  dfMerge[["type"]] <- NA
+  dfMerge[["type"]] <- na_chr
   dfMerge[["absent"]] <- FALSE
 
   rm(dfCoex, dfValue)
@@ -268,6 +269,7 @@ heatmapPlot <- function(objCOTAN = NULL,
 #' @importFrom circlize colorRamp2
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang rep_named
 #'
 #' @examples
 #' ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,
@@ -323,7 +325,7 @@ genesHeatmapPlot <-
     clGenesRows <- data.frame()
     for (g in names(listRows)) {
       tmp <- data.frame("genes" = listRows[[g]],
-                        "cl" = rep(g, length(listRows[[g]])))
+                        "cl" = rep_named(listRows[[g]], g))
       clGenesRows <- rbind(clGenesRows, tmp)
     }
 
@@ -342,7 +344,7 @@ genesHeatmapPlot <-
       clGenesCols <- data.frame()
       for (g in names(listCols)) {
         tmp <- data.frame("genes" = listCols[[g]],
-                          "cl" = rep(g, length(listCols[[g]])))
+                          "cl" = rep_named(listRows[[g]], g))
         clGenesCols <- rbind(clGenesCols, tmp)
       }
     }

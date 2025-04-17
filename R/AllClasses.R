@@ -485,6 +485,8 @@ setIs(
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
+#' @importFrom rlang rep_named
+#' @importFrom rlang na_chr
 #'
 #' @importClassesFrom Matrix dgCMatrix
 #' @importClassesFrom Matrix dspMatrix
@@ -537,7 +539,7 @@ getScCOTANSlots <- function(from) {
     clusters <- set_names(levels(clusters)[clusters], rownames(from@metaCells))
   } else {
     # ensure non-empty vector
-    clusters <- set_names(rep(NA, ncol(from@raw)), colnames(from@raw))
+    clusters <- rep_named(colnames(from@raw), na_chr)
   }
 
   if (!is_empty(from@cellsCoex)) {

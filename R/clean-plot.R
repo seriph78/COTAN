@@ -18,6 +18,8 @@
 #' @export
 #'
 #' @importFrom rlang set_names
+#' @importFrom rlang rep_named
+#' @importFrom rlang na_dbl
 #'
 #' @importFrom tibble rownames_to_column
 #' @importFrom tibble column_to_rownames
@@ -93,8 +95,8 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
       hcCells <- hclust(distCells, method = "complete")
       groups <- cutree(hcCells, k = 2L)
     } else {
-      groups <- set_names(rep(1L, times = getNumCells(objCOTAN)),
-                          getCells(objCOTAN))
+      groups <- rep_named(getCells(objCOTAN), 1L)
+
       # ensure B group is not empty picking the first cell
       groups[[1L]] <- 2L
 
@@ -134,7 +136,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     rm(toClust)
 
-    D <- data.frame("means" = rowMeans(B), "n" = NA)
+    D <- data.frame("means" = rowMeans(B), "n" = na_dbl)
     rownames(D) <- rownames(B)
     D <- rownames_to_column(D)
     rm(B)

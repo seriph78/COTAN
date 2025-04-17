@@ -344,15 +344,15 @@ handleNamesSubsets <- function(names, subset = vector(mode = "character")) {
 #'
 conditionsFromNames <-
   function(names, splitPattern = " ", fragmentNum = 2L) {
-  numNames <- length(names)
   conditions <- str_split_i(names, pattern = splitPattern, fragmentNum)
   if (anyNA(conditions) ||
-      length(unique(conditions)) == numNames) {
+      length(unique(conditions)) == length(names)) {
     warning("conditionsFromNames: no proper pattern has been recognized",
             " or given column number was too high")
-    conditions <- rep("1", numNames)
+    conditions <- rep_named(names, "1")
+  } else {
+    names(conditions) <- names
   }
-  names(conditions) <- names
   return(conditions)
 }
 

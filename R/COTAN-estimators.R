@@ -355,8 +355,7 @@ setMethod(
     logThis(paste("dispersion",
                   "| min:", min(getDispersion(objCOTAN)[goodPos]),
                   "| max:", max(getDispersion(objCOTAN)[goodPos]),
-                  "| % negative:", (sum(getDispersion(objCOTAN) < 0.0) * 100.0 /
-                                    getNumGenes(objCOTAN))),
+                  "| % negative:", mean(getDispersion(objCOTAN) < 0.0) * 100.0),
             logLevel = 1L)
 
     return(objCOTAN)
@@ -366,14 +365,14 @@ setMethod(
 
 
 # local utility wrapper for parallel estimation of lambda in the mixture model
-runLambdaSolver <- function(genesBatches, avgNonZeros, means, nu,
+runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts, nu,
                             threshold, maxIterations, cores) {
   if (cores != 1L) {
     res <- parallel::mclapply(
       genesBatches,
       parallelLambdaNewton,
-      avgNonZeros = avgNonZeros,
-      means = means,
+      avgNumNonZeros = avgNumNonZeros,
+      avgCounts = avgCounts,
       nu = nu,
       threshold = threshold,
       maxIterations = maxIterations,
@@ -388,8 +387,8 @@ runLambdaSolver <- function(genesBatches, avgNonZeros, means, nu,
     return(lapply(
       genesBatches,
       parallelLambdaNewton,
-      avgNonZeros = avgNonZeros,
-      means = means,
+      avgNumNonZeros = avgNumNonZeros,
+      avgCounts = avgCounts,
       nu = nu,
       threshold = threshold,
       maxIterations = maxIterations))
@@ -451,16 +450,12 @@ setMethod(
     assert_that(!is_empty(nu),
                 msg = "`nu` must not be empty, estimate it")
 
-    means <- rowMeans(getRawData(objCOTAN), dims = 1L)
-
-    avgNonZeros <- getNumOfExpressingCells(objCOTAN) / getNumCells(objCOTAN)
+    avgNumNonZeros <- getNumOfExpressingCells(objCOTAN) / getNumCells(objCOTAN)
+    avgCounts <- rowMeans(getRawData(objCOTAN), dims = 1L)
 
     lambdaList <- list()
 
     genes <- getGenes(objCOTAN)
-
-    # TODO: drop the simple solutio genes for which pi := 0 and lambda := mean
-
 
     spIdx <- parallel::splitIndices(length(genes),
                                     ceiling(length(genes) / chunkSize))
@@ -488,8 +483,8 @@ setMethod(
         failCount <- failCount + 1L
         c(res, resError) %<-%
           tryCatch(list(runLambdaSolver(genesBatches = spGenes[pBegin:pEnd],
-                                        avgNonZeros = avgNonZeros,
-                                        means = means,
+                                        avgNumNonZeros = avgNumNonZeros,
+                                        avgCounts = avgCounts,
                                         nu = nu,
                                         threshold = threshold,
                                         maxIterations = maxIterations,
@@ -512,7 +507,7 @@ setMethod(
     gc()
 
     lambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
-    pi <- set_names(1.0 - (means / lambda), getGenes(objCOTAN))
+    pi <- set_names(1.0 - (avgCounts / lambda), getGenes(objCOTAN))
     if (TRUE) {
       if (!identical(lambda, suppressWarnings(getLambda(objCOTAN)))) {
         # flag the coex slots are out of sync (if any)!
@@ -535,7 +530,7 @@ setMethod(
     logThis(paste("pi",
                   "| min:", min(getPi(objCOTAN)[goodPos]),
                   "| max:", max(getPi(objCOTAN)[goodPos]),
-                  "| % zeros:", sum(goodPos)),
+                  "| % zeros:", mean(goodPos) * 100.0),
             logLevel = 1L)
 
     return(objCOTAN)

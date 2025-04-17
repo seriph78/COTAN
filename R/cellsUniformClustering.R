@@ -248,6 +248,7 @@ NULL
 #'
 #' @importFrom rlang set_names
 #' @importFrom rlang is_null
+#' @importFrom rlang na_chr
 #'
 #' @importFrom stringr str_detect
 #' @importFrom stringr str_pad
@@ -301,8 +302,7 @@ cellsUniformClustering <- function(objCOTAN,
 
   saveSeuratObj <- saveObj && FALSE
 
-  outputClusters <- set_names(rep(NA, length = getNumCells(objCOTAN)),
-                              getCells(objCOTAN))
+  outputClusters <- rep_named(getCells(objCOTAN), na_chr)
 
   if (!is.integer(initialIteration)) {
     initialIteration <- 1L

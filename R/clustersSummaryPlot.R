@@ -32,6 +32,8 @@
 #' @importFrom assertthat assert_that
 #'
 #' @importFrom rlang is_empty
+#' @importFrom rlang na_dbl
+#' @importFrom rlang na_int
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
@@ -75,10 +77,10 @@ clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
 
   df <- setColumnInDF(df, colToSet = cellsPerc, colName = "CellPercentage")
 
-  df <- setColumnInDF(df, NA, colName = "MeanUDE")
-  df <- setColumnInDF(df, NA, colName = "MedianUDE")
-  df <- setColumnInDF(df, NA, colName = "ExpGenes25")
-  df <- setColumnInDF(df, NA, colName = "ExpGenes")
+  df <- setColumnInDF(df, na_dbl, colName = "MeanUDE")
+  df <- setColumnInDF(df, na_dbl, colName = "MedianUDE")
+  df <- setColumnInDF(df, na_int, colName = "ExpGenes25")
+  df <- setColumnInDF(df, na_int, colName = "ExpGenes")
 
   for (cond in levels(factor(df[[condName]]))) {
     condPosInDF <- df[[condName]] == cond

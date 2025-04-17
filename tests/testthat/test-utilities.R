@@ -1,4 +1,5 @@
 library(Matrix)
+library(rlang)
 
 tm <- tempdir()
 stopifnot(file.exists(tm))
@@ -121,9 +122,9 @@ test_that("Adding/extracting columns to/from data.frames", {
   expect_identical(rownames(df), LETTERS[1L:10L])
   expect_identical(colnames(df), c("constant", "sequence"))
   expect_identical(getColumnFromDF(df, "constant"),
-                   rlang::set_names(rep(1L, 10L), LETTERS[1L:10L]))
+                   rep_named(LETTERS[1L:10L], 1L))
   expect_identical(getColumnFromDF(df, 2L),
-                   rlang::set_names(seq_len(10L), LETTERS[1L:10L]))
+                   set_names(seq_len(10L), LETTERS[1L:10L]))
 
   df <- setColumnInDF(df, colName = "constant", colToSet = rep(2L, 10L))
   expect_identical(colnames(df), c("constant", "sequence"))

@@ -34,12 +34,18 @@ parallelDispersionBisection(
   maxIterations = 100L
 )
 
-lambdaNewton(avgNumNonZero, mean, nu, threshold = 1e-04, maxIterations = 20L)
+lambdaNewton(
+  avgNumNonZeros,
+  avgCounts,
+  nu,
+  threshold = 1e-04,
+  maxIterations = 20L
+)
 
 parallelLambdaNewton(
   genes,
-  sumZeros,
-  lambda,
+  avgNumNonZeros,
+  avgCounts,
   nu,
   threshold = 0.001,
   maxIterations = 100L
@@ -85,11 +91,12 @@ gene (a \eqn{n}-sized vector)}
 
 \item{maxIterations}{max number of iterations (avoids infinite loops)}
 
-\item{genes}{names of the relevant genes}
+\item{genes}{names of the relevant genes (a \eqn{n}-sized vector)}
 
-\item{avgNumNonZero}{the average number of cells that express the gene}
+\item{avgNumNonZeros}{the average number of cells that express the gene  (a
+\eqn{n}-sized vector)}
 
-\item{mean}{the average expression of the gene}
+\item{avgCounts}{the average expression of the gene  (a \eqn{n}-sized vector)}
 
 \item{initialGuess}{the initial guess for \code{nu}  (a \eqn{m}-sized vector)}
 
@@ -120,7 +127,9 @@ count} is identically zero
 
 \code{lambdaNewton()} returns the lambda value
 
-\code{parallelLambdaNewton()} returns the dispersion values
+\code{lambdaNewton()} returns the lambda value
+
+\code{parallelLambdaNewton()} returns the \code{lambda} values
 
 the nu value
 
@@ -171,7 +180,7 @@ The goal of \code{parallelDispersionBisection()} is to find a \verb{dispersion a
 and counted zeros
 
 \code{lambdaNewton()} is a private function for the estimation of
-\emph{lambda} slot of a \code{COTAN} object via a Newton-Raphson solver
+\code{lambda} slot of a \code{COTAN} object via a Newton-Raphson solver
 
 The goal of \code{lambdaNewton()} is to find a \code{lambda} value by which
 the equation \eqn{\frac{1 - e^{-\lambda}}{\lambda} = \frac{1 - z}{m}},
@@ -183,8 +192,10 @@ and number of zero in the model. The formula is actually \eqn{\nu} weighted
 \code{COTAN} object via a Newton-Raphson solver
 
 The goal of \code{parallelLambdaNewton()} is to find a \verb{lambda array}
-that reduces to zero the difference between the number of estimated and
-counted zeros
+that solves the equation \eqn{\frac{1 - e^{-\lambda}}{\lambda} = \frac{1 -
+  z}{m}}, coming from the mixture model, so to match contemporaneously both
+average and number of zero in the model. The formula is actually \eqn{\nu}
+weighted
 
 \code{nuBisection} is a private function for the estimation of \code{nu} slot
 of a \code{COTAN} object via a bisection solver

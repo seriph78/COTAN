@@ -174,6 +174,8 @@ dispersionBisection <-
 #'
 #' @importFrom Rfast rowsums
 #'
+#' @importFrom rlang rep_along
+#'
 #' @rdname NumericUtilities
 #'
 parallelDispersionBisection <-
@@ -188,7 +190,7 @@ parallelDispersionBisection <-
 
     # cannot match exactly zero prob of zeros with finite values
     # so we ignore the rows with no zeros from the solver and return -Inf
-    output <- rep(-Inf, length(sumZeros))
+    output <- rep_along(sumZeros, -Inf)
 
     # in case of zero lambda dispersion is irrelevant. We return 1.0
     goodPos <- sumZeros != length(nu)
@@ -207,7 +209,7 @@ parallelDispersionBisection <-
 
     # we look for two dispersion values where the first leads to a
     # diffZeros negative and the second positive
-    disps1 <- rep(0.0, length(sumZeros))
+    disps1 <- rep_along(sumZeros, 0.0)
     diffs1 <- rowsums(funProbZeroNegBin(disps1, mu)) - sumZeros
     if (all(abs(diffs1) <= threshold)) {
       output[goodPos] <- disps1
@@ -217,7 +219,7 @@ parallelDispersionBisection <-
     # we assume error is an increasing function of the dispersion
     disps2 <- -1.0 * sign(diffs1)
     diffs2 <- diffs1
-    runPos <- rep(TRUE, length(diffs1))
+    runPos <- rep_along(diffs1, TRUE)
     iter <- 1L
     repeat {
       diffs2[runPos] <-
@@ -243,8 +245,7 @@ parallelDispersionBisection <-
     }
 
     # once we have found the two bounds to the dispersion value we use bisection
-    runNum <- length(diffs1)
-    runPos <- rep(TRUE, runNum)
+    runPos <- rep_along(diffs1, TRUE)
     disps <- disps1
     diffs <- diffs1
     iter <- 1L
@@ -283,15 +284,15 @@ parallelDispersionBisection <-
 #--------------------- lambda solvers mixture model ----------------
 
 #' @details `lambdaNewton()` is a private function for the estimation of
-#'   *lambda* slot of a `COTAN` object via a Newton-Raphson solver
+#'   `lambda` slot of a `COTAN` object via a Newton-Raphson solver
 #'
 #' @details The goal of `lambdaNewton()` is to find a `lambda` value by which
 #'   the equation \eqn{\frac{1 - e^{-\lambda}}{\lambda} = \frac{1 - z}{m}},
 #'   coming from the mixture model, so to match contemporaneously both average
 #'   and number of zero in the model. The formula is actually \eqn{\nu} weighted
 #'
-#' @param avgNumNonZero the average number of cells that express the gene
-#' @param mean the average expression of the gene
+#' @param avgNumNonZeros the average number of cells that express the gene
+#' @param avgCounts the average expression of the gene
 #' @param nu the estimated `nu` (a \eqn{m}-sized vector)
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
@@ -301,21 +302,21 @@ parallelDispersionBisection <-
 #' @rdname NumericUtilities
 #'
 lambdaNewton <-
-  function(avgNumNonZero,
-           mean,
+  function(avgNumNonZeros,
+           avgCounts,
            nu,
            threshold = 0.0001,
            maxIterations = 20L) {
-    if (avgNumNonZero == 1.0 || avgNumNonZero == mean) {
+    if (avgNumNonZero == 1.0 || avgNumNonZero == avgCounts) {
       # no zero counts or only counts with 0L and 1L
-      return(mean)
+      return(avgCounts)
     }
 
     #initial guess
-    ratio <- avgNumNonZero / mean
+    ratio <- avgNumNonZeros / avgCounts
     lambda <- 1.0 / ratio
 
-    # once we have found the two bounds to the dispersion value we use bisection
+    # Newton-Raphson loop
     iter <- 1L
     repeat {
       mu <- lambda * nu
@@ -326,11 +327,11 @@ lambdaNewton <-
 
       diff <- (1.0 - avgExpMu - lambda * ratio)
 
-      pi <- max(0.0, 1.0 - mean / lambda) # max here is not strictly necessary
-      print(paste0(iter, ": diff ", diff/lambda, ", lambda ", lambda,
-                   ", mean error ", (1.0 - pi) * lambda - mean,
-                   ", prob zero error ",
-                   (1.0 - pi) * (1 - avgExpMu) - avgNumNonZero))
+      #pi <- max(0.0, 1.0 - mean / lambda) # max here is not strictly necessary
+      #print(paste0(iter, ": diff ", diff/lambda, ", lambda ", lambda,
+      #             ", mean error ", (1.0 - pi) * lambda - mean,
+      #             ", prob zero error ",
+      #             (1.0 - pi) * (1 - avgExpMu) - avgNumNonZero))
 
       if (abs(diff / lambda) <= threshold) {
         return(lambda)
@@ -348,109 +349,80 @@ lambdaNewton <-
   }
 
 
+
+
+
+#'
+#' @returns `lambdaNewton()` returns the lambda value
+#'
+
 #' @details `parallelLambdaNewton()` is a private function invoked by
 #'   [estimateLambdaPiNewton()] for the estimation of the `lambda` slot of a
 #'   `COTAN` object via a Newton-Raphson solver
 #'
 #' @details The goal of `parallelLambdaNewton()` is to find a `lambda array`
-#'   that reduces to zero the difference between the number of estimated and
-#'   counted zeros
+#'   that solves the equation \eqn{\frac{1 - e^{-\lambda}}{\lambda} = \frac{1 -
+#'   z}{m}}, coming from the mixture model, so to match contemporaneously both
+#'   average and number of zero in the model. The formula is actually \eqn{\nu}
+#'   weighted
 #'
-#' @param genes names of the relevant genes
-#' @param sumZeros the number of cells that didn't express the relevant gene (a
+#' @param genes names of the relevant genes (a \eqn{n}-sized vector)
+#' @param avgNumNonZeros the average number of cells that express the gene  (a
 #'   \eqn{n}-sized vector)
-#' @param lambda the estimated `lambda` (a \eqn{n}-sized vector)
+#' @param avgCounts the average expression of the gene  (a \eqn{n}-sized vector)
 #' @param nu the estimated `nu` (a \eqn{m}-sized vector)
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
-#' @returns `parallelLambdaNewton()` returns the dispersion values
+#' @returns `parallelLambdaNewton()` returns the `lambda` values
 #'
-#' @importFrom Rfast rowsums
+#' @importFrom Rfast rowmeans
+#'
+#' @importFrom rlang rep_along
 #'
 #' @rdname NumericUtilities
 #'
 parallelLambdaNewton <-
   function(genes,
-           sumZeros,
-           lambda,
+           avgNumNonZeros,
+           avgCounts,
            nu,
            threshold = 0.001,
            maxIterations = 100L) {
-    sumZeros <- sumZeros[genes]
-    lambda <- lambda[genes]
+    avgNumNonZeros <- avgNumNonZeros[genes]
+    avgCounts <- avgCounts[genes]
 
-    # cannot match exactly zero prob of zeros with finite values
-    # so we ignore the rows with no zeros from the solver and return -Inf
-    output <- rep(-Inf, length(sumZeros))
+    # in some cases (no zero counts or only counts with 0L and 1L) we cannot
+    # match exactly the prob of zero so we return the mean
+    output <- avgCounts
 
-    # in case of zero lambda dispersion is irrelevant. We return 1.0
-    goodPos <- sumZeros != length(nu)
-    output[!goodPos] <- 1.0
-
-    goodPos <- goodPos & sumZeros != 0L
+    goodPos <- (avgNumNonZeros != 1.0 & abs(avgNumNonZeros - avgCounts) < 1e-6)
 
     if (sum(goodPos) == 0L) {
+      # only exceptional cases
       return(output)
     }
 
-    sumZeros <- sumZeros[goodPos]
-    lambda <- lambda[goodPos]
+    #initial guess
+    ratio <- avgNumNonZeros[goodPos] / avgCounts[goodPos]
+    lambda <- 1.0 / ratio
 
-    mu <- lambda %o% nu
-
-    # we look for two dispersion values where the first leads to a
-    # diffZeros negative and the second positive
-    disps1 <- rep(0.0, length(sumZeros))
-    diffs1 <- rowsums(funProbZeroNegBin(disps1, mu)) - sumZeros
-    if (all(abs(diffs1) <= threshold)) {
-      output[goodPos] <- disps1
-      return(output)
-    }
-
-    # we assume error is an increasing function of the dispersion
-    disps2 <- -1.0 * sign(diffs1)
-    diffs2 <- diffs1
-    runPos <- rep(TRUE, length(diffs1))
+    # Newton-Raphson loop
+    runPos <- rep_along(lambda, TRUE)
+    diff <- rep_along(lambda, NaN)
     iter <- 1L
     repeat {
-      diffs2[runPos] <-
-        (rowsums(funProbZeroNegBin(disps2[runPos],
-                                   mu[runPos, , drop = FALSE])) -
-           sumZeros[runPos])
+      lambda1 <- lambda[runPos]
+      mu <- lambda1 %o% nu
+      expMu <- exp(-mu)
 
-      runPos <- (diffs2 * diffs1 >= 0.0)
+      avgExpMu <- rowmeans(expMu)
 
-      if (!any(runPos)) {
-        break
-      }
+      tmp <- (1.0 - avgExpMu - lambda1 * ratio)
 
-      if (iter >= maxIterations) {
-        stop("Max number of iterations reached while finding",
-             " the solution straddling intervals")
-      }
-      iter <- iter + 1L
+      diff[runPos] <- tmp / lambda1
 
-      disps1[runPos] <- disps2[runPos] # disps2 are closer to producing 0
-
-      disps2[runPos] <- 2.0 * disps2[runPos] # we double at each step
-    }
-
-    # once we have found the two bounds to the dispersion value we use bisection
-    runNum <- length(diffs1)
-    runPos <- rep(TRUE, runNum)
-    disps <- disps1
-    diffs <- diffs1
-    iter <- 1L
-    repeat {
-      disps[runPos] <- (disps1[runPos] + disps2[runPos]) / 2.0
-
-      diffs[runPos] <-
-        (rowsums(funProbZeroNegBin(disps[runPos],
-                                   mu[runPos, , drop = FALSE])) -
-           sumZeros[runPos])
-
-      runPos <- abs(diffs) > threshold
+      runPos <- abs(diff) > threshold
       if (!any(runPos)) {
         break
       }
@@ -460,15 +432,12 @@ parallelLambdaNewton <-
       }
       iter <- iter + 1L
 
-      # drop same sign diff point
-      pPos <- runPos & (diffs * diffs2 > 0.0)
-      disps2[pPos] <- disps[pPos]
-
-      nPos <- runPos & !pPos
-      disps1[nPos] <- disps[nPos]
+      #update lambda
+      avgMuExpMu <- rowmeans(mu * expMu)
+      lambda[runPos] <- lambda1 * (1.0 + tmp / (1.0 - avgExpMu - avgMuExpMu))
     }
 
-    output[goodPos] <- disps
+    output[goodPos] <- lambda
     return(output)
   }
 
@@ -580,6 +549,8 @@ nuBisection <-
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom rlang rep_along
+#'
 #' @importFrom Rfast colsums
 #'
 #' @rdname NumericUtilities
@@ -601,7 +572,7 @@ parallelNuBisection <-
     goodPos <- sumZeros != 0L
 
     # cannot match exactly zero prob of zeros with finite values
-    output <- rep(Inf, length(initialGuess))
+    output <- rep_along(initialGuess, Inf)
 
     if (sum(goodPos) == 0L) {
       return(output)
@@ -623,7 +594,7 @@ parallelNuBisection <-
     factors <- 2.0 ^ sign(diffs1)
     nus2 <- nus1 * factors
     diffs2 <- diffs1
-    runPos <- rep(TRUE, length(diffs1))
+    runPos <- rep_along(diffs1, TRUE)
     iter <- 1L
     repeat {
       diffs2[runPos] <-
@@ -652,8 +623,7 @@ parallelNuBisection <-
     }
 
     # once we have found the two bounds to the dispersion value we use bisection
-    runNum <- length(diffs1)
-    runPos <- rep(TRUE, runNum)
+    runPos <- rep_along(diffs1, TRUE)
     nus <- nus1
     diffs <- diffs1
     iter <- 1L
