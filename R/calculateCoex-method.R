@@ -1047,24 +1047,28 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   dispersion <- suppressWarnings(getDispersion(objCOTAN))
   pi <- suppressWarnings(getPi(objCOTAN))
 
-  expectedYY <- torch::torch_tensor(
-    switch(getMetadataElement(objCOTAN, datasetTags()[["model"]]),
-           MixedPoisson = probOneMixPoi(
-             torch::torch_tensor(nu, dtype = torch::torch_float64(),
-                                 device = device),
-             torch::torch_tensor(lambda, dtype = torch::torch_float64(),
-                                 device = device),
-             torch::torch_tensor(pi, dtype = torch::torch_float64(),
-                                 device = device)),
-           NegativeBinomial = ,
-           probOneNegBin(
-             torch::torch_tensor(nu, dtype = torch::torch_float64(),
-                                 device = device),
-             torch::torch_tensor(lambda, dtype = torch::torch_float64(),
-                                 device = device),
-             torch::torch_tensor(dispersion, dtype = torch::torch_float64(),
-                                 device = device))),
-    device = device, dtype = dtypeForCalc)
+  modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
+  if (str_equal(modelUsed, "MixedPoisson")) {
+    expectedYY <- torch::torch_tensor(
+      probOneMixPoi(
+        torch::torch_tensor(nu, dtype = torch::torch_float64(),
+                            device = device),
+        torch::torch_tensor(lambda, dtype = torch::torch_float64(),
+                            device = device),
+        torch::torch_tensor(pi, dtype = torch::torch_float64(),
+                            device = device)),
+      device = device, dtype = dtypeForCalc)
+  } else {
+    expectedYY <- torch::torch_tensor(
+      probOneNegBin(
+        torch::torch_tensor(nu, dtype = torch::torch_float64(),
+                            device = device),
+        torch::torch_tensor(lambda, dtype = torch::torch_float64(),
+                            device = device),
+        torch::torch_tensor(dispersion, dtype = torch::torch_float64(),
+                            device = device)),
+      device = device, dtype = dtypeForCalc)
+  }
 
   if (useCuda) {
     torch::cuda_empty_cache()

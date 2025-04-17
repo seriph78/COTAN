@@ -518,7 +518,7 @@ setMethod(
     gc()
 
     lambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
-    pi <- ifelse(lambda == 0.0, 0.0, max(1.0 - avgCounts / lambda, 0.0))
+    pi <- ifelse(lambda == 0.0, 0.0, pmax(1.0 - avgCounts / lambda, 0.0))
     pi <- set_names(pi, getGenes(objCOTAN))
     if (TRUE) {
       if (!identical(lambda, suppressWarnings(getLambda(objCOTAN)))) {
