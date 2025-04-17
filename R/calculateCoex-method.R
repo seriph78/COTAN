@@ -982,9 +982,36 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   device <- torch::torch_device(deviceStr)
 
-  probOne <- function(nu, lambda, a) {
+  probOneNegBin <- function(nu, lambda, a) {
+    assert_that(!is_empty(a),
+                msg = "`dispersion` must not be empty, estimate it")
+
     zero     <- torch::torch_tensor( 0.0, device = device,
                                     dtype = torch::torch_float64())
+    minusOne <- torch::torch_tensor(-1.0, device = device,
+                                    dtype = torch::torch_float64())
+
+    # Calculate terms based on conditions
+    term1 <- (a <= zero) *
+      torch::torch_exp(torch::torch_ger(nu, lambda) *
+                         (torch::torch_minimum(a, zero) + minusOne))
+
+    term2 <- (a >  zero) *
+      torch::torch_pow(one + torch::torch_ger(nu, lambda)
+                       * torch::torch_maximum(a, zero), minusOne / a)
+
+    invisible(term1$add_(term2)$add_(minusOne)$neg_())
+
+    return(term1)
+  }
+
+  probOneMixPoi <- function(nu, lambda, pi) {
+    stop("Still not unsupported yet!")
+    assert_that(!is_empty(pi),
+                msg = "`pi` must not be empty, estimate it")
+
+    zero     <- torch::torch_tensor( 0.0, device = device,
+                                     dtype = torch::torch_float64())
     minusOne <- torch::torch_tensor(-1.0, device = device,
                                     dtype = torch::torch_float64())
 
@@ -1018,16 +1045,25 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
               msg = "`nu` must not be empty, estimate it")
 
   dispersion <- suppressWarnings(getDispersion(objCOTAN))
-  assert_that(!is_empty(dispersion),
-              msg = "`dispersion` must not be empty, estimate it")
+  pi <- suppressWarnings(getPi(objCOTAN))
 
-  expectedYY <- torch::torch_tensor(probOne(
-    torch::torch_tensor(nu,
-                        dtype = torch::torch_float64(), device = device),
-    torch::torch_tensor(lambda,
-                        dtype = torch::torch_float64(), device = device),
-    torch::torch_tensor(dispersion,
-                        dtype = torch::torch_float64(), device = device)),
+  expectedYY <- torch::torch_tensor(
+    switch(getMetadataElement(objCOTAN, datasetTags()[["model"]]),
+           MixedPoisson = probOneMixPoi(
+             torch::torch_tensor(nu, dtype = torch::torch_float64(),
+                                 device = device),
+             torch::torch_tensor(lambda, dtype = torch::torch_float64(),
+                                 device = device),
+             torch::torch_tensor(pi, dtype = torch::torch_float64(),
+                                 device = device)),
+           NegativeBinomial = ,
+           probOneNegBin(
+             torch::torch_tensor(nu, dtype = torch::torch_float64(),
+                                 device = device),
+             torch::torch_tensor(lambda, dtype = torch::torch_float64(),
+                                 device = device),
+             torch::torch_tensor(dispersion, dtype = torch::torch_float64(),
+                                 device = device))),
     device = device, dtype = dtypeForCalc)
 
   if (useCuda) {
@@ -1231,7 +1267,12 @@ setMethod(
     } else {
       c(useTorch, deviceStr) %<-% canUseTorch(optimizeForSpeed, deviceStr)
 
-      if (useTorch) {
+      # TODO: finish torch support: write probOneMixPoi() function
+      modelOK <-
+        str_equal(getMetadataElement(objCOTAN, datasetTags()[["model"]]),
+                  "NegativeBinomial")
+
+      if (useTorch && modelOK) {
         c(coex, problematicPairsFraction) %<-%
           calculateCoex_Torch(objCOTAN, deviceStr = deviceStr,
                               returnPPFract = returnPPFract)

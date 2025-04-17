@@ -178,6 +178,36 @@ test_that("funProbZeroNegBin with matrices", {
 })
 
 
+test_that("funProbZeroMixPoi", {
+  # Cases with mu = 0 are not actually in use
+  expect_identical(funProbZeroMixPoi(0.0, 1.0), 0.0 + 1.0 * exp(-1.0))
+  expect_identical(funProbZeroMixPoi(1.0, 1.0), 1.0 + 0.0 * exp(-1.0))
+  expect_identical(funProbZeroMixPoi(0.5, 2.0), 0.5 + 0.5 * exp(-2.0))
+  expect_identical(funProbZeroMixPoi(0.2, 0.5), 0.2 + 0.8 * exp(-0.5))
+  expect_identical(funProbZeroMixPoi(0.8, 4.0), 0.8 + 0.2 * exp(-4.0))
+  expect_identical(funProbZeroMixPoi(0.6, 0.8), 0.6 + 0.4 * exp(-0.8))
+})
+
+
+test_that("funProbZeroMixPoi with matrices", {
+  mu <- matrix((1L:25L) / 7.0, nrow = 10L, ncol = 10L)
+  pi <- (0L:9L) / 9.0
+
+  p <- funProbZeroMixPoi(pi, mu)
+
+  expect_identical(dim(p), dim(mu))
+
+  expect_identical(p[ 1L,  1L], funProbZeroMixPoi(pi[[ 1L]], mu[ 1L,  1L]))
+  expect_identical(p[ 1L, 10L], funProbZeroMixPoi(pi[[ 1L]], mu[ 1L, 10L]))
+
+  expect_identical(p[ 3L,  8L], funProbZeroMixPoi(pi[[ 3L]], mu[ 3L,  8L]))
+  expect_identical(p[ 6L,  4L], funProbZeroMixPoi(pi[[ 6L]], mu[ 6L,  4L]))
+
+  expect_identical(p[10L,  1L], funProbZeroMixPoi(pi[[10L]], mu[10L,  1L]))
+  expect_identical(p[10L, 10L], funProbZeroMixPoi(pi[[10L]], mu[10L, 10L]))
+})
+
+
 test_that("dispersionBisection", {
   lambda   <- c(3.0, 1.75)
   nu       <- rep(c(0.5, 1.5), 5L)
@@ -189,6 +219,30 @@ test_that("dispersionBisection", {
                              lambda = lambda[[2L]], nu = nu))
 
   expect_identical(d, c(-Inf, 1.98046875))
+})
+
+
+test_that("lambdaNewton", {
+  nu <- rep(c(0.5, 1.5), 5L)
+  avgNumNonZeros <- c(0.0, 0.1, 0.4, 0.6, 0.8,  1.0)
+  avgCounts      <- c(0.0, 0.1, 1.0, 1.3, 3.0, 10.0)
+
+  lambda <- mapply(lambdaNewton, avgNumNonZeros, avgCounts,
+                   MoreArgs = list(nu = nu))
+
+  expect_equal(lambda, c(0.0, 0.1, 1.967160, 1.569549, 3.394932, 10.0),
+               tolerance = 1e-6)
+
+  pi <- ifelse(lambda == 0.0, 0.0, max(1.0 - avgCounts / lambda, 0.0))
+
+  piError <- avgNumNonZeros -
+    (1.0 - pi) * (1.0 - rowSums(exp(-(lambda %o% nu))) / 10.0)
+
+  expect_identical(piError[1L], 0.0)
+  expect_gt(min(piError[c(2L, 6L)]), 0.0)
+  expect_lt(max(piError[c(2L, 6L)]), 1.0e-2)
+  expect_lt(max(piError[3L:5L]), 0.0)
+  expect_gt(min(piError[3L:5L]), -5.0e-5)
 })
 
 

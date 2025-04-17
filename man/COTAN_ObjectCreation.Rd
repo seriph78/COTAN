@@ -16,6 +16,7 @@ COTAN(raw = "ANY")
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   cores = 1L,
+  modelToUse = "NegBin",
   cellsCutoff = 0.003,
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
@@ -33,6 +34,7 @@ automaticCOTANObjectCreation(
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   cores = 1L,
+  modelToUse = "NegBin",
   cellsCutoff = 0.003,
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
@@ -59,6 +61,10 @@ the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
 to a specific device}
 
 \item{cores}{number of cores to use. Default is 1.}
+
+\item{modelToUse}{select which statistical model to use in \code{COEX}
+calculations. Recognized strings are: \code{"NegativeBinomial"} (default),
+\code{"MixturePoisson"}}
 
 \item{cellsCutoff}{\code{clean()} will delete from the \code{raw} data any gene that is
 expressed in less cells than threshold times the total number of cells.
@@ -130,9 +136,9 @@ if (FALSE) {
 #
 # in case the genes' `COEX` is not needed it can be skipped
 # (e.g. when calling [cellsUniformClustering()])
-  objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-                            cores = 6L, optimizeForSpeed = TRUE,
-                            deviceStr = "cuda", saveObj = FALSE)
+  objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE, cores = 6L,
+                            optimizeForSpeed = TRUE, deviceStr = "cuda",
+                            modelToUse = "NegBin", saveObj = FALSE)
 }
 
 
@@ -143,6 +149,7 @@ objCOTAN <- automaticCOTANObjectCreation(
   sequencingMethod = "10X",
   sampleCondition = "mouse_dataset",
   calcCoex = TRUE,
+  modelToUse = "MixturePoisson",
   saveObj = FALSE,
   outDir = tempdir(),
   cores = 6L)

@@ -217,7 +217,8 @@ and returns it.
 \code{\link[=getLogNormData]{getLogNormData()}} directly as appropriate
 
 \code{getProbabilityOfZero()} gives for each cell and each gene the
-probability of observing zero reads
+probability of observing zero reads. The result depends on the statistical
+model chosen for the estimators
 }
 \examples{
 data("test.dataset")

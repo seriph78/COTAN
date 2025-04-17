@@ -1,4 +1,6 @@
 
+## ----------- proceedToCoex ---------
+
 #'
 #' @aliases proceedToCoex
 #'
@@ -16,6 +18,9 @@
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
 #' @param cores number of cores to use. Default is 1.
+#' @param modelToUse select which statistical model to use in `COEX`
+#'   calculations. Recognized strings are: `"NegativeBinomial"` (default),
+#'   `"MixturePoisson"`
 #' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
 #'   expressed in less cells than threshold times the total number of cells.
 #'   Default cutoff is \eqn{0.003 \; (0.3\%)}
@@ -64,9 +69,9 @@
 #' #
 #' # in case the genes' `COEX` is not needed it can be skipped
 #' # (e.g. when calling [cellsUniformClustering()])
-#'   objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-#'                             cores = 6L, optimizeForSpeed = TRUE,
-#'                             deviceStr = "cuda", saveObj = FALSE)
+#'   objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE, cores = 6L,
+#'                             optimizeForSpeed = TRUE, deviceStr = "cuda",
+#'                             modelToUse = "NegBin", saveObj = FALSE)
 #' }
 #'
 #' @rdname COTAN_ObjectCreation
@@ -75,7 +80,7 @@ setMethod(
   "proceedToCoex",
   "COTAN",
   function(objCOTAN, calcCoex = TRUE, optimizeForSpeed = TRUE,
-           deviceStr = "cuda", cores = 1L,
+           deviceStr = "cuda", cores = 1L, modelToUse = "NegBin",
            cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
            saveObj = TRUE, outDir = ".") {
@@ -146,7 +151,15 @@ setMethod(
     analysisTime <- Sys.time()
 
     objCOTAN <- estimateLambdaLinear(objCOTAN)
-    objCOTAN <- estimateDispersionBisection(objCOTAN, cores = cores)
+    objCOTAN <-
+      switch(modelToUse,
+             MixPoi = ,
+             MixturePoisson = ,
+             Mixture =
+               estimateLambdaPiNewton(objCOTAN, cores = cores),
+             NegBin = ,
+             NegativeBinomial = ,
+               estimateDispersionBisection(objCOTAN, cores = cores))
 
     gc()
 
@@ -203,6 +216,9 @@ setMethod(
   }
 )
 
+
+## ---- automaticCOTANObjectCreation ----
+
 #' @details `automaticCOTANObjectCreation()` takes a raw dataset, creates and
 #'   initializes a `COTAN` object and runs [proceedToCoex()]
 #'
@@ -222,6 +238,9 @@ setMethod(
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
 #' @param cores number of cores to use. Default is 1.
+#' @param modelToUse select which statistical model to use in `COEX`
+#'   calculations. Recognized strings are: `"NegativeBinomial"` (default),
+#'   `"MixturePoisson"`
 #' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
 #'   expressed in less cells than threshold times the total number of cells.
 #'   Default cutoff is \eqn{0.003 \; (0.3\%)}
@@ -253,6 +272,7 @@ setMethod(
 #'   sequencingMethod = "10X",
 #'   sampleCondition = "mouse_dataset",
 #'   calcCoex = TRUE,
+#'   modelToUse = "MixturePoisson",
 #'   saveObj = FALSE,
 #'   outDir = tempdir(),
 #'   cores = 6L)
@@ -262,7 +282,7 @@ setMethod(
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,
            calcCoex = TRUE, optimizeForSpeed = TRUE,
-           deviceStr = "cuda", cores = 1L,
+           deviceStr = "cuda", cores = 1L, modelToUse = "NegBin",
            cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
            saveObj = TRUE, outDir = ".") {
@@ -278,7 +298,10 @@ automaticCOTANObjectCreation <-
     return(proceedToCoex(objCOTAN, calcCoex = calcCoex,
                          optimizeForSpeed = optimizeForSpeed,
                          deviceStr = deviceStr, cores = cores,
-                         cellsCutoff, genesCutoff,
-                         cellsThreshold, genesThreshold,
+                         modelToUse = modelToUse,
+                         cellsCutoff = cellsCutoff,
+                         genesCutoff = genesCutoff,
+                         cellsThreshold = cellsThreshold,
+                         genesThreshold = genesThreshold,
                          saveObj = saveObj, outDir = outDir))
   }

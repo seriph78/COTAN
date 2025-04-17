@@ -15,6 +15,8 @@
 #' @name ParametersEstimations
 NULL
 
+## ---- estimateLambdaLinear ----
+
 #'
 #' @aliases estimateLambdaLinear
 #'
@@ -63,6 +65,8 @@ setMethod(
   }
 )
 
+
+## ---- estimateNuLinear ----
 
 #' @aliases estimateNuLinear
 #'
@@ -134,6 +138,8 @@ setMethod(
 #' @name HandlingClusterizations
 NULL
 
+##  ---- estimateNuLinearByCluster ----
+
 #' @aliases estimateNuLinearByCluster
 #'
 #' @details `estimateNuLinearByCluster()` does a linear estimation of nu:
@@ -191,6 +197,8 @@ setMethod(
   }
 )
 
+
+## ---- estimateDispersionBisection ----
 
 # local utility wrapper for parallel estimation of dispersion
 runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
@@ -347,6 +355,8 @@ setMethod(
 
     objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
                                         "dispersion", genes)
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, NULL,
+                                        "pi", genes)
     objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                            datasetTags()[["model"]],
                                            "NegativeBinomial")
@@ -363,6 +373,7 @@ setMethod(
 )
 
 
+## ---- estimateLambdaPiNewton ----
 
 # local utility wrapper for parallel estimation of lambda in the mixture model
 runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts, nu,
@@ -507,7 +518,8 @@ setMethod(
     gc()
 
     lambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
-    pi <- set_names(1.0 - (avgCounts / lambda), getGenes(objCOTAN))
+    pi <- ifelse(lambda == 0.0, 0.0, max(1.0 - avgCounts / lambda, 0.0))
+    pi <- set_names(pi, getGenes(objCOTAN))
     if (TRUE) {
       if (!identical(lambda, suppressWarnings(getLambda(objCOTAN)))) {
         # flag the coex slots are out of sync (if any)!
@@ -522,6 +534,8 @@ setMethod(
                                         "lambda", genes)
     objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, pi,
                                         "pi", genes)
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, NULL,
+                                        "dispersion", genes)
     objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                            datasetTags()[["model"]],
                                            "MixturePoisson")
@@ -537,6 +551,8 @@ setMethod(
   }
 )
 
+
+## ---- estimateNuBisection ----
 
 # local utility wrapper for parallel estimation of nu
 runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
@@ -714,6 +730,8 @@ setMethod(
 )
 
 
+## ---- estimateDispersionNuBisection ----
+
 #' @aliases estimateDispersionNuBisection
 #'
 #' @details `estimateDispersionNuBisection()` estimates the `dispersion` and
@@ -828,6 +846,9 @@ setMethod(
     return(objCOTAN)
   }
 )
+
+
+## ---- estimateDispersionNuNlminb ----
 
 #' @aliases estimateDispersionNuNlminb
 #'

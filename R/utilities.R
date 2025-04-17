@@ -468,9 +468,9 @@ getColumnFromDF <- function(df, colName) {
 
 #' @details `setColumnInDF()` is a function to append, if missing, or resets, if
 #'   present, a column into a `data.frame`, whether the `data.frame` is empty or
-#'   not. The given `rowNames` are used only in the case the `data.frame` has
-#'   only the default row numbers, so this function cannot be used to override
-#'   row names
+#'   not; a `NULL` `colToSet` removes the column from the `data.frame`. The
+#'   given `rowNames` are used only in the case the `data.frame` has only the
+#'   default row numbers, so this function cannot be used to override row names
 #'
 #' @param df the `data.frame`
 #' @param colToSet the column to add
@@ -478,8 +478,8 @@ getColumnFromDF <- function(df, colName) {
 #' @param rowNames when not empty, if the input `data.frame` has no real row
 #'   names, the new row names of the resulting `data.frame`
 #'
-#' @returns `setColumnInDF()` returns the updated, or the newly created,
-#'   `data.frame`
+#' @returns `setColumnInDF()` returns input `data.frame` with the
+#'   newly-created/updated/removed column
 #'
 #' @export
 #'
@@ -495,7 +495,7 @@ setColumnInDF <- function(df, colToSet, colName,
   } else {
     if (colName %in% colnames(df)) {
       df[[colName]] <- colToSet
-    } else {
+    } else if (!is_empty(colToSet)) {
       df <- cbind(df, set_names(data.frame(colToSet), colName))
     }
   }

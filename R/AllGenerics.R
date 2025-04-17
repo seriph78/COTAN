@@ -2,7 +2,7 @@
 setGeneric(
   "proceedToCoex",
   function(objCOTAN, calcCoex = TRUE, optimizeForSpeed = TRUE,
-           deviceStr = "cuda", cores = 1L,
+           deviceStr = "cuda", cores = 1L, modelToUse = "NegBin",
            cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
            saveObj = TRUE, outDir = ".") {

@@ -307,7 +307,7 @@ lambdaNewton <-
            nu,
            threshold = 0.0001,
            maxIterations = 20L) {
-    if (avgNumNonZero == 1.0 || avgNumNonZero == avgCounts) {
+    if (avgNumNonZeros == 1.0 || abs(avgNumNonZeros - avgCounts) < 1e-6) {
       # no zero counts or only counts with 0L and 1L
       return(avgCounts)
     }
@@ -327,7 +327,8 @@ lambdaNewton <-
 
       diff <- (1.0 - avgExpMu - lambda * ratio)
 
-      #pi <- max(0.0, 1.0 - mean / lambda) # max here is not strictly necessary
+      # max here is not strictly necessary
+      #pi <- ifelse(lambda == 0.0, 0.0, max(1.0 - mean / lambda, 0.0))
       #print(paste0(iter, ": diff ", diff/lambda, ", lambda ", lambda,
       #             ", mean error ", (1.0 - pi) * lambda - mean,
       #             ", prob zero error ",
