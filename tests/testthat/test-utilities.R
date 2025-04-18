@@ -235,8 +235,8 @@ test_that("lambdaNewton", {
 
   pi <- ifelse(lambda == 0.0, 0.0, pmax(1.0 - avgCounts / lambda, 0.0))
 
-  piError <- avgNumNonZeros -
-    (1.0 - pi) * (1.0 - rowSums(exp(-(lambda %o% nu))) / 10.0)
+  piError <- avgNumNonZeros - 1.0 +
+    rowSums(funProbZeroMixPoi(pi, lambda %o% nu)) / 10.0
 
   expect_identical(piError[1L], 0.0)
   expect_gt(min(piError[c(2L, 6L)]), 0.0)

@@ -19,7 +19,7 @@
 #'   to a specific device
 #' @param cores number of cores to use. Default is 1.
 #' @param modelToUse select which statistical model to use in `COEX`
-#'   calculations. Recognized strings are: `"NegativeBinomial"` (default),
+#'   calculations. Recognized strings are: `""` (default), `"NegativeBinomial"`,
 #'   `"MixturePoisson"`
 #' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
 #'   expressed in less cells than threshold times the total number of cells.
@@ -80,7 +80,7 @@ setMethod(
   "proceedToCoex",
   "COTAN",
   function(objCOTAN, calcCoex = TRUE, optimizeForSpeed = TRUE,
-           deviceStr = "cuda", cores = 1L, modelToUse = "NegBin",
+           deviceStr = "cuda", cores = 1L, modelToUse = "",
            cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
            saveObj = TRUE, outDir = ".") {
@@ -151,6 +151,17 @@ setMethod(
     analysisTime <- Sys.time()
 
     objCOTAN <- estimateLambdaLinear(objCOTAN)
+
+    if (isEmptyName(modelToUse)) {
+      # try to continue using the same model
+      modelToUse <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
+    }
+    if (isEmptyName(modelToUse)) {
+      # fall-back to Negative Binomial
+      modelToUse <- "NegativeBinomial"
+    }
+    logThis(paste("Using statitical model:", modelToUse), logLevel = 2L)
+
     objCOTAN <-
       switch(modelToUse,
              MixPoi = ,
@@ -239,7 +250,7 @@ setMethod(
 #'   to a specific device
 #' @param cores number of cores to use. Default is 1.
 #' @param modelToUse select which statistical model to use in `COEX`
-#'   calculations. Recognized strings are: `"NegativeBinomial"` (default),
+#'   calculations. Recognized strings are: `""` (default), `"NegativeBinomial"`,
 #'   `"MixturePoisson"`
 #' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
 #'   expressed in less cells than threshold times the total number of cells.
@@ -282,7 +293,7 @@ setMethod(
 automaticCOTANObjectCreation <-
   function(raw, GEO, sequencingMethod, sampleCondition,
            calcCoex = TRUE, optimizeForSpeed = TRUE,
-           deviceStr = "cuda", cores = 1L, modelToUse = "NegBin",
+           deviceStr = "cuda", cores = 1L, modelToUse = "",
            cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
            saveObj = TRUE, outDir = ".") {

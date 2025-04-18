@@ -414,12 +414,15 @@ parallelLambdaNewton <-
     iter <- 1L
     repeat {
       lambda1 <- lambda[runPos]
+
       mu <- lambda1 %o% nu
       expMu <- exp(-mu)
-
       avgExpMu <- rowmeans(expMu)
 
-      tmp <- (1.0 - avgExpMu - lambda1 * ratio)
+      mu <- mu * expMu
+      avgMuExpMu <- rowmeans(mu)
+
+      tmp <- (1.0 - avgExpMu - lambda1 * ratio[runPos])
 
       diff[runPos] <- tmp / lambda1
 
@@ -434,7 +437,6 @@ parallelLambdaNewton <-
       iter <- iter + 1L
 
       #update lambda
-      avgMuExpMu <- rowmeans(mu * expMu)
       lambda[runPos] <- lambda1 * (1.0 + tmp / (1.0 - avgExpMu - avgMuExpMu))
     }
 
