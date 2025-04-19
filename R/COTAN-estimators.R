@@ -518,8 +518,16 @@ setMethod(
     gc()
 
     lambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
-    pi <- ifelse(lambda == 0.0, 0.0, pmax(1.0 - avgCounts / lambda, 0.0))
+    pi <- ifelse(lambda == 0.0, 0.0, 1.0 - avgCounts / lambda)
     pi <- set_names(pi, getGenes(objCOTAN))
+
+    # for cases when the zeros are too few and strongly uneven nu
+    # it follows that sometimes pi < 0.0
+    # solve by projecting to pi = 0 and lambda = avgCounts
+    goodPos <- pi > 0.0
+    lambda[!goodPos] <- avgCounts[!goodPos]
+    pi[!goodPos] <- 0.0
+
     if (TRUE) {
       if (!identical(lambda, suppressWarnings(getLambda(objCOTAN)))) {
         # flag the coex slots are out of sync (if any)!
@@ -540,12 +548,8 @@ setMethod(
                                            datasetTags()[["model"]],
                                            "MixturePoisson")
 
-    goodPos <- getPi(objCOTAN) != 0.0
-    logThis(paste("`pi`",
-                  "| min:", min(getPi(objCOTAN)[goodPos]),
-                  "| max:", max(getPi(objCOTAN)[goodPos]),
-                  "| % zeros:", mean(!goodPos) * 100.0),
-            logLevel = 1L)
+    logThis(paste("`pi` | min:", min(pi[goodPos]), "| max:", max(pi[goodPos]),
+                  "| % zeros:", mean(!goodPos) * 100.0), logLevel = 1L)
 
     return(objCOTAN)
   }

@@ -306,7 +306,7 @@ lambdaNewton <-
            avgCounts,
            nu,
            threshold = 0.0001,
-           maxIterations = 20L) {
+           maxIterations = 100L) {
     if (avgNumNonZeros == 1.0 || abs(avgNumNonZeros - avgCounts) < 1e-6) {
       # no zero counts or only counts with 0L and 1L
       return(avgCounts)
@@ -327,12 +327,11 @@ lambdaNewton <-
 
       diff <- (1.0 - avgExpMu - lambda * ratio)
 
-      # max here is not strictly necessary
-      #pi <- ifelse(lambda == 0.0, 0.0, max(1.0 - mean / lambda, 0.0))
+      #pi <- ifelse(lambda == 0.0, 0.0, 1.0 - avgCounts / lambda)
       #print(paste0(iter, ": diff ", diff/lambda, ", lambda ", lambda,
-      #             ", mean error ", (1.0 - pi) * lambda - mean,
+      #             ", mean error ", (1.0 - pi) * lambda - avgCounts,
       #             ", prob zero error ",
-      #             (1.0 - pi) * (1 - avgExpMu) - avgNumNonZero))
+      #             (1.0 - pi) * (1 - avgExpMu) - avgNumNonZeros))
 
       if (abs(diff / lambda) <= threshold) {
         return(lambda)
@@ -342,10 +341,13 @@ lambdaNewton <-
         stop("Max number of iterations reached ",
              "while finding the solution straddling intervals")
       }
-      iter <- iter + 1L
 
       #update lambda
-      lambda <- lambda * (1.0 + diff / (1.0 - avgExpMu - mean(mu * expMu)))
+      fact <- 1.0 + diff / (1.0 - avgExpMu - mean(mu * expMu))
+      #print(paste0(iter, ": factor ", fact, ", lambda ", lambda))
+
+      iter <- iter + 1L
+      lambda <- lambda * fact
     }
   }
 
@@ -411,6 +413,7 @@ parallelLambdaNewton <-
     # Newton-Raphson loop
     runPos <- rep_along(lambda, TRUE)
     diff <- rep_along(lambda, NaN)
+    tmp1 <- rep_along(lambda, NaN)
     iter <- 1L
     repeat {
       lambda1 <- lambda[runPos]
@@ -422,12 +425,12 @@ parallelLambdaNewton <-
       mu <- mu * expMu
       avgMuExpMu <- rowmeans(mu)
 
-      tmp <- (1.0 - avgExpMu - lambda1 * ratio[runPos])
+      tmp2 <- (1.0 - avgExpMu - lambda1 * ratio[runPos])
 
-      diff[runPos] <- tmp / lambda1
+      diff[runPos] <- tmp2 / lambda1
 
-      runPos <- abs(diff) > threshold
-      if (all(!runPos)) {
+      runPos1 <- abs(diff) > threshold
+      if (all(!runPos1)) {
         break
       }
 
@@ -437,7 +440,9 @@ parallelLambdaNewton <-
       iter <- iter + 1L
 
       #update lambda
-      lambda[runPos] <- lambda1 * (1.0 + tmp / (1.0 - avgExpMu - avgMuExpMu))
+      tmp1[runPos] <- lambda1 * (1.0 + tmp2 / (1.0 - avgExpMu - avgMuExpMu))
+      runPos <- runPos1
+      lambda[runPos] <- tmp1[runPos]
     }
 
     output[goodPos] <- lambda
