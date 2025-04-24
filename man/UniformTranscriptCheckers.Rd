@@ -29,7 +29,7 @@
 
 checkersToDF(checkers)
 
-dfToCheckers(df, checkerClass)
+dfToCheckers(df, checkerClass = "")
 
 \S4method{getCheckerThreshold}{SimpleGDIUniformityCheck}(checker)
 
