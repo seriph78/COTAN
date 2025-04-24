@@ -1,3 +1,7 @@
+bugfix/clusterization_reordering_issue_with_-1
+Solved issue with reordering of merged *clusterization*:
+flag `keepMinusOne` was off and label "-1" was moved around
+
 Added checker class type to the data.frame obtained after conversion.
 It will make loading checker results from file easier.
 

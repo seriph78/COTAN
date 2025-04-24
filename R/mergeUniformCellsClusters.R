@@ -561,8 +561,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
       clTagsMap[["-1"]] <- "-1"
     }
 
-    outputClusters <- clTagsMap[outputClusters]
-    outputClusters <- set_names(outputClusters, getCells(objCOTAN))
+    outputClusters <- set_names(clTagsMap[outputClusters], getCells(objCOTAN))
 
     checksTokeep <- names(allCheckResults) %in% clTags
     allCheckResults <- allCheckResults[checksTokeep]
@@ -579,7 +578,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   c(outputClusters, outputCoexDF, permMap) %<-% tryCatch(
     reorderClusterization(objCOTAN, clusters = outputClusters,
                           coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = FALSE, useDEA = useDEA,
+                          keepMinusOne = TRUE, useDEA = useDEA,
                           distance = distance, hclustMethod = hclustMethod),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
