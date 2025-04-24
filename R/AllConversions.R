@@ -26,10 +26,11 @@ NULL
 #   cells
 
 #' @details `convertToSingleCellExperiment()` converts a [COTAN-class] object
-#'   into a [SingleCellExperiment-class] object. Stores the raw counts in the
-#'   `"counts"` [Assays-class], the metadata for genes and cells as `rowData`
-#'   and `colData` slots respectively and finally the genes' and cells' *coex*
-#'   along the dataset metadata into the `metadata` slot.
+#'   into a [SingleCellExperiment::SingleCellExperiment-class] object. Stores
+#'   the raw counts in the `"counts"` [SummarizedExperiment::Assays-class], the
+#'   metadata for genes and cells as `rowData` and `colData` slots respectively
+#'   and finally the genes' and cells' *coex* along the dataset metadata into
+#'   the `metadata` slot.
 #'
 #'   The function performs the following steps:
 #'   * Extracts the raw counts matrix, gene metadata, cell metadata, gene
@@ -45,12 +46,13 @@ NULL
 #'
 #'   The resulting `SingleCellExperiment` object is compatible with downstream
 #'   analysis packages and workflows within the Bioconductor ecosystem
-
+#'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns A [SingleCellExperiment-class] object containing the data from the
-#'   input [COTAN-class] object, with clusterizations and conditions
-#'   appropriately prefixed and stored in the cell metadata.
+#' @returns A [SingleCellExperiment::SingleCellExperiment-class] object
+#'   containing the data from the input [COTAN-class] object, with
+#'   *clusterizations* and *conditions* appropriately prefixed and stored in the
+#'   cell metadata.
 #'
 #' @importFrom methods is
 #'
@@ -62,7 +64,7 @@ NULL
 #'
 #' @export
 #'
-#' @seealso [COTAN-class], [SingleCellExperiment]
+#' @seealso [COTAN-class], [SingleCellExperiment::SingleCellExperiment]
 #'
 #' @rdname Conversions
 #'
@@ -119,14 +121,16 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #' convertFromSingleCellExperiment
 #'
 #' @details `convertFromSingleCellExperiment()` converts a
-#'   [SingleCellExperiment-class] object back into a [COTAN-class] object. It
-#'   supports `SCE` objects that were originally created from either a `COTAN`
-#'   object or a `Seurat` object. The function extracts the `"counts"` matrix,
-#'   genes' metadata, cells' metadata, *co-expression* matrices (if available),
-#'   and reconstructs the `COTAN` object accordingly.
-#'
+#'   [SingleCellExperiment::SingleCellExperiment-class] object back into a
+#'   [COTAN-class] object. It supports `SCE` objects that were originally
+#'   created from either a `COTAN` object or a `Seurat` object. The function
+#'   extracts the `"counts"` matrix, genes' metadata, cells' metadata,
+#'   *co-expression* matrices (if available), and reconstructs the `COTAN`
+#'   object accordingly.
+
 #'   The function performs the following steps:
-#'   * Extracts the raw matrix from the `"counts"` [Assays-class]
+#'   * Extracts the raw matrix from the `"counts"`
+#'     [SummarizedExperiment::Assays-class]
 #'   * Extracts gene metadata from `rowData`
 #'   * Extracts cell metadata from `colData`, excluding any *clusterizations* or
 #'     *conditions* present
@@ -138,13 +142,14 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #'   the `genesCoex` and `cellsCoex` slots in the resulting `COTAN` object will
 #'   be empty matrices
 #'
-#' @param objSCE A [SingleCellExperiment-class] object to be converted
+#' @param objSCE A [SingleCellExperiment::SingleCellExperiment-class] object to
+#'   be converted
 #' @param clNamesPattern A regular expression pattern used to identify the
 #'   clustering columns in `colData`. Default supports `Seurat` conventions:
 #'   `"^(COTAN_clusters_|seurat_clusters$|.*_snn_res\\..*|wsnn_res\\..*)"`
 #'
 #' @returns A [COTAN-class] object containing the data extracted from the input
-#'   [SingleCellExperiment-class] object
+#'   [SingleCellExperiment::SingleCellExperiment-class] object
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -162,7 +167,7 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #'
 #' @export
 #'
-#' @seealso [COTAN-class], [SingleCellExperiment]
+#' @seealso [COTAN-class], [SingleCellExperiment::SingleCellExperiment]
 #'
 #' @rdname Conversions
 #'

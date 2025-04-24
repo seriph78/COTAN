@@ -14,8 +14,10 @@
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
-#' @param numNeighbors Overrides the `n_neighbors` value from [umap.defaults]
-#' @param minPointsDist Overrides the `min_dist` value from [umap.defaults]
+#' @param numNeighbors Overrides the `n_neighbors` value from
+#'   [umap::umap.defaults]
+#' @param minPointsDist Overrides the `min_dist` value from
+#'   [umap::umap.defaults]
 #'
 #'
 #' @returns `UMAPPlot()` returns a `ggplot2` object
@@ -217,8 +219,8 @@ UMAPPlot <- function(df,
 
 #' @title Get High Variable Genes running the `Seurat` package
 #'
-#' @description The function uses the [Seurat-package] to extract the high
-#'   variable genes given the counts raw data
+#' @description The function uses the [Seurat::Seurat] package to extract the
+#'   high variable genes given the counts raw data
 #'
 #' @param rawData the raw counts
 #' @param hvgMethod the HVG method
@@ -304,8 +306,10 @@ seuratHVG <- function(rawData, hvgMethod, cond, numFeatures = 2000L) {
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
-#' @param numNeighbors Overrides the `n_neighbors` value from [umap.defaults]
-#' @param minPointsDist Overrides the `min_dist` value from [umap.defaults]
+#' @param numNeighbors Overrides the `n_neighbors` value from
+#'   [umap::umap.defaults]
+#' @param minPointsDist Overrides the `min_dist` value from
+#'   [umap::umap.defaults]
 #'
 #' @returns `cellsUMAPPlot()` returns a list with 2 objects:
 #'  * `"plot"` a `ggplot2` object representing the `umap` plot
