@@ -1,11 +1,12 @@
-bugfix/clusterization_reordering_issue_with_-1
-Solved issue with reordering of merged *clusterization*:
-flag `keepMinusOne` was off and label "-1" was moved around
+## 2.8.1
 
-Added checker class type to the data.frame obtained after conversion.
+Solved issue with reordering of merged *clusterization*:
+flag `keepMinusOne` was off and label `"-1"` was moved around
+
+Added checker class type to the `data.frame` obtained after conversion.
 It will make loading checker results from file easier.
 
-Improved README.md with stable links to devel and release versions in
+Improved `README.md` with stable links to `devel` and `release` versions in
 BioConductor
 
 ## 2.7.5

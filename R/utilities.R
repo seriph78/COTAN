@@ -966,10 +966,10 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
 #' @title getColorsVector
 #'
 #' @description This function returns a list of colors based on the
-#'   [brewer.pal()] function
+#'   [RColorBrewer::brewer.pal()] function
 #'
-#' @details The colors are taken from the [brewer.pal.info()] sets with
-#'   `Set1`, `Set2`, `Set3` placed first.
+#' @details The colors are taken from the [RColorBrewer::brewer.pal.info()] sets
+#'   with `Set1`, `Set2`, `Set3` placed first.
 #'
 #' @param numNeededColors The number of returned colors. If omitted it returns
 #'   all available colors
