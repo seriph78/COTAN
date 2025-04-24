@@ -1,10 +1,10 @@
 # COTAN v2
 
-A Comprehensive and Versatile Framework for Single-Cell Gene Co-Expression Studies and Cell Type Identification
+This package provides a *comprehensive* and *versatile* framework for single-cell **gene Co-Expression** studies and cell type identification.
 
 ## About
 
-The estimation of gene co-expression in single-cell RNA sequencing (scRNA-seq) is a critical step in the analysis of scRNA-seq data. The low efficiency of scRNA-seq methodologies makes sensitive computational approaches crucial to accurately infer transcription profiles in a cell population.
+The estimation of gene *co-expression* in single-cell RNA sequencing (scRNA-seq) is a critical step in the analysis of scRNA-seq data. The low efficiency of scRNA-seq methodologies makes sensitive computational approaches crucial to accurately infer transcription profiles in a cell population.
 
 `COTAN` is a statistical and computational method that analyzes the co-expression of gene pairs at the single-cell level. It employs an innovative mathematical model that leads to a generalized contingency table framework. `COTAN` relies on the zero Unique Molecular Identifier (`UMI`) counts distribution instead of focusing on positive counts to evaluate or extract different scores and information for gene correlation studies and gene or cell clustering.
 
@@ -24,7 +24,12 @@ The first link shows how to handle the genes' clustering while the second shows 
 
 ## Installation
 
-The production version can be installed via Bioconductor [COTAN for Bioconductor 3.20](https://bioconductor.org/packages/3.20/bioc/html/COTAN.html "Production version"){.uri}, while a stable development version can be found [COTAN for Bioconductor 3.21](https://bioconductor.org/packages/3.21/bioc/html/COTAN.html%20%22Development%20version%22){.uri}.
+| Build | Status |
+|----|----|
+| Bioc-release | [![](https://bioconductor.org/shields/build/release/bioc/COTAN.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/COTAN) |
+| Bioc-devel | [![](https://bioconductor.org/shields/build/devel/bioc/COTAN.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/COTAN/) |
+
+Check out the user guide on the [Bioconductor landing page](https://bioconductor.org/packages/devel/bioc/html/COTAN.html) for more details.
 
 The latest snapshot can be installed directly as `R` package using `devtools`. The installation was tested on *Linux*, *Windows* and *Mac* but please note that due to lack of multi-core support under *Windows* it might run slower. `devtools::install_github("seriph78/COTAN")`
 

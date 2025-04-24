@@ -1,3 +1,9 @@
+Added checker class type to the data.frame obtained after conversion.
+It will make loading checker results from file easier.
+
+Improved README.md with stable links to devel and release versions in
+BioConductor
+
 ## 2.7.5
 
 Solved issue with use of `parallelDist::parDist()` by allowing a fall-back to
