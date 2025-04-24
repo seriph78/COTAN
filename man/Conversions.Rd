@@ -13,19 +13,21 @@ convertFromSingleCellExperiment(objSCE, clNamesPattern = "")
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{objSCE}{A \linkS4class{SingleCellExperiment} object to be converted}
+\item{objSCE}{A \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object to
+be converted}
 
 \item{clNamesPattern}{A regular expression pattern used to identify the
 clustering columns in \code{colData}. Default supports \code{Seurat} conventions:
 \code{"^(COTAN_clusters_|seurat_clusters$|.*_snn_res\\\\..*|wsnn_res\\\\..*)"}}
 }
 \value{
-A \linkS4class{SingleCellExperiment} object containing the data from the
-input \linkS4class{COTAN} object, with clusterizations and conditions
-appropriately prefixed and stored in the cell metadata.
+A \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object
+containing the data from the input \linkS4class{COTAN} object, with
+\emph{clusterizations} and \emph{conditions} appropriately prefixed and stored in the
+cell metadata.
 
 A \linkS4class{COTAN} object containing the data extracted from the input
-\linkS4class{SingleCellExperiment} object
+\link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object
 }
 \description{
 All functions to convert a \linkS4class{COTAN} object to/from other
@@ -33,10 +35,11 @@ data classes used by the \code{BioConductor} analysis packages
 }
 \details{
 \code{convertToSingleCellExperiment()} converts a \linkS4class{COTAN} object
-into a \linkS4class{SingleCellExperiment} object. Stores the raw counts in the
-\code{"counts"} \linkS4class{Assays}, the metadata for genes and cells as \code{rowData}
-and \code{colData} slots respectively and finally the genes' and cells' \emph{coex}
-along the dataset metadata into the \code{metadata} slot.
+into a \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object. Stores
+the raw counts in the \code{"counts"} \link[SummarizedExperiment:Assays-class]{SummarizedExperiment::Assays}, the
+metadata for genes and cells as \code{rowData} and \code{colData} slots respectively
+and finally the genes' and cells' \emph{coex} along the dataset metadata into
+the \code{metadata} slot.
 
 The function performs the following steps:
 \itemize{
@@ -56,15 +59,16 @@ The resulting \code{SingleCellExperiment} object is compatible with downstream
 analysis packages and workflows within the Bioconductor ecosystem
 
 \code{convertFromSingleCellExperiment()} converts a
-\linkS4class{SingleCellExperiment} object back into a \linkS4class{COTAN} object. It
-supports \code{SCE} objects that were originally created from either a \code{COTAN}
-object or a \code{Seurat} object. The function extracts the \code{"counts"} matrix,
-genes' metadata, cells' metadata, \emph{co-expression} matrices (if available),
-and reconstructs the \code{COTAN} object accordingly.
-
+\link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object back into a
+\linkS4class{COTAN} object. It supports \code{SCE} objects that were originally
+created from either a \code{COTAN} object or a \code{Seurat} object. The function
+extracts the \code{"counts"} matrix, genes' metadata, cells' metadata,
+\emph{co-expression} matrices (if available), and reconstructs the \code{COTAN}
+object accordingly.
 The function performs the following steps:
 \itemize{
-\item Extracts the raw matrix from the \code{"counts"} \linkS4class{Assays}
+\item Extracts the raw matrix from the \code{"counts"}
+\link[SummarizedExperiment:Assays-class]{SummarizedExperiment::Assays}
 \item Extracts gene metadata from \code{rowData}
 \item Extracts cell metadata from \code{colData}, excluding any \emph{clusterizations} or
 \emph{conditions} present
@@ -90,7 +94,7 @@ be empty matrices
 
 }
 \seealso{
-\linkS4class{COTAN}, \link{SingleCellExperiment}
+\linkS4class{COTAN}, \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment}
 
-\linkS4class{COTAN}, \link{SingleCellExperiment}
+\linkS4class{COTAN}, \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment}
 }

@@ -226,9 +226,11 @@ specified}
 colors are given it will complete the list using colors from
 \code{\link[=getColorsVector]{getColorsVector()}}}
 
-\item{numNeighbors}{Overrides the \code{n_neighbors} value from \link{umap.defaults}}
+\item{numNeighbors}{Overrides the \code{n_neighbors} value from
+\link[umap:umap.defaults]{umap::umap.defaults}}
 
-\item{minPointsDist}{Overrides the \code{min_dist} value from \link{umap.defaults}}
+\item{minPointsDist}{Overrides the \code{min_dist} value from
+\link[umap:umap.defaults]{umap::umap.defaults}}
 
 \item{dataMethod}{selects the method to use to create the \code{data.frame} to
 pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. To calculate, for each cell, a statistic for each
