@@ -292,8 +292,8 @@ setMethod(
 
     # Copy the meta data for the data-set thus erasing the sync bits
     output@metaDataset <- getMetadataDataset(objCOTAN)
-    output <- addElementToMetaDataset(output, tags[["gsync"]], FALSE)
-    output <- addElementToMetaDataset(output, tags[["csync"]], FALSE)
+    output <- addElementToMetaDataset(output, datasetTags()[["gsync"]], FALSE)
+    output <- addElementToMetaDataset(output, datasetTags()[["csync"]], FALSE)
 
     # Filter the meta data for genes keeping those not related to estimates
     colsToKeep <- !(names(getMetadataGenes(objCOTAN)) %in%
