@@ -413,6 +413,7 @@ objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
                                   sampleCondition = "reconstructed_dataset")
 objCOTAN <- clean(objCOTAN)
 
+objCOTAN <- estimateLambdaLinear(objCOTAN)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 
 ## Now the `COTAN` object is ready to calculate the genes' `COEX`
@@ -441,8 +442,9 @@ identical(partialGenesCoex,
 gdiDF <- calculateGDI(objCOTAN)
 objCOTAN <- storeGDI(objCOTAN, genesGDI = gdiDF)
 
-## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
-## matrix and derivatives, so it can be dropped it from the `COTAN` object
+## Touching any of the `lambda`/`nu`/`dispersion` parameters invalidates the
+## `COEX` matrix and derivatives, so it can be dropped it from the `COTAN`
+## object
 objCOTAN <- dropGenesCoex(objCOTAN)
 stopifnot(!isCoexAvailable(objCOTAN))
 
@@ -450,7 +452,7 @@ stopifnot(!isCoexAvailable(objCOTAN))
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 
 ## Now the `COTAN` object is ready to calculate the cells' `COEX`
-## In case one need to caclualte both it is more sensible to run the above
+## In case one needs to calculate both, it is more sensible to run the above
 ## before any `COEX` evaluation
 
 g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]

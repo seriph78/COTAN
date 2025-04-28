@@ -145,6 +145,7 @@ setMethod(
 
     analysisTime <- Sys.time()
 
+    objCOTAN <- estimateLambdaLinear(objCOTAN)
     objCOTAN <- estimateDispersionBisection(objCOTAN, cores = cores)
 
     gc()
@@ -212,7 +213,7 @@ setMethod(
 #' @param sampleCondition a string reporting the specific sample condition or
 #'   time point.
 #' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
-#'   or stop just before at the [estimateDispersionBisection()] step
+#'   or stop just after the [estimateDispersionBisection()] step
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
 #'   not available will run the slower legacy code

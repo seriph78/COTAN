@@ -2,8 +2,8 @@
 #'
 #' @details `clean()` is the main method that can be used to check and clean the
 #'   dataset. It will discard any genes that has less than 3 non-zero counts per
-#'   thousand cells and all cells expressing less than 2 per thousand genes. It
-#'   also produces and stores the estimators for nu and lambda
+#'   thousand cells and all cells expressing less than 2 per thousand genes.
+#'   also produces and stores the estimators for `nu`
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
@@ -68,10 +68,9 @@ setMethod(
     objCOTAN <- findFullyExpressingCells(objCOTAN,
                                          genesThreshold = genesThreshold)
 
-    objCOTAN <- estimateLambdaLinear(objCOTAN)
-    objCOTAN <- estimateNuLinear(objCOTAN)
-
     gc()
+
+    objCOTAN <- estimateNuLinear(objCOTAN)
 
     return(objCOTAN)
   }

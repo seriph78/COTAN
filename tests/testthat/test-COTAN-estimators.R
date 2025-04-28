@@ -39,6 +39,7 @@ test_that("Bisection estimates", {
   obj <- COTAN(raw = raw)
   obj <- clean(obj)
 
+  obj <- estimateLambdaLinear(obj)
   obj <- estimateDispersionBisection(obj, cores = 3L, chunkSize = 2L)
 
   expect_length(getDispersion(obj), getNumGenes(obj))
