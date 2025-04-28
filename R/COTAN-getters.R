@@ -436,11 +436,12 @@ setMethod(
 
 #' @aliases getNu
 #'
-#' @details `getNu()` extracts the nu array (normalized cells' counts averages)
+#' @details `getNu()` extracts the `nu` array (normalized cells' counts
+#'   averages)
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getNu()` returns the nu array
+#' @returns `getNu()` returns the `nu` array
 #'
 #' @importFrom rlang is_empty
 #'
@@ -455,7 +456,7 @@ setMethod(
     nu <- getMetadataCells(objCOTAN)[["nu"]]
 
     if (is_empty(nu)) {
-      warning("nu is empty")
+      warning("`nu` is empty")
     } else {
       names(nu) <- getCells(objCOTAN)
     }
@@ -467,12 +468,12 @@ setMethod(
 
 #' @aliases getLambda
 #'
-#' @details `getLambda()` extracts the lambda array (mean expression for each
+#' @details `getLambda()` extracts the `lambda` array (mean expression for each
 #'   gene)
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getLambda()` returns the lambda array
+#' @returns `getLambda()` returns the `lambda` array
 #'
 #' @importFrom rlang is_empty
 #'
@@ -487,7 +488,7 @@ setMethod(
     lambda <- getMetadataGenes(objCOTAN)[["lambda"]]
 
     if (is_empty(lambda)) {
-      warning("lambda is empty")
+      warning("`lambda` is empty")
     } else {
       names(lambda) <- getGenes(objCOTAN)
     }
@@ -499,11 +500,12 @@ setMethod(
 
 #' @aliases getDispersion
 #'
-#' @details `getDispersion()` extracts the dispersion array
+#' @details `getDispersion()` extracts the `dispersion` array (one value for
+#'   each gene)
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getDispersion()` returns the dispersion array
+#' @returns `getDispersion()` returns the `dispersion` array
 #'
 #' @importFrom rlang is_empty
 #'
@@ -518,7 +520,7 @@ setMethod(
     dispersion <- getMetadataGenes(objCOTAN)[["dispersion"]]
 
     if (is_empty(dispersion)) {
-      warning("dispersion is empty")
+      warning("`dispersion` is empty")
     } else {
       names(dispersion) <- getGenes(objCOTAN)
     }
@@ -528,8 +530,8 @@ setMethod(
 )
 
 
-#' @details `estimatorsAreReady()` checks whether the estimators arrays lambda,
-#'   nu, dispersion are available
+#' @details `estimatorsAreReady()` checks whether the estimators arrays
+#'   `lambda`, `nu`, `dispersion` are available
 #'
 #' @param objCOTAN a `COTAN` object
 #'
@@ -676,12 +678,12 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 #' @rdname ParametersEstimations
 #'
 getProbabilityOfZero <- function(objCOTAN) {
-  if (is_empty(getDispersion(objCOTAN))) {
-    stop("dispersion must not be empty, estimate it")
-  }
+  dispersion <- suppressWarnings(getDispersion(objCOTAN))
+  assert_that(!is_empty(dispersion),
+              msg = "`dispersion` must not be empty, estimate it")
 
   # estimate Probabilities of 0 with internal function funProbZero
-  return(funProbZero(getDispersion(objCOTAN), getMu(objCOTAN)))
+  return(funProbZero(dispersion, getMu(objCOTAN)))
 }
 
 
@@ -897,8 +899,9 @@ NULL
 #' gdiDF <- calculateGDI(objCOTAN)
 #' objCOTAN <- storeGDI(objCOTAN, genesGDI = gdiDF)
 #'
-#' ## Touching any of the lambda/nu/dispersino parameters invalidates the `COEX`
-#' ## matrix and derivatives, so it can be dropped it from the `COTAN` object
+#' ## Touching any of the `lambda`/`nu`/`dispersion` parameters invalidates the
+#' ## `COEX` matrix and derivatives, so it can be dropped it from the `COTAN`
+#' ## object
 #' objCOTAN <- dropGenesCoex(objCOTAN)
 #' stopifnot(!isCoexAvailable(objCOTAN))
 #'
@@ -906,7 +909,7 @@ NULL
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 #'
 #' ## Now the `COTAN` object is ready to calculate the cells' `COEX`
-#' ## In case one need to caclualte both it is more sensible to run the above
+#' ## In case one needs to calculate both, it is more sensible to run the above
 #' ## before any `COEX` evaluation
 #'
 #' g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]

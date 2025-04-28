@@ -42,7 +42,7 @@ funProbZero <- function(dispersion, mu) {
 #--------------------- dispersion solvers ----------------
 
 #' @details `dispersionBisection` is a private function for the estimation of
-#'   *dispersion* slot of a `COTAN` object via a bisection solver
+#'   `dispersion` slot of a `COTAN` object via a bisection solver
 #'
 #' @details The goal is to find a `dispersion` value that reduces to zero the
 #'   difference between the number of estimated and counted zeros
@@ -53,7 +53,7 @@ funProbZero <- function(dispersion, mu) {
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
-#' @returns the dispersion value
+#' @returns the `dispersion` value
 #'
 #' @rdname NumericUtilities
 #'
@@ -132,7 +132,7 @@ dispersionBisection <-
 #'   [estimateDispersionBisection()] for the estimation of the `dispersion` slot
 #'   of a `COTAN` object via a parallel bisection solver
 #'
-#' @details The goal is to find a `dispersion array` that reduces to zero the
+#' @details The goal is to find a `dispersion` `array` that reduces to zero the
 #'   difference between the number of estimated and counted zeros
 #'
 #' @param genes names of the relevant genes
@@ -341,8 +341,8 @@ nuBisection <-
 #'   [estimateNuBisection()] for the estimation of `nu` slot of a `COTAN` object
 #'   via a parallel bisection solver
 #'
-#' @details The goal is to find a `nu array` that reduces to zero the difference
-#'   between the number of estimated and counted zeros
+#' @details The goal is to find a `nu` `array` that reduces to zero the
+#'   difference between the number of estimated and counted zeros
 #'
 #' @param cells names of the relevant cells
 #' @param sumZeros the number of genes not expressed in the relevant cell (a
@@ -506,10 +506,10 @@ calcDist <- function(data, method, diag = FALSE, upper = FALSE) {
 }
 
 
-#----------------- legacy functions --------------------
+#----------------- depreacetd functions --------------------
 
-#' @details This is a legacy function related to old `scCOTAN` objects. Use the
-#'   more appropriate `Matrix::dspMatrix` type for similar functionality.
+#' @details This is a deprecated function related to old `scCOTAN` objects. Use
+#'   the more appropriate `Matrix::dspMatrix` type for similar functionality.
 #'
 #'   `mat2vec_rfast` converts a compacted symmetric matrix (that is an array)
 #'   into a symmetric matrix.
@@ -600,8 +600,8 @@ vec2mat_rfast <- function(x, genes = "all") {
   return(m)
 }
 
-#' @details This is a legacy function related to old `scCOTAN` objects. Use the
-#'   more appropriate `Matrix::dspMatrix` type for similar functionality.
+#' @details This is a deprecated function related to old `scCOTAN` objects. Use
+#'   the more appropriate `Matrix::dspMatrix` type for similar functionality.
 #'
 #'   `vec2mat_rfast` converts a symmetric matrix into a compacted symmetric
 #'   matrix. It will forcibly make its argument symmetric.

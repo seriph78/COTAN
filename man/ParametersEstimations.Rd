@@ -110,11 +110,11 @@ equal to 1}
 
 \code{estimateDispersionNuNlminb()} returns the updated \code{COTAN} object
 
-\code{getNu()} returns the nu array
+\code{getNu()} returns the \code{nu} array
 
-\code{getLambda()} returns the lambda array
+\code{getLambda()} returns the \code{lambda} array
 
-\code{getDispersion()} returns the dispersion array
+\code{getDispersion()} returns the \code{dispersion} array
 
 \code{estimatorsAreReady()} returns a boolean specifying whether all
 three arrays are non-empty
@@ -133,8 +133,8 @@ probabilities of zero
 }
 \description{
 These functions are used to estimate the \code{COTAN} model's
-parameters. That is the average count for each gene (lambda) the average
-count for each cell (nu) and the dispersion parameter for each gene to
+parameters. That is the average count for each gene (\code{lambda}) the average
+count for each cell (\code{nu}) and the \code{dispersion} parameter for each gene to
 match the probability of zero.
 
 The estimator methods are named \code{Linear} if they can be calculated as a
@@ -142,16 +142,16 @@ linear statistic of the raw data or \code{Bisection} if they are found via a
 parallel bisection solver.
 }
 \details{
-\code{estimateLambdaLinear()} does a linear estimation of lambda (genes'
-counts averages)
+\code{estimateLambdaLinear()} does a linear estimation of \code{lambda}
+(genes' counts averages)
 
-\code{estimateNuLinear()} does a linear estimation of nu (normalized
+\code{estimateNuLinear()} does a linear estimation of \code{nu} (normalized
 cells' counts averages)
 
 \code{estimateDispersionBisection()} estimates the negative binomial
-dispersion factor for each gene (a). Determines the \code{dispersion} such that,
-for each gene, the probability of zero count matches the number of observed
-zeros. It assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being already run.
+dispersion factor for each gene (\code{dispersion}). Determines the value such
+that, for each gene, the probability of zero count matches the number of
+observed zeros. It assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being already run.
 
 \code{estimateNuBisection()} estimates the \code{nu} vector of a \code{COTAN}
 object by bisection. It determines the \code{nu} parameters such that, for each
@@ -170,15 +170,17 @@ and expected probability of zero. It uses the \code{\link[stats:nlminb]{stats::n
 but since the joint parameters have too high dimensionality, it converges
 too slowly to be actually useful in real cases.
 
-\code{getNu()} extracts the nu array (normalized cells' counts averages)
+\code{getNu()} extracts the \code{nu} array (normalized cells' counts
+averages)
 
-\code{getLambda()} extracts the lambda array (mean expression for each
+\code{getLambda()} extracts the \code{lambda} array (mean expression for each
 gene)
 
-\code{getDispersion()} extracts the dispersion array
+\code{getDispersion()} extracts the \code{dispersion} array (one value for
+each gene)
 
-\code{estimatorsAreReady()} checks whether the estimators arrays lambda,
-nu, dispersion are available
+\code{estimatorsAreReady()} checks whether the estimators arrays
+\code{lambda}, \code{nu}, \code{dispersion} are available
 
 \code{getNuNormData()} extracts the \eqn{\nu}\emph{-normalized} count table
 (i.e. where each column is divided by \code{nu}) and returns it
