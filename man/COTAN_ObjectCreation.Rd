@@ -16,7 +16,7 @@ COTAN(raw = "ANY")
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   cores = 1L,
-  modelToUse = "NegBin",
+  modelToUse = "",
   cellsCutoff = 0.003,
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
@@ -34,7 +34,7 @@ automaticCOTANObjectCreation(
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   cores = 1L,
-  modelToUse = "NegBin",
+  modelToUse = "",
   cellsCutoff = 0.003,
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
@@ -63,7 +63,7 @@ to a specific device}
 \item{cores}{number of cores to use. Default is 1.}
 
 \item{modelToUse}{select which statistical model to use in \code{COEX}
-calculations. Recognized strings are: \code{"NegativeBinomial"} (default),
+calculations. Recognized strings are: \code{""} (default), \code{"NegativeBinomial"},
 \code{"MixturePoisson"}}
 
 \item{cellsCutoff}{\code{clean()} will delete from the \code{raw} data any gene that is

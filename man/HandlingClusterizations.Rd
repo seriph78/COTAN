@@ -432,7 +432,7 @@ The formulae for this \emph{In/Out} \code{COEX} are similar to those used in the
 \emph{In/Out} status of the cells with respect to each \emph{cluster}.
 }
 \details{
-\code{estimateNuLinearByCluster()} does a linear estimation of nu:
+\code{estimateNuLinearByCluster()} does a linear estimation of \code{nu}:
 cells' counts averages normalized \emph{cluster} by \emph{cluster}
 
 \code{getClusterizations()} extracts the list of the \emph{clusterizations}

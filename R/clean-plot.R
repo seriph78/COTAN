@@ -10,10 +10,10 @@
 #'   * `"pcaCells"` is for pca cells
 #'   * `"pcaCellsData"` is the data of the pca cells (can be plotted)
 #'   * `"genes"` is for `B` group cells' genes
-#'   * `"UDE"` is for cells' UDE against their pca
-#'   * `"nu"` is for cell *nu*
+#'   * `"UDE"` is for cells' *UDE* against their pca
+#'   * `"nu"` is for cell `nu`
 #'   * `"zoomedNu"` is the same but zoomed on the left and with an estimate
-#'   for the low *nu* threshold that defines problematic cells
+#'   for the low `nu` threshold that defines problematic cells
 #'
 #' @export
 #'

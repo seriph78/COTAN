@@ -374,8 +374,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
   logThis("Merging cells' uniform clustering: START", logLevel = 2L)
 
   assert_that(estimatorsAreReady(objCOTAN),
-              msg = paste("Estimators lambda, nu, dispersion are not ready:",
-                          "Use proceedToCoex() to prepare them"))
+              msg = paste("Estimators `lambda`, `nu`, `dispersion` are not",
+                          "ready: Use proceedToCoex() to prepare them"))
 
   if (is_empty(checkers)) {
     GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.43)

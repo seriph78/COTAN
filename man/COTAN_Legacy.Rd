@@ -68,14 +68,14 @@ Explicitly converts an object from class \code{COTAN} into \code{scCOTAN}
 \code{\link[=DEAOnClusters]{DEAOnClusters()}}. It estimates the change in genes' expression inside the
 \emph{cluster} compared to the average situation in the data set.
 
-This is a legacy function related to old \code{scCOTAN} objects. Use the
-more appropriate \code{Matrix::dspMatrix} type for similar functionality.
+This is a deprecated function related to old \code{scCOTAN} objects. Use
+the more appropriate \code{Matrix::dspMatrix} type for similar functionality.
 
 \code{mat2vec_rfast} converts a compacted symmetric matrix (that is an array)
 into a symmetric matrix.
 
-This is a legacy function related to old \code{scCOTAN} objects. Use the
-more appropriate \code{Matrix::dspMatrix} type for similar functionality.
+This is a deprecated function related to old \code{scCOTAN} objects. Use
+the more appropriate \code{Matrix::dspMatrix} type for similar functionality.
 
 \code{vec2mat_rfast} converts a symmetric matrix into a compacted symmetric
 matrix. It will forcibly make its argument symmetric.

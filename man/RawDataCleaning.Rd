@@ -159,10 +159,10 @@ dropped too
 \item \code{"pcaCells"} is for pca cells
 \item \code{"pcaCellsData"} is the data of the pca cells (can be plotted)
 \item \code{"genes"} is for \code{B} group cells' genes
-\item \code{"UDE"} is for cells' UDE against their pca
-\item \code{"nu"} is for cell \emph{nu}
+\item \code{"UDE"} is for cells' \emph{UDE} against their pca
+\item \code{"nu"} is for cell \code{nu}
 \item \code{"zoomedNu"} is the same but zoomed on the left and with an estimate
-for the low \emph{nu} threshold that defines problematic cells
+for the low \code{nu} threshold that defines problematic cells
 }
 
 \code{screePlot()} returns a \code{ggplot2} plot for the explained variances

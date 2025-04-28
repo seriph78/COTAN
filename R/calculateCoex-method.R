@@ -1061,12 +1061,12 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
     expectedYY <- torch::torch_tensor(
       probOneMixPoi(
-        torch::torch_tensor(nu, dtype = torch::torch_float64(),
-                            device = device),
-        torch::torch_tensor(lambda, dtype = torch::torch_float64(),
-                            device = device),
-        torch::torch_tensor(pi, dtype = torch::torch_float64(),
-                            device = device)),
+        torch::torch_tensor(nu,
+                            dtype = torch::torch_float64(), device = device),
+        torch::torch_tensor(lambda,
+                            dtype = torch::torch_float64(), device = device),
+        torch::torch_tensor(pi,
+                            dtype = torch::torch_float64(), device = device)),
       device = device, dtype = dtypeForCalc)
   } else {
     dispersion <- suppressWarnings(getDispersion(objCOTAN))
@@ -1075,12 +1075,12 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
     expectedYY <- torch::torch_tensor(
       probOneNegBin(
-        torch::torch_tensor(nu, dtype = torch::torch_float64(),
-                            device = device),
-        torch::torch_tensor(lambda, dtype = torch::torch_float64(),
-                            device = device),
-        torch::torch_tensor(dispersion, dtype = torch::torch_float64(),
-                            device = device)),
+        torch::torch_tensor(nu,
+                            dtype = torch::torch_float64(), device = device),
+        torch::torch_tensor(lambda,
+                            dtype = torch::torch_float64(), device = device),
+        torch::torch_tensor(dispersion,
+                            dtype = torch::torch_float64(), device = device)),
       device = device, dtype = dtypeForCalc)
   }
 
