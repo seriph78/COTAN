@@ -36,7 +36,10 @@ test_that("'scCOTAN' converters", {
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X",
                                sampleCondition = "Test")
   obj <- clean(obj)
+
+  obj <- estimateLambdaLinear(obj)
   obj <- estimateDispersionBisection(obj)
+
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 
   coexDF <-

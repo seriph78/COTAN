@@ -284,8 +284,8 @@ cellsUniformClustering <- function(objCOTAN,
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
 
   assert_that(estimatorsAreReady(objCOTAN),
-              msg = paste("Estimators lambda, nu, dispersion are not ready:",
-                          "Use proceedToCoex() to prepare them"))
+              msg = paste("Estimators `lambda`, `nu`, `dispersion` are not",
+                          "ready: Use proceedToCoex() to prepare them"))
 
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 

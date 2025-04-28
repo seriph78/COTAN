@@ -817,9 +817,19 @@ contingencyTables <- function(objCOTAN, g1, g2) {
                        ncol = 2L, nrow = 2L, dimnames = dimnames)
 
   # estimated
+  lambda <- suppressWarnings(getLambda(objCOTAN))
+  assert_that(!is_empty(lambda),
+              msg = "`lambda` must not be empty, estimate it")
 
-  probZero <- funProbZero(getDispersion(objCOTAN)[c(g1, g2)],
-                          getLambda(objCOTAN)[c(g1, g2)] %o% getNu(objCOTAN))
+  nu <- suppressWarnings(getNu(objCOTAN))
+  assert_that(!is_empty(nu),
+              msg = "`nu` must not be empty, estimate it")
+
+  dispersion <- suppressWarnings(getDispersion(objCOTAN))
+  assert_that(!is_empty(dispersion),
+              msg = "`dispersion` must not be empty, estimate it")
+
+  probZero <- funProbZero(dispersion[c(g1, g2)], lambda[c(g1, g2)] %o% nu)
   rownames(probZero) <- c(g1, g2)
 
   if (anyNA(probZero)) {
@@ -1001,12 +1011,24 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   m   <- torch::torch_tensor(getNumCells(objCOTAN),
                              device = device, dtype = dtypeForCalc)
 
+  lambda <- suppressWarnings(getLambda(objCOTAN))
+  assert_that(!is_empty(lambda),
+              msg = "`lambda` must not be empty, estimate it")
+
+  nu <- suppressWarnings(getNu(objCOTAN))
+  assert_that(!is_empty(nu),
+              msg = "`nu` must not be empty, estimate it")
+
+  dispersion <- suppressWarnings(getDispersion(objCOTAN))
+  assert_that(!is_empty(dispersion),
+              msg = "`dispersion` must not be empty, estimate it")
+
   expectedYY <- torch::torch_tensor(probOne(
-    torch::torch_tensor(getNu(objCOTAN),
+    torch::torch_tensor(nu,
                         dtype = torch::torch_float64(), device = device),
-    torch::torch_tensor(getLambda(objCOTAN),
+    torch::torch_tensor(lambda,
                         dtype = torch::torch_float64(), device = device),
-    torch::torch_tensor(getDispersion(objCOTAN),
+    torch::torch_tensor(dispersion,
                         dtype = torch::torch_float64(), device = device)),
     device = device, dtype = dtypeForCalc)
 

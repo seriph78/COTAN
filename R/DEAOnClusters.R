@@ -70,8 +70,8 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
                            labels = clusters, isCond = FALSE)
 
   assert_that(estimatorsAreReady(objCOTAN),
-              msg = paste("Estimators lambda, nu, dispersion are not ready:",
-                          "Use proceedToCoex() to prepare them"))
+              msg = paste("Estimators `lambda`, `nu`, `dispersion` are not",
+                          "ready: Use proceedToCoex() to prepare them"))
 
   clustersList <- toClustersList(clusters)
 
@@ -153,9 +153,19 @@ clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
                        ncol = 2L, nrow = 2L, dimnames = dimnames)
 
   # estimated
+  lambda <- suppressWarnings(getLambda(objCOTAN))
+  assert_that(!is_empty(lambda),
+              msg = "`lambda` must not be empty, estimate it")
 
-  probZero <- funProbZero(getDispersion(objCOTAN)[gene],
-                          getLambda(objCOTAN)[gene] * getNu(objCOTAN))
+  nu <- suppressWarnings(getNu(objCOTAN))
+  assert_that(!is_empty(nu),
+              msg = "`nu` must not be empty, estimate it")
+
+  dispersion <- suppressWarnings(getDispersion(objCOTAN))
+  assert_that(!is_empty(dispersion),
+              msg = "`dispersion` must not be empty, estimate it")
+
+  probZero <- funProbZero(dispersion[gene], lambda[gene] * nu)
 
   if (anyNA(probZero)) {
     warning("Some NA in estimated probability of zero matrix")
@@ -273,10 +283,11 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 
   normData <- getNuNormData(objCOTAN)
 
-  assert_that(!is_empty(getLambda(objCOTAN)),
-              msg = "lambda must not be empty, estimate it")
+  lambda <- suppressWarnings(getLambda(objCOTAN))
+  assert_that(!is_empty(lambda),
+              msg = "`lambda` must not be empty, estimate it")
 
-  floorAverage <- getLambda(objCOTAN) * floorLambdaFraction
+  floorAverage <- lambda * floorLambdaFraction
 
   allSums <- rowSums(normData)
 
