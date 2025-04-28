@@ -4,8 +4,8 @@
 #' @title Estimation of the `COTAN` model's parameters
 #'
 #' @description These functions are used to estimate the `COTAN` model's
-#'   parameters. That is the average count for each gene (lambda) the average
-#'   count for each cell (nu) and the dispersion parameter for each gene to
+#'   parameters. That is the average count for each gene (`lambda`) the average
+#'   count for each cell (`nu`) and the `dispersion` parameter for each gene to
 #'   match the probability of zero.
 #'
 #'   The estimator methods are named `Linear` if they can be calculated as a
@@ -18,8 +18,8 @@ NULL
 #'
 #' @aliases estimateLambdaLinear
 #'
-#' @details `estimateLambdaLinear()` does a linear estimation of lambda (genes'
-#'   counts averages)
+#' @details `estimateLambdaLinear()` does a linear estimation of `lambda`
+#'   (genes' counts averages)
 #'
 #' @param objCOTAN a `COTAN` object
 #'
@@ -56,7 +56,7 @@ setMethod(
 
 #' @aliases estimateNuLinear
 #'
-#' @details `estimateNuLinear()` does a linear estimation of nu (normalized
+#' @details `estimateNuLinear()` does a linear estimation of `nu` (normalized
 #'   cells' counts averages)
 #'
 #' @param objCOTAN a `COTAN` object
@@ -123,9 +123,9 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 #' @aliases estimateDispersionBisection
 #'
 #' @details `estimateDispersionBisection()` estimates the negative binomial
-#'   dispersion factor for each gene (a). Determines the `dispersion` such that,
-#'   for each gene, the probability of zero count matches the number of observed
-#'   zeros. It assumes [estimateNuLinear()] being already run.
+#'   dispersion factor for each gene (`dispersion`). Determines the value such
+#'   that, for each gene, the probability of zero count matches the number of
+#'   observed zeros. It assumes [estimateNuLinear()] being already run.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param threshold minimal solution precision
@@ -165,7 +165,7 @@ setMethod(
            maxIterations = 100L, chunkSize = 1024L) {
     assert_that(isEmptyName(getMetadataElement(objCOTAN,
                                                datasetTags()[["batch"]])))
-    logThis("Estimate dispersion: START", logLevel = 2L)
+    logThis("Estimate `dispersion`: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
 
@@ -178,7 +178,7 @@ setMethod(
 
     nu <- suppressWarnings(getNu(objCOTAN))
     assert_that(!is_empty(nu),
-                msg = "nu must not be empty, estimate it")
+                msg = "`nu` must not be empty, estimate it")
 
     dispList <- list()
 
@@ -227,7 +227,7 @@ setMethod(
 
       pBegin <- pEnd + 1L
     }
-    logThis("Estimate dispersion: DONE", logLevel = 2L)
+    logThis("Estimate `dispersion`: DONE", logLevel = 2L)
 
     gc()
 
@@ -236,7 +236,7 @@ setMethod(
     objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
 
     goodPos <- is.finite(getDispersion(objCOTAN))
-    logThis(paste("dispersion",
+    logThis(paste("`dispersion`",
                   "| min:", min(getDispersion(objCOTAN)[goodPos]),
                   "| max:", max(getDispersion(objCOTAN)[goodPos]),
                   "| % negative:", (sum(getDispersion(objCOTAN) < 0.0) * 100.0 /
@@ -321,7 +321,7 @@ setMethod(
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
-    logThis("Estimate nu: START", logLevel = 2L)
+    logThis("Estimate `nu`: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
 
@@ -337,11 +337,11 @@ setMethod(
 
     nu <- suppressWarnings(getNu(objCOTAN))
     assert_that(!is_empty(nu),
-                msg = "nu must not be empty, estimate it")
+                msg = "`nu` must not be empty, estimate it")
 
     dispersion <- suppressWarnings(getDispersion(objCOTAN))
     assert_that(!is_empty(dispersion),
-                msg = "dispersion must not be empty, estimate it")
+                msg = "`dispersion` must not be empty, estimate it")
 
     initialGuess <- nu
 
@@ -395,7 +395,7 @@ setMethod(
     }
 
     gc()
-    logThis("Estimate nu: DONE", logLevel = 2L)
+    logThis("Estimate `nu`: DONE", logLevel = 2L)
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
 
@@ -403,7 +403,7 @@ setMethod(
 
     if (TRUE) {
       nuChange <- abs(nu - initialGuess)
-      logThis(paste("nu change (abs)",
+      logThis(paste("`nu` change (abs)",
                     "| max:",     max(nuChange),
                     "| median: ", median(nuChange),
                     "| mean: ",   mean(nuChange)),
@@ -454,9 +454,9 @@ setMethod(
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
-    logThis("Estimate 'dispersion'/'nu': START", logLevel = 2L)
+    logThis("Estimate `dispersion`/`nu`: START", logLevel = 2L)
 
-    # getNu() would show a warning when no 'nu' present
+    # getNu() would show a warning when no `nu` present
     if (is_empty(suppressWarnings(getNu(objCOTAN)))) {
       objCOTAN <- estimateNuLinear(objCOTAN)
     }
@@ -465,7 +465,7 @@ setMethod(
 
     iter <- 1L
     repeat {
-      # a smalle threshold is used in order to ensure the global convergence
+      # a smaller threshold is used in order to ensure the global convergence
       objCOTAN <- estimateDispersionBisection(objCOTAN,
                                               threshold = threshold / 10.0,
                                               cores = cores,
@@ -483,7 +483,7 @@ setMethod(
       gc()
 
       meanNu <- mean(getNu(objCOTAN))
-      logThis(paste("Nu mean:", meanNu), logLevel = 2L)
+      logThis(paste("`nu` mean:", meanNu), logLevel = 2L)
 
       if (isTRUE(enforceNuAverageToOne)) {
         if (is.finite(meanNu)) {
@@ -491,9 +491,9 @@ setMethod(
             setColumnInDF(objCOTAN@metaCells, getNu(objCOTAN) / meanNu, "nu")
         } else {
           assert_that(iter == 1L,
-                      msg = paste("It can happen to have infinite mean 'nu'",
+                      msg = paste("It can happen to have infinite mean `nu`",
                                   "only after the first loop"))
-          warning("Infinite 'nu' found: one of the cells expressed all genes\n",
+          warning("Infinite `nu` found: one of the cells expressed all genes\n",
                   " Setting 'enforceNuAverageToOne <- FALSE'")
           enforceNuAverageToOne <- FALSE
         }
@@ -524,7 +524,7 @@ setMethod(
       iter <- iter + 1L
     }
 
-    logThis("Estimate dispersion/nu: DONE", logLevel = 2L)
+    logThis("Estimate `dispersion`/`nu`: DONE", logLevel = 2L)
 
     return(objCOTAN)
   }
@@ -568,7 +568,7 @@ setMethod(
            enforceNuAverageToOne = TRUE) {
     assert_that(isEmptyName(getMetadataElement(objCOTAN,
                                                datasetTags()[["batch"]])))
-    logThis("Estimate 'dispersion'/'nu': START", logLevel = 2L)
+    logThis("Estimate `dispersion`/`nu`: START", logLevel = 2L)
 
     lambda <- suppressWarnings(getLambda(objCOTAN))
     assert_that(!is_empty(lambda),
@@ -624,7 +624,7 @@ setMethod(
     objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
     objCOTAN <- setNu(objCOTAN, nu = nu)
 
-    logThis("Estimate 'dispersion'/'nu': DONE", logLevel = 2L)
+    logThis("Estimate `dispersion`/`nu`: DONE", logLevel = 2L)
 
     return(objCOTAN)
   }

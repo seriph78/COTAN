@@ -77,7 +77,7 @@ setMethod(
 
     batches <- getBatches(objCOTAN)
 
-    if (any(batches != "NoCond")) {
+    if (any(levels(batches) != "NoCond")) {
       for (batch in levels(batches)) {
         logThis(paste("Handling batch", batch), logLevel = 3L)
 
@@ -90,9 +90,9 @@ setMethod(
       }
     }
 
-    gc()
-
     objCOTAN <- setNu(objCOTAN, nu)
+    
+    gc()
 
     return(objCOTAN)
   }

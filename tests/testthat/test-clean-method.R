@@ -12,7 +12,7 @@ test_that("clean COTAN object", {
   expect_true(validObject(obj))
 
   expect_identical(colnames(getMetadataCells(obj)), c("feCells", "nu"))
-  expect_identical(colnames(getMetadataGenes(obj)), c("feGenes"))
+  expect_identical(colnames(getMetadataGenes(obj)), "feGenes")
 })
 
 test_that("Clean on test dataset", {

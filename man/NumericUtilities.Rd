@@ -87,7 +87,7 @@ distance matrix should be printed by print.dist}
 \value{
 the probability \code{matrix} that a \emph{read count} is identically zero
 
-the dispersion value
+the \code{dispersion} value
 
 the dispersion values
 
@@ -117,7 +117,7 @@ It returns 0 when \eqn{d = -\infty}{`disp = -Inf`} or
 It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
 
 \code{dispersionBisection} is a private function for the estimation of
-\emph{dispersion} slot of a \code{COTAN} object via a bisection solver
+\code{dispersion} slot of a \code{COTAN} object via a bisection solver
 
 The goal is to find a \code{dispersion} value that reduces to zero the
 difference between the number of estimated and counted zeros
@@ -126,7 +126,7 @@ difference between the number of estimated and counted zeros
 \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} for the estimation of the \code{dispersion} slot
 of a \code{COTAN} object via a parallel bisection solver
 
-The goal is to find a \verb{dispersion array} that reduces to zero the
+The goal is to find a \code{dispersion} \code{array} that reduces to zero the
 difference between the number of estimated and counted zeros
 
 \code{nuBisection} is a private function for the estimation of \code{nu} slot
@@ -139,8 +139,8 @@ between the number of estimated and counted zeros
 \code{\link[=estimateNuBisection]{estimateNuBisection()}} for the estimation of \code{nu} slot of a \code{COTAN} object
 via a parallel bisection solver
 
-The goal is to find a \verb{nu array} that reduces to zero the difference
-between the number of estimated and counted zeros
+The goal is to find a \code{nu} \code{array} that reduces to zero the
+difference between the number of estimated and counted zeros
 
 \code{calcDist} is a wrapper function that invokes
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}: the main goal is to recover and finish the
