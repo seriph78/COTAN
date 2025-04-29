@@ -154,7 +154,7 @@ when \eqn{d > 0}{`disp > 0`} and
 The function is continuous in \eqn{d = 0}{`disp = 0`},
 increasing in \eqn{d}{`disp`} and decreasing in \eqn{\mu}{`mu`}.
 It returns 0 when \eqn{d = -\infty}{`disp = -Inf`} or
-q\eqn{\mu = \infty}{`mu = Inf`}.
+\eqn{\mu = \infty}{`mu = Inf`}.
 It returns \eqn{1.0} when \eqn{\mu = 0}{`mu = 0`}.
 
 \code{funProbZeroMixPoi} is a private function that gives the probability
