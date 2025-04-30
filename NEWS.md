@@ -6,7 +6,7 @@ editor_options:
 
 Fixed issue with use of `parallelDist::parDist()` on Linux aarch64
 machines: it crashed irrecoverably due to an ***invalid alignment***
-error.  Now code calls the normal `dist()` function on such machines
+error. Now code calls the normal `dist()` function on such machines
 
 ## 2.9.1
 
@@ -38,7 +38,7 @@ BioSingular::runPCA() instead
 
 Added new utility function `asClusterization()` that takes any input
 representing a *clusterization* (`factor`, `vector` or `data.frame`) and
-makes it into a `factor`.  This function is now used in all functions
+makes it into a `factor`. This function is now used in all functions
 taking in a *clusterization* to standardize the given input
 
 Added `initialIteration` as input parameter to *clusterization*
@@ -80,7 +80,7 @@ check: was testing third highest GDI value instead of second
 ## 2.5.11
 
 Fixed bug in the function `cellsUMAPPlot()`: restored possibility of
-passing a genes `vector` as `genesSel` parameter.  Also updated the
+passing a genes `vector` as `genesSel` parameter. Also updated the
 documentation about the available genes selection methods
 
 ## 2.5.10
@@ -99,7 +99,7 @@ Exported utility functions about names arrays: `conditionsFromNames()`,
 
 feature/add_condition_arguments_to_plot_functions Now the following plot
 functions take in conditions explicitly, instead of just instructions to
-determine them from the cells' names.  The changes involved:
+determine them from the cells' names. The changes involved:
 `cellSizePlot()`, `ECDPlot()`, `genesSizePlot()`,
 `mitochondrialPercentagePlot()`, `scatterPlot()`
 
@@ -122,7 +122,7 @@ method is more effective at describing really **statistically uniform**
 
 Functions `cellsUniformClustering()` and `mergeUniformCellsClusters()`
 have been re-factored so to support new class hierarchy for **UT**
-checkers.  This allows user to select which method to use for the checks;
+checkers. This allows user to select which method to use for the checks;
 as of now the following methods are supported: \*
 `"SimpleGDIUniformityCheck"` \* `"AdvancedGDIUniformityCheck"`
 
@@ -425,12 +425,12 @@ Included new functionalities for Bioc 2.17 release:
 
 ## COTAN 0.99.13
 
-After official release.  PCA function changed to avoid basilisk and
+After official release. PCA function changed to avoid basilisk and
 Python.
 
 ## COTAN 0.99.12
 
-Release before the official release of Bioc 3.15.  Main changes: - The
+Release before the official release of Bioc 3.15. Main changes: - The
 way in which the COEX matrix is estimated and stored is changed to
 occupy less space and run faster.
 
