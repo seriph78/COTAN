@@ -523,10 +523,7 @@ setMethod(
 
     # for cases when the zeros are too few and strongly uneven nu
     # it follows that sometimes pi < 0.0
-    # solve by projecting to pi = 0 and lambda = avgCounts
     goodPos <- pi > 0.0
-    lambda[!goodPos] <- avgCounts[!goodPos]
-    pi[!goodPos] <- 0.0
 
     if (TRUE) {
       if (!identical(lambda, suppressWarnings(getLambda(objCOTAN)))) {
@@ -548,8 +545,8 @@ setMethod(
                                            datasetTags()[["model"]],
                                            "MixturePoisson")
 
-    logThis(paste("`pi` | min:", min(pi[goodPos]), "| max:", max(pi[goodPos]),
-                  "| % zeros:", mean(!goodPos) * 100.0), logLevel = 1L)
+    logThis(paste("`pi` | min:", min(pi), "| max:", max(pi),
+                  "| % non-positive:", mean(!goodPos) * 100.0), logLevel = 1L)
 
     return(objCOTAN)
   }
