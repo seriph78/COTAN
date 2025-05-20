@@ -1,3 +1,122 @@
+LogLikeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClusters){
+  tryCatch({
+  res <-  eigs_sym(as.matrix(getGenesCoex(obj)), k = 50, which = "LM") 
+  autovettori <- res$vectors[,1:npc]
+  #BinarizedCounts <- COTAN::getZeroOneProj(obj)
+  #ProbOfZero <- COTAN::getProbabilityOfZero(obj)
+  matrix  <- COTAN:::calculateLikelihoodOfObserved(obj)
+  matrix <- log(matrix)
+ 
+  MatAutovet <- t(autovettori) %*% matrix  
+  
+  cellNorms <- sqrt(colMeans(as.matrix(MatAutovet**2)))
+  MatAutovetNew <- t(t(as.matrix(MatAutovet))/cellNorms)
+  
+  FindNeighborsTest <- Seurat::FindNeighbors(t(MatAutovetNew))
+  
+  resolution <- initialResolution
+  resolutionStep <- 0.5
+  maxResolution <- initialResolution + 10.0 * resolutionStep
+  usedMaxResolution <- FALSE
+  repeat {
+    #srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
+    ClusterSeuratMatAutovetNew <- Seurat:::RunModularityClustering(FindNeighborsTest$snn,n.start = 50,
+                                                                   resolution = resolution)
+    
+    # The next lines are necessary to make cluster smaller while
+    # the number of residual cells decrease and to stop clustering
+    # if the algorithm gives too many singletons.
+    usedMaxResolution <- (resolution + 0.1 * resolutionStep) > maxResolution
+
+    numClusters <- nlevels(factor(ClusterSeuratMatAutovet))
+    
+    if (numClusters > minNumClusters || usedMaxResolution) {
+      break
+    }
+    
+    logThis(paste("Number of clusters is too small.",
+                  "Reclustering at resolution higher than:", resolution),
+            logLevel = 3L)
+    
+    resolution <- resolution + resolutionStep
+  }
+  
+  
+  gc()
+  
+  return(list("Clusters" = ClusterSeuratMatAutovetNew, 
+              "ScaledMatrix" = t(as.matrix(MatAutovetNew)),
+              "usedMaxResolution"=resolution))
+},
+error = function(e) {
+  logThis(msg = paste("Clusterization failed", dim(getRawData(obj))[2],
+                      "cells with the following error:"), logLevel = 1L)
+  logThis(msg = conditionMessage(e), logLevel = 1L)
+  return(list("Clusters" = NULL, "UsedMaxResolution" = FALSE))
+})
+}
+
+DerivativeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClusters){
+  tryCatch({
+  res <-  eigs_sym(as.matrix(getGenesCoex(obj)), k = 50, which = "LM") 
+  autovettori <- res$vectors[,1:npc]
+  BinarizedCounts <- COTAN::getZeroOneProj(obj)
+  ProbOfZero <- COTAN::getProbabilityOfZero(obj)
+  matrix <- as.matrix(BinarizedCounts/(1 - ProbOfZero) - (1 - BinarizedCounts)/ProbOfZero)
+  # matrix  <- COTAN:::calculateLikelihoodOfObserved(obj)
+  # matrix <- log(matrix)
+  # 
+  MatAutovet <- t(autovettori) %*% matrix  
+  
+  cellNorms <- sqrt(colMeans(as.matrix(MatAutovet**2)))
+  MatAutovetNew <- t(t(as.matrix(MatAutovet))/cellNorms)
+  
+  FindNeighborsTest <- Seurat::FindNeighbors(t(MatAutovetNew))
+  
+  resolution <- initialResolution
+  resolutionStep <- 0.5
+  maxResolution <- initialResolution + 10.0 * resolutionStep
+  usedMaxResolution <- FALSE
+  repeat {
+    #srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
+    ClusterSeuratMatAutovetNew <- Seurat:::RunModularityClustering(FindNeighborsTest$snn,n.start = 50,
+                                                                   resolution = resolution)
+    
+    # The next lines are necessary to make cluster smaller while
+    # the number of residual cells decrease and to stop clustering
+    # if the algorithm gives too many singletons.
+    usedMaxResolution <- (resolution + 0.1 * resolutionStep) > maxResolution
+    numClusters <- nlevels(factor(ClusterSeuratMatAutovet))
+    if (numClusters > minNumClusters || usedMaxResolution) {
+      break
+    }
+    
+    logThis(paste("Number of clusters is too small.",
+                  "Reclustering at resolution higher than:", resolution),
+            logLevel = 3L)
+    
+    resolution <- resolution + resolutionStep
+  }
+  
+  
+  
+  
+  gc()
+  
+  return(list("Clusters" = ClusterSeuratMatAutovetNew, 
+              "ScaledMatrix" = t(as.matrix(MatAutovetNew)),
+              "usedMaxResolution"=resolution))
+  },
+  error = function(e) {
+    logThis(msg = paste("Clusterization failed", dim(getRawData(obj))[2],
+                        "cells with the following error:"), logLevel = 1L)
+    logThis(msg = conditionMessage(e), logLevel = 1L)
+    return(list("Clusters" = NULL, "UsedMaxResolution" = FALSE))
+  })
+}
+
+
+
 
 #' @title Get a clusterization running the `Seurat` package
 #'
@@ -266,9 +385,10 @@ NULL
 #'
 
 cellsUniformClustering <- function(objCOTAN,
+                                   ClusteringType = NULL,
                                    checker = NULL,
                                    GDIThreshold = NaN,
-                                   initialResolution = 0.8,
+                                   initialResolution = 0.5,
                                    maxIterations = 25L,
                                    cores = 1L,
                                    optimizeForSpeed = TRUE,
@@ -311,7 +431,7 @@ cellsUniformClustering <- function(objCOTAN,
   iter <- initialIteration - 1L
   iterReset <- -1L
   numClustersToRecluster <- 0L
-  srat <- NULL
+  #srat <- NULL
   allCheckResults <- list()
 
   if (is.null(checker)) {
@@ -336,37 +456,88 @@ cellsUniformClustering <- function(objCOTAN,
 
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
-    c(objSeurat, usedMaxResolution) %<-%
-      seuratClustering(rawData = getRawData(objCOTAN)[, is.na(outputClusters)],
-                       cond = cond, iter = iter,
-                       initialResolution = initialResolution,
-                       minNumClusters = minNumClusters, genesSel = genesSel,
-                       cores = cores, optimizeForSpeed = optimizeForSpeed,
-                       deviceStr = deviceStr,
-                       saveObj = saveObj, outDirCond = splitOutDir)
-
-    if (is_null(objSeurat)) {
-      logThis(paste("NO new possible uniform clusters!",
-                    "Unclustered cell left:", sum(is.na(outputClusters))),
-              logLevel = 1L)
-      break
+    if (ClusteringType == "LogLike") {
+      obj <-  COTAN(raw = getRawData(objCOTAN)[, is.na(outputClusters)])
+      obj <- initializeMetaDataset(obj,
+                                   GEO = "...",
+                                   sequencingMethod = "",
+                                   sampleCondition = "")
+      obj <- clean(obj)
+      obj <- proceedToCoex(obj, calcCoex = TRUE,
+                           optimizeForSpeed = TRUE, cores = 4L, deviceStr = "cuda",
+                           saveObj = FALSE, outDir = outDir)
+      
+      clData <- LogLikeClustering(
+                obj              = obj,
+                npc              = 20L,
+                initialResolution= initialResolution,
+                minNumClusters   = minNumClusters
+              )
+      # if (is_null(clData[["Clusters"]])) {
+      #   logThis(paste("NO new possible uniform clusters!",
+      #                 "Unclustered cell left:", sum(is.na(outputClusters))),
+      #           logLevel = 1L)
+      #   break
+      # }
+        
+    }else if (ClusteringType == "Derivative") {
+      obj <-  COTAN(raw = getRawData(objCOTAN)[, is.na(outputClusters)])
+      obj <- initializeMetaDataset(obj,
+                                   GEO = "...",
+                                   sequencingMethod = "",
+                                   sampleCondition = "")
+      obj <- clean(obj)
+      obj <- proceedToCoex(obj, calcCoex = TRUE,
+                           optimizeForSpeed = TRUE, cores = 4L, deviceStr = "cuda",
+                           saveObj = FALSE, outDir = outDir)
+      
+      clData <- DerivativeClustering(
+                obj              = obj,
+                npc              = 20L,
+                initialResolution= initialResolution,
+                minNumClusters   = minNumClusters
+              )
+      # if (is_null(clData[["Clusters"]])) {
+      #     logThis(paste("NO new possible uniform clusters!",
+      #                   "Unclustered cell left:", sum(is.na(outputClusters))),
+      #             logLevel = 1L)
+      #     break
+      #   }
     }
-
-    if (saveSeuratObj && iter == 1L) tryCatch({
-      # save the Seurat object to file to be reloaded later
-      saveRDS(objSeurat,
-              file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
-      },
-      error = function(err) {
-        logThis(paste("While saving seurat object", err), logLevel = 1L)
-      })
-
-    metaData <- objSeurat@meta.data
-
-    rm(objSeurat)
-    gc()
-
-    # Step 2
+    
+    
+    
+    # c(objSeurat, usedMaxResolution) %<-%
+    #   seuratClustering(rawData = getRawData(objCOTAN)[, is.na(outputClusters)],
+    #                    cond = cond, iter = iter,
+    #                    initialResolution = initialResolution,
+    #                    minNumClusters = minNumClusters, genesSel = genesSel,
+    #                    cores = cores, optimizeForSpeed = optimizeForSpeed,
+    #                    deviceStr = deviceStr,
+    #                    saveObj = saveObj, outDirCond = splitOutDir)
+    # 
+    # if (is_null(objSeurat)) {
+    #   logThis(paste("NO new possible uniform clusters!",
+    #                 "Unclustered cell left:", sum(is.na(outputClusters))),
+    #           logLevel = 1L)
+    #   break
+    # }
+    # 
+    # if (saveSeuratObj && iter == 1L) tryCatch({
+    #   # save the Seurat object to file to be reloaded later
+    #   saveRDS(objSeurat,
+    #           file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
+    #   },
+    #   error = function(err) {
+    #     logThis(paste("While saving seurat object", err), logLevel = 1L)
+    #   })
+    # 
+    # metaData <- objSeurat@meta.data
+    # 
+    # rm(objSeurat)
+    # gc()
+    # 
+    # # Step 2
 
     # The next lines check for each new cell cluster if it is homogeneous.
     # In cases they are not, save the corresponding cells in cellsToRecluster
@@ -374,9 +545,13 @@ cellsUniformClustering <- function(objCOTAN,
     numClustersToRecluster <- 0L
     cellsToRecluster <- vector(mode = "character")
 
-    testClusters <- factor(metaData[["seurat_clusters"]])
-    allCells <- rownames(metaData)
-    names(testClusters) <- allCells
+    # testClusters <- factor(metaData[["seurat_clusters"]])
+    # allCells <- rownames(metaData)
+    usedMaxResolution <- clData[["usedMaxResolution"]]
+    
+    testClusters <- factor(clData[["Clusters"]])
+    names(testClusters) <- getCells(objCOTAN)
+    allCells <- names(testClusters)
     if (iter == initialIteration && !is_null(initialClusters)) {
       logThis("Using passed in clusterization", logLevel = 3L)
       testClusters <- asClusterization(initialClusters, getCells(objCOTAN))
@@ -441,7 +616,7 @@ cellsUniformClustering <- function(objCOTAN,
         }
         logThis("", logLevel = 2L)
 
-        rm(checkResults)
+        #rm(checkResults)
         gc()
       }
     }
@@ -496,10 +671,16 @@ cellsUniformClustering <- function(objCOTAN,
       }
     )
 
-    if (sum(is.na(outputClusters)) != length(cellsToRecluster)) {
-      warning("Some problems in cells reclustering")
-      break
-    }
+    # if (1) {
+    #   warning("Some problems in cells reclustering")
+    #   break
+    # }
+    # 
+    # only break if the set of “to‐recluster” cells didn't shrink
+          if (sum(is.na(outputClusters)) != length(cellsToRecluster)) {
+              warning("Cells to recluster didn’t shrink — stopping here.")
+              break
+            }
 
     if (length(cellsToRecluster) < 40L
         || iter > maxIterations + initialIteration) {
