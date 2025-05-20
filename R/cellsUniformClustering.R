@@ -435,7 +435,7 @@ cellsUniformClustering <- function(objCOTAN,
   allCheckResults <- list()
 
   if (is.null(checker)) {
-    GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.40)
+    GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.30)
     checker <- new("SimpleGDIUniformityCheck",
                    check = new("GDICheck",
                                GDIThreshold = GDIThreshold,
@@ -473,12 +473,12 @@ cellsUniformClustering <- function(objCOTAN,
                 initialResolution= initialResolution,
                 minNumClusters   = minNumClusters
               )
-      # if (is_null(clData[["Clusters"]])) {
-      #   logThis(paste("NO new possible uniform clusters!",
-      #                 "Unclustered cell left:", sum(is.na(outputClusters))),
-      #           logLevel = 1L)
-      #   break
-      # }
+       if (is_null(clData[["Clusters"]])) {
+         logThis(paste("NO new possible uniform clusters!",
+                       "Unclustered cell left:", sum(is.na(outputClusters))),
+                 logLevel = 1L)
+         break
+       }
         
     }else if (ClusteringType == "Derivative") {
       obj <-  COTAN(raw = getRawData(objCOTAN)[, is.na(outputClusters)])
@@ -497,12 +497,12 @@ cellsUniformClustering <- function(objCOTAN,
                 initialResolution= initialResolution,
                 minNumClusters   = minNumClusters
               )
-      # if (is_null(clData[["Clusters"]])) {
-      #     logThis(paste("NO new possible uniform clusters!",
-      #                   "Unclustered cell left:", sum(is.na(outputClusters))),
-      #             logLevel = 1L)
-      #     break
-      #   }
+       if (is_null(clData[["Clusters"]])) {
+           logThis(paste("NO new possible uniform clusters!",
+                         "Unclustered cell left:", sum(is.na(outputClusters))),
+                   logLevel = 1L)
+           break
+         }
     }
     
     
@@ -522,6 +522,13 @@ cellsUniformClustering <- function(objCOTAN,
     #           logLevel = 1L)
     #   break
     # }
+    if (is_null(clData[["Clusters"]])) {
+      logThis(paste("NO new possible uniform clusters!",
+                    "Unclustered cell left:", sum(is.na(outputClusters))),
+              logLevel = 1L)
+      break
+    }
+    
     # 
     # if (saveSeuratObj && iter == 1L) tryCatch({
     #   # save the Seurat object to file to be reloaded later
@@ -616,7 +623,7 @@ cellsUniformClustering <- function(objCOTAN,
         }
         logThis("", logLevel = 2L)
 
-        #rm(checkResults)
+        rm(checkResults)
         gc()
       }
     }
@@ -671,11 +678,11 @@ cellsUniformClustering <- function(objCOTAN,
       }
     )
 
-    # if (1) {
-    #   warning("Some problems in cells reclustering")
-    #   break
-    # }
-    # 
+     if (1) {
+       warning("Some problems in cells reclustering")
+       break
+     }
+     
     # only break if the set of “to‐recluster” cells didn't shrink
           if (sum(is.na(outputClusters)) != length(cellsToRecluster)) {
               warning("Cells to recluster didn’t shrink — stopping here.")
