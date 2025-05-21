@@ -1,11 +1,15 @@
 
+Fixed issue with use of `parallelDist::parDist()` on Linux aarch64 machines: it
+crashed irrecoverably due to an ***invalid alignment*** error. Now code calls
+the normal `dist()` function on such machines
+
 ## 2.9.1
 
-Solved issue with reordering of merged *clusterization*:
-flag `keepMinusOne` was off and label `"-1"` was moved around
+Solved issue with reordering of merged *clusterization*: flag `keepMinusOne` was
+off and label `"-1"` was moved around
 
-Added checker class type to the `data.frame` obtained after conversion.
-It will make loading checker results from file easier.
+Added checker class type to the `data.frame` obtained after conversion. It will
+make loading checker results from file easier
 
 Improved `README.md` with stable links to `devel` and `release` versions in
 BioConductor
@@ -13,27 +17,27 @@ BioConductor
 ## 2.7.5
 
 Solved issue with use of `parallelDist::parDist()` by allowing a fall-back to
-`stats::dist()`. This was needed to address failures running `parDist()` 
-on Linux-aarch64 machines
+`stats::dist()`. This was needed to address failures running `parDist()` on
+Linux-aarch64 machines
 
 ## 2.7.4
 
 Solved bug causing errors while using `torch` with a `CPU` device
 
-Ensure the drop out cluster from `cellsUnifromClustersing()` [`-1`]
-keeps its name if it has not been merged at the end of 
-the function `mergeUniformCellsClusters()`
+Ensure the drop out cluster from `cellsUnifromClustersing()` [`-1`] keeps its
+name if it has not been merged at the end of the function
+`mergeUniformCellsClusters()`
 
-Stopped using broken BioConductor PCAtools::pca:
-using BioSingular::runPCA() instead
+Stopped using broken BioConductor `PCAtools::pca()`: using
+`BioSingular::runPCA()` instead
 
 Added new utility function `asClusterization()` that takes any input
-representing a *clusterization* (`factor`, `vector` or `data.frame`)
-and makes it into a `factor`. This function is now used in all functions taking
-in a *clusterization* to standardize the given input
+representing a *clusterization* (`factor`, `vector` or `data.frame`) and makes
+it into a `factor`. This function is now used in all functions taking in a
+*clusterization* to standardize the given input
 
-Added `initialIteration` as input parameter to *clusterization* functions so
-to avoid override of partial data when the functions are being restarted
+Added `initialIteration` as input parameter to *clusterization* functions so to
+avoid override of partial data when the functions are being restarted
 
 ## 2.7.3
 
@@ -61,8 +65,8 @@ each marker gene and the shown content is more expressive
 Marked the function `clustersDeltaExpression()` as legacy: it has been replaced
 with the function `DEAOnClusters()` in the package
 
-Fixed minor bug in class `AdvancedGDIUniformityCheck` regarding third check:
-was testing third highest GDI value instead of second
+Fixed minor bug in class `AdvancedGDIUniformityCheck` regarding third check: was
+testing third highest GDI value instead of second
 
 ## 2.5.11
 
@@ -84,10 +88,9 @@ Exported utility functions about names arrays: `conditionsFromNames()`,
 
 ## 2.5.8
 
-feature/add_condition_arguments_to_plot_functions
 Now the following plot functions take in conditions explicitly, instead of just
 instructions to determine them from the cells' names. The changes involved:
-`cellSizePlot()`,  `ECDPlot()`, `genesSizePlot()`,
+`cellSizePlot()`, `ECDPlot()`, `genesSizePlot()`,
 `mitochondrialPercentagePlot()`, `scatterPlot()`
 
 Added possibility to convert `COTAN` objects to/from `SingleCellExperiment`
@@ -96,24 +99,23 @@ objects. `SCE` objects created by the `Seurat` package are supported
 Hardened arguments' checks for function `UMAPPlot()`
 
 Solved issue with the function `establishGenesClusters()`: it was throwing an
-error when one of the sub-lists in the `groupMarkers` argument did contain
-only one element
+error when one of the sub-lists in the `groupMarkers` argument did contain only
+one element
 
 ## 2.5.7
 
-Introduced new way to check for the **Uniform-Transcript** property of the 
+Introduced new way to check for the **Uniform-Transcript** property of the
 *clusters* based on multiple thresholds calibrated so that the new method is
 more effective at describing really **statistically uniform** *clusters*
 
 Functions `cellsUniformClustering()` and `mergeUniformCellsClusters()` have been
-re-factored so to support new class hierarchy for **UT** checkers.
-This allows user to select which method to use for the checks;
-as of now the following methods are supported:
-* `"SimpleGDIUniformityCheck"`
-* `"AdvancedGDIUniformityCheck"`
+re-factored so to support new class hierarchy for **UT** checkers. This allows
+user to select which method to use for the checks; as of now the following
+methods are supported: `"SimpleGDIUniformityCheck"` and
+`"AdvancedGDIUniformityCheck"`
 
-Avoided issue with pdf file creation: file handle was not closed
-in case of errors
+Avoided issue with pdf file creation: file handle was not closed in case of
+errors
 
 Added possibility of choosing number of features in `seuratHVG()`
 
@@ -122,11 +124,11 @@ cluster was created
 
 ## 2.5.6
 
-Made function `heatmapPlot()` more easy to use and in line with the rest of
-the `COTAN` package
+Made function `heatmapPlot()` more easy to use and in line with the rest of the
+`COTAN` package
 
-Now the method `storeGDI()` can take in the output `data.frame` from
-the function `calculateGDI()`
+Now the method `storeGDI()` can take in the output `data.frame` from the
+function `calculateGDI()`
 
 Solved few minor issues with the vignette and changed a few default parameters
 in `cellsUMAPPlot()`, `pValueFromDEA()` and `findClustersMarkers()`
@@ -139,10 +141,10 @@ Stopped function `cellsUniformClustering()` from saving the internally created
 Split the now deprecated function `getNormalizedData()` into two separated
 functions: `getNuNormData()` and `getLogNormData()`
 
-Re-factored function `mergeUniformCellsClusters()` to be more precise:
-now it merges clusters starting from the most similar in latest batch and
-also runs the merging in multiple steps adjusting gradually the *GDI* threshold
-ranging from a very strict up to the user given ones.
+Re-factored function `mergeUniformCellsClusters()` to be more precise: now it
+merges clusters starting from the most similar in latest batch and also runs the
+merging in multiple steps adjusting gradually the *GDI* threshold ranging from a
+very strict up to the user given ones
 
 Fixed minor bugs in functions `GDIPlot()` and `clustersMarkersHeatmapPlot()`
 
@@ -155,16 +157,15 @@ Added possibility to display UMAP plots of cells clusters, using the function
 
 Updated the vignette to the most recent changes
 
-Allowed user to set the ratio of genes above the threshold allowed
-in a Uniform Transcript cluster
+Allowed user to set the ratio of genes above the threshold allowed in a Uniform
+Transcript cluster
 
 ## 2.5.2
 
 Solved issue with usage checks about the `torch` library
 
-Allowed user to explicitly **opt-out** from the `torch` library usage:
-COTAN will avoid `torch` commands when the option `"COTAN.UseTorch"` is
-set to `FALSE`
+Allowed user to explicitly **opt-out** from the `torch` library usage: COTAN
+will avoid `torch` commands when the option `"COTAN.UseTorch"` is set to `FALSE`
 
 ## 2.5.1
 
@@ -194,8 +195,8 @@ object
 
 Made checks more strict when adding a *clusterization* or *condition*
 
-Increased reliability of clustering functions by improved error handling and 
-by allowing retry runs on estimators functions
+Increased reliability of clustering functions by improved error handling and by
+allowing retry runs on estimators functions
 
 ## COTAN 2.3.4
 
@@ -214,8 +215,8 @@ Added method to handle expression levels' change via log-normalized data:
 
 Minor fix in the import of operators to align to new version of `roxigen2`
 
-Restored default adjustment method of `pValueFromDEA()` to `"none"`
-for backward compatibility reasons
+Restored default adjustment method of `pValueFromDEA()` to `"none"` for backward
+compatibility reasons
 
 ## COTAN 2.3.2
 
@@ -227,8 +228,8 @@ Now the function `pValueFromDEA()` returns the p-value adjusted for multi-test
 
 ## COTAN 2.3.1
 
-Stopped using explicit PCA via irlba package:
-using BioConductor PCAtools::pca instead
+Stopped using explicit PCA via irlba package: using BioConductor PCAtools::pca
+instead
 
 ## COTAN 2.3.0
 
@@ -236,9 +237,9 @@ First release in Bioconductor 3.19
 
 ## COTAN 2.1.8
 
-Made passing *clusterizations* to `COTAN` functions more easy:
-now all functions that take a `COTAN` object and a *clusterization* as input
-parameters can also take a *clusterization* name 
+Made passing *clusterizations* to `COTAN` functions more easy: now all functions
+that take a `COTAN` object and a *clusterization* as input parameters can also
+take a *clusterization* name
 
 Added time-stamps to log entries when written on a log file
 
@@ -276,8 +277,8 @@ by the functions `DEAOnClusters()` and `mergeUniformCellsClusters()`
 Added function `getClusters()` to retrieve the wanted clusterization from the
 cells' meta-dataset
 
-Added function `calculateGenesCE()`: it returns the cross-entropy between
-the expected absence of a gene reading against the observed state
+Added function `calculateGenesCE()`: it returns the cross-entropy between the
+expected absence of a gene reading against the observed state
 
 Fixed minor issue with `logThis()` to file: it was always appending a new line
 even when `appendLF` was set to `FALSE`
@@ -292,13 +293,13 @@ balance the merging of most possible candidates versus the time spent doing so
 Improved `dropGenesCells()` method: it now retains all meta-data information
 that is not related to the results of the other methods
 
-Added zoomed UDE plot to `cleanPlots()` return. It suggests a possible
-cut level for low UDE cells
+Added zoomed UDE plot to `cleanPlots()` return. It suggests a possible cut level
+for low UDE cells
 
 ## COTAN 2.1.5
 
-Improved `mergeUniformCellsClusters()`: now it attempts to merge more
-clusters pairs
+Improved `mergeUniformCellsClusters()`: now it attempts to merge more clusters
+pairs
 
 Now errors in the `seuratClustering()` function are interpreted as remaining
 cells not-clustered "-1". This applies mostly to cases when `Seurat` finds only
@@ -312,8 +313,8 @@ Solved potential issue in the `clustersMarkersHeatmapPlot()` regarding clusters'
 labels
 
 Added new internal function `niceFactorLevels()` that ensures all the factors'
-levels will have labels with the same length, via padding  the integers values
-with '0' and string values with '_'
+levels will have labels with the same length, via padding the integers values
+with '0' and string values with '\_'
 
 Relaxed tolerance on tests comparing against saved data
 
@@ -376,37 +377,37 @@ Minor bug fixes and new function `clustersMarkersHeatmapPlot()`
 
 Included new functionalities for Bioc 2.17 release:
 
-* created a new `COTAN` class to replace the old `scCOTAN`: this class provides
-  internal invariants along a wide host of accessors that allows users to avoid
-  peeking inside the class
-  
-* made a new multi-core implementation of the model parameters estimations and
-  `COEX` calculations that achieves much higher speeds.
-  
-* added new functionality about **gene clusters** starting from given markers
-  lists
+-   created a new `COTAN` class to replace the old `scCOTAN`: this class
+    provides internal invariants along a wide host of accessors that allows
+    users to avoid peeking inside the class
 
-* added new functionality about **uniform cell clustering** based on the maximum
-  *GDI* level in the *cluster*
-  
-* added function to get a *differential expression* estimation for each cluster
-  against background
-  
-* added function to get an *enrichment score* for each cluster given a list of
-  markers specific for the cells' population
-  
-* added plots to asses data-set information at cleaning stage
+-   made a new multi-core implementation of the model parameters estimations and
+    `COEX` calculations that achieves much higher speeds.
+
+-   added new functionality about **gene clusters** starting from given markers
+    lists
+
+-   added new functionality about **uniform cell clustering** based on the
+    maximum *GDI* level in the *cluster*
+
+-   added function to get a *differential expression* estimation for each
+    cluster against background
+
+-   added function to get an *enrichment score* for each cluster given a list of
+    markers specific for the cells' population
+
+-   added plots to asses data-set information at cleaning stage
 
 ## COTAN 0.99.13
 
 After official release. PCA function changed to avoid basilisk and Python.
- 
+
 ## COTAN 0.99.12
 
-Release before the official release of Bioc 3.15. Main changes:
- - The way in which the COEX matrix is estimated and stored is changed to occupy
-   less space and run faster.
- 
+Release before the official release of Bioc 3.15. Main changes: - The way in
+which the COEX matrix is estimated and stored is changed to occupy less space
+and run faster.
+
 ## COTAN 0.99.10
 
 Initial Bioconductor release

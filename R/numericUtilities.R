@@ -483,6 +483,8 @@ parallelNuBisection <-
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom rlang is_null
+#'
 #' @importFrom parallelDist parDist
 #'
 #' @importFrom stats dist
@@ -492,16 +494,27 @@ parallelNuBisection <-
 
 calcDist <- function(data, method, diag = FALSE, upper = FALSE) {
   data <- as.matrix(data)
-  ret <- tryCatch(parDist(data, method = method,
-                          diag = diag, upper = upper),
-                  error = function(err) {
-                    logThis(paste("While calculating distance", err),
-                            logLevel = 1L)
-                    logThis("Falling back to single threaded algo",
-                            logLevel = 1L)
-                    return(dist(data, method = method,
-                                diag = diag, upper = upper))
-                  })
+
+  ret <- NULL
+
+  sI <- Sys.info()
+  if (!grepl("Linux", sI[["sysname"]], ignore.case = TRUE) ||
+      !grepl("aarch64", sI[["machine"]], ignore.case = TRUE)) {
+    ret <- tryCatch(parDist(data, method = method,
+                            diag = diag, upper = upper),
+                    error = function(err) {
+                      logThis(paste("While calculating distance", err),
+                              logLevel = 1L)
+                      logThis("Falling back to single threaded algo",
+                              logLevel = 1L)
+                      return(NULL)
+                    })
+  }
+
+  if (is_null(ret)) {
+    ret <- dist(data, method = method, diag = diag, upper = upper)
+  }
+
   return(ret)
 }
 
