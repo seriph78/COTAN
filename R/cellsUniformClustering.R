@@ -1,6 +1,6 @@
 LogLikeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClusters){
   tryCatch({
-  res <-  eigs_sym(as.matrix(getGenesCoex(obj)), k = 50, which = "LM")
+  res <- RSpectra::eigs_sym(as.matrix(getGenesCoex(obj)), k = 50, which = "LM")
   autovettori <- res$vectors[,1:npc]
   #BinarizedCounts <- COTAN::getZeroOneProj(obj)
   #ProbOfZero <- COTAN::getProbabilityOfZero(obj)
@@ -20,7 +20,7 @@ LogLikeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClus
   usedMaxResolution <- FALSE
   repeat {
     #srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
-    ClusterSeuratMatAutovetNew <- Seurat:::RunModularityClustering(FindNeighborsTest$snn,n.start = 50,
+    newClusters <- Seurat:::RunModularityClustering(FindNeighborsTest$snn,n.start = 50,
                                                                    resolution = resolution)
 
     # The next lines are necessary to make cluster smaller while
@@ -28,7 +28,7 @@ LogLikeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClus
     # if the algorithm gives too many singletons.
     usedMaxResolution <- (resolution + 0.1 * resolutionStep) > maxResolution
 
-    numClusters <- nlevels(factor(ClusterSeuratMatAutovet))
+    numClusters <- nlevels(factor(newClusters))
 
     if (numClusters > minNumClusters || usedMaxResolution) {
       break
@@ -44,7 +44,7 @@ LogLikeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClus
 
   gc()
 
-  return(list("Clusters" = ClusterSeuratMatAutovetNew,
+  return(list("Clusters" = newClusters,
               "ScaledMatrix" = t(as.matrix(MatAutovetNew)),
               "usedMaxResolution" = usedMaxResolution))
 },
@@ -58,7 +58,7 @@ error = function(e) {
 
 DerivativeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClusters){
   tryCatch({
-  res <-  eigs_sym(as.matrix(getGenesCoex(obj)), k = 50, which = "LM")
+  res <- RSpectra::eigs_sym(as.matrix(getGenesCoex(obj)), k = 50, which = "LM")
   autovettori <- res$vectors[,1:npc]
   BinarizedCounts <- COTAN::getZeroOneProj(obj)
   ProbOfZero <- COTAN::getProbabilityOfZero(obj)
@@ -79,14 +79,14 @@ DerivativeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumC
     usedMaxResolution <- FALSE
   repeat {
     #srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
-    ClusterSeuratMatAutovetNew <- Seurat:::RunModularityClustering(FindNeighborsTest$snn,n.start = 50,
+    newClusters <- Seurat:::RunModularityClustering(FindNeighborsTest$snn,n.start = 50,
                                                                    resolution = resolution)
 
     # The next lines are necessary to make cluster smaller while
     # the number of residual cells decrease and to stop clustering
     # if the algorithm gives too many singletons.
     usedMaxResolution <- (resolution + 0.1 * resolutionStep) > maxResolution
-    numClusters <- nlevels(factor(ClusterSeuratMatAutovet))
+    numClusters <- nlevels(factor(newClusters))
     if (numClusters > minNumClusters || usedMaxResolution) {
       break
     }
@@ -103,7 +103,7 @@ DerivativeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumC
 
   gc()
 
-  return(list("Clusters" = ClusterSeuratMatAutovetNew,
+  return(list("Clusters" = newClusters,
               "ScaledMatrix" = t(as.matrix(MatAutovetNew)),
               "usedMaxResolution" = usedMaxResolution))
   },
@@ -557,7 +557,7 @@ cellsUniformClustering <- function(objCOTAN,
     usedMaxResolution <- clData[["usedMaxResolution"]]
 
     testClusters <- factor(clData[["Clusters"]])
-    names(testClusters) <- getCells(objCOTAN)
+    names(testClusters) <- getCells(objCOTAN)[is.na(outputClusters)]
     allCells <- names(testClusters)
     if (iter == initialIteration && !is_null(initialClusters)) {
       logThis("Using passed in clusterization", logLevel = 3L)
@@ -678,16 +678,10 @@ cellsUniformClustering <- function(objCOTAN,
       }
     )
 
-     if (1) {
-       warning("Some problems in cells reclustering")
-       break
-     }
-
-    # only break if the set of “to‐recluster” cells didn't shrink
-          if (sum(is.na(outputClusters)) != length(cellsToRecluster)) {
-              warning("Cells to recluster didn’t shrink — stopping here.")
-              break
-            }
+    if (sum(is.na(outputClusters)) != length(cellsToRecluster)) {
+      warning("Some problems in cells reclustering")
+      break
+    }
 
     if (length(cellsToRecluster) < 40L
         || iter > maxIterations + initialIteration) {
