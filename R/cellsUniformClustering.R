@@ -15,7 +15,7 @@ LogLikeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClus
   FindNeighborsTest <- Seurat::FindNeighbors(t(MatAutovetNew))
 
   resolution <- initialResolution
-  resolutionStep <- 0.5
+  resolutionStep <- 0.2
   maxResolution <- initialResolution + 10.0 * resolutionStep
   usedMaxResolution <- FALSE
   repeat {
@@ -40,13 +40,15 @@ LogLikeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClus
 
     resolution <- resolution + resolutionStep
   }
-
+  
+  newClusters <- factor(newClusters)
+  names(newClusters) <- colnames(matrix)
 
   gc()
 
   return(list("Clusters" = newClusters,
-              "ScaledMatrix" = t(as.matrix(MatAutovetNew)),
-              "usedMaxResolution" = usedMaxResolution))
+              #"ScaledMatrix" = t(as.matrix(MatAutovetNew)),
+              "UsedMaxResolution" = usedMaxResolution))
 },
 error = function(e) {
   logThis(msg = paste("Clusterization failed", dim(getRawData(obj))[2],
@@ -55,6 +57,8 @@ error = function(e) {
   return(list("Clusters" = NULL, "UsedMaxResolution" = FALSE))
 })
 }
+
+
 
 DerivativeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClusters){
   tryCatch({
@@ -97,15 +101,15 @@ DerivativeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumC
 
     resolution <- resolution + resolutionStep
   }
-
-
+    newClusters <- factor(newClusters)
+ names(newClusters) <- colnames(matrix)
 
 
   gc()
 
   return(list("Clusters" = newClusters,
-              "ScaledMatrix" = t(as.matrix(MatAutovetNew)),
-              "usedMaxResolution" = usedMaxResolution))
+              #"ScaledMatrix" = t(as.matrix(MatAutovetNew)),
+              "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
     logThis(msg = paste("Clusterization failed", dim(getRawData(obj))[2],
@@ -435,7 +439,7 @@ cellsUniformClustering <- function(objCOTAN,
   allCheckResults <- list()
 
   if (is.null(checker)) {
-    GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.30)
+    GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.40)
     checker <- new("SimpleGDIUniformityCheck",
                    check = new("GDICheck",
                                GDIThreshold = GDIThreshold,
@@ -473,6 +477,7 @@ cellsUniformClustering <- function(objCOTAN,
                 initialResolution= initialResolution,
                 minNumClusters   = minNumClusters
               )
+      usedMaxResolution <- clData[["UsedMaxResolution"]]
        if (is_null(clData[["Clusters"]])) {
          logThis(paste("NO new possible uniform clusters!",
                        "Unclustered cell left:", sum(is.na(outputClusters))),
@@ -497,6 +502,7 @@ cellsUniformClustering <- function(objCOTAN,
                 initialResolution= initialResolution,
                 minNumClusters   = minNumClusters
               )
+      usedMaxResolution <- clData[["UsedMaxResolution"]]
        if (is_null(clData[["Clusters"]])) {
            logThis(paste("NO new possible uniform clusters!",
                          "Unclustered cell left:", sum(is.na(outputClusters))),
@@ -554,10 +560,9 @@ cellsUniformClustering <- function(objCOTAN,
 
     # testClusters <- factor(metaData[["seurat_clusters"]])
     # allCells <- rownames(metaData)
-    usedMaxResolution <- clData[["usedMaxResolution"]]
 
-    testClusters <- factor(clData[["Clusters"]])
-    names(testClusters) <- getCells(objCOTAN)[is.na(outputClusters)]
+    testClusters <- clData[["Clusters"]]
+    #names(testClusters) <- getCells(objCOTAN)[is.na(outputClusters)]
     allCells <- names(testClusters)
     if (iter == initialIteration && !is_null(initialClusters)) {
       logThis("Using passed in clusterization", logLevel = 3L)
