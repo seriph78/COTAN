@@ -18,6 +18,7 @@ LogLikeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClus
   resolutionStep <- 0.2
   maxResolution <- initialResolution + 10.0 * resolutionStep
   usedMaxResolution <- FALSE
+
   repeat {
     #srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
     newClusters <- Seurat:::RunModularityClustering(FindNeighborsTest$snn,n.start = 50,
@@ -40,14 +41,11 @@ LogLikeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumClus
 
     resolution <- resolution + resolutionStep
   }
-  
-  newClusters <- factor(newClusters)
-  names(newClusters) <- colnames(matrix)
+  newClusters <- factor(set_names(newClusters, colnames(matrix)))
 
   gc()
 
   return(list("Clusters" = newClusters,
-              #"ScaledMatrix" = t(as.matrix(MatAutovetNew)),
               "UsedMaxResolution" = usedMaxResolution))
 },
 error = function(e) {
@@ -66,7 +64,8 @@ DerivativeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumC
   autovettori <- res$vectors[,1:npc]
   BinarizedCounts <- COTAN::getZeroOneProj(obj)
   ProbOfZero <- COTAN::getProbabilityOfZero(obj)
-  matrix <- as.matrix(BinarizedCounts/(1 - ProbOfZero) - (1 - BinarizedCounts)/ProbOfZero)
+  matrix <- as.matrix(BinarizedCounts/(1 - ProbOfZero) -
+                        (1 - BinarizedCounts)/ProbOfZero)
   # matrix  <- COTAN:::calculateLikelihoodOfObserved(obj)
   # matrix <- log(matrix)
   #
@@ -80,7 +79,8 @@ DerivativeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumC
   resolution <- initialResolution
   resolutionStep <- 0.5
   maxResolution <- initialResolution + 10.0 * resolutionStep
-    usedMaxResolution <- FALSE
+  usedMaxResolution <- FALSE
+
   repeat {
     #srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
     newClusters <- Seurat:::RunModularityClustering(FindNeighborsTest$snn,n.start = 50,
@@ -101,14 +101,12 @@ DerivativeClustering <- function(obj, npc = 20, initialResolution = 0.8, minNumC
 
     resolution <- resolution + resolutionStep
   }
-    newClusters <- factor(newClusters)
- names(newClusters) <- colnames(matrix)
 
+  newClusters <- factor(set_names(newClusters, colnames(matrix)))
 
   gc()
 
   return(list("Clusters" = newClusters,
-              #"ScaledMatrix" = t(as.matrix(MatAutovetNew)),
               "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
@@ -562,75 +560,84 @@ cellsUniformClustering <- function(objCOTAN,
     # allCells <- rownames(metaData)
 
     testClusters <- clData[["Clusters"]]
-    #names(testClusters) <- getCells(objCOTAN)[is.na(outputClusters)]
-    allCells <- names(testClusters)
     if (iter == initialIteration && !is_null(initialClusters)) {
       logThis("Using passed in clusterization", logLevel = 3L)
       testClusters <- asClusterization(initialClusters, getCells(objCOTAN))
-      allCells <- names(testClusters)
     }
+    allCells <- names(testClusters)
     testClList <- toClustersList(testClusters)
 
     globalClName <- ""
 
-    for (clName in names(testClList)) {
-      logThis("*", logLevel = 1L, appendLF = FALSE)
-      logThis(paste0(" checking uniformity of cluster '", clName,
-                     "' of ", length(testClList), " clusters"),
-              logLevel = 2L)
+    minimumUTClusterSize <- 20L
+    maxClusterSize <- max(lengths(testClList))
 
-      if (clName == "singleton") {
-        next
-      }
+    if (maxClusterSize >= minimumUTClusterSize) {
+      for (clName in names(testClList)) {
+        logThis("*", logLevel = 1L, appendLF = FALSE)
+        logThis(paste0(" checking uniformity of cluster '", clName,
+                       "' of ", length(testClList), " clusters"),
+                logLevel = 2L)
 
-      globalClName <-
-        paste0(str_pad(iter, width = 2L, pad = "0"), "_",
-               str_pad(clName, width = 4L, pad = "0"))
+        if (clName == "singleton") {
+          next
+        }
 
-      cells <- testClList[[clName]]
-      if (length(cells) < 20L) {
-        logThis(paste("cluster", globalClName, "has too few cells:",
-                      "will be reclustered!"), logLevel = 2L)
+        globalClName <-
+          paste0(str_pad(iter, width = 2L, pad = "0"), "_",
+                 str_pad(clName, width = 4L, pad = "0"))
 
-        numClustersToRecluster <- numClustersToRecluster + 1L
-        cellsToRecluster <- c(cellsToRecluster, cells)
-      } else {
-        checkResults <- tryCatch(
-          checkClusterUniformity(objCOTAN = objCOTAN,
-                                 clusterName = globalClName,
-                                 cells = cells,
-                                 checker = checker,
-                                 cores = cores,
-                                 optimizeForSpeed = optimizeForSpeed,
-                                 deviceStr = deviceStr,
-                                 saveObj = saveObj,
-                                 outDir = splitOutDir),
-          error = function(err) {
-            logThis(paste("while checking cluster uniformity", err),
-                    logLevel = 0L)
-            logThis("marking cluster as not uniform", logLevel = 2L)
-            return(checker)
-          })
-
-        invisible(validObject(checkResults))
-
-        allCheckResults <- append(allCheckResults, checkResults)
-        names(allCheckResults)[length(allCheckResults)] <- globalClName
-
-        if (!checkResults@isUniform) {
-          logThis(paste("cluster", globalClName, "has too high GDI:",
+        cells <- testClList[[clName]]
+        if (length(cells) < 20L) {
+          logThis(paste("cluster", globalClName, "has too few cells:",
                         "will be reclustered!"), logLevel = 2L)
 
           numClustersToRecluster <- numClustersToRecluster + 1L
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
-          logThis(paste("cluster", globalClName, "is uniform"), logLevel = 2L)
-        }
-        logThis("", logLevel = 2L)
+          checkResults <- tryCatch(
+            checkClusterUniformity(objCOTAN = objCOTAN,
+                                   clusterName = globalClName,
+                                   cells = cells,
+                                   checker = checker,
+                                   cores = cores,
+                                   optimizeForSpeed = optimizeForSpeed,
+                                   deviceStr = deviceStr,
+                                   saveObj = saveObj,
+                                   outDir = splitOutDir),
+            error = function(err) {
+              logThis(paste("while checking cluster uniformity", err),
+                      logLevel = 0L)
+              logThis("marking cluster as not uniform", logLevel = 2L)
+              return(checker)
+            })
 
-        rm(checkResults)
-        gc()
+          invisible(validObject(checkResults))
+
+          allCheckResults <- append(allCheckResults, checkResults)
+          names(allCheckResults)[length(allCheckResults)] <- globalClName
+
+          if (!checkResults@isUniform) {
+            logThis(paste("cluster", globalClName, "has too high GDI:",
+                          "will be reclustered!"), logLevel = 2L)
+
+            numClustersToRecluster <- numClustersToRecluster + 1L
+            cellsToRecluster <- c(cellsToRecluster, cells)
+          } else {
+            logThis(paste("cluster", globalClName, "is uniform"), logLevel = 2L)
+          }
+          logThis("", logLevel = 2L)
+
+          rm(checkResults)
+          gc()
+        }
       }
+    } else {
+      # all clusters are too small: nothing to do
+      logThis(paste("All clusters in iteration ", iter, "have too few cells"),
+                    logLevel = 2L)
+      numClustersToRecluster <- length(testClList)
+      cellsToRecluster <- allCells
     }
 
     logThis("", logLevel = 1L)
@@ -643,8 +650,8 @@ cellsUniformClustering <- function(objCOTAN,
       # Another iteration can be attempted as the minimum number of clusters
       # will be higher. This happens unless the resolution already reached
       # its maximum. In the latter case we simply stop here.
-      if (isTRUE(usedMaxResolution)) {
-        logThis("Max resolution reached", logLevel = 1L)
+      if (isTRUE(usedMaxResolution) || maxClusterSize < minimumUTClusterSize) {
+        logThis("Max resolution reached or too small clusters", logLevel = 1L)
         if (iterReset != -1L) {
           logThis("Cannot clusterize anything more", logLevel = 2L)
           break
