@@ -130,6 +130,7 @@ genesSelector <- function(objCOTAN, genesSel, numFeatures = 2000L) {
 #' @importFrom Seurat FindClusters
 #' @importFrom Seurat Idents
 #'
+#' @importFrom assertthat assert_that
 #'
 #' @noRd
 #'
@@ -139,11 +140,14 @@ seuratClustering <- function(objCOTAN,
   tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
+    assert_that(all(selectedGenes %in% getGenes(objCOTAN)),
+                msg = "Passed genes' list is not compatible with the data")
+
     srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
                                project = "genes_selections")
     srat <- NormalizeData(srat)
 
-    srat <- ScaleData(srat, features = rownames(srat))
+    srat <- ScaleData(srat, features = selectedGenes)
 
     numPCAComp <- min(numPCAComp, length(Cells(srat)) - 1L)
     srat <- RunPCA(srat, features = selectedGenes, npcs = numPCAComp)
