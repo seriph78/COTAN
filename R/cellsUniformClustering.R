@@ -47,7 +47,7 @@ NULL
 genesSelector <- function(objCOTAN, genesSel, numFeatures = 2000L) {
   logThis("Running genes' selection: START", logLevel = 2L)
 
-  numFeatures <- min(2000L, nrow(rawData))
+  numFeatures <- min(2000L, getNumGenes(objCOTAN))
   selectedGenes <- NULL
 
   if (length(genesSel) > 1L) {
@@ -69,7 +69,7 @@ genesSelector <- function(objCOTAN, genesSel, numFeatures = 2000L) {
       rm(gdi)
     } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE) ||
                str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
-      srat <- CreateSeuratObject(counts = ,
+      srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
                                  project = "genes_selections")
       srat <- NormalizeData(srat)
 
@@ -124,11 +124,11 @@ genesSelector <- function(objCOTAN, genesSel, numFeatures = 2000L) {
 #' @importFrom Seurat CreateSeuratObject
 #' @importFrom Seurat NormalizeData
 #' @importFrom Seurat ScaleData
+#' @importFrom Seurat Cells
 #' @importFrom Seurat RunPCA
 #' @importFrom Seurat FindNeighbors
 #' @importFrom Seurat FindClusters
-#' @importFrom Seurat Cells
-#' @importFrom Seurat FetchData
+#' @importFrom Seurat Idents
 #'
 #'
 #' @noRd
@@ -190,7 +190,8 @@ seuratClustering <- function(objCOTAN,
                 "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
-    logThis(msg = paste("Seurat clusterization failed with", ncol(rawData),
+    logThis(msg = paste("Seurat clusterization failed with",
+                        getNumCells(objCOTAN),
                         "cells with the following error:"), logLevel = 1L)
     logThis(msg = conditionMessage(e), logLevel = 1L)
     return(list("SeuratClusters" = NULL, "PCA" = NULL,
@@ -322,8 +323,6 @@ cellsUniformClustering <- function(objCOTAN,
     dir.create(splitOutDir)
   }
 
-  saveSeuratObj <- saveObj && FALSE
-
   outputClusters <- set_names(rep(NA, length = getNumCells(objCOTAN)),
                               getCells(objCOTAN))
 
@@ -388,15 +387,13 @@ cellsUniformClustering <- function(objCOTAN,
 
     ## print umap graph
     if (isTRUE(saveObj)) tryCatch({
-      outFile <- file.path(outDirCond, paste0("pdf_umap_", iter, ".pdf"))
+      outFile <- file.path(splitOutDir, paste0("pdf_umap_", iter, ".pdf"))
       logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
       pdf(outFile)
 
-      if (iter == 1L) {
-        plot(UMAPPlot(dataIn = pca,
-                      clusters = getCondition(subObj),
-                      title = paste0("Cells number: ", nrow(pca))))
-      }
+      plot(UMAPPlot(dataIn = pca,
+                    clusters = getCondition(subObj),
+                    title = paste0("Cells number: ", nrow(pca))))
 
       plot(UMAPPlot(dataIn = pca,
                     clusters = testClusters,

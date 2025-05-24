@@ -1,7 +1,7 @@
 
 #' @details `UMAPPlot()` plots the given `data.frame` containing genes
-#'   information related to clusters after applying the umap transformation via
-#'   [Seurat::RunUMAP()]
+#'   information related to clusters after applying the `umap` transformation
+#'   via [Seurat::RunUMAP()]
 #'
 #' @param dataIn The `matrix` to plot. It must have a row names containing the
 #'   given elements (the columns are features)
@@ -175,7 +175,7 @@ UMAPPlot <- function(dataIn,
 
   assert_that(setequal(c(entryType, "none", "centroid"), names(myColours)))
 
-  pointSize <- min(max(0.33, 5000.0 / nrow(plotDF)), 3.0)
+  pointSize <- min(max(0.33, 5000.0 / nrow(plotDF)), 2.0)
 
   plot <- ggplot() +
     scale_color_manual("Status", values = myColours) +
@@ -267,10 +267,8 @@ UMAPPlot <- function(dataIn,
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
-#' @param numNeighbors Overrides the `n_neighbors` value from
-#'   [umap::umap.defaults]
-#' @param minPointsDist Overrides the `min_dist` value from
-#'   [umap::umap.defaults]
+#' @param numNeighbors Overrides the default `n_neighbors` value
+#' @param minPointsDist Overrides the default `min_dist` value
 #'
 #' @returns `cellsUMAPPlot()` returns a list with 2 objects:
 #'  * `"plot"` a `ggplot2` object representing the `umap` plot

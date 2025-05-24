@@ -226,11 +226,9 @@ specified}
 colors are given it will complete the list using colors from
 \code{\link[=getColorsVector]{getColorsVector()}}}
 
-\item{numNeighbors}{Overrides the \code{n_neighbors} value from
-\link[umap:umap.defaults]{umap::umap.defaults}}
+\item{numNeighbors}{Overrides the default \code{n_neighbors} value}
 
-\item{minPointsDist}{Overrides the \code{min_dist} value from
-\link[umap:umap.defaults]{umap::umap.defaults}}
+\item{minPointsDist}{Overrides the default \code{min_dist} value}
 
 \item{dataMethod}{selects the method to use to create the \code{data.frame} to
 pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. To calculate, for each cell, a statistic for each
@@ -488,8 +486,8 @@ the clusters. Depending on the value of the \code{useDEA} flag will base the
 distance on the \emph{DEA} columns or the averages of the \emph{Zero-One} matrix.
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
-information related to clusters after applying the umap transformation via
-\code{\link[Seurat:RunUMAP]{Seurat::RunUMAP()}}
+information related to clusters after applying the \code{umap} transformation
+via \code{\link[Seurat:RunUMAP]{Seurat::RunUMAP()}}
 
 \code{cellsUMAPPlot()} returns a \code{ggplot2} plot where the given
 \emph{clusters} are placed on the base of their relative distance. Also if
