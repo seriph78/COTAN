@@ -26,6 +26,8 @@ test_that("Cell Uniform Clustering", {
   })
 
   expect_true(file.exists(file.path(tm, "test", "reclustering",
+                                    "pdf_umap_1.pdf")))
+  expect_true(file.exists(file.path(tm, "test", "reclustering",
                                     "partial_clusterization_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "reclustering",
                                     "all_check_results_1.csv")))
@@ -93,7 +95,7 @@ test_that("Cell Uniform Clustering", {
   expect_identical(rClusters2 == "-1", clusters2 == "-1")
   # this is an happenstance
   expect_identical(colnames(rCoexDF2), rev(levels(rClusters2)))
-  expect_identical(permMap2, set_names(paste0(c(2L, 1L, 4L, 3L, -1L)),
+  expect_identical(permMap2, set_names(paste0(c(4L:1L, -1L)),
                                        paste0(c(1L:4L, -1L))))
 
   clusters3 <- factor(clusters, levels = c(levels(clusters), "-1"))
@@ -108,7 +110,7 @@ test_that("Cell Uniform Clustering", {
   expect_identical((clusters3 == "-1")[51L:150L], (clusters2 == "-1")[1L:100L])
   # this is an happenstance
   expect_identical(colnames(coexDF3)[-5L], levels(clusters3)[-1L])
-  expect_identical(permMap3, set_names(paste0(c(2L, 3L, 1L, 4L, -1L)),
+  expect_identical(permMap3, set_names(paste0(c(1L, 3L, 2L, 4L, -1L)),
                                        paste0(c(1L:4L, -1L))))
 
   exactClusters <- set_names(rep(1L:2L, each = 600L), nm = getCells(obj))
@@ -135,7 +137,7 @@ test_that("Cell Uniform Clustering", {
   expect_gt(min(clMarkersDF[["DEA"]] * clMarkersDF[["logFoldCh"]]), 0.0)
 
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
-  highPos <- (1L:80L) %in% c(11L:20L, 31L:40L, 41L:50L, 61L:70L)
+  highPos <- (1L:80L) %in% c(1L:10L, 21L:30L, 51L:60L, 71L:80L)
   expect_gt(min(topGenesNum[ highPos]), 480L)
   expect_lt(max(topGenesNum[!highPos]), 241L)
 
