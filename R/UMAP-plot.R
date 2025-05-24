@@ -3,10 +3,10 @@
 #'   information related to clusters after applying the umap transformation via
 #'   [Seurat::RunUMAP()]
 #'
-#' @param df The `data.frame` to plot. It must have a row names containing the
-#'   given elements
+#' @param dataIn The `matrix` to plot. It must have a row names containing the
+#'   given elements (the columns are features)
 #' @param clusters The **clusterization**. Must be a named `array` aligned to
-#'   the rows in the `data.frame`.
+#'   the rows in the `matrix`.
 #' @param elements a named `list` of elements to label. Each array in the list
 #'   will be shown with a different color
 #' @param title a string giving the plot title. Will default to UMAP Plot if not
@@ -14,11 +14,8 @@
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
-#' @param numNeighbors Overrides the `n_neighbors` value from
-#'   [umap::umap.defaults]
-#' @param minPointsDist Overrides the `min_dist` value from
-#'   [umap::umap.defaults]
-#'
+#' @param numNeighbors Overrides the default `n_neighbors` value
+#' @param minPointsDist Overrides the default `min_dist` value
 #'
 #' @returns `UMAPPlot()` returns a `ggplot2` object
 #'
@@ -42,11 +39,13 @@
 #' @importFrom rlang set_names
 #' @importFrom rlang is_empty
 #'
+#' @importFrom withr with_options
+#'
 #' @export
 #'
 #' @rdname HandlingClusterizations
 #'
-UMAPPlot <- function(df,
+UMAPPlot <- function(dataIn,
                      clusters = NULL,
                      elements = NULL,
                      title = "",
@@ -55,23 +54,23 @@ UMAPPlot <- function(df,
                      minPointsDist = NaN) {
   logThis("UMAP plot", logLevel = 2L)
 
-  assert_that(!is_empty(rownames(df)),
-              msg = "UMAPPlot - data.frame must have proper row-names")
+  assert_that(!is_empty(rownames(dataIn)),
+              msg = "UMAPPlot - input matrix must have proper row-names")
 
-  assert_that(is_empty(clusters) || identical(names(clusters), rownames(df)),
+  assert_that(is_empty(clusters) || identical(names(clusters), rownames(dataIn)),
               msg = paste("UMAPPlot - clusters' names must be the same",
-                          "as the row-names of the data.frame"))
+                          "as the row-names of the input matrix"))
 
   # empty title
   if (isEmptyName(title)) {
     title <- "UMAP Plot"
   }
 
-  entryType <- rep_len("none", nrow(df))
+  entryType <- rep_len("none", nrow(dataIn))
 
   # assign a different color to each list of elements
   for (nm in names(elements)) {
-    selec <- rownames(df) %in% elements[[nm]]
+    selec <- rownames(dataIn) %in% elements[[nm]]
     if (any(selec)) {
       entryType[selec] <- nm
     } else {
@@ -107,8 +106,8 @@ UMAPPlot <- function(df,
 
   logThis("Calculating UMAP: START", logLevel = 3L)
 
-  umap <- suppressWarnings(
-    Embeddings(RunUMAP(df,
+  umap <- with_options(list(Seurat.warn.umap.uwot = FALSE),
+    Embeddings(RunUMAP(as.matrix(dataIn),
                        assay = "Generic",
                        reduction.key = "UMAP_",
                        umap.method = "uwot",
@@ -444,7 +443,6 @@ cellsUMAPPlot <- function(objCOTAN,
 
   gc()
 
-  cellsPCA <- as.data.frame(cellsPCA)
   logThis("Elaborating PCA - END", logLevel = 3L)
 
   umapTitle <- paste("UMAP of clusterization", clName, "using", dataMethod,

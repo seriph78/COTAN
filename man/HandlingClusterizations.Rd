@@ -85,7 +85,7 @@ distancesBetweenClusters(
 )
 
 UMAPPlot(
-  df,
+  dataIn,
   clusters = NULL,
   elements = NULL,
   title = "",
@@ -213,8 +213,8 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
-\item{df}{The \code{data.frame} to plot. It must have a row names containing the
-given elements}
+\item{dataIn}{The \code{matrix} to plot. It must have a row names containing the
+given elements (the columns are features)}
 
 \item{elements}{a named \code{list} of elements to label. Each array in the list
 will be shown with a different color}
