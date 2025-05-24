@@ -49,6 +49,8 @@
 #' @importFrom Seurat FindClusters
 #' @importFrom Seurat RunUMAP
 #' @importFrom Seurat DimPlot
+#' @importFrom Seurat Cells
+#' @importFrom Seurat FetchData
 #'
 #' @importFrom grDevices pdf
 #' @importFrom grDevices dev.off
@@ -97,7 +99,7 @@ seuratClustering <- function(rawData, cond, iter,
 
     srat <- ScaleData(srat, features = rownames(srat))
 
-    maxRows <- nrow(srat@meta.data) - 1L
+    maxRows <- length(Cells(srat)) - 1L
     srat <- RunPCA(srat, features = VariableFeatures(object = srat),
                    npcs = min(50L, maxRows))
 
@@ -110,12 +112,15 @@ seuratClustering <- function(rawData, cond, iter,
     repeat {
       srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
 
+      seuratClusters <-
+        getColumnFromDF(FetchData(srat, vars = "seurat_clusters"),
+                        colName = "seurat_clusters")
+
       # The next lines are necessary to make cluster smaller while
       # the number of residual cells decrease and to stop clustering
       # if the algorithm gives too many singletons.
       usedMaxResolution <- (resolution + 0.1 * resolutionStep) > maxResolution
-      numClusters <- nlevels(factor(srat[["seurat_clusters", drop = TRUE]]))
-      if (numClusters > minNumClusters || usedMaxResolution) {
+      if (nlevels(seuratClusters) > minNumClusters || usedMaxResolution) {
         break
       }
 
@@ -361,7 +366,8 @@ cellsUniformClustering <- function(objCOTAN,
         logThis(paste("While saving seurat object", err), logLevel = 1L)
       })
 
-    metaData <- objSeurat@meta.data
+    testClusters <-
+      asClusterization(FetchData(objSeurat, vars = "seurat_clusters"))
 
     rm(objSeurat)
     gc()
@@ -374,14 +380,11 @@ cellsUniformClustering <- function(objCOTAN,
     numClustersToRecluster <- 0L
     cellsToRecluster <- vector(mode = "character")
 
-    testClusters <- factor(metaData[["seurat_clusters"]])
-    allCells <- rownames(metaData)
-    names(testClusters) <- allCells
     if (iter == initialIteration && !is_null(initialClusters)) {
       logThis("Using passed in clusterization", logLevel = 3L)
       testClusters <- asClusterization(initialClusters, getCells(objCOTAN))
-      allCells <- names(testClusters)
     }
+    allCells <- names(testClusters)
     testClList <- toClustersList(testClusters)
 
     globalClName <- ""
@@ -391,10 +394,6 @@ cellsUniformClustering <- function(objCOTAN,
       logThis(paste0(" checking uniformity of cluster '", clName,
                      "' of ", length(testClList), " clusters"),
               logLevel = 2L)
-
-      if (clName == "singleton") {
-        next
-      }
 
       globalClName <-
         paste0(str_pad(iter, width = 2L, pad = "0"), "_",

@@ -1,7 +1,7 @@
 
 #' @details `UMAPPlot()` plots the given `data.frame` containing genes
-#'   information related to clusters after applying the [umap::umap()]
-#'   transformation
+#'   information related to clusters after applying the umap transformation via
+#'   [Seurat::RunUMAP()]
 #'
 #' @param df The `data.frame` to plot. It must have a row names containing the
 #'   given elements
@@ -36,8 +36,8 @@
 #'
 #' @importFrom stats quantile
 #'
-#' @importFrom umap umap
-#' @importFrom umap umap.defaults
+#' @importFrom Seurat RunUMAP
+#' @importFrom Seurat Embeddings
 #'
 #' @importFrom rlang set_names
 #' @importFrom rlang is_empty
@@ -98,21 +98,31 @@ UMAPPlot <- function(df,
 
   clustered <- !labelled & entryType != "none"
 
-  umapConfig <- umap.defaults
-  if (numNeighbors > 0L) {
-    umapConfig[["n_neighbors"]] <- numNeighbors
+  if (numNeighbors == 0L) {
+    numNeighbors <- 30L
   }
-  if (is.finite(minPointsDist)) {
-    umapConfig[["min_dist"]] <- minPointsDist
+  if (!is.finite(minPointsDist)) {
+    minPointsDist <- 0.3
   }
-  umapConfig[["verbose"]] <- TRUE
 
   logThis("Calculating UMAP: START", logLevel = 3L)
 
-  umap <- umap(df, config = umapConfig)
+  umap <- suppressWarnings(
+    Embeddings(RunUMAP(df,
+                       assay = "Generic",
+                       reduction.key = "UMAP_",
+                       umap.method = "uwot",
+                       n.neighbors = numNeighbors, #30L
+                       n.components = 2L,
+                       metric = "cosine",
+                       learning.rate = 1,
+                       min.dist = minPointsDist, # 0.3
+                       uwot.sgd = FALSE,
+                       seed.use = 42,
+                       verbose = TRUE)))
 
-  plotDF <- data.frame(x = umap[["layout"]][, 1L],
-                       y = umap[["layout"]][, 2L],
+  plotDF <- data.frame(x = umap[, 1L],
+                       y = umap[, 2L],
                        types = entryType)
 
   logThis("Calculating UMAP: DONE", logLevel = 3L)
@@ -166,7 +176,7 @@ UMAPPlot <- function(df,
 
   assert_that(setequal(c(entryType, "none", "centroid"), names(myColours)))
 
-  pointSize <- min(max(0.33, 10000.0 / nrow(plotDF)), 3.0)
+  pointSize <- min(max(0.33, 5000.0 / nrow(plotDF)), 3.0)
 
   plot <- ggplot() +
     scale_color_manual("Status", values = myColours) +

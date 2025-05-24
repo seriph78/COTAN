@@ -488,8 +488,8 @@ the clusters. Depending on the value of the \code{useDEA} flag will base the
 distance on the \emph{DEA} columns or the averages of the \emph{Zero-One} matrix.
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
-information related to clusters after applying the \code{\link[umap:umap]{umap::umap()}}
-transformation
+information related to clusters after applying the umap transformation via
+\code{\link[Seurat:RunUMAP]{Seurat::RunUMAP()}}
 
 \code{cellsUMAPPlot()} returns a \code{ggplot2} plot where the given
 \emph{clusters} are placed on the base of their relative distance. Also if
