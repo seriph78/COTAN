@@ -226,54 +226,6 @@ UMAPPlot <- function(dataIn,
   return(plot)
 }
 
-#' @title Get High Variable Genes running the `Seurat` package
-#'
-#' @description The function uses the [Seurat::Seurat] package to extract the
-#'   high variable genes given the counts raw data
-#'
-#' @param rawData the raw counts
-#' @param hvgMethod the HVG method
-#' @param cond the sample condition
-#' @param numFeatures the number of genes to select. It defaults to 2000
-#'
-#' @returns a subset of the genes in the dataset
-#'
-#' @importFrom Seurat CreateSeuratObject
-#' @importFrom Seurat NormalizeData
-#' @importFrom Seurat FindVariableFeatures
-#' @importFrom Seurat ScaleData
-#' @importFrom Seurat VariableFeatures
-#'
-#' @importFrom withr with_options
-#'
-#' @noRd
-#'
-seuratHVG <- function(rawData, hvgMethod, cond, numFeatures = 2000L) {
-  tryCatch({
-    logThis("Creating Seurat object: START", logLevel = 2L)
-
-    srat <- CreateSeuratObject(counts = as.data.frame(rawData),
-                               project = paste0(cond, "_UMAP"),
-                               min.cells = 3L, min.features = 4L)
-    srat <- NormalizeData(srat)
-    srat <- FindVariableFeatures(srat, selection.method = hvgMethod,
-                                 nfeatures = numFeatures)
-
-    hvg <- VariableFeatures(object = srat)
-
-    rm(srat)
-    logThis("Creating Seurat object: DONE", logLevel = 2L)
-
-    return(hvg)
-  },
-  error = function(e) {
-    logThis(msg = paste("Seurat HVG failed with", nrow(rawData),
-                        "genes with the following error:"), logLevel = 1L)
-    logThis(msg = conditionMessage(e), logLevel = 1L)
-    return(NULL)
-  })
-}
-
 
 #' @details `cellsUMAPPlot()` returns a `ggplot2` plot where the given
 #'   *clusters* are placed on the base of their relative distance. Also if
@@ -387,58 +339,12 @@ cellsUMAPPlot <- function(objCOTAN,
     stop("Unrecognised `dataMethod` passed in: ", dataMethod)
   }
 
-  genesPos <- rep(TRUE, getNumGenes(objCOTAN))
-  if (length(genesSel) > 1L) {
-    genesPos <- getGenes(objCOTAN) %in% genesSel
-    logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
-  } else {
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE) &&
-        !isCoexAvailable(objCOTAN)) {
-      logThis(paste("The COEX matrix is not available: falling back",
-                    "to HVG_Seurat for genes' selection"), logLevel = 1L)
-      genesSel <- "HVG_Seurat"
-    }
-
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-      gdi <- getGDI(objCOTAN)
-      if (is_empty(gdi)) {
-        gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
-                                            rowsFraction = 0.05), "GDI")
-      }
-      if (sum(gdi >= 1.5) > numGenes) {
-        genesPos <-
-          seq_along(gdi) %in% order(gdi, decreasing = TRUE)[1L:numGenes]
-      } else {
-        genesPos <- gdi >= 1.4
-      }
-      rm(gdi)
-    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
-      condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
-      genesPos <-
-        getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
-                                          hvgMethod = "vst",
-                                          cond = condition,
-                                          numFeatures = numGenes)
-      rm(condition)
-    } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
-      condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
-      genesPos <-
-        getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
-                                          hvgMethod = "mean.var.plot",
-                                          cond = condition,
-                                          numFeatures = numGenes)
-      rm(condition)
-    } else {
-      stop("Unrecognised `genesSel` passed in: ", genesSel)
-    }
-    logThis(paste("Selected", sum(genesPos), "genes using",
-                  genesSel, "selector"), logLevel = 2L)
-  }
-
-  cellsMatrix <- cellsMatrix[genesPos, ]
+  selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
+                                 numFeatures = numFeatures)
+  cellsMatrix <- cellsMatrix[selectedGenes, ]
 
   logThis("Elaborating PCA - START", logLevel = 3L)
-  cellsPCA <- runPCA(x = t(cellsMatrix), rank = 50L,
+  cellsPCA <- runPCA(x = t(cellsMatrix), rank = 25L,
                      BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
 
   gc()

@@ -1,15 +1,108 @@
+# --------------------- Uniform Clusters ----------------------
+
+#' @title Uniform Clusters
+#'
+#' @description This group of functions takes in input a `COTAN` object and
+#'   handle the task of dividing the dataset into **Uniform Clusters**, that is
+#'   *clusters* that have an homogeneous genes' expression. This condition is
+#'   checked by calculating the `GDI` of the *cluster* and verifying that no
+#'   more than a small fraction of the genes have their `GDI` level above the
+#'   given `GDIThreshold`
+#'
+#' @name UniformClusters
+NULL
+
+
+## -------- Genes selector -------
+
+#' @details `genesSelector()` selects the *most representative* genes of the
+#'   `data.set`
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param genesSel Decides whether and how to perform the gene-selection. used
+#'   for the clustering. It is a string indicating one of the following
+#'   selection methods:
+#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'     via the \pkg{Seurat} package (the default method)
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param numFeatures The number of genes to return
+#'
+#' @returns `genesSelector()` returns an array with the genes' names
+#'
+#' @export
+#'
+#' @importFrom stringr str_equal
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom Seurat CreateSeuratObject
+#' @importFrom Seurat NormalizeData
+#' @importFrom Seurat FindVariableFeatures
+#' @importFrom Seurat VariableFeatures
+#'
+#' @rdname UniformClusters
+
+genesSelector <- function(objCOTAN, genesSel, numFeatures = 2000L) {
+  logThis("Running genes' selection: START", logLevel = 2L)
+
+  numFeatures <- min(2000L, nrow(rawData))
+  selectedGenes <- NULL
+
+  if (length(genesSel) > 1L) {
+    selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% genesSel]
+    logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
+  } else {
+    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
+      gdi <- getGDI(objCOTAN)
+      if (is_empty(gdi)) {
+        gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
+                                            rowsFraction = 0.05), "GDI")
+      }
+      if (sum(gdi >= 1.5) > numFeatures) {
+        selectedGenes <-
+          names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numFeatures)]
+      } else {
+        selectedGenes <- names(gdi)[gdi >= 1.4]
+      }
+      rm(gdi)
+    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE) ||
+               str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
+      srat <- CreateSeuratObject(counts = ,
+                                 project = "genes_selections")
+      srat <- NormalizeData(srat)
+
+      useVST <- str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)
+      srat <- FindVariableFeatures(
+        srat, nfeatures = numFeatures,
+        selection.method = ifelse(useVST, "vst", "mean.var.plot"))
+
+      selectedGenes <- VariableFeatures(object = srat)
+    } else {
+      stop("Unrecognised `genesSel` passed in: ", genesSel)
+    }
+    logThis(paste("Selected", length(selectedGenes), "genes using",
+                  genesSel, "selector"), logLevel = 3L)
+  }
+
+  logThis("Running genes' selection: DONE", logLevel = 2L)
+
+  return(selectedGenes)
+}
+
+
+### ------ Seurat Clustering -------
 
 #' @title Get a clusterization running the `Seurat` package
 #'
-#' @description The function uses the [Seurat-package] to clusterize the given
+#' @description The function uses the \pkg{Seurat} to clusterize the given
 #'   counts raw data.
 #'
 #' @details The parameter resolution is set at 0.5 initially, but in case of too
 #'   few clusters it can be raised up to 2.5.
 #'
 #' @param rawData The raw counts
-#' @param cond The sample condition
-#' @param iter The current iteration
 #' @param initialResolution The resolution to use at first in the
 #'   *clusterization* algorithm
 #' @param minNumClusters The minimum number of *clusters* expected from this
@@ -20,105 +113,58 @@
 #'   selection methods:
 #'   * `"HGDI"` Will pick-up the genes with highest **GDI**
 #'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'     via the \pkg{Seurat} package (the default method)
+#'   via the \pkg{Seurat} package (the default method)
 #'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
-#' @param cores number of cores to use. Default is 1.
-#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
-#'   library to run the matrix calculations. Otherwise, or when the library is
-#'   not available will run the slower legacy code
-#' @param deviceStr On the `torch` library enforces which device to use to run
-#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
-#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
-#'   to a specific device
-#' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
-#'   plots to file
-#' @param outDirCond an existing directory for the analysis output.
+#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#'  @param numPCAComp the number of calculated **PCA** components
 #'
-#' @returns a list with a `Seurat` object along a Boolean on whether maximum
-#'   resolution has been used
+#' @returns a list with a `Seurat` *clusterization*, along a Boolean on whether
+#'   maximum resolution has been used
 #'
 #' @importFrom Seurat CreateSeuratObject
 #' @importFrom Seurat NormalizeData
-#' @importFrom Seurat FindVariableFeatures
 #' @importFrom Seurat ScaleData
-#' @importFrom Seurat VariableFeatures
-#' @importFrom Seurat `VariableFeatures<-`
 #' @importFrom Seurat RunPCA
 #' @importFrom Seurat FindNeighbors
 #' @importFrom Seurat FindClusters
-#' @importFrom Seurat RunUMAP
-#' @importFrom Seurat DimPlot
 #' @importFrom Seurat Cells
 #' @importFrom Seurat FetchData
 #'
-#' @importFrom grDevices pdf
-#' @importFrom grDevices dev.off
-#' @importFrom grDevices dev.cur
-#'
-#' @importFrom ggplot2 annotate
-#'
-#' @importFrom withr with_options
 #'
 #' @noRd
 #'
-seuratClustering <- function(rawData, cond, iter,
-                             initialResolution, minNumClusters, genesSel,
-                             cores, optimizeForSpeed, deviceStr,
-                             saveObj, outDirCond) {
+seuratClustering <- function(objCOTAN,
+                             selectedGenes, numPCAComp = 25L,
+                             initialResolution, minNumClusters) {
   tryCatch({
     logThis("Creating Seurat object: START", logLevel = 2L)
 
-    srat <- CreateSeuratObject(counts = rawData,
-                               project = paste0(cond, "_reclustering_", iter),
-                               min.cells = if (iter == 1L) 3L else 1L,
-                               min.features = if (iter == 1L) 4L else 2L)
+    srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
+                               project = "genes_selections")
     srat <- NormalizeData(srat)
-
-    numFeatures <- min(2000L, nrow(rawData))
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-      obj <- COTAN(rawData)
-      obj <- proceedToCoex(obj, calcCoex = TRUE, cores = cores,
-                           optimizeForSpeed = optimizeForSpeed,
-                           deviceStr = deviceStr,
-                           saveObj = FALSE, outDir = outDirCond)
-      gdi <- getColumnFromDF(calculateGDI(obj, statType = "S",
-                                          rowsFraction = 0.05), "GDI")
-      VariableFeatures(object = srat) <-
-        names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numFeatures)]
-      rm(gdi, obj)
-    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
-      srat <- FindVariableFeatures(srat, nfeatures = numFeatures,
-                                   selection.method = "vst")
-    } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
-      srat <- FindVariableFeatures(srat, nfeatures = numFeatures,
-                                   selection.method = "mean.var.plot")
-    } else {
-      stop("Unrecognised `genesSel` passed in: ", genesSel)
-    }
 
     srat <- ScaleData(srat, features = rownames(srat))
 
-    maxRows <- length(Cells(srat)) - 1L
-    srat <- RunPCA(srat, features = VariableFeatures(object = srat),
-                   npcs = min(50L, maxRows))
+    numPCAComp <- min(numPCAComp, length(Cells(srat)) - 1L)
+    srat <- RunPCA(srat, features = selectedGenes, npcs = numPCAComp)
 
-    srat <- FindNeighbors(srat, dims = seq_len(min(25L, maxRows)))
+    pca <- Embeddings(srat, reduction = "pca")  # matrix [cells x PCs]
+
+    srat <- FindNeighbors(srat, dims = seq_len(numPCAComp))
 
     resolution <- initialResolution
     resolutionStep <- 0.5
     maxResolution <- initialResolution + 10.0 * resolutionStep
+
+    seuratClusters <- NULL
     usedMaxResolution <- FALSE
     repeat {
-      srat <- FindClusters(srat, resolution = resolution, algorithm = 2L)
-
-      seuratClusters <-
-        getColumnFromDF(FetchData(srat, vars = "seurat_clusters"),
-                        colName = "seurat_clusters")
+      seuratClusters <- Idents(FindClusters(srat, resolution = resolution,
+                                            algorithm = 2L)) # Louvain (refined)
 
       # The next lines are necessary to make cluster smaller while
       # the number of residual cells decrease and to stop clustering
-      # if the algorithm gives too many singletons.
+      # if the algorithm has gone for too long
       usedMaxResolution <- (resolution + 0.1 * resolutionStep) > maxResolution
       if (nlevels(seuratClusters) > minNumClusters || usedMaxResolution) {
         break
@@ -134,61 +180,25 @@ seuratClustering <- function(rawData, cond, iter,
     logThis(paste("Used resolution for Seurat clusterization is:", resolution),
             logLevel = 2L)
 
-    # disable annoying warning about Seurat::RunUMAP()
-    srat <- with_options(list(Seurat.warn.umap.uwot = FALSE),
-                         RunUMAP(srat, umap.method = "uwot", metric = "cosine",
-                                 dims = 1L:min(c(50L, maxRows))))
-
-    if (isTRUE(saveObj)) tryCatch({
-        outFile <- file.path(outDirCond, paste0("pdf_umap_", iter, ".pdf"))
-        logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
-        pdf(outFile)
-
-        if (iter == 1L) {
-          plot(DimPlot(srat, reduction = "umap", label = FALSE,
-                       group.by = "orig.ident"))
-        }
-
-        plot(DimPlot(srat, reduction = "umap", label = TRUE) +
-             annotate(geom = "text", x = 0.0, y = 30.0, color = "black",
-                      label = paste0("Cells number: ", ncol(rawData), "\n",
-                                     "Cl. resolution: ", resolution)))
-      }, error = function(err) {
-        logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)
-      }, finally = {
-        # Check for active device
-        if (dev.cur() > 1L) {
-          dev.off()
-        }
-      })
-    gc()
-
     logThis("Creating Seurat object: DONE", logLevel = 2L)
 
+    rm(srat)
+    gc()
+
     # returned objects
-    return(list("SeuratObj" = srat, "UsedMaxResolution" = usedMaxResolution))
+    return(list("SeuratClusters" = seuratClusters, "PCA" = pca,
+                "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
     logThis(msg = paste("Seurat clusterization failed with", ncol(rawData),
                         "cells with the following error:"), logLevel = 1L)
     logThis(msg = conditionMessage(e), logLevel = 1L)
-    return(list("SeuratObj" = NULL, "UsedMaxResolution" = FALSE))
+    return(list("SeuratClusters" = NULL, "PCA" = NULL,
+                "UsedMaxResolution" = FALSE))
   })
 }
 
-# --------------------- Uniform Clusters ----------------------
-
-#' @title Uniform Clusters
-#'
-#' @description This group of functions takes in input a `COTAN` object and
-#'   handle the task of dividing the dataset into **Uniform Clusters**, that is
-#'   *clusters* that have an homogeneous genes' expression. This condition is
-#'   checked by calculating the `GDI` of the *cluster* and verifying that no
-#'   more than a small fraction of the genes have their `GDI` level above the
-#'   given `GDIThreshold`
-#'
-#' @name UniformClusters
-NULL
+## -------- Cells Uniform Clustering --------
 
 #' @details `cellsUniformClustering()` finds a **Uniform** *clusterizations* by
 #'   means of the `GDI`. Once a preliminary *clusterization* is obtained from
@@ -267,6 +277,14 @@ NULL
 #' @importFrom methods new
 #' @importFrom methods validObject
 #'
+#' @importFrom grDevices pdf
+#' @importFrom grDevices dev.off
+#' @importFrom grDevices dev.cur
+#'
+#' @importFrom ggplot2 annotate
+#'
+#' @importFrom withr with_options
+#'
 #' @rdname UniformClusters
 #'
 
@@ -339,38 +357,59 @@ cellsUniformClustering <- function(objCOTAN,
                   sum(is.na(outputClusters)), "cells belonging to",
                   numClustersToRecluster, "clusters"), logLevel = 2L)
 
+    # create COTAN sub-object
+    cellsToDrop <- getCells(objCOTAN)[!is.na(outputClusters)]
+    subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
+
+    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
+      subObj <-
+        proceedToCoex(subObj, calcCoex = TRUE, cores = cores,
+                      optimizeForSpeed = optimizeForSpeed,
+                      deviceStr = deviceStr,
+                      saveObj = FALSE, outDir = outDirCond)
+    }
+
+    selectedGenes <- genesSelector(subObj, genesSel = genesSel,
+                                   numFeatures = 2000L)
+
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
-    c(objSeurat, usedMaxResolution) %<-%
-      seuratClustering(rawData = getRawData(objCOTAN)[, is.na(outputClusters)],
-                       cond = cond, iter = iter,
+    c(testClusters, pca, usedMaxResolution) %<-%
+      seuratClustering(subObj, selectedGenes = selectedGenes, numPCAComp = 25L,
                        initialResolution = initialResolution,
-                       minNumClusters = minNumClusters, genesSel = genesSel,
-                       cores = cores, optimizeForSpeed = optimizeForSpeed,
-                       deviceStr = deviceStr,
-                       saveObj = saveObj, outDirCond = splitOutDir)
+                       minNumClusters = minNumClusters)
 
-    if (is_null(objSeurat)) {
+    if (is_null(testClusters)) {
       logThis(paste("NO new possible uniform clusters!",
                     "Unclustered cell left:", sum(is.na(outputClusters))),
               logLevel = 1L)
       break
     }
 
-    if (saveSeuratObj && iter == 1L) tryCatch({
-      # save the Seurat object to file to be reloaded later
-      saveRDS(objSeurat,
-              file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
-      },
-      error = function(err) {
-        logThis(paste("While saving seurat object", err), logLevel = 1L)
-      })
+    ## print umap graph
+    if (isTRUE(saveObj)) tryCatch({
+      outFile <- file.path(outDirCond, paste0("pdf_umap_", iter, ".pdf"))
+      logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
+      pdf(outFile)
 
-    testClusters <-
-      asClusterization(FetchData(objSeurat, vars = "seurat_clusters"))
+      if (iter == 1L) {
+        plot(UMAPPlot(dataIn = pca,
+                      clusters = getCondition(subObj),
+                      title = paste0("Cells number: ", nrow(pca))))
+      }
 
-    rm(objSeurat)
-    gc()
+      plot(UMAPPlot(dataIn = pca,
+                    clusters = testClusters,
+                    title = paste0("Cells number: ", nrow(pca), "\n",
+                                   "Cl. resolution: ", resolution)))
+    }, error = function(err) {
+      logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)
+    }, finally = {
+      # Check for active device
+      if (dev.cur() > 1L) {
+        dev.off()
+      }
+    })
 
     # Step 2
 
@@ -389,60 +428,71 @@ cellsUniformClustering <- function(objCOTAN,
 
     globalClName <- ""
 
-    for (clName in names(testClList)) {
-      logThis("*", logLevel = 1L, appendLF = FALSE)
-      logThis(paste0(" checking uniformity of cluster '", clName,
-                     "' of ", length(testClList), " clusters"),
-              logLevel = 2L)
+    minimumUTClusterSize <- 20L
+    maxClusterSize <- max(lengths(testClList))
 
-      globalClName <-
-        paste0(str_pad(iter, width = 2L, pad = "0"), "_",
-               str_pad(clName, width = 4L, pad = "0"))
+    if (maxClusterSize >= minimumUTClusterSize) {
+      for (clName in names(testClList)) {
+        logThis("*", logLevel = 1L, appendLF = FALSE)
+        logThis(paste0(" checking uniformity of cluster '", clName,
+                       "' of ", length(testClList), " clusters"),
+                logLevel = 2L)
 
-      cells <- testClList[[clName]]
-      if (length(cells) < 20L) {
-        logThis(paste("cluster", globalClName, "has too few cells:",
-                      "will be reclustered!"), logLevel = 2L)
+        globalClName <-
+          paste0(str_pad(iter, width = 2L, pad = "0"), "_",
+                 str_pad(clName, width = 4L, pad = "0"))
 
-        numClustersToRecluster <- numClustersToRecluster + 1L
-        cellsToRecluster <- c(cellsToRecluster, cells)
-      } else {
-        checkResults <- tryCatch(
-          checkClusterUniformity(objCOTAN = objCOTAN,
-                                 clusterName = globalClName,
-                                 cells = cells,
-                                 checker = checker,
-                                 cores = cores,
-                                 optimizeForSpeed = optimizeForSpeed,
-                                 deviceStr = deviceStr,
-                                 saveObj = saveObj,
-                                 outDir = splitOutDir),
-          error = function(err) {
-            logThis(paste("while checking cluster uniformity", err),
-                    logLevel = 0L)
-            logThis("marking cluster as not uniform", logLevel = 2L)
-            return(checker)
-          })
-
-        invisible(validObject(checkResults))
-
-        allCheckResults <- append(allCheckResults, checkResults)
-        names(allCheckResults)[length(allCheckResults)] <- globalClName
-
-        if (!checkResults@isUniform) {
-          logThis(paste("cluster", globalClName, "has too high GDI:",
+        cells <- testClList[[clName]]
+        if (length(cells) < 20L) {
+          logThis(paste("cluster", globalClName, "has too few cells:",
                         "will be reclustered!"), logLevel = 2L)
 
           numClustersToRecluster <- numClustersToRecluster + 1L
           cellsToRecluster <- c(cellsToRecluster, cells)
         } else {
-          logThis(paste("cluster", globalClName, "is uniform"), logLevel = 2L)
-        }
-        logThis("", logLevel = 2L)
+          checkResults <- tryCatch(
+            checkClusterUniformity(objCOTAN = objCOTAN,
+                                   clusterName = globalClName,
+                                   cells = cells,
+                                   checker = checker,
+                                   cores = cores,
+                                   optimizeForSpeed = optimizeForSpeed,
+                                   deviceStr = deviceStr,
+                                   saveObj = saveObj,
+                                   outDir = splitOutDir),
+            error = function(err) {
+              logThis(paste("while checking cluster uniformity", err),
+                      logLevel = 0L)
+              logThis("marking cluster as not uniform", logLevel = 2L)
+              return(checker)
+            })
 
-        rm(checkResults)
-        gc()
+          invisible(validObject(checkResults))
+
+          allCheckResults <- append(allCheckResults, checkResults)
+          names(allCheckResults)[length(allCheckResults)] <- globalClName
+
+          if (!checkResults@isUniform) {
+            logThis(paste("cluster", globalClName, "has too high GDI:",
+                          "will be reclustered!"), logLevel = 2L)
+
+            numClustersToRecluster <- numClustersToRecluster + 1L
+            cellsToRecluster <- c(cellsToRecluster, cells)
+          } else {
+            logThis(paste("cluster", globalClName, "is uniform"), logLevel = 2L)
+          }
+          logThis("", logLevel = 2L)
+
+          rm(checkResults)
+          gc()
+        }
       }
+    } else {
+      # all clusters are too small: nothing to do
+      logThis(paste("All clusters in iteration ", iter, "have too few cells"),
+              logLevel = 2L)
+      numClustersToRecluster <- length(testClList)
+      cellsToRecluster <- allCells
     }
 
     logThis("", logLevel = 1L)
@@ -455,7 +505,7 @@ cellsUniformClustering <- function(objCOTAN,
       # Another iteration can be attempted as the minimum number of clusters
       # will be higher. This happens unless the resolution already reached
       # its maximum. In the latter case we simply stop here.
-      if (isTRUE(usedMaxResolution)) {
+      if (isTRUE(usedMaxResolution) || maxClusterSize < minimumUTClusterSize) {
         logThis("Max resolution reached", logLevel = 1L)
         if (iterReset != -1L) {
           logThis("Cannot clusterize anything more", logLevel = 2L)
@@ -507,7 +557,9 @@ cellsUniformClustering <- function(objCOTAN,
               logLevel = 1L)
       break
     }
+
     rm(cellsToRecluster)
+    gc()
   } # End repeat
 
   logThis(paste("The final raw clusterization contains [",
@@ -561,47 +613,11 @@ cellsUniformClustering <- function(objCOTAN,
   if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(outDirCond, "split_check_results.csv")
       write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
-
-      if (saveSeuratObj) {
-        clusterizationName <-
-          paste0(as.roman(length(getClusterizations(objCOTAN)) + 1L))
-
-        srat <-
-          readRDS(file.path(outDirCond, "Seurat_obj_with_cotan_clusters.RDS"))
-
-        if (!setequal(rownames(srat@meta.data), names(outputClusters))) {
-          warning("List of cells got corrupted")
-          return(outputList)
-        }
-
-        srat@meta.data <-
-          setColumnInDF(srat@meta.data,
-                        colToSet = outputClusters[rownames(srat@meta.data)],
-                        colName = paste0("COTAN_", clusterizationName))
-
-        if (!dim(srat)[[2L]] == getNumCells(objCOTAN)) {
-          warning("Number of cells got wrong")
-          return(outputList)
-        }
-
-        logThis("Cluster, UMAP and Saving the Seurat dataset", logLevel = 2L)
-
-        srat <- FindNeighbors(srat, dims = 1L:25L)
-        srat <- FindClusters(srat, resolution = 0.5, algorithm = 2L)
-        srat <- RunUMAP(srat, umap.method = "uwot",
-                        metric = "cosine", dims = 1L:25L)
-
-        saveRDS(srat, file.path(outDirCond,
-                                "Seurat_obj_with_cotan_clusters.RDS"))
-      }
     },
     error = function(err) {
-      logThis(paste("While saving seurat object", err), logLevel = 1L)
+      logThis(paste("While saving results csv", err), logLevel = 1L)
     }
   )
-
-  rm(srat)
-  gc()
 
   logThis("Creating cells' uniform clustering: DONE", logLevel = 2L)
 
