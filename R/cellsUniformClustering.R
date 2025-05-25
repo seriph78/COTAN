@@ -12,86 +12,6 @@
 #' @name UniformClusters
 NULL
 
-
-## -------- Genes selector -------
-
-#' @details `genesSelector()` selects the *most representative* genes of the
-#'   `data.set`
-#'
-#' @param objCOTAN a `COTAN` object
-#' @param genesSel Decides whether and how to perform the gene-selection. used
-#'   for the clustering. It is a string indicating one of the following
-#'   selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'     via the \pkg{Seurat} package (the default method)
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
-#' @param numFeatures The number of genes to return
-#'
-#' @returns `genesSelector()` returns an array with the genes' names
-#'
-#' @export
-#'
-#' @importFrom stringr str_equal
-#'
-#' @importFrom assertthat assert_that
-#'
-#' @importFrom Seurat CreateSeuratObject
-#' @importFrom Seurat NormalizeData
-#' @importFrom Seurat FindVariableFeatures
-#' @importFrom Seurat VariableFeatures
-#'
-#' @rdname UniformClusters
-
-genesSelector <- function(objCOTAN, genesSel, numFeatures = 2000L) {
-  logThis("Running genes' selection: START", logLevel = 2L)
-
-  numFeatures <- min(2000L, getNumGenes(objCOTAN))
-  selectedGenes <- NULL
-
-  if (length(genesSel) > 1L) {
-    selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% genesSel]
-    logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
-  } else {
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-      gdi <- getGDI(objCOTAN)
-      if (is_empty(gdi)) {
-        gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
-                                            rowsFraction = 0.05), "GDI")
-      }
-      if (sum(gdi >= 1.5) > numFeatures) {
-        selectedGenes <-
-          names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numFeatures)]
-      } else {
-        selectedGenes <- names(gdi)[gdi >= 1.4]
-      }
-      rm(gdi)
-    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE) ||
-               str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
-      srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
-                                 project = "genes_selections")
-      srat <- NormalizeData(srat)
-
-      useVST <- str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)
-      srat <- FindVariableFeatures(
-        srat, nfeatures = numFeatures,
-        selection.method = ifelse(useVST, "vst", "mean.var.plot"))
-
-      selectedGenes <- VariableFeatures(object = srat)
-    } else {
-      stop("Unrecognised `genesSel` passed in: ", genesSel)
-    }
-    logThis(paste("Selected", length(selectedGenes), "genes using",
-                  genesSel, "selector"), logLevel = 3L)
-  }
-
-  logThis("Running genes' selection: DONE", logLevel = 2L)
-
-  return(selectedGenes)
-}
-
-
 ### ------ Seurat Clustering -------
 
 #' @title Get a clusterization running the `Seurat` package
@@ -239,14 +159,8 @@ seuratClustering <- function(objCOTAN,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param genesSel Decides whether and how to perform the gene-selection. used
-#'   for the clustering. It is a string indicating one of the following
-#'   selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'     via the \pkg{Seurat} package (the default method)
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param genesSel Decides whether and how to perform the gene-selection
+#'   (defaults to `"HVG_Seurat"`). See [genesSelector()] for more details.
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param initialClusters an existing *clusterization* to use as starting point:

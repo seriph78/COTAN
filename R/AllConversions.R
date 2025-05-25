@@ -16,7 +16,7 @@
 #'
 #'   newObj <- convertFromSingleCellExperiment(sce)
 #'
-#'   identical(getDims(newObj), getDims(obj))
+#'   stopifnot(identical(getDims(newObj), getDims(obj)))
 #'
 NULL
 

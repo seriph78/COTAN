@@ -4,7 +4,6 @@
 \name{UniformClusters}
 \alias{UniformClusters}
 \alias{GDIPlot}
-\alias{genesSelector}
 \alias{cellsUniformClustering}
 \alias{checkClusterUniformity}
 \alias{mergeUniformCellsClusters}
@@ -18,8 +17,6 @@ GDIPlot(
   GDIThreshold = 1.43,
   GDIIn = NULL
 )
-
-genesSelector(objCOTAN, genesSel, numFeatures = 2000L)
 
 cellsUniformClustering(
   objCOTAN,
@@ -88,19 +85,6 @@ chi-squared test statistics. "G" is G-test statistics}
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
 
-\item{genesSel}{Decides whether and how to perform the gene-selection. used
-for the clustering. It is a string indicating one of the following
-selection methods:
-\itemize{
-\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}
-\item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
-via the \pkg{Seurat} package (the default method)
-\item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability
-according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
-}}
-
-\item{numFeatures}{The number of genes to return}
-
 \item{checker}{the object that defines the method and the threshold to
 discriminate whether a \emph{cluster} is \emph{uniform transcript}. See
 \link{UniformTranscriptCheckers} for more details}
@@ -130,6 +114,9 @@ faster but less precise.}
 \item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+
+\item{genesSel}{Decides whether and how to perform the gene-selection
+(defaults to \code{"HVG_Seurat"}). See \code{\link[=genesSelector]{genesSelector()}} for more details.}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
@@ -174,8 +161,6 @@ where on the ordinates are the \code{GDI} levels and on the abscissa are the
 average gene expression (log scaled). Also marked are the given \emph{threshold}
 (in red) and the \eqn{50\%} and \eqn{75\%} quantiles (in blue).
 
-\code{genesSelector()} returns an array with the genes' names
-
 \code{cellsUniformClustering()} returns a \code{list} with 2 elements:
 \itemize{
 \item \code{"clusters"} the newly found cluster labels array
@@ -202,9 +187,6 @@ given \code{GDIThreshold}
 }
 \details{
 \code{GDIPlot()} directly evaluates and plots the \code{GDI} for a sample.
-
-\code{genesSelector()} selects the \emph{most representative} genes of the
-\code{data.set}
 
 \code{cellsUniformClustering()} finds a \strong{Uniform} \emph{clusterizations} by
 means of the \code{GDI}. Once a preliminary \emph{clusterization} is obtained from
@@ -258,10 +240,10 @@ plot(gdiPlot)
 ##
 
 checker <- new("AdvancedGDIUniformityCheck")
-identical(checker@firstCheck@GDIThreshold, 1.297)
+stopifnot(identical(checker@firstCheck@GDIThreshold, 1.297))
 
 checker2 <- shiftCheckerThresholds(checker, 0.1)
-identical(checker2@firstCheck@GDIThreshold, 1.397)
+stopifnot(identical(checker2@firstCheck@GDIThreshold, 1.397))
 
 splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
                                     optimizeForSpeed = TRUE,
@@ -286,7 +268,7 @@ objCOTAN <- addClusterization(objCOTAN,
                               coexDF = splitList[["coex"]],
                               override = FALSE)
 
-identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
+stopifnot(identical(reorderClusterization(objCOTAN)[["clusters"]], clusters))
 
 ## It is possible to pass a list of checkers tot the merge function that will
 ## be applied each to the *resulting* merged *clusterization* obtained using
@@ -310,6 +292,7 @@ objCOTAN <- addClusterization(objCOTAN,
                               coexDF = mergedList[["coex"]],
                               override = TRUE)
 
-identical(reorderClusterization(objCOTAN), mergedList[["clusters"]])
+stopifnot(identical(reorderClusterization(objCOTAN),
+                    mergedList[["clusters"]]))
 
 }

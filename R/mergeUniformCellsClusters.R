@@ -110,10 +110,10 @@
 #' ##
 #'
 #' checker <- new("AdvancedGDIUniformityCheck")
-#' identical(checker@firstCheck@GDIThreshold, 1.297)
+#' stopifnot(identical(checker@firstCheck@GDIThreshold, 1.297))
 #'
 #' checker2 <- shiftCheckerThresholds(checker, 0.1)
-#' identical(checker2@firstCheck@GDIThreshold, 1.397)
+#' stopifnot(identical(checker2@firstCheck@GDIThreshold, 1.397))
 #'
 #' splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
 #'                                     optimizeForSpeed = TRUE,
@@ -138,7 +138,7 @@
 #'                               coexDF = splitList[["coex"]],
 #'                               override = FALSE)
 #'
-#' identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
+#' stopifnot(identical(reorderClusterization(objCOTAN)[["clusters"]], clusters))
 #'
 #' ## It is possible to pass a list of checkers tot the merge function that will
 #' ## be applied each to the *resulting* merged *clusterization* obtained using
@@ -162,7 +162,8 @@
 #'                               coexDF = mergedList[["coex"]],
 #'                               override = TRUE)
 #'
-#' identical(reorderClusterization(objCOTAN), mergedList[["clusters"]])
+#' stopifnot(identical(reorderClusterization(objCOTAN),
+#'                     mergedList[["clusters"]]))
 #'
 #' @rdname UniformClusters
 #'

@@ -890,8 +890,11 @@ NULL
 #' partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
 #'                                          actOnCells = FALSE)
 #'
-#' identical(partialGenesCoex,
-#'           getGenesCoex(objCOTAN, getGenes(objCOTAN)[sort(genesSample)]))
+#' stopifnot(all(1e-6 >
+#'                 abs(partialGenesCoex -
+#'                       getGenesCoex(objCOTAN,
+#'                                    getGenes(objCOTAN)[sort(genesSample)],
+#'                                    zeroDiagonal = FALSE))))
 #'
 #' ## S <- calculateS(objCOTAN)
 #' ## G <- calculateG(objCOTAN)
@@ -919,13 +922,14 @@ NULL
 #'
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 #' stopifnot(isCoexAvailable(objCOTAN, actOnCells = TRUE, ignoreSync = TRUE))
-#' cellsCoex <- getCellsCoex(objCOTAN)
+#' cellsCoex <- getCellsCoex(objCOTAN, zeroDiagonal = FALSE)
 #'
 #' cellsSample <- sample(getNumCells(objCOTAN), 10)
 #' partialCellsCoex <- calculatePartialCoex(objCOTAN, cellsSample,
 #'                                          actOnCells = TRUE)
 #'
-#' identical(partialCellsCoex, cellsCoex[, sort(cellsSample)])
+#' stopifnot(all(1e-6 >
+#'                 abs(partialCellsCoex - cellsCoex[, sort(cellsSample)])))
 #'
 #' objCOTAN <- dropCellsCoex(objCOTAN)
 #' stopifnot(!isCoexAvailable(objCOTAN, actOnCells = TRUE))
@@ -1406,7 +1410,9 @@ NULL
 #' names(cellLine) <- getCells(objCOTAN)
 #' objCOTAN <- addCondition(objCOTAN, condName = "Line", conditions = cellLine)
 #'
-#' ##objCOTAN <- dropCondition(objCOTAN, "Genre")
+#' if (FALSE) {
+#'   objCOTAN <- dropCondition(objCOTAN, "Genre")
+#' }
 #'
 #' conditionsNames <- getAllConditions(objCOTAN)
 #'

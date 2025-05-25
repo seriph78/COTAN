@@ -231,40 +231,6 @@ UMAPPlot <- function(dataIn,
 
 # ------ cellsUMAPPlot -------
 
-getDataMatrix <- function(objCOTAN, dataMethod = "") {
-  if (isEmptyName(dataMethod)) {
-    dataMethod <- "LogNormalized"
-  }
-
-  binDiscr <- function(objCOTAN) {
-    zeroOne <- getZeroOneProj(objCOTAN)
-    probOne <- 1.0 - getProbabilityOfZero(objCOTAN)
-    return(zeroOne - probOne)
-  }
-
-  getLH <- function(objCOTAN, formula) {
-    return(calculateLikelihoodOfObserved(objCOTAN, formula))
-  }
-
-  dataMatrix <- as.matrix(switch(
-    dataMethod,
-    RW = , Raw      = , RawData                 = getRawData(objCOTAN),
-    NN = , NuNorm   = , Normalized              = getNuNormData(objCOTAN),
-    LN = , LogNorm  = , LogNormalized           = getLogNormData(objCOTAN),
-    BI = , Bin      = , Binarized               = getZeroOneProj(objCOTAN),
-    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN),
-    AB = , AdjBin   = , AdjBinarized            = abs(binDiscr(objCOTAN)),
-    LH = , Like     = , Likelihood              = getLH(objCOTAN, "raw"),
-    LL = , LogLike  = , LogLikelihood           = getLH(objCOTAN, "log"),
-    DL = , DerLogL  = , DerivativeLogLikelihood = getLH(objCOTAN, "der"),
-    SL = , SignLogL = , SignedLogLikelihood     = getLH(objCOTAN, "sLog"),
-    stop("Unrecognised `dataMethod` passed in: ", dataMethod)
-  ))
-
-  return(dataMatrix)
-}
-
-
 #' @details `cellsUMAPPlot()` returns a `ggplot2` plot where the given
 #'   *clusters* are placed on the base of their relative distance. Also if
 #'   needed calculates and stores the `DEA` of the relevant *clusterization*.
@@ -277,41 +243,13 @@ getDataMatrix <- function(objCOTAN, dataMethod = "") {
 #'   on the one indicated by `clName` that will only indicate the relevant
 #'   column name in the returned `data.frame`
 #' @param dataMethod selects the method to use to create the `data.frame` to
-#'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
-#'   gene based on available data/model, the following methods are supported:
-#'   * `"RW", "Raw", "RawData"` uses the *raw* counts
-#'   * `"NN", "NuNorm", "Normalized"` uses the \eqn{\nu}*-normalized* counts
-#'   * `"LN", "LogNorm", "LogNormalized"` uses the *log-normalized* counts
-#'   (default)
-#'   * `"BI", "Bin", "Binarized"` uses the *binarized* data matrix
-#'   * `"BD", "BinDiscr", "BinarizedDiscrepancy"` uses the *difference* between
-#'   the *binarized* data matrix and the estimated *probability of one*
-#'   * `"AB", "AdjBin", "AdjBinarized"` uses the absolute value of
-#'   the *binarized discrepancy* above
-#'   * `"LH", "Like", "Likelihood"` uses the *likelihood* of *binarized*
-#'   data matrix
-#'   * `"LL", "LogLike", "LogLikelihood"` uses the *log-likelihood*
-#'   of *binarized* data matrix
-#'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
-#'   the *log-likelihood* of *binarized* data matrix
-#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
-#'   of *binarized* data matrix
-#'
-#'   For the last four options see [calculateLikelihoodOfObserved()] for more
-#'   details
-#' @param genesSel Decides whether and how to perform gene-selection. It can be
-#'   a straight list of genes or a string indicating one of the following
-#'   selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**. Since it requires
-#'   an available `COEX` matrix it will fall-back to `"HVG_Seurat"` when the
-#'   matrix is not available
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'   via the \pkg{Seurat} package (the default method)
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
+#' @param numComp Number of components of the reduced `matrix`, it defaults to
+#'   25L.
+#' @param genesSel Decides whether and how to perform gene-selection. See
+#'   [genesSelector()] for more details.
 #' @param numGenes the number of genes to select using the above method. Will be
-#'   ignored when no selection have been asked or when an explicit list of genes
-#'   was passed in
+#'   ignored when an explicit list of genes has been passed in
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
@@ -323,8 +261,6 @@ getDataMatrix <- function(objCOTAN, dataMethod = "") {
 #'  * `"cellsPCA"` the `data.frame` PCA used to create the plot
 #'
 #' @importFrom rlang is_empty
-#'
-#' @importFrom stringr str_equal
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
@@ -339,7 +275,8 @@ cellsUMAPPlot <- function(objCOTAN,
                           clName = "",
                           clusters = NULL,
                           dataMethod = "",
-                          genesSel = "HVG_Seurat",
+                          numComp = 25L,
+                          genesSel = "",
                           numGenes = 2000L,
                           colors = NULL,
                           numNeighbors = 0L,
@@ -360,6 +297,9 @@ cellsUMAPPlot <- function(objCOTAN,
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
+  if (isEmptyName(genesSel)) {
+    genesSel <- "HGDI" # this default could differ from the one in the selector
+  }
   selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
                                  numFeatures = numFeatures)
   cellsMatrix <-
@@ -376,8 +316,12 @@ cellsUMAPPlot <- function(objCOTAN,
 
   logThis("Elaborating PCA - END", logLevel = 3L)
 
-  umapTitle <- paste("UMAP of clusterization", clName, "using", dataMethod,
-                     "matrix with", genesSel, "genes selector")
+  genesSel
+  umapTitle <- paste("UMAP of clusterization", clName,
+                     "using", dataMethod, "matrix with",
+                     ifelse(length(genesSel) == 1,
+                            paste(genesSel, "genes selector"),
+                            "user provided genes"))
   umapPlot <- UMAPPlot(cellsPCA,
                        clusters = clusters,
                        colors = colors,

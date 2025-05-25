@@ -99,7 +99,8 @@ cellsUMAPPlot(
   clName = "",
   clusters = NULL,
   dataMethod = "",
-  genesSel = "HVG_Seurat",
+  numComp = 25L,
+  genesSel = "",
   numGenes = 2000L,
   colors = NULL,
   numNeighbors = 0L,
@@ -231,47 +232,16 @@ colors are given it will complete the list using colors from
 \item{minPointsDist}{Overrides the default \code{min_dist} value}
 
 \item{dataMethod}{selects the method to use to create the \code{data.frame} to
-pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. To calculate, for each cell, a statistic for each
-gene based on available data/model, the following methods are supported:
-\itemize{
-\item \verb{"RW", "Raw", "RawData"} uses the \emph{raw} counts
-\item \verb{"NN", "NuNorm", "Normalized"} uses the \eqn{\nu}\emph{-normalized} counts
-\item \verb{"LN", "LogNorm", "LogNormalized"} uses the \emph{log-normalized} counts
-(default)
-\item \verb{"BI", "Bin", "Binarized"} uses the \emph{binarized} data matrix
-\item \verb{"BD", "BinDiscr", "BinarizedDiscrepancy"} uses the \emph{difference} between
-the \emph{binarized} data matrix and the estimated \emph{probability of one}
-\item \verb{"AB", "AdjBin", "AdjBinarized"} uses the absolute value of
-the \emph{binarized discrepancy} above
-\item \verb{"LH", "Like", "Likelihood"} uses the \emph{likelihood} of \emph{binarized}
-data matrix
-\item \verb{"LL", "LogLike", "LogLikelihood"} uses the \emph{log-likelihood}
-of \emph{binarized} data matrix
-\item \verb{"DL", "DerLogL", "DerivativeLogLikelihood"} uses the \emph{derivative} of
-the \emph{log-likelihood} of \emph{binarized} data matrix
-\item \verb{"SL", "SignLogL", "SignedLogLikelihood"} uses the \emph{signed log-likelihood}
-of \emph{binarized} data matrix
-}
+pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.}
 
-For the last four options see \code{\link[=calculateLikelihoodOfObserved]{calculateLikelihoodOfObserved()}} for more
-details}
+\item{numComp}{Number of components of the reduced \code{matrix}, it defaults to
+25L.}
 
-\item{genesSel}{Decides whether and how to perform gene-selection. It can be
-a straight list of genes or a string indicating one of the following
-selection methods:
-\itemize{
-\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}. Since it requires
-an available \code{COEX} matrix it will fall-back to \code{"HVG_Seurat"} when the
-matrix is not available
-\item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
-via the \pkg{Seurat} package (the default method)
-\item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability
-according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
-}}
+\item{genesSel}{Decides whether and how to perform gene-selection. See
+\code{\link[=genesSelector]{genesSelector()}} for more details.}
 
 \item{numGenes}{the number of genes to select using the above method. Will be
-ignored when no selection have been asked or when an explicit list of genes
-was passed in}
+ignored when an explicit list of genes has been passed in}
 
 \item{groupMarkers}{an optional named \code{list} with an element for each group
 comprised of one or more marker genes}

@@ -99,6 +99,75 @@ calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
   )
 }
 
+#' @details `getDataMatrix()` gives for each cell and each gene the result of
+#'   the selected formula as function of the observed counts and their expected
+#'   value
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
+#'   gene based on available data/model, the following methods are supported:
+#'   * `"RW", "Raw", "RawData"` uses the *raw* counts
+#'   * `"NN", "NuNorm", "Normalized"` uses the \eqn{\nu}*-normalized* counts
+#'   * `"LN", "LogNorm", "LogNormalized"` uses the *log-normalized* counts
+#'   (default)
+#'   * `"BI", "Bin", "Binarized"` uses the *binarized* data matrix
+#'   * `"BD", "BinDiscr", "BinarizedDiscrepancy"` uses the *difference* between
+#'   the *binarized* data matrix and the estimated *probability of one*
+#'   * `"AB", "AdjBin", "AdjBinarized"` uses the absolute value of
+#'   the *binarized discrepancy* above
+#'   * `"LH", "Like", "Likelihood"` uses the *likelihood* of *binarized*
+#'   data matrix
+#'   * `"LL", "LogLike", "LogLikelihood"` uses the *log-likelihood*
+#'   of *binarized* data matrix
+#'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
+#'   the *log-likelihood* of *binarized* data matrix
+#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
+#'   of *binarized* data matrix
+#'
+#'   For the last four options see [calculateLikelihoodOfObserved()] for more
+#'   details
+#'
+#' @returns `getDataMatrix()` returns a `matrix` with the same shape as the
+#'   *raw* data
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+getDataMatrix <- function(objCOTAN, dataMethod = "") {
+  if (isEmptyName(dataMethod)) {
+    dataMethod <- "LogNormalized"
+  }
+
+  binDiscr <- function(objCOTAN) {
+    zeroOne <- getZeroOneProj(objCOTAN)
+    probOne <- 1.0 - getProbabilityOfZero(objCOTAN)
+    return(zeroOne - probOne)
+  }
+
+  getLH <- function(objCOTAN, formula) {
+    return(calculateLikelihoodOfObserved(objCOTAN, formula))
+  }
+
+  dataMatrix <- as.matrix(switch(
+    dataMethod,
+    RW = , Raw      = , RawData                 = getRawData(objCOTAN),
+    NN = , NuNorm   = , Normalized              = getNuNormData(objCOTAN),
+    LN = , LogNorm  = , LogNormalized           = getLogNormData(objCOTAN),
+    BI = , Bin      = , Binarized               = getZeroOneProj(objCOTAN),
+    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN),
+    AB = , AdjBin   = , AdjBinarized            = abs(binDiscr(objCOTAN)),
+    LH = , Like     = , Likelihood              = getLH(objCOTAN, "raw"),
+    LL = , LogLike  = , LogLikelihood           = getLH(objCOTAN, "log"),
+    DL = , DerLogL  = , DerivativeLogLikelihood = getLH(objCOTAN, "der"),
+    SL = , SignLogL = , SignedLogLikelihood     = getLH(objCOTAN, "sLog"),
+    stop("Unrecognised `dataMethod` passed in: ", dataMethod)
+  ))
+
+  return(dataMatrix)
+}
+
 
 #' @details `observedContingencyTablesYY()` calculates observed *Yes/Yes* field
 #'   of the contingency table
@@ -1497,4 +1566,165 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
   logThis("Calculating G: DONE", logLevel = 2L)
 
   return(G)
+}
+
+
+
+## -------- Genes selector -------
+
+#' @details `genesSelector()` selects the *most representative* genes of the
+#'   `data.set`
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param genesSel Decides whether and how to perform the gene-selection. used
+#'   for the clustering and the `UMAP`. It is a string indicating one of the
+#'   following selection methods:
+#'   * `"HGDI"` Will pick-up the genes with highest **GDI** (the default method)
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'   via the \pkg{Seurat} package
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param numGenes the number of genes to select using the above method. Will be
+#'   ignored when an explicit list of genes has been passed in
+#'
+#' @returns `genesSelector()` returns an array with the genes' names
+#'
+#' @export
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom Seurat CreateSeuratObject
+#' @importFrom Seurat NormalizeData
+#' @importFrom Seurat FindVariableFeatures
+#' @importFrom Seurat VariableFeatures
+#'
+#' @rdname CalculatingCOEX
+
+genesSelector <- function(objCOTAN, genesSel = "", numFeatures = 2000L) {
+  logThis("Running genes' selection: START", logLevel = 2L)
+
+  numFeatures <- min(2000L, getNumGenes(objCOTAN))
+  selectedGenes <- NULL
+
+  getHighestGDIGenes <- function(objCOTAN, numFeatures) {
+    gdi <- getGDI(objCOTAN)
+    if (is_empty(gdi)) {
+      gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
+                                          rowsFraction = 0.05), "GDI")
+    }
+
+    if (sum(gdi >= 1.5) > numFeatures) {
+      return(names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numFeatures)])
+    } else {
+      return(names(gdi)[gdi >= 1.4])
+    }
+  }
+
+  getHighestVariableGenes <- function(rawData, numFeatures, useVST) {
+    srat <- CreateSeuratObject(counts = rawData, project = "genes_selections")
+    srat <- NormalizeData(srat)
+
+    srat <- FindVariableFeatures(
+      srat, nfeatures = numFeatures,
+      selection.method = ifelse(useVST, "vst", "mean.var.plot"))
+
+    return(VariableFeatures(object = srat))
+  }
+
+  if (length(genesSel) > 1L) {
+    assert_that(all(genesSel %in% getGenes(objCOTAN)),
+                msg = "Passed genes are not a subset of the relevant ones")
+
+    selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% genesSel]
+
+    logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
+  } else {
+    if (isEmptyName(genesSel)) {
+      genesSel = "HGDI"
+    }
+
+    selectedGenes <- switch(
+      genesSel,
+      HGDI = getHighestGDIGenes(objCOTAN, numFeatures),
+      HVG_Seurat = , vst =
+        getHighestVariableGenes(objCOTAN, numFeatures, TRUE),
+      HVG_Scanpy = , mean.var.plot =
+        getHighestVariableGenes(objCOTAN, numFeatures, FALSE),
+      stop("Unrecognised `genesSel` passed in: ", genesSel)
+    )
+
+    logThis(paste("Selected", length(selectedGenes), "genes using",
+                  genesSel, "selector"), logLevel = 3L)
+  }
+
+  logThis("Running genes' selection: DONE", logLevel = 2L)
+
+  return(selectedGenes)
+}
+
+
+#' @details `calculateReducedDataMatrix()` calculates the reduced data-matrix to
+#'   be used for *clusterizations* or `UMAP` plots.
+#'
+#'   It uses the given `dataMethod` to determine with which data to start, then,
+#'   depending on the value of `useCoexEigen`, either uses the `genesSel` to
+#'   restrict evaluation to the relevant genes' before the `PCA` is run, or it
+#'   calculates the first **COEX** eigenvectors and projects the data matrix to
+#'   their sub-space.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
+#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
+#'   the data `matrix` to the selected genes before applying the `PCA` reduction
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
+#'   gene based on available data/model, the following methods are supported:
+#'   * `"RW", "Raw", "RawData"` uses the *raw* counts
+#'   * `"NN", "NuNorm", "Normalized"` uses the \eqn{\nu}*-normalized* counts
+#'   * `"LN", "LogNorm", "LogNormalized"` uses the *log-normalized* counts
+#'   (default)
+#'   * `"BI", "Bin", "Binarized"` uses the *binarized* data matrix
+#'   * `"BD", "BinDiscr", "BinarizedDiscrepancy"` uses the *difference* between
+#'   the *binarized* data matrix and the estimated *probability of one*
+#'   * `"AB", "AdjBin", "AdjBinarized"` uses the absolute value of
+#'   the *binarized discrepancy* above
+#'   * `"LH", "Like", "Likelihood"` uses the *likelihood* of *binarized*
+#'   data matrix
+#'   * `"LL", "LogLike", "LogLikelihood"` uses the *log-likelihood*
+#'   of *binarized* data matrix
+#'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
+#'   the *log-likelihood* of *binarized* data matrix
+#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
+#'   of *binarized* data matrix
+#'
+#'   For the last four options see [calculateLikelihoodOfObserved()] for more
+#'   details
+#' @param numComp Number of components of the reduced `matrix`, it defaults to
+#'   25L.
+#' @param genesSel Decides whether and how to perform the gene-selection. used
+#'   for the clustering and the `UMAP`. It is a string indicating one of the
+#'   following selection methods:
+#'   * `"HGDI"` Will pick-up the genes with highest **GDI** (the default method)
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'   via the \pkg{Seurat} package
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param numGenes the number of genes to select using the above method. Will be
+#'   ignored when an explicit list of genes has been passed in
+#'
+#' @returns `calculateReducedDataMatrix()` returns the reduced matrix. The
+#'   returned `matrix` has dimensions: (number of cells, number of components)
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+calculateReducedDataMatrix <-
+  function(objCOTAN, useCoexEigen = FALSE,
+           dataMethod = "", numComp = 25L,
+           genesSel = "", numGenes = 2000L) {
+  stop("Not implemented yet")
 }
