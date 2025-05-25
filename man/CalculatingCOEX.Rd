@@ -162,13 +162,13 @@ otherwise for the genes}
 actually returned. Supported formulas are:
 \itemize{
 \item \code{"raw"} just the likelihood (default):
-\eqn{(1.0 - z) * p + z * (1.0 - p)}
+\eqn{p^{(1-z)} \times (1-p)^z = (1.0 - z) p + z (1.0 - p)}
 \item \code{"log"} the log of the likelihood:
-\eqn{(1.0 - z) * \log(p) + z * \log(1.0 - p)}
+\eqn{(1.0 - z) \log(p) + z \log(1.0 - p)}
 \item \code{"der"} the derivative of the log of the likelihood:
-\eqn{(1.0 - z) * p - z * (1.0 - p)}
+\eqn{(1.0 - z) / p - z / (1.0 - p)}
 \item \code{"sLog"} the \emph{signed} log of the likelihood:
-\eqn{(1.0 - z) * \log(p) - z * \log(1.0 - p)}
+\eqn{(1.0 - z) \log(p) - z \log(1.0 - p)}
 }
 
 where \eqn{z} is the \emph{binarized projection} and \eqn{p} is the \emph{probability

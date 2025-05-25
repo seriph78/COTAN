@@ -61,13 +61,13 @@ NULL
 #' @param formula a string indicating which function of the likelihood is
 #'   actually returned. Supported formulas are:
 #'   * `"raw"` just the likelihood (default):
-#'     \eqn{(1.0 - z) * p + z * (1.0 - p)}
+#'     \eqn{p^{(1-z)} \times (1-p)^z = (1.0 - z) p + z (1.0 - p)}
 #'   * `"log"` the log of the likelihood:
-#'     \eqn{(1.0 - z) * \log(p) + z * \log(1.0 - p)}
+#'     \eqn{(1.0 - z) \log(p) + z \log(1.0 - p)}
 #'   * `"der"` the derivative of the log of the likelihood:
-#'     \eqn{(1.0 - z) * p - z * (1.0 - p)}
+#'     \eqn{(1.0 - z) / p - z / (1.0 - p)}
 #'   * `"sLog"` the *signed* log of the likelihood:
-#'     \eqn{(1.0 - z) * \log(p) - z * \log(1.0 - p)}
+#'     \eqn{(1.0 - z) \log(p) - z \log(1.0 - p)}
 #'
 #'   where \eqn{z} is the *binarized projection* and \eqn{p} is the *probability
 #'   of zero*
@@ -93,7 +93,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
     formula,
     raw  = (1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero),
     log  = (1.0 - zeroOne) * log(probZero) + zeroOne * log(1.0 - probZero),
-    der  = (1.0 - zeroOne) * probZero - zeroOne * (1.0 - probZero),
+    der  = (1.0 - zeroOne) / probZero - zeroOne / (1.0 - probZero),
     sLog = (1.0 - zeroOne) * log(probZero) - zeroOne * log(1.0 - probZero),
     stop("Unrecognised `formula` passed in: ", formula)
   )

@@ -1,3 +1,8 @@
+Expanded `calculateLikelihoodOfObserved()` to support more formulas related to
+likelihood
+
+Unified code that produces UMAP plots: now they all run `UMAPPlot()` that in
+turn calls the `Seurat::RunUMAP()` function
 
 Fixed issue with use of `parallelDist::parDist()` on Linux aarch64 machines: it
 crashed irrecoverably due to an ***invalid alignment*** error. Now code calls
