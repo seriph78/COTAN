@@ -365,10 +365,11 @@ cellsUMAPPlot <- function(objCOTAN,
   cellsMatrix <-
     getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ]
 
-  # TODO: decide whether to run some rescaling in ether dimensions
+  # re-scale so that all the genes have mean 0.0 and stdev 1.0
+  cellsMatrix <- scale(t(cellsMatrix), center = TRUE, scale = TRUE)
 
   logThis("Elaborating PCA - START", logLevel = 3L)
-  cellsPCA <- runPCA(x = t(cellsMatrix), rank = 25L,
+  cellsPCA <- runPCA(x = cellsMatrix, rank = 25L,
                      BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
 
   gc()
