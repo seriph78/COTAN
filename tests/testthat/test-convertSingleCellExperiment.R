@@ -1,4 +1,6 @@
 
+options(parallelly.fork.enable = TRUE)
+
 test_that("Convert COTAN to and from SCE on test dataset", {
   utils::data("test.dataset", package = "COTAN")
 

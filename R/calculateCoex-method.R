@@ -1600,32 +1600,33 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 #'
 #' @rdname CalculatingCOEX
 
-genesSelector <- function(objCOTAN, genesSel = "", numFeatures = 2000L) {
+genesSelector <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
   logThis("Running genes' selection: START", logLevel = 2L)
 
-  numFeatures <- min(2000L, getNumGenes(objCOTAN))
+  numGenes <- min(2000L, getNumGenes(objCOTAN))
   selectedGenes <- NULL
 
-  getHighestGDIGenes <- function(objCOTAN, numFeatures) {
+  getHighestGDIGenes <- function(objCOTAN, numGenes) {
     gdi <- getGDI(objCOTAN)
     if (is_empty(gdi)) {
       gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
                                           rowsFraction = 0.05), "GDI")
     }
 
-    if (sum(gdi >= 1.5) > numFeatures) {
-      return(names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numFeatures)])
+    if (sum(gdi >= 1.5) > numGenes) {
+      return(names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numGenes)])
     } else {
       return(names(gdi)[gdi >= 1.4])
     }
   }
 
-  getHighestVariableGenes <- function(rawData, numFeatures, useVST) {
-    srat <- CreateSeuratObject(counts = rawData, project = "genes_selections")
+  getHighestVariableGenes <- function(objCOTAN, numGenes, useVST) {
+    srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
+                               project = "genes_selections")
     srat <- NormalizeData(srat)
 
     srat <- FindVariableFeatures(
-      srat, nfeatures = numFeatures,
+      srat, nfeatures = numGenes,
       selection.method = ifelse(useVST, "vst", "mean.var.plot"))
 
     return(VariableFeatures(object = srat))
@@ -1645,11 +1646,11 @@ genesSelector <- function(objCOTAN, genesSel = "", numFeatures = 2000L) {
 
     selectedGenes <- switch(
       genesSel,
-      HGDI = getHighestGDIGenes(objCOTAN, numFeatures),
+      HGDI = getHighestGDIGenes(objCOTAN, numGenes),
       HVG_Seurat = , vst =
-        getHighestVariableGenes(objCOTAN, numFeatures, TRUE),
+        getHighestVariableGenes(objCOTAN, numGenes, TRUE),
       HVG_Scanpy = , mean.var.plot =
-        getHighestVariableGenes(objCOTAN, numFeatures, FALSE),
+        getHighestVariableGenes(objCOTAN, numGenes, FALSE),
       stop("Unrecognised `genesSel` passed in: ", genesSel)
     )
 
@@ -1726,5 +1727,21 @@ calculateReducedDataMatrix <-
   function(objCOTAN, useCoexEigen = FALSE,
            dataMethod = "", numComp = 25L,
            genesSel = "", numGenes = 2000L) {
-  stop("Not implemented yet")
+  if (useCoexEigen) {
+    stop("Not implemented yet")
+  } else {
+    selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
+                                   numGenes = numGenes)
+    cellsMatrix <-
+      getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ]
+
+    # re-scale so that all the genes have mean 0.0 and stdev 1.0
+    cellsMatrix <- scale(t(cellsMatrix), center = TRUE, scale = TRUE)
+
+    logThis("Elaborating PCA - START", logLevel = 3L)
+    cellsPCA <- runPCA(x = cellsMatrix, rank = numComp,
+                       BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
+
+    return(cellsPCA)
+  }
 }

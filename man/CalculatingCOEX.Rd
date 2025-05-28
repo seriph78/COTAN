@@ -144,7 +144,7 @@ calculateG(
   geneSubsetRow = vector(mode = "character")
 )
 
-genesSelector(objCOTAN, genesSel = "", numFeatures = 2000L)
+genesSelector(objCOTAN, genesSel = "", numGenes = 2000L)
 
 calculateReducedDataMatrix(
   objCOTAN,
@@ -260,15 +260,15 @@ via the \pkg{Seurat} package
 according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
 }}
 
+\item{numGenes}{the number of genes to select using the above method. Will be
+ignored when an explicit list of genes has been passed in}
+
 \item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
 onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
 the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
 
 \item{numComp}{Number of components of the reduced \code{matrix}, it defaults to
 25L.}
-
-\item{numGenes}{the number of genes to select using the above method. Will be
-ignored when an explicit list of genes has been passed in}
 }
 \value{
 \code{getMu()} returns the \code{mu} matrix

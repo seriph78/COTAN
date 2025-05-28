@@ -277,7 +277,7 @@ cellsUMAPPlot <- function(objCOTAN,
                           dataMethod = "",
                           numComp = 25L,
                           genesSel = "",
-                          numGenes = 2000L,
+                          numGenes = 200L,
                           colors = NULL,
                           numNeighbors = 0L,
                           minPointsDist = NA) {
@@ -301,7 +301,7 @@ cellsUMAPPlot <- function(objCOTAN,
     genesSel <- "HGDI" # this default could differ from the one in the selector
   }
   selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
-                                 numFeatures = numFeatures)
+                                 numGenes = numGenes)
   cellsMatrix <-
     getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ]
 
@@ -309,7 +309,7 @@ cellsUMAPPlot <- function(objCOTAN,
   cellsMatrix <- scale(t(cellsMatrix), center = TRUE, scale = TRUE)
 
   logThis("Elaborating PCA - START", logLevel = 3L)
-  cellsPCA <- runPCA(x = cellsMatrix, rank = 25L,
+  cellsPCA <- runPCA(x = cellsMatrix, rank = numComp,
                      BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
 
   gc()

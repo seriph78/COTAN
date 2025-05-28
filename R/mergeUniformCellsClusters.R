@@ -128,7 +128,7 @@
 #'
 #' checkerRes <-
 #'   checkClusterUniformity(objCOTAN, checker = checker2,
-#'                          cluster = clusters[[1L]], cells = firstCluster,
+#'                          clusterName = clusters[[1L]], cells = firstCluster,
 #'                          cores = 6L, optimizeForSpeed = TRUE,
 #'                          deviceStr = "cuda", saveObj = FALSE)
 #'
@@ -162,7 +162,7 @@
 #'                               coexDF = mergedList[["coex"]],
 #'                               override = TRUE)
 #'
-#' stopifnot(identical(reorderClusterization(objCOTAN),
+#' stopifnot(identical(reorderClusterization(objCOTAN)[["clusters"]],
 #'                     mergedList[["clusters"]]))
 #'
 #' @rdname UniformClusters
@@ -192,7 +192,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   fromMergedName <- function(mergedClName, currentClNames) {
     partialMatch <- vapply(currentClNames, function(clName, mergedName) {
       return(str_detect(mergedName, clName))
-    }, FUN.VAL = logical(1L), mergedClName)
+    }, FUN.VALUE = logical(1L), mergedClName)
 
     c(clName1, clName2) %<-% c("", "")
     if (sum(partialMatch) == 2L) {

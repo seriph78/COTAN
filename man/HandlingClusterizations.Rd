@@ -101,7 +101,7 @@ cellsUMAPPlot(
   dataMethod = "",
   numComp = 25L,
   genesSel = "",
-  numGenes = 2000L,
+  numGenes = 200L,
   colors = NULL,
   numNeighbors = 0L,
   minPointsDist = NA
@@ -384,7 +384,7 @@ outside the cluster from \code{\link[=logFoldChangeOnClusters]{logFoldChangeOnCl
 \code{geneSetEnrichment()} returns a \code{data.frame} with the cumulative
 score
 
-\code{reorderClusterization()} returns a \code{list} with 2 elements:
+\code{reorderClusterization()} returns a \code{list} with 3 elements:
 \itemize{
 \item \code{"clusters"} the newly reordered cluster labels array
 \item \code{"coex"} the associated \code{COEX} \code{data.frame}
