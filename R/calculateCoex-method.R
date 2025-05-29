@@ -97,6 +97,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
     sLog = (1.0 - zeroOne) * log(probZero) - zeroOne * log(1.0 - probZero),
     stop("Unrecognised `formula` passed in: ", formula)
   )
+
 }
 
 #' @details `getDataMatrix()` gives for each cell and each gene the result of

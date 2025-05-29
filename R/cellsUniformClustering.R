@@ -12,6 +12,7 @@
 #' @name UniformClusters
 NULL
 
+
 ### ------ Seurat Clustering -------
 
 #' @title Get a clusterization running the `Seurat` package
@@ -23,6 +24,11 @@ NULL
 #'   few clusters it can be raised up to 2.5.
 #'
 #' @param rawData The raw counts
+#' @param initialResolution The resolution to use at first in the
+#'   *clusterization* algorithm
+#' @param minNumClusters The minimum number of *clusters* expected from this
+#'   *clusterization*. In cases it is not reached, it will increase the
+#'   resolution of the *clusterization*
 #' @param genesSel Decides whether and how to perform the gene-selection. used
 #'   for the clustering. It is a string indicating one of the following
 #'   selection methods:
@@ -34,11 +40,6 @@ NULL
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param numPCAComp the number of calculated **PCA** components
-#' @param initialResolution The resolution to use at first in the
-#'   *clusterization* algorithm
-#' @param minNumClusters The minimum number of *clusters* expected from this
-#'   *clusterization*. In cases it is not reached, it will increase the
-#'   resolution of the *clusterization*
 #'
 #' @returns a list with a `Seurat` *clusterization*, along a Boolean on whether
 #'   maximum resolution has been used
@@ -53,9 +54,11 @@ NULL
 #'
 #' @noRd
 #'
-seuratClustering <- function(objCOTAN, genesSel, numGenes = 2000L,
-                             numPCAComp = 25L, initialResolution,
-                             minNumClusters) {
+
+seuratClustering <- function(objCOTAN,
+                             initialResolution, minNumClusters,
+                             genesSel, numGenes = 2000L,
+                             numPCAComp = 25L) {
   tryCatch({
     logThis("Creating new clusterization: START", logLevel = 2L)
 
@@ -296,10 +299,9 @@ cellsUniformClustering <- function(objCOTAN,
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
     c(testClusters, pca, resolution, usedMaxResolution) %<-%
-      seuratClustering(subObj, numPCAComp = 25L,
-                       genesSel = genesSel, numGenes = 2000L,
-                       initialResolution = initialResolution,
-                       minNumClusters = minNumClusters)
+      seuratClustering(subObj, initialResolution = initialResolution,
+                       minNumClusters = minNumClusters,
+                       numPCAComp = 25L, genesSel = genesSel, numGenes = 2000L)
 
     if (is_null(testClusters)) {
       logThis(paste("NO new possible uniform clusters!",
