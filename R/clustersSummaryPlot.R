@@ -162,9 +162,10 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
   plotDF[["Cluster"]] <- plotDF[[cNames[[1L]]]]
   plotDF[["Condition"]] <- plotDF[[cNames[[2L]]]]
 
-  plot <- ggplot(plotDF, aes(Cluster, values, fill = Condition)) +
+  plot <- ggplot(plotDF, aes(.data$Cluster, .data$values,
+                             fill = .data$Condition)) +
     geom_bar(position = "dodge", stat = "identity", color = "black") +
-    geom_text(aes(x = Cluster, y = values, label = values,
+    geom_text(aes(x = .data$Cluster, y = .data$values, label = .data$values,
                   vjust = 0.5, hjust = -0.1),
               position = position_dodge(width = 1.0)) +
     facet_wrap(~ keys, ncol = 6L, scales = "free") +

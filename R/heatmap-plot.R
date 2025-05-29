@@ -209,7 +209,7 @@ heatmapPlot <- function(objCOTAN = NULL,
                   logLevel = 0L)
           return(NULL)
         })
-      if (is.null(obj)) {
+      if (is.null(tempObj)) {
         next
       }
       dfTemp <- singleHeatmapDF(tempObj, genesLists = genesLists,

@@ -84,7 +84,7 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
 
   srat <- Seurat::FindClusters(srat, resolution = 0.8, algorithm = 2L)
 
-  sce <- Seurat::as.SingleCellExperiment(srat)
+  sce <- suppressWarnings(Seurat::as.SingleCellExperiment(srat))
   obj <- convertFromSingleCellExperiment(sce)
 
   allDims <- set_names(c(600L, 1200L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),

@@ -191,7 +191,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   fromMergedName <- function(mergedClName, currentClNames) {
     partialMatch <- vapply(currentClNames, function(clName, mergedName) {
       return(str_detect(mergedName, clName))
-    }, FUN.VAL = logical(1L), mergedClName)
+    }, FUN.VALUE = logical(1L), mergedClName)
 
     c(clName1, clName2) %<-% c("", "")
     if (sum(partialMatch) == 2L) {

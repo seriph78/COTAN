@@ -153,10 +153,11 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     #if the smallest group of cells are characterized by particular genes
 
     pcaCellsPlot <- ggplot(subset(pcaCells, groups == "A"),
-                           aes(x = PC1, y = PC2, colour = groups)) +
+                           aes(x = .data$PC1, y = .data$PC2, colour = groups)) +
                     geom_point(alpha = 0.5, size = 3L) +
                     geom_point(data = subset(pcaCells, groups != "A"),
-                               aes(x = PC1, y = PC2, colour = groups),
+                               aes(x = .data$PC1, y = .data$PC2,
+                                   colour = groups),
                                alpha = 0.8, size = 3L) +
                     scale_color_manual(groups, values = c("A" = "#8491B4B2",
                                                           "B" = "#E64B35FF")) +
@@ -164,13 +165,14 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     minN <- min(D[["n"]]) + 15.0
     lowD <- D[["n"]] < minN
-    genesPlot <- ggplot(D, aes(x = n, y = means)) +
+    genesPlot <- ggplot(D, aes(x = .data$n, y = .data$means)) +
                  geom_point() +
                  ggtitle(label = "B cell group genes mean expression"
                          #subtitle = " - B group NOT removed -"
                          ) +
                  geom_label(data = subset(D, lowD),
-                       aes(x = n, y = means, label = rownames(D)[lowD]),
+                       aes(x = .data$n, y = .data$means,
+                           label = rownames(D)[lowD]),
                        #nudge_y = 0.05,
                        nudge_x = 400.0
                        #direction = "x",
@@ -183,7 +185,8 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
           plot.subtitle = element_text(hjust = 0.95, vjust = -25.0))
 
     nuEst <- round(getNu(objCOTAN), digits = 7L)
-    UDEPlot <- ggplot(pcaCells, aes(x = PC1, y = PC2, colour = log(nuEst))) +
+    UDEPlot <- ggplot(pcaCells, aes(x = .data$PC1, y = .data$PC2,
+                                    colour = log(nuEst))) +
                geom_point(size = 1L, alpha = 0.8) +
                scale_color_gradient2(low = "#E64B35B2", mid = "#4DBBD5B2",
                                      high = "#3C5488B2",
@@ -200,12 +203,12 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
   nuDf <- data.frame("nu" = sort(getNu(objCOTAN)),
                      "n" = seq_len(getNumCells(objCOTAN)))
-  nuPlot <- ggplot(nuDf, aes(x = n, y = nu)) +
+  nuPlot <- ggplot(nuDf, aes(x = .data$n, y = .data$nu)) +
             geom_point(colour = "#8491B4B2", size = 1L) +
             plotTheme("common")
 
   nuDf <- nuDf[seq_len(min(400L, nrow(nuDf))), ]
-  zNuPlot <- ggplot(nuDf, aes(x = n, y = nu)) +
+  zNuPlot <- ggplot(nuDf, aes(x = .data$n, y = .data$nu)) +
              geom_point(colour = "#8491B4B2", size = 1L) +
              plotTheme("common") +
              xlim(0L, nrow(nuDf)) +
@@ -261,7 +264,7 @@ screePlot <- function(pcaStdDev) {
   screeDF <- data.frame(PC = seq_along(varExplained), Variance = varExplained)
 
   # Create ggplot scree plot
-  ggplot(screeDF, aes(x = PC, y = Variance)) +
+  ggplot(screeDF, aes(x = .data$PC, y = .data$Variance)) +
     geom_bar(stat = "identity", fill = "steelblue") +
     geom_point(color = "red", size = 3L) +
     geom_line(group = 1L, color = "red") +

@@ -667,15 +667,15 @@ Here is possible to visualize how the `split` clusters are merged in to
 `merge` and `merge2`
 
 ```{r eval=TRUE, include=TRUE}
-c(mergeHeatmap, ...) %<-%
+c(mergeHeatmap, mergeScoresDF, mergePValuesDF) %<-%
   clustersMarkersHeatmapPlot(obj, clName = "merge", condNameList = "split",
                              conditionsList = list(splitClusters))
 draw(mergeHeatmap)
 
-c(mergeHeatmap2, ...) %<-%
+c(merge2Heatmap, merge2ScoresDF, merge2PValuesDF) %<-%
   clustersMarkersHeatmapPlot(obj, clName = "merge2", condNameList = "split",
                              conditionsList = list(splitClusters))
-draw(mergeHeatmap2)
+draw(merge2Heatmap)
 ```
 
 In the following graph, it is possible to check that the found clusters align
