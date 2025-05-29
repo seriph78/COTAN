@@ -27,7 +27,7 @@ NULL
 #'     via the \pkg{Seurat} package (the default method)
 #'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
 #'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
-#' @param numFeatures The number of genes to return
+#' @param numGenes The number of genes to return
 #'
 #' @returns `genesSelector()` returns an array with the genes' names
 #'
@@ -44,10 +44,10 @@ NULL
 #'
 #' @rdname UniformClusters
 
-genesSelector <- function(objCOTAN, genesSel, numFeatures = 2000L) {
+genesSelector <- function(objCOTAN, genesSel, numGenes = 2000L) {
   logThis("Running genes' selection: START", logLevel = 2L)
 
-  numFeatures <- min(2000L, getNumGenes(objCOTAN))
+  numGenes <- min(numGenes, getNumGenes(objCOTAN))
   selectedGenes <- NULL
 
   if (length(genesSel) > 1L) {
@@ -60,9 +60,9 @@ genesSelector <- function(objCOTAN, genesSel, numFeatures = 2000L) {
         gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
                                             rowsFraction = 0.05), "GDI")
       }
-      if (sum(gdi >= 1.5) > numFeatures) {
+      if (sum(gdi >= 1.5) > numGenes) {
         selectedGenes <-
-          names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numFeatures)]
+          names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numGenes)]
       } else {
         selectedGenes <- names(gdi)[gdi >= 1.4]
       }
@@ -75,7 +75,7 @@ genesSelector <- function(objCOTAN, genesSel, numFeatures = 2000L) {
 
       useVST <- str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)
       srat <- FindVariableFeatures(
-        srat, nfeatures = numFeatures,
+        srat, nfeatures = numGenes,
         selection.method = ifelse(useVST, "vst", "mean.var.plot"))
 
       selectedGenes <- VariableFeatures(object = srat)
@@ -373,7 +373,7 @@ cellsUniformClustering <- function(objCOTAN,
     }
 
     selectedGenes <- genesSelector(subObj, genesSel = genesSel,
-                                   numFeatures = 2000L)
+                                   numGenes = 2000L)
 
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L

@@ -19,7 +19,7 @@ GDIPlot(
   GDIIn = NULL
 )
 
-genesSelector(objCOTAN, genesSel, numFeatures = 2000L)
+genesSelector(objCOTAN, genesSel, numGenes = 2000L)
 
 cellsUniformClustering(
   objCOTAN,
@@ -99,7 +99,7 @@ via the \pkg{Seurat} package (the default method)
 according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
 }}
 
-\item{numFeatures}{The number of genes to return}
+\item{numGenes}{The number of genes to return}
 
 \item{checker}{the object that defines the method and the threshold to
 discriminate whether a \emph{cluster} is \emph{uniform transcript}. See

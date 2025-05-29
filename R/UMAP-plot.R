@@ -361,7 +361,7 @@ cellsUMAPPlot <- function(objCOTAN,
               msg = "Internal error - clusters must be factors")
 
   selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
-                                 numFeatures = numFeatures)
+                                 numGenes = numGenes)
   cellsMatrix <-
     getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ]
 
