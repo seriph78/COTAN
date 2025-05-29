@@ -71,16 +71,21 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
 
   rawData <- as(as.matrix(test.dataset), "dgCMatrix")
 
-  sratObj <-
-    seuratClustering(rawData = rawData, cond = "Test", iter = 1L,
-                     initialResolution = 0.8, minNumClusters = 0L,
-                     genesSel = "HVG_Seurat", cores = 6L,
-                     optimizeForSpeed = TRUE, deviceStr = "cuda",
-                     saveObj = FALSE, outDirCond = "")[["SeuratObj"]]
+  srat <- Seurat::CreateSeuratObject(counts = rawData,
+                                     project = "conversion_test")
+  srat <- Seurat::NormalizeData(srat)
+  srat <- Seurat::FindVariableFeatures(srat,
+                                       nfeatures = min(2000L, nrow(rawData)),
+                                       selection.method = "vst")
+  srat <- Seurat::ScaleData(srat, features = VariableFeatures(object = srat))
+  srat <- Seurat::RunPCA(srat, npcs = 25L,
+                         features = VariableFeatures(object = srat))
+  srat <- Seurat::FindNeighbors(srat, dims = seq_len(25L))
 
-  sceObj <- Seurat::as.SingleCellExperiment(sratObj)
+  srat <- Seurat::FindClusters(srat, resolution = 0.8, algorithm = 2L)
 
-  obj <- convertFromSingleCellExperiment(sceObj)
+  sce <- Seurat::as.SingleCellExperiment(srat)
+  obj <- convertFromSingleCellExperiment(sce)
 
   allDims <- set_names(c(600L, 1200L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),
     c("raw1", "raw2", "genesCoex1", "genesCoex2", "cellsCoex1", "cellsCoex2",
@@ -91,9 +96,10 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
                    c("RNA_snn_res.0.8", "seurat_clusters"))
   expect_identical(getAllConditions(obj), "orig.ident")
   expect_identical(getClusters(obj, clName = "seurat_clusters"),
-                   sratObj$seurat_clusters)
+                   Seurat::Idents(srat))
   expect_identical(getCondition(obj, condName = "orig.ident"),
-                   sratObj$orig.ident)
+                   asClusterization(Seurat::FetchData(srat, var = "orig.ident"),
+                                    getCells(obj)))
 
   obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 6L, saveObj = FALSE)
 

@@ -1,12 +1,14 @@
 
+# ------ UMAPPlot -------
+
 #' @details `UMAPPlot()` plots the given `data.frame` containing genes
-#'   information related to clusters after applying the [umap::umap()]
-#'   transformation
+#'   information related to clusters after applying the `umap` transformation
+#'   via [Seurat::RunUMAP()]
 #'
-#' @param df The `data.frame` to plot. It must have a row names containing the
-#'   given elements
+#' @param dataIn The `matrix` to plot. It must have a row names containing the
+#'   given elements (the columns are features)
 #' @param clusters The **clusterization**. Must be a named `array` aligned to
-#'   the rows in the `data.frame`.
+#'   the rows in the `matrix`.
 #' @param elements a named `list` of elements to label. Each array in the list
 #'   will be shown with a different color
 #' @param title a string giving the plot title. Will default to UMAP Plot if not
@@ -14,11 +16,8 @@
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
-#' @param numNeighbors Overrides the `n_neighbors` value from
-#'   [umap::umap.defaults]
-#' @param minPointsDist Overrides the `min_dist` value from
-#'   [umap::umap.defaults]
-#'
+#' @param numNeighbors Overrides the default `n_neighbors` value
+#' @param minPointsDist Overrides the default `min_dist` value
 #'
 #' @returns `UMAPPlot()` returns a `ggplot2` object
 #'
@@ -36,17 +35,19 @@
 #'
 #' @importFrom stats quantile
 #'
-#' @importFrom umap umap
-#' @importFrom umap umap.defaults
+#' @importFrom Seurat RunUMAP
+#' @importFrom Seurat Embeddings
 #'
 #' @importFrom rlang set_names
 #' @importFrom rlang is_empty
+#'
+#' @importFrom withr with_options
 #'
 #' @export
 #'
 #' @rdname HandlingClusterizations
 #'
-UMAPPlot <- function(df,
+UMAPPlot <- function(dataIn,
                      clusters = NULL,
                      elements = NULL,
                      title = "",
@@ -55,23 +56,23 @@ UMAPPlot <- function(df,
                      minPointsDist = NaN) {
   logThis("UMAP plot", logLevel = 2L)
 
-  assert_that(!is_empty(rownames(df)),
-              msg = "UMAPPlot - data.frame must have proper row-names")
+  assert_that(!is_empty(rownames(dataIn)),
+              msg = "UMAPPlot - input matrix must have proper row-names")
 
-  assert_that(is_empty(clusters) || identical(names(clusters), rownames(df)),
+  assert_that(is_empty(clusters) || identical(names(clusters), rownames(dataIn)),
               msg = paste("UMAPPlot - clusters' names must be the same",
-                          "as the row-names of the data.frame"))
+                          "as the row-names of the input matrix"))
 
   # empty title
   if (isEmptyName(title)) {
     title <- "UMAP Plot"
   }
 
-  entryType <- rep_len("none", nrow(df))
+  entryType <- rep_len("none", nrow(dataIn))
 
   # assign a different color to each list of elements
   for (nm in names(elements)) {
-    selec <- rownames(df) %in% elements[[nm]]
+    selec <- rownames(dataIn) %in% elements[[nm]]
     if (any(selec)) {
       entryType[selec] <- nm
     } else {
@@ -98,21 +99,31 @@ UMAPPlot <- function(df,
 
   clustered <- !labelled & entryType != "none"
 
-  umapConfig <- umap.defaults
-  if (numNeighbors > 0L) {
-    umapConfig[["n_neighbors"]] <- numNeighbors
+  if (numNeighbors == 0L) {
+    numNeighbors <- 30L
   }
-  if (is.finite(minPointsDist)) {
-    umapConfig[["min_dist"]] <- minPointsDist
+  if (!is.finite(minPointsDist)) {
+    minPointsDist <- 0.3
   }
-  umapConfig[["verbose"]] <- TRUE
 
   logThis("Calculating UMAP: START", logLevel = 3L)
 
-  umap <- umap(df, config = umapConfig)
+  umap <- with_options(list(Seurat.warn.umap.uwot = FALSE),
+    Embeddings(RunUMAP(as.matrix(dataIn),
+                       assay = "Generic",
+                       reduction.key = "UMAP_",
+                       umap.method = "uwot",
+                       n.neighbors = numNeighbors, #30L
+                       n.components = 2L,
+                       metric = "cosine",
+                       learning.rate = 1,
+                       min.dist = minPointsDist, # 0.3
+                       uwot.sgd = FALSE,
+                       seed.use = 42,
+                       verbose = TRUE)))
 
-  plotDF <- data.frame(x = umap[["layout"]][, 1L],
-                       y = umap[["layout"]][, 2L],
+  plotDF <- data.frame(x = umap[, 1L],
+                       y = umap[, 2L],
                        types = entryType)
 
   logThis("Calculating UMAP: DONE", logLevel = 3L)
@@ -166,7 +177,7 @@ UMAPPlot <- function(df,
 
   assert_that(setequal(c(entryType, "none", "centroid"), names(myColours)))
 
-  pointSize <- min(max(0.33, 10000.0 / nrow(plotDF)), 3.0)
+  pointSize <- min(max(0.33, 5000.0 / nrow(plotDF)), 2.0)
 
   plot <- ggplot() +
     scale_color_manual("Status", values = myColours) +
@@ -217,52 +228,40 @@ UMAPPlot <- function(df,
   return(plot)
 }
 
-#' @title Get High Variable Genes running the `Seurat` package
-#'
-#' @description The function uses the [Seurat::Seurat] package to extract the
-#'   high variable genes given the counts raw data
-#'
-#' @param rawData the raw counts
-#' @param hvgMethod the HVG method
-#' @param cond the sample condition
-#' @param numFeatures the number of genes to select. It defaults to 2000
-#'
-#' @returns a subset of the genes in the dataset
-#'
-#' @importFrom Seurat CreateSeuratObject
-#' @importFrom Seurat NormalizeData
-#' @importFrom Seurat FindVariableFeatures
-#' @importFrom Seurat ScaleData
-#' @importFrom Seurat VariableFeatures
-#'
-#' @importFrom withr with_options
-#'
-#' @noRd
-#'
-seuratHVG <- function(rawData, hvgMethod, cond, numFeatures = 2000L) {
-  tryCatch({
-    logThis("Creating Seurat object: START", logLevel = 2L)
 
-    srat <- CreateSeuratObject(counts = as.data.frame(rawData),
-                               project = paste0(cond, "_UMAP"),
-                               min.cells = 3L, min.features = 4L)
-    srat <- NormalizeData(srat)
-    srat <- FindVariableFeatures(srat, selection.method = hvgMethod,
-                                 nfeatures = numFeatures)
+# ------ cellsUMAPPlot -------
 
-    hvg <- VariableFeatures(object = srat)
+getDataMatrix <- function(objCOTAN, dataMethod = "") {
+  if (isEmptyName(dataMethod)) {
+    dataMethod <- "LogNormalized"
+  }
 
-    rm(srat)
-    logThis("Creating Seurat object: DONE", logLevel = 2L)
+  binDiscr <- function(objCOTAN) {
+    zeroOne <- getZeroOneProj(objCOTAN)
+    probOne <- 1.0 - getProbabilityOfZero(objCOTAN)
+    return(zeroOne - probOne)
+  }
 
-    return(hvg)
-  },
-  error = function(e) {
-    logThis(msg = paste("Seurat HVG failed with", nrow(rawData),
-                        "genes with the following error:"), logLevel = 1L)
-    logThis(msg = conditionMessage(e), logLevel = 1L)
-    return(NULL)
-  })
+  getLH <- function(objCOTAN, formula) {
+    return(calculateLikelihoodOfObserved(objCOTAN, formula))
+  }
+
+  dataMatrix <- as.matrix(switch(
+    dataMethod,
+    RW = , Raw      = , RawData                 = getRawData(objCOTAN),
+    NN = , NuNorm   = , Normalized              = getNuNormData(objCOTAN),
+    LN = , LogNorm  = , LogNormalized           = getLogNormData(objCOTAN),
+    BI = , Bin      = , Binarized               = getZeroOneProj(objCOTAN),
+    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN),
+    AB = , AdjBin   = , AdjBinarized            = abs(binDiscr(objCOTAN)),
+    LH = , Like     = , Likelihood              = getLH(objCOTAN, "raw"),
+    LL = , LogLike  = , LogLikelihood           = getLH(objCOTAN, "log"),
+    DL = , DerLogL  = , DerivativeLogLikelihood = getLH(objCOTAN, "der"),
+    SL = , SignLogL = , SignedLogLikelihood     = getLH(objCOTAN, "sLog"),
+    stop("Unrecognised `dataMethod` passed in: ", dataMethod)
+  ))
+
+  return(dataMatrix)
 }
 
 
@@ -280,36 +279,44 @@ seuratHVG <- function(rawData, hvgMethod, cond, numFeatures = 2000L) {
 #' @param dataMethod selects the method to use to create the `data.frame` to
 #'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
 #'   gene based on available data/model, the following methods are supported:
-#'   * `"NuNorm"` uses the \eqn{\nu}*-normalized* counts
-#'   * `"LogNormalized"` uses the *log-normalized* counts. The default method
-#'   * `"Likelihood"` uses the likelihood of observed presence/absence of each
-#'     gene
-#'   * `"LogLikelihood"` uses the likelihood of observed presence/absence of
-#'     each gene
-#'   * `"Binarized"` uses the binarized data matrix
-#'   * `"AdjBinarized"` uses the binarized data matrix where ones and zeros
-#'     are replaced by the per-gene estimated probability of zero and its
-#'     complement respectively
+#'   * `"RW", "Raw", "RawData"` uses the *raw* counts
+#'   * `"NN", "NuNorm", "Normalized"` uses the \eqn{\nu}*-normalized* counts
+#'   * `"LN", "LogNorm", "LogNormalized"` uses the *log-normalized* counts
+#'   (default)
+#'   * `"BI", "Bin", "Binarized"` uses the *binarized* data matrix
+#'   * `"BD", "BinDiscr", "BinarizedDiscrepancy"` uses the *difference* between
+#'   the *binarized* data matrix and the estimated *probability of one*
+#'   * `"AB", "AdjBin", "AdjBinarized"` uses the absolute value of
+#'   the *binarized discrepancy* above
+#'   * `"LH", "Like", "Likelihood"` uses the *likelihood* of *binarized*
+#'   data matrix
+#'   * `"LL", "LogLike", "LogLikelihood"` uses the *log-likelihood*
+#'   of *binarized* data matrix
+#'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
+#'   the *log-likelihood* of *binarized* data matrix
+#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
+#'   of *binarized* data matrix
+#'
+#'   For the last four options see [calculateLikelihoodOfObserved()] for more
+#'   details
 #' @param genesSel Decides whether and how to perform gene-selection. It can be
 #'   a straight list of genes or a string indicating one of the following
 #'   selection methods:
 #'   * `"HGDI"` Will pick-up the genes with highest **GDI**. Since it requires
-#'     an available `COEX` matrix it will fall-back to `"HVG_Seurat"` when the
-#'     matrix is not available
+#'   an available `COEX` matrix it will fall-back to `"HVG_Seurat"` when the
+#'   matrix is not available
 #'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'     via the \pkg{Seurat} package (the default method)
+#'   via the \pkg{Seurat} package (the default method)
 #'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when no selection have been asked or when an explicit list of genes
 #'   was passed in
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
-#' @param numNeighbors Overrides the `n_neighbors` value from
-#'   [umap::umap.defaults]
-#' @param minPointsDist Overrides the `min_dist` value from
-#'   [umap::umap.defaults]
+#' @param numNeighbors Overrides the default `n_neighbors` value
+#' @param minPointsDist Overrides the default `min_dist` value
 #'
 #' @returns `cellsUMAPPlot()` returns a list with 2 objects:
 #'  * `"plot"` a `ggplot2` object representing the `umap` plot
@@ -353,88 +360,20 @@ cellsUMAPPlot <- function(objCOTAN,
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
-  if (isEmptyName(dataMethod)) {
-    dataMethod <- "LogNormalized"
-  }
+  selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
+                                 numFeatures = numFeatures)
+  cellsMatrix <-
+    getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ]
 
-  cellsMatrix <- NULL
-  if (str_equal(dataMethod, "Binarized", ignore_case = TRUE)) {
-    cellsMatrix <- getZeroOneProj(objCOTAN)
-  } else if (str_equal(dataMethod, "AdjBinarized", ignore_case = TRUE)) {
-    zeroOne <- getZeroOneProj(objCOTAN)
-    rwMns <- rowMeans(zeroOne)
-    cellsMatrix <- (zeroOne * (1.0 - rwMns) + (1.0 - zeroOne) * rwMns)
-  } else if (str_equal(dataMethod, "Likelihood", ignore_case = TRUE)) {
-    cellsMatrix <- calculateLikelihoodOfObserved(objCOTAN)
-  } else if (str_equal(dataMethod, "LogLikelihood", ignore_case = TRUE)) {
-    cellsMatrix <- log(calculateLikelihoodOfObserved(objCOTAN))
-  } else if (str_equal(dataMethod, "NuNorm", ignore_case = TRUE) ||
-             str_equal(dataMethod, "Normalized", ignore_case = TRUE)) {
-    cellsMatrix <- getNuNormData(objCOTAN)
-  } else if (str_equal(dataMethod, "LogNorm", ignore_case = TRUE) ||
-             str_equal(dataMethod, "LogNormalized", ignore_case = TRUE)) {
-    cellsMatrix <- getLogNormData(objCOTAN)
-  } else {
-    stop("Unrecognised `dataMethod` passed in: ", dataMethod)
-  }
-
-  genesPos <- rep(TRUE, getNumGenes(objCOTAN))
-  if (length(genesSel) > 1L) {
-    genesPos <- getGenes(objCOTAN) %in% genesSel
-    logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
-  } else {
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE) &&
-        !isCoexAvailable(objCOTAN)) {
-      logThis(paste("The COEX matrix is not available: falling back",
-                    "to HVG_Seurat for genes' selection"), logLevel = 1L)
-      genesSel <- "HVG_Seurat"
-    }
-
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-      gdi <- getGDI(objCOTAN)
-      if (is_empty(gdi)) {
-        gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
-                                            rowsFraction = 0.05), "GDI")
-      }
-      if (sum(gdi >= 1.5) > numGenes) {
-        genesPos <-
-          seq_along(gdi) %in% order(gdi, decreasing = TRUE)[1L:numGenes]
-      } else {
-        genesPos <- gdi >= 1.4
-      }
-      rm(gdi)
-    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)) {
-      condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
-      genesPos <-
-        getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
-                                          hvgMethod = "vst",
-                                          cond = condition,
-                                          numFeatures = numGenes)
-      rm(condition)
-    } else if (str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
-      condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
-      genesPos <-
-        getGenes(objCOTAN) %in% seuratHVG(getRawData(objCOTAN),
-                                          hvgMethod = "mean.var.plot",
-                                          cond = condition,
-                                          numFeatures = numGenes)
-      rm(condition)
-    } else {
-      stop("Unrecognised `genesSel` passed in: ", genesSel)
-    }
-    logThis(paste("Selected", sum(genesPos), "genes using",
-                  genesSel, "selector"), logLevel = 2L)
-  }
-
-  cellsMatrix <- cellsMatrix[genesPos, ]
+  # re-scale so that all the genes have mean 0.0 and stdev 1.0
+  cellsMatrix <- scale(t(cellsMatrix), center = TRUE, scale = TRUE)
 
   logThis("Elaborating PCA - START", logLevel = 3L)
-  cellsPCA <- runPCA(x = t(cellsMatrix), rank = 50L,
+  cellsPCA <- runPCA(x = cellsMatrix, rank = 25L,
                      BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
 
   gc()
 
-  cellsPCA <- as.data.frame(cellsPCA)
   logThis("Elaborating PCA - END", logLevel = 3L)
 
   umapTitle <- paste("UMAP of clusterization", clName, "using", dataMethod,
