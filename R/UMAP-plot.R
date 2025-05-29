@@ -177,17 +177,17 @@ UMAPPlot <- function(df,
   if (any(generic)) {
     plot <- plot +
       geom_point(data = plotDF[generic, , drop = FALSE],
-                 aes(x, y, colour = types),
+                 aes(.data$x, .data$y, colour = .data$types),
                  size = pointSize, alpha = 0.3)
   }
 
   if (any(clustered | centroids)) {
     plot <- plot +
       geom_point(data = plotDF[clustered, , drop = FALSE],
-                 aes(x, y, colour = types),
+                 aes(.data$x, .data$y, colour = .data$types),
                  size = pointSize, alpha = 0.5) +
       geom_text_repel(data = plotDF[centroids, , drop = FALSE],
-                      aes(x, y, colour = "centroid"),
+                      aes(.data$x, .data$y, colour = "centroid"),
                       label = rownames(plotDF)[centroids],
                       max.overlaps = 40L, fontface = "bold",
                       show.legend = FALSE, alpha = 0.8)
@@ -200,10 +200,10 @@ UMAPPlot <- function(df,
   if (any(labelled)) {
     plot <- plot +
       geom_point(data = plotDF[labelled, , drop = FALSE],
-                 aes(x, y, colour = types),
+                 aes(.data$x, .data$y, colour = .data$types),
                  size = 1.2 * pointSize, alpha = 0.8) +
       geom_label_repel(data = plotDF[labelled, , drop = FALSE],
-                       aes(x, y, fill = types,
+                       aes(.data$x, .data$y, fill = .data$types,
                            label = rownames(plotDF)[labelled]),
                        label.size = NA, show.legend = FALSE, force = 2.0,
                        box.padding = 0.25,
