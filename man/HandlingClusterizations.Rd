@@ -85,7 +85,7 @@ distancesBetweenClusters(
 )
 
 UMAPPlot(
-  df,
+  dataIn,
   clusters = NULL,
   elements = NULL,
   title = "",
@@ -213,8 +213,8 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
-\item{df}{The \code{data.frame} to plot. It must have a row names containing the
-given elements}
+\item{dataIn}{The \code{matrix} to plot. It must have a row names containing the
+given elements (the columns are features)}
 
 \item{elements}{a named \code{list} of elements to label. Each array in the list
 will be shown with a different color}
@@ -226,27 +226,35 @@ specified}
 colors are given it will complete the list using colors from
 \code{\link[=getColorsVector]{getColorsVector()}}}
 
-\item{numNeighbors}{Overrides the \code{n_neighbors} value from
-\link[umap:umap.defaults]{umap::umap.defaults}}
+\item{numNeighbors}{Overrides the default \code{n_neighbors} value}
 
-\item{minPointsDist}{Overrides the \code{min_dist} value from
-\link[umap:umap.defaults]{umap::umap.defaults}}
+\item{minPointsDist}{Overrides the default \code{min_dist} value}
 
 \item{dataMethod}{selects the method to use to create the \code{data.frame} to
 pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. To calculate, for each cell, a statistic for each
 gene based on available data/model, the following methods are supported:
 \itemize{
-\item \code{"NuNorm"} uses the \eqn{\nu}\emph{-normalized} counts
-\item \code{"LogNormalized"} uses the \emph{log-normalized} counts. The default method
-\item \code{"Likelihood"} uses the likelihood of observed presence/absence of each
-gene
-\item \code{"LogLikelihood"} uses the likelihood of observed presence/absence of
-each gene
-\item \code{"Binarized"} uses the binarized data matrix
-\item \code{"AdjBinarized"} uses the binarized data matrix where ones and zeros
-are replaced by the per-gene estimated probability of zero and its
-complement respectively
-}}
+\item \verb{"RW", "Raw", "RawData"} uses the \emph{raw} counts
+\item \verb{"NN", "NuNorm", "Normalized"} uses the \eqn{\nu}\emph{-normalized} counts
+\item \verb{"LN", "LogNorm", "LogNormalized"} uses the \emph{log-normalized} counts
+(default)
+\item \verb{"BI", "Bin", "Binarized"} uses the \emph{binarized} data matrix
+\item \verb{"BD", "BinDiscr", "BinarizedDiscrepancy"} uses the \emph{difference} between
+the \emph{binarized} data matrix and the estimated \emph{probability of one}
+\item \verb{"AB", "AdjBin", "AdjBinarized"} uses the absolute value of
+the \emph{binarized discrepancy} above
+\item \verb{"LH", "Like", "Likelihood"} uses the \emph{likelihood} of \emph{binarized}
+data matrix
+\item \verb{"LL", "LogLike", "LogLikelihood"} uses the \emph{log-likelihood}
+of \emph{binarized} data matrix
+\item \verb{"DL", "DerLogL", "DerivativeLogLikelihood"} uses the \emph{derivative} of
+the \emph{log-likelihood} of \emph{binarized} data matrix
+\item \verb{"SL", "SignLogL", "SignedLogLikelihood"} uses the \emph{signed log-likelihood}
+of \emph{binarized} data matrix
+}
+
+For the last four options see \code{\link[=calculateLikelihoodOfObserved]{calculateLikelihoodOfObserved()}} for more
+details}
 
 \item{genesSel}{Decides whether and how to perform gene-selection. It can be
 a straight list of genes or a string indicating one of the following
@@ -488,8 +496,8 @@ the clusters. Depending on the value of the \code{useDEA} flag will base the
 distance on the \emph{DEA} columns or the averages of the \emph{Zero-One} matrix.
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
-information related to clusters after applying the \code{\link[umap:umap]{umap::umap()}}
-transformation
+information related to clusters after applying the \code{umap} transformation
+via \code{\link[Seurat:RunUMAP]{Seurat::RunUMAP()}}
 
 \code{cellsUMAPPlot()} returns a \code{ggplot2} plot where the given
 \emph{clusters} are placed on the base of their relative distance. Also if

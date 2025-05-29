@@ -54,7 +54,7 @@ getMu(objCOTAN)
 
 \S4method{dropCellsCoex}{COTAN}(objCOTAN)
 
-calculateLikelihoodOfObserved(objCOTAN)
+calculateLikelihoodOfObserved(objCOTAN, formula = "raw")
 
 observedContingencyTablesYY(
   objCOTAN,
@@ -158,6 +158,22 @@ provided by calculating the partial \code{COEX} matrix on the fly}
 \item{actOnCells}{Boolean; when \code{TRUE} the function works for the cells,
 otherwise for the genes}
 
+\item{formula}{a string indicating which function of the likelihood is
+actually returned. Supported formulas are:
+\itemize{
+\item \code{"raw"} just the likelihood (default):
+\eqn{p^{(1-z)} \times (1-p)^z = (1.0 - z) p + z (1.0 - p)}
+\item \code{"log"} the log of the likelihood:
+\eqn{(1.0 - z) \log(p) + z \log(1.0 - p)}
+\item \code{"der"} the derivative of the log of the likelihood:
+\eqn{(1.0 - z) / p - z / (1.0 - p)}
+\item \code{"sLog"} the \emph{signed} log of the likelihood:
+\eqn{(1.0 - z) \log(p) - z \log(1.0 - p)}
+}
+
+where \eqn{z} is the \emph{binarized projection} and \eqn{p} is the \emph{probability
+of zero}}
+
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
 
@@ -205,8 +221,8 @@ calculated and, in case, if it is still aligned to the estimators.
 
 \code{dropCellsCoex()} returns the updated \code{COTAN} object
 
-\code{calculateLikelihoodOfObserved()} returns a \code{data.frame} with the
-likelihood of the observed zero/one
+\code{calculateLikelihoodOfObserved()} returns a \code{matrix} with the
+selected \emph{formula} of the likelihood of the observed zero/one
 
 \code{observedContingencyTablesYY()} returns a \code{list} with:
 \itemize{
@@ -473,7 +489,7 @@ identical(partialCellsCoex, cellsCoex[, sort(cellsSample)])
 objCOTAN <- dropCellsCoex(objCOTAN)
 stopifnot(!isCoexAvailable(objCOTAN, actOnCells = TRUE))
 
-lh <- calculateLikelihoodOfObserved(objCOTAN)
+signedLikelhood <- calculateLikelihoodOfObserved(objCOTAN, formula = "sLog")
 
 }
 \seealso{

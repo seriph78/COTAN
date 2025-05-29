@@ -58,24 +58,45 @@ NULL
 #'   the likelihood of the observed zero/one data
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param formula a string indicating which function of the likelihood is
+#'   actually returned. Supported formulas are:
+#'   * `"raw"` just the likelihood (default):
+#'     \eqn{p^{(1-z)} \times (1-p)^z = (1.0 - z) p + z (1.0 - p)}
+#'   * `"log"` the log of the likelihood:
+#'     \eqn{(1.0 - z) \log(p) + z \log(1.0 - p)}
+#'   * `"der"` the derivative of the log of the likelihood:
+#'     \eqn{(1.0 - z) / p - z / (1.0 - p)}
+#'   * `"sLog"` the *signed* log of the likelihood:
+#'     \eqn{(1.0 - z) \log(p) - z \log(1.0 - p)}
 #'
-#' @returns `calculateLikelihoodOfObserved()` returns a `data.frame` with the
-#'   likelihood of the observed zero/one
+#'   where \eqn{z} is the *binarized projection* and \eqn{p} is the *probability
+#'   of zero*
+#'
+
+#' @returns `calculateLikelihoodOfObserved()` returns a `matrix` with the
+#'   selected *formula* of the likelihood of the observed zero/one
 #'
 #' @export
 #'
 #' @examples
-#' lh <- calculateLikelihoodOfObserved(objCOTAN)
+#' signedLikelhood <- calculateLikelihoodOfObserved(objCOTAN, formula = "sLog")
 #'
 #' @rdname CalculatingCOEX
 #'
-calculateLikelihoodOfObserved <- function(objCOTAN) {
+calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
   zeroOne <- getZeroOneProj(objCOTAN)
 
   probZero <- getProbabilityOfZero(objCOTAN)
 
   # estimate the likelihood of observed result
-  return((1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero))
+  switch(
+    formula,
+    raw  = (1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero),
+    log  = (1.0 - zeroOne) * log(probZero) + zeroOne * log(1.0 - probZero),
+    der  = (1.0 - zeroOne) / probZero - zeroOne / (1.0 - probZero),
+    sLog = (1.0 - zeroOne) * log(probZero) - zeroOne * log(1.0 - probZero),
+    stop("Unrecognised `formula` passed in: ", formula)
+  )
 }
 
 
