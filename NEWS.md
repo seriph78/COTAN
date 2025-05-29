@@ -1,3 +1,7 @@
+## 2.8.2
+
+Solved issues with breaking changes from `zeallot` package
+
 Expanded `calculateLikelihoodOfObserved()` to support more formulas related to
 likelihood
 
