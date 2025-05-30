@@ -199,7 +199,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
   colExtr <- suppressWarnings(max(-min(scoreDF, na.rm = TRUE),
                                    max(scoreDF, na.rm = TRUE)))
   colorFunc <- colorRamp2(c(-colExtr, 0.0, colExtr),
-                          c("blue", "white", "red"))
+                          c("#E64B35FF", "gray93", "#3C5488FF"))
 
   cutpoints <- c(0.0,        0.001,       0.01,      0.05,      0.1,     1.0)
   symbols   <- c(     "***",        "**",       "*",       ".",      " ")

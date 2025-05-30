@@ -126,7 +126,8 @@ clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
 #'   * `"data"` contains the data,
 #'   * `"plot"` is the returned plot
 #'
-#' @importFrom tidyr gather
+#' @importFrom tidyr pivot_longer
+#' @importFrom tidyr all_of
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
@@ -154,8 +155,12 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
   df <- clustersSummaryData(objCOTAN, clName = clName, clusters = clusters,
                             condName = condName, conditions = conditions)
 
+  dfNames <- colnames(df)
+  colRng <- which(dfNames=="CellNumber") : which(dfNames=="ExpGenes")
   plotDF <- df %>%
-    gather(keys, values, CellNumber:ExpGenes)
+    pivot_longer(cols      = all_of(dfNames[colRng]),
+                 names_to  = "keys",
+                 values_to = "values")
 
   # normalize col names
   cNames <- colnames(df)
