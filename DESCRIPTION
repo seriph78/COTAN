@@ -1,7 +1,7 @@
 Package: COTAN
 Type: Package
 Title: COexpression Tables ANalysis 
-Version: 2.9.1
+Version: 2.9.2
 Authors@R: c(
   person("Galfrè", "Silvia Giulia",email = "silvia.galfre@di.unipi.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
   person("Morandin","Francesco", email = "francesco.morandin@unipr.it", role = "aut",comment = c(ORCID = "0000-0002-2022-2300")),
@@ -32,19 +32,19 @@ RoxygenNote: 7.3.2
 Roxygen: list(markdown = TRUE)
 Imports:
     stats,
-    plyr,
-    dplyr,
     methods,
     grDevices,
     Matrix,
     ggplot2,
     ggrepel,
+    gghalves,
     ggthemes,
     graphics,
     parallel,
     parallelly,
     tibble,
     tidyr,
+    dplyr,
     BiocSingular,
     parallelDist,
     ComplexHeatmap,

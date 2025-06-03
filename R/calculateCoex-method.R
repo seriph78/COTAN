@@ -1639,7 +1639,8 @@ genesSelector <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 
     selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% genesSel]
 
-    logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
+    logThis(paste("Given", length(selectedGenes), "genes as input"),
+            logLevel = 2L)
   } else {
     if (isEmptyName(genesSel)) {
       genesSel = "HGDI"

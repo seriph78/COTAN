@@ -41,8 +41,11 @@ NULL
 #'   ignored when an explicit list of genes has been passed in
 #' @param numPCAComp the number of calculated **PCA** components
 #'
-#' @returns a list with a `Seurat` *clusterization*, along a Boolean on whether
-#'   maximum resolution has been used
+#' @returns a list with:
+#'   * `"SeuratClusters"` a `Seurat` *clusterization*
+#'   * `"PCA"` the reduced data matrix
+#'   * `"Resolution"` the used resolution
+#'   * `"UsedMaxResolution"` whether the maximum resolution has been reached
 #'
 #' @importFrom Seurat CreateSeuratObject
 #' @importFrom Seurat CreateDimReducObject
@@ -119,7 +122,7 @@ seuratClustering <- function(objCOTAN,
 
     # returned objects
     return(list("SeuratClusters" = seuratClusters, "PCA" = pca,
-                "resolution" = resolution,
+                "Resolution" = resolution,
                 "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
@@ -127,8 +130,8 @@ seuratClustering <- function(objCOTAN,
                         getNumCells(objCOTAN),
                         "cells with the following error:"), logLevel = 1L)
     logThis(msg = conditionMessage(e), logLevel = 1L)
-    return(list("SeuratClusters" = NULL, "PCA" = NULL, "resolution" = NaN,
-                "UsedMaxResolution" = FALSE))
+    return(list("SeuratClusters" = NULL, "PCA" = NULL,
+                "Resolution" = NaN, "UsedMaxResolution" = FALSE))
   })
 }
 
