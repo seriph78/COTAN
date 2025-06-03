@@ -1,6 +1,8 @@
-#' @importFrom zeallot zeallous
 .onLoad <- function(libname, pkgname) {
-  zeallous()
+  if (requireNamespace("zeallot") &&
+      utils::packageVersion("zeallot") >= "2.0.0") {
+    zeallot::zeallous()
+  }
 }
 
 #' @importFrom rlang .data
