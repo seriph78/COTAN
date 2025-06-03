@@ -52,7 +52,8 @@ genesSelector <- function(objCOTAN, genesSel, numGenes = 2000L) {
 
   if (length(genesSel) > 1L) {
     selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% genesSel]
-    logThis(paste("Given", sum(genesPos), "genes as input"), logLevel = 2L)
+    logThis(paste("Given", length(selectedGenes), "genes as input"),
+            logLevel = 2L)
   } else {
     if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
       gdi <- getGDI(objCOTAN)
@@ -118,8 +119,11 @@ genesSelector <- function(objCOTAN, genesSel, numGenes = 2000L) {
 #'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #'  @param numPCAComp the number of calculated **PCA** components
 #'
-#' @returns a list with a `Seurat` *clusterization*, along a Boolean on whether
-#'   maximum resolution has been used
+#' @returns a list with:
+#'   * `"SeuratClusters"` a `Seurat` *clusterization*
+#'   * `"PCA"` the reduced data matrix
+#'   * `"Resolution"` the used resolution
+#'   * `"UsedMaxResolution"` whether the maximum resolution has been reached
 #'
 #' @importFrom Seurat CreateSeuratObject
 #' @importFrom Seurat NormalizeData
@@ -191,6 +195,7 @@ seuratClustering <- function(objCOTAN,
 
     # returned objects
     return(list("SeuratClusters" = seuratClusters, "PCA" = pca,
+                "Resolution" = resolution,
                 "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
@@ -199,7 +204,7 @@ seuratClustering <- function(objCOTAN,
                         "cells with the following error:"), logLevel = 1L)
     logThis(msg = conditionMessage(e), logLevel = 1L)
     return(list("SeuratClusters" = NULL, "PCA" = NULL,
-                "UsedMaxResolution" = FALSE))
+                "Resolution" = NaN, "UsedMaxResolution" = FALSE))
   })
 }
 
@@ -377,7 +382,7 @@ cellsUniformClustering <- function(objCOTAN,
 
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
-    c(testClusters, pca, usedMaxResolution) %<-%
+    c(testClusters, pca, resolution, usedMaxResolution) %<-%
       seuratClustering(subObj, selectedGenes = selectedGenes, numPCAComp = 25L,
                        initialResolution = initialResolution,
                        minNumClusters = minNumClusters)

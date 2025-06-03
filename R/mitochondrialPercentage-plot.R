@@ -21,6 +21,8 @@
 #' @importFrom ggplot2 scale_y_continuous
 #' @importFrom ggplot2 ylim
 #'
+#' @importFrom gghalves geom_half_violin
+#'
 #' @importFrom Matrix rowSums
 #'
 #' @importFrom rlang is_empty
@@ -76,8 +78,8 @@ mitochondrialPercentagePlot <- function(objCOTAN, genePrefix = "^MT-",
     ggplot(aes(x = .data$sample, y = .data$mit.percentage,
                fill = .data$sample)) +
     #geom_point(size = 0.5) +
-    geom_flat_violin(position = position_nudge(x = 0.15, y = 0.0),
-                     adjust = 2.0, alpha = 0.5) +
+    geom_half_violin(side = "r", position = position_nudge(x = 0.15),
+                     adjust = 2.0, alpha = 0.5, trim = TRUE) +
     geom_point(position = position_jitter(width = 0.1),
                size = 0.4, color = "black", alpha = 0.5) +
     geom_boxplot(aes(x = .data$sample, y = .data$mit.percentage,
