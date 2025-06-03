@@ -26,10 +26,10 @@ The first link shows how to handle the genes' clustering while the second shows 
 
 | Build | Status |
 |----|----|
-| Bioc-release | [![](https://bioconductor.org/shields/build/release/bioc/COTAN.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/COTAN) |
-| Bioc-devel | [![](https://bioconductor.org/shields/build/devel/bioc/COTAN.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/COTAN/) |
+| Bioc-release | [![Bioc-release](https://images.weserv.nl/?url=bioconductor.org/shields/build/release/bioc/COTAN.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/COTAN) |
+| Bioc-devel | [![Bioc-devel](https://images.weserv.nl/?url=bioconductor.org/shields/build/devel/bioc/COTAN.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/COTAN/) |
 
-Check out the user guide on the [Bioconductor landing page](https://bioconductor.org/packages/devel/bioc/html/COTAN.html) for more details.
+Check out the user guide on the [Bioconductor landing page - `release`](https://bioconductor.org/packages/release/bioc/html/COTAN.html) (or [`devel`](https://bioconductor.org/packages/devel/bioc/html/COTAN.html)) for more details.
 
 The latest snapshot can be installed directly as `R` package using `devtools`. The installation was tested on *Linux*, *Windows* and *Mac* but please note that due to lack of multi-core support under *Windows* it might run slower. `devtools::install_github("seriph78/COTAN")`
 
