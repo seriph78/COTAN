@@ -29,14 +29,8 @@ NULL
 #' @param minNumClusters The minimum number of *clusters* expected from this
 #'   *clusterization*. In cases it is not reached, it will increase the
 #'   resolution of the *clusterization*
-#' @param genesSel Decides whether and how to perform the gene-selection. used
-#'   for the clustering. It is a string indicating one of the following
-#'   selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'   via the \pkg{Seurat} package (the default method)
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param genesSel Decides whether and how to perform the gene-selection
+#'   (defaults to `"HVG_Seurat"`). See [genesSelector()] for more details.
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param numPCAComp the number of calculated **PCA** components
@@ -67,12 +61,13 @@ seuratClustering <- function(objCOTAN,
 
     assert_that(numPCAComp <= getNumGenes(objCOTAN))
 
+    numPCACompToCalc <- numPCAComp + 15L
     pca <- calculateReducedDataMatrix(
       objCOTAN, useCoexEigen = FALSE,
-      dataMethod = "LogNorm", numComp = numPCAComp,
+      dataMethod = "LogNorm", numComp = numPCACompToCalc,
       genesSel = genesSel, numGenes = numGenes)
 
-    assert_that(all(dim(pca) == c(getNumCells(objCOTAN), numPCAComp)),
+    assert_that(all(dim(pca) == c(getNumCells(objCOTAN), numPCACompToCalc)),
                 msg = "Returned PCA matrix has wrong dimensions")
 
     # Create the Seurat object
@@ -94,8 +89,12 @@ seuratClustering <- function(objCOTAN,
     seuratClusters <- NULL
     usedMaxResolution <- FALSE
     repeat {
-      seuratClusters <- Idents(FindClusters(srat, resolution = resolution,
-                                            algorithm = 2L)) # Louvain (refined)
+      seuratClusters <- Idents(FindClusters(
+        srat,
+        resolution = resolution,
+        algorithm = 2L,      # Louvain (refined)
+        random.seed = 137    # controls igraph::cluster_louvain()
+      ))
 
       # The next lines are necessary to make cluster smaller while
       # the number of residual cells decrease and to stop clustering

@@ -1580,7 +1580,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 #' @param genesSel Decides whether and how to perform the gene-selection. used
 #'   for the clustering and the `UMAP`. It is a string indicating one of the
 #'   following selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI** (the default method)
+#'   * `"HGDI"` Will pick-up the genes with highest **GDI** (default)
 #'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
 #'   via the \pkg{Seurat} package
 #'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
@@ -1707,7 +1707,7 @@ genesSelector <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #' @param genesSel Decides whether and how to perform the gene-selection. used
 #'   for the clustering and the `UMAP`. It is a string indicating one of the
 #'   following selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI** (the default method)
+#'   * `"HGDI"` Will pick-up the genes with highest **GDI** (default)
 #'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
 #'   via the \pkg{Seurat} package
 #'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
@@ -1741,8 +1741,11 @@ calculateReducedDataMatrix <-
     cellsMatrix <- scale(t(cellsMatrix), center = TRUE, scale = TRUE)
 
     logThis("Elaborating PCA - START", logLevel = 3L)
-    cellsPCA <- runPCA(x = cellsMatrix, rank = numComp,
-                       BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
+    numComp <- min(numComp, ncol(cellsMatrix))
+    cellsPCA <- runPCA(x = cellsMatrix,
+                       rank = numComp,
+                       BSPARAM = IrlbaParam(),
+                       get.rotation = FALSE)[["x"]]
 
     return(cellsPCA)
   }
