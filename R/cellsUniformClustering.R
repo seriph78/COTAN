@@ -154,7 +154,12 @@ seuratClustering <- function(objCOTAN,
     srat <- ScaleData(srat, features = selectedGenes)
 
     numPCAComp <- min(numPCAComp, length(Cells(srat)) - 1L)
-    srat <- RunPCA(srat, features = selectedGenes, npcs = numPCAComp)
+    srat <- RunPCA(
+      srat,
+      features = selectedGenes,
+      npcs = (numPCAComp + 15L), # extra comp to increase stability
+      seed.use = 137             # also passed down to irlba()
+    )
 
     pca <- Embeddings(srat, reduction = "pca")  # matrix [cells x PCs]
 
@@ -167,8 +172,12 @@ seuratClustering <- function(objCOTAN,
     seuratClusters <- NULL
     usedMaxResolution <- FALSE
     repeat {
-      seuratClusters <- Idents(FindClusters(srat, resolution = resolution,
-                                            algorithm = 2L)) # Louvain (refined)
+      seuratClusters <- Idents(FindClusters(
+        srat,
+        resolution = resolution,
+        algorithm = 2L,      # Louvain (refined)
+        random.seed = 137    # controls igraph::cluster_louvain()
+      ))
 
       # The next lines are necessary to make cluster smaller while
       # the number of residual cells decrease and to stop clustering

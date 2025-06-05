@@ -63,7 +63,8 @@ Imports:
     withr,
     SingleCellExperiment,
     SummarizedExperiment,
-    S4Vectors
+    S4Vectors,
+    proxy
 Suggests: 
     testthat (>= 3.2.0),
     proto,
