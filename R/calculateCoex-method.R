@@ -4,11 +4,11 @@
 #' @title Calculating the `COEX` matrix
 #'
 #' @description These are the functions and methods used to calculate the
-#'   **COEX** matrices according to the `COTAN` model. From there it is possible
-#'   to calculate the associated *pValue* and the *GDI* (*Global Differential
+#'   `COEX` matrices according to the `COTAN` model. From there it is possible
+#'   to calculate the associated `p-value` and the `GDI` (*Global Differential
 #'   Expression*)
 #'
-#' @description The **COEX** matrix is defined by following formula:
+#' @description The `COEX` matrix is defined by following formula:
 #'
 #'   \deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{
 #'                     (-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
@@ -16,8 +16,8 @@
 #'                             \frac{1}{1 \vee E_{ij}}}}}}
 #'
 #'   where \eqn{O} and \eqn{E} are the observed and expected contingency tables
-#'   and \eqn{n} is the relevant numerosity (the number of genes/cells depending
-#'   on given `actOnCells` flag).
+#'   and \eqn{n} is the relevant number of genes/cells (depending on given
+#'   `actOnCells` flag).
 #'
 #'   The formula can be more effectively implemented as:
 #'
@@ -958,7 +958,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
   } else {
     kind <- "genes'"
   }
-  logThis(paste("Calculate", kind, "coex (legacy): START"), logLevel = 1L)
+  logThis(paste("Calculate", kind, "COEX (legacy): START"), logLevel = 1L)
 
   logThis(paste("Retrieving expected", kind, "contingency table"),
           logLevel = 3L)
@@ -975,7 +975,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
                 difftime(expectedTime, startTime, units = "secs")),
           logLevel = 3L)
 
-  logThis(paste("Calculating", kind, "coex normalization factor"),
+  logThis(paste("Calculating", kind, "COEX normalization factor"),
           logLevel = 3L)
 
   if (isTRUE(actOnCells)) {
@@ -1023,8 +1023,8 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
                 difftime(observedTime, sqrtTime, units = "secs")),
           logLevel = 3L)
 
-  # coex estimation
-  logThis(paste("Estimating", kind, "coex"), logLevel = 3L)
+  # COEX estimation
+  logThis(paste("Estimating", kind, "COEX"), logLevel = 3L)
 
   coex <- coex * (observedYY@x - expectedYY@x)
 
@@ -1037,7 +1037,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
   gc()
 
   endTime <- Sys.time()
-  logThis(paste("Calculate", kind, "coex elapsed time:",
+  logThis(paste("Calculate", kind, "COEX elapsed time:",
                 difftime(endTime, observedTime, units = "secs")),
           logLevel = 3L)
 
@@ -1045,7 +1045,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
                 difftime(endTime, startTime, units = "secs")),
           logLevel = 2L)
 
-  logThis(paste("Calculate", kind, "coex (legacy): DONE"), logLevel = 1L)
+  logThis(paste("Calculate", kind, "COEX (legacy): DONE"), logLevel = 1L)
 
   return(list("coex" = coex, "ppf" = problematicPairsFraction))
 }
@@ -1053,7 +1053,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
 
 # torch based code
 calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
-  logThis(paste0("Calculate genes coex (torch) on device ", deviceStr,
+  logThis(paste0("Calculate genes COEX (torch) on device ", deviceStr,
                  ": START"), logLevel = 1L)
 
   startTime <- Sys.time()
@@ -1136,7 +1136,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
                 difftime(expectedTime, startTime, units = "secs")),
           logLevel = 3L)
 
-  logThis("Calculating genes coex normalization factor", logLevel = 3L)
+  logThis("Calculating genes COEX normalization factor", logLevel = 3L)
 
   coex <- torch::torch_maximum(expectedYY, one)$reciprocal_()
 
@@ -1209,7 +1209,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   }
 
   sqrtTime <- Sys.time()
-  logThis(paste("Calculating genes coex normalization factor elapsed time:",
+  logThis(paste("Calculating genes COEX normalization factor elapsed time:",
                 difftime(sqrtTime, expectedTime, units = "secs")),
           logLevel = 3L)
 
@@ -1246,14 +1246,14 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   }
 
   endTime <- Sys.time()
-  logThis(paste("Calculate genes coex elapsed time:",
+  logThis(paste("Calculate genes COEX elapsed time:",
                 difftime(endTime, observedTime, units = "secs")),
           logLevel = 3L)
   logThis(paste("Total calculations elapsed time:",
                 difftime(endTime, startTime, units = "secs")),
           logLevel = 2L)
 
-  logThis(paste0("Calculate genes coex (torch) on device ", deviceStr,
+  logThis(paste0("Calculate genes COEX (torch) on device ", deviceStr,
                  ": DONE"), logLevel = 1L)
 
   return(list("coex" = ret, "ppf" = problematicPairsFraction))
@@ -1386,7 +1386,7 @@ calculatePartialCoex <- function(objCOTAN,
     } else {
       kind <- "genes'"
     }
-    logThis(paste("Calculate", kind, "partial coex: START"), logLevel = 1L)
+    logThis(paste("Calculate", kind, "partial COEX: START"), logLevel = 1L)
 
     logThis(paste("Retrieving expected", kind, "partial contingency table"),
             logLevel = 3L)
@@ -1400,7 +1400,7 @@ calculatePartialCoex <- function(objCOTAN,
 
     gc()
 
-    logThis(paste("Calculating", kind, "partial coex normalization factor"),
+    logThis(paste("Calculating", kind, "partial COEX normalization factor"),
             logLevel = 3L)
 
     if (isTRUE(actOnCells)) {
@@ -1437,15 +1437,15 @@ calculatePartialCoex <- function(objCOTAN,
 
     gc()
 
-    # coex estimation
-    logThis(paste("Estimating", kind, "partial coex"), logLevel = 3L)
+    # COEX estimation
+    logThis(paste("Estimating", kind, "partial COEX"), logLevel = 3L)
 
     coex <- coex * (observedYY - expectedYY)
 
     rm(observedYY, expectedYY)
     gc()
 
-    logThis(paste("Calculate", kind, "partial coex: DONE"), logLevel = 1L)
+    logThis(paste("Calculate", kind, "partial COEX: DONE"), logLevel = 1L)
 
     return(coex)
   }
@@ -1580,7 +1580,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 #' @param genesSel Decides whether and how to perform the gene-selection. used
 #'   for the clustering and the `UMAP`. It is a string indicating one of the
 #'   following selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI** (default)
+#'   * `"HGDI"` Will pick-up the genes with highest `GDI` (default)
 #'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
 #'   via the \pkg{Seurat} package
 #'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
@@ -1707,7 +1707,7 @@ genesSelector <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #' @param genesSel Decides whether and how to perform the gene-selection. used
 #'   for the clustering and the `UMAP`. It is a string indicating one of the
 #'   following selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI** (default)
+#'   * `"HGDI"` Will pick-up the genes with highest `GDI` (default)
 #'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
 #'   via the \pkg{Seurat} package
 #'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability

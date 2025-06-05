@@ -141,7 +141,7 @@ genesCoexSpace <-
 #' @returns `establishGenesClusters()` a `list` of:
 #'   * `"g.space"` the genes' `COEX` space `data.frame`
 #'   * `"plot.eig"` the eigenvalues plot
-#'   * `"pca_clusters"` the *pca* components `data.frame`
+#'   * `"pca_clusters"` the `PCA` components `data.frame`
 #'   * `"tree_plot"` the tree plot for the genes' `COEX` space
 #'
 #' @export
@@ -203,7 +203,7 @@ establishGenesClusters <-
   GCSPca <- runPCA(x = GCS, rank = 10L,
                    BSPARAM = IrlbaParam(), get.rotation = FALSE)
   assert_that(identical(rownames(GCSPca[["x"]]), rownames(GCS)),
-              (ncol(GCSPca[["x"]]) == 10L), msg = "Issues with pca output")
+              (ncol(GCSPca[["x"]]) == 10L), msg = "Issues with PCA output")
 
   SMRelevance <- matrix(nrow = length(secondaryMarkers),
                         ncol = length(groupMarkers),

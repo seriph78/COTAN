@@ -5,11 +5,11 @@ Solved issues with breaking changes from `zeallot` package
 Expanded `calculateLikelihoodOfObserved()` to support more formulas related to
 likelihood
 
-Unified code that produces UMAP plots: now they all run `UMAPPlot()` that in
+Unified code that produces `UMAP` plots: now they all run `UMAPPlot()` that in
 turn calls the `Seurat::RunUMAP()` function
 
-Fixed issue with use of `parallelDist::parDist()` on Linux aarch64 machines: it
-crashed irrecoverably due to an ***invalid alignment*** error. Now code calls
+Fixed issue with use of `parallelDist::parDist()` on Linux `aarch64` machines:
+it crashed irrecoverably due to an ***invalid alignment*** error. Now code calls
 the normal `dist()` function on such machines
 
 ## 2.9.1
@@ -27,7 +27,7 @@ BioConductor
 
 Solved issue with use of `parallelDist::parDist()` by allowing a fall-back to
 `stats::dist()`. This was needed to address failures running `parDist()` on
-Linux-aarch64 machines
+Linux `aarch64` machines
 
 ## 2.7.4
 
@@ -75,7 +75,7 @@ Marked the function `clustersDeltaExpression()` as legacy: it has been replaced
 with the function `DEAOnClusters()` in the package
 
 Fixed minor bug in class `AdvancedGDIUniformityCheck` regarding third check: was
-testing third highest GDI value instead of second
+testing third highest `GDI` value instead of second
 
 ## 2.5.11
 
@@ -152,14 +152,14 @@ functions: `getNuNormData()` and `getLogNormData()`
 
 Re-factored function `mergeUniformCellsClusters()` to be more precise: now it
 merges clusters starting from the most similar in latest batch and also runs the
-merging in multiple steps adjusting gradually the *GDI* threshold ranging from a
+merging in multiple steps adjusting gradually the `GDI` threshold ranging from a
 very strict up to the user given ones
 
 Fixed minor bugs in functions `GDIPlot()` and `clustersMarkersHeatmapPlot()`
 
 ## 2.5.4
 
-Added possibility to display UMAP plots of cells clusters, using the function
+Added possibility to display `UMAP` plots of cells clusters, using the function
 `cellsUMAPPlot()`
 
 ## 2.5.3
@@ -209,7 +209,7 @@ allowing retry runs on estimators functions
 
 ## COTAN 2.3.4
 
-Speed-up of GDI calculation via Rfast package
+Speed-up of `GDI` calculation via `Rfast` package
 
 Added possibility of using distance between clusters based on *Zero-One* matrix
 instead of *DEA*
@@ -237,8 +237,8 @@ Now the function `pValueFromDEA()` returns the p-value adjusted for multi-test
 
 ## COTAN 2.3.1
 
-Stopped using explicit PCA via irlba package: using BioConductor PCAtools::pca
-instead
+Stopped using explicit PCA via `irlba` package: using BioConductor
+`PCAtools::pca` instead
 
 ## COTAN 2.3.0
 
@@ -292,8 +292,8 @@ expected absence of a gene reading against the observed state
 Fixed minor issue with `logThis()` to file: it was always appending a new line
 even when `appendLF` was set to `FALSE`
 
-Now `checkClusterUniformity()` returns more GDI stats like the percentage of
-genes above threshold or the last percentile of the GDI values
+Now `checkClusterUniformity()` returns more `GDI` stats like the percentage of
+genes above threshold or the last percentile of the `GDI` values
 
 Revamped `mergeUniformCellsClusters()` to select in order all the the most
 likely candidates pairs of clusters to merge. Provided new user parameter to
@@ -302,8 +302,8 @@ balance the merging of most possible candidates versus the time spent doing so
 Improved `dropGenesCells()` method: it now retains all meta-data information
 that is not related to the results of the other methods
 
-Added zoomed UDE plot to `cleanPlots()` return. It suggests a possible cut level
-for low UDE cells
+Added zoomed `UDE` plot to `cleanPlots()` return. It suggests a possible cut
+level for low `UDE` cells
 
 ## COTAN 2.1.5
 
@@ -384,7 +384,7 @@ Minor bug fixes and new function `clustersMarkersHeatmapPlot()`
 
 ## COTAN 1.99.0
 
-Included new functionalities for Bioc 2.17 release:
+Included new functionalities for BioConductor 2.17 release:
 
 -   created a new `COTAN` class to replace the old `scCOTAN`: this class
     provides internal invariants along a wide host of accessors that allows
@@ -397,7 +397,7 @@ Included new functionalities for Bioc 2.17 release:
     lists
 
 -   added new functionality about **uniform cell clustering** based on the
-    maximum *GDI* level in the *cluster*
+    maximum `GDI` level in the *cluster*
 
 -   added function to get a *differential expression* estimation for each
     cluster against background
@@ -413,9 +413,9 @@ After official release. PCA function changed to avoid basilisk and Python.
 
 ## COTAN 0.99.12
 
-Release before the official release of Bioc 3.15. Main changes: - The way in
-which the COEX matrix is estimated and stored is changed to occupy less space
-and run faster.
+Release before the official release of BioConductor 3.15. Main changes:
+- The way in which the COEX matrix is estimated and stored is changed
+  to occupy less space and run faster.
 
 ## COTAN 0.99.10
 

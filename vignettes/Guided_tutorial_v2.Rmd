@@ -120,14 +120,14 @@ logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
 ```
 
 Before we proceed to the analysis, we need to clean the data.
-The analysis will use a matrix of raw UMI counts as the input.
+The analysis will use a matrix of raw `UMI` counts as the input.
 To obtain this matrix, we have to remove any potential cell doublets or
 multiplets, as well as any low quality or dying cells.
 
 ## Data cleaning
 
-We can check the library size (UMI number) with an empirical cumulative
-distribution function
+We can check the library size (`UMI` number) with an *Empirical Cumulative
+Distribution* function
 
 ```{r}
 plot(ECDPlot(obj))
@@ -262,7 +262,7 @@ To color the PCA based on `nu` (so the cells' efficiency)
 plot(UDEPlot)
 ```
 
-UDE (color) should not correlate with principal components! This is very important.
+`UDE` (color) should not correlate with principal components! This is very important.
 
 The next part is used to remove the cells with efficiency too low.
 
@@ -346,7 +346,7 @@ obj2 <- automaticCOTANObjectCreation(
 
 # Analysis of the elaborated data
 
-## GDI
+## `GDI`
 
 To calculate and store the Global Differentiation Index (`GDI`) we can run:
 

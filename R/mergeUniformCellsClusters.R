@@ -2,15 +2,15 @@
 # --------------------- Uniform Clusters ----------------------
 
 #' @details `mergeUniformCellsClusters()` takes in a **uniform**
-#'   *clusterization* and iteratively checks whether merging two *near clusters*
-#'   would form a **uniform** *cluster* still. Multiple thresholds will be used
-#'   from \eqn{1.37} up to the given one in order to prioritize merge of the
-#'   best fitting pairs.
+#'   *clusterization* and progressively checks whether *merging* two *near
+#'   clusters* would form a **uniform** *cluster* still. Multiple thresholds
+#'   will be used from \eqn{1.37} up to the given one in order to prioritize
+#'   merge of the best fitting pairs.
 #'
 #'   This function uses the *cosine distance* to establish the *nearest clusters
 #'   pairs*. It will use the [checkClusterUniformity()] function to check
 #'   whether the merged *clusters* are **uniform**. The function will stop once
-#'   no *tested pairs* of clusters are mergeable after testing all pairs in a
+#'   no *tested pairs* of clusters can be *merged* after testing all pairs in a
 #'   single batch
 #'
 #' @param objCOTAN a `COTAN` object

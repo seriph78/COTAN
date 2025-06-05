@@ -221,8 +221,8 @@ heatmapPlot <- function(objCOTAN = NULL,
     }
   }
 
-  logThis(paste("min coex:", min(dfToPrint[["coex"]], na.rm = TRUE),
-                "max coex:", max(dfToPrint[["coex"]], na.rm = TRUE)),
+  logThis(paste("min COEX:", min(dfToPrint[["coex"]], na.rm = TRUE),
+                "max COEX:", max(dfToPrint[["coex"]], na.rm = TRUE)),
           logLevel = 2L)
 
   filteredDF <- dfToPrint %>%
@@ -386,7 +386,7 @@ genesHeatmapPlot <-
       row_title_gp = gpar(fill = "#8491B44C", font = 3L, col = "#3C5488FF")
     )
     lgd <- Legend(
-      col_fun = colorFunc, title = "coex", grid_width = unit(0.3, "cm"),
+      col_fun = colorFunc, title = "COEX", grid_width = unit(0.3, "cm"),
       direction = "horizontal", title_position = "topcenter",
       title_gp = gpar(fontsize = 10L, fontface = "bold", col = "#3C5488FF"),
       labels_gp = gpar(col = "#3C5488FF", font = 3L)
@@ -427,7 +427,7 @@ genesHeatmapPlot <-
 #'
 cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
   coexMat <- as.matrix(getCellsCoex(objCOTAN))
-  assert_that(!is_empty(coexMat), msg = "cells coex not found in the COTAN")
+  assert_that(!is_empty(coexMat), msg = "cells COEX not found in the COTAN")
 
   # if clustering is needed
   if (!is_empty(clusters)) {

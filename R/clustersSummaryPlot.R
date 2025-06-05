@@ -21,8 +21,8 @@
 #'   * `"clName"` the *cluster* **labels**
 #'   * `"condName"` the relevant condition (that sub-divides the *clusters*)
 #'   * `"CellNumber"` the number of cells in the group
-#'   * `"MeanUDE"` the average "UDE" in the group of cells
-#'   * `"MedianUDE"` the median "UDE" in the group of cells
+#'   * `"MeanUDE"` the average `UDE` in the group of cells
+#'   * `"MedianUDE"` the median `UDE` in the group of cells
 #'   * `"ExpGenes25"` the number of genes expressed in at the least 25% of the
 #'     cells in the group
 #'   * `"ExpGenes"` the number of genes expressed at the least once in any of

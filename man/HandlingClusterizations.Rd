@@ -181,7 +181,7 @@ significant!}
 on the one indicated by \code{clName}}
 
 \item{dropNoCoex}{When \code{TRUE} drops the names from the \emph{clusterizations} with
-empty associated coex \code{data.frame}}
+empty associated \code{COEX} \code{data.frame}}
 
 \item{keepPrefix}{When \code{TRUE} returns the internal name of the
 \emph{clusterization}: the one with the \code{CL_} prefix.}
@@ -220,8 +220,8 @@ given elements (the columns are features)}
 \item{elements}{a named \code{list} of elements to label. Each array in the list
 will be shown with a different color}
 
-\item{title}{a string giving the plot title. Will default to UMAP Plot if not
-specified}
+\item{title}{a string giving the plot title. Will default to \code{UMAP} Plot if
+not specified}
 
 \item{colors}{an \code{array} of colors to use in the plot. If not sufficient
 colors are given it will complete the list using colors from
@@ -344,8 +344,8 @@ statistics: The calculated statistics are:
 \item \code{"clName"} the \emph{cluster} \strong{labels}
 \item \code{"condName"} the relevant condition (that sub-divides the \emph{clusters})
 \item \code{"CellNumber"} the number of cells in the group
-\item \code{"MeanUDE"} the average "UDE" in the group of cells
-\item \code{"MedianUDE"} the median "UDE" in the group of cells
+\item \code{"MeanUDE"} the average \code{UDE} in the group of cells
+\item \code{"MedianUDE"} the median \code{UDE} in the group of cells
 \item \code{"ExpGenes25"} the number of genes expressed in at the least 25\% of the
 cells in the group
 \item \code{"ExpGenes"} the number of genes expressed at the least once in any of
@@ -475,8 +475,8 @@ needed calculates and stores the \code{DEA} of the relevant \emph{clusterization
 
 \code{clustersMarkersHeatmapPlot()} returns the heatmap plot of a summary
 score for each \emph{cluster} and each gene marker in the given
-\emph{clusterization}. It also returns the numerosity and percentage of each
-\emph{cluster} on the right and a \emph{clusterization} dendogram on the left, as
+\emph{clusterization}. It also returns the size and percentage of each
+\emph{cluster} on the right and a \emph{clusterization} \code{dendogram} on the left, as
 returned by the function \code{\link[=clustersTreePlot]{clustersTreePlot()}}. The heatmap cells' colors
 express the \strong{DEA}, that is whether a gene is enriched or depleted in the
 cluster, while the stars are aligned to the corresponding adjusted

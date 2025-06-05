@@ -11,8 +11,8 @@
 #'   the rows in the `matrix`.
 #' @param elements a named `list` of elements to label. Each array in the list
 #'   will be shown with a different color
-#' @param title a string giving the plot title. Will default to UMAP Plot if not
-#'   specified
+#' @param title a string giving the plot title. Will default to `UMAP` Plot if
+#'   not specified
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]

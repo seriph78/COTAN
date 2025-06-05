@@ -7,10 +7,10 @@
 #'   elements of the returned list will be `NULL`
 #'
 #' @returns `cleanPlots()` returns a `list` of `ggplot2` plots:
-#'   * `"pcaCells"` is for pca cells
-#'   * `"pcaCellsData"` is the data of the pca cells (can be plotted)
+#'   * `"pcaCells"` is for `PCA` cells
+#'   * `"pcaCellsData"` is the data of the `PCA` cells (can be plotted)
 #'   * `"genes"` is for `B` group cells' genes
-#'   * `"UDE"` is for cells' *UDE* against their pca
+#'   * `"UDE"` is for cells' `UDE` against their `PCA`
 #'   * `"nu"` is for cell `nu`
 #'   * `"zoomedNu"` is the same but zoomed on the left and with an estimate
 #'   for the low `nu` threshold that defines problematic cells
@@ -149,7 +149,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     gc()
 
-    #check if the pca plot is clean enough and from the printed genes,
+    #check if the PCA plot is clean enough and from the printed genes,
     #if the smallest group of cells are characterized by particular genes
 
     pcaCellsPlot <- ggplot(subset(pcaCells, groups == "A"),

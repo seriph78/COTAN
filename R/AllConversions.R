@@ -29,7 +29,7 @@ NULL
 #'   into a [SingleCellExperiment::SingleCellExperiment-class] object. Stores
 #'   the raw counts in the `"counts"` [SummarizedExperiment::Assays-class], the
 #'   metadata for genes and cells as `rowData` and `colData` slots respectively
-#'   and finally the genes' and cells' *coex* along the dataset metadata into
+#'   and finally the genes' and cells' `COEX` along the dataset metadata into
 #'   the `metadata` slot.
 #'
 #'   The function performs the following steps:

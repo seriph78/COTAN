@@ -150,16 +150,16 @@ elements. The columns calculated via \code{estimate} and \code{find} methods are
 dropped too
 }
 
-\code{ECDPlot()} returns an ECD plot
+\code{ECDPlot()} returns an \code{ECD} plot
 
 \code{clean()} returns the updated \code{COTAN} object
 
 \code{cleanPlots()} returns a \code{list} of \code{ggplot2} plots:
 \itemize{
-\item \code{"pcaCells"} is for pca cells
-\item \code{"pcaCellsData"} is the data of the pca cells (can be plotted)
+\item \code{"pcaCells"} is for \code{PCA} cells
+\item \code{"pcaCellsData"} is the data of the \code{PCA} cells (can be plotted)
 \item \code{"genes"} is for \code{B} group cells' genes
-\item \code{"UDE"} is for cells' \emph{UDE} against their pca
+\item \code{"UDE"} is for cells' \code{UDE} against their \code{PCA}
 \item \code{"nu"} is for cell \code{nu}
 \item \code{"zoomedNu"} is the same but zoomed on the left and with an estimate
 for the low \code{nu} threshold that defines problematic cells
@@ -211,9 +211,9 @@ expressing all genes in the dataset
 \code{dropGenesCells()} removes an array of genes and/or cells from the
 current \code{COTAN} object.
 
-\code{ECDPlot()} plots the empirical distribution function of library
-sizes (UMI number). It helps to define where to drop "cells" that are
-simple background signal.
+\code{ECDPlot()} plots the \emph{Empirical Cumulative Distribution} function
+of library sizes (\code{UMI} number). It helps to define where to drop "cells"
+that are simple background signal.
 
 \code{clean()} is the main method that can be used to check and clean the
 dataset. It will discard any genes that has less than 3 non-zero counts per

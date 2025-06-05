@@ -19,8 +19,8 @@ datasetTags <- function() {
          , "sc.m"  = "scRNAseq method:"                                 # 2
          , "cond"  = "condition sample:"                                # 3
          , "cells" = "starting n. of cells:"                            # 4
-         , "gsync" = "genes' coex is in sync:"                          # 5
-         , "csync" = "cells' coex is in sync:"                          # 6
+         , "gsync" = "genes' COEX is in sync:"                          # 5
+         , "csync" = "cells' COEX is in sync:"                          # 6
          , "gbad"  = "genes' pairs fraction with small expected count:" # 7
          , "cbad"  = "cells' pairs fraction with small expected count:" # 8
          ))
@@ -196,15 +196,15 @@ setMethod(
 
 #' @aliases storeGDI
 #'
-#' @details `storeGDI()` stored and already calculated genes' GDI `array` in a
+#' @details `storeGDI()` stored and already calculated genes' `GDI` `array` in a
 #'   `COTAN` object. It can be retrieved using the method [getGDI()]
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param genesGDI the named genes' GDI `array` to store or the output
+#' @param genesGDI the named genes' `GDI` `array` to store or the output
 #'   `data.frame` of the function [calculateGDI()]
 #'
-#' @returns `storeGDI()` returns the given `COTAN` object  with updated
-#'   **GDI** genes' information
+#' @returns `storeGDI()` returns the given `COTAN` object  with updated `GDI`
+#'   genes' information
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -393,7 +393,7 @@ setMethod(
 
       assert_that(identical(rownames(coexDF), getGenes(objCOTAN)),
                   setequal(colnames(coexDF), levels(clusters)),
-                  msg = "coex is not aligned to the given clusterization")
+                  msg = "COEX is not aligned to the given clusterization")
     }
 
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, clusters,
@@ -444,7 +444,7 @@ setMethod(
       assert_that(identical(rownames(coexDF), getGenes(objCOTAN)),
                   setequal(colnames(coexDF),
                            getClusters(objCOTAN, clName = internalName)),
-                  msg = "coex is not aligned to the given clusterization")
+                  msg = "COEX is not aligned to the given clusterization")
     }
 
     # this should not add any new elements to the list!

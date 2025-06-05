@@ -10,7 +10,7 @@ setGeneric(
   }
 )
 
-# -------- calculate coex --------
+# -------- calculate COEX --------
 
 setGeneric(
   "calculateCoex",

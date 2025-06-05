@@ -253,7 +253,7 @@ the function will do it genome-wide.}
 for the clustering and the \code{UMAP}. It is a string indicating one of the
 following selection methods:
 \itemize{
-\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI} (the default method)
+\item \code{"HGDI"} Will pick-up the genes with highest \code{GDI} (default)
 \item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
 via the \pkg{Seurat} package
 \item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability
@@ -372,11 +372,11 @@ returned \code{matrix} has dimensions: (number of cells, number of components)
 }
 \description{
 These are the functions and methods used to calculate the
-\strong{COEX} matrices according to the \code{COTAN} model. From there it is possible
-to calculate the associated \emph{pValue} and the \emph{GDI} (\emph{Global Differential
+\code{COEX} matrices according to the \code{COTAN} model. From there it is possible
+to calculate the associated \code{p-value} and the \code{GDI} (\emph{Global Differential
 Expression})
 
-The \strong{COEX} matrix is defined by following formula:
+The \code{COEX} matrix is defined by following formula:
 
 \deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{
                     (-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
@@ -384,8 +384,8 @@ The \strong{COEX} matrix is defined by following formula:
                             \frac{1}{1 \vee E_{ij}}}}}}
 
 where \eqn{O} and \eqn{E} are the observed and expected contingency tables
-and \eqn{n} is the relevant numerosity (the number of genes/cells depending
-on given \code{actOnCells} flag).
+and \eqn{n} is the relevant number of genes/cells (depending on given
+\code{actOnCells} flag).
 
 The formula can be more effectively implemented as:
 
