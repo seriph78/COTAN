@@ -1721,6 +1721,10 @@ genesSelector <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
 #'
+#' @importFrom RSpectra eigs_sym
+#'
+#' @importFrom BiocSingular runPCA
+#'
 #' @export
 #'
 #' @rdname CalculatingCOEX
@@ -1730,7 +1734,25 @@ calculateReducedDataMatrix <-
            dataMethod = "", numComp = 25L,
            genesSel = "", numGenes = 2000L) {
   if (useCoexEigen) {
-    stop("Not implemented yet")
+    # calculate the most relenvat eigen-vectors of the COEX matrix
+    coex <- getGenesCoex(objCOTAN, zeroDiagonal = FALSE)
+    res <- RSpectra::eigs_sym(as(coex, "dsyMatrix"),
+                              k = numComp, which = "LM")
+    eigenVectors <- res$vectors[, seq_len(numComp)]
+
+    # retrive the relvant data matrix
+    dataMatrix <- getDataMatrix(objCOTAN, dataMethod = dataMethod)
+
+    # project the data matrix onto the calcualted eigen-space
+    dataMatrix <- t(eigenVectors) %*% datamatrix
+
+    assert_that(ncol(dataMatrix) == getNumCells(objCOTAN),
+                nrow(dataMatrix) == numComp)
+
+    # re-scale in the cells direction
+    dataMatrix <- scale(dataMatrix, center = FALSE, scale = TRUE)
+
+    return(t(dataMatrix))
   } else {
     selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
                                    numGenes = numGenes)
