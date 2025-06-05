@@ -62,9 +62,8 @@ Imports:
     assertthat,
     withr,
     SingleCellExperiment,
-    SummarizedExperiment,
-    S4Vectors,
-    proxy
+    proxy,
+    RSpectra
 Suggests: 
     testthat (>= 3.2.0),
     proto,
@@ -84,7 +83,9 @@ Suggests:
     qpdf,
     GEOquery,
     sf,
-    torch
+    torch,
+    SummarizedExperiment,
+    S4Vectors
 Config/testthat/edition: 3
 Language: en-US
 biocViews: 

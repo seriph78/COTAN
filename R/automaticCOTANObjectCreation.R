@@ -45,9 +45,7 @@
 #' @importFrom grDevices pdf
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices dev.cur
-#' @importFrom grDevices colors
 #'
-#' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 annotate
 #'
 #' @examples

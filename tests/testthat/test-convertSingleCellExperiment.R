@@ -29,14 +29,15 @@ test_that("Convert COTAN to and from SCE on test dataset", {
   objSCE <- convertToSingleCellExperiment(objCOTAN = obj)
 
   expect_identical(counts(objSCE), getRawData(obj))
-  expect_identical(rowData(objSCE), DataFrame(getMetadataGenes(obj)))
-  expect_identical(colData(objSCE), DataFrame(getMetadataCells(obj)))
-  expect_named(metadata(objSCE),
+  expect_identical(rowData(objSCE), S4Vectors::DataFrame(getMetadataGenes(obj)))
+  expect_identical(colData(objSCE), S4Vectors::DataFrame(getMetadataCells(obj)))
+  expect_named(S4Vectors::metadata(objSCE),
                c("genesCoex", "cellsCoex", "datasetMetadata"))
-  expect_identical(metadata(objSCE)[["datasetMetadata"]],
+  expect_identical(S4Vectors::metadata(objSCE)[["datasetMetadata"]],
                    getMetadataDataset(obj))
-  expect_identical(metadata(objSCE)[["genesCoex"]], coex)
-  expect_identical(metadata(objSCE)[["cellsCoex"]], emptySymmetricMatrix())
+  expect_identical(S4Vectors::metadata(objSCE)[["genesCoex"]], coex)
+  expect_identical(S4Vectors::metadata(objSCE)[["cellsCoex"]],
+                   emptySymmetricMatrix())
 
   newObj <- convertFromSingleCellExperiment(objSCE = objSCE)
 

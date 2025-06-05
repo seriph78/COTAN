@@ -60,8 +60,6 @@ NULL
 #'
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #'
-#' @importFrom S4Vectors DataFrame
-#'
 #' @export
 #'
 #' @seealso [COTAN-class], [SingleCellExperiment::SingleCellExperiment]
@@ -102,8 +100,8 @@ convertToSingleCellExperiment <- function(objCOTAN) {
   # Create the SingleCellExperiment object
   objSCE <- SingleCellExperiment(
     assays = list(counts = getRawData(objCOTAN)),
-    rowData = DataFrame(getMetadataGenes(objCOTAN)),
-    colData = DataFrame(cellsMeta),
+    rowData = S4Vectors::DataFrame(getMetadataGenes(objCOTAN)),
+    colData = S4Vectors::DataFrame(cellsMeta),
     metadata = list(
       genesCoex = genesCoex,
       cellsCoex = cellsCoex,
@@ -161,10 +159,6 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #' @importFrom SingleCellExperiment rowData
 #' @importFrom SingleCellExperiment colData
 #'
-#' @importFrom SummarizedExperiment assayNames
-#'
-#' @importFrom S4Vectors metadata
-#'
 #' @export
 #'
 #' @seealso [COTAN-class], [SingleCellExperiment::SingleCellExperiment]
@@ -177,7 +171,7 @@ convertFromSingleCellExperiment <- function(objSCE,
               msg = "The input object must be of class 'SingleCellExperiment'.")
 
   # Extract counts matrix
-  assert_that("counts" %in% assayNames(objSCE),
+  assert_that("counts" %in% SummarizedExperiment::assayNames(objSCE),
               msg = paste("The 'counts' assay is missing",
                           "in the SingleCellExperiment object."))
 
@@ -207,7 +201,7 @@ convertFromSingleCellExperiment <- function(objSCE,
   cellsMeta <- cellsMetaSCE[, colsToKeep, drop = FALSE]
 
   # Attempt to retrieve co-expression matrices from metadata
-  sceMetadataList <- metadata(objSCE)
+  sceMetadataList <- S4Vectors::metadata(objSCE)
 
   genesCoex <- emptySymmetricMatrix()
   if ("genesCoex" %in% names(sceMetadataList)) {

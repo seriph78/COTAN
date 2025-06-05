@@ -1733,18 +1733,26 @@ calculateReducedDataMatrix <-
   function(objCOTAN, useCoexEigen = FALSE,
            dataMethod = "", numComp = 25L,
            genesSel = "", numGenes = 2000L) {
+  logThis("Elaborating reduced dimensionality data matrix - START",
+          logLevel = 2L)
+
+  ret <- NULL
   if (useCoexEigen) {
+    logThis("Elaborating COEX Eigen Vectors - START", logLevel = 3L)
+
     # calculate the most relenvat eigen-vectors of the COEX matrix
     coex <- getGenesCoex(objCOTAN, zeroDiagonal = FALSE)
     res <- RSpectra::eigs_sym(as(coex, "dsyMatrix"),
                               k = numComp, which = "LM")
     eigenVectors <- res$vectors[, seq_len(numComp)]
 
+    logThis("Elaborating COEX Eigen Vectors - DONE", logLevel = 3L)
+
     # retrive the relvant data matrix
     dataMatrix <- getDataMatrix(objCOTAN, dataMethod = dataMethod)
 
     # project the data matrix onto the calcualted eigen-space
-    dataMatrix <- t(eigenVectors) %*% datamatrix
+    dataMatrix <- t(eigenVectors) %*% dataMatrix
 
     assert_that(ncol(dataMatrix) == getNumCells(objCOTAN),
                 nrow(dataMatrix) == numComp)
@@ -1752,7 +1760,7 @@ calculateReducedDataMatrix <-
     # re-scale in the cells direction
     dataMatrix <- scale(dataMatrix, center = FALSE, scale = TRUE)
 
-    return(t(dataMatrix))
+    ret <- t(dataMatrix)
   } else {
     selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
                                    numGenes = numGenes)
@@ -1763,12 +1771,20 @@ calculateReducedDataMatrix <-
     cellsMatrix <- scale(t(cellsMatrix), center = TRUE, scale = TRUE)
 
     logThis("Elaborating PCA - START", logLevel = 3L)
+
     numComp <- min(numComp, ncol(cellsMatrix))
     cellsPCA <- runPCA(x = cellsMatrix,
                        rank = numComp,
                        BSPARAM = IrlbaParam(),
                        get.rotation = FALSE)[["x"]]
 
-    return(cellsPCA)
+    logThis("Elaborating PCA - DONE", logLevel = 3L)
+
+    ret <- cellsPCA
   }
+
+  logThis("Elaborating reduced dimensionality data matrix - DONE",
+          logLevel = 2L)
+
+  return(ret)
 }

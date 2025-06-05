@@ -300,28 +300,20 @@ cellsUMAPPlot <- function(objCOTAN,
   if (isEmptyName(genesSel)) {
     genesSel <- "HGDI" # this default could differ from the one in the selector
   }
-  selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
-                                 numGenes = numGenes)
-  cellsMatrix <-
-    getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ]
 
-  # re-scale so that all the genes have mean 0.0 and stdev 1.0
-  cellsMatrix <- scale(t(cellsMatrix), center = TRUE, scale = TRUE)
-
-  logThis("Elaborating PCA - START", logLevel = 3L)
-  cellsPCA <- runPCA(x = cellsMatrix, rank = numComp,
-                     BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
-
-  gc()
+  cellsPCA <- calculateReducedDataMatrix(
+    objCOTAN, useCoexEigen = FALSE,
+    dataMethod = dataMethod, numComp = numComp,
+    genesSel = genesSel, numGenes = numGenes)
 
   logThis("Elaborating PCA - END", logLevel = 3L)
 
-  genesSel
   umapTitle <- paste("UMAP of clusterization", clName,
                      "using", dataMethod, "matrix with",
                      ifelse(length(genesSel) == 1,
                             paste(genesSel, "genes selector"),
                             "user provided genes"))
+
   umapPlot <- UMAPPlot(cellsPCA,
                        clusters = clusters,
                        colors = colors,
