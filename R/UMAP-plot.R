@@ -242,6 +242,9 @@ UMAPPlot <- function(dataIn,
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName` that will only indicate the relevant
 #'   column name in the returned `data.frame`
+#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
+#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
+#'   the data `matrix` to the selected genes before applying the `PCA` reduction
 #' @param dataMethod selects the method to use to create the `data.frame` to
 #'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
 #' @param numComp Number of components of the reduced `matrix`, it defaults to
@@ -258,14 +261,12 @@ UMAPPlot <- function(dataIn,
 #'
 #' @returns `cellsUMAPPlot()` returns a list with 2 objects:
 #'  * `"plot"` a `ggplot2` object representing the `umap` plot
-#'  * `"cellsPCA"` the `data.frame` PCA used to create the plot
+#'  * `"cellsRDM"` the *Reduced Data Matrix* used to create the plot
 #'
 #' @importFrom rlang is_empty
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
-#'
-#' @importFrom BiocSingular runPCA
 #'
 #' @export
 #'
@@ -274,6 +275,7 @@ UMAPPlot <- function(dataIn,
 cellsUMAPPlot <- function(objCOTAN,
                           clName = "",
                           clusters = NULL,
+                          useCoexEigen = FALSE,
                           dataMethod = "",
                           numComp = 25L,
                           genesSel = "",
@@ -301,12 +303,14 @@ cellsUMAPPlot <- function(objCOTAN,
     genesSel <- "HGDI" # this default could differ from the one in the selector
   }
 
-  cellsPCA <- calculateReducedDataMatrix(
-    objCOTAN, useCoexEigen = FALSE,
+  if (isEmptyName(dataMethod)) {
+    dataMethod <- "LogNormalized"
+  }
+
+  cellsRDM <- calculateReducedDataMatrix(
+    objCOTAN, useCoexEigen = useCoexEigen,
     dataMethod = dataMethod, numComp = numComp,
     genesSel = genesSel, numGenes = numGenes)
-
-  logThis("Elaborating PCA - END", logLevel = 3L)
 
   umapTitle <- paste("UMAP of clusterization", clName,
                      "using", dataMethod, "matrix with",
@@ -314,12 +318,12 @@ cellsUMAPPlot <- function(objCOTAN,
                             paste(genesSel, "genes selector"),
                             "user provided genes"))
 
-  umapPlot <- UMAPPlot(cellsPCA,
+  umapPlot <- UMAPPlot(cellsRDM,
                        clusters = clusters,
                        colors = colors,
                        numNeighbors = numNeighbors,
                        minPointsDist = minPointsDist,
                        title = umapTitle)
 
-  return(list("plot" = umapPlot, "cellsPCA" = cellsPCA))
+  return(list("plot" = umapPlot, "cellsRDM" = cellsRDM))
 }

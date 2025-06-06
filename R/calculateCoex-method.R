@@ -1733,17 +1733,18 @@ calculateReducedDataMatrix <-
   function(objCOTAN, useCoexEigen = FALSE,
            dataMethod = "", numComp = 25L,
            genesSel = "", numGenes = 2000L) {
-  logThis("Elaborating reduced dimensionality data matrix - START",
+  logThis("Elaborating Reduced dimensionality Data Matrix - START",
           logLevel = 2L)
 
-  ret <- NULL
+  numComp <- min(numComp, getNumGenes(objCOTAN))
+
+  cellsRDM <- NULL
   if (useCoexEigen) {
     logThis("Elaborating COEX Eigen Vectors - START", logLevel = 3L)
 
     # calculate the most relenvat eigen-vectors of the COEX matrix
     coex <- getGenesCoex(objCOTAN, zeroDiagonal = FALSE)
-    res <- RSpectra::eigs_sym(as(coex, "dsyMatrix"),
-                              k = numComp, which = "LM")
+    res <- eigs_sym(as(coex, "dsyMatrix"), k = numComp, which = "LM")
     eigenVectors <- res$vectors[, seq_len(numComp)]
 
     logThis("Elaborating COEX Eigen Vectors - DONE", logLevel = 3L)
@@ -1754,37 +1755,31 @@ calculateReducedDataMatrix <-
     # project the data matrix onto the calcualted eigen-space
     dataMatrix <- t(eigenVectors) %*% dataMatrix
 
-    assert_that(ncol(dataMatrix) == getNumCells(objCOTAN),
-                nrow(dataMatrix) == numComp)
-
     # re-scale in the cells direction
-    dataMatrix <- scale(dataMatrix, center = FALSE, scale = TRUE)
-
-    ret <- t(dataMatrix)
+    cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))
   } else {
     selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
                                    numGenes = numGenes)
     cellsMatrix <-
-      getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ]
+      t(getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ])
 
     # re-scale so that all the genes have mean 0.0 and stdev 1.0
-    cellsMatrix <- scale(t(cellsMatrix), center = TRUE, scale = TRUE)
+    cellsMatrix <- scale(cellsMatrix, center = TRUE, scale = TRUE)
 
     logThis("Elaborating PCA - START", logLevel = 3L)
 
-    numComp <- min(numComp, ncol(cellsMatrix))
-    cellsPCA <- runPCA(x = cellsMatrix,
+    cellsRDM <- runPCA(x = cellsMatrix,
                        rank = numComp,
                        BSPARAM = IrlbaParam(),
                        get.rotation = FALSE)[["x"]]
 
     logThis("Elaborating PCA - DONE", logLevel = 3L)
-
-    ret <- cellsPCA
   }
 
-  logThis("Elaborating reduced dimensionality data matrix - DONE",
+  assert_that(identical(dim(cellsRDM), c(getNumCells(objCOTAN), numComp)))
+
+  logThis("Elaborating Reduced dimensionality Data Matrix - DONE",
           logLevel = 2L)
 
-  return(ret)
+  return(cellsRDM)
 }

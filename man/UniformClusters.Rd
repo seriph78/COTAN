@@ -29,7 +29,11 @@ cellsUniformClustering(
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
+  useCoexEigen = FALSE,
+  dataMethod = "",
   genesSel = "HVG_Seurat",
+  numGenes = 2000L,
+  numReducedComp = 25L,
   hclustMethod = "ward.D2",
   initialClusters = NULL,
   initialIteration = 1L,
@@ -115,8 +119,20 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
+\item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
+onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
+the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
+
+\item{dataMethod}{selects the method to use to create the \code{data.frame} to
+pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.}
+
 \item{genesSel}{Decides whether and how to perform the gene-selection
 (defaults to \code{"HVG_Seurat"}). See \code{\link[=genesSelector]{genesSelector()}} for more details.}
+
+\item{numGenes}{the number of genes to select using the above method. Will be
+ignored when an explicit list of genes has been passed in}
+
+\item{numReducedComp}{the number of calculated \strong{RDM} components}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}

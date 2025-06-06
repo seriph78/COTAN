@@ -98,6 +98,7 @@ cellsUMAPPlot(
   objCOTAN,
   clName = "",
   clusters = NULL,
+  useCoexEigen = FALSE,
   dataMethod = "",
   numComp = 25L,
   genesSel = "",
@@ -231,6 +232,10 @@ colors are given it will complete the list using colors from
 
 \item{minPointsDist}{Overrides the default \code{min_dist} value}
 
+\item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
+onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
+the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
+
 \item{dataMethod}{selects the method to use to create the \code{data.frame} to
 pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.}
 
@@ -327,7 +332,7 @@ corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 \code{cellsUMAPPlot()} returns a list with 2 objects:
 \itemize{
 \item \code{"plot"} a \code{ggplot2} object representing the \code{umap} plot
-\item \code{"cellsPCA"} the \code{data.frame} PCA used to create the plot
+\item \code{"cellsRDM"} the \emph{Reduced Data Matrix} used to create the plot
 }
 
 \code{clustersMarkersHeatmapPlot()} returns a list with:

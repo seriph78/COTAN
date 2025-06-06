@@ -29,15 +29,20 @@ NULL
 #' @param minNumClusters The minimum number of *clusters* expected from this
 #'   *clusterization*. In cases it is not reached, it will increase the
 #'   resolution of the *clusterization*
+#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
+#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
+#'   the data `matrix` to the selected genes before applying the `PCA` reduction
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
 #' @param genesSel Decides whether and how to perform the gene-selection
 #'   (defaults to `"HVG_Seurat"`). See [genesSelector()] for more details.
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
-#' @param numPCAComp the number of calculated **PCA** components
+#' @param numReducedComp the number of calculated **RDM** components
 #'
 #' @returns a list with:
 #'   * `"SeuratClusters"` a `Seurat` *clusterization*
-#'   * `"PCA"` the reduced data matrix
+#'   * `"CellsRDM"` the Reduced Data Matrix
 #'   * `"Resolution"` the used resolution
 #'   * `"UsedMaxResolution"` whether the maximum resolution has been reached
 #'
@@ -54,33 +59,35 @@ NULL
 
 seuratClustering <- function(objCOTAN,
                              initialResolution, minNumClusters,
-                             genesSel, numGenes = 2000L,
-                             numPCAComp = 25L) {
+                             useCoexEigen, dataMethod,
+                             genesSel, numGenes,
+                             numReducedComp) {
   tryCatch({
     logThis("Creating new clusterization: START", logLevel = 2L)
 
-    assert_that(numPCAComp <= getNumGenes(objCOTAN))
+    assert_that(numReducedComp <= getNumGenes(objCOTAN))
 
-    numPCACompToCalc <- numPCAComp + 15L
-    pca <- calculateReducedDataMatrix(
+    numReducedCompToCalc <- numReducedComp + 15L
+    cellsRDM <- calculateReducedDataMatrix(
       objCOTAN, useCoexEigen = FALSE,
-      dataMethod = "LogNorm", numComp = numPCACompToCalc,
+      dataMethod = "LogNorm", numComp = numReducedCompToCalc,
       genesSel = genesSel, numGenes = numGenes)
 
-    assert_that(all(dim(pca) == c(getNumCells(objCOTAN), numPCACompToCalc)),
+    assert_that(identical(dim(cellsRDM),
+                          c(getNumCells(objCOTAN), numReducedCompToCalc)),
                 msg = "Returned PCA matrix has wrong dimensions")
 
     # Create the Seurat object
     srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
                                project = "clusterization")
 
-    # Add PCA manually (assumes pca: cells × PCs)
+    # Add RDM manually
     srat[["pca"]] <-
-      CreateDimReducObject(embeddings = pca,
+      CreateDimReducObject(embeddings = cellsRDM,
                            key = "PC_",
                            assay = "RNA")
 
-    srat <- FindNeighbors(srat, dims = seq_len(numPCAComp))
+    srat <- FindNeighbors(srat, dims = seq_len(numReducedComp))
 
     resolution <- initialResolution
     resolutionStep <- 0.5
@@ -120,7 +127,7 @@ seuratClustering <- function(objCOTAN,
     gc()
 
     # returned objects
-    return(list("SeuratClusters" = seuratClusters, "PCA" = pca,
+    return(list("SeuratClusters" = seuratClusters, "CellsRDM" = cellsRDM,
                 "Resolution" = resolution,
                 "UsedMaxResolution" = usedMaxResolution))
   },
@@ -129,7 +136,7 @@ seuratClustering <- function(objCOTAN,
                         getNumCells(objCOTAN),
                         "cells with the following error:"), logLevel = 1L)
     logThis(msg = conditionMessage(e), logLevel = 1L)
-    return(list("SeuratClusters" = NULL, "PCA" = NULL,
+    return(list("SeuratClusters" = NULL, "CellsRDM" = NULL,
                 "Resolution" = NaN, "UsedMaxResolution" = FALSE))
   })
 }
@@ -170,8 +177,16 @@ seuratClustering <- function(objCOTAN,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
+#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
+#'   the data `matrix` to the selected genes before applying the `PCA` reduction
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
 #' @param genesSel Decides whether and how to perform the gene-selection
 #'   (defaults to `"HVG_Seurat"`). See [genesSelector()] for more details.
+#' @param numGenes the number of genes to select using the above method. Will be
+#'   ignored when an explicit list of genes has been passed in
+#' @param numReducedComp the number of calculated **RDM** components
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param initialClusters an existing *clusterization* to use as starting point:
@@ -229,7 +244,11 @@ cellsUniformClustering <- function(objCOTAN,
                                    deviceStr = "cuda",
                                    useDEA = TRUE,
                                    distance = NULL,
+                                   useCoexEigen = FALSE,
+                                   dataMethod = "",
                                    genesSel = "HVG_Seurat",
+                                   numGenes = 2000L,
+                                   numReducedComp = 25L,
                                    hclustMethod = "ward.D2",
                                    initialClusters = NULL,
                                    initialIteration = 1L,
@@ -278,6 +297,10 @@ cellsUniformClustering <- function(objCOTAN,
                             "a legacy `GDIThreshold` must be given"))
   }
 
+  if (isEmptyName(dataMethod)) {
+    dataMethod = "LogNormalized"
+  }
+
   repeat {
     iter <- iter + 1L
 
@@ -300,10 +323,13 @@ cellsUniformClustering <- function(objCOTAN,
 
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
-    c(testClusters, pca, resolution, usedMaxResolution) %<-%
+    c(testClusters, cellsRDM, resolution, usedMaxResolution) %<-%
       seuratClustering(subObj, initialResolution = initialResolution,
                        minNumClusters = minNumClusters,
-                       numPCAComp = 25L, genesSel = genesSel, numGenes = 2000L)
+                       useCoexEigen = useCoexEigen,
+                       dataMethod = dataMethod,
+                       numReducedComp = numReducedComp,
+                       genesSel = genesSel, numGenes = numGenes)
 
     if (is_null(testClusters)) {
       logThis(paste("NO new possible uniform clusters!",
@@ -318,13 +344,13 @@ cellsUniformClustering <- function(objCOTAN,
       logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
       pdf(outFile)
 
-      plot(UMAPPlot(dataIn = pca,
+      plot(UMAPPlot(dataIn = cellsRDM,
                     clusters = getCondition(subObj),
-                    title = paste0("Cells number: ", nrow(pca))))
+                    title = paste0("Cells number: ", nrow(cellsRDM))))
 
-      plot(UMAPPlot(dataIn = pca,
+      plot(UMAPPlot(dataIn = cellsRDM,
                     clusters = testClusters,
-                    title = paste0("Cells number: ", nrow(pca), "\n",
+                    title = paste0("Cells number: ", nrow(cellsRDM), "\n",
                                    "Cl. resolution: ", resolution)))
     }, error = function(err) {
       logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)

@@ -684,9 +684,10 @@ very well to the expression of the layers' genes defined above...
 It is possible to plot the *clusterization* on a `UMAP` plot
 
 ```{r}
-c(umapPlot, cellsPCA) %<-% cellsUMAPPlot(obj, clName = "merge2",
+c(umapPlot, cellsRDM) %<-% cellsUMAPPlot(obj, clName = "merge2",
                                          clusters = NULL,
                                          dataMethod = "LogLikelihood",
+                                         numComp = 25L,
                                          genesSel = "HGDI",
                                          numGenes = 200L,
                                          colors = NULL,
