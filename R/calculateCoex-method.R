@@ -1744,7 +1744,7 @@ calculateReducedDataMatrix <-
 
     # calculate the most relenvat eigen-vectors of the COEX matrix
     coex <- getGenesCoex(objCOTAN, zeroDiagonal = FALSE)
-    res <- eigs_sym(as(coex, "dsyMatrix"), k = numComp, which = "LM")
+    res <- eigs_sym(as.matrix(coex), k = numComp, which = "LM")
     eigenVectors <- res$vectors[, seq_len(numComp)]
 
     logThis("Elaborating COEX Eigen Vectors - DONE", logLevel = 3L)

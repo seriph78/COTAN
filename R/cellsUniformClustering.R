@@ -70,7 +70,7 @@ seuratClustering <- function(objCOTAN,
     numReducedCompToCalc <- numReducedComp + 15L
     cellsRDM <- calculateReducedDataMatrix(
       objCOTAN, useCoexEigen = FALSE,
-      dataMethod = "LogNorm", numComp = numReducedCompToCalc,
+      dataMethod = dataMethod, numComp = numReducedCompToCalc,
       genesSel = genesSel, numGenes = numGenes)
 
     assert_that(identical(dim(cellsRDM),

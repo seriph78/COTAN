@@ -686,7 +686,8 @@ It is possible to plot the *clusterization* on a `UMAP` plot
 ```{r}
 c(umapPlot, cellsRDM) %<-% cellsUMAPPlot(obj, clName = "merge2",
                                          clusters = NULL,
-                                         dataMethod = "LogLikelihood",
+                                         useCoexEigen = TRUE,
+                                         dataMethod = "SignLogL",
                                          numComp = 25L,
                                          genesSel = "HGDI",
                                          numGenes = 200L,
