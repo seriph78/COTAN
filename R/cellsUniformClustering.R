@@ -69,12 +69,12 @@ seuratClustering <- function(objCOTAN,
 
     numReducedCompToCalc <- numReducedComp + 15L
     cellsRDM <- calculateReducedDataMatrix(
-      objCOTAN, useCoexEigen = FALSE,
+      objCOTAN, useCoexEigen = useCoexEigen,
       dataMethod = dataMethod, numComp = numReducedCompToCalc,
       genesSel = genesSel, numGenes = numGenes)
 
-    assert_that(identical(dim(cellsRDM),
-                          c(getNumCells(objCOTAN), numReducedCompToCalc)),
+    assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
+                ncol(cellsRDM) <= numReducedCompToCalc,
                 msg = "Returned PCA matrix has wrong dimensions")
 
     # Create the Seurat object
@@ -107,7 +107,7 @@ seuratClustering <- function(objCOTAN,
       # the number of residual cells decrease and to stop clustering
       # if the algorithm has gone for too long
       usedMaxResolution <- (resolution + 0.1 * resolutionStep) > maxResolution
-      if (nlevels(seuratClusters) > minNumClusters || usedMaxResolution) {
+      if (nlevels(seuratClusters) >= minNumClusters || usedMaxResolution) {
         break
       }
 

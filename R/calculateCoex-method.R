@@ -1641,11 +1641,12 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
     return(VariableFeatures(object = srat))
   }
 
+  selectedGenes <- NULL
   if (length(genesSel) > 1L) {
     assert_that(all(genesSel %in% getGenes(objCOTAN)),
                 msg = "Passed genes are not a subset of the relevant ones")
 
-    selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% genesSel]
+    selectedGenes <- genesSel
 
     logThis(paste("Given", length(selectedGenes), "genes as input"),
             logLevel = 2L)
@@ -1667,6 +1668,9 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
     logThis(paste("Selected", length(selectedGenes), "genes using",
                   genesSel, "selector"), logLevel = 3L)
   }
+
+  # align to sequence in input data
+  selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% selectedGenes]
 
   logThis("Running genes' selection: DONE", logLevel = 2L)
 
@@ -1749,7 +1753,7 @@ calculateReducedDataMatrix <-
   dataMat <- getDataMatrix(objCOTAN, dataMethod = dataMethod)
 
   cellsRDM <- NULL
-  if (useCoexEigen) {
+  if (isTRUE(useCoexEigen)) {
     logThis("Elaborating COEX Eigen Vectors - START", logLevel = 3L)
 
     # calculate the most relenvat eigen-vectors of the COEX matrix
@@ -1767,6 +1771,8 @@ calculateReducedDataMatrix <-
 
     # re-scale in the cells direction
     cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))
+
+    colnames(cellsRDM) <- paste0("EC_", seq_len(ncol(cellsRDM)))
   } else {
     selectedGenes <- getSelectedGenes(objCOTAN, genesSel = genesSel,
                                    numGenes = numGenes)

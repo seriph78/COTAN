@@ -183,12 +183,14 @@ test_that("COTAN getters", {
                    getSelectedGenes(obj, genesSel = "HGDI", numGenes = 2000L))
 
   expect_identical(getSelectedGenes(obj, genesSel = "HGDI", numGenes = 5L),
-                   c("D", "I", "F", "C", "G"))
+                   c("C", "D", "F", "G", "I"))
   expect_identical(suppressWarnings(
                      getSelectedGenes(obj, genesSel = "HVG_Seurat",
                                       numGenes = 5L)),
-                   c("E", "J", "B", "C", "D"))
+                   c("B", "C", "D", "E", "J"))
   expect_error(getSelectedGenes(obj, genesSel = "HVG_Scanpy", numGenes = 5L))
+  expect_identical(getSelectedGenes(obj, genesSel = c("C", "A", "D", "E", "B")),
+                   LETTERS[1L:5L])
 
 
   calcRDM <- function(objCOTAN, useCoexEigen, dataMethod,
@@ -227,19 +229,27 @@ test_that("COTAN getters", {
     rep(c(1.408210608361951,     -1.408216669492208    ), times = 10L),
     rep(c(0.0001095961016898374, -0.0001990257478942304), times = 10L),
     rep(c(-0.1301647820478256,    0.1300990859038809   ), times = 10L))
+  colnames(m2) <- paste0("EC_", c(1L:3L))
   rownames(m2) <- letters[1L:20L]
+  attr(m2, "scaled:scale") <-
+    set_names(rep(c(1.04428866237142, 1.04434243252230), times = 10L),
+              letters[1L:20L])
 
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
                            dataMethod = "BinDiscr", numComp = 3L),
-               m2, tolerance = 1e-12, ignore_attr = TRUE)
+               m2, tolerance = 1e-12)
 
   m3 <- cbind(
     rep(c(-1.399254464334427,   1.399054366867996 ), times = 10L),
     rep(c( 0.1574674670950663,  0.1582654478193421), times = 10L),
     rep(c( 0.1314950221371185, -0.1326609459265815), times = 10L))
+  colnames(m3) <- paste0("EC_", c(1L:3L))
   rownames(m3) <- letters[1L:20L]
+  attr(m3, "scaled:scale") <-
+    set_names(rep(c(4.24255829899041, 4.24340574003457), times = 10L),
+              letters[1L:20L])
 
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
                            dataMethod = "DerLogL", numComp = 3L),
-               m3, tolerance = 1e-12, ignore_attr = TRUE)
+               m3, tolerance = 1e-12)
 })
