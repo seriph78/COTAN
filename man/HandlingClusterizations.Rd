@@ -243,7 +243,7 @@ pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]
 25L.}
 
 \item{genesSel}{Decides whether and how to perform gene-selection. See
-\code{\link[=genesSelector]{genesSelector()}} for more details.}
+\code{\link[=getSelectedGenes]{getSelectedGenes()}} for more details.}
 
 \item{numGenes}{the number of genes to select using the above method. Will be
 ignored when an explicit list of genes has been passed in}

@@ -96,7 +96,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
     log  = (1.0 - zeroOne) * log(probZero) + zeroOne * log(1.0 - probZero),
     der  = (1.0 - zeroOne) / probZero - zeroOne / (1.0 - probZero),
     sLog = (1.0 - zeroOne) * log(probZero) - zeroOne * log(1.0 - probZero),
-    stop("Unrecognised `formula` passed in: ", formula)
+    stop("Unrecognised `formula` passed in (case sensitive): ", formula)
   )
 
 }
@@ -1574,7 +1574,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 
 ## -------- Genes selector -------
 
-#' @details `genesSelector()` selects the *most representative* genes of the
+#' @details `getSelectedGenes()` selects the *most representative* genes of the
 #'   `data.set`
 #'
 #' @param objCOTAN a `COTAN` object
@@ -1589,7 +1589,7 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #'
-#' @returns `genesSelector()` returns an array with the genes' names
+#' @returns `getSelectedGenes()` returns an array with the genes' names
 #'
 #' @export
 #'
@@ -1602,24 +1602,31 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 #'
 #' @rdname CalculatingCOEX
 
-genesSelector <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
+getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
   logThis("Running genes' selection: START", logLevel = 2L)
 
-  numGenes <- min(2000L, getNumGenes(objCOTAN))
+  numGenes <- min(numGenes, getNumGenes(objCOTAN))
   selectedGenes <- NULL
 
   getHighestGDIGenes <- function(objCOTAN, numGenes) {
-    gdi <- getGDI(objCOTAN)
+    gdi <- suppressWarnings(getGDI(objCOTAN))
     if (is_empty(gdi)) {
       gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
                                           rowsFraction = 0.05), "GDI")
     }
 
+    sortedCandidates <- NULL
     if (sum(gdi >= 1.5) > numGenes) {
-      return(names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numGenes)])
+      sortedCandidates <- names(gdi)[order(gdi, decreasing = TRUE)]
     } else {
-      return(names(gdi)[gdi >= 1.4])
+      sortedCandidates <- names(gdi)[gdi >= 1.4]
+      sortedCandidates <-
+        sortedCandidates[order(gdi[sortedCandidates], decreasing = TRUE)]
+      if (length(sortedCandidates) < numGenes) {
+        return(sortedCandidates)
+      }
     }
+    return(sortedCandidates[seq_len(numGenes)])
   }
 
   getHighestVariableGenes <- function(objCOTAN, numGenes, useVST) {
@@ -1739,6 +1746,8 @@ calculateReducedDataMatrix <-
 
   numComp <- min(numComp, getNumGenes(objCOTAN))
 
+  dataMat <- getDataMatrix(objCOTAN, dataMethod = dataMethod)
+
   cellsRDM <- NULL
   if (useCoexEigen) {
     logThis("Elaborating COEX Eigen Vectors - START", logLevel = 3L)
@@ -1751,7 +1760,7 @@ calculateReducedDataMatrix <-
     logThis("Elaborating COEX Eigen Vectors - DONE", logLevel = 3L)
 
     # retrive the relvant data matrix
-    dataMatrix <- getDataMatrix(objCOTAN, dataMethod = dataMethod)
+    dataMatrix <- dataMat
 
     # project the data matrix onto the calcualted eigen-space
     dataMatrix <- t(eigenVectors) %*% dataMatrix
@@ -1759,10 +1768,9 @@ calculateReducedDataMatrix <-
     # re-scale in the cells direction
     cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))
   } else {
-    selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
+    selectedGenes <- getSelectedGenes(objCOTAN, genesSel = genesSel,
                                    numGenes = numGenes)
-    cellsMatrix <-
-      t(getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ])
+    cellsMatrix <- t(dataMat[selectedGenes, ])
 
     # re-scale so that all the genes have mean 0.0 and stdev 1.0
     cellsMatrix <- scale(cellsMatrix, center = TRUE, scale = TRUE)
@@ -1770,14 +1778,15 @@ calculateReducedDataMatrix <-
     logThis("Elaborating PCA - START", logLevel = 3L)
 
     cellsRDM <- runPCA(x = cellsMatrix,
-                       rank = numComp,
+                       rank = min(numComp, ncol(cellsMatrix)),
                        BSPARAM = IrlbaParam(),
                        get.rotation = FALSE)[["x"]]
 
     logThis("Elaborating PCA - DONE", logLevel = 3L)
   }
 
-  assert_that(identical(dim(cellsRDM), c(getNumCells(objCOTAN), numComp)))
+  assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
+              ncol(cellsRDM) <= numComp)
 
   logThis("Elaborating Reduced dimensionality Data Matrix - DONE",
           logLevel = 2L)

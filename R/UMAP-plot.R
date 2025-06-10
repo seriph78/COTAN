@@ -250,7 +250,7 @@ UMAPPlot <- function(dataIn,
 #' @param numComp Number of components of the reduced `matrix`, it defaults to
 #'   25L.
 #' @param genesSel Decides whether and how to perform gene-selection. See
-#'   [genesSelector()] for more details.
+#'   [getSelectedGenes()] for more details.
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param colors an `array` of colors to use in the plot. If not sufficient
@@ -312,11 +312,13 @@ cellsUMAPPlot <- function(objCOTAN,
     dataMethod = dataMethod, numComp = numComp,
     genesSel = genesSel, numGenes = numGenes)
 
+  tailMsg <- ifelse(useCoexEigen, "COEX eigenvectors projection",
+                    ifelse(length(genesSel) == 1,
+                           paste(genesSel, "genes selector"),
+                           "user provided genes"))
+
   umapTitle <- paste("UMAP of clusterization", clName,
-                     "using", dataMethod, "matrix with",
-                     ifelse(length(genesSel) == 1,
-                            paste(genesSel, "genes selector"),
-                            "user provided genes"))
+                     "using", dataMethod, "matrix with", tailMsg)
 
   umapPlot <- UMAPPlot(cellsRDM,
                        clusters = clusters,

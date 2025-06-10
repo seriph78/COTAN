@@ -31,7 +31,7 @@
 \alias{calculatePartialCoex}
 \alias{calculateS}
 \alias{calculateG}
-\alias{genesSelector}
+\alias{getSelectedGenes}
 \alias{calculateReducedDataMatrix}
 \title{Calculating the COEX matrix for genes and cells}
 \usage{
@@ -144,7 +144,7 @@ calculateG(
   geneSubsetRow = vector(mode = "character")
 )
 
-genesSelector(objCOTAN, genesSel = "", numGenes = 2000L)
+getSelectedGenes(objCOTAN, genesSel = "", numGenes = 2000L)
 
 calculateReducedDataMatrix(
   objCOTAN,
@@ -365,7 +365,7 @@ matrix
 
 \code{calculateG()} returns the G matrix
 
-\code{genesSelector()} returns an array with the genes' names
+\code{getSelectedGenes()} returns an array with the genes' names
 
 \code{calculateReducedDataMatrix()} returns the reduced matrix. The
 returned \code{matrix} has dimensions: (number of cells, number of components)
@@ -490,7 +490,7 @@ tables. It always has the diagonal set to zero.
 contingency tables. It always has the diagonal set to zero. It is
 proportional to the genes' presence mutual information.
 
-\code{genesSelector()} selects the \emph{most representative} genes of the
+\code{getSelectedGenes()} selects the \emph{most representative} genes of the
 \code{data.set}
 
 \code{calculateReducedDataMatrix()} calculates the reduced data-matrix to

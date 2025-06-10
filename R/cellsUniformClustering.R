@@ -35,7 +35,7 @@ NULL
 #' @param dataMethod selects the method to use to create the `data.frame` to
 #'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
 #' @param genesSel Decides whether and how to perform the gene-selection
-#'   (defaults to `"HVG_Seurat"`). See [genesSelector()] for more details.
+#'   (defaults to `"HVG_Seurat"`). See [getSelectedGenes()] for more details.
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param numReducedComp the number of calculated **RDM** components
@@ -183,7 +183,7 @@ seuratClustering <- function(objCOTAN,
 #' @param dataMethod selects the method to use to create the `data.frame` to
 #'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
 #' @param genesSel Decides whether and how to perform the gene-selection
-#'   (defaults to `"HVG_Seurat"`). See [genesSelector()] for more details.
+#'   (defaults to `"HVG_Seurat"`). See [getSelectedGenes()] for more details.
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param numReducedComp the number of calculated **RDM** components
