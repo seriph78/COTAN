@@ -1,3 +1,8 @@
+Added possibility to choose which data matrix to use for
+clusterizations and UMAP plots. Also now it is possible to
+use a projection onto the main COEX matrix eigen-vectors
+as alternative to the `PCA` as dimensionality reduction tool
+
 ## 2.9.2
 
 Solved issues with breaking changes from `zeallot` package
