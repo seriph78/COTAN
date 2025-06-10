@@ -32,9 +32,9 @@ cells
 \code{vignette.merge2.clusters} is a \code{factor}
 }
 \source{
-GEO GSM2861514
+\code{GEO} \code{GSM2861514}
 
-ERCC
+\code{ERCC}
 }
 \usage{
 data(raw.dataset)
@@ -76,15 +76,15 @@ the same expression in both \emph{clusters}.
 
 \code{vignette.split.clusters} is the clusterization obtained running
 \code{cellsUniformClustering()} on the vignette dataset (mouse cortex E17.5,
-GEO: GSM2861514)
+\code{GEO}: \code{GSM2861514})
 
 \code{vignette.merge.clusters} is the clusterization obtained running
 \code{mergeUniformCellsClusters()} on the vignette dataset (mouse cortex E17.5,
-GEO: GSM2861514) using the previous \emph{clusterization}
+\code{GEO}: \code{GSM2861514}) using the previous \emph{clusterization}
 
 \code{vignette.merge2.clusters} is the clusterization obtained re-running
 \code{mergeUniformCellsClusters()} on the vignette dataset (mouse cortex E17.5,
-GEO: GSM2861514) using the \code{vignette.split.clusters} \emph{clusterization}, but
-with a sequence of progressively relaxed checks
+\code{GEO}: \code{GSM2861514}) using the \code{vignette.split.clusters} \emph{clusterization},
+but with a sequence of progressively relaxed checks
 }
 \keyword{datasets}

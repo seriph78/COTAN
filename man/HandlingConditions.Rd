@@ -105,7 +105,9 @@ cellLine <- rep(c("A", "B"), getNumCells(objCOTAN) / 2)
 names(cellLine) <- getCells(objCOTAN)
 objCOTAN <- addCondition(objCOTAN, condName = "Line", conditions = cellLine)
 
-##objCOTAN <- dropCondition(objCOTAN, "Genre")
+if (FALSE) {
+  objCOTAN <- dropCondition(objCOTAN, "Genre")
+}
 
 conditionsNames <- getAllConditions(objCOTAN)
 

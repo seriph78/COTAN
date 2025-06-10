@@ -45,9 +45,7 @@
 #' @importFrom grDevices pdf
 #' @importFrom grDevices dev.off
 #' @importFrom grDevices dev.cur
-#' @importFrom grDevices colors
 #'
-#' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 annotate
 #'
 #' @examples
@@ -156,7 +154,7 @@ setMethod(
 
       logThis(paste("Only analysis elapsed time:", analysisTime), logLevel = 3L)
 
-      logThis("Cotan genes' coex estimation started", logLevel = 1L)
+      logThis("Cotan genes' COEX estimation started", logLevel = 1L)
       objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE,
                                 optimizeForSpeed = optimizeForSpeed,
                                 deviceStr = deviceStr)
@@ -167,10 +165,10 @@ setMethod(
 
       genesCoexTime <- difftime(endTime, genesCoexTime, units = "secs")
 
-      logThis(paste("Only genes' coex elapsed time:", genesCoexTime),
+      logThis(paste("Only genes' COEX elapsed time:", genesCoexTime),
               logLevel = 3L)
     } else {
-      logThis("Cotan genes' coex estimation not requested", logLevel = 2L)
+      logThis("Cotan genes' COEX estimation not requested", logLevel = 2L)
 
       genesCoexTime <- 0.0
 

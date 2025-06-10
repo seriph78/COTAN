@@ -2,15 +2,15 @@
 # --------------------- Uniform Clusters ----------------------
 
 #' @details `mergeUniformCellsClusters()` takes in a **uniform**
-#'   *clusterization* and iteratively checks whether merging two *near clusters*
-#'   would form a **uniform** *cluster* still. Multiple thresholds will be used
-#'   from \eqn{1.37} up to the given one in order to prioritize merge of the
-#'   best fitting pairs.
+#'   *clusterization* and progressively checks whether *merging* two *near
+#'   clusters* would form a **uniform** *cluster* still. Multiple thresholds
+#'   will be used from \eqn{1.37} up to the given one in order to prioritize
+#'   merge of the best fitting pairs.
 #'
 #'   This function uses the *cosine distance* to establish the *nearest clusters
 #'   pairs*. It will use the [checkClusterUniformity()] function to check
 #'   whether the merged *clusters* are **uniform**. The function will stop once
-#'   no *tested pairs* of clusters are mergeable after testing all pairs in a
+#'   no *tested pairs* of clusters can be *merged* after testing all pairs in a
 #'   single batch
 #'
 #' @param objCOTAN a `COTAN` object
@@ -110,10 +110,10 @@
 #' ##
 #'
 #' checker <- new("AdvancedGDIUniformityCheck")
-#' identical(checker@firstCheck@GDIThreshold, 1.297)
+#' stopifnot(identical(checker@firstCheck@GDIThreshold, 1.297))
 #'
 #' checker2 <- shiftCheckerThresholds(checker, 0.1)
-#' identical(checker2@firstCheck@GDIThreshold, 1.397)
+#' stopifnot(identical(checker2@firstCheck@GDIThreshold, 1.397))
 #'
 #' splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
 #'                                     optimizeForSpeed = TRUE,
@@ -128,7 +128,7 @@
 #'
 #' checkerRes <-
 #'   checkClusterUniformity(objCOTAN, checker = checker2,
-#'                          cluster = clusters[[1L]], cells = firstCluster,
+#'                          clusterName = clusters[[1L]], cells = firstCluster,
 #'                          cores = 6L, optimizeForSpeed = TRUE,
 #'                          deviceStr = "cuda", saveObj = FALSE)
 #'
@@ -138,7 +138,7 @@
 #'                               coexDF = splitList[["coex"]],
 #'                               override = FALSE)
 #'
-#' identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
+#' stopifnot(identical(reorderClusterization(objCOTAN)[["clusters"]], clusters))
 #'
 #' ## It is possible to pass a list of checkers tot the merge function that will
 #' ## be applied each to the *resulting* merged *clusterization* obtained using
@@ -162,7 +162,8 @@
 #'                               coexDF = mergedList[["coex"]],
 #'                               override = TRUE)
 #'
-#' identical(reorderClusterization(objCOTAN), mergedList[["clusters"]])
+#' stopifnot(identical(reorderClusterization(objCOTAN)[["clusters"]],
+#'                     mergedList[["clusters"]]))
 #'
 #' @rdname UniformClusters
 #'

@@ -18,8 +18,8 @@ test_that("Linear estimates", {
   obj <- estimateNuLinear(obj)
 
   expect_identical(getNu(obj),
-                   colMeans(getRawData(obj), dims = 1L) /
-                     mean(colMeans(getRawData(obj), dims = 1L)))
+                   Matrix::colMeans(getRawData(obj)) /
+                     mean(Matrix::colMeans(getRawData(obj))))
 
   clusters <- set_names(rep(1L:2L, times = 10L), getCells(obj))
   obj <- estimateNuLinearByCluster(obj, clusters = clusters)

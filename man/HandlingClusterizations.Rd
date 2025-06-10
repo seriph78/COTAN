@@ -98,9 +98,11 @@ cellsUMAPPlot(
   objCOTAN,
   clName = "",
   clusters = NULL,
+  useCoexEigen = FALSE,
   dataMethod = "",
-  genesSel = "HVG_Seurat",
-  numGenes = 2000L,
+  numComp = 25L,
+  genesSel = "",
+  numGenes = 200L,
   colors = NULL,
   numNeighbors = 0L,
   minPointsDist = NA
@@ -180,7 +182,7 @@ significant!}
 on the one indicated by \code{clName}}
 
 \item{dropNoCoex}{When \code{TRUE} drops the names from the \emph{clusterizations} with
-empty associated coex \code{data.frame}}
+empty associated \code{COEX} \code{data.frame}}
 
 \item{keepPrefix}{When \code{TRUE} returns the internal name of the
 \emph{clusterization}: the one with the \code{CL_} prefix.}
@@ -219,8 +221,8 @@ given elements (the columns are features)}
 \item{elements}{a named \code{list} of elements to label. Each array in the list
 will be shown with a different color}
 
-\item{title}{a string giving the plot title. Will default to UMAP Plot if not
-specified}
+\item{title}{a string giving the plot title. Will default to \code{UMAP} Plot if
+not specified}
 
 \item{colors}{an \code{array} of colors to use in the plot. If not sufficient
 colors are given it will complete the list using colors from
@@ -230,48 +232,21 @@ colors are given it will complete the list using colors from
 
 \item{minPointsDist}{Overrides the default \code{min_dist} value}
 
+\item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
+onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
+the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
+
 \item{dataMethod}{selects the method to use to create the \code{data.frame} to
-pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. To calculate, for each cell, a statistic for each
-gene based on available data/model, the following methods are supported:
-\itemize{
-\item \verb{"RW", "Raw", "RawData"} uses the \emph{raw} counts
-\item \verb{"NN", "NuNorm", "Normalized"} uses the \eqn{\nu}\emph{-normalized} counts
-\item \verb{"LN", "LogNorm", "LogNormalized"} uses the \emph{log-normalized} counts
-(default)
-\item \verb{"BI", "Bin", "Binarized"} uses the \emph{binarized} data matrix
-\item \verb{"BD", "BinDiscr", "BinarizedDiscrepancy"} uses the \emph{difference} between
-the \emph{binarized} data matrix and the estimated \emph{probability of one}
-\item \verb{"AB", "AdjBin", "AdjBinarized"} uses the absolute value of
-the \emph{binarized discrepancy} above
-\item \verb{"LH", "Like", "Likelihood"} uses the \emph{likelihood} of \emph{binarized}
-data matrix
-\item \verb{"LL", "LogLike", "LogLikelihood"} uses the \emph{log-likelihood}
-of \emph{binarized} data matrix
-\item \verb{"DL", "DerLogL", "DerivativeLogLikelihood"} uses the \emph{derivative} of
-the \emph{log-likelihood} of \emph{binarized} data matrix
-\item \verb{"SL", "SignLogL", "SignedLogLikelihood"} uses the \emph{signed log-likelihood}
-of \emph{binarized} data matrix
-}
+pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.}
 
-For the last four options see \code{\link[=calculateLikelihoodOfObserved]{calculateLikelihoodOfObserved()}} for more
-details}
+\item{numComp}{Number of components of the reduced \code{matrix}, it defaults to
+25L.}
 
-\item{genesSel}{Decides whether and how to perform gene-selection. It can be
-a straight list of genes or a string indicating one of the following
-selection methods:
-\itemize{
-\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}. Since it requires
-an available \code{COEX} matrix it will fall-back to \code{"HVG_Seurat"} when the
-matrix is not available
-\item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
-via the \pkg{Seurat} package (the default method)
-\item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability
-according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
-}}
+\item{genesSel}{Decides whether and how to perform gene-selection. See
+\code{\link[=getSelectedGenes]{getSelectedGenes()}} for more details.}
 
 \item{numGenes}{the number of genes to select using the above method. Will be
-ignored when no selection have been asked or when an explicit list of genes
-was passed in}
+ignored when an explicit list of genes has been passed in}
 
 \item{groupMarkers}{an optional named \code{list} with an element for each group
 comprised of one or more marker genes}
@@ -357,7 +332,7 @@ corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 \code{cellsUMAPPlot()} returns a list with 2 objects:
 \itemize{
 \item \code{"plot"} a \code{ggplot2} object representing the \code{umap} plot
-\item \code{"cellsPCA"} the \code{data.frame} PCA used to create the plot
+\item \code{"cellsRDM"} the \emph{Reduced Data Matrix} used to create the plot
 }
 
 \code{clustersMarkersHeatmapPlot()} returns a list with:
@@ -374,8 +349,8 @@ statistics: The calculated statistics are:
 \item \code{"clName"} the \emph{cluster} \strong{labels}
 \item \code{"condName"} the relevant condition (that sub-divides the \emph{clusters})
 \item \code{"CellNumber"} the number of cells in the group
-\item \code{"MeanUDE"} the average "UDE" in the group of cells
-\item \code{"MedianUDE"} the median "UDE" in the group of cells
+\item \code{"MeanUDE"} the average \code{UDE} in the group of cells
+\item \code{"MedianUDE"} the median \code{UDE} in the group of cells
 \item \code{"ExpGenes25"} the number of genes expressed in at the least 25\% of the
 cells in the group
 \item \code{"ExpGenes"} the number of genes expressed at the least once in any of
@@ -414,7 +389,7 @@ outside the cluster from \code{\link[=logFoldChangeOnClusters]{logFoldChangeOnCl
 \code{geneSetEnrichment()} returns a \code{data.frame} with the cumulative
 score
 
-\code{reorderClusterization()} returns a \code{list} with 2 elements:
+\code{reorderClusterization()} returns a \code{list} with 3 elements:
 \itemize{
 \item \code{"clusters"} the newly reordered cluster labels array
 \item \code{"coex"} the associated \code{COEX} \code{data.frame}
@@ -505,8 +480,8 @@ needed calculates and stores the \code{DEA} of the relevant \emph{clusterization
 
 \code{clustersMarkersHeatmapPlot()} returns the heatmap plot of a summary
 score for each \emph{cluster} and each gene marker in the given
-\emph{clusterization}. It also returns the numerosity and percentage of each
-\emph{cluster} on the right and a \emph{clusterization} dendogram on the left, as
+\emph{clusterization}. It also returns the size and percentage of each
+\emph{cluster} on the right and a \emph{clusterization} \code{dendogram} on the left, as
 returned by the function \code{\link[=clustersTreePlot]{clustersTreePlot()}}. The heatmap cells' colors
 express the \strong{DEA}, that is whether a gene is enriched or depleted in the
 cluster, while the stars are aligned to the corresponding adjusted

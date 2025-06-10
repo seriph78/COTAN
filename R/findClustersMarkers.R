@@ -77,7 +77,7 @@ findClustersMarkers <- function(
   assert_that(identical(rownames(adjPValueDF), rownames(coexDF)),
               identical(getGenes(objCOTAN),    rownames(coexDF)),
               msg = paste("Inconsistent data-frames passed in",
-                          "for 'coex' or 'p-value'"))
+                          "for `COEX` or `p-value`"))
 
   retDF <- as.data.frame(matrix(data = NA, nrow = 0L, ncol = 6L))
   colnames(retDF) <- c("CL", "Gene", "DEA", "adjPVal", "IsMarker", "logFoldCh")

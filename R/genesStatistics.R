@@ -34,14 +34,14 @@ calculateGenesCE <- function(objCOTAN) {
 }
 
 
-#' @details `calculateGDIGivenS()` produces a `vector` with the *GDI* for each
+#' @details `calculateGDIGivenS()` produces a `vector` with the `GDI` for each
 #'   column based on the `S` matrix (*Pearson's *\eqn{\chi^{2}}* test*)
 #'
 #' @param S a `matrix` object
 #' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
 #'
-#' @returns `calculateGDIGivenS()` returns a `vector` with the *GDI* data for
+#' @returns `calculateGDIGivenS()` returns a `vector` with the `GDI` data for
 #'   each column of the input
 #'
 #' @importFrom rlang set_names
@@ -67,7 +67,7 @@ calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
   return(GDI)
 }
 
-#' @details `calculateGDIGivenCorr()` produces a `vector` with the *GDI* for
+#' @details `calculateGDIGivenCorr()` produces a `vector` with the `GDI` for
 #'   each column based on the given correlation matrix, using the *Pearson's
 #'   *\eqn{\chi^{2}}* test*
 #'
@@ -78,7 +78,7 @@ calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
 #' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
 #'
-#' @returns `calculateGDIGivenCorr()` returns a `vector` with the *GDI* data for
+#' @returns `calculateGDIGivenCorr()` returns a `vector` with the `GDI` data for
 #'   each column of the input
 #'
 #' @export
@@ -93,7 +93,7 @@ calculateGDIGivenCorr <-
 }
 
 
-#' @details `calculateGDI()` produces a `data.frame` with the *GDI* for each
+#' @details `calculateGDI()` produces a `data.frame` with the `GDI` for each
 #'   gene based on the `COEX` matrix
 #'
 #' @param objCOTAN a `COTAN` object
@@ -105,7 +105,7 @@ calculateGDIGivenCorr <-
 #'
 #' @returns `calculateGDI()` returns a `data.frame` with:
 #'  * `"sum.raw.norm"` the sum of the normalized data rows
-#'  * `"GDI"` the *GDI* data
+#'  * `"GDI"` the `GDI` data
 #'  * `"exp.cells"` the percentage of cells expressing the gene
 #'
 #' @export

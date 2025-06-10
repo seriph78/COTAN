@@ -32,7 +32,7 @@ emptySymmetricMatrix <- function() {
 
 #' Definition of the `COTAN` class
 #'
-#' @slot raw `dgCMatrix` - the raw UMI count matrix \eqn{n \times m} (gene
+#' @slot raw `dgCMatrix` - the raw `UMI` count matrix \eqn{n \times m} (gene
 #'   number × cell number)
 #' @slot genesCoex `dspMatrix` - the correlation of `COTAN` between genes,
 #'   \eqn{n \times n}
@@ -41,7 +41,7 @@ emptySymmetricMatrix <- function() {
 #' @slot metaDataset `data.frame`
 #' @slot metaCells `data.frame`
 #' @slot clustersCoex a `list` of `COEX` `data.frames` for each clustering in
-#'   the metaCells
+#'   the `metaCells`
 #'
 #' @importFrom rlang is_empty
 #'
@@ -237,7 +237,7 @@ NULL
 #' @slot raw `ANY`. To store the raw data matrix
 #' @slot raw.norm `ANY`. To store the raw data matrix divided for the cell
 #'   efficiency estimated (nu)
-#' @slot coex `ANY`. The coex matrix
+#' @slot coex `ANY`. The `COEX` matrix
 #' @slot nu `vector`.
 #' @slot lambda `vector`.
 #' @slot a `vector`.
@@ -325,11 +325,11 @@ getCOTANSlots <- function(from) {
     } else if (isa(from@coex, "matrix")) {
       genesCoex <- from@coex
     } else {
-      warning("scCOTAN as COTAN: unsupported coex type '", class(from@coex),
-              "' - genes' coex will be discarded!", call. = FALSE)
+      warning("scCOTAN as COTAN: unsupported COEX type '", class(from@coex),
+              "' - genes' COEX will be discarded!", call. = FALSE)
       genesCoex <- emptySymmetricMatrix()
     }
-    # now 'coex' is of type 'matrix'
+    # now 'COEX' is of type 'matrix'
     genesCoex <- pack(forceSymmetric(genesCoex))
   }
 
@@ -372,7 +372,7 @@ getCOTANSlots <- function(from) {
 
     if (!hasClusters && !is_empty(clusterData)) {
       warning("scCOTAN as COTAN: cannot have 'cluster_data' along",
-              " empty 'clusters' - genes' coex will be discarded!",
+              " empty 'clusters' - genes' COEX will be discarded!",
               call. = FALSE)
       clusterData <- data.frame()
     }
@@ -380,7 +380,7 @@ getCOTANSlots <- function(from) {
     if (!is_empty(clusterData) &&
           !all(rownames(clusterData) %in% rownames(from@raw))) {
       warning("scCOTAN as COTAN: 'cluster_data' refers to unknown genes",
-              " - clusters' coex will be discarded!", call. = FALSE)
+              " - clusters' COEX will be discarded!", call. = FALSE)
       clusterData <- data.frame()
     }
 
@@ -394,7 +394,7 @@ getCOTANSlots <- function(from) {
 
       if (!all(colnames(clusterData) %in% from@clusters)) {
         warning("scCOTAN as COTAN: 'cluster_data' refers to unknown",
-                " clusters - clusters' coex will be discarded!",
+                " clusters - clusters' COEX will be discarded!",
                 call. = FALSE)
         clusterData <- data.frame()
       }
@@ -404,14 +404,14 @@ getCOTANSlots <- function(from) {
           !all(rownames(from@raw) %in% union(rownames(clusterData), from@hk))) {
       warning("scCOTAN as COTAN: 'cluster_data' has no information",
               " on some genes that are not fully-expressed",
-              " - clusters' coex will be discarded!", call. = FALSE)
+              " - clusters' COEX will be discarded!", call. = FALSE)
       clusterData <- data.frame()
     }
 
     if (!is_empty(clusterData)) {
       missingGenes <- setdiff(rownames(from@raw), rownames(clusterData))
       if (!is_empty(missingGenes)) {
-        # missing genes are fully-expressed thus have all zero coex!
+        # missing genes are fully-expressed thus have all zero COEX!
         missingData <- matrix(0.0, nrow = length(missingGenes),
                               ncol = ncol(clusterData),
                               dimnames = c(missingGenes, colnames(clusterData)))

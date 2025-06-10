@@ -22,7 +22,7 @@
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #'
-#' @returns `reorderClusterization()` returns a `list` with 2 elements:
+#' @returns `reorderClusterization()` returns a `list` with 3 elements:
 #'   * `"clusters"` the newly reordered cluster labels array
 #'   * `"coex"` the associated `COEX` `data.frame`
 #'   * `"permMap"` the reordering mapping

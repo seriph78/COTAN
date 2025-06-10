@@ -258,7 +258,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
   }
 
   if (useTorch) {
-    # Device configuration - fall-back to cpu if no cuda device is available
+    # Device configuration - fall-back to `cpu` if no `cuda` device is available
     if (startsWith(deviceStr, "cuda") && !torch::cuda_is_available()) {
       if (!warnedAboutTorch) {
         warning("The `torch` library could not find any `CUDA` device")
@@ -963,7 +963,7 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   return(basicTheme)
 }
 
-#' @title getColorsVector
+#' @title `getColorsVector`
 #'
 #' @description This function returns a list of colors based on the
 #'   [RColorBrewer::brewer.pal()] function

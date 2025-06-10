@@ -4,11 +4,11 @@
 #' @title Calculating the `COEX` matrix
 #'
 #' @description These are the functions and methods used to calculate the
-#'   **COEX** matrices according to the `COTAN` model. From there it is possible
-#'   to calculate the associated *pValue* and the *GDI* (*Global Differential
+#'   `COEX` matrices according to the `COTAN` model. From there it is possible
+#'   to calculate the associated `p-value` and the `GDI` (*Global Differential
 #'   Expression*)
 #'
-#' @description The **COEX** matrix is defined by following formula:
+#' @description The `COEX` matrix is defined by following formula:
 #'
 #'   \deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{
 #'                     (-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
@@ -16,8 +16,8 @@
 #'                             \frac{1}{1 \vee E_{ij}}}}}}
 #'
 #'   where \eqn{O} and \eqn{E} are the observed and expected contingency tables
-#'   and \eqn{n} is the relevant numerosity (the number of genes/cells depending
-#'   on given `actOnCells` flag).
+#'   and \eqn{n} is the relevant number of genes/cells (depending on given
+#'   `actOnCells` flag).
 #'
 #'   The formula can be more effectively implemented as:
 #'
@@ -86,7 +86,8 @@ NULL
 calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
   zeroOne <- getZeroOneProj(objCOTAN)
 
-  probZero <- getProbabilityOfZero(objCOTAN)
+  # bound the probabilities to avoid exact zero or one
+  probZero <- pmin(pmax(getProbabilityOfZero(objCOTAN), 1.0e-8), 1.0 - 1.0e-8)
 
   # estimate the likelihood of observed result
   switch(
@@ -95,8 +96,78 @@ calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
     log  = (1.0 - zeroOne) * log(probZero) + zeroOne * log(1.0 - probZero),
     der  = (1.0 - zeroOne) / probZero - zeroOne / (1.0 - probZero),
     sLog = (1.0 - zeroOne) * log(probZero) - zeroOne * log(1.0 - probZero),
-    stop("Unrecognised `formula` passed in: ", formula)
+    stop("Unrecognised `formula` passed in (case sensitive): ", formula)
   )
+
+}
+
+#' @details `getDataMatrix()` gives for each cell and each gene the result of
+#'   the selected formula as function of the observed counts and their expected
+#'   value
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
+#'   gene based on available data/model, the following methods are supported:
+#'   * `"RW", "Raw", "RawData"` uses the *raw* counts
+#'   * `"NN", "NuNorm", "Normalized"` uses the \eqn{\nu}*-normalized* counts
+#'   * `"LN", "LogNorm", "LogNormalized"` uses the *log-normalized* counts
+#'   (default)
+#'   * `"BI", "Bin", "Binarized"` uses the *binarized* data matrix
+#'   * `"BD", "BinDiscr", "BinarizedDiscrepancy"` uses the *difference* between
+#'   the *binarized* data matrix and the estimated *probability of one*
+#'   * `"AB", "AdjBin", "AdjBinarized"` uses the absolute value of
+#'   the *binarized discrepancy* above
+#'   * `"LH", "Like", "Likelihood"` uses the *likelihood* of *binarized*
+#'   data matrix
+#'   * `"LL", "LogLike", "LogLikelihood"` uses the *log-likelihood*
+#'   of *binarized* data matrix
+#'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
+#'   the *log-likelihood* of *binarized* data matrix
+#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
+#'   of *binarized* data matrix
+#'
+#'   For the last four options see [calculateLikelihoodOfObserved()] for more
+#'   details
+#'
+#' @returns `getDataMatrix()` returns a `matrix` with the same shape as the
+#'   *raw* data
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+getDataMatrix <- function(objCOTAN, dataMethod = "") {
+  if (isEmptyName(dataMethod)) {
+    dataMethod <- "LogNormalized"
+  }
+
+  binDiscr <- function(objCOTAN) {
+    zeroOne <- getZeroOneProj(objCOTAN)
+    probOne <- 1.0 - getProbabilityOfZero(objCOTAN)
+    return(zeroOne - probOne)
+  }
+
+  getLH <- function(objCOTAN, formula) {
+    return(calculateLikelihoodOfObserved(objCOTAN, formula))
+  }
+
+  dataMatrix <- as.matrix(switch(
+    dataMethod,
+    RW = , Raw      = , RawData                 = getRawData(objCOTAN),
+    NN = , NuNorm   = , Normalized              = getNuNormData(objCOTAN),
+    LN = , LogNorm  = , LogNormalized           = getLogNormData(objCOTAN),
+    BI = , Bin      = , Binarized               = getZeroOneProj(objCOTAN),
+    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN),
+    AB = , AdjBin   = , AdjBinarized            = abs(binDiscr(objCOTAN)),
+    LH = , Like     = , Likelihood              = getLH(objCOTAN, "raw"),
+    LL = , LogLike  = , LogLikelihood           = getLH(objCOTAN, "log"),
+    DL = , DerLogL  = , DerivativeLogLikelihood = getLH(objCOTAN, "der"),
+    SL = , SignLogL = , SignedLogLikelihood     = getLH(objCOTAN, "sLog"),
+    stop("Unrecognised `dataMethod` passed in: ", dataMethod)
+  ))
+
+  return(dataMatrix)
 }
 
 
@@ -888,7 +959,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
   } else {
     kind <- "genes'"
   }
-  logThis(paste("Calculate", kind, "coex (legacy): START"), logLevel = 1L)
+  logThis(paste("Calculate", kind, "COEX (legacy): START"), logLevel = 1L)
 
   logThis(paste("Retrieving expected", kind, "contingency table"),
           logLevel = 3L)
@@ -905,7 +976,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
                 difftime(expectedTime, startTime, units = "secs")),
           logLevel = 3L)
 
-  logThis(paste("Calculating", kind, "coex normalization factor"),
+  logThis(paste("Calculating", kind, "COEX normalization factor"),
           logLevel = 3L)
 
   if (isTRUE(actOnCells)) {
@@ -953,8 +1024,8 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
                 difftime(observedTime, sqrtTime, units = "secs")),
           logLevel = 3L)
 
-  # coex estimation
-  logThis(paste("Estimating", kind, "coex"), logLevel = 3L)
+  # COEX estimation
+  logThis(paste("Estimating", kind, "COEX"), logLevel = 3L)
 
   coex <- coex * (observedYY@x - expectedYY@x)
 
@@ -967,7 +1038,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
   gc()
 
   endTime <- Sys.time()
-  logThis(paste("Calculate", kind, "coex elapsed time:",
+  logThis(paste("Calculate", kind, "COEX elapsed time:",
                 difftime(endTime, observedTime, units = "secs")),
           logLevel = 3L)
 
@@ -975,7 +1046,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
                 difftime(endTime, startTime, units = "secs")),
           logLevel = 2L)
 
-  logThis(paste("Calculate", kind, "coex (legacy): DONE"), logLevel = 1L)
+  logThis(paste("Calculate", kind, "COEX (legacy): DONE"), logLevel = 1L)
 
   return(list("coex" = coex, "ppf" = problematicPairsFraction))
 }
@@ -983,7 +1054,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
 
 # torch based code
 calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
-  logThis(paste0("Calculate genes coex (torch) on device ", deviceStr,
+  logThis(paste0("Calculate genes COEX (torch) on device ", deviceStr,
                  ": START"), logLevel = 1L)
 
   startTime <- Sys.time()
@@ -1066,7 +1137,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
                 difftime(expectedTime, startTime, units = "secs")),
           logLevel = 3L)
 
-  logThis("Calculating genes coex normalization factor", logLevel = 3L)
+  logThis("Calculating genes COEX normalization factor", logLevel = 3L)
 
   coex <- torch::torch_maximum(expectedYY, one)$reciprocal_()
 
@@ -1139,7 +1210,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   }
 
   sqrtTime <- Sys.time()
-  logThis(paste("Calculating genes coex normalization factor elapsed time:",
+  logThis(paste("Calculating genes COEX normalization factor elapsed time:",
                 difftime(sqrtTime, expectedTime, units = "secs")),
           logLevel = 3L)
 
@@ -1176,14 +1247,14 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   }
 
   endTime <- Sys.time()
-  logThis(paste("Calculate genes coex elapsed time:",
+  logThis(paste("Calculate genes COEX elapsed time:",
                 difftime(endTime, observedTime, units = "secs")),
           logLevel = 3L)
   logThis(paste("Total calculations elapsed time:",
                 difftime(endTime, startTime, units = "secs")),
           logLevel = 2L)
 
-  logThis(paste0("Calculate genes coex (torch) on device ", deviceStr,
+  logThis(paste0("Calculate genes COEX (torch) on device ", deviceStr,
                  ": DONE"), logLevel = 1L)
 
   return(list("coex" = ret, "ppf" = problematicPairsFraction))
@@ -1316,7 +1387,7 @@ calculatePartialCoex <- function(objCOTAN,
     } else {
       kind <- "genes'"
     }
-    logThis(paste("Calculate", kind, "partial coex: START"), logLevel = 1L)
+    logThis(paste("Calculate", kind, "partial COEX: START"), logLevel = 1L)
 
     logThis(paste("Retrieving expected", kind, "partial contingency table"),
             logLevel = 3L)
@@ -1330,7 +1401,7 @@ calculatePartialCoex <- function(objCOTAN,
 
     gc()
 
-    logThis(paste("Calculating", kind, "partial coex normalization factor"),
+    logThis(paste("Calculating", kind, "partial COEX normalization factor"),
             logLevel = 3L)
 
     if (isTRUE(actOnCells)) {
@@ -1367,15 +1438,15 @@ calculatePartialCoex <- function(objCOTAN,
 
     gc()
 
-    # coex estimation
-    logThis(paste("Estimating", kind, "partial coex"), logLevel = 3L)
+    # COEX estimation
+    logThis(paste("Estimating", kind, "partial COEX"), logLevel = 3L)
 
     coex <- coex * (observedYY - expectedYY)
 
     rm(observedYY, expectedYY)
     gc()
 
-    logThis(paste("Calculate", kind, "partial coex: DONE"), logLevel = 1L)
+    logThis(paste("Calculate", kind, "partial COEX: DONE"), logLevel = 1L)
 
     return(coex)
   }
@@ -1497,4 +1568,234 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
   logThis("Calculating G: DONE", logLevel = 2L)
 
   return(G)
+}
+
+
+
+## -------- Genes selector -------
+
+#' @details `getSelectedGenes()` selects the *most representative* genes of the
+#'   `data.set`
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param genesSel Decides whether and how to perform the gene-selection. used
+#'   for the clustering and the `UMAP`. It is a string indicating one of the
+#'   following selection methods:
+#'   * `"HGDI"` Will pick-up the genes with highest `GDI` (default)
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'   via the \pkg{Seurat} package
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param numGenes the number of genes to select using the above method. Will be
+#'   ignored when an explicit list of genes has been passed in
+#'
+#' @returns `getSelectedGenes()` returns an array with the genes' names
+#'
+#' @export
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom Seurat CreateSeuratObject
+#' @importFrom Seurat NormalizeData
+#' @importFrom Seurat FindVariableFeatures
+#' @importFrom Seurat VariableFeatures
+#'
+#' @rdname CalculatingCOEX
+
+getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
+  logThis("Running genes' selection: START", logLevel = 2L)
+
+  numGenes <- min(numGenes, getNumGenes(objCOTAN))
+  selectedGenes <- NULL
+
+  getHighestGDIGenes <- function(objCOTAN, numGenes) {
+    gdi <- suppressWarnings(getGDI(objCOTAN))
+    if (is_empty(gdi)) {
+      gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
+                                          rowsFraction = 0.05), "GDI")
+    }
+
+    sortedCandidates <- NULL
+    if (sum(gdi >= 1.5) > numGenes) {
+      sortedCandidates <- names(gdi)[order(gdi, decreasing = TRUE)]
+    } else {
+      sortedCandidates <- names(gdi)[gdi >= 1.4]
+      sortedCandidates <-
+        sortedCandidates[order(gdi[sortedCandidates], decreasing = TRUE)]
+      if (length(sortedCandidates) < numGenes) {
+        return(sortedCandidates)
+      }
+    }
+    return(sortedCandidates[seq_len(numGenes)])
+  }
+
+  getHighestVariableGenes <- function(objCOTAN, numGenes, useVST) {
+    srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
+                               project = "genes_selections")
+    srat <- NormalizeData(srat)
+
+    srat <- FindVariableFeatures(
+      srat, nfeatures = numGenes,
+      selection.method = ifelse(useVST, "vst", "mean.var.plot"))
+
+    return(VariableFeatures(object = srat))
+  }
+
+  selectedGenes <- NULL
+  if (length(genesSel) > 1L) {
+    assert_that(all(genesSel %in% getGenes(objCOTAN)),
+                msg = "Passed genes are not a subset of the relevant ones")
+
+    selectedGenes <- genesSel
+
+    logThis(paste("Given", length(selectedGenes), "genes as input"),
+            logLevel = 2L)
+  } else {
+    if (isEmptyName(genesSel)) {
+      genesSel = "HGDI"
+    }
+
+    selectedGenes <- switch(
+      genesSel,
+      HGDI = getHighestGDIGenes(objCOTAN, numGenes),
+      HVG_Seurat = , vst =
+        getHighestVariableGenes(objCOTAN, numGenes, TRUE),
+      HVG_Scanpy = , mean.var.plot =
+        getHighestVariableGenes(objCOTAN, numGenes, FALSE),
+      stop("Unrecognised `genesSel` passed in: ", genesSel)
+    )
+
+    logThis(paste("Selected", length(selectedGenes), "genes using",
+                  genesSel, "selector"), logLevel = 3L)
+  }
+
+  # align to sequence in input data
+  selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% selectedGenes]
+
+  logThis("Running genes' selection: DONE", logLevel = 2L)
+
+  return(selectedGenes)
+}
+
+
+#' @details `calculateReducedDataMatrix()` calculates the reduced data-matrix to
+#'   be used for *clusterizations* or `UMAP` plots.
+#'
+#'   It uses the given `dataMethod` to determine with which data to start, then,
+#'   depending on the value of `useCoexEigen`, either uses the `genesSel` to
+#'   restrict evaluation to the relevant genes' before the `PCA` is run, or it
+#'   calculates the first **COEX** eigenvectors and projects the data matrix to
+#'   their sub-space.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
+#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
+#'   the data `matrix` to the selected genes before applying the `PCA` reduction
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
+#'   gene based on available data/model, the following methods are supported:
+#'   * `"RW", "Raw", "RawData"` uses the *raw* counts
+#'   * `"NN", "NuNorm", "Normalized"` uses the \eqn{\nu}*-normalized* counts
+#'   * `"LN", "LogNorm", "LogNormalized"` uses the *log-normalized* counts
+#'   (default)
+#'   * `"BI", "Bin", "Binarized"` uses the *binarized* data matrix
+#'   * `"BD", "BinDiscr", "BinarizedDiscrepancy"` uses the *difference* between
+#'   the *binarized* data matrix and the estimated *probability of one*
+#'   * `"AB", "AdjBin", "AdjBinarized"` uses the absolute value of
+#'   the *binarized discrepancy* above
+#'   * `"LH", "Like", "Likelihood"` uses the *likelihood* of *binarized*
+#'   data matrix
+#'   * `"LL", "LogLike", "LogLikelihood"` uses the *log-likelihood*
+#'   of *binarized* data matrix
+#'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
+#'   the *log-likelihood* of *binarized* data matrix
+#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
+#'   of *binarized* data matrix
+#'
+#'   For the last four options see [calculateLikelihoodOfObserved()] for more
+#'   details
+#' @param numComp Number of components of the reduced `matrix`, it defaults to
+#'   25L.
+#' @param genesSel Decides whether and how to perform the gene-selection. used
+#'   for the clustering and the `UMAP`. It is a string indicating one of the
+#'   following selection methods:
+#'   * `"HGDI"` Will pick-up the genes with highest `GDI` (default)
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'   via the \pkg{Seurat} package
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param numGenes the number of genes to select using the above method. Will be
+#'   ignored when an explicit list of genes has been passed in
+#'
+#' @returns `calculateReducedDataMatrix()` returns the reduced matrix. The
+#'   returned `matrix` has dimensions: (number of cells, number of components)
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @importFrom RSpectra eigs_sym
+#'
+#' @importFrom BiocSingular runPCA
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+calculateReducedDataMatrix <-
+  function(objCOTAN, useCoexEigen = FALSE,
+           dataMethod = "", numComp = 25L,
+           genesSel = "", numGenes = 2000L) {
+  logThis("Elaborating Reduced dimensionality Data Matrix - START",
+          logLevel = 2L)
+
+  numComp <- min(numComp, getNumGenes(objCOTAN))
+
+  dataMat <- getDataMatrix(objCOTAN, dataMethod = dataMethod)
+
+  cellsRDM <- NULL
+  if (isTRUE(useCoexEigen)) {
+    logThis("Elaborating COEX Eigen Vectors - START", logLevel = 3L)
+
+    # calculate the most relenvat eigen-vectors of the COEX matrix
+    coex <- getGenesCoex(objCOTAN, zeroDiagonal = FALSE)
+    res <- eigs_sym(as.matrix(coex), k = numComp, which = "LM")
+    eigenVectors <- res$vectors[, seq_len(numComp)]
+
+    logThis("Elaborating COEX Eigen Vectors - DONE", logLevel = 3L)
+
+    # retrive the relvant data matrix
+    dataMatrix <- dataMat
+
+    # project the data matrix onto the calcualted eigen-space
+    dataMatrix <- t(eigenVectors) %*% dataMatrix
+
+    # re-scale in the cells direction
+    cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))
+
+    colnames(cellsRDM) <- paste0("EC_", seq_len(ncol(cellsRDM)))
+  } else {
+    selectedGenes <- getSelectedGenes(objCOTAN, genesSel = genesSel,
+                                   numGenes = numGenes)
+    cellsMatrix <- t(dataMat[selectedGenes, ])
+
+    # re-scale so that all the genes have mean 0.0 and stdev 1.0
+    cellsMatrix <- scale(cellsMatrix, center = TRUE, scale = TRUE)
+
+    logThis("Elaborating PCA - START", logLevel = 3L)
+
+    cellsRDM <- runPCA(x = cellsMatrix,
+                       rank = min(numComp, ncol(cellsMatrix)),
+                       BSPARAM = IrlbaParam(),
+                       get.rotation = FALSE)[["x"]]
+
+    logThis("Elaborating PCA - DONE", logLevel = 3L)
+  }
+
+  assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
+              ncol(cellsRDM) <= numComp)
+
+  logThis("Elaborating Reduced dimensionality Data Matrix - DONE",
+          logLevel = 2L)
+
+  return(cellsRDM)
 }
