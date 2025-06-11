@@ -132,7 +132,7 @@ seuratClustering <- function(objCOTAN,
                 "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
-    logThis(msg = paste("Seurat clusterization failed with",
+    logThis(msg = paste("Clusterization failed with",
                         getNumCells(objCOTAN),
                         "cells with the following error:"), logLevel = 1L)
     logThis(msg = conditionMessage(e), logLevel = 1L)
@@ -313,7 +313,7 @@ cellsUniformClustering <- function(objCOTAN,
     cellsToDrop <- getCells(objCOTAN)[!is.na(outputClusters)]
     subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-    if (str_equal(genesSel, "HGDI")) {
+    if (str_equal(genesSel, "HGDI") || isTRUE(useCoexEigen)) {
       subObj <-
         proceedToCoex(subObj, calcCoex = TRUE, cores = cores,
                       optimizeForSpeed = optimizeForSpeed,
