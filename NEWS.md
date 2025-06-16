@@ -1,7 +1,7 @@
-Added possibility to choose which data matrix to use for
-clusterizations and UMAP plots. Also now it is possible to
-use a projection onto the main COEX matrix eigen-vectors
-as alternative to the `PCA` as dimensionality reduction tool
+Added possibility to choose which data matrix to use for clusterizations and
+`UMAP` plots. Also now it is possible to use a projection onto the main `COEX`
+matrix eigen-vectors as alternative to the `PCA` as dimensionality reduction
+tool
 
 ## 2.9.2
 
@@ -320,7 +320,7 @@ cells not-clustered "-1". This applies mostly to cases when `Seurat` finds only
 *singlets*
 
 Added flag `calcCoex` to `proceedToCoex()` and `automaticCOTANObjectCreation()`
-functions to allow user not to spend time calculating the *genes' COEX* when not
+functions to allow user not to spend time calculating the genes' `COEX` when not
 needed
 
 Solved potential issue in the `clustersMarkersHeatmapPlot()` regarding clusters'
