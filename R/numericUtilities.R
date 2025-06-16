@@ -689,7 +689,7 @@ parallelNuBisection <-
 #'
 #' @importFrom parallelDist parDist
 #'
-#' @importFrom stats dist
+#' @importFrom proxy dist
 #'
 #' @rdname NumericUtilities
 #'

@@ -16,6 +16,7 @@
 \alias{dropCellsCoex,COTAN-method}
 \alias{dropCellsCoex}
 \alias{calculateLikelihoodOfObserved}
+\alias{getDataMatrix}
 \alias{observedContingencyTablesYY}
 \alias{observedPartialContingencyTablesYY}
 \alias{observedContingencyTables}
@@ -30,6 +31,8 @@
 \alias{calculatePartialCoex}
 \alias{calculateS}
 \alias{calculateG}
+\alias{getSelectedGenes}
+\alias{calculateReducedDataMatrix}
 \title{Calculating the COEX matrix for genes and cells}
 \usage{
 getMu(objCOTAN)
@@ -55,6 +58,8 @@ getMu(objCOTAN)
 \S4method{dropCellsCoex}{COTAN}(objCOTAN)
 
 calculateLikelihoodOfObserved(objCOTAN, formula = "raw")
+
+getDataMatrix(objCOTAN, dataMethod = "")
 
 observedContingencyTablesYY(
   objCOTAN,
@@ -138,6 +143,17 @@ calculateG(
   geneSubsetCol = vector(mode = "character"),
   geneSubsetRow = vector(mode = "character")
 )
+
+getSelectedGenes(objCOTAN, genesSel = "", numGenes = 2000L)
+
+calculateReducedDataMatrix(
+  objCOTAN,
+  useCoexEigen = FALSE,
+  dataMethod = "",
+  numComp = 25L,
+  genesSel = "",
+  numGenes = 2000L
+)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
@@ -174,6 +190,32 @@ actually returned. Supported formulas are:
 where \eqn{z} is the \emph{binarized projection} and \eqn{p} is the \emph{probability
 of zero}}
 
+\item{dataMethod}{selects the method to use to create the \code{data.frame} to
+pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. To calculate, for each cell, a statistic for each
+gene based on available data/model, the following methods are supported:
+\itemize{
+\item \verb{"RW", "Raw", "RawData"} uses the \emph{raw} counts
+\item \verb{"NN", "NuNorm", "Normalized"} uses the \eqn{\nu}\emph{-normalized} counts
+\item \verb{"LN", "LogNorm", "LogNormalized"} uses the \emph{log-normalized} counts
+(default)
+\item \verb{"BI", "Bin", "Binarized"} uses the \emph{binarized} data matrix
+\item \verb{"BD", "BinDiscr", "BinarizedDiscrepancy"} uses the \emph{difference} between
+the \emph{binarized} data matrix and the estimated \emph{probability of one}
+\item \verb{"AB", "AdjBin", "AdjBinarized"} uses the absolute value of
+the \emph{binarized discrepancy} above
+\item \verb{"LH", "Like", "Likelihood"} uses the \emph{likelihood} of \emph{binarized}
+data matrix
+\item \verb{"LL", "LogLike", "LogLikelihood"} uses the \emph{log-likelihood}
+of \emph{binarized} data matrix
+\item \verb{"DL", "DerLogL", "DerivativeLogLikelihood"} uses the \emph{derivative} of
+the \emph{log-likelihood} of \emph{binarized} data matrix
+\item \verb{"SL", "SignLogL", "SignedLogLikelihood"} uses the \emph{signed log-likelihood}
+of \emph{binarized} data matrix
+}
+
+For the last four options see \code{\link[=calculateLikelihoodOfObserved]{calculateLikelihoodOfObserved()}} for more
+details}
+
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
 
@@ -206,6 +248,27 @@ empty the function will do it genome-wide.}
 
 \item{geneSubsetRow}{an array of genes. It will be put in rows. If left empty
 the function will do it genome-wide.}
+
+\item{genesSel}{Decides whether and how to perform the gene-selection. used
+for the clustering and the \code{UMAP}. It is a string indicating one of the
+following selection methods:
+\itemize{
+\item \code{"HGDI"} Will pick-up the genes with highest \code{GDI} (default)
+\item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
+via the \pkg{Seurat} package
+\item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability
+according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
+}}
+
+\item{numGenes}{the number of genes to select using the above method. Will be
+ignored when an explicit list of genes has been passed in}
+
+\item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
+onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
+the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
+
+\item{numComp}{Number of components of the reduced \code{matrix}, it defaults to
+25L.}
 }
 \value{
 \code{getMu()} returns the \code{mu} matrix
@@ -223,6 +286,9 @@ calculated and, in case, if it is still aligned to the estimators.
 
 \code{calculateLikelihoodOfObserved()} returns a \code{matrix} with the
 selected \emph{formula} of the likelihood of the observed zero/one
+
+\code{getDataMatrix()} returns a \code{matrix} with the same shape as the
+\emph{raw} data
 
 \code{observedContingencyTablesYY()} returns a \code{list} with:
 \itemize{
@@ -298,14 +364,19 @@ matrix
 \code{calculateS()} returns the \code{S} matrix
 
 \code{calculateG()} returns the G matrix
+
+\code{getSelectedGenes()} returns an array with the genes' names
+
+\code{calculateReducedDataMatrix()} returns the reduced matrix. The
+returned \code{matrix} has dimensions: (number of cells, number of components)
 }
 \description{
 These are the functions and methods used to calculate the
-\strong{COEX} matrices according to the \code{COTAN} model. From there it is possible
-to calculate the associated \emph{pValue} and the \emph{GDI} (\emph{Global Differential
+\code{COEX} matrices according to the \code{COTAN} model. From there it is possible
+to calculate the associated \code{p-value} and the \code{GDI} (\emph{Global Differential
 Expression})
 
-The \strong{COEX} matrix is defined by following formula:
+The \code{COEX} matrix is defined by following formula:
 
 \deqn{\frac{\sum_{i,j \in \{\text{Y, N}\}}{
                     (-1)^{\#\{i,j\}}\frac{O_{ij}-E_{ij}}{1 \vee E_{ij}}}}
@@ -313,8 +384,8 @@ The \strong{COEX} matrix is defined by following formula:
                             \frac{1}{1 \vee E_{ij}}}}}}
 
 where \eqn{O} and \eqn{E} are the observed and expected contingency tables
-and \eqn{n} is the relevant numerosity (the number of genes/cells depending
-on given \code{actOnCells} flag).
+and \eqn{n} is the relevant number of genes/cells (depending on given
+\code{actOnCells} flag).
 
 The formula can be more effectively implemented as:
 
@@ -357,6 +428,10 @@ matrix from the \code{COTAN} object is available to use
 
 \code{calculateLikelihoodOfObserved()} gives for each cell and each gene
 the likelihood of the observed zero/one data
+
+\code{getDataMatrix()} gives for each cell and each gene the result of
+the selected formula as function of the observed counts and their expected
+value
 
 \code{observedContingencyTablesYY()} calculates observed \emph{Yes/Yes} field
 of the contingency table
@@ -414,6 +489,18 @@ tables. It always has the diagonal set to zero.
 \code{calculateG()} calculates the statistics \emph{G-test} for genes
 contingency tables. It always has the diagonal set to zero. It is
 proportional to the genes' presence mutual information.
+
+\code{getSelectedGenes()} selects the \emph{most representative} genes of the
+\code{data.set}
+
+\code{calculateReducedDataMatrix()} calculates the reduced data-matrix to
+be used for \emph{clusterizations} or \code{UMAP} plots.
+
+It uses the given \code{dataMethod} to determine with which data to start, then,
+depending on the value of \code{useCoexEigen}, either uses the \code{genesSel} to
+restrict evaluation to the relevant genes' before the \code{PCA} is run, or it
+calculates the first \strong{COEX} eigenvectors and projects the data matrix to
+their sub-space.
 }
 \note{
 The sum of the matrices returned by the function
@@ -449,8 +536,11 @@ genesSample <- sample(getNumGenes(objCOTAN), 10)
 partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
                                          actOnCells = FALSE)
 
-identical(partialGenesCoex,
-          getGenesCoex(objCOTAN, getGenes(objCOTAN)[sort(genesSample)]))
+stopifnot(all(1e-6 >
+                abs(partialGenesCoex -
+                      getGenesCoex(objCOTAN,
+                                   getGenes(objCOTAN)[sort(genesSample)],
+                                   zeroDiagonal = FALSE))))
 
 ## S <- calculateS(objCOTAN)
 ## G <- calculateG(objCOTAN)
@@ -478,13 +568,14 @@ tables
 
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 stopifnot(isCoexAvailable(objCOTAN, actOnCells = TRUE, ignoreSync = TRUE))
-cellsCoex <- getCellsCoex(objCOTAN)
+cellsCoex <- getCellsCoex(objCOTAN, zeroDiagonal = FALSE)
 
 cellsSample <- sample(getNumCells(objCOTAN), 10)
 partialCellsCoex <- calculatePartialCoex(objCOTAN, cellsSample,
                                          actOnCells = TRUE)
 
-identical(partialCellsCoex, cellsCoex[, sort(cellsSample)])
+stopifnot(all(1e-6 >
+                abs(partialCellsCoex - cellsCoex[, sort(cellsSample)])))
 
 objCOTAN <- dropCellsCoex(objCOTAN)
 stopifnot(!isCoexAvailable(objCOTAN, actOnCells = TRUE))

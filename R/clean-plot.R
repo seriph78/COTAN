@@ -1,3 +1,6 @@
+
+## ------- Clean Plots --------
+
 #' @details `cleanPlots()` creates the plots associated to the output of the
 #'   [clean()] method.
 #'
@@ -7,10 +10,10 @@
 #'   elements of the returned list will be `NULL`
 #'
 #' @returns `cleanPlots()` returns a `list` of `ggplot2` plots:
-#'   * `"pcaCells"` is for pca cells
-#'   * `"pcaCellsData"` is the data of the pca cells (can be plotted)
+#'   * `"pcaCells"` is for `PCA` cells
+#'   * `"pcaCellsData"` is the data of the `PCA` cells (can be plotted)
 #'   * `"genes"` is for `B` group cells' genes
-#'   * `"UDE"` is for cells' *UDE* against their pca
+#'   * `"UDE"` is for cells' `UDE` against their `PCA`
 #'   * `"nu"` is for cell `nu`
 #'   * `"zoomedNu"` is the same but zoomed on the left and with an estimate
 #'   for the low `nu` threshold that defines problematic cells
@@ -31,7 +34,6 @@
 #'
 #' @importFrom Matrix t
 #' @importFrom Matrix rowMeans
-#' @importFrom Matrix colMeans
 #'
 #' @importFrom BiocSingular runPCA
 #' @importFrom BiocSingular IrlbaParam
@@ -55,6 +57,8 @@
 #' @importFrom graphics par
 #' @importFrom graphics title
 #'
+#' @importFrom dplyr filter
+#'
 #' @importFrom assertthat assert_that
 #'
 #' @importFrom zeallot %<-%
@@ -75,17 +79,25 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
   if (isTRUE(includePCA)) {
     logThis("PCA: START", logLevel = 2L)
 
-    rawNorm <- getNuNormData(objCOTAN)
+    nuNormData <- getNuNormData(objCOTAN)
 
-    pcaCells <- runPCA(x = t(rawNorm), rank = 5L,
-                       BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
-    assert_that(identical(rownames(pcaCells), getCells(objCOTAN)),
+    logThis("Elaborating PCA - START", logLevel = 3L)
+
+    # re-scale so that all the genes have mean 0.0 and stdev 1.0
+    cellsRDM <- runPCA(x = t(nuNormData),
+                       rank = 5L,
+                       BSPARAM = IrlbaParam(),
+                       get.rotation = FALSE)[["x"]]
+
+    logThis("Elaborating PCA - DONE", logLevel = 3L)
+
+    assert_that(identical(rownames(cellsRDM), getCells(objCOTAN)),
                 msg = "Issues with pca output")
 
-    distCells <- scale(pcaCells)
+    distCells <- scale(cellsRDM)
     distCells <- calcDist(distCells, method = "euclidean") # mahlanobis
 
-    pcaCells <- as.data.frame(pcaCells)
+    cellsRDM <- as.data.frame(cellsRDM)
 
     logThis("PCA: DONE", logLevel = 2L)
 
@@ -122,12 +134,12 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     groups[pos1] <- "A"
     groups[pos2] <- "B"
 
-    pcaCells <- cbind(pcaCells, groups)
+    cellsRDM <- cbind(cellsRDM, groups)
 
     logThis("Hierarchical clustering: DONE", logLevel = 2L)
     gc()
 
-    toClust <- as.matrix(round(rawNorm, digits = 4L))
+    toClust <- as.matrix(round(nuNormData, digits = 4L))
 
     assert_that(identical(colnames(toClust), names(groups)),
                 msg = "Error in the cell names")
@@ -151,28 +163,35 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     gc()
 
-    #check if the pca plot is clean enough and from the printed genes,
+    #check if the PCA plot is clean enough and from the printed genes,
     #if the smallest group of cells are characterized by particular genes
 
-    pcaCellsPlot <- ggplot(subset(pcaCells, groups == "A"),
-                           aes(x = PC1, y = PC2, colour = groups)) +
+    cellsRDM_A <- filter(cellsRDM, .data$groups == "A")
+    cellsRDM_B <- filter(cellsRDM, .data$groups != "A")
+
+    cellsRDMPlot <- ggplot(cellsRDM_A,
+                           aes(x = .data$PC1, y = .data$PC2,
+                               colour = .data$groups)) +
                     geom_point(alpha = 0.5, size = 3L) +
-                    geom_point(data = subset(pcaCells, groups != "A"),
-                               aes(x = PC1, y = PC2, colour = groups),
+                    geom_point(data = cellsRDM_B,
+                               aes(x = .data$PC1, y = .data$PC2,
+                                   colour = .data$groups),
                                alpha = 0.8, size = 3L) +
-                    scale_color_manual(groups, values = c("A" = "#8491B4B2",
-                                                          "B" = "#E64B35FF")) +
+                    scale_color_manual(name = "groups",
+                                       values = c("A" = "#8491B4B2",
+                                                  "B" = "#E64B35FF")) +
                     plotTheme("pca")
 
     minN <- min(D[["n"]]) + 15.0
     lowD <- D[["n"]] < minN
-    genesPlot <- ggplot(D, aes(x = n, y = means)) +
+    genesPlot <- ggplot(D, aes(x = .data$n, y = .data$means)) +
                  geom_point() +
                  ggtitle(label = "B cell group genes mean expression"
                          #subtitle = " - B group NOT removed -"
                          ) +
                  geom_label(data = subset(D, lowD),
-                       aes(x = n, y = means, label = rownames(D)[lowD]),
+                       aes(x = .data$n, y = .data$means,
+                           label = rownames(D)[lowD]),
                        #nudge_y = 0.05,
                        nudge_x = 400.0
                        #direction = "x",
@@ -185,7 +204,8 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
           plot.subtitle = element_text(hjust = 0.95, vjust = -25.0))
 
     nuEst <- round(getNu(objCOTAN), digits = 7L)
-    UDEPlot <- ggplot(pcaCells, aes(x = PC1, y = PC2, colour = log(nuEst))) +
+    UDEPlot <- ggplot(cellsRDM, aes(x = .data$PC1, y = .data$PC2,
+                                    colour = log(nuEst))) +
                geom_point(size = 1L, alpha = 0.8) +
                scale_color_gradient2(low = "#E64B35B2", mid = "#4DBBD5B2",
                                      high = "#3C5488B2",
@@ -194,20 +214,20 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
                ggtitle("Cells PCA coloured by cells efficiency") +
                plotTheme("UDE")
   } else {
-    pcaCellsPlot <- NULL
-    pcaCells <- NULL
+    cellsRDMPlot <- NULL
+    cellsRDM <- NULL
     genesPlot <- NULL
     UDEPlot <- NULL
   }
 
   nuDf <- data.frame("nu" = sort(getNu(objCOTAN)),
                      "n" = seq_len(getNumCells(objCOTAN)))
-  nuPlot <- ggplot(nuDf, aes(x = n, y = nu)) +
+  nuPlot <- ggplot(nuDf, aes(x = .data$n, y = .data$nu)) +
             geom_point(colour = "#8491B4B2", size = 1L) +
             plotTheme("common")
 
   nuDf <- nuDf[seq_len(min(400L, nrow(nuDf))), ]
-  zNuPlot <- ggplot(nuDf, aes(x = n, y = nu)) +
+  zNuPlot <- ggplot(nuDf, aes(x = .data$n, y = .data$nu)) +
              geom_point(colour = "#8491B4B2", size = 1L) +
              plotTheme("common") +
              xlim(0L, nrow(nuDf)) +
@@ -229,12 +249,13 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
                         color = "darkred", size = 4.5)
   }
 
-  return(list("pcaCells" = pcaCellsPlot, "pcaCellsData" = pcaCells,
+  return(list("pcaCells" = cellsRDMPlot, "pcaCellsData" = cellsRDM,
               "genes" = genesPlot, "UDE" = UDEPlot,
               "nu" = nuPlot, "zoomedNu" = zNuPlot))
 }
 
-
+## ------- Scree Plots --------
+##
 #' @details `screePlot()` creates a plots showing the explained variance of the
 #'   components of a PCA
 #'
@@ -263,7 +284,7 @@ screePlot <- function(pcaStdDev) {
   screeDF <- data.frame(PC = seq_along(varExplained), Variance = varExplained)
 
   # Create ggplot scree plot
-  ggplot(screeDF, aes(x = PC, y = Variance)) +
+  ggplot(screeDF, aes(x = .data$PC, y = .data$Variance)) +
     geom_bar(stat = "identity", fill = "steelblue") +
     geom_point(color = "red", size = 3L) +
     geom_line(group = 1L, color = "red") +

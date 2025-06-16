@@ -21,8 +21,8 @@
 #'   * `"clName"` the *cluster* **labels**
 #'   * `"condName"` the relevant condition (that sub-divides the *clusters*)
 #'   * `"CellNumber"` the number of cells in the group
-#'   * `"MeanUDE"` the average "UDE" in the group of cells
-#'   * `"MedianUDE"` the median "UDE" in the group of cells
+#'   * `"MeanUDE"` the average `UDE` in the group of cells
+#'   * `"MedianUDE"` the median `UDE` in the group of cells
 #'   * `"ExpGenes25"` the number of genes expressed in at the least 25% of the
 #'     cells in the group
 #'   * `"ExpGenes"` the number of genes expressed at the least once in any of
@@ -128,7 +128,8 @@ clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
 #'   * `"data"` contains the data,
 #'   * `"plot"` is the returned plot
 #'
-#' @importFrom tidyr gather
+#' @importFrom tidyr pivot_longer
+#' @importFrom tidyr all_of
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 aes
@@ -156,17 +157,22 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
   df <- clustersSummaryData(objCOTAN, clName = clName, clusters = clusters,
                             condName = condName, conditions = conditions)
 
+  dfNames <- colnames(df)
+  colRng <- which(dfNames=="CellNumber") : which(dfNames=="ExpGenes")
   plotDF <- df %>%
-    gather(keys, values, CellNumber:ExpGenes)
+    pivot_longer(cols      = all_of(dfNames[colRng]),
+                 names_to  = "keys",
+                 values_to = "values")
 
   # normalize col names
   cNames <- colnames(df)
   plotDF[["Cluster"]] <- plotDF[[cNames[[1L]]]]
   plotDF[["Condition"]] <- plotDF[[cNames[[2L]]]]
 
-  plot <- ggplot(plotDF, aes(Cluster, values, fill = Condition)) +
+  plot <- ggplot(plotDF, aes(.data$Cluster, .data$values,
+                             fill = .data$Condition)) +
     geom_bar(position = "dodge", stat = "identity", color = "black") +
-    geom_text(aes(x = Cluster, y = values, label = values,
+    geom_text(aes(x = .data$Cluster, y = .data$values, label = .data$values,
                   vjust = 0.5, hjust = -0.1),
               position = position_dodge(width = 1.0)) +
     facet_wrap(~ keys, ncol = 6L, scales = "free") +

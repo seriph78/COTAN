@@ -10,7 +10,7 @@ Definition of the \code{COTAN} class
 \section{Slots}{
 
 \describe{
-\item{\code{raw}}{\code{dgCMatrix} - the raw UMI count matrix \eqn{n \times m} (gene
+\item{\code{raw}}{\code{dgCMatrix} - the raw \code{UMI} count matrix \eqn{n \times m} (gene
 number × cell number)}
 
 \item{\code{genesCoex}}{\code{dspMatrix} - the correlation of \code{COTAN} between genes,
@@ -24,6 +24,6 @@ number × cell number)}
 \item{\code{metaCells}}{\code{data.frame}}
 
 \item{\code{clustersCoex}}{a \code{list} of \code{COEX} \code{data.frames} for each clustering in
-the metaCells}
+the \code{metaCells}}
 }}
 

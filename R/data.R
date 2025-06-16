@@ -19,13 +19,13 @@ NULL
 #'
 #' @usage data(raw.dataset)
 #'
-#' @source GEO GSM2861514
+#' @source `GEO` `GSM2861514`
 #'
 #' @rdname Datasets
 #'
 "raw.dataset"
 
-# Raw ERCC dataset
+# Raw `ERCC` dataset
 
 #' @details `ERCCRaw` dataset
 #'
@@ -35,7 +35,7 @@ NULL
 #'
 #' @usage data(ERCCraw)
 #'
-#' @source ERCC
+#' @source `ERCC`
 #'
 #' @rdname Datasets
 #'
@@ -88,7 +88,7 @@ NULL
 
 #' @details `vignette.split.clusters` is the clusterization obtained running
 #'   `cellsUniformClustering()` on the vignette dataset (mouse cortex E17.5,
-#'   GEO: GSM2861514)
+#'   `GEO`: `GSM2861514`)
 #'
 #' @format `vignette.split.clusters` is a `factor`
 #'
@@ -103,7 +103,7 @@ NULL
 
 #' @details `vignette.merge.clusters` is the clusterization obtained running
 #'   `mergeUniformCellsClusters()` on the vignette dataset (mouse cortex E17.5,
-#'   GEO: GSM2861514) using the previous *clusterization*
+#'   `GEO`: `GSM2861514`) using the previous *clusterization*
 #'
 #' @format `vignette.merge.clusters` is a `factor`
 #'
@@ -118,8 +118,8 @@ NULL
 
 #' @details `vignette.merge2.clusters` is the clusterization obtained re-running
 #'   `mergeUniformCellsClusters()` on the vignette dataset (mouse cortex E17.5,
-#'   GEO: GSM2861514) using the `vignette.split.clusters` *clusterization*, but
-#'   with a sequence of progressively relaxed checks
+#'   `GEO`: `GSM2861514`) using the `vignette.split.clusters` *clusterization*,
+#'   but with a sequence of progressively relaxed checks
 #'
 #' @format `vignette.merge2.clusters` is a `factor`
 #'
@@ -162,8 +162,7 @@ NULL
 #'
 #'   Below a link to install `cuda` 11.8 for `WSL2` given: use a local installer
 #'   to be sure the wanted `cuda` version is being installed, and not the latest
-#'   one: [cuda 11.8 for
-#'   WSL2](https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_local)
+#'   one: [`cuda` 11.8 for `WSL2`](https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_local)
 #'
 #' @name Installing_torch
 #'

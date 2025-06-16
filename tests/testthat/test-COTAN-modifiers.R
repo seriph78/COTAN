@@ -218,12 +218,12 @@ test_that("Managed clusterizations and conditions", {
   expect_error(addClusterization(obj, clName = "Test", clusters = rep(0L, 17L)))
   expect_error(addCondition(obj, condName = "Test", conditions = rep("A", 17L)))
 
-  # wrong coex data.frame size
+  # wrong COEX data.frame size
   expect_error(addClusterization(obj, clName = "Test",
                                  clusters = clusters,
                                  coexDF = coexDF[1L:8L, ]))
 
-  # wrong coex data.frame column names
+  # wrong COEX data.frame column names
   expect_error(addClusterization(obj, clName = "Test",
                                  clusters = rep(c("3", "4"), 20L),
                                  coexDF = coexDF))

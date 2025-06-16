@@ -38,7 +38,7 @@ data classes used by the \code{BioConductor} analysis packages
 into a \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object. Stores
 the raw counts in the \code{"counts"} \link[SummarizedExperiment:Assays-class]{SummarizedExperiment::Assays}, the
 metadata for genes and cells as \code{rowData} and \code{colData} slots respectively
-and finally the genes' and cells' \emph{coex} along the dataset metadata into
+and finally the genes' and cells' \code{COEX} along the dataset metadata into
 the \code{metadata} slot.
 
 The function performs the following steps:
@@ -90,7 +90,7 @@ be empty matrices
 
   newObj <- convertFromSingleCellExperiment(sce)
 
-  identical(getDims(newObj), getDims(obj))
+  stopifnot(identical(getDims(newObj), getDims(obj)))
 
 }
 \seealso{

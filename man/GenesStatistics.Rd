@@ -54,7 +54,7 @@ calculatePDI(
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{genesGDI}{the named genes' GDI \code{array} to store or the output
+\item{genesGDI}{the named genes' \code{GDI} \code{array} to store or the output
 \code{data.frame} of the function \code{\link[=calculateGDI]{calculateGDI()}}}
 
 \item{primaryMarkers}{A vector of primary marker names.}
@@ -94,11 +94,11 @@ empty the function will do it genome-wide.}
 the function will do it genome-wide.}
 }
 \value{
-\code{getGDI()} returns the genes' \strong{GDI} array if available or \code{NULL}
+\code{getGDI()} returns the genes' \verb{GDI`` array if available or }NULL`
 otherwise
 
-\code{storeGDI()} returns the given \code{COTAN} object  with updated
-\strong{GDI} genes' information
+\code{storeGDI()} returns the given \code{COTAN} object  with updated \code{GDI}
+genes' information
 
 \code{genesCoexSpace()} returns a \code{list} with:
 \itemize{
@@ -113,20 +113,20 @@ gives the \code{list} of primary markers that selected for it
 \itemize{
 \item \code{"g.space"} the genes' \code{COEX} space \code{data.frame}
 \item \code{"plot.eig"} the eigenvalues plot
-\item \code{"pca_clusters"} the \emph{pca} components \code{data.frame}
+\item \code{"pca_clusters"} the \code{PCA} components \code{data.frame}
 \item \code{"tree_plot"} the tree plot for the genes' \code{COEX} space
 }
 
 \code{calculateGenesCE()} returns a named \code{array} with the \emph{cross-entropy}
 of each gene
 
-\code{calculateGDIGivenCorr()} returns a \code{vector} with the \emph{GDI} data for
+\code{calculateGDIGivenCorr()} returns a \code{vector} with the \code{GDI} data for
 each column of the input
 
 \code{calculateGDI()} returns a \code{data.frame} with:
 \itemize{
 \item \code{"sum.raw.norm"} the sum of the normalized data rows
-\item \code{"GDI"} the \emph{GDI} data
+\item \code{"GDI"} the \code{GDI} data
 \item \code{"exp.cells"} the percentage of cells expressing the gene
 }
 
@@ -150,10 +150,10 @@ denote it as \emph{Local Differentiation Index} (\code{LDI}) relative to the sel
 subset.
 }
 \details{
-\code{getGDI()} extracts the genes' \strong{GDI} array as it was stored by the
+\code{getGDI()} extracts the genes' \code{GDI} array as it was stored by the
 method \code{\link[=storeGDI]{storeGDI()}}
 
-\code{storeGDI()} stored and already calculated genes' GDI \code{array} in a
+\code{storeGDI()} stored and already calculated genes' \code{GDI} \code{array} in a
 \code{COTAN} object. It can be retrieved using the method \code{\link[=getGDI]{getGDI()}}
 
 \code{genesCoexSpace()} calculates genes groups based on the primary
@@ -168,11 +168,11 @@ for each gene as \emph{cross-entropy}: \eqn{-\sum_{c}{\mathbb{1}_{X_c == 0}
    \log(p_c) - \mathbb{1}_{X_c != 0} \log(1 - p_c)}} where \eqn{X_c} is the
 observed count and \eqn{p_c} the probability of zero
 
-\code{calculateGDIGivenCorr()} produces a \code{vector} with the \emph{GDI} for
+\code{calculateGDIGivenCorr()} produces a \code{vector} with the \code{GDI} for
 each column based on the given correlation matrix, using the \emph{Pearson's
 \emph{\eqn{\chi^{2}}} test}
 
-\code{calculateGDI()} produces a \code{data.frame} with the \emph{GDI} for each
+\code{calculateGDI()} produces a \code{data.frame} with the \code{GDI} for each
 gene based on the \code{COEX} matrix
 
 \code{calculatePValue()} computes the p-values for genes in the \code{COTAN}

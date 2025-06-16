@@ -146,6 +146,8 @@ singleHeatmapDF <- function(objCOTAN,
 #' @importFrom ggplot2 facet_grid
 #' @importFrom ggplot2 scale_fill_gradient2
 #'
+#' @importFrom dplyr filter
+#'
 #' @importFrom scales squish
 #'
 #' @importFrom assertthat assert_that
@@ -210,7 +212,7 @@ heatmapPlot <- function(objCOTAN = NULL,
                   logLevel = 0L)
           return(NULL)
         })
-      if (is.null(obj)) {
+      if (is.null(tempObj)) {
         next
       }
       dfTemp <- singleHeatmapDF(tempObj, genesLists = genesLists,
@@ -220,14 +222,21 @@ heatmapPlot <- function(objCOTAN = NULL,
     }
   }
 
-  logThis(paste("min coex:", min(dfToPrint[["coex"]], na.rm = TRUE),
-                "max coex:", max(dfToPrint[["coex"]], na.rm = TRUE)),
+  logThis(paste("min COEX:", min(dfToPrint[["coex"]], na.rm = TRUE),
+                "max COEX:", max(dfToPrint[["coex"]], na.rm = TRUE)),
           logLevel = 2L)
 
-  heatmap <- ggplot(data = subset(dfToPrint, type %in% names(genesLists)[sets]),
-                    aes(cond, factor(g2, levels = rev(levels(factor(g2)))))) +
-             geom_tile(aes(fill = coex), colour = "black", show.legend = TRUE) +
-             facet_grid(type ~ g1, scales = "free", space = "free") +
+  filteredDF <- dfToPrint %>%
+    filter(.data$type %in% names(genesLists)[sets])
+
+  heatmap <- ggplot(filteredDF,
+                    aes(x = .data$cond,
+                        y = factor(.data$g2,
+                                   levels = rev(levels(factor(.data$g2)))))) +
+             geom_tile(aes(fill = .data$coex),
+                       colour = "black", show.legend = TRUE) +
+             facet_grid(rows = vars(.data$type), cols = vars(.data$g1),
+                        scales = "free", space = "free") +
              scale_fill_gradient2(low = "#E64B35FF", mid = "gray93",
                                   high = "#3C5488FF", midpoint = 0L,
                                   na.value = "grey80", space = "Lab",
@@ -355,7 +364,7 @@ genesHeatmapPlot <-
 
     coex <- coex[reorderIdxRow, reorderIdxCol]
 
-    colFun <- colorRamp2(
+    colorFunc <- colorRamp2(
       c(round(quantile(as.matrix(coex), probs = 0.001), digits = 3L),
         0.0,
         round(quantile(as.matrix(coex), probs = 0.999), digits = 3L)),
@@ -369,7 +378,7 @@ genesHeatmapPlot <-
       cluster_columns = FALSE,
       row_split = clGenesRows[["cl"]],
       column_split = clGenesCols[["cl"]],
-      col = colFun,
+      col = colorFunc,
       show_row_names = FALSE,
       show_column_names = FALSE,
       column_title_gp = gpar(
@@ -379,7 +388,7 @@ genesHeatmapPlot <-
       row_title_gp = gpar(fill = "#8491B44C", font = 3L, col = "#3C5488FF")
     )
     lgd <- Legend(
-      col_fun = colFun, title = "coex", grid_width = unit(0.3, "cm"),
+      col_fun = colorFunc, title = "COEX", grid_width = unit(0.3, "cm"),
       direction = "horizontal", title_position = "topcenter",
       title_gp = gpar(fontsize = 10L, fontface = "bold", col = "#3C5488FF"),
       labels_gp = gpar(col = "#3C5488FF", font = 3L)
@@ -420,7 +429,7 @@ genesHeatmapPlot <-
 #'
 cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
   coexMat <- as.matrix(getCellsCoex(objCOTAN))
-  assert_that(!is_empty(coexMat), msg = "cells coex not found in the COTAN")
+  assert_that(!is_empty(coexMat), msg = "cells COEX not found in the COTAN")
 
   # if clustering is needed
   if (!is_empty(clusters)) {

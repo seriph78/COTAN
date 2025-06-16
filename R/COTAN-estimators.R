@@ -50,7 +50,7 @@ setMethod(
     if (TRUE) {
       oldLambda <- getMetadataGenes(objCOTAN)[["lambda"]]
       if (!identical(lambda, oldLambda)) {
-        # flag the coex slots are out of sync (if any)!
+        # flag the COEX slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                                datasetTags()[["gsync"]], FALSE)
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
@@ -98,7 +98,7 @@ setMethod(
     if (TRUE) {
       oldNu <- getMetadataCells(objCOTAN)[["nu"]]
       if (!identical(nu, oldNu)) {
-        # flag the coex slots are out of sync (if any)!
+        # flag the COEX slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                                datasetTags()[["gsync"]], FALSE)
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
@@ -182,7 +182,7 @@ setMethod(
     if (TRUE) {
       oldNu <- getMetadataCells(objCOTAN)[["nu"]]
       if (!identical(nu, oldNu)) {
-        # flag the coex slots are out of sync (if any)!
+        # flag the COEX slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                                datasetTags()[["gsync"]], FALSE)
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
@@ -345,7 +345,7 @@ setMethod(
     if (TRUE) {
       oldDispersion <-  getMetadataGenes(objCOTAN)[["dispersion"]]
       if (!identical(dispersion, oldDispersion)) {
-        # flag the coex slots are out of sync (if any)!
+        # flag the COEX slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                                datasetTags()[["gsync"]], FALSE)
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
@@ -707,7 +707,7 @@ setMethod(
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
     if (!identical(nu, initialGuess)) {
-      # flag the coex slots are out of sync (if any)!
+      # flag the COEX slots are out of sync (if any)!
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                              datasetTags()[["gsync"]], FALSE)
       objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
