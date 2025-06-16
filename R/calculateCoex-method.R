@@ -1117,17 +1117,17 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
                                     dtype = torch::torch_float64())
 
     # Calculate terms based on conditions
-    term1 <- (a <= zero) *
-      torch::torch_exp(torch::torch_ger(nu, lambda) *
-                         (torch::torch_minimum(a, zero) + minusOne))
-
-    term2 <- (a >  zero) *
-      torch::torch_pow(one + torch::torch_ger(nu, lambda)
-                       * torch::torch_maximum(a, zero), minusOne / a)
-
-    invisible(term1$add_(term2)$add_(minusOne)$neg_())
-
-    return(term1)
+    # term1 <- (a <= zero) *
+    #   torch::torch_exp(torch::torch_ger(nu, lambda) *
+    #                      (torch::torch_minimum(a, zero) + minusOne))
+    #
+    # term2 <- (a >  zero) *
+    #   torch::torch_pow(one + torch::torch_ger(nu, lambda)
+    #                    * torch::torch_maximum(a, zero), minusOne / a)
+    #
+    # invisible(term1$add_(term2)$add_(minusOne)$neg_())
+    #
+    return(NULL)
   }
 
   logThis("Retrieving expected genes contingency table", logLevel = 3L)
