@@ -1,8 +1,8 @@
 
 #' @details `clustersMarkersHeatmapPlot()` returns the heatmap plot of a summary
 #'   score for each *cluster* and each gene marker in the given
-#'   *clusterization*. It also returns the numerosity and percentage of each
-#'   *cluster* on the right and a *clusterization* dendogram on the left, as
+#'   *clusterization*. It also returns the size and percentage of each
+#'   *cluster* on the right and a *clusterization* `dendogram` on the left, as
 #'   returned by the function [clustersTreePlot()]. The heatmap cells' colors
 #'   express the **DEA**, that is whether a gene is enriched or depleted in the
 #'   cluster, while the stars are aligned to the corresponding adjusted

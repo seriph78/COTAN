@@ -11,8 +11,8 @@
 #'   the rows in the `matrix`.
 #' @param elements a named `list` of elements to label. Each array in the list
 #'   will be shown with a different color
-#' @param title a string giving the plot title. Will default to UMAP Plot if not
-#'   specified
+#' @param title a string giving the plot title. Will default to `UMAP` Plot if
+#'   not specified
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
@@ -231,40 +231,6 @@ UMAPPlot <- function(dataIn,
 
 # ------ cellsUMAPPlot -------
 
-getDataMatrix <- function(objCOTAN, dataMethod = "") {
-  if (isEmptyName(dataMethod)) {
-    dataMethod <- "LogNormalized"
-  }
-
-  binDiscr <- function(objCOTAN) {
-    zeroOne <- getZeroOneProj(objCOTAN)
-    probOne <- 1.0 - getProbabilityOfZero(objCOTAN)
-    return(zeroOne - probOne)
-  }
-
-  getLH <- function(objCOTAN, formula) {
-    return(calculateLikelihoodOfObserved(objCOTAN, formula))
-  }
-
-  dataMatrix <- as.matrix(switch(
-    dataMethod,
-    RW = , Raw      = , RawData                 = getRawData(objCOTAN),
-    NN = , NuNorm   = , Normalized              = getNuNormData(objCOTAN),
-    LN = , LogNorm  = , LogNormalized           = getLogNormData(objCOTAN),
-    BI = , Bin      = , Binarized               = getZeroOneProj(objCOTAN),
-    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN),
-    AB = , AdjBin   = , AdjBinarized            = abs(binDiscr(objCOTAN)),
-    LH = , Like     = , Likelihood              = getLH(objCOTAN, "raw"),
-    LL = , LogLike  = , LogLikelihood           = getLH(objCOTAN, "log"),
-    DL = , DerLogL  = , DerivativeLogLikelihood = getLH(objCOTAN, "der"),
-    SL = , SignLogL = , SignedLogLikelihood     = getLH(objCOTAN, "sLog"),
-    stop("Unrecognised `dataMethod` passed in: ", dataMethod)
-  ))
-
-  return(dataMatrix)
-}
-
-
 #' @details `cellsUMAPPlot()` returns a `ggplot2` plot where the given
 #'   *clusters* are placed on the base of their relative distance. Also if
 #'   needed calculates and stores the `DEA` of the relevant *clusterization*.
@@ -276,42 +242,17 @@ getDataMatrix <- function(objCOTAN, dataMethod = "") {
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName` that will only indicate the relevant
 #'   column name in the returned `data.frame`
+#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
+#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
+#'   the data `matrix` to the selected genes before applying the `PCA` reduction
 #' @param dataMethod selects the method to use to create the `data.frame` to
-#'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
-#'   gene based on available data/model, the following methods are supported:
-#'   * `"RW", "Raw", "RawData"` uses the *raw* counts
-#'   * `"NN", "NuNorm", "Normalized"` uses the \eqn{\nu}*-normalized* counts
-#'   * `"LN", "LogNorm", "LogNormalized"` uses the *log-normalized* counts
-#'   (default)
-#'   * `"BI", "Bin", "Binarized"` uses the *binarized* data matrix
-#'   * `"BD", "BinDiscr", "BinarizedDiscrepancy"` uses the *difference* between
-#'   the *binarized* data matrix and the estimated *probability of one*
-#'   * `"AB", "AdjBin", "AdjBinarized"` uses the absolute value of
-#'   the *binarized discrepancy* above
-#'   * `"LH", "Like", "Likelihood"` uses the *likelihood* of *binarized*
-#'   data matrix
-#'   * `"LL", "LogLike", "LogLikelihood"` uses the *log-likelihood*
-#'   of *binarized* data matrix
-#'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
-#'   the *log-likelihood* of *binarized* data matrix
-#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
-#'   of *binarized* data matrix
-#'
-#'   For the last four options see [calculateLikelihoodOfObserved()] for more
-#'   details
-#' @param genesSel Decides whether and how to perform gene-selection. It can be
-#'   a straight list of genes or a string indicating one of the following
-#'   selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**. Since it requires
-#'   an available `COEX` matrix it will fall-back to `"HVG_Seurat"` when the
-#'   matrix is not available
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'   via the \pkg{Seurat} package (the default method)
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
+#' @param numComp Number of components of the reduced `matrix`, it defaults to
+#'   25L.
+#' @param genesSel Decides whether and how to perform gene-selection. See
+#'   [getSelectedGenes()] for more details.
 #' @param numGenes the number of genes to select using the above method. Will be
-#'   ignored when no selection have been asked or when an explicit list of genes
-#'   was passed in
+#'   ignored when an explicit list of genes has been passed in
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
@@ -320,16 +261,12 @@ getDataMatrix <- function(objCOTAN, dataMethod = "") {
 #'
 #' @returns `cellsUMAPPlot()` returns a list with 2 objects:
 #'  * `"plot"` a `ggplot2` object representing the `umap` plot
-#'  * `"cellsPCA"` the `data.frame` PCA used to create the plot
+#'  * `"cellsRDM"` the *Reduced Data Matrix* used to create the plot
 #'
 #' @importFrom rlang is_empty
 #'
-#' @importFrom stringr str_equal
-#'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
-#'
-#' @importFrom BiocSingular runPCA
 #'
 #' @export
 #'
@@ -338,9 +275,11 @@ getDataMatrix <- function(objCOTAN, dataMethod = "") {
 cellsUMAPPlot <- function(objCOTAN,
                           clName = "",
                           clusters = NULL,
+                          useCoexEigen = FALSE,
                           dataMethod = "",
-                          genesSel = "HVG_Seurat",
-                          numGenes = 2000L,
+                          numComp = 25L,
+                          genesSel = "",
+                          numGenes = 200L,
                           colors = NULL,
                           numNeighbors = 0L,
                           minPointsDist = NA) {
@@ -360,30 +299,33 @@ cellsUMAPPlot <- function(objCOTAN,
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
-  selectedGenes <- genesSelector(objCOTAN, genesSel = genesSel,
-                                 numGenes = numGenes)
-  cellsMatrix <-
-    getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ]
+  if (isEmptyName(genesSel)) {
+    genesSel <- "HGDI" # this default could differ from the one in the selector
+  }
 
-  # re-scale so that all the genes have mean 0.0 and stdev 1.0
-  cellsMatrix <- scale(t(cellsMatrix), center = TRUE, scale = TRUE)
+  if (isEmptyName(dataMethod)) {
+    dataMethod <- "LogNormalized"
+  }
 
-  logThis("Elaborating PCA - START", logLevel = 3L)
-  cellsPCA <- runPCA(x = cellsMatrix, rank = 25L,
-                     BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
+  cellsRDM <- calculateReducedDataMatrix(
+    objCOTAN, useCoexEigen = useCoexEigen,
+    dataMethod = dataMethod, numComp = numComp,
+    genesSel = genesSel, numGenes = numGenes)
 
-  gc()
+  tailMsg <- ifelse(useCoexEigen, "COEX eigenvectors projection",
+                    ifelse(length(genesSel) == 1,
+                           paste(genesSel, "genes selector"),
+                           "user provided genes"))
 
-  logThis("Elaborating PCA - END", logLevel = 3L)
+  umapTitle <- paste("UMAP of clusterization", clName,
+                     "using", dataMethod, "matrix with", tailMsg)
 
-  umapTitle <- paste("UMAP of clusterization", clName, "using", dataMethod,
-                     "matrix with", genesSel, "genes selector")
-  umapPlot <- UMAPPlot(cellsPCA,
+  umapPlot <- UMAPPlot(cellsRDM,
                        clusters = clusters,
                        colors = colors,
                        numNeighbors = numNeighbors,
                        minPointsDist = minPointsDist,
                        title = umapTitle)
 
-  return(list("plot" = umapPlot, "cellsPCA" = cellsPCA))
+  return(list("plot" = umapPlot, "cellsRDM" = cellsRDM))
 }

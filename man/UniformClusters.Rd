@@ -4,7 +4,6 @@
 \name{UniformClusters}
 \alias{UniformClusters}
 \alias{GDIPlot}
-\alias{genesSelector}
 \alias{cellsUniformClustering}
 \alias{checkClusterUniformity}
 \alias{mergeUniformCellsClusters}
@@ -19,8 +18,6 @@ GDIPlot(
   GDIIn = NULL
 )
 
-genesSelector(objCOTAN, genesSel, numGenes = 2000L)
-
 cellsUniformClustering(
   objCOTAN,
   checker = NULL,
@@ -32,7 +29,11 @@ cellsUniformClustering(
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
+  useCoexEigen = FALSE,
+  dataMethod = "",
   genesSel = "HVG_Seurat",
+  numGenes = 2000L,
+  numReducedComp = 25L,
   hclustMethod = "ward.D2",
   initialClusters = NULL,
   initialIteration = 1L,
@@ -88,19 +89,6 @@ chi-squared test statistics. "G" is G-test statistics}
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
 
-\item{genesSel}{Decides whether and how to perform the gene-selection. used
-for the clustering. It is a string indicating one of the following
-selection methods:
-\itemize{
-\item \code{"HGDI"} Will pick-up the genes with highest \strong{GDI}
-\item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
-via the \pkg{Seurat} package (the default method)
-\item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability
-according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
-}}
-
-\item{numGenes}{The number of genes to return}
-
 \item{checker}{the object that defines the method and the threshold to
 discriminate whether a \emph{cluster} is \emph{uniform transcript}. See
 \link{UniformTranscriptCheckers} for more details}
@@ -130,6 +118,21 @@ faster but less precise.}
 \item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+
+\item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
+onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
+the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
+
+\item{dataMethod}{selects the method to use to create the \code{data.frame} to
+pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.}
+
+\item{genesSel}{Decides whether and how to perform the gene-selection
+(defaults to \code{"HVG_Seurat"}). See \code{\link[=getSelectedGenes]{getSelectedGenes()}} for more details.}
+
+\item{numGenes}{the number of genes to select using the above method. Will be
+ignored when an explicit list of genes has been passed in}
+
+\item{numReducedComp}{the number of calculated \strong{RDM} components}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
@@ -174,8 +177,6 @@ where on the ordinates are the \code{GDI} levels and on the abscissa are the
 average gene expression (log scaled). Also marked are the given \emph{threshold}
 (in red) and the \eqn{50\%} and \eqn{75\%} quantiles (in blue).
 
-\code{genesSelector()} returns an array with the genes' names
-
 \code{cellsUniformClustering()} returns a \code{list} with 2 elements:
 \itemize{
 \item \code{"clusters"} the newly found cluster labels array
@@ -203,9 +204,6 @@ given \code{GDIThreshold}
 \details{
 \code{GDIPlot()} directly evaluates and plots the \code{GDI} for a sample.
 
-\code{genesSelector()} selects the \emph{most representative} genes of the
-\code{data.set}
-
 \code{cellsUniformClustering()} finds a \strong{Uniform} \emph{clusterizations} by
 means of the \code{GDI}. Once a preliminary \emph{clusterization} is obtained from
 the \code{Seurat-package} methods, each \emph{cluster} is checked for \strong{uniformity}
@@ -221,15 +219,15 @@ genes' \code{GDI} distribution. The function runs \code{\link[=checkObjIsUniform
 given input checker
 
 \code{mergeUniformCellsClusters()} takes in a \strong{uniform}
-\emph{clusterization} and iteratively checks whether merging two \emph{near clusters}
-would form a \strong{uniform} \emph{cluster} still. Multiple thresholds will be used
-from \eqn{1.37} up to the given one in order to prioritize merge of the
-best fitting pairs.
+\emph{clusterization} and progressively checks whether \emph{merging} two \emph{near
+clusters} would form a \strong{uniform} \emph{cluster} still. Multiple thresholds
+will be used from \eqn{1.37} up to the given one in order to prioritize
+merge of the best fitting pairs.
 
 This function uses the \emph{cosine distance} to establish the \emph{nearest clusters
 pairs}. It will use the \code{\link[=checkClusterUniformity]{checkClusterUniformity()}} function to check
 whether the merged \emph{clusters} are \strong{uniform}. The function will stop once
-no \emph{tested pairs} of clusters are mergeable after testing all pairs in a
+no \emph{tested pairs} of clusters can be \emph{merged} after testing all pairs in a
 single batch
 }
 \examples{
@@ -258,10 +256,10 @@ plot(gdiPlot)
 ##
 
 checker <- new("AdvancedGDIUniformityCheck")
-identical(checker@firstCheck@GDIThreshold, 1.297)
+stopifnot(identical(checker@firstCheck@GDIThreshold, 1.297))
 
 checker2 <- shiftCheckerThresholds(checker, 0.1)
-identical(checker2@firstCheck@GDIThreshold, 1.397)
+stopifnot(identical(checker2@firstCheck@GDIThreshold, 1.397))
 
 splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
                                     optimizeForSpeed = TRUE,
@@ -276,7 +274,7 @@ firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
 
 checkerRes <-
   checkClusterUniformity(objCOTAN, checker = checker2,
-                         cluster = clusters[[1L]], cells = firstCluster,
+                         clusterName = clusters[[1L]], cells = firstCluster,
                          cores = 6L, optimizeForSpeed = TRUE,
                          deviceStr = "cuda", saveObj = FALSE)
 
@@ -286,7 +284,7 @@ objCOTAN <- addClusterization(objCOTAN,
                               coexDF = splitList[["coex"]],
                               override = FALSE)
 
-identical(reorderClusterization(objCOTAN)[["clusters"]], clusters)
+stopifnot(identical(reorderClusterization(objCOTAN)[["clusters"]], clusters))
 
 ## It is possible to pass a list of checkers tot the merge function that will
 ## be applied each to the *resulting* merged *clusterization* obtained using
@@ -310,6 +308,7 @@ objCOTAN <- addClusterization(objCOTAN,
                               coexDF = mergedList[["coex"]],
                               override = TRUE)
 
-identical(reorderClusterization(objCOTAN), mergedList[["clusters"]])
+stopifnot(identical(reorderClusterization(objCOTAN)[["clusters"]],
+                    mergedList[["clusters"]]))
 
 }

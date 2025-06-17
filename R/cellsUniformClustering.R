@@ -13,86 +13,6 @@
 NULL
 
 
-## -------- Genes selector -------
-
-#' @details `genesSelector()` selects the *most representative* genes of the
-#'   `data.set`
-#'
-#' @param objCOTAN a `COTAN` object
-#' @param genesSel Decides whether and how to perform the gene-selection. used
-#'   for the clustering. It is a string indicating one of the following
-#'   selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'     via the \pkg{Seurat} package (the default method)
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
-#' @param numGenes The number of genes to return
-#'
-#' @returns `genesSelector()` returns an array with the genes' names
-#'
-#' @export
-#'
-#' @importFrom stringr str_equal
-#'
-#' @importFrom assertthat assert_that
-#'
-#' @importFrom Seurat CreateSeuratObject
-#' @importFrom Seurat NormalizeData
-#' @importFrom Seurat FindVariableFeatures
-#' @importFrom Seurat VariableFeatures
-#'
-#' @rdname UniformClusters
-
-genesSelector <- function(objCOTAN, genesSel, numGenes = 2000L) {
-  logThis("Running genes' selection: START", logLevel = 2L)
-
-  numGenes <- min(numGenes, getNumGenes(objCOTAN))
-  selectedGenes <- NULL
-
-  if (length(genesSel) > 1L) {
-    selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% genesSel]
-    logThis(paste("Given", length(selectedGenes), "genes as input"),
-            logLevel = 2L)
-  } else {
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-      gdi <- getGDI(objCOTAN)
-      if (is_empty(gdi)) {
-        gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
-                                            rowsFraction = 0.05), "GDI")
-      }
-      if (sum(gdi >= 1.5) > numGenes) {
-        selectedGenes <-
-          names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numGenes)]
-      } else {
-        selectedGenes <- names(gdi)[gdi >= 1.4]
-      }
-      rm(gdi)
-    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE) ||
-               str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
-      srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
-                                 project = "genes_selections")
-      srat <- NormalizeData(srat)
-
-      useVST <- str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)
-      srat <- FindVariableFeatures(
-        srat, nfeatures = numGenes,
-        selection.method = ifelse(useVST, "vst", "mean.var.plot"))
-
-      selectedGenes <- VariableFeatures(object = srat)
-    } else {
-      stop("Unrecognised `genesSel` passed in: ", genesSel)
-    }
-    logThis(paste("Selected", length(selectedGenes), "genes using",
-                  genesSel, "selector"), logLevel = 3L)
-  }
-
-  logThis("Running genes' selection: DONE", logLevel = 2L)
-
-  return(selectedGenes)
-}
-
-
 ### ------ Seurat Clustering -------
 
 #' @title Get a clusterization running the `Seurat` package
@@ -109,27 +29,25 @@ genesSelector <- function(objCOTAN, genesSel, numGenes = 2000L) {
 #' @param minNumClusters The minimum number of *clusters* expected from this
 #'   *clusterization*. In cases it is not reached, it will increase the
 #'   resolution of the *clusterization*
-#' @param genesSel Decides whether and how to perform the gene-selection. used
-#'   for the clustering. It is a string indicating one of the following
-#'   selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'   via the \pkg{Seurat} package (the default method)
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
-#'  @param numPCAComp the number of calculated **PCA** components
+#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
+#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
+#'   the data `matrix` to the selected genes before applying the `PCA` reduction
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
+#' @param genesSel Decides whether and how to perform the gene-selection
+#'   (defaults to `"HVG_Seurat"`). See [getSelectedGenes()] for more details.
+#' @param numGenes the number of genes to select using the above method. Will be
+#'   ignored when an explicit list of genes has been passed in
+#' @param numReducedComp the number of calculated **RDM** components
 #'
 #' @returns a list with:
 #'   * `"SeuratClusters"` a `Seurat` *clusterization*
-#'   * `"PCA"` the reduced data matrix
+#'   * `"CellsRDM"` the Reduced Data Matrix
 #'   * `"Resolution"` the used resolution
 #'   * `"UsedMaxResolution"` whether the maximum resolution has been reached
 #'
 #' @importFrom Seurat CreateSeuratObject
-#' @importFrom Seurat NormalizeData
-#' @importFrom Seurat ScaleData
-#' @importFrom Seurat Cells
-#' @importFrom Seurat RunPCA
+#' @importFrom Seurat CreateDimReducObject
 #' @importFrom Seurat FindNeighbors
 #' @importFrom Seurat FindClusters
 #' @importFrom Seurat Idents
@@ -138,32 +56,38 @@ genesSelector <- function(objCOTAN, genesSel, numGenes = 2000L) {
 #'
 #' @noRd
 #'
+
 seuratClustering <- function(objCOTAN,
-                             selectedGenes, numPCAComp = 25L,
-                             initialResolution, minNumClusters) {
+                             initialResolution, minNumClusters,
+                             useCoexEigen, dataMethod,
+                             genesSel, numGenes,
+                             numReducedComp) {
   tryCatch({
-    logThis("Creating Seurat object: START", logLevel = 2L)
+    logThis("Creating new clusterization: START", logLevel = 2L)
 
-    assert_that(all(selectedGenes %in% getGenes(objCOTAN)),
-                msg = "Passed genes' list is not compatible with the data")
+    assert_that(numReducedComp <= getNumGenes(objCOTAN))
 
+    numReducedCompToCalc <- numReducedComp + 15L
+    cellsRDM <- calculateReducedDataMatrix(
+      objCOTAN, useCoexEigen = useCoexEigen,
+      dataMethod = dataMethod, numComp = numReducedCompToCalc,
+      genesSel = genesSel, numGenes = numGenes)
+
+    assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
+                ncol(cellsRDM) <= numReducedCompToCalc,
+                msg = "Returned PCA matrix has wrong dimensions")
+
+    # Create the Seurat object
     srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
-                               project = "genes_selections")
-    srat <- NormalizeData(srat)
+                               project = "clusterization")
 
-    srat <- ScaleData(srat, features = selectedGenes)
+    # Add RDM manually
+    srat[["pca"]] <-
+      CreateDimReducObject(embeddings = cellsRDM,
+                           key = "PC_",
+                           assay = "RNA")
 
-    numPCAComp <- min(numPCAComp, length(Cells(srat)) - 1L)
-    srat <- RunPCA(
-      srat,
-      features = selectedGenes,
-      npcs = (numPCAComp + 15L), # extra comp to increase stability
-      seed.use = 137             # also passed down to irlba()
-    )
-
-    pca <- Embeddings(srat, reduction = "pca")  # matrix [cells x PCs]
-
-    srat <- FindNeighbors(srat, dims = seq_len(numPCAComp))
+    srat <- FindNeighbors(srat, dims = seq_len(numReducedComp))
 
     resolution <- initialResolution
     resolutionStep <- 0.5
@@ -183,7 +107,7 @@ seuratClustering <- function(objCOTAN,
       # the number of residual cells decrease and to stop clustering
       # if the algorithm has gone for too long
       usedMaxResolution <- (resolution + 0.1 * resolutionStep) > maxResolution
-      if (nlevels(seuratClusters) > minNumClusters || usedMaxResolution) {
+      if (nlevels(seuratClusters) >= minNumClusters || usedMaxResolution) {
         break
       }
 
@@ -197,22 +121,22 @@ seuratClustering <- function(objCOTAN,
     logThis(paste("Used resolution for Seurat clusterization is:", resolution),
             logLevel = 2L)
 
-    logThis("Creating Seurat object: DONE", logLevel = 2L)
+    logThis("Creating new clusterization: DONE", logLevel = 2L)
 
     rm(srat)
     gc()
 
     # returned objects
-    return(list("SeuratClusters" = seuratClusters, "PCA" = pca,
+    return(list("SeuratClusters" = seuratClusters, "CellsRDM" = cellsRDM,
                 "Resolution" = resolution,
                 "UsedMaxResolution" = usedMaxResolution))
   },
   error = function(e) {
-    logThis(msg = paste("Seurat clusterization failed with",
+    logThis(msg = paste("Clusterization failed with",
                         getNumCells(objCOTAN),
                         "cells with the following error:"), logLevel = 1L)
     logThis(msg = conditionMessage(e), logLevel = 1L)
-    return(list("SeuratClusters" = NULL, "PCA" = NULL,
+    return(list("SeuratClusters" = NULL, "CellsRDM" = NULL,
                 "Resolution" = NaN, "UsedMaxResolution" = FALSE))
   })
 }
@@ -253,14 +177,16 @@ seuratClustering <- function(objCOTAN,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param genesSel Decides whether and how to perform the gene-selection. used
-#'   for the clustering. It is a string indicating one of the following
-#'   selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'     via the \pkg{Seurat} package (the default method)
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
+#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
+#'   the data `matrix` to the selected genes before applying the `PCA` reduction
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
+#' @param genesSel Decides whether and how to perform the gene-selection
+#'   (defaults to `"HVG_Seurat"`). See [getSelectedGenes()] for more details.
+#' @param numGenes the number of genes to select using the above method. Will be
+#'   ignored when an explicit list of genes has been passed in
+#' @param numReducedComp the number of calculated **RDM** components
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param initialClusters an existing *clusterization* to use as starting point:
@@ -283,6 +209,7 @@ seuratClustering <- function(objCOTAN,
 #' @importFrom rlang set_names
 #' @importFrom rlang is_null
 #'
+#' @importFrom stringr str_equal
 #' @importFrom stringr str_detect
 #' @importFrom stringr str_pad
 #'
@@ -317,7 +244,11 @@ cellsUniformClustering <- function(objCOTAN,
                                    deviceStr = "cuda",
                                    useDEA = TRUE,
                                    distance = NULL,
+                                   useCoexEigen = FALSE,
+                                   dataMethod = "",
                                    genesSel = "HVG_Seurat",
+                                   numGenes = 2000L,
+                                   numReducedComp = 25L,
                                    hclustMethod = "ward.D2",
                                    initialClusters = NULL,
                                    initialIteration = 1L,
@@ -366,6 +297,10 @@ cellsUniformClustering <- function(objCOTAN,
                             "a legacy `GDIThreshold` must be given"))
   }
 
+  if (isEmptyName(dataMethod)) {
+    dataMethod = "LogNormalized"
+  }
+
   repeat {
     iter <- iter + 1L
 
@@ -378,7 +313,7 @@ cellsUniformClustering <- function(objCOTAN,
     cellsToDrop <- getCells(objCOTAN)[!is.na(outputClusters)]
     subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
+    if (str_equal(genesSel, "HGDI") || isTRUE(useCoexEigen)) {
       subObj <-
         proceedToCoex(subObj, calcCoex = TRUE, cores = cores,
                       optimizeForSpeed = optimizeForSpeed,
@@ -386,15 +321,15 @@ cellsUniformClustering <- function(objCOTAN,
                       saveObj = FALSE, outDir = outDirCond)
     }
 
-    selectedGenes <- genesSelector(subObj, genesSel = genesSel,
-                                   numGenes = 2000L)
-
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
-    c(testClusters, pca, resolution, usedMaxResolution) %<-%
-      seuratClustering(subObj, selectedGenes = selectedGenes, numPCAComp = 25L,
-                       initialResolution = initialResolution,
-                       minNumClusters = minNumClusters)
+    c(testClusters, cellsRDM, resolution, usedMaxResolution) %<-%
+      seuratClustering(subObj, initialResolution = initialResolution,
+                       minNumClusters = minNumClusters,
+                       useCoexEigen = useCoexEigen,
+                       dataMethod = dataMethod,
+                       numReducedComp = numReducedComp,
+                       genesSel = genesSel, numGenes = numGenes)
 
     if (is_null(testClusters)) {
       logThis(paste("NO new possible uniform clusters!",
@@ -409,13 +344,13 @@ cellsUniformClustering <- function(objCOTAN,
       logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
       pdf(outFile)
 
-      plot(UMAPPlot(dataIn = pca,
+      plot(UMAPPlot(dataIn = cellsRDM,
                     clusters = getCondition(subObj),
-                    title = paste0("Cells number: ", nrow(pca))))
+                    title = paste0("Cells number: ", nrow(cellsRDM))))
 
-      plot(UMAPPlot(dataIn = pca,
+      plot(UMAPPlot(dataIn = cellsRDM,
                     clusters = testClusters,
-                    title = paste0("Cells number: ", nrow(pca), "\n",
+                    title = paste0("Cells number: ", nrow(cellsRDM), "\n",
                                    "Cl. resolution: ", resolution)))
     }, error = function(err) {
       logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)

@@ -203,8 +203,7 @@ handleMultiCore <- function(cores) {
 canUseTorch <- function(optimizeForSpeed, deviceStr) {
   warnedAboutTorch <- !is.null(getOption("COTAN.TorchWarning"))
 
-  useTorch <- isTRUE(optimizeForSpeed) &&
-    requireNamespace("torch", quietly = TRUE)
+  useTorch <- isTRUE(optimizeForSpeed)
 
   if (useTorch) {
     # if torch is not explicitly opted-out, we try using it as
@@ -221,8 +220,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
     useTorch <- isTRUE(useTorchOpt)
 
     if (!useTorch && !warnedAboutTorch) {
-      warning("The `torch` library is installed,",
-              " but has been explicitly opted out")
+      warning("The `torch` library has been explicitly opted out")
       warning("In case you might try 'options(COTAN.UseTorch = TRUE)'",
               " to enable it")
       warnedAboutTorch <- TRUE
@@ -231,12 +229,12 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
 
   if (useTorch) {
     tryCatch({
+      if (!requireNamespace("torch", quietly = TRUE)) {
+        stop("The `torch` library is not installed")
+      }
       if (!torch::torch_is_installed()) {
         stop("The `torch` library is installed but the required",
              " additional libraries are not avalable yet")
-      }
-      if (!require("torch", character.only = TRUE)) {
-        stop("The `torch` library is installed but cannot be loaded")
       }
       # Call a simple torch function to check if it's working
       if (is.null(torch::torch_tensor(1L))) {
@@ -258,7 +256,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
   }
 
   if (useTorch) {
-    # Device configuration - fall-back to cpu if no cuda device is available
+    # Device configuration - fall-back to `cpu` if no `cuda` device is available
     if (startsWith(deviceStr, "cuda") && !torch::cuda_is_available()) {
       if (!warnedAboutTorch) {
         warning("The `torch` library could not find any `CUDA` device")
@@ -963,7 +961,7 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   return(basicTheme)
 }
 
-#' @title getColorsVector
+#' @title `getColorsVector`
 #'
 #' @description This function returns a list of colors based on the
 #'   [RColorBrewer::brewer.pal()] function

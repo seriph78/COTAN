@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.R
 \name{getColorsVector}
 \alias{getColorsVector}
-\title{getColorsVector}
+\title{\code{getColorsVector}}
 \usage{
 getColorsVector(numNeededColors = 0L)
 }

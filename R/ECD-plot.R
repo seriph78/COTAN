@@ -1,8 +1,8 @@
 
 
-#' @details `ECDPlot()` plots the empirical distribution function of library
-#'   sizes (UMI number). It helps to define where to drop "cells" that are
-#'   simple background signal.
+#' @details `ECDPlot()` plots the *Empirical Cumulative Distribution* function
+#'   of library sizes (`UMI` number). It helps to define where to drop "cells"
+#'   that are simple background signal.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param yCut y threshold of library size to drop. Default is `NaN`
@@ -13,7 +13,7 @@
 #'   on the one indicated by `condName` that will only indicate the relevant
 #'   column name in the returned `data.frame`
 #'
-#' @returns `ECDPlot()` returns an ECD plot
+#' @returns `ECDPlot()` returns an `ECD` plot
 #'
 #' @importFrom ggplot2 ggplot
 #' @importFrom ggplot2 geom_point

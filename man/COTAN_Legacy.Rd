@@ -88,7 +88,7 @@ matrix. It will forcibly make its argument symmetric.
 \item{\code{raw.norm}}{\code{ANY}. To store the raw data matrix divided for the cell
 efficiency estimated (nu)}
 
-\item{\code{coex}}{\code{ANY}. The coex matrix}
+\item{\code{coex}}{\code{ANY}. The \code{COEX} matrix}
 
 \item{\code{nu}}{\code{vector}.}
 

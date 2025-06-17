@@ -35,6 +35,8 @@
 #' @importFrom ggrepel geom_text_repel
 #' @importFrom ggrepel geom_label_repel
 #'
+#' @importFrom dplyr filter
+#'
 #' @importFrom stats quantile
 #'
 #' @importFrom rlang set_names
@@ -94,12 +96,15 @@ GDIPlot <- function(objCOTAN, genes, condition = "",
   }
   title <- paste0("GDI plot - ", condition)
 
-  plot <- ggplot(subset(GDIDf, colors == "none"),
+  df_none <- filter(GDIDf, .data$colors == "none")
+  df_col  <- filter(GDIDf, .data$colors != "none")
+
+  plot <- ggplot(df_none,
                  aes(x = .data$sum.raw.norm, y = .data$GDI)) +
           geom_point(alpha = 0.3, color = "#8491B4B2", size = 2.5) +
-          geom_point(data = subset(GDIDf, colors != "none"),
+          geom_point(data = df_col,
                      aes(x = .data$sum.raw.norm, y = .data$GDI,
-                         colour = colors),
+                         colour = .data$colors),
                      size = 2.5, alpha = 0.8) +
           geom_hline(yintercept = quantile(GDIDf[["GDI"]])[[4L]],
                      linetype = "dashed", color = "darkblue") +
@@ -113,7 +118,7 @@ GDIPlot <- function(objCOTAN, genes, condition = "",
           ylab("GDI") +
           geom_label_repel(data = GDIDf[labelledGenes, ],
                            aes(x = .data$sum.raw.norm, y = .data$GDI,
-                               fill = colors),
+                               fill = .data$colors),
                            label = rownames(GDIDf)[labelledGenes],
                            label.size = NA, max.overlaps = 40L, alpha = 0.8,
                            direction = "both", na.rm = TRUE, seed = 1234L) +

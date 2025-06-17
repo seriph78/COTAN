@@ -890,8 +890,11 @@ NULL
 #' partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
 #'                                          actOnCells = FALSE)
 #'
-#' identical(partialGenesCoex,
-#'           getGenesCoex(objCOTAN, getGenes(objCOTAN)[sort(genesSample)]))
+#' stopifnot(all(1e-6 >
+#'                 abs(partialGenesCoex -
+#'                       getGenesCoex(objCOTAN,
+#'                                    getGenes(objCOTAN)[sort(genesSample)],
+#'                                    zeroDiagonal = FALSE))))
 #'
 #' ## S <- calculateS(objCOTAN)
 #' ## G <- calculateG(objCOTAN)
@@ -919,13 +922,14 @@ NULL
 #'
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 #' stopifnot(isCoexAvailable(objCOTAN, actOnCells = TRUE, ignoreSync = TRUE))
-#' cellsCoex <- getCellsCoex(objCOTAN)
+#' cellsCoex <- getCellsCoex(objCOTAN, zeroDiagonal = FALSE)
 #'
 #' cellsSample <- sample(getNumCells(objCOTAN), 10)
 #' partialCellsCoex <- calculatePartialCoex(objCOTAN, cellsSample,
 #'                                          actOnCells = TRUE)
 #'
-#' identical(partialCellsCoex, cellsCoex[, sort(cellsSample)])
+#' stopifnot(all(1e-6 >
+#'                 abs(partialCellsCoex - cellsCoex[, sort(cellsSample)])))
 #'
 #' objCOTAN <- dropCellsCoex(objCOTAN)
 #' stopifnot(!isCoexAvailable(objCOTAN, actOnCells = TRUE))
@@ -941,7 +945,7 @@ setMethod(
 
     if (is_empty(genes)) {
       assert_that(coexIsReady,
-                  msg = paste0("Cannot return genes' coex as the matrix was ",
+                  msg = paste0("Cannot return genes' COEX as the matrix was ",
                                "never calculated or is out-of-sync with the ",
                                "estimators."))
 
@@ -957,7 +961,7 @@ setMethod(
       ret <- objCOTAN@genesCoex
 
       if (!coexIsReady) {
-        warning("Missing or out-of-sync genes' coex:",
+        warning("Missing or out-of-sync genes' COEX:",
                 "calculating the required subset now!")
         ret <- calculatePartialCoex(objCOTAN, columnsSubset = genes,
                                     actOnCells = FALSE)
@@ -1006,7 +1010,7 @@ setMethod(
 
     if (is_empty(cells)) {
       assert_that(coexIsReady,
-                  msg = paste0("Cannot return cells' coex as the matrix was ",
+                  msg = paste0("Cannot return cells' COEX as the matrix was ",
                                "never calculated or is out-of-sync with the ",
                                "estimators."))
 
@@ -1022,7 +1026,7 @@ setMethod(
       ret <- objCOTAN@cellsCoex
 
       if (!coexIsReady) {
-        warning("Missing or out-of-sync cells' coex:",
+        warning("Missing or out-of-sync cells' COEX:",
                 "calculating the required subset now!")
         ret <- calculatePartialCoex(objCOTAN, columnsSubset = cells,
                                     actOnCells = TRUE)
@@ -1081,12 +1085,12 @@ setMethod(
 
 #' @aliases getGDI
 #'
-#' @details `getGDI()` extracts the genes' **GDI** array as it was stored by the
+#' @details `getGDI()` extracts the genes' `GDI` array as it was stored by the
 #'   method [storeGDI()]
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getGDI()` returns the genes' **GDI** array if available or `NULL`
+#' @returns `getGDI()` returns the genes' `GDI`` array if available or `NULL`
 #'   otherwise
 #'
 #' @importFrom rlang is_empty
@@ -1119,7 +1123,7 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param dropNoCoex When `TRUE` drops the names from the *clusterizations* with
-#'   empty associated coex `data.frame`
+#'   empty associated `COEX` `data.frame`
 #' @param keepPrefix When `TRUE` returns the internal name of the
 #'   *clusterization*: the one with the `CL_` prefix.
 #'
@@ -1406,7 +1410,9 @@ NULL
 #' names(cellLine) <- getCells(objCOTAN)
 #' objCOTAN <- addCondition(objCOTAN, condName = "Line", conditions = cellLine)
 #'
-#' ##objCOTAN <- dropCondition(objCOTAN, "Genre")
+#' if (FALSE) {
+#'   objCOTAN <- dropCondition(objCOTAN, "Genre")
+#' }
 #'
 #' conditionsNames <- getAllConditions(objCOTAN)
 #'

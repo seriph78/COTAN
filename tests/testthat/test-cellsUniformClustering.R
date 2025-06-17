@@ -12,15 +12,30 @@ test_that("Cell Uniform Clustering", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, calcCoex = FALSE,
+  obj <- proceedToCoex(obj, calcCoex = TRUE,
                        cores = 6L, saveObj = TRUE, outDir = tm)
 
-  GDIThreshold <- 1.46
   initialResolution <- 0.8
+  c(sClusters, cellsRDM, resolution, usedMaxResolution) %<-%
+    seuratClustering(obj, initialResolution = initialResolution,
+                     minNumClusters = 3L, useCoexEigen = TRUE,
+                     dataMethod = "SignLogL", numReducedComp = 25L,
+                     genesSel = "", numGenes = -1L) #irrelevant inputs
+
+  expect_identical(nlevels(sClusters), 5L)
+  expect_identical(as.vector(table(sClusters)), c(360L, 252L, 213L, 192L, 183L))
+  expect_identical(dim(cellsRDM), c(1200L, 25L + 15L))
+  expect_identical(resolution, 1.3)
+  expect_identical(usedMaxResolution, FALSE)
+
+  GDIThreshold <- 1.46
   suppressWarnings({
     c(clusters, coexDF) %<-%
       cellsUniformClustering(obj, GDIThreshold = GDIThreshold,
                              initialResolution = initialResolution,
+                             dataMethod = "LogNormalized", useCoexEigen = FALSE,
+                             genesSel = "HVG_Seurat", numGenes = 2000L,
+                             numReducedComp = 25L,
                              cores = 6L, optimizeForSpeed = TRUE,
                              deviceStr = "cuda", saveObj = TRUE, outDir = tm)
   })
