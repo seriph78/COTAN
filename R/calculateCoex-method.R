@@ -1615,16 +1615,11 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
                                           rowsFraction = 0.05), "GDI")
     }
 
-    sortedCandidates <- NULL
-    if (sum(gdi >= 1.5) > numGenes) {
-      sortedCandidates <- names(gdi)[order(gdi, decreasing = TRUE)]
-    } else {
-      sortedCandidates <- names(gdi)[gdi >= 1.4]
-      sortedCandidates <-
-        sortedCandidates[order(gdi[sortedCandidates], decreasing = TRUE)]
-      if (length(sortedCandidates) < numGenes) {
-        return(sortedCandidates)
-      }
+    sortedCandidates <- names(gdi)[order(gdi, decreasing = TRUE)]
+    if (gdi[sortedCandidates[numGenes]] < 1.3) {
+      numLowGDIGenes <- sum(gdi[sortedCandidates[seq_len(numGenes)]] <1.3)
+      logThis(paste("Included", numLowGDIGenes, "genes with GDI below 1.3"),
+              logLevel = 1L)
     }
     return(sortedCandidates[seq_len(numGenes)])
   }
