@@ -1,3 +1,4 @@
+## 2.8.3
 
 Fixed issue with function `genesSelector()` in cases when asked for `HGDI`
 selection and dataset `GDI` is low overall: it was returning too few and,
