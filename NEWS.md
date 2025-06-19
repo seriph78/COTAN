@@ -1,3 +1,8 @@
+
+Fixed issue with function `genesSelector()` in cases when asked for `HGDI`
+selection and dataset `GDI` is low overall: it was returning too few and,
+in some cases, even no genes
+
 ## 2.8.2
 
 Solved issues with breaking changes from `zeallot` package

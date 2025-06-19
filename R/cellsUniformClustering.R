@@ -56,17 +56,20 @@ genesSelector <- function(objCOTAN, genesSel, numGenes = 2000L) {
             logLevel = 2L)
   } else {
     if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-      gdi <- getGDI(objCOTAN)
+      gdi <- suppressWarnings(getGDI(objCOTAN))
       if (is_empty(gdi)) {
         gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
                                             rowsFraction = 0.05), "GDI")
       }
-      if (sum(gdi >= 1.5) > numGenes) {
-        selectedGenes <-
-          names(gdi)[order(gdi, decreasing = TRUE)][seq_len(numGenes)]
-      } else {
-        selectedGenes <- names(gdi)[gdi >= 1.4]
+
+      sortedCandidates <- names(gdi)[order(gdi, decreasing = TRUE)]
+      if (gdi[sortedCandidates[numGenes]] < 1.3) {
+        numLowGDIGenes <- sum(gdi[sortedCandidates[seq_len(numGenes)]] <1.3)
+        logThis(paste("Included", numLowGDIGenes, "genes with GDI below 1.3"),
+                logLevel = 1L)
       }
+      selectedGenes <- sortedCandidates[seq_len(numGenes)]
+
       rm(gdi)
     } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE) ||
                str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
