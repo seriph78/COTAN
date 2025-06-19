@@ -38,6 +38,7 @@ lambdaNewton(
   avgNumNonZeros,
   avgCounts,
   nu,
+  zeroPi,
   threshold = 1e-04,
   maxIterations = 100L
 )
@@ -47,6 +48,7 @@ parallelLambdaNewton(
   avgNumNonZeros,
   avgCounts,
   nu,
+  zeroPi,
   threshold = 0.001,
   maxIterations = 100L
 )
@@ -97,6 +99,9 @@ gene (a \eqn{n}-sized vector)}
 \eqn{n}-sized vector)}
 
 \item{avgCounts}{the average expression of the gene  (a \eqn{n}-sized vector)}
+
+\item{zeroPi}{whether this genes is a special case where \eqn{p \equiv 0} and
+only the zero probability marginals are calibrated (a \eqn{n}-sized vector)}
 
 \item{initialGuess}{the initial guess for \code{nu}  (a \eqn{m}-sized vector)}
 

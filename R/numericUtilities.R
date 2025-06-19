@@ -293,6 +293,8 @@ parallelDispersionBisection <-
 #' @param avgNumNonZeros the average number of cells that express the gene
 #' @param avgCounts the average expression of the gene
 #' @param nu the estimated `nu` (a \eqn{m}-sized vector)
+#' @param zeroPi whether this genes is a special case where \eqn{p \equiv 0} and
+#'   only the zero probability marginals are calibrated
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
@@ -304,13 +306,9 @@ lambdaNewton <-
   function(avgNumNonZeros,
            avgCounts,
            nu,
+           zeroPi,
            threshold = 0.0001,
            maxIterations = 100L) {
-    if (avgNumNonZeros == 1.0 || abs(avgNumNonZeros - avgCounts) < 1e-6) {
-      # no zero counts or only counts with 0L and 1L
-      return(avgCounts)
-    }
-
     #initial guess
     ratio <- avgNumNonZeros / avgCounts
     lambda <- 1.0 / ratio
@@ -323,8 +321,11 @@ lambdaNewton <-
 
       avgExpMu <- mean(expMu)
 
-
-      diff <- (1.0 - avgExpMu - lambda * ratio)
+      if (zeroPi) {
+        diff <- (1.0 - avgExpMu - avgNumNonZeros)
+      } else {
+        diff <- (1.0 - avgExpMu - lambda * ratio)
+      }
 
       #pi <- ifelse(lambda == 0.0, 0.0, 1.0 - avgCounts / lambda)
       #print(paste0(iter, ": diff ", diff/lambda, ", lambda ", lambda,
@@ -341,8 +342,14 @@ lambdaNewton <-
              "while finding the solution straddling intervals")
       }
 
+      avgMuExpMu <- mean(mu * expMu)
+
       #update lambda
-      fact <- 1.0 + diff / (1.0 - avgExpMu - mean(mu * expMu))
+      if (zeroPi) {
+        fact <- diff / avgMuExpMu - 1.0
+      } else {
+        fact <- 1.0 + diff / (1.0 - avgExpMu - avgMuExpMu)
+      }
       #print(paste0(iter, ": factor ", fact, ", lambda ", lambda))
 
       iter <- iter + 1L
@@ -373,6 +380,8 @@ lambdaNewton <-
 #'   \eqn{n}-sized vector)
 #' @param avgCounts the average expression of the gene  (a \eqn{n}-sized vector)
 #' @param nu the estimated `nu` (a \eqn{m}-sized vector)
+#' @param zeroPi whether this genes is a special case where \eqn{p \equiv 0} and
+#'   only the zero probability marginals are calibrated (a \eqn{n}-sized vector)
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #'
@@ -389,24 +398,19 @@ parallelLambdaNewton <-
            avgNumNonZeros,
            avgCounts,
            nu,
+           zeroPi,
            threshold = 0.001,
            maxIterations = 100L) {
     avgNumNonZeros <- avgNumNonZeros[genes]
     avgCounts <- avgCounts[genes]
+    zeroPi <- zeroPi[genes]
 
     # in some cases (no zero counts or only counts with 0L and 1L) we cannot
     # match exactly the prob of zero so we return the mean
     output <- avgCounts
 
-    goodPos <- (avgNumNonZeros != 1.0 & abs(avgNumNonZeros - avgCounts) > 1e-6)
-
-    if (all(!goodPos)) {
-      # only exceptional cases
-      return(output)
-    }
-
     #initial guess
-    ratio <- avgNumNonZeros[goodPos] / avgCounts[goodPos]
+    ratio <- avgNumNonZeros / avgCounts
     lambda <- 1.0 / ratio
 
     # Newton-Raphson loop
@@ -424,9 +428,13 @@ parallelLambdaNewton <-
       mu <- mu * expMu
       avgMuExpMu <- rowmeans(mu)
 
-      tmp2 <- (1.0 - avgExpMu - lambda1 * ratio[runPos])
+      if (any(zeroPi)) {
+        stop("still unsupported")
+      } else {
+        tmp2 <- (1.0 - avgExpMu - lambda1 * ratio[runPos])
 
-      diff[runPos] <- tmp2 / lambda1
+        diff[runPos] <- tmp2 / lambda1
+      }
 
       runPos1 <- abs(diff) > threshold
       if (all(!runPos1)) {
@@ -439,12 +447,17 @@ parallelLambdaNewton <-
       iter <- iter + 1L
 
       #update lambda
-      tmp1[runPos] <- lambda1 * (1.0 + tmp2 / (1.0 - avgExpMu - avgMuExpMu))
+      if (any(zeroPi)) {
+        stop("still unsupported")
+      } else {
+        tmp1[runPos] <- lambda1 * (1.0 + tmp2 / (1.0 - avgExpMu - avgMuExpMu))
+      }
+
       runPos <- runPos1
       lambda[runPos] <- tmp1[runPos]
     }
 
-    output[goodPos] <- lambda
+    output <- lambda
     return(output)
   }
 

@@ -376,8 +376,8 @@ setMethod(
 ## ---- estimateLambdaPiNewton ----
 
 # local utility wrapper for parallel estimation of lambda in the mixture model
-runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts, nu,
-                            threshold, maxIterations, cores) {
+runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts,
+                            nu, zeroPi, threshold, maxIterations, cores) {
   if (cores != 1L) {
     res <- parallel::mclapply(
       genesBatches,
@@ -385,6 +385,7 @@ runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts, nu,
       avgNumNonZeros = avgNumNonZeros,
       avgCounts = avgCounts,
       nu = nu,
+      zeroPi = zeroPi,
       threshold = threshold,
       maxIterations = maxIterations,
       mc.cores = cores)
@@ -401,6 +402,7 @@ runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts, nu,
       avgNumNonZeros = avgNumNonZeros,
       avgCounts = avgCounts,
       nu = nu,
+      zeroPi = zeroPi,
       threshold = threshold,
       maxIterations = maxIterations))
   }
@@ -463,6 +465,8 @@ setMethod(
 
     avgNumNonZeros <- getNumOfExpressingCells(objCOTAN) / getNumCells(objCOTAN)
     avgCounts <- rowMeans(getRawData(objCOTAN), dims = 1L)
+    zeroPi <- (abs(avgCounts - avgNumNonZeros) < 1.0e-6) |
+      (avgNumNonZeros > 1.0 - rowMeans(exp(-(avgCounts %o% nu))))
 
     lambdaList <- list()
 
@@ -497,6 +501,7 @@ setMethod(
                                         avgNumNonZeros = avgNumNonZeros,
                                         avgCounts = avgCounts,
                                         nu = nu,
+                                        zeroPi = zeroPi,
                                         threshold = threshold,
                                         maxIterations = maxIterations,
                                         cores = cores), NULL),
@@ -518,6 +523,7 @@ setMethod(
     gc()
 
     lambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
+
     pi <- ifelse(lambda == 0.0, 0.0, 1.0 - avgCounts / lambda)
     pi <- set_names(pi, getGenes(objCOTAN))
 
