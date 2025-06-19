@@ -1,5 +1,9 @@
 ## 2.9.3
 
+Fixed issue with function `getSelectedGenes()` in cases when asked for `HGDI`
+selection and dataset `GDI` is low overall: it was returning too few and,
+in some cases, even no genes
+
 Added possibility to choose which data matrix to use for clusterizations and
 `UMAP` plots. Also now it is possible to use a projection onto the main `COEX`
 matrix eigen-vectors as alternative to the `PCA` as dimensionality reduction

@@ -179,6 +179,7 @@ test_that("COTAN getters", {
   ## strings are case sensitive
   expect_error(getDataMatrix(obj, dataMethod = "signLogl"))
 
+  expect_message(getSelectedGenes(obj))
   expect_identical(getSelectedGenes(obj),
                    getSelectedGenes(obj, genesSel = "HGDI", numGenes = 2000L))
 
