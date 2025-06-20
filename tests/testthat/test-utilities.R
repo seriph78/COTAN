@@ -226,23 +226,24 @@ test_that("lambdaNewton", {
   nu <- rep(c(0.5, 1.5), 5L)
   avgNumNonZeros <- c(0.0, 0.1, 0.4, 0.6, 0.8,  1.0)
   avgCounts      <- c(0.0, 0.1, 1.0, 1.3, 3.0, 10.0)
+  zeroPi <- (avgNumNonZeros == 1.0 | avgNumNonZeros == avgCounts)
 
-  lambda <- mapply(lambdaNewton, avgNumNonZeros, avgCounts,
+  lambda <- mapply(lambdaNewton,
+                   avgNumNonZeros = avgNumNonZeros,
+                   avgCounts = avgCounts,
+                   zeroPi = zeroPi,
                    MoreArgs = list(nu = nu))
 
-  expect_equal(lambda, c(0.0, 0.1, 1.967160, 1.569549, 3.394932, 10.0),
+  expect_equal(lambda, c(0.0, 0.1067852, 1.9671601, 1.5695487, 3.3949319, +Inf),
                tolerance = 1e-6)
 
-  pi <- ifelse(lambda == 0.0, 0.0, 1.0 - avgCounts / lambda)
+  pi <- ifelse(zeroPi, 0.0, 1.0 - avgCounts / lambda)
 
-  piError <- avgNumNonZeros - 1.0 +
-    rowSums(funProbZeroMixPoi(pi, lambda %o% nu)) / 10.0
+  piError <- avgNumNonZeros -
+    (1.0 - rowSums(funProbZeroMixPoi(pi, lambda %o% nu)) / 10.0)
 
-  expect_identical(piError[1L], 0.0)
-  expect_gt(min(piError[c(2L, 6L)]), 0.0)
-  expect_lt(max(piError[c(2L, 6L)]), 1.0e-2)
-  expect_lt(max(piError[3L:5L]), 0.0)
-  expect_gt(min(piError[3L:5L]), -5.0e-5)
+  expect_identical(piError[c(1L, 6L)], c(0.0, 0.0))
+  expect_lt(max(abs(piError[2L:5L])), 5.0e-5)
 })
 
 

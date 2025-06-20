@@ -312,10 +312,18 @@ lambdaNewton <-
            threshold = 0.0001,
            maxIterations = 100L) {
     assert_that(avgNumNonZeros != 1.0 || zeroPi,
+                avgNumNonZeros != avgCounts || zeroPi,
                 msg = "Inconsistent `zeroPi` given")
-
-    if (zeroPi && avgNumNonZeros == 1.0) {
-      return(+Inf)
+    # handle boundary cases
+    if (zeroPi) {
+      if (avgNumNonZeros == 1.0) {
+        return(+Inf)
+      }
+      if (avgNumNonZeros == 0.0) {
+        assert_that(avgCounts == 0.0,
+                    msg = "Inconsistent `avgCounts` given")
+        return(0.0)
+      }
     }
 
     #initial guess
@@ -331,13 +339,15 @@ lambdaNewton <-
       avgExpMu <- mean(expMu)
 
       if (zeroPi) {
-        diff <- (1.0 - avgExpMu - avgNumNonZeros)
+        tmp1 <- (1.0 - avgExpMu - avgNumNonZeros)
       } else {
-        diff <- (1.0 - avgExpMu - lambda * ratio)
+        tmp1 <- (1.0 - avgExpMu - lambda * ratio)
       }
 
-      #pi <- ifelse(lambda == 0.0, 0.0, 1.0 - avgCounts / lambda)
-      #print(paste0(iter, ": diff ", diff/lambda, ", lambda ", lambda,
+      diff <- tmp1 / lambda
+
+      # pi <- ifelse(zeroPi, 0.0, 1.0 - avgCounts / lambda)
+      # print(paste0(iter, ": diff ", diff/lambda, ", lambda ", lambda,
       #             ", mean error ", (1.0 - pi) * lambda - avgCounts,
       #             ", prob zero error ",
       #             (1.0 - pi) * (1 - avgExpMu) - avgNumNonZeros))
@@ -355,15 +365,18 @@ lambdaNewton <-
 
       #update lambda
       if (zeroPi) {
-        fact <- diff / avgMuExpMu - 1.0
+        fact <- 1.0 - tmp1 / avgMuExpMu
       } else {
-        fact <- 1.0 + diff / (1.0 - avgExpMu - avgMuExpMu)
+        fact <- 1.0 + tmp1 / (1.0 - avgExpMu - avgMuExpMu)
       }
-      #print(paste0(iter, ": factor ", fact, ", lambda ", lambda))
+
+      # print(paste0(iter, ": factor ", fact, ", lambda ", lambda))
 
       iter <- iter + 1L
       lambda <- lambda * fact
     }
+
+    return(lambda)
   }
 
 
@@ -415,16 +428,24 @@ parallelLambdaNewton <-
     zeroPi <- zeroPi[genes]
 
     assert_that(all(avgNumNonZeros != 1.0 | zeroPi),
+                all(avgNumNonZeros != avgCounts | zeroPi),
                 msg = "Inconsistent `zeroPi` given")
 
-    # `avgNumNonZeros == 1.0` implies `lambda == +Inf`
-    runPos <- avgNumNonZeros != 1.0
+    # handle boundary cases
+    output <- rep_along(avgCounts, NaN)
 
-    # in some cases (no zero counts or only counts with 0L and 1L) we cannot
-    # match exactly the prob of zero so we return the mean
-    output[!runPos] <- +Inf
+    noZeros <- avgNumNonZeros == 1.0
+    output[noZeros] <- +Inf
 
-    if (all(!runPos)) {
+    assert_that(identical(avgNumNonZeros == 0.0, avgCounts == 0.0),
+                msg = "Inconsistent `avgCounts` given")
+
+    onlyZeros <- avgNumNonZeros == 0.0
+    output[onlyZeros] <- 0.0
+
+    goodPos <- !(noZeros | onlyZeros)
+
+    if (all(!goodPos)) {
       return(output)
     }
 
@@ -432,11 +453,10 @@ parallelLambdaNewton <-
     ratio <- avgNumNonZeros / avgCounts
     lambda <- 1.0 / ratio
 
-    output[runPos] <- lambda[runPos]
-
     # Newton-Raphson loop
-    diff <- rep_along(lambda, NaN)
-    tmp2 <- rep_along(lambda, NaN)
+    runPos <- goodPos
+    scaledDiff <- rep_along(runPos, NaN)
+    tmp2 <- rep_along(runPos, NaN)
     iter <- 1L
     repeat {
       lambda1 <- lambda[runPos]
@@ -454,9 +474,9 @@ parallelLambdaNewton <-
       tmp1[!zeroPi] <- (1.0 - avgExpMu[!zeroPi1] -
                           lambda1[!zeroPi1] * ratio[runPos][!zeroPi1])
 
-      diff[runPos] <- (tmp1 / lambda1)
+      scaledDiff[runPos] <- (tmp1 / lambda1)
 
-      runPos1 <- abs(diff) > threshold
+      runPos1 <- abs(scaledDiff) > threshold
       if (all(!runPos1)) {
         break
       }
@@ -468,17 +488,17 @@ parallelLambdaNewton <-
 
       # update lambda
       tmp2[runPos][ zeroPi1] <-
-        lambda1[ zeroPi1] * (-1.0 + tmp1[ zeroPi1] / avgMuExpMu[zeroPi1])
+        lambda1[ zeroPi1] * (1.0 - tmp1[ zeroPi1] / avgMuExpMu[zeroPi1])
       tmp2[runPos][!zeroPi1] <-
-        lambda1[!zeroPi1] * ( 1.0 + tmp1[!zeroPi1] / (1.0 - avgExpMu[!zeroPi1] -
-                                                       avgMuExpMu[!zeroPi1]))
+        lambda1[!zeroPi1] * (1.0 + tmp1[!zeroPi1] / (1.0 - avgExpMu[!zeroPi1] -
+                                                      avgMuExpMu[!zeroPi1]))
 
       # update only the lambda not already OK
       runPos <- runPos1
       lambda[runPos] <- tmp2[runPos]
     }
 
-    output <- lambda
+    output[goodPos] <- lambda[goodPos]
     return(output)
   }
 
