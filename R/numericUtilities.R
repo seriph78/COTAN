@@ -300,6 +300,8 @@ parallelDispersionBisection <-
 #'
 #' @returns `lambdaNewton()` returns the lambda value
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @rdname NumericUtilities
 #'
 lambdaNewton <-
@@ -309,6 +311,13 @@ lambdaNewton <-
            zeroPi,
            threshold = 0.0001,
            maxIterations = 100L) {
+    assert_that(avgNumNonZeros != 1.0 || zeroPi,
+                msg = "Inconsistent `zeroPi` given")
+
+    if (zeroPi && avgNumNonZeros == 1.0) {
+      return(+Inf)
+    }
+
     #initial guess
     ratio <- avgNumNonZeros / avgCounts
     lambda <- 1.0 / ratio
@@ -359,8 +368,6 @@ lambdaNewton <-
 
 
 
-
-
 #'
 #' @returns `lambdaNewton()` returns the lambda value
 #'
@@ -391,6 +398,8 @@ lambdaNewton <-
 #'
 #' @importFrom rlang rep_along
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @rdname NumericUtilities
 #'
 parallelLambdaNewton <-
@@ -405,21 +414,33 @@ parallelLambdaNewton <-
     avgCounts <- avgCounts[genes]
     zeroPi <- zeroPi[genes]
 
+    assert_that(all(avgNumNonZeros != 1.0 | zeroPi),
+                msg = "Inconsistent `zeroPi` given")
+
+    # `avgNumNonZeros == 1.0` implies `lambda == +Inf`
+    runPos <- avgNumNonZeros != 1.0
+
     # in some cases (no zero counts or only counts with 0L and 1L) we cannot
     # match exactly the prob of zero so we return the mean
-    output <- avgCounts
+    output[!runPos] <- +Inf
+
+    if (all(!runPos)) {
+      return(output)
+    }
 
     #initial guess
     ratio <- avgNumNonZeros / avgCounts
     lambda <- 1.0 / ratio
 
+    output[runPos] <- lambda[runPos]
+
     # Newton-Raphson loop
-    runPos <- rep_along(lambda, TRUE)
     diff <- rep_along(lambda, NaN)
-    tmp1 <- rep_along(lambda, NaN)
+    tmp2 <- rep_along(lambda, NaN)
     iter <- 1L
     repeat {
       lambda1 <- lambda[runPos]
+      zeroPi1 <- zeroPi[runPos]
 
       mu <- lambda1 %o% nu
       expMu <- exp(-mu)
@@ -428,13 +449,12 @@ parallelLambdaNewton <-
       mu <- mu * expMu
       avgMuExpMu <- rowmeans(mu)
 
-      if (any(zeroPi)) {
-        stop("still unsupported")
-      } else {
-        tmp2 <- (1.0 - avgExpMu - lambda1 * ratio[runPos])
+      tmp1 <- rep_along(lambda1, NaN)
+      tmp1[ zeroPi] <- (1.0 - avgExpMu[ zeroPi1] - avgNumNonZeros[zeroPi1])
+      tmp1[!zeroPi] <- (1.0 - avgExpMu[!zeroPi1] -
+                          lambda1[!zeroPi1] * ratio[runPos][!zeroPi1])
 
-        diff[runPos] <- tmp2 / lambda1
-      }
+      diff[runPos] <- (tmp1 / lambda1)
 
       runPos1 <- abs(diff) > threshold
       if (all(!runPos1)) {
@@ -446,15 +466,16 @@ parallelLambdaNewton <-
       }
       iter <- iter + 1L
 
-      #update lambda
-      if (any(zeroPi)) {
-        stop("still unsupported")
-      } else {
-        tmp1[runPos] <- lambda1 * (1.0 + tmp2 / (1.0 - avgExpMu - avgMuExpMu))
-      }
+      # update lambda
+      tmp2[runPos][ zeroPi1] <-
+        lambda1[ zeroPi1] * (-1.0 + tmp1[ zeroPi1] / avgMuExpMu[zeroPi1])
+      tmp2[runPos][!zeroPi1] <-
+        lambda1[!zeroPi1] * ( 1.0 + tmp1[!zeroPi1] / (1.0 - avgExpMu[!zeroPi1] -
+                                                       avgMuExpMu[!zeroPi1]))
 
+      # update only the lambda not already OK
       runPos <- runPos1
-      lambda[runPos] <- tmp1[runPos]
+      lambda[runPos] <- tmp2[runPos]
     }
 
     output <- lambda
