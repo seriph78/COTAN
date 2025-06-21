@@ -344,15 +344,9 @@ lambdaNewton <-
         tmp1 <- (1.0 - avgExpMu - lambda * ratio)
       }
 
-      diff <- tmp1 / lambda
+      relDiff <- (tmp1 / lambda) / lambda
 
-      # pi <- ifelse(zeroPi, 0.0, 1.0 - avgCounts / lambda)
-      # print(paste0(iter, ": diff ", diff/lambda, ", lambda ", lambda,
-      #             ", mean error ", (1.0 - pi) * lambda - avgCounts,
-      #             ", prob zero error ",
-      #             (1.0 - pi) * (1 - avgExpMu) - avgNumNonZeros))
-
-      if (abs(diff / lambda) <= threshold) {
+      if (abs(relDiff) <= threshold) {
         return(lambda)
       }
 
@@ -421,7 +415,7 @@ parallelLambdaNewton <-
            avgCounts,
            nu,
            zeroPi,
-           threshold = 0.001,
+           threshold = 0.0001,
            maxIterations = 100L) {
     avgNumNonZeros <- avgNumNonZeros[genes]
     avgCounts <- avgCounts[genes]
@@ -450,12 +444,13 @@ parallelLambdaNewton <-
     }
 
     #initial guess
-    ratio <- avgNumNonZeros / avgCounts
+    ratio <- rep_along(avgCounts, 1.0)
+    ratio[goodPos] <- avgNumNonZeros[goodPos] / avgCounts[goodPos]
     lambda <- 1.0 / ratio
 
     # Newton-Raphson loop
     runPos <- goodPos
-    scaledDiff <- rep_along(runPos, NaN)
+    relDiff <- rep_along(runPos, 0.0)
     tmp2 <- rep_along(runPos, NaN)
     iter <- 1L
     repeat {
@@ -470,13 +465,14 @@ parallelLambdaNewton <-
       avgMuExpMu <- rowmeans(mu)
 
       tmp1 <- rep_along(lambda1, NaN)
-      tmp1[ zeroPi] <- (1.0 - avgExpMu[ zeroPi1] - avgNumNonZeros[zeroPi1])
-      tmp1[!zeroPi] <- (1.0 - avgExpMu[!zeroPi1] -
-                          lambda1[!zeroPi1] * ratio[runPos][!zeroPi1])
+      tmp1[ zeroPi1] <- (1.0 - avgExpMu[ zeroPi1] -
+                           avgNumNonZeros[runPos][zeroPi1])
+      tmp1[!zeroPi1] <- (1.0 - avgExpMu[!zeroPi1] -
+                           lambda1[!zeroPi1] * ratio[runPos][!zeroPi1])
 
-      scaledDiff[runPos] <- (tmp1 / lambda1)
+      relDiff[runPos] <- (tmp1 / lambda1) / lambda1
 
-      runPos1 <- abs(scaledDiff) > threshold
+      runPos1 <- abs(relDiff) > threshold
       if (all(!runPos1)) {
         break
       }

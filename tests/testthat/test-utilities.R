@@ -226,7 +226,8 @@ test_that("lambdaNewton", {
   nu <- rep(c(0.5, 1.5), 5L)
   avgNumNonZeros <- c(0.0, 0.1, 0.4, 0.6, 0.8,  1.0)
   avgCounts      <- c(0.0, 0.1, 1.0, 1.3, 3.0, 10.0)
-  zeroPi <- (avgNumNonZeros == 1.0 | avgNumNonZeros == avgCounts)
+  zeroPi <- (rowSums(exp(-(avgCounts %o% nu))) / 10.0 + avgNumNonZeros > 1.0)
+  zeroPi <- (zeroPi | avgNumNonZeros == avgCounts)
 
   lambda <- mapply(lambdaNewton,
                    avgNumNonZeros = avgNumNonZeros,
@@ -234,7 +235,8 @@ test_that("lambdaNewton", {
                    zeroPi = zeroPi,
                    MoreArgs = list(nu = nu))
 
-  expect_equal(lambda, c(0.0, 0.1067852, 1.9671601, 1.5695487, 3.3949319, +Inf),
+  expectedRes <- c(0.0, 0.1067852, 1.9671601, 1.5695487, 3.3949319, +Inf)
+  expect_equal(lambda, expectedRes,
                tolerance = 1e-6)
 
   pi <- ifelse(zeroPi, 0.0, 1.0 - avgCounts / lambda)
@@ -244,6 +246,14 @@ test_that("lambdaNewton", {
 
   expect_identical(piError[c(1L, 6L)], c(0.0, 0.0))
   expect_lt(max(abs(piError[2L:5L])), 5.0e-5)
+
+  lambda2 <- parallelLambdaNewton(genes = rep_len(TRUE, 6L),
+                                  avgNumNonZeros = avgNumNonZeros,
+                                  avgCounts = avgCounts,
+                                  nu = nu,
+                                  zeroPi = zeroPi)
+
+  expect_equal(lambda2, expectedRes, tolerance = 1e-6)
 })
 
 
