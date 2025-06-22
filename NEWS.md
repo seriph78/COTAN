@@ -1,5 +1,7 @@
 Solved minor issue with `maxIterations` argument in the function
 `cellsUniformClustering()`: it was doing two extra loops
+Fixed bug with function `isCoexAvailable()` when used with `COTAN` objects
+created with older versions
 
 ## 2.9.3
 
