@@ -1,3 +1,6 @@
+Solved minor issue with `maxIterations` argument in the function
+`cellsUniformClustering()`: it was doing two extra loops
+
 ## 2.9.3
 
 Fixed issue with function `getSelectedGenes()` in cases when asked for `HGDI`
