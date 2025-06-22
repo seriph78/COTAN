@@ -3,6 +3,7 @@ stopifnot(file.exists(tm))
 
 library(zeallot)
 
+options(parallelly.fork.enable = TRUE)
 
 test_that("Cell Uniform Clustering", {
   utils::data("test.dataset", package = "COTAN")

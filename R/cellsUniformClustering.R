@@ -568,11 +568,14 @@ cellsUniformClustering <- function(objCOTAN,
       break
     }
 
-    if (length(cellsToRecluster) < 40L
-        || iter > maxIterations + initialIteration) {
-      logThis(paste("NO new possible uniform clusters!",
-                    "Unclustered cell left:", length(cellsToRecluster)),
+    if (length(cellsToRecluster) < 40L ||
+        iter >= maxIterations + initialIteration - 1L) {
+      logThis(ifelse(length(cellsToRecluster) < 40L,
+                     "Stopping: too few cells left to cluster",
+                     "Stopping: maximum number of iterations reached"),
               logLevel = 1L)
+      logThis(paste("Unclustered cell left:", length(cellsToRecluster)),
+              logLevel = 2L)
       break
     }
 
