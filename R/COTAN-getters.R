@@ -329,6 +329,8 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom stringr str_equal
+#'
 #' @export
 #'
 #' @examples

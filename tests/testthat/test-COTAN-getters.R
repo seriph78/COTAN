@@ -64,6 +64,12 @@ test_that("COTAN getters", {
   expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[1L:8L],
                ignore_attr = TRUE)
   expect_identical(getMetadataDataset(obj)[[2L]], metaInfo)
+  expect_identical(getMetadataElement(obj, tag = "genes' coex is in sync:"),
+                   "TRUE")
+  expect_true(isCoexAvailable(obj, actOnCells = FALSE))
+  expect_true(isCoexAvailable(obj, actOnCells = FALSE, ignoreSync = TRUE))
+  expect_true(isCoexAvailable(obj, actOnCells = TRUE))
+  expect_true(isCoexAvailable(obj, actOnCells = TRUE, ignoreSync = TRUE))
   expect_setequal(colnames(getMetadataGenes(obj)),
                   c("lambda", "feGenes", "dispersion", "GDI"))
   expect_identical(rownames(getMetadataGenes(obj)), getGenes(obj))
