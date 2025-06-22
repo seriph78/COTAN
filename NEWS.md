@@ -1,3 +1,6 @@
+Fixed bug with function `isCoexAvailable()` when used with `COTAN` objects
+created with older versions
+
 ## 2.8.3
 
 Fixed issue with function `genesSelector()` in cases when asked for `HGDI`

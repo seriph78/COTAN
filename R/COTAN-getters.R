@@ -329,6 +329,8 @@ setMethod(
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom stringr str_equal
+#'
 #' @export
 #'
 #' @examples
@@ -342,14 +344,16 @@ setMethod(
   function(objCOTAN, tag) {
     meta <- getMetadataDataset(objCOTAN)
 
-    if (is_empty(meta) || !(tag %in% meta[[1L]])) {
-      out <- ""
-    } else {
-      rowPos <- which(meta[[1L]] %in% tag)
-      out <- meta[, -1L, drop = FALSE][rowPos, ]
+    if (is_empty(meta)) {
+      return("")
+    }
+    matches <- str_equal(tag, meta[[1L]], ignore_case = TRUE)
+    if (all(!matches)) {
+      return("")
     }
 
-    return(out)
+    rowPos <- which(matches)
+    return(meta[, -1L, drop = FALSE][rowPos, ])
   }
 )
 
@@ -1065,15 +1069,17 @@ setMethod(
   "COTAN",
   function(objCOTAN, actOnCells = FALSE, ignoreSync = FALSE) {
     if (isTRUE(actOnCells)) {
-      isInSync <- as.logical(getMetadataElement(objCOTAN,
-                                                datasetTags()[["csync"]]))
+      isInSync <-
+        as.logical(getMetadataElement(objCOTAN, datasetTags()[["csync"]]))
 
-      return(!is_empty(objCOTAN@cellsCoex) && (isTRUE(ignoreSync) || isInSync))
+      return(!is_empty(objCOTAN@cellsCoex) &&
+               (isTRUE(ignoreSync) || isTRUE(isInSync)))
     } else {
-      isInSync <- as.logical(getMetadataElement(objCOTAN,
-                                                datasetTags()[["gsync"]]))
+      isInSync <-
+        as.logical(getMetadataElement(objCOTAN, datasetTags()[["gsync"]]))
 
-      return(!is_empty(objCOTAN@genesCoex) && (isTRUE(ignoreSync) || isInSync))
+      return(!is_empty(objCOTAN@genesCoex) &&
+               (isTRUE(ignoreSync) || isTRUE(isInSync)))
     }
   }
 )
