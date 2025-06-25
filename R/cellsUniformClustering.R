@@ -344,8 +344,10 @@ cellsUniformClustering <- function(objCOTAN,
       logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
       pdf(outFile)
 
+      allCondNames <- getAllConditions(subObj)
+      condName <- ifelse(length(allCondNames) == 0L, "", allCondNames[[1L]])
       plot(UMAPPlot(dataIn = cellsRDM,
-                    clusters = getCondition(subObj),
+                    clusters = getCondition(subObj, condName),
                     title = paste0("Cells number: ", nrow(cellsRDM))))
 
       plot(UMAPPlot(dataIn = cellsRDM,
