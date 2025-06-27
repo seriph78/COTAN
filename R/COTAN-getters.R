@@ -340,7 +340,11 @@ setMethod(
   function(objCOTAN, tag) {
     meta <- getMetadataDataset(objCOTAN)
     rowPos <- getMetaInfoRow(meta, tag)
-    return(ifelse(rowPos == 0L, "", meta[, -1L, drop = FALSE][rowPos, ]))
+    if (rowPos == 0L) {
+      return("")
+    } else {
+      return(meta[, -1L, drop = FALSE][rowPos, ])
+    }
   }
 )
 
