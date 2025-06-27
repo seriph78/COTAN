@@ -20,6 +20,8 @@
 \alias{addElementToMetaDataset}
 \alias{getColumnFromDF}
 \alias{setColumnInDF}
+\alias{getMetaInfoRow}
+\alias{updateMetaInfo}
 \title{Handling \emph{meta-data} in \code{COTAN} objects}
 \usage{
 \S4method{getMetadataDataset}{COTAN}(objCOTAN)
@@ -41,11 +43,15 @@ datasetTags()
 getColumnFromDF(df, colName)
 
 setColumnInDF(df, colToSet, colName, rowNames = vector(mode = "character"))
+
+getMetaInfoRow(meta, tag)
+
+updateMetaInfo(meta, tag, value)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{tag}{the new information tag}
+\item{tag}{The tag associated to the wanted value}
 
 \item{GEO}{a code reporting the GEO identification or other specific data-set
 code}
@@ -55,7 +61,7 @@ code}
 \item{sampleCondition}{a string reporting the specific sample condition or
 time point}
 
-\item{value}{a value (or an array) containing the information}
+\item{value}{The value or the values to associate to the tag}
 
 \item{df}{the \code{data.frame}}
 
@@ -65,6 +71,8 @@ time point}
 
 \item{rowNames}{when not empty, if the input \code{data.frame} has no real row
 names, the new row names of the resulting \code{data.frame}}
+
+\item{meta}{The information \code{data.frame} to update}
 }
 \value{
 \code{getMetadataDataset()} returns the meta-data \code{data.frame}
@@ -90,6 +98,11 @@ updated \code{metaDataset}
 
 \code{setColumnInDF()} returns the updated, or the newly created,
 \code{data.frame}
+
+\code{getMetaInfoRow()} returns the last relevant row position if any or
+zero otherwise.
+
+\code{updateMetaInfo()} returns the updated \code{data.frame}
 }
 \description{
 Much of the information stored in the \code{COTAN} object is
@@ -134,6 +147,12 @@ present, a column into a \code{data.frame}, whether the \code{data.frame} is emp
 not. The given \code{rowNames} are used only in the case the \code{data.frame} has
 only the default row numbers, so this function cannot be used to override
 row names
+
+\code{getMetaInfoRow()} is an internal function: it extracts the row\
+associated with the given tag if present or zero otherwise.
+
+\code{updateMetaInfo()} is an internal function: updates an information
+\code{data.frame}
 }
 \examples{
 data("test.dataset")
@@ -148,7 +167,7 @@ objCOTAN <- addElementToMetaDataset(objCOTAN, "Test",
 
 dataSetInfo <- getMetadataDataset(objCOTAN)
 
-numInitialCells <- getMetadataElement(objCOTAN, "cells")
+numInitialCells <- getMetadataElement(objCOTAN, datasetTags()[["cells"]])
 
 metaGenes <- getMetadataGenes(objCOTAN)
 

@@ -506,6 +506,66 @@ setColumnInDF <- function(df, colToSet, colName,
   return(df)
 }
 
+#' @details `getMetaInfoRow()` is an internal function: it extracts the row\
+#'   associated with the given tag if present or zero otherwise.
+#'
+#' @param meta The information `data.frame` to update
+#' @param tag The tag associated to the wanted value
+#'
+#' @returns `getMetaInfoRow()` returns the last relevant row position if any or
+#'   zero otherwise.
+#'
+#' @importFrom rlang is_empty
+#'
+#' @importFrom stringr str_equal
+#'
+#' @rdname HandleMetaData
+#'
+getMetaInfoRow <- function(meta, tag) {
+  # nothing to look into
+  if (is_empty(meta)) {
+    return(0L)
+  }
+
+  #get all matches
+  matches <- str_equal(tag, meta[[1L]], ignore_case = TRUE)
+  if (all(!matches)) {
+    return(0L)
+  }
+
+  # get last match!
+  rowPos <- which(matches)
+  rowPos <- rowPos[[length(rowPos)]]
+  return(rowPos)
+}
+
+
+#' @details `updateMetaInfo()` is an internal function: updates an information
+#'   `data.frame`
+#'
+#' @param meta The information `data.frame` to update
+#' @param tag The tag associated to the wanted value
+#' @param value The value or the values to associate to the tag
+#'
+#' @returns `updateMetaInfo()` returns the updated `data.frame`
+#'
+#' @rdname HandleMetaData
+#'
+updateMetaInfo <- function(meta, tag, value) {
+  # get relevant row or a new one if necessary
+  rowPos <- getMetaInfoRow(meta, tag)
+  if (rowPos == 0L) {
+    # new tag: add a new entry
+    rowPos <- nrow(meta) + 1L
+  }
+
+  # all values are converted to strings
+  newLine <- c(tag, paste0(value))
+  meta[rowPos, seq_along(newLine)] <- newLine
+
+  return(meta)
+}
+
 
 #------------------- clusters utilities ----------
 

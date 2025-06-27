@@ -27,37 +27,6 @@ datasetTags <- function() {
 }
 
 
-#' @details `updateMetaInfo()` is an internal function: updates an information
-#'   `data.frame`
-#'
-#' @param meta the information `data.frame` to update
-#' @param tag the tag of the line
-#' @param value the value or the values to associate to the tag
-#'
-#' @returns `updateMetaInfo()` returns the updated `data.frame`
-#'
-#' @importFrom rlang is_empty
-#'
-#' @noRd
-#'
-updateMetaInfo <- function(meta, tag, value) {
-  # all values are converted to strings
-  newLine <- c(tag, paste0(value))
-
-  if (!is_empty(meta) && (tag %in% meta[[1L]])) {
-    # existing tag: update the value
-    rowPos <- which(meta[[1L]] %in% tag)
-  } else {
-    # new tag: add a new entry
-    rowPos <- nrow(meta) + 1L
-  }
-
-  meta[rowPos, seq_along(newLine)] <- newLine
-
-  return(meta)
-}
-
-
 #' @aliases initializeMetaDataset
 #'
 #' @details `initializeMetaDataset()` initializes meta-data data-set

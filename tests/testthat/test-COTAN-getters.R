@@ -16,6 +16,10 @@ test_that("COTAN getters", {
   obj <- estimateLambdaLinear(obj)
   obj <- estimateDispersionBisection(obj)
 
+  # set tag label as legacy value
+  row <- getMetaInfoRow(getMetadataDataset(obj), datasetTags()[["gsync"]])
+  obj@metaDataset[row, 1L] <- "genes' coex is in sync:"
+
   suppressWarnings({
     obj <- calculateCoex(obj, actOnCells = FALSE, returnPPFract = TRUE,
                          optimizeForSpeed = TRUE, deviceStr = "cpu")
@@ -64,6 +68,8 @@ test_that("COTAN getters", {
   expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[1L:8L],
                ignore_attr = TRUE)
   expect_identical(getMetadataDataset(obj)[[2L]], metaInfo)
+  expect_identical(getMetaInfoRow(getMetadataDataset(obj),
+                                  "genes' COEX is in sync:"), 5L)
   expect_identical(getMetadataElement(obj, tag = "genes' coex is in sync:"),
                    "TRUE")
   expect_true(isCoexAvailable(obj, actOnCells = FALSE))

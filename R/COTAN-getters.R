@@ -327,14 +327,10 @@ setMethod(
 #'
 #' @returns `getMetadataElement()` returns a string with the relevant value
 #'
-#' @importFrom rlang is_empty
-#'
-#' @importFrom stringr str_equal
-#'
 #' @export
 #'
 #' @examples
-#' numInitialCells <- getMetadataElement(objCOTAN, "cells")
+#' numInitialCells <- getMetadataElement(objCOTAN, datasetTags()[["cells"]])
 #'
 #' @rdname HandleMetaData
 #'
@@ -343,17 +339,8 @@ setMethod(
   "COTAN",
   function(objCOTAN, tag) {
     meta <- getMetadataDataset(objCOTAN)
-
-    if (is_empty(meta)) {
-      return("")
-    }
-    matches <- str_equal(tag, meta[[1L]], ignore_case = TRUE)
-    if (all(!matches)) {
-      return("")
-    }
-
-    rowPos <- which(matches)
-    return(meta[, -1L, drop = FALSE][rowPos, ])
+    rowPos <- getMetaInfoRow(meta, tag)
+    return(ifelse(rowPos == 0L, "", meta[, -1L, drop = FALSE][rowPos, ]))
   }
 )
 
