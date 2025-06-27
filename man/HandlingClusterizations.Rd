@@ -66,7 +66,7 @@ DEAOnClusters(objCOTAN, clName = "", clusters = NULL)
 
 clusterGeneContingencyTables(objCOTAN, gene, cells)
 
-pValueFromDEA(coexDF, numCells, adjustmentMethod = "none")
+pValueFromDEA(coexDF, numCells, adjustmentMethod)
 
 logFoldChangeOnClusters(
   objCOTAN,
@@ -200,8 +200,9 @@ data losses}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
-\item{adjustmentMethod}{\emph{p-value} multi-test adjustment method. Defaults to
-\code{"bonferroni"}; use \code{"none"} for no adjustment}
+\item{adjustmentMethod}{\emph{p-value} multi-test adjustment method, see
+\code{\link[stats:p.adjust]{stats::p.adjust.methods()}}. Defaults to \code{"bonferroni"}; use \code{"none"} for
+no adjustment}
 
 \item{floorLambdaFraction}{Indicates the lower bound to the average count
 sums inside or outside the cluster for each gene as fraction of the
