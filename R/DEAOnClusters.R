@@ -194,8 +194,8 @@ clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
 #' @param numCells the number of overall cells in all *clusters*
-#' @param adjustmentMethod *p-value* multi-test adjustment method. Defaults to
-#'   `"none"` (i.e. no adjustment)
+#' @param adjustmentMethod *p-value* multi-test adjustment method, see
+#'   [stats::p.adjust.methods()]. Defaults to `"none"` (i.e. no adjustment)
 #'
 #' @return `pValueFromDEA()` returns a `data.frame` containing the *p-values*
 #'   corresponding to the given `COEX` adjusted for *multi-test*
@@ -213,8 +213,7 @@ clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
 #'
 #' @rdname HandlingClusterizations
 #'
-pValueFromDEA <- function(coexDF, numCells, adjustmentMethod = "none") {
-
+pValueFromDEA <- function(coexDF, numCells, adjustmentMethod) {
   pValue <- pchisq(as.matrix(coexDF^2L * numCells),
                              df = 1L, lower.tail = FALSE)
 
