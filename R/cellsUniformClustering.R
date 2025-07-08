@@ -578,8 +578,6 @@ cellsUniformClustering <- function(objCOTAN,
     })
   names(allCheckResults) <- permMap[names(allCheckResults)]
 
-  outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
-
   if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(outDirCond, "split_check_results.csv")
       write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
@@ -595,5 +593,5 @@ cellsUniformClustering <- function(objCOTAN,
 
   logThis("Creating cells' uniform clustering: DONE", logLevel = 2L)
 
-  return(outputList)
+  return(list("clusters" = outputClusters, "coex" = outputCoexDF))
 }
