@@ -26,6 +26,8 @@ NULL
 #' @param rawData The raw counts
 #' @param initialResolution The resolution to use at first in the
 #'   *clusterization* algorithm
+#' @param resolutionStep How much to increase the resolution to retry a
+#'   *clusterization* that does not respect the `minNumClusters`
 #' @param minNumClusters The minimum number of *clusters* expected from this
 #'   *clusterization*. In cases it is not reached, it will increase the
 #'   resolution of the *clusterization*
@@ -58,7 +60,9 @@ NULL
 #'
 
 seuratClustering <- function(objCOTAN,
-                             initialResolution, minNumClusters,
+                             initialResolution = 0.8,
+                             resolutionStep = 0.5,
+                             minNumClusters = 1L,
                              useCoexEigen, dataMethod,
                              genesSel, numGenes,
                              numReducedComp) {
@@ -90,8 +94,7 @@ seuratClustering <- function(objCOTAN,
     srat <- FindNeighbors(srat, dims = seq_len(numReducedComp))
 
     resolution <- initialResolution
-    resolutionStep <- 0.5
-    maxResolution <- initialResolution + 10.0 * resolutionStep
+    maxResolution <- initialResolution + 30.0 * resolutionStep
 
     seuratClusters <- NULL
     usedMaxResolution <- FALSE
@@ -281,6 +284,7 @@ cellsUniformClustering <- function(objCOTAN,
 
   iter <- initialIteration - 1L
   iterReset <- -1L
+  resolutionStep <- 0.5
   numClustersToRecluster <- 0L
   srat <- NULL
   allCheckResults <- list()
@@ -313,7 +317,8 @@ cellsUniformClustering <- function(objCOTAN,
     cellsToDrop <- getCells(objCOTAN)[!is.na(outputClusters)]
     subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-    if (str_equal(genesSel, "HGDI") || isTRUE(useCoexEigen)) {
+    if ((str_equal(genesSel, "HGDI") || isTRUE(useCoexEigen)) &&
+      !isCoexAvailable(subObj)) {
       subObj <-
         proceedToCoex(subObj, calcCoex = TRUE, cores = cores,
                       optimizeForSpeed = optimizeForSpeed,
@@ -324,7 +329,9 @@ cellsUniformClustering <- function(objCOTAN,
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
     c(testClusters, cellsRDM, resolution, usedMaxResolution) %<-%
-      seuratClustering(subObj, initialResolution = initialResolution,
+      seuratClustering(subObj,
+                       initialResolution = initialResolution,
+                       resolutionStep = resolutionStep,
                        minNumClusters = minNumClusters,
                        useCoexEigen = useCoexEigen,
                        dataMethod = dataMethod,
@@ -338,6 +345,11 @@ cellsUniformClustering <- function(objCOTAN,
       break
     }
 
+    if (iter == initialIteration && !is_null(initialClusters)) {
+      logThis("Using passed in clusterization", logLevel = 3L)
+      testClusters <- asClusterization(initialClusters, getCells(objCOTAN))
+    }
+
     ## print umap graph
     if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(splitOutDir, paste0("pdf_umap_", iter, ".pdf"))
@@ -345,15 +357,16 @@ cellsUniformClustering <- function(objCOTAN,
       pdf(outFile)
 
       allCondNames <- getAllConditions(subObj)
-      condName <- ifelse(length(allCondNames) == 0L, "", allCondNames[[1L]])
-      plot(UMAPPlot(dataIn = cellsRDM,
-                    clusters = getCondition(subObj, condName),
-                    title = paste0("Cells number: ", nrow(cellsRDM))))
+      condName <- ifelse(length(allCondNames) == 0L, "",
+                         allCondNames[[length(allCondNames)]])
+      title <- paste0("Cells number: ", nrow(cellsRDM))
+      plot(UMAPPlot(dataIn = cellsRDM, title = title,
+                    clusters = getCondition(subObj, condName)))
 
-      plot(UMAPPlot(dataIn = cellsRDM,
-                    clusters = testClusters,
-                    title = paste0("Cells number: ", nrow(cellsRDM), "\n",
-                                   "Cl. resolution: ", resolution)))
+      title <- paste0(title, "\nCl. resolution: ", resolution,
+                      ifelse(isTRUE(usedMaxResolution), " [max]", ""))
+      plot(UMAPPlot(dataIn = cellsRDM, title = title,
+                    clusters = testClusters))
     }, error = function(err) {
       logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)
     }, finally = {
@@ -371,10 +384,6 @@ cellsUniformClustering <- function(objCOTAN,
     numClustersToRecluster <- 0L
     cellsToRecluster <- vector(mode = "character")
 
-    if (iter == initialIteration && !is_null(initialClusters)) {
-      logThis("Using passed in clusterization", logLevel = 3L)
-      testClusters <- asClusterization(initialClusters, getCells(objCOTAN))
-    }
     allCells <- names(testClusters)
     testClList <- toClustersList(testClusters)
 
@@ -456,7 +465,10 @@ cellsUniformClustering <- function(objCOTAN,
       warning("In iteration '", iter, "' no uniform clusters found!")
       # Another iteration can be attempted as the minimum number of clusters
       # will be higher. This happens unless the resolution already reached
-      # its maximum. In the latter case we simply stop here.
+      # its maximum. In the latter case we simply stop here, unless some UT
+      # cluster was found. In the latter case we restart from the minimal
+      # resolution, but with larger resolution steps and try to re-cluster with
+      # no minimal number of clusters
       if (isTRUE(usedMaxResolution) || maxClusterSize < minimumUTClusterSize) {
         logThis("Max resolution reached", logLevel = 1L)
         if (iterReset != -1L) {
@@ -468,6 +480,9 @@ cellsUniformClustering <- function(objCOTAN,
                   logLevel = 2L)
           numClustersToRecluster <- 0L
           iterReset <- iter
+          if (maxClusterSize >= minimumUTClusterSize) {
+            resolutionStep <- resolutionStep + 0.3
+          }
         }
       }
     } else {
@@ -563,11 +578,13 @@ cellsUniformClustering <- function(objCOTAN,
     })
   names(allCheckResults) <- permMap[names(allCheckResults)]
 
-  outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
-
   if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(outDirCond, "split_check_results.csv")
       write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
+
+      outFile <- file.path(outDirCond, "split_clusterization.csv")
+      write.csv(as.data.frame(list("split" = outputClusters)),
+                file = outFile, na = "NaN")
     },
     error = function(err) {
       logThis(paste("While saving results csv", err), logLevel = 1L)
@@ -576,5 +593,5 @@ cellsUniformClustering <- function(objCOTAN,
 
   logThis("Creating cells' uniform clustering: DONE", logLevel = 2L)
 
-  return(outputList)
+  return(list("clusters" = outputClusters, "coex" = outputCoexDF))
 }
