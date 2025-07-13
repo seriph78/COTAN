@@ -456,6 +456,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       maxIterations = maxIterations,
       mc.cores = cores,
       mc.preschedule = FALSE)
+    logThis("|", logLevel = 1L, appendLF = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
@@ -559,6 +560,9 @@ setMethod(
                           threshold = threshold,
                           maxIterations = maxIterations,
                           cores = cores)
+
+      logThis(paste0("Executing ", length(spCells), " cells batches"),
+              logLevel = 3L)
 
     # numSplits <- length(spCells)
     # splitStep <- max(4L, cores * 2L)

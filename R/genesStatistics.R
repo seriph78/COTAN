@@ -40,11 +40,12 @@ calculateGenesCE <- function(objCOTAN) {
 #' @param S a `matrix` object
 #' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
+#' @param cores number of cores to use. Default is 1.
+#' @param chunkSize number of genes to solve in batch in a single core. Default
+#'   is 1024.
 #'
 #' @returns `calculateGDIGivenS()` returns a `vector` with the `GDI` data for
 #'   each column of the input
-#'
-#' @importFrom rlang set_names
 #'
 #' @importFrom assertthat assert_that
 #'
@@ -56,81 +57,87 @@ calculateGenesCE <- function(objCOTAN) {
 #' @noRd
 #'
 
-calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
-  assert_that(length(dim(S)) == 2L, rowsFraction > 0.0, rowsFraction <= 1.0)
-  topRows <- as.integer(max(1L:round(nrow(S) * rowsFraction, digits = 0L)))
-
-  pValue <- colSort(as.matrix(S), descending = TRUE)
-  logThis("S matrix sorted", logLevel = 3L)
-  pValue <- pValue[1L:topRows, , drop = FALSE]
-  pValue <- pchisq(as.matrix(pValue), df = 1L, lower.tail = FALSE)
-
-  GDI <- set_names(log(-log(colmeans(pValue, parallel = TRUE))), colnames(S))
-
-  return(GDI)
-}
-
-# calculateGDIGivenS <- function(S, rowsFraction = 0.05,
-#                                cores = 1L, chunkSize = 1024L) {
-#   assert_that(is.matrix(S), nrow(S) == ncol(S),
-#               rowsFraction > 0.0, rowsFraction <= 1.0)
-#   logThis("Calculate GDI given `S`: START", logLevel = 2L)
+# calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
+#   assert_that(length(dim(S)) == 2L, rowsFraction > 0.0, rowsFraction <= 1.0)
+#   topRows <- as.integer(max(1L:round(nrow(S) * rowsFraction, digits = 0L)))
 #
-#   cores <- handleMultiCore(cores)
+#   pValue <- colSort(as.matrix(S), descending = TRUE)
+#   logThis("S matrix sorted", logLevel = 3L)
+#   pValue <- pValue[1L:topRows, , drop = FALSE]
+#   pValue <- pchisq(as.matrix(pValue), df = 1L, lower.tail = FALSE)
 #
-#   numGenes <- ncol(S)
-#   topRows <- as.integer(max(1L:round(numGenes * rowsFraction, digits = 0L)))
-#
-#   spIdx <- parallel::splitIndices(numGenes, ceiling(numGenes / chunkSize))
-#
-#   spGenes <- lapply(spIdx, function(x) colnames(S)[x])
-#
-#   numSplits <- length(spGenes)
-#   splitStep <- max(4L, cores * 2L)
-#
-#   gc()
-#
-#
-# #  colBatches <- split(seq_len(nCols), ceiling(seq_along(seq_len(nCols)) / chunkSize))
-#
-#   # create a tiny private env and a worker within:
-#   # it reduces spawning memory foot-print
-#   mini <- new.env(parent = emptyenv())
-#   mini$colSort <- Rfast::colSort
-#   mini$pchisq <- stats::pchisq
-#
-#   # function to do one batch of columns
-#   worker <- function(genes, S) {
-#     subS <- S[, genes, drop = FALSE]
-#
-#     # 1) sort each column in descending order
-#     pValues <- colSort(subS, descending = TRUE)
-#     # 2) take only the topRows rows
-#     pValues <- pValues[seq_len(topRows), , drop = FALSE]
-#     # 3) convert to tail p‑values
-#     pValues <- pchisq(as.matrix(pValues), df = 1L, lower.tail = FALSE)
-#
-#     GDI <- set_names(log(-log(colmeans(pValues, parallel = TRUE))), colnames(S))
-#     return(GDI)
-#   }
-#   environment(worker) <- mini
-#
-#   # fire off mclapply
-#   parts <- parallel::mclapply(
-#     colBatches,
-#     worker,
-#     mc.cores      = cores,
-#     mc.preschedule = FALSE
-#   )
-#
-#   # glue back into a single named vector
-#   GDI <- unlist(parts, use.names = TRUE)
-#   GDI[colnames(S)]  # ensure original order
-#
-#   logThis("Calculate GDI given `S`: DONE", logLevel = 2L)
+#   GDI <- set_names(log(-log(colmeans(pValue, parallel = TRUE))), colnames(S))
 #
 #   return(GDI)
 # }
+
+calculateGDIGivenS  <- function(S,
+                                rowsFraction = 0.05,
+                                cores        = 1L,
+                                chunkSize    = 1024L) {
+  assertthat::assert_that(length(dim(S)) == 2L,
+                          rowsFraction > 0, rowsFraction <= 1)
+
+  logThis("Estimate `dispersion`: START", logLevel = 2L)
+
+  cores <- handleMultiCore(cores)
+
+  ## rows to retain per column
+  topRows <- max(1L, round(nrow(S) * rowsFraction))
+
+  ##  split column indices into batches
+  colIdx <- seq_len(ncol(S))
+  colBatches <- split(colIdx, ceiling(colIdx / chunkSize))
+
+  ##  tiny sandbox env to keep each worker lean
+  mini <- new.env(parent = baseenv())
+  mini$colSort <- Rfast::colSort
+  mini$colmeans <- Rfast::colmeans
+  mini$logThis  <- logThis
+
+  ##  worker: operate on one batch of columns
+  worker <- function(idx, topRows) {
+    ## slice columns (single read avoids copying the rest)
+    subS <- S[, idx, drop = FALSE]
+
+    ## 1. sort each column descending
+    subS <- colSort(subS, descending = TRUE)
+
+    ## 2. keep only the top rows
+    subS <- subS[seq_len(topRows), , drop = FALSE]
+
+    ## 3. p-value of χ²₁ for each entry
+    subS <- stats::pchisq(subS, df = 1L, lower.tail = FALSE)
+
+    ## 4. mean p-value per column → transform
+    gdi <- log(-log(colMeans(subS)))
+
+    ## restore names
+    names(gdi) <- colnames(subS)
+
+    rm(subS)
+
+    ## ---- progress tick
+    logThis("*", logLevel = 1L, appendLF = FALSE)
+
+    return(gdi)
+  }
+  environment(worker) <- mini
+
+  ##  fork once, stream tasks
+  parts <- parallel::mclapply(colBatches,
+                              worker,
+                              topRows = topRows,
+                              mc.cores  = cores,
+                              mc.preschedule = FALSE)
+
+  ## glue result and reorder to original gene order
+  GDI <- unlist(parts, use.names = TRUE)
+
+  GDI <- GDI[colnames(S)]
+
+  return(GDI)
+}
 
 
 #' @details `calculateGDIGivenCorr()` produces a `vector` with the `GDI` for
@@ -168,6 +175,9 @@ calculateGDIGivenCorr <-
 #'   (*G-test*)
 #' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
+#' @param cores number of cores to use. Default is 1.
+#' @param chunkSize number of genes to solve in batch in a single core. Default
+#'   is 1024.
 #'
 #' @returns `calculateGDI()` returns a `data.frame` with:
 #'  * `"sum.raw.norm"` the sum of the normalized data rows
@@ -185,7 +195,11 @@ calculateGDIGivenCorr <-
 #' @rdname GenesStatistics
 #'
 
-calculateGDI <- function(objCOTAN, statType = "S", rowsFraction = 0.05) {
+calculateGDI <- function(objCOTAN,
+                         statType     = "S",
+                         rowsFraction = 0.05,
+                         cores        = 1L,
+                         chunkSize    = 1024L) {
   logThis("Calculate GDI dataframe: START", logLevel = 2L)
 
   if (statType == "S") {
@@ -198,7 +212,8 @@ calculateGDI <- function(objCOTAN, statType = "S", rowsFraction = 0.05) {
     stop("Unrecognised stat type: must be either 'S' or 'G'")
   }
 
-  GDI <- calculateGDIGivenS(S, rowsFraction = rowsFraction)
+  GDI <- calculateGDIGivenS(S, rowsFraction = rowsFraction,
+                            cores = cores, chunkSize = chunkSize)
   GDI <- set_names(as.data.frame(GDI), "GDI")
   gc()
 

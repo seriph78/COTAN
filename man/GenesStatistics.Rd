@@ -35,7 +35,13 @@ calculateGenesCE(objCOTAN)
 
 calculateGDIGivenCorr(corr, numDegreesOfFreedom, rowsFraction = 0.05)
 
-calculateGDI(objCOTAN, statType = "S", rowsFraction = 0.05)
+calculateGDI(
+  objCOTAN,
+  statType = "S",
+  rowsFraction = 0.05,
+  cores = 1L,
+  chunkSize = 1024L
+)
 
 calculatePValue(
   objCOTAN,
@@ -86,6 +92,11 @@ the \code{GDI}. Defaults to \eqn{5\%}}
 \item{statType}{Which statistics to use to compute the p-values. By default
 it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 (G-test)}
+
+\item{cores}{number of cores to use. Default is 1.}
+
+\item{chunkSize}{number of genes to solve in batch in a single core. Default
+is 1024.}
 
 \item{geneSubsetCol}{an array of genes. It will be put in columns. If left
 empty the function will do it genome-wide.}
