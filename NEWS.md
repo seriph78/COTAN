@@ -1,3 +1,7 @@
+Reduced significantly the memory foot-print while use multi-process
+solvers
+Also improved speed of GDI calculations, by going multi-process there too
+
 ## 2.9.4
 
 Solved minor issue with `maxIterations` argument in the function
