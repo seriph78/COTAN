@@ -105,6 +105,8 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
     }
     return(res)
   } else {
+    logThis("|", logLevel = 1L, appendLF = FALSE)
+
     res <- lapply(genesBatches,
                   worker,
                   S = S,

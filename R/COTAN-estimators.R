@@ -234,6 +234,8 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     environment(mini$parallelDispersionBisection) <- mini
     environment(mini$worker) <- mini
 
+    logThis("|", logLevel = 1L, appendLF = FALSE)
+
     res <- parallel::mclapply(
       genesBatches,
       worker,
@@ -453,6 +455,8 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     ## set on the copy in `mini` to only use `mini`
     environment(mini$parallelNuBisection) <- mini
     environment(mini$worker) <- mini
+
+    logThis("|", logLevel = 1L, appendLF = FALSE)
 
     res <- parallel::mclapply(
       cellsBatches,
