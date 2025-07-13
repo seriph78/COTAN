@@ -203,6 +203,23 @@ setMethod(
 # local utility wrapper for parallel estimation of dispersion
 runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
                           threshold, maxIterations, cores) {
+
+  ## forward caller that allows for logging progress
+  worker <- function(genesBatch, sumZeros, lambda, nu,
+                     threshold, maxIterations) {
+    bres <- parallelDispersionBisection(genes         = genesBatch,
+                                        sumZeros      = sumZeros,
+                                        lambda        = lambda,
+                                        nu            = nu,
+                                        threshold     = threshold,
+                                        maxIterations = maxIterations)
+
+    ## progress mark – goes straight to the main R session’s stdout
+    logThis("*", logLevel = 1L, appendLF = FALSE)
+
+    return(bres)
+  }
+
   if (cores != 1L) {
     ## create a tiny private env `mini` and a worker within it:
     ## this reduces spawning memory foot-print
@@ -211,26 +228,11 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     mini$rowsums <- Rfast::rowsums
     mini$funProbZero <- funProbZero
     mini$logThis <- logThis
+    mini$worker <- worker
 
     ## set on the copy in `mini` to only use `mini`
     environment(mini$parallelDispersionBisection) <- mini
-
-    ## wrapper that lives in `mini`
-    worker <- function(genesBatch, sumZeros, lambda, nu,
-                       threshold, maxIterations) {
-      bres <- parallelDispersionBisection(genes         = genesBatch,
-                                          sumZeros      = sumZeros,
-                                          lambda        = lambda,
-                                          nu            = nu,
-                                          threshold     = threshold,
-                                          maxIterations = maxIterations)
-
-      ## progress mark – goes straight to the main R session’s stdout
-      logThis("*", logLevel = 1L, appendLF = FALSE)
-
-      return(bres)
-    }
-    environment(worker) <- mini
+    environment(mini$worker) <- mini
 
     res <- parallel::mclapply(
       genesBatches,
@@ -242,6 +244,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
       maxIterations = maxIterations,
       mc.cores = cores,
       mc.preschedule = FALSE)
+
     logThis("|", logLevel = 1L, appendLF = TRUE)
 
     # spawned errors are stored as try-error classes
@@ -249,16 +252,20 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     if (any(resError)) {
       stop(res[[which(resError)[[1L]]]], call. = FALSE)
     }
+
     return(res)
   } else {
-    return(lapply(
-      genesBatches,
-      parallelDispersionBisection,
-      sumZeros = sumZeros,
-      lambda = lambda,
-      nu = nu,
-      threshold = threshold,
-      maxIterations = maxIterations))
+    res <- lapply(genesBatches,
+                  parallelDispersionBisection,
+                  sumZeros = sumZeros,
+                  lambda = lambda,
+                  nu = nu,
+                  threshold = threshold,
+                  maxIterations = maxIterations)
+
+    logThis("|", logLevel = 1L, appendLF = TRUE)
+
+    return(res)
   }
 }
 
@@ -414,6 +421,24 @@ setMethod(
 # local utility wrapper for parallel estimation of nu
 runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
                         initialGuess, threshold, maxIterations, cores) {
+
+  ## forward caller that allows for logging progress
+  worker <- function(batch, sumZeros, lambda, dispersion,
+                     initialGuess, threshold, maxIterations) {
+    bres <- parallelNuBisection(batch,
+                                sumZeros      = sumZeros,
+                                lambda        = lambda,
+                                dispersion    = dispersion,
+                                initialGuess  = initialGuess,
+                                threshold     = threshold,
+                                maxIterations = maxIterations)
+
+    ## progress mark – goes straight to the main R session’s stdout
+    logThis("*", logLevel = 1L, appendLF = FALSE)
+
+    return(bres)
+  }
+
   if (cores != 1L) {
     # create a tiny private env and a worker within:
     # it reduces spawning memory foot-print
@@ -423,27 +448,11 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     mini$colsums <- Rfast::colsums
     mini$funProbZero <- funProbZero
     mini$logThis <- logThis
+    mini$worker <- worker
 
     ## set on the copy in `mini` to only use `mini`
     environment(mini$parallelNuBisection) <- mini
-
-    ## wrapper that lives in `mini`
-    worker <- function(batch, sumZeros, lambda, dispersion,
-                       initialGuess, threshold, maxIterations) {
-      bres <- parallelNuBisection(batch,
-                                  sumZeros      = sumZeros,
-                                  lambda        = lambda,
-                                  dispersion    = dispersion,
-                                  initialGuess  = initialGuess,
-                                  threshold     = threshold,
-                                  maxIterations = maxIterations)
-
-      ## progress mark – goes straight to the main R session’s stdout
-      logThis("*", logLevel = 1L, appendLF = FALSE)
-
-      return(bres)
-    }
-    environment(worker) <- mini
+    environment(mini$worker) <- mini
 
     res <- parallel::mclapply(
       cellsBatches,
@@ -456,6 +465,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       maxIterations = maxIterations,
       mc.cores = cores,
       mc.preschedule = FALSE)
+
     logThis("|", logLevel = 1L, appendLF = TRUE)
 
     # spawned errors are stored as try-error classes
@@ -465,15 +475,18 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     }
     return(res)
   } else {
-    return(lapply(
-      cellsBatches,
-      parallelNuBisection,
-      sumZeros = sumZeros,
-      lambda = lambda,
-      dispersion = dispersion,
-      initialGuess = initialGuess,
-      threshold = threshold,
-      maxIterations = maxIterations))
+    res <- lapply(cellsBatches,
+                  parallelNuBisection,
+                  sumZeros = sumZeros,
+                  lambda = lambda,
+                  dispersion = dispersion,
+                  initialGuess = initialGuess,
+                  threshold = threshold,
+                  maxIterations = maxIterations)
+
+    logThis("|", logLevel = 1L, appendLF = TRUE)
+
+    return(res)
   }
 }
 

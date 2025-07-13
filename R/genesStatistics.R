@@ -33,6 +33,89 @@ calculateGenesCE <- function(objCOTAN) {
                      getNumCells(objCOTAN), getGenes(objCOTAN)))
 }
 
+# calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
+#   assert_that(length(dim(S)) == 2L, rowsFraction > 0.0, rowsFraction <= 1.0)
+#   topRows <- as.integer(max(1L:round(nrow(S) * rowsFraction, digits = 0L)))
+#
+#   pValue <- colSort(as.matrix(S), descending = TRUE)
+#   logThis("S matrix sorted", logLevel = 3L)
+#   pValue <- pValue[1L:topRows, , drop = FALSE]
+#   pValue <- pchisq(as.matrix(pValue), df = 1L, lower.tail = FALSE)
+#
+#   GDI <- set_names(log(-log(colmeans(pValue, parallel = TRUE))), colnames(S))
+#
+#   return(GDI)
+# }
+#
+
+
+# local utility wrapper for parallel estimation of dispersion
+runGDICalc <- function(genesBatches, S, topRows, cores) {
+
+  ##  worker: operate on one batch of columns
+  worker <- function(geneBatch, S, topRows) {
+    ## slice columns (single read avoids copying the rest)
+    subS <- as.matrix(S[, geneBatch, drop = FALSE])
+
+    ## 1. sort each column descending
+    subS <- colSort(subS, descending = TRUE)
+
+    ## 2. keep only the top rows
+    subS <- subS[seq_len(topRows), , drop = FALSE]
+
+    ## 3. p-value of χ²₁ for each entry
+    subS <- stats::pchisq(subS, df = 1L, lower.tail = FALSE)
+
+    ## 4. mean p-value per column → transform
+    gdi <- log(-log(colMeans(subS)))
+
+    rm(subS)
+
+    ## ---- progress tick
+    logThis("*", logLevel = 1L, appendLF = FALSE)
+
+    return(gdi)
+  }
+
+  if (cores != 1L) {
+    ##  tiny sandbox env to keep each worker lean
+    mini <- new.env(parent = baseenv())
+    mini$colSort <- Rfast::colSort
+    mini$colmeans <- Rfast::colmeans
+    mini$logThis <- logThis
+    mini$S <- S
+    mini$worker <- worker
+
+    environment(mini$worker) <- mini
+
+    ##  fork once, stream tasks
+    res <- parallel::mclapply(genesBatches,
+                              worker,
+                              S = S,
+                              topRows = topRows,
+                              mc.cores  = cores,
+                              mc.preschedule = FALSE)
+
+    logThis("|", logLevel = 1L, appendLF = TRUE)
+
+    # spawned errors are stored as try-error classes
+    resError <- unlist(lapply(res, inherits, "try-error"))
+    if (any(resError)) {
+      stop(res[[which(resError)[[1L]]]], call. = FALSE)
+    }
+    return(res)
+  } else {
+    res <- lapply(genesBatches,
+                  worker,
+                  S = S,
+                  topRows = topRows)
+
+    logThis("|", logLevel = 1L, appendLF = TRUE)
+
+    return(res)
+  }
+}
+
 
 #' @details `calculateGDIGivenS()` produces a `vector` with the `GDI` for each
 #'   column based on the `S` matrix (*Pearson's *\eqn{\chi^{2}}* test*)
@@ -57,20 +140,6 @@ calculateGenesCE <- function(objCOTAN) {
 #' @noRd
 #'
 
-# calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
-#   assert_that(length(dim(S)) == 2L, rowsFraction > 0.0, rowsFraction <= 1.0)
-#   topRows <- as.integer(max(1L:round(nrow(S) * rowsFraction, digits = 0L)))
-#
-#   pValue <- colSort(as.matrix(S), descending = TRUE)
-#   logThis("S matrix sorted", logLevel = 3L)
-#   pValue <- pValue[1L:topRows, , drop = FALSE]
-#   pValue <- pchisq(as.matrix(pValue), df = 1L, lower.tail = FALSE)
-#
-#   GDI <- set_names(log(-log(colmeans(pValue, parallel = TRUE))), colnames(S))
-#
-#   return(GDI)
-# }
-
 calculateGDIGivenS  <- function(S,
                                 rowsFraction = 0.05,
                                 cores        = 1L,
@@ -78,7 +147,7 @@ calculateGDIGivenS  <- function(S,
   assertthat::assert_that(length(dim(S)) == 2L,
                           rowsFraction > 0, rowsFraction <= 1)
 
-  logThis("Estimate `dispersion`: START", logLevel = 2L)
+  logThis("Calculate `GDI`: START", logLevel = 2L)
 
   cores <- handleMultiCore(cores)
 
@@ -86,55 +155,18 @@ calculateGDIGivenS  <- function(S,
   topRows <- max(1L, round(nrow(S) * rowsFraction))
 
   ##  split column indices into batches
-  colIdx <- seq_len(ncol(S))
-  colBatches <- split(colIdx, ceiling(colIdx / chunkSize))
+  spIdx <- seq_len(ncol(S))
+  spGenes <- split(spIdx, ceiling(spIdx / chunkSize))
 
-  ##  tiny sandbox env to keep each worker lean
-  mini <- new.env(parent = baseenv())
-  mini$colSort <- Rfast::colSort
-  mini$colmeans <- Rfast::colmeans
-  mini$logThis  <- logThis
-
-  ##  worker: operate on one batch of columns
-  worker <- function(idx, topRows) {
-    ## slice columns (single read avoids copying the rest)
-    subS <- S[, idx, drop = FALSE]
-
-    ## 1. sort each column descending
-    subS <- colSort(subS, descending = TRUE)
-
-    ## 2. keep only the top rows
-    subS <- subS[seq_len(topRows), , drop = FALSE]
-
-    ## 3. p-value of χ²₁ for each entry
-    subS <- stats::pchisq(subS, df = 1L, lower.tail = FALSE)
-
-    ## 4. mean p-value per column → transform
-    gdi <- log(-log(colMeans(subS)))
-
-    ## restore names
-    names(gdi) <- colnames(subS)
-
-    rm(subS)
-
-    ## ---- progress tick
-    logThis("*", logLevel = 1L, appendLF = FALSE)
-
-    return(gdi)
-  }
-  environment(worker) <- mini
-
-  ##  fork once, stream tasks
-  parts <- parallel::mclapply(colBatches,
-                              worker,
-                              topRows = topRows,
-                              mc.cores  = cores,
-                              mc.preschedule = FALSE)
+  gdiList <- runGDICalc(genesBatches = spGenes, S = S,
+                        topRows = topRows, cores = cores)
 
   ## glue result and reorder to original gene order
-  GDI <- unlist(parts, use.names = TRUE)
+  GDI <- unlist(gdiList, use.names = FALSE, recursive = TRUE)
 
-  GDI <- GDI[colnames(S)]
+  names(GDI) <- colnames(S)
+
+  logThis("Calculate `GDI`: DONE", logLevel = 2L)
 
   return(GDI)
 }
