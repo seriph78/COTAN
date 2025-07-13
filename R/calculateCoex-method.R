@@ -143,9 +143,8 @@ getDataMatrix <- function(objCOTAN, dataMethod = "") {
   }
 
   binDiscr <- function(objCOTAN) {
-    zeroOne <- getZeroOneProj(objCOTAN)
-    probOne <- 1.0 - getProbabilityOfZero(objCOTAN)
-    return(zeroOne - probOne)
+    # zeroOne - probOne
+    return(getZeroOneProj(objCOTAN) + getProbabilityOfZero(objCOTAN) - 1.0)
   }
 
   getLH <- function(objCOTAN, formula) {
@@ -166,6 +165,8 @@ getDataMatrix <- function(objCOTAN, dataMethod = "") {
     SL = , SignLogL = , SignedLogLikelihood     = getLH(objCOTAN, "sLog"),
     stop("Unrecognised `dataMethod` passed in: ", dataMethod)
   ))
+
+  gc()
 
   return(dataMatrix)
 }
@@ -1745,33 +1746,33 @@ calculateReducedDataMatrix <-
 
   numComp <- min(numComp, getNumGenes(objCOTAN))
 
-  dataMat <- getDataMatrix(objCOTAN, dataMethod = dataMethod)
-
   cellsRDM <- NULL
   if (isTRUE(useCoexEigen)) {
     logThis("Elaborating COEX Eigen Vectors - START", logLevel = 3L)
 
     # calculate the most relenvat eigen-vectors of the COEX matrix
-    coex <- getGenesCoex(objCOTAN, zeroDiagonal = FALSE)
-    res <- eigs_sym(as.matrix(coex), k = numComp, which = "LM")
+    res <- eigs_sym(as.matrix(getGenesCoex(objCOTAN, zeroDiagonal = FALSE)),
+                    k = numComp, which = "LM")
     eigenVectors <- res$vectors[, seq_len(numComp)]
+    rm(res)
+    gc()
 
     logThis("Elaborating COEX Eigen Vectors - DONE", logLevel = 3L)
 
-    # retrive the relvant data matrix
-    dataMatrix <- dataMat
-
-    # project the data matrix onto the calcualted eigen-space
-    dataMatrix <- t(eigenVectors) %*% dataMatrix
+    # retrieve the the data matrix and project it onto the coex eigen-space
+    dataMatrix <- t(eigenVectors) %*%
+                    getDataMatrix(objCOTAN, dataMethod = dataMethod)
 
     # re-scale in the cells direction
     cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))
+    rm(dataMatrix)
 
     colnames(cellsRDM) <- paste0("EC_", seq_len(ncol(cellsRDM)))
   } else {
     selectedGenes <- getSelectedGenes(objCOTAN, genesSel = genesSel,
-                                   numGenes = numGenes)
-    cellsMatrix <- t(dataMat[selectedGenes, ])
+                                      numGenes = numGenes)
+    cellsMatrix <-
+      t(getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ])
 
     # re-scale so that all the genes have mean 0.0 and stdev 1.0
     cellsMatrix <- scale(cellsMatrix, center = TRUE, scale = TRUE)
@@ -1782,9 +1783,11 @@ calculateReducedDataMatrix <-
                        rank = min(numComp, ncol(cellsMatrix)),
                        BSPARAM = IrlbaParam(),
                        get.rotation = FALSE)[["x"]]
+    rm(cellsMatrix)
 
     logThis("Elaborating PCA - DONE", logLevel = 3L)
   }
+  gc()
 
   assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
               ncol(cellsRDM) <= numComp)

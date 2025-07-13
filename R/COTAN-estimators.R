@@ -15,6 +15,9 @@
 #' @name ParametersEstimations
 NULL
 
+
+### ------ estimateLambdaLinear -----
+
 #'
 #' @aliases estimateLambdaLinear
 #'
@@ -63,6 +66,8 @@ setMethod(
   }
 )
 
+
+### ------ estimateNuLinear -----
 
 #' @aliases estimateNuLinear
 #'
@@ -134,6 +139,9 @@ setMethod(
 #' @name HandlingClusterizations
 NULL
 
+
+### ------ estimateNuLinearByCluster -----
+
 #' @aliases estimateNuLinearByCluster
 #'
 #' @details `estimateNuLinearByCluster()` does a linear estimation of `nu`:
@@ -191,19 +199,51 @@ setMethod(
   }
 )
 
+
 # local utility wrapper for parallel estimation of dispersion
 runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
                           threshold, maxIterations, cores) {
   if (cores != 1L) {
+    ## create a tiny private env `mini` and a worker within it:
+    ## this reduces spawning memory foot-print
+    mini <- new.env(parent = baseenv())
+    mini$parallelDispersionBisection <- parallelDispersionBisection
+    mini$rowsums <- Rfast::rowsums
+    mini$funProbZero <- funProbZero
+    mini$logThis <- logThis
+
+    ## set on the copy in `mini` to only use `mini`
+    environment(mini$parallelDispersionBisection) <- mini
+
+    ## wrapper that lives in `mini`
+    worker <- function(genesBatch, sumZeros, lambda, nu,
+                       threshold, maxIterations) {
+      bres <- parallelDispersionBisection(genes         = genesBatch,
+                                          sumZeros      = sumZeros,
+                                          lambda        = lambda,
+                                          nu            = nu,
+                                          threshold     = threshold,
+                                          maxIterations = maxIterations)
+
+      ## progress mark – goes straight to the main R session’s stdout
+      logThis("*", logLevel = 1L, appendLF = FALSE)
+
+      return(bres)
+    }
+    environment(worker) <- mini
+
     res <- parallel::mclapply(
       genesBatches,
-      parallelDispersionBisection,
+      worker,
       sumZeros = sumZeros,
       lambda = lambda,
       nu = nu,
       threshold = threshold,
       maxIterations = maxIterations,
-      mc.cores = cores)
+      mc.cores = cores,
+      mc.preschedule = FALSE)
+    logThis("|", logLevel = 1L, appendLF = TRUE)
+
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
     if (any(resError)) {
@@ -222,6 +262,8 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
   }
 }
 
+
+### ------ estimateDispersionBisection -----
 
 #' @aliases estimateDispersionBisection
 #'
@@ -288,48 +330,56 @@ setMethod(
 
     spGenes <- lapply(spIdx, function(x) genes[x])
 
-    numSplits <- length(spGenes)
-    splitStep <- max(4L, cores * 2L)
+    logThis(paste0("Executing ", length(spGenes), " genes batches"),
+            logLevel = 3L)
 
-    gc()
+    dispList <- runDispSolver(spGenes,
+                              sumZeros      = sumZeros,
+                              lambda        = lambda,
+                              nu            = nu,
+                              threshold     = threshold,
+                              maxIterations = maxIterations,
+                              cores         = cores)
 
-    pBegin <- 1L
-    while (pBegin <= numSplits) {
-      pEnd <- min(pBegin + splitStep - 1L, numSplits)
-
-      logThis(paste0("Executing ", (pEnd - pBegin + 1L), " genes batches from",
-                     " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
-              logLevel = 3L)
-
-      # as the runSolver() might trow, we force up to 5 reruns
-      res <- NULL
-      resError <- "No errors"
-      failCount <- 0L
-      while (!is_null(resError) && failCount < 5L) {
-        failCount <- failCount + 1L
-        c(res, resError) %<-%
-          tryCatch(list(runDispSolver(genesBatches = spGenes[pBegin:pEnd],
-                                      sumZeros = sumZeros,
-                                      lambda = lambda,
-                                      nu = nu,
-                                      threshold = threshold,
-                                      maxIterations = maxIterations,
-                                      cores = cores), NULL),
-                   error = function(e) {
-                     logThis(paste("In genes batches -", e), logLevel = 2L)
-                     list(NULL, e) })
-      }
-
-      assert_that(is_null(resError),
-                  msg = paste("Genes batches failed", failCount,
-                              "times with", resError))
-      dispList <- append(dispList, res)
-      rm(res)
-
-      pBegin <- pEnd + 1L
-    }
-    logThis("Estimate `dispersion`: DONE", logLevel = 2L)
-
+    # numSplits <-
+    # splitStep <- max(4L, cores * 2L)
+    #
+    # gc()
+    #
+    # pBegin <- 1L
+    # while (pBegin <= numSplits) {
+    #   pEnd <- min(pBegin + splitStep - 1L, numSplits)
+    #
+    #
+    #   # as the runSolver() might trow, we force up to 5 reruns
+    #   res <- NULL
+    #   resError <- "No errors"
+    #   failCount <- 0L
+    #   while (!is_null(resError) && failCount < 5L) {
+    #     failCount <- failCount + 1L
+    #     c(res, resError) %<-%
+    #       tryCatch(list(runDispSolver(genesBatches = spGenes[pBegin:pEnd],
+    #                                   sumZeros = sumZeros,
+    #                                   lambda = lambda,
+    #                                   nu = nu,
+    #                                   threshold = threshold,
+    #                                   maxIterations = maxIterations,
+    #                                   cores = cores), NULL),
+    #                error = function(e) {
+    #                  logThis(paste("In genes batches -", e), logLevel = 2L)
+    #                  list(NULL, e) })
+    #   }
+    #
+    #   assert_that(is_null(resError),
+    #               msg = paste("Genes batches failed", failCount,
+    #                           "times with", resError))
+    #   dispList <- append(dispList, res)
+    #   rm(res)
+    #
+    #   pBegin <- pEnd + 1L
+    # }
+    # logThis("Estimate `dispersion`: DONE", logLevel = 2L)
+    #
     gc()
 
     dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
@@ -359,10 +409,42 @@ setMethod(
   }
 )
 
+
+
 # local utility wrapper for parallel estimation of nu
 runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
                         initialGuess, threshold, maxIterations, cores) {
   if (cores != 1L) {
+    # create a tiny private env and a worker within:
+    # it reduces spawning memory foot-print
+    mini <- new.env(parent = baseenv())
+    mini$parallelNuBisection <- parallelNuBisection
+    mini$assert_that <- assertthat::assert_that
+    mini$colsums <- Rfast::colsums
+    mini$funProbZero <- funProbZero
+    mini$logThis <- logThis
+
+    ## set on the copy in `mini` to only use `mini`
+    environment(mini$parallelNuBisection) <- mini
+
+    ## wrapper that lives in `mini`
+    worker <- function(batch, sumZeros, lambda, dispersion,
+                       initialGuess, threshold, maxIterations) {
+      bres <- parallelNuBisection(batch,
+                                  sumZeros      = sumZeros,
+                                  lambda        = lambda,
+                                  dispersion    = dispersion,
+                                  initialGuess  = initialGuess,
+                                  threshold     = threshold,
+                                  maxIterations = maxIterations)
+
+      ## progress mark – goes straight to the main R session’s stdout
+      logThis("*", logLevel = 1L, appendLF = FALSE)
+
+      return(bres)
+    }
+    environment(worker) <- mini
+
     res <- parallel::mclapply(
       cellsBatches,
       parallelNuBisection,
@@ -372,7 +454,9 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       initialGuess = initialGuess,
       threshold = threshold,
       maxIterations = maxIterations,
-      mc.cores = cores)
+      mc.cores = cores,
+      mc.preschedule = FALSE)
+
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
     if (any(resError)) {
@@ -391,6 +475,9 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       maxIterations = maxIterations))
   }
 }
+
+
+### ------ estimateNuBisection -----
 
 #' @aliases estimateNuBisection
 #'
@@ -464,47 +551,56 @@ setMethod(
 
     spCells <- lapply(spIdx, function(x) cells[x])
 
-    numSplits <- length(spCells)
-    splitStep <- max(4L, cores * 2L)
+    nuList <- runNuSolver(spCells,
+                          sumZeros = sumZeros,
+                          lambda = lambda,
+                          dispersion = dispersion,
+                          initialGuess = initialGuess,
+                          threshold = threshold,
+                          maxIterations = maxIterations,
+                          cores = cores)
 
-    gc()
-
-    pBegin <- 1L
-    while (pBegin <= numSplits) {
-      pEnd <- min(pBegin + splitStep - 1L, numSplits)
-
-      logThis(paste0("Executing ", (pEnd - pBegin + 1L), " cells batches from",
-                     " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
-              logLevel = 3L)
-
-      # as the runSolver() might trow, we force up to 5 reruns
-      res <- NULL
-      resError <- "No errors"
-      failCount <- 0L
-      while (!is_null(resError) && failCount < 5L) {
-        failCount <- failCount + 1L
-        c(res, resError) %<-%
-          tryCatch(list(runNuSolver(spCells[pBegin:pEnd],
-                                    sumZeros = sumZeros,
-                                    lambda = lambda,
-                                    dispersion = dispersion,
-                                    initialGuess = initialGuess,
-                                    threshold = threshold,
-                                    maxIterations = maxIterations,
-                                    cores = cores), NULL),
-                   error = function(e) {
-                     logThis(paste("In cells batches -", e), logLevel = 2L)
-                     list(NULL, e) })
-      }
-
-      assert_that(is_null(resError),
-                  msg = paste("Cells batches failed", failCount,
-                              "times with", resError))
-      nuList <- append(nuList, res)
-      rm(res)
-
-      pBegin <- pEnd + 1L
-    }
+    # numSplits <- length(spCells)
+    # splitStep <- max(4L, cores * 2L)
+    #
+    # gc()
+    #
+    # pBegin <- 1L
+    # while (pBegin <= numSplits) {
+    #   pEnd <- min(pBegin + splitStep - 1L, numSplits)
+    #
+    #   logThis(paste0("Executing ", (pEnd - pBegin + 1L), " cells batches from",
+    #                  " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
+    #           logLevel = 3L)
+    #
+    #   # as the runSolver() might trow, we force up to 5 reruns
+    #   res <- NULL
+    #   resError <- "No errors"
+    #   failCount <- 0L
+    #   while (!is_null(resError) && failCount < 5L) {
+    #     failCount <- failCount + 1L
+    #     c(res, resError) %<-%
+    #       tryCatch(list(runNuSolver(spCells[pBegin:pEnd],
+    #                                 sumZeros = sumZeros,
+    #                                 lambda = lambda,
+    #                                 dispersion = dispersion,
+    #                                 initialGuess = initialGuess,
+    #                                 threshold = threshold,
+    #                                 maxIterations = maxIterations,
+    #                                 cores = cores), NULL),
+    #                error = function(e) {
+    #                  logThis(paste("In cells batches -", e), logLevel = 2L)
+    #                  list(NULL, e) })
+    #   }
+    #
+    #   assert_that(is_null(resError),
+    #               msg = paste("Cells batches failed", failCount,
+    #                           "times with", resError))
+    #   nuList <- append(nuList, res)
+    #   rm(res)
+    #
+    #   pBegin <- pEnd + 1L
+    # }
 
     gc()
     logThis("Estimate `nu`: DONE", logLevel = 2L)
@@ -534,6 +630,8 @@ setMethod(
   }
 )
 
+
+### ------ estimateDispersionNuBisection -----
 
 #' @aliases estimateDispersionNuBisection
 #'
@@ -649,6 +747,9 @@ setMethod(
     return(objCOTAN)
   }
 )
+
+
+### ------ estimateDispersionNuNlminb -----
 
 #' @aliases estimateDispersionNuNlminb
 #'

@@ -46,6 +46,8 @@ calculateGenesCE <- function(objCOTAN) {
 #'
 #' @importFrom rlang set_names
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @importFrom stats pchisq
 #'
 #' @importFrom Rfast colSort
@@ -55,6 +57,7 @@ calculateGenesCE <- function(objCOTAN) {
 #'
 
 calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
+  assert_that(length(dim(S)) == 2L, rowsFraction > 0.0, rowsFraction <= 1.0)
   topRows <- as.integer(max(1L:round(nrow(S) * rowsFraction, digits = 0L)))
 
   pValue <- colSort(as.matrix(S), descending = TRUE)
@@ -66,6 +69,69 @@ calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
 
   return(GDI)
 }
+
+# calculateGDIGivenS <- function(S, rowsFraction = 0.05,
+#                                cores = 1L, chunkSize = 1024L) {
+#   assert_that(is.matrix(S), nrow(S) == ncol(S),
+#               rowsFraction > 0.0, rowsFraction <= 1.0)
+#   logThis("Calculate GDI given `S`: START", logLevel = 2L)
+#
+#   cores <- handleMultiCore(cores)
+#
+#   numGenes <- ncol(S)
+#   topRows <- as.integer(max(1L:round(numGenes * rowsFraction, digits = 0L)))
+#
+#   spIdx <- parallel::splitIndices(numGenes, ceiling(numGenes / chunkSize))
+#
+#   spGenes <- lapply(spIdx, function(x) colnames(S)[x])
+#
+#   numSplits <- length(spGenes)
+#   splitStep <- max(4L, cores * 2L)
+#
+#   gc()
+#
+#
+# #  colBatches <- split(seq_len(nCols), ceiling(seq_along(seq_len(nCols)) / chunkSize))
+#
+#   # create a tiny private env and a worker within:
+#   # it reduces spawning memory foot-print
+#   mini <- new.env(parent = emptyenv())
+#   mini$colSort <- Rfast::colSort
+#   mini$pchisq <- stats::pchisq
+#
+#   # function to do one batch of columns
+#   worker <- function(genes, S) {
+#     subS <- S[, genes, drop = FALSE]
+#
+#     # 1) sort each column in descending order
+#     pValues <- colSort(subS, descending = TRUE)
+#     # 2) take only the topRows rows
+#     pValues <- pValues[seq_len(topRows), , drop = FALSE]
+#     # 3) convert to tail p‑values
+#     pValues <- pchisq(as.matrix(pValues), df = 1L, lower.tail = FALSE)
+#
+#     GDI <- set_names(log(-log(colmeans(pValues, parallel = TRUE))), colnames(S))
+#     return(GDI)
+#   }
+#   environment(worker) <- mini
+#
+#   # fire off mclapply
+#   parts <- parallel::mclapply(
+#     colBatches,
+#     worker,
+#     mc.cores      = cores,
+#     mc.preschedule = FALSE
+#   )
+#
+#   # glue back into a single named vector
+#   GDI <- unlist(parts, use.names = TRUE)
+#   GDI[colnames(S)]  # ensure original order
+#
+#   logThis("Calculate GDI given `S`: DONE", logLevel = 2L)
+#
+#   return(GDI)
+# }
+
 
 #' @details `calculateGDIGivenCorr()` produces a `vector` with the `GDI` for
 #'   each column based on the given correlation matrix, using the *Pearson's

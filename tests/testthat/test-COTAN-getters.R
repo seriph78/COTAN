@@ -1,4 +1,5 @@
 options(COTAN.TorchWarning = NULL)
+options(parallelly.fork.enable = TRUE)
 
 
 test_that("COTAN getters", {
@@ -14,7 +15,7 @@ test_that("COTAN getters", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj)
+  obj <- estimateDispersionBisection(obj, cores = 2L)
 
   # set tag label as legacy value
   row <- getMetaInfoRow(getMetadataDataset(obj), datasetTags()[["gsync"]])
@@ -169,12 +170,12 @@ test_that("COTAN getters", {
   expect_identical(getDataMatrix(obj, dataMethod = "BI"),                      as.matrix(zeroOne))
   expect_identical(getDataMatrix(obj, dataMethod = "Bin"),                     as.matrix(zeroOne))
   expect_identical(getDataMatrix(obj, dataMethod = "Binarized"),               as.matrix(zeroOne))
-  expect_identical(getDataMatrix(obj, dataMethod = "BD"),                      as.matrix(    zeroOne - (1.0 - probZero)))
-  expect_identical(getDataMatrix(obj, dataMethod = "BinDiscr"),                as.matrix(    zeroOne - (1.0 - probZero)))
-  expect_identical(getDataMatrix(obj, dataMethod = "BinarizedDiscrepancy"),    as.matrix(    zeroOne - (1.0 - probZero)))
-  expect_identical(getDataMatrix(obj, dataMethod = "AB"),                      as.matrix(abs(zeroOne - (1.0 - probZero))))
-  expect_identical(getDataMatrix(obj, dataMethod = "AdjBin"),                  as.matrix(abs(zeroOne - (1.0 - probZero))))
-  expect_identical(getDataMatrix(obj, dataMethod = "AdjBinarized"),            as.matrix(abs(zeroOne - (1.0 - probZero))))
+  expect_identical(getDataMatrix(obj, dataMethod = "BD"),                      as.matrix(    zeroOne + probZero - 1.0))
+  expect_identical(getDataMatrix(obj, dataMethod = "BinDiscr"),                as.matrix(    zeroOne + probZero - 1.0))
+  expect_identical(getDataMatrix(obj, dataMethod = "BinarizedDiscrepancy"),    as.matrix(    zeroOne + probZero - 1.0))
+  expect_identical(getDataMatrix(obj, dataMethod = "AB"),                      as.matrix(abs(zeroOne + probZero - 1.0)))
+  expect_identical(getDataMatrix(obj, dataMethod = "AdjBin"),                  as.matrix(abs(zeroOne + probZero - 1.0)))
+  expect_identical(getDataMatrix(obj, dataMethod = "AdjBinarized"),            as.matrix(abs(zeroOne + probZero - 1.0)))
   expect_identical(getDataMatrix(obj, dataMethod = "LH"),                      as.matrix(getLH(obj, "raw")))
   expect_identical(getDataMatrix(obj, dataMethod = "Like"),                    as.matrix(getLH(obj, "raw")))
   expect_identical(getDataMatrix(obj, dataMethod = "Likelihood"),              as.matrix(getLH(obj, "raw")))
