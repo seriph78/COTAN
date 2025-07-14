@@ -125,6 +125,7 @@ calculateGDIGivenS  <- function(S,
                                 rowsFraction = 0.05,
                                 cores        = 1L,
                                 chunkSize    = 1024L) {
+  # Beware S might not be square!
   assertthat::assert_that(length(dim(S)) == 2L,
                           rowsFraction > 0, rowsFraction <= 1)
 
@@ -132,10 +133,10 @@ calculateGDIGivenS  <- function(S,
 
   cores <- handleMultiCore(cores)
 
-  genes <- getGenes(objCOTAN)
+  genes <- colnames(S)
 
   ## rows to retain per column
-  topRows <- max(1L, round(length(genes) * rowsFraction))
+  topRows <- max(1L, round(nrow(S) * rowsFraction))
 
   ##  split genes into batches
   spIdx <- parallel::splitIndices(length(genes),
@@ -154,7 +155,7 @@ calculateGDIGivenS  <- function(S,
   ## glue result and reorder to original gene order
   GDI <- unlist(gdiList, use.names = FALSE, recursive = TRUE)
 
-  names(GDI) <- colnames(S)
+  names(GDI) <- genes
 
   logThis("Calculate `GDI`: DONE", logLevel = 2L)
 

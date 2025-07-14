@@ -522,7 +522,7 @@ according to a \emph{DEA} (or \emph{Zero-One}) based distance
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calcCoex = TRUE,
+objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calcCoex = FALSE,
                           optimizeForSpeed = TRUE, saveObj = FALSE)
 
 data("test.dataset.clusters1")
@@ -568,11 +568,6 @@ cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, dataMethod = "LogNormalized",
                                     clName = "first_clusterization",
                                     genesSel = "HVG_Seurat")
 plot(cellsUmapPlotAndDF[["plot"]])
-
-cellsUmapPlotAndDF2 <- cellsUMAPPlot(objCOTAN, dataMethod = "LogLikelihood",
-                                    clName = "first_clusterization",
-                                    useCoexEigen = TRUE)
-plot(cellsUmapPlotAndDF2[["plot"]])
 
 enrichment <- geneSetEnrichment(clustersCoex = coexDF,
                                 groupMarkers = groupMarkers)
