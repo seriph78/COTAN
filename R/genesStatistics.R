@@ -33,21 +33,6 @@ calculateGenesCE <- function(objCOTAN) {
                      getNumCells(objCOTAN), getGenes(objCOTAN)))
 }
 
-# calculateGDIGivenS <- function(S, rowsFraction = 0.05) {
-#   assert_that(length(dim(S)) == 2L, rowsFraction > 0.0, rowsFraction <= 1.0)
-#   topRows <- as.integer(max(1L:round(nrow(S) * rowsFraction, digits = 0L)))
-#
-#   pValue <- colSort(as.matrix(S), descending = TRUE)
-#   logThis("S matrix sorted", logLevel = 3L)
-#   pValue <- pValue[1L:topRows, , drop = FALSE]
-#   pValue <- pchisq(as.matrix(pValue), df = 1L, lower.tail = FALSE)
-#
-#   GDI <- set_names(log(-log(colmeans(pValue, parallel = TRUE))), colnames(S))
-#
-#   return(GDI)
-# }
-#
-
 
 # local utility wrapper for parallel estimation of dispersion
 runGDICalc <- function(genesBatches, S, topRows, cores) {
@@ -130,7 +115,10 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
 #' @importFrom Rfast colSort
 #' @importFrom Rfast colmeans
 #'
-#' @noRd
+#' @importFrom parallel mclapply
+#' @importFrom parallel splitIndices
+#'
+#' @rdname GenesStatistics
 #'
 
 calculateGDIGivenS  <- function(S,
@@ -144,12 +132,21 @@ calculateGDIGivenS  <- function(S,
 
   cores <- handleMultiCore(cores)
 
-  ## rows to retain per column
-  topRows <- max(1L, round(nrow(S) * rowsFraction))
+  genes <- getGenes(objCOTAN)
 
-  ##  split column indices into batches
-  spIdx <- seq_len(ncol(S))
-  spGenes <- split(spIdx, ceiling(spIdx / chunkSize))
+  ## rows to retain per column
+  topRows <- max(1L, round(length(genes) * rowsFraction))
+
+  ##  split genes into batches
+  spIdx <- parallel::splitIndices(length(genes),
+                                  ceiling(length(genes) / chunkSize))
+
+  spGenes <- lapply(spIdx, function(x) genes[x])
+
+  cores <- min(cores, length(spGenes))
+
+  logThis(paste0("Executing ", length(spGenes), " genes batches"),
+          logLevel = 3L)
 
   gdiList <- runGDICalc(genesBatches = spGenes, S = S,
                         topRows = topRows, cores = cores)

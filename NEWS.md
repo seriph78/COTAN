@@ -1,6 +1,7 @@
-Reduced significantly the memory foot-print while use multi-process
-solvers
-Also improved speed of GDI calculations, by going multi-process there too
+Reduced significantly the memory foot-print
+while use multi-process solvers
+Also improved speed of `GDI` and data-reduction calculations,
+by going multi-process there too
 
 ## 2.9.4
 

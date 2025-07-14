@@ -78,6 +78,9 @@ NULL
 #' @returns `calculateLikelihoodOfObserved()` returns a `matrix` with the
 #'   selected *formula* of the likelihood of the observed zero/one
 #'
+#' @importFrom parallel mclapply
+#' @importFrom parallel splitIndices
+#'
 #' @export
 #'
 #' @examples
@@ -96,8 +99,18 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
   # bound the probabilities to avoid exact zero or one
   probZero <- pmin(pmax(getProbabilityOfZero(objCOTAN), 1.0e-8), 1.0 - 1.0e-8)
 
-  cellsIdx <- seq_len(getNumCells(objCOTAN))
-  cellsBatches <- split(cellsIdx, ceiling(cellsIdx / chunkSize))
+  # split columns (cells) into chunks
+  cells <- getCells(objCOTAN)
+
+  spIdx <- parallel::splitIndices(length(cells),
+                                  ceiling(length(cells) / chunkSize))
+
+  spCells <- lapply(spIdx, function(x) cells[x])
+
+  cores <- min(cores, length(spCells))
+
+  logThis(paste0("Executing ", length(spCells), " genes batches"),
+          logLevel = 3L)
 
   worker <- function(cellsBatch, formula, rawData, probZero) {
       subZ <- rawData[, cellsBatch, drop = FALSE] != 0
@@ -120,7 +133,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
     environment(mini$worker) <- mini
 
     ##  fork once, stream tasks
-    res <- parallel::mclapply(cellsBatches,
+    res <- parallel::mclapply(spCells,
                               worker,
                               formula,
                               rawData,
@@ -134,11 +147,11 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
       stop(res[[which(resError)[[1L]]]], call. = FALSE)
     }
   } else {
-    res <- lapply(cellsBatches,
-                 worker,
-                 formula,
-                 rawData,
-                 probZero)
+    res <- lapply(spCells,
+                  worker,
+                  formula,
+                  rawData,
+                  probZero)
   }
 
   # now reassemble genes × cells
@@ -184,6 +197,9 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
 #' @returns `getDataMatrix()` returns a `matrix` with the same shape as the
 #'   *raw* data
 #'
+#' @importFrom parallel mclapply
+#' @importFrom parallel splitIndices
+#'
 #' @export
 #'
 #' @rdname CalculatingCOEX
@@ -201,8 +217,17 @@ getDataMatrix <- function(objCOTAN,
   # A little helper to do all 3 from binarized in parallel
   binDiscr <- function(objCOTAN, formula) {
     # split columns (cells) into chunks
-    cellsBatches <- split(seq_len(getNumCells(objCOTAN)),
-                          ceiling(seq_len(getNumCells(objCOTAN))/chunkSize))
+    cells <- getCells(objCOTAN)
+
+    spIdx <- parallel::splitIndices(length(cells),
+                                    ceiling(length(cells) / chunkSize))
+
+    spCells <- lapply(spIdx, function(x) cells[x])
+
+    cores <- min(cores, length(spCells))
+
+    logThis(paste0("Executing ", length(spCells), " genes batches"),
+            logLevel = 3L)
 
     worker <- function(cellsBatch, formula, rawData, probZero) {
       subZ <- rawData[, cellsBatch, drop = FALSE] != 0
@@ -222,14 +247,13 @@ getDataMatrix <- function(objCOTAN,
       mini$worker <- worker
       environment(mini$worker) <- mini
 
-      res <- parallel::mclapply(
-        cellsBatches,
-        worker,
-        formula,
-        getRawData(objCOTAN),
-        getProbabilityOfZero(objCOTAN),
-        mc.cores       = cores,
-        mc.preschedule = FALSE)
+      res <- parallel::mclapply(spCells,
+                                worker,
+                                formula,
+                                getRawData(objCOTAN),
+                                getProbabilityOfZero(objCOTAN),
+                                mc.cores       = cores,
+                                mc.preschedule = FALSE)
 
       # spawned errors are stored as try-error classes
       resError <- unlist(lapply(res, inherits, "try-error"))
@@ -237,13 +261,14 @@ getDataMatrix <- function(objCOTAN,
         stop(res[[which(resError)[[1L]]]], call. = FALSE)
       }
     } else {
-      res <- lapply(
-        cellsBatches,
-        worker,
-        formula,
-        getRawData(objCOTAN),
-        getProbabilityOfZero(objCOTAN))
+      res <- lapply(spCells,
+                    worker,
+                    formula,
+                    getRawData(objCOTAN),
+                    getProbabilityOfZero(objCOTAN))
     }
+
+    # now reassemble genes × cells
     res <- do.call(cbind, res)
     rownames(res) <- getGenes(objCOTAN)
     colnames(res) <- getCells(objCOTAN)

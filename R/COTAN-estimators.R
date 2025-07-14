@@ -328,6 +328,8 @@ setMethod(
 
     spGenes <- lapply(spIdx, function(x) genes[x])
 
+    cores <- min(cores, length(spGenes))
+
     logThis(paste0("Executing ", length(spGenes), " genes batches"),
             logLevel = 3L)
 
@@ -339,45 +341,6 @@ setMethod(
                               maxIterations = maxIterations,
                               cores         = cores)
 
-    # numSplits <-
-    # splitStep <- max(4L, cores * 2L)
-    #
-    # gc()
-    #
-    # pBegin <- 1L
-    # while (pBegin <= numSplits) {
-    #   pEnd <- min(pBegin + splitStep - 1L, numSplits)
-    #
-    #
-    #   # as the runSolver() might trow, we force up to 5 reruns
-    #   res <- NULL
-    #   resError <- "No errors"
-    #   failCount <- 0L
-    #   while (!is_null(resError) && failCount < 5L) {
-    #     failCount <- failCount + 1L
-    #     c(res, resError) %<-%
-    #       tryCatch(list(runDispSolver(genesBatches = spGenes[pBegin:pEnd],
-    #                                   sumZeros = sumZeros,
-    #                                   lambda = lambda,
-    #                                   nu = nu,
-    #                                   threshold = threshold,
-    #                                   maxIterations = maxIterations,
-    #                                   cores = cores), NULL),
-    #                error = function(e) {
-    #                  logThis(paste("In genes batches -", e), logLevel = 2L)
-    #                  list(NULL, e) })
-    #   }
-    #
-    #   assert_that(is_null(resError),
-    #               msg = paste("Genes batches failed", failCount,
-    #                           "times with", resError))
-    #   dispList <- append(dispList, res)
-    #   rm(res)
-    #
-    #   pBegin <- pEnd + 1L
-    # }
-    # logThis("Estimate `dispersion`: DONE", logLevel = 2L)
-    #
     gc()
 
     dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
@@ -548,6 +511,11 @@ setMethod(
 
     spCells <- lapply(spIdx, function(x) cells[x])
 
+    cores <- min(cores, length(spCells))
+
+    logThis(paste0("Executing ", length(spCells), " cells batches"),
+            logLevel = 3L)
+
     nuList <- runNuSolver(spCells,
                           sumZeros = sumZeros,
                           lambda = lambda,
@@ -556,51 +524,6 @@ setMethod(
                           threshold = threshold,
                           maxIterations = maxIterations,
                           cores = cores)
-
-      logThis(paste0("Executing ", length(spCells), " cells batches"),
-              logLevel = 3L)
-
-    # numSplits <- length(spCells)
-    # splitStep <- max(4L, cores * 2L)
-    #
-    # gc()
-    #
-    # pBegin <- 1L
-    # while (pBegin <= numSplits) {
-    #   pEnd <- min(pBegin + splitStep - 1L, numSplits)
-    #
-    #   logThis(paste0("Executing ", (pEnd - pBegin + 1L), " cells batches from",
-    #                  " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
-    #           logLevel = 3L)
-    #
-    #   # as the runSolver() might trow, we force up to 5 reruns
-    #   res <- NULL
-    #   resError <- "No errors"
-    #   failCount <- 0L
-    #   while (!is_null(resError) && failCount < 5L) {
-    #     failCount <- failCount + 1L
-    #     c(res, resError) %<-%
-    #       tryCatch(list(runNuSolver(spCells[pBegin:pEnd],
-    #                                 sumZeros = sumZeros,
-    #                                 lambda = lambda,
-    #                                 dispersion = dispersion,
-    #                                 initialGuess = initialGuess,
-    #                                 threshold = threshold,
-    #                                 maxIterations = maxIterations,
-    #                                 cores = cores), NULL),
-    #                error = function(e) {
-    #                  logThis(paste("In cells batches -", e), logLevel = 2L)
-    #                  list(NULL, e) })
-    #   }
-    #
-    #   assert_that(is_null(resError),
-    #               msg = paste("Cells batches failed", failCount,
-    #                           "times with", resError))
-    #   nuList <- append(nuList, res)
-    #   rm(res)
-    #
-    #   pBegin <- pEnd + 1L
-    # }
 
     gc()
     logThis("Estimate `nu`: DONE", logLevel = 2L)
