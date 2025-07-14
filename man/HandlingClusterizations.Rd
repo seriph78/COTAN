@@ -566,6 +566,11 @@ cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, dataMethod = "LogNormalized",
                                     genesSel = "HVG_Seurat")
 plot(cellsUmapPlotAndDF[["plot"]])
 
+cellsUmapPlotAndDF2 <- cellsUMAPPlot(objCOTAN, dataMethod = "LogLikelihood",
+                                    clName = "first_clusterization",
+                                    useCoexEigen = TRUE)
+plot(cellsUmapPlotAndDF2[["plot"]])
+
 enrichment <- geneSetEnrichment(clustersCoex = coexDF,
                                 groupMarkers = groupMarkers)
 

@@ -71,9 +71,6 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
 
     rm(subS)
 
-    ## ---- progress tick
-    logThis("*", logLevel = 1L, appendLF = FALSE)
-
     return(gdi)
   }
 
@@ -83,7 +80,6 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
     mini$colSort <- Rfast::colSort
     mini$colmeans <- Rfast::colmeans
     mini$logThis <- logThis
-    mini$S <- S
     mini$worker <- worker
 
     environment(mini$worker) <- mini
@@ -96,23 +92,18 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
                               mc.cores  = cores,
                               mc.preschedule = FALSE)
 
-    logThis("|", logLevel = 1L, appendLF = TRUE)
-
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
     if (any(resError)) {
       stop(res[[which(resError)[[1L]]]], call. = FALSE)
     }
+
     return(res)
   } else {
-    logThis("|", logLevel = 1L, appendLF = FALSE)
-
     res <- lapply(genesBatches,
                   worker,
                   S = S,
                   topRows = topRows)
-
-    logThis("|", logLevel = 1L, appendLF = TRUE)
 
     return(res)
   }
@@ -126,8 +117,8 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
 #' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
 #' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of genes to solve in batch in a single core. Default
-#'   is 1024.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #'
 #' @returns `calculateGDIGivenS()` returns a `vector` with the `GDI` data for
 #'   each column of the input
@@ -210,8 +201,8 @@ calculateGDIGivenCorr <-
 #' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
 #' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of genes to solve in batch in a single core. Default
-#'   is 1024.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #'
 #' @returns `calculateGDI()` returns a `data.frame` with:
 #'  * `"sum.raw.norm"` the sum of the normalized data rows

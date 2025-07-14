@@ -207,17 +207,12 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
   ## forward caller that allows for logging progress
   worker <- function(genesBatch, sumZeros, lambda, nu,
                      threshold, maxIterations) {
-    bres <- parallelDispersionBisection(genes         = genesBatch,
-                                        sumZeros      = sumZeros,
-                                        lambda        = lambda,
-                                        nu            = nu,
-                                        threshold     = threshold,
-                                        maxIterations = maxIterations)
-
-    ## progress mark – goes straight to the main R session’s stdout
-    logThis("*", logLevel = 1L, appendLF = FALSE)
-
-    return(bres)
+    return(parallelDispersionBisection(genes         = genesBatch,
+                                       sumZeros      = sumZeros,
+                                       lambda        = lambda,
+                                       nu            = nu,
+                                       threshold     = threshold,
+                                       maxIterations = maxIterations))
   }
 
   if (cores != 1L) {
@@ -234,8 +229,6 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     environment(mini$parallelDispersionBisection) <- mini
     environment(mini$worker) <- mini
 
-    logThis("|", logLevel = 1L, appendLF = FALSE)
-
     res <- parallel::mclapply(
       genesBatches,
       worker,
@@ -246,8 +239,6 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
       maxIterations = maxIterations,
       mc.cores = cores,
       mc.preschedule = FALSE)
-
-    logThis("|", logLevel = 1L, appendLF = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
@@ -264,8 +255,6 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
                   nu = nu,
                   threshold = threshold,
                   maxIterations = maxIterations)
-
-    logThis("|", logLevel = 1L, appendLF = TRUE)
 
     return(res)
   }
@@ -285,8 +274,8 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 #' @param threshold minimal solution precision
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of iterations (avoids infinite loops)
-#' @param chunkSize number of genes to solve in batch in a single core. Default
-#'   is 1024.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #'
 #' @returns `estimateDispersionBisection()` returns the updated `COTAN` object
 #'
@@ -427,18 +416,13 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
   ## forward caller that allows for logging progress
   worker <- function(batch, sumZeros, lambda, dispersion,
                      initialGuess, threshold, maxIterations) {
-    bres <- parallelNuBisection(batch,
-                                sumZeros      = sumZeros,
-                                lambda        = lambda,
-                                dispersion    = dispersion,
-                                initialGuess  = initialGuess,
-                                threshold     = threshold,
-                                maxIterations = maxIterations)
-
-    ## progress mark – goes straight to the main R session’s stdout
-    logThis("*", logLevel = 1L, appendLF = FALSE)
-
-    return(bres)
+    return(parallelNuBisection(batch,
+                               sumZeros      = sumZeros,
+                               lambda        = lambda,
+                               dispersion    = dispersion,
+                               initialGuess  = initialGuess,
+                               threshold     = threshold,
+                               maxIterations = maxIterations))
   }
 
   if (cores != 1L) {
@@ -456,8 +440,6 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     environment(mini$parallelNuBisection) <- mini
     environment(mini$worker) <- mini
 
-    logThis("|", logLevel = 1L, appendLF = FALSE)
-
     res <- parallel::mclapply(
       cellsBatches,
       parallelNuBisection,
@@ -470,13 +452,12 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       mc.cores = cores,
       mc.preschedule = FALSE)
 
-    logThis("|", logLevel = 1L, appendLF = TRUE)
-
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
     if (any(resError)) {
       stop(res[[which(resError)[[1L]]]], call. = FALSE)
     }
+
     return(res)
   } else {
     res <- lapply(cellsBatches,
@@ -487,8 +468,6 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
                   initialGuess = initialGuess,
                   threshold = threshold,
                   maxIterations = maxIterations)
-
-    logThis("|", logLevel = 1L, appendLF = TRUE)
 
     return(res)
   }
@@ -510,8 +489,8 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
 #' @param threshold minimal solution precision
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of iterations (avoids infinite loops)
-#' @param chunkSize number of genes to solve in batch in a single core. Default
-#'   is 1024.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #'
 #' @returns `estimateNuBisection()` returns the updated `COTAN` object
 #'
@@ -664,8 +643,8 @@ setMethod(
 #' @param threshold minimal solution precision
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of iterations (avoids infinite loops)
-#' @param chunkSize number of genes to solve in batch in a single core. Default
-#'   is 1024.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #' @param enforceNuAverageToOne a Boolean on whether to keep the average `nu`
 #'   equal to 1
 #'
@@ -783,8 +762,8 @@ setMethod(
 #' @param objCOTAN a `COTAN` object
 #' @param threshold minimal solution precision
 #' @param maxIterations max number of iterations (avoids infinite loops)
-#' @param chunkSize number of genes to solve in batch in a single core. Default
-#'   is 1024.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #' @param enforceNuAverageToOne a Boolean on whether to keep the average `nu`
 #'   equal to 1
 #'

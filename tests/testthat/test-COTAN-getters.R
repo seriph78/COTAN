@@ -135,21 +135,32 @@ test_that("COTAN getters", {
   bProbZero <- pmax(1.0e-8, pmin(1.0 - 1.0e-8, probZero))
 
 
-  getLH <- function(objCOTAN, formula) {
-    return(calculateLikelihoodOfObserved(objCOTAN, formula))
+  getLH <- function(objCOTAN, formula, cores = 1L) {
+    return(calculateLikelihoodOfObserved(objCOTAN, formula, cores))
+  }
+
+  asDataMatrix <- function(objCOTAN, array) {
+    matrix(array, nrow = getNumGenes(objCOTAN),
+           dimnames = list(getGenes(objCOTAN), getCells(objCOTAN)))
   }
 
   ## check default
-  expect_identical(calculateLikelihoodOfObserved(obj), getLH(obj, formula = "raw"))
+  expect_identical(calculateLikelihoodOfObserved(obj),
+                   getLH(obj, formula = "raw", cores = 2L))
 
-  expect_identical(getLH(obj, formula = "raw"),
-                   (1.0 - zeroOne) *     bProbZero  + zeroOne *    (1.0 - bProbZero))
-  expect_identical(getLH(obj, formula = "log"),
-                   (1.0 - zeroOne) * log(bProbZero) + zeroOne * log(1.0 - bProbZero))
-  expect_identical(getLH(obj, formula = "der"),
-                   (1.0 - zeroOne) /     bProbZero  - zeroOne /    (1.0 - bProbZero))
-  expect_identical(getLH(obj, formula = "sLog"),
-                   (1.0 - zeroOne) * log(bProbZero) - zeroOne * log(1.0 - bProbZero))
+  expect_identical(
+    getLH(obj, formula = "raw", cores = 4L),
+    asDataMatrix(obj, ifelse(zeroOne, (1.0 - bProbZero), bProbZero)))
+  expect_identical(
+    getLH(obj, formula = "log"),
+    asDataMatrix(obj, ifelse(zeroOne, log1p(-bProbZero), log(bProbZero))))
+  expect_identical(
+    getLH(obj, formula = "der"),
+    asDataMatrix(obj,  ifelse(zeroOne, -1.0/(1.0 - bProbZero), 1.0/bProbZero)))
+  expect_identical(
+    getLH(obj, formula = "sLog", cores = 2L),
+    asDataMatrix(obj, ifelse(zeroOne, -log1p(-bProbZero), log(bProbZero))))
+
   ## strings are case sensitive
   expect_error(getLH(obj, formula = "SLog"))
 

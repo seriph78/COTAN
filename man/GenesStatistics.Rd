@@ -95,8 +95,8 @@ it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
 
 \item{cores}{number of cores to use. Default is 1.}
 
-\item{chunkSize}{number of genes to solve in batch in a single core. Default
-is 1024.}
+\item{chunkSize}{number of elements to solve in batch in a single core.
+Default is 1024.}
 
 \item{geneSubsetCol}{an array of genes. It will be put in columns. If left
 empty the function will do it genome-wide.}

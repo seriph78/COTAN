@@ -57,9 +57,14 @@ getMu(objCOTAN)
 
 \S4method{dropCellsCoex}{COTAN}(objCOTAN)
 
-calculateLikelihoodOfObserved(objCOTAN, formula = "raw")
+calculateLikelihoodOfObserved(
+  objCOTAN,
+  formula = "raw",
+  cores = 1L,
+  chunkSize = 1024L
+)
 
-getDataMatrix(objCOTAN, dataMethod = "")
+getDataMatrix(objCOTAN, dataMethod = "", cores = 1L, chunkSize = 1024L)
 
 observedContingencyTablesYY(
   objCOTAN,
@@ -189,6 +194,11 @@ actually returned. Supported formulas are:
 
 where \eqn{z} is the \emph{binarized projection} and \eqn{p} is the \emph{probability
 of zero}}
+
+\item{cores}{number of cores to use. Default is 1.}
+
+\item{chunkSize}{number of elements to solve in batch in a single core.
+Default is 1024.}
 
 \item{dataMethod}{selects the method to use to create the \code{data.frame} to
 pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. To calculate, for each cell, a statistic for each

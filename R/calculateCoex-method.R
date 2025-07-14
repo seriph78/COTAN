@@ -71,8 +71,10 @@ NULL
 #'
 #'   where \eqn{z} is the *binarized projection* and \eqn{p} is the *probability
 #'   of zero*
+#' @param cores number of cores to use. Default is 1.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #'
-
 #' @returns `calculateLikelihoodOfObserved()` returns a `matrix` with the
 #'   selected *formula* of the likelihood of the observed zero/one
 #'
@@ -83,22 +85,68 @@ NULL
 #'
 #' @rdname CalculatingCOEX
 #'
-calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
-  zeroOne <- getZeroOneProj(objCOTAN)
+calculateLikelihoodOfObserved <- function(objCOTAN,
+                                          formula = "raw",
+                                          cores = 1L,
+                                          chunkSize = 1024L) {
+  cores <- handleMultiCore(cores)
+
+  rawData <- getRawData(objCOTAN)
 
   # bound the probabilities to avoid exact zero or one
   probZero <- pmin(pmax(getProbabilityOfZero(objCOTAN), 1.0e-8), 1.0 - 1.0e-8)
 
-  # estimate the likelihood of observed result
-  switch(
-    formula,
-    raw  = (1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero),
-    log  = (1.0 - zeroOne) * log(probZero) + zeroOne * log(1.0 - probZero),
-    der  = (1.0 - zeroOne) / probZero - zeroOne / (1.0 - probZero),
-    sLog = (1.0 - zeroOne) * log(probZero) - zeroOne * log(1.0 - probZero),
-    stop("Unrecognised `formula` passed in (case sensitive): ", formula)
-  )
+  cellsIdx <- seq_len(getNumCells(objCOTAN))
+  cellsBatches <- split(cellsIdx, ceiling(cellsIdx / chunkSize))
 
+  worker <- function(cellsBatch, formula, rawData, probZero) {
+      subZ <- rawData[, cellsBatch, drop = FALSE] != 0
+      subP <- probZero[, cellsBatch, drop = FALSE]
+      resM <- switch(formula,
+                    raw  = ifelse(subZ,       1.0-subP,       subP),
+                    log  = ifelse(subZ,    log1p(-subP),  log(subP)),
+                    der  = ifelse(subZ, -1.0/(1.0-subP),  1.0/subP),
+                    sLog = ifelse(subZ,   -log1p(-subP),  log(subP)),
+                    stop("Unknown formula: ", formula))
+      dim(resM) <- dim(subZ)
+      return(resM)
+    }
+
+  res <- NULL
+  if (cores != 1L) {
+    ##  tiny sandbox env to keep each worker lean
+    mini <- new.env(parent = baseenv())
+    mini$worker <- worker
+    environment(mini$worker) <- mini
+
+    ##  fork once, stream tasks
+    res <- parallel::mclapply(cellsBatches,
+                              worker,
+                              formula,
+                              rawData,
+                              probZero,
+                              mc.cores = cores,
+                              mc.preschedule = FALSE)
+
+    # spawned errors are stored as try-error classes
+    resError <- unlist(lapply(res, inherits, "try-error"))
+    if (any(resError)) {
+      stop(res[[which(resError)[[1L]]]], call. = FALSE)
+    }
+  } else {
+    res <- lapply(cellsBatches,
+                 worker,
+                 formula,
+                 rawData,
+                 probZero)
+  }
+
+  # now reassemble genes × cells
+  res <- do.call(cbind, res)
+  rownames(res) <- getGenes(objCOTAN)
+  colnames(res) <- getCells(objCOTAN)
+
+  return(res)
 }
 
 #' @details `getDataMatrix()` gives for each cell and each gene the result of
@@ -137,18 +185,71 @@ calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
 #'
 #' @rdname CalculatingCOEX
 #'
-getDataMatrix <- function(objCOTAN, dataMethod = "") {
+getDataMatrix <- function(objCOTAN,
+                          dataMethod = "",
+                          cores = 1L,
+                          chunkSize = 1024L) {
   if (isEmptyName(dataMethod)) {
     dataMethod <- "LogNormalized"
   }
 
-  binDiscr <- function(objCOTAN) {
-    # zeroOne - probOne
-    return(getZeroOneProj(objCOTAN) + getProbabilityOfZero(objCOTAN) - 1.0)
+  cores <- handleMultiCore(cores)
+
+  # A little helper to do all 3 from binarized in parallel
+  binDiscr <- function(objCOTAN, formula) {
+    # split columns (cells) into chunks
+    cellsBatches <- split(seq_len(getNumCells(objCOTAN)),
+                          ceiling(seq_len(getNumCells(objCOTAN))/chunkSize))
+
+    worker <- function(cellsBatch, formula, rawData, probZero) {
+      subZ <- rawData[, cellsBatch, drop = FALSE] != 0
+      subP <- probZero[, cellsBatch, drop = FALSE]
+      resM <- switch(formula,
+                     raw  = subZ + 0.0, # make numeric from logical
+                     dis  = subZ + subP - 1.0,
+                     abs  = abs(subZ + subP - 1.0),
+                     stop("Unknown formula: ", formula))
+      return(resM)
+    }
+
+    res <- NULL
+    if (cores != 1L) {
+      ##  tiny sandbox env to keep each worker lean
+      mini <- new.env(parent = baseenv())
+      mini$worker <- worker
+      environment(mini$worker) <- mini
+
+      res <- parallel::mclapply(
+        cellsBatches,
+        worker,
+        formula,
+        getRawData(objCOTAN),
+        getProbabilityOfZero(objCOTAN),
+        mc.cores       = cores,
+        mc.preschedule = FALSE)
+
+      # spawned errors are stored as try-error classes
+      resError <- unlist(lapply(res, inherits, "try-error"))
+      if (any(resError)) {
+        stop(res[[which(resError)[[1L]]]], call. = FALSE)
+      }
+    } else {
+      res <- lapply(
+        cellsBatches,
+        worker,
+        formula,
+        getRawData(objCOTAN),
+        getProbabilityOfZero(objCOTAN))
+    }
+    res <- do.call(cbind, res)
+    rownames(res) <- getGenes(objCOTAN)
+    colnames(res) <- getCells(objCOTAN)
+
+    return(res)
   }
 
   getLH <- function(objCOTAN, formula) {
-    return(calculateLikelihoodOfObserved(objCOTAN, formula))
+    return(calculateLikelihoodOfObserved(objCOTAN, formula, cores, chunkSize))
   }
 
   dataMatrix <- as.matrix(switch(
@@ -156,9 +257,9 @@ getDataMatrix <- function(objCOTAN, dataMethod = "") {
     RW = , Raw      = , RawData                 = getRawData(objCOTAN),
     NN = , NuNorm   = , Normalized              = getNuNormData(objCOTAN),
     LN = , LogNorm  = , LogNormalized           = getLogNormData(objCOTAN),
-    BI = , Bin      = , Binarized               = getZeroOneProj(objCOTAN),
-    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN),
-    AB = , AdjBin   = , AdjBinarized            = abs(binDiscr(objCOTAN)),
+    BI = , Bin      = , Binarized               = binDiscr(objCOTAN, "raw"),
+    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN, "dis"),
+    AB = , AdjBin   = , AdjBinarized            = binDiscr(objCOTAN, "abs"),
     LH = , Like     = , Likelihood              = getLH(objCOTAN, "raw"),
     LL = , LogLike  = , LogLikelihood           = getLH(objCOTAN, "log"),
     DL = , DerLogL  = , DerivativeLogLikelihood = getLH(objCOTAN, "der"),

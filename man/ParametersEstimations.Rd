@@ -89,8 +89,8 @@ getProbabilityOfZero(objCOTAN)
 
 \item{maxIterations}{max number of iterations (avoids infinite loops)}
 
-\item{chunkSize}{number of genes to solve in batch in a single core. Default
-is 1024.}
+\item{chunkSize}{number of elements to solve in batch in a single core.
+Default is 1024.}
 
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
