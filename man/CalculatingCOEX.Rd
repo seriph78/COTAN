@@ -157,7 +157,9 @@ calculateReducedDataMatrix(
   dataMethod = "",
   numComp = 25L,
   genesSel = "",
-  numGenes = 2000L
+  numGenes = 2000L,
+  cores = 1L,
+  chunkSize = 1024L
 )
 }
 \arguments{

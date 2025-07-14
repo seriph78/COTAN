@@ -103,6 +103,7 @@ cellsUMAPPlot(
   numComp = 25L,
   genesSel = "",
   numGenes = 200L,
+  cores = 1L,
   colors = NULL,
   numNeighbors = 0L,
   minPointsDist = NA
@@ -248,6 +249,8 @@ pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]
 
 \item{numGenes}{the number of genes to select using the above method. Will be
 ignored when an explicit list of genes has been passed in}
+
+\item{cores}{number of cores to use. Default is 1.}
 
 \item{groupMarkers}{an optional named \code{list} with an element for each group
 comprised of one or more marker genes}

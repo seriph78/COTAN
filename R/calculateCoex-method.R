@@ -177,6 +177,9 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
 #'
 #'   For the last four options see [calculateLikelihoodOfObserved()] for more
 #'   details
+#' @param cores number of cores to use. Default is 1.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #'
 #' @returns `getDataMatrix()` returns a `matrix` with the same shape as the
 #'   *raw* data
@@ -1823,6 +1826,9 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
+#' @param cores number of cores to use. Default is 1.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #'
 #' @returns `calculateReducedDataMatrix()` returns the reduced matrix. The
 #'   returned `matrix` has dimensions: (number of cells, number of components)
@@ -1841,7 +1847,8 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 calculateReducedDataMatrix <-
   function(objCOTAN, useCoexEigen = FALSE,
            dataMethod = "", numComp = 25L,
-           genesSel = "", numGenes = 2000L) {
+           genesSel = "", numGenes = 2000L,
+           cores = 1L, chunkSize = 1024L) {
   logThis("Elaborating Reduced dimensionality Data Matrix - START",
           logLevel = 2L)
 
@@ -1862,7 +1869,8 @@ calculateReducedDataMatrix <-
 
     # retrieve the the data matrix and project it onto the coex eigen-space
     dataMatrix <- t(eigenVectors) %*%
-                    getDataMatrix(objCOTAN, dataMethod = dataMethod)
+                    getDataMatrix(objCOTAN, dataMethod = dataMethod,
+                                  cores = cores, chunkSize = chunkSize)
 
     # re-scale in the cells direction
     cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))
@@ -1873,7 +1881,8 @@ calculateReducedDataMatrix <-
     selectedGenes <- getSelectedGenes(objCOTAN, genesSel = genesSel,
                                       numGenes = numGenes)
     cellsMatrix <-
-      t(getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ])
+      t(getDataMatrix(objCOTAN, dataMethod = dataMethod,
+                      cores = cores, chunkSize = chunkSize)[selectedGenes, ])
 
     # re-scale so that all the genes have mean 0.0 and stdev 1.0
     cellsMatrix <- scale(cellsMatrix, center = TRUE, scale = TRUE)

@@ -253,6 +253,7 @@ UMAPPlot <- function(dataIn,
 #'   [getSelectedGenes()] for more details.
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
+#' @param cores number of cores to use. Default is 1.
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
@@ -280,6 +281,7 @@ cellsUMAPPlot <- function(objCOTAN,
                           numComp = 25L,
                           genesSel = "",
                           numGenes = 200L,
+                          cores = 1L,
                           colors = NULL,
                           numNeighbors = 0L,
                           minPointsDist = NA) {
@@ -310,7 +312,7 @@ cellsUMAPPlot <- function(objCOTAN,
   cellsRDM <- calculateReducedDataMatrix(
     objCOTAN, useCoexEigen = useCoexEigen,
     dataMethod = dataMethod, numComp = numComp,
-    genesSel = genesSel, numGenes = numGenes)
+    genesSel = genesSel, numGenes = numGenes, cores = cores)
 
   tailMsg <- ifelse(useCoexEigen, "COEX eigenvectors projection",
                     ifelse(length(genesSel) == 1,
