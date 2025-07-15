@@ -100,21 +100,21 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
   probZero <- pmin(pmax(getProbabilityOfZero(objCOTAN), 1.0e-8), 1.0 - 1.0e-8)
 
   # split columns (cells) into chunks
-  cells <- getCells(objCOTAN)
+  genes <- getGenes(objCOTAN)
 
-  spIdx <- parallel::splitIndices(length(cells),
-                                  ceiling(length(cells) / chunkSize))
+  spIdx <- parallel::splitIndices(length(genes),
+                                  ceiling(length(genes) / chunkSize))
 
-  spCells <- lapply(spIdx, function(x) cells[x])
+  spGenes <- lapply(spIdx, function(x) genes[x])
 
-  cores <- min(cores, length(spCells))
+  cores <- min(cores, length(spGenes))
 
-  logThis(paste0("Executing ", length(spCells), " genes batches"),
+  logThis(paste0("Executing ", length(spGenes), " genes batches"),
           logLevel = 3L)
 
-  worker <- function(cellsBatch, formula, rawData, probZero) {
-      subZ <- rawData[, cellsBatch, drop = FALSE] != 0
-      subP <- probZero[, cellsBatch, drop = FALSE]
+  worker <- function(genesBatch, formula, rawData, probZero) {
+      subZ <- rawData [genesBatch, , drop = FALSE] != 0
+      subP <- probZero[genesBatch, , drop = FALSE]
       resM <- switch(formula,
                     raw  = ifelse(subZ,       1.0-subP,       subP),
                     log  = ifelse(subZ,    log1p(-subP),  log(subP)),
@@ -133,7 +133,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
     environment(mini$worker) <- mini
 
     ##  fork once, stream tasks
-    res <- parallel::mclapply(spCells,
+    res <- parallel::mclapply(spGenes,
                               worker,
                               formula,
                               rawData,
@@ -147,7 +147,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
       stop(res[[which(resError)[[1L]]]], call. = FALSE)
     }
   } else {
-    res <- lapply(spCells,
+    res <- lapply(spGenes,
                   worker,
                   formula,
                   rawData,
@@ -155,7 +155,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
   }
 
   # now reassemble genes × cells
-  res <- do.call(cbind, res)
+  res <- do.call(rbind, res)
   rownames(res) <- getGenes(objCOTAN)
   colnames(res) <- getCells(objCOTAN)
 
@@ -217,21 +217,21 @@ getDataMatrix <- function(objCOTAN,
   # A little helper to do all 3 from binarized in parallel
   binDiscr <- function(objCOTAN, formula) {
     # split columns (cells) into chunks
-    cells <- getCells(objCOTAN)
+    genes <- getCells(objCOTAN)
 
-    spIdx <- parallel::splitIndices(length(cells),
-                                    ceiling(length(cells) / chunkSize))
+    spIdx <- parallel::splitIndices(length(genes),
+                                    ceiling(length(genes) / chunkSize))
 
-    spCells <- lapply(spIdx, function(x) cells[x])
+    spGenes <- lapply(spIdx, function(x) genes[x])
 
-    cores <- min(cores, length(spCells))
+    cores <- min(cores, length(spGenes))
 
-    logThis(paste0("Executing ", length(spCells), " genes batches"),
+    logThis(paste0("Executing ", length(spGenes), " genes batches"),
             logLevel = 3L)
 
-    worker <- function(cellsBatch, formula, rawData, probZero) {
-      subZ <- rawData[, cellsBatch, drop = FALSE] != 0
-      subP <- probZero[, cellsBatch, drop = FALSE]
+    worker <- function(genesBatch, formula, rawData, probZero) {
+      subZ <- rawData [genesBatch, , drop = FALSE] != 0
+      subP <- probZero[genesBatch, , drop = FALSE]
       resM <- switch(formula,
                      raw  = subZ + 0.0, # make numeric from logical
                      dis  = subZ + subP - 1.0,
@@ -247,7 +247,7 @@ getDataMatrix <- function(objCOTAN,
       mini$worker <- worker
       environment(mini$worker) <- mini
 
-      res <- parallel::mclapply(spCells,
+      res <- parallel::mclapply(spGenes,
                                 worker,
                                 formula,
                                 getRawData(objCOTAN),
@@ -261,7 +261,7 @@ getDataMatrix <- function(objCOTAN,
         stop(res[[which(resError)[[1L]]]], call. = FALSE)
       }
     } else {
-      res <- lapply(spCells,
+      res <- lapply(spGenes,
                     worker,
                     formula,
                     getRawData(objCOTAN),
@@ -269,7 +269,7 @@ getDataMatrix <- function(objCOTAN,
     }
 
     # now reassemble genes × cells
-    res <- do.call(cbind, res)
+    res <- do.call(rbind, res)
     rownames(res) <- getGenes(objCOTAN)
     colnames(res) <- getCells(objCOTAN)
 
@@ -285,7 +285,7 @@ getDataMatrix <- function(objCOTAN,
     RW = , Raw      = , RawData                 = getRawData(objCOTAN),
     NN = , NuNorm   = , Normalized              = getNuNormData(objCOTAN),
     LN = , LogNorm  = , LogNormalized           = getLogNormData(objCOTAN),
-    BI = , Bin      = , Binarized               = binDiscr(objCOTAN, "raw"),
+    BI = , Bin      = , Binarized               = getZeroOneProj(objCOTAN),
     BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN, "dis"),
     AB = , AdjBin   = , AdjBinarized            = binDiscr(objCOTAN, "abs"),
     LH = , Like     = , Likelihood              = getLH(objCOTAN, "raw"),
