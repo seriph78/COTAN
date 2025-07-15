@@ -144,6 +144,12 @@ test_that("COTAN getters", {
            dimnames = list(getGenes(objCOTAN), getCells(objCOTAN)))
   }
 
+  binDiscr <- function(objCOTAN) {
+    rawData <- getRawData(objCOTAN)
+    probZero <- getProbabilityOfZero(objCOTAN)
+    return(asDataMatrix(objCOTAN,
+                        ifelse(rawData != 0L, probZero, probZero - 1.0)))
+  }
   ## check default
   expect_identical(calculateLikelihoodOfObserved(obj),
                    getLH(obj, formula = "raw"))
@@ -181,12 +187,12 @@ test_that("COTAN getters", {
   expect_identical(getDataMatrix(obj, dataMethod = "BI"),                      as.matrix(zeroOne))
   expect_identical(getDataMatrix(obj, dataMethod = "Bin"),                     as.matrix(zeroOne))
   expect_identical(getDataMatrix(obj, dataMethod = "Binarized"),               as.matrix(zeroOne))
-  expect_identical(getDataMatrix(obj, dataMethod = "BD"),                      as.matrix(    zeroOne + probZero - 1.0))
-  expect_identical(getDataMatrix(obj, dataMethod = "BinDiscr"),                as.matrix(    zeroOne + probZero - 1.0))
-  expect_identical(getDataMatrix(obj, dataMethod = "BinarizedDiscrepancy"),    as.matrix(    zeroOne + probZero - 1.0))
-  expect_identical(getDataMatrix(obj, dataMethod = "AB"),                      as.matrix(abs(zeroOne + probZero - 1.0)))
-  expect_identical(getDataMatrix(obj, dataMethod = "AdjBin"),                  as.matrix(abs(zeroOne + probZero - 1.0)))
-  expect_identical(getDataMatrix(obj, dataMethod = "AdjBinarized"),            as.matrix(abs(zeroOne + probZero - 1.0)))
+  expect_identical(getDataMatrix(obj, dataMethod = "BD"),                      as.matrix(    binDiscr(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "BinDiscr"),                as.matrix(    binDiscr(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "BinarizedDiscrepancy"),    as.matrix(    binDiscr(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "AB"),                      as.matrix(abs(binDiscr(obj))))
+  expect_identical(getDataMatrix(obj, dataMethod = "AdjBin"),                  as.matrix(abs(binDiscr(obj))))
+  expect_identical(getDataMatrix(obj, dataMethod = "AdjBinarized"),            as.matrix(abs(binDiscr(obj))))
   expect_identical(getDataMatrix(obj, dataMethod = "LH"),                      as.matrix(getLH(obj, "raw")))
   expect_identical(getDataMatrix(obj, dataMethod = "Like"),                    as.matrix(getLH(obj, "raw")))
   expect_identical(getDataMatrix(obj, dataMethod = "Likelihood"),              as.matrix(getLH(obj, "raw")))
