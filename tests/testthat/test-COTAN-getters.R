@@ -1,4 +1,5 @@
 options(COTAN.TorchWarning = NULL)
+options(parallelly.fork.enable = TRUE)
 
 
 test_that("COTAN getters", {
@@ -14,7 +15,7 @@ test_that("COTAN getters", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj)
+  obj <- estimateDispersionBisection(obj, cores = 2L)
 
   # set tag label as legacy value
   row <- getMetaInfoRow(getMetadataDataset(obj), datasetTags()[["gsync"]])
@@ -138,17 +139,28 @@ test_that("COTAN getters", {
     return(calculateLikelihoodOfObserved(objCOTAN, formula))
   }
 
-  ## check default
-  expect_identical(calculateLikelihoodOfObserved(obj), getLH(obj, formula = "raw"))
+  asDataMatrix <- function(objCOTAN, array) {
+    matrix(array, nrow = getNumGenes(objCOTAN),
+           dimnames = list(getGenes(objCOTAN), getCells(objCOTAN)))
+  }
 
-  expect_identical(getLH(obj, formula = "raw"),
-                   (1.0 - zeroOne) *     bProbZero  + zeroOne *    (1.0 - bProbZero))
-  expect_identical(getLH(obj, formula = "log"),
-                   (1.0 - zeroOne) * log(bProbZero) + zeroOne * log(1.0 - bProbZero))
-  expect_identical(getLH(obj, formula = "der"),
-                   (1.0 - zeroOne) /     bProbZero  - zeroOne /    (1.0 - bProbZero))
-  expect_identical(getLH(obj, formula = "sLog"),
-                   (1.0 - zeroOne) * log(bProbZero) - zeroOne * log(1.0 - bProbZero))
+  ## check default
+  expect_identical(calculateLikelihoodOfObserved(obj),
+                   getLH(obj, formula = "raw"))
+
+  expect_identical(
+    getLH(obj, formula = "raw"),
+    asDataMatrix(obj, ifelse(zeroOne, (1.0 - bProbZero), bProbZero)))
+  expect_identical(
+    getLH(obj, formula = "log"),
+    asDataMatrix(obj, ifelse(zeroOne, log1p(-bProbZero), log(bProbZero))))
+  expect_identical(
+    getLH(obj, formula = "der"),
+    asDataMatrix(obj,  ifelse(zeroOne, -1.0/(1.0 - bProbZero), 1.0/bProbZero)))
+  expect_identical(
+    getLH(obj, formula = "sLog"),
+    asDataMatrix(obj, ifelse(zeroOne, -log1p(-bProbZero), log(bProbZero))))
+
   ## strings are case sensitive
   expect_error(getLH(obj, formula = "SLog"))
 
@@ -169,12 +181,12 @@ test_that("COTAN getters", {
   expect_identical(getDataMatrix(obj, dataMethod = "BI"),                      as.matrix(zeroOne))
   expect_identical(getDataMatrix(obj, dataMethod = "Bin"),                     as.matrix(zeroOne))
   expect_identical(getDataMatrix(obj, dataMethod = "Binarized"),               as.matrix(zeroOne))
-  expect_identical(getDataMatrix(obj, dataMethod = "BD"),                      as.matrix(    zeroOne - (1.0 - probZero)))
-  expect_identical(getDataMatrix(obj, dataMethod = "BinDiscr"),                as.matrix(    zeroOne - (1.0 - probZero)))
-  expect_identical(getDataMatrix(obj, dataMethod = "BinarizedDiscrepancy"),    as.matrix(    zeroOne - (1.0 - probZero)))
-  expect_identical(getDataMatrix(obj, dataMethod = "AB"),                      as.matrix(abs(zeroOne - (1.0 - probZero))))
-  expect_identical(getDataMatrix(obj, dataMethod = "AdjBin"),                  as.matrix(abs(zeroOne - (1.0 - probZero))))
-  expect_identical(getDataMatrix(obj, dataMethod = "AdjBinarized"),            as.matrix(abs(zeroOne - (1.0 - probZero))))
+  expect_identical(getDataMatrix(obj, dataMethod = "BD"),                      as.matrix(    zeroOne + probZero - 1.0))
+  expect_identical(getDataMatrix(obj, dataMethod = "BinDiscr"),                as.matrix(    zeroOne + probZero - 1.0))
+  expect_identical(getDataMatrix(obj, dataMethod = "BinarizedDiscrepancy"),    as.matrix(    zeroOne + probZero - 1.0))
+  expect_identical(getDataMatrix(obj, dataMethod = "AB"),                      as.matrix(abs(zeroOne + probZero - 1.0)))
+  expect_identical(getDataMatrix(obj, dataMethod = "AdjBin"),                  as.matrix(abs(zeroOne + probZero - 1.0)))
+  expect_identical(getDataMatrix(obj, dataMethod = "AdjBinarized"),            as.matrix(abs(zeroOne + probZero - 1.0)))
   expect_identical(getDataMatrix(obj, dataMethod = "LH"),                      as.matrix(getLH(obj, "raw")))
   expect_identical(getDataMatrix(obj, dataMethod = "Like"),                    as.matrix(getLH(obj, "raw")))
   expect_identical(getDataMatrix(obj, dataMethod = "Likelihood"),              as.matrix(getLH(obj, "raw")))

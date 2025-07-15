@@ -72,7 +72,6 @@ NULL
 #'   where \eqn{z} is the *binarized projection* and \eqn{p} is the *probability
 #'   of zero*
 #'
-
 #' @returns `calculateLikelihoodOfObserved()` returns a `matrix` with the
 #'   selected *formula* of the likelihood of the observed zero/one
 #'
@@ -83,22 +82,27 @@ NULL
 #'
 #' @rdname CalculatingCOEX
 #'
-calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
-  zeroOne <- getZeroOneProj(objCOTAN)
+calculateLikelihoodOfObserved <- function(objCOTAN,
+                                          formula = "raw") {
+  rawData <- getRawData(objCOTAN)
 
   # bound the probabilities to avoid exact zero or one
   probZero <- pmin(pmax(getProbabilityOfZero(objCOTAN), 1.0e-8), 1.0 - 1.0e-8)
 
-  # estimate the likelihood of observed result
-  switch(
-    formula,
-    raw  = (1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero),
-    log  = (1.0 - zeroOne) * log(probZero) + zeroOne * log(1.0 - probZero),
-    der  = (1.0 - zeroOne) / probZero - zeroOne / (1.0 - probZero),
-    sLog = (1.0 - zeroOne) * log(probZero) - zeroOne * log(1.0 - probZero),
-    stop("Unrecognised `formula` passed in (case sensitive): ", formula)
-  )
+  res <-
+    switch(formula,
+           raw  = ifelse(rawData != 0L,       1.0-probZero,       probZero),
+           log  = ifelse(rawData != 0L,    log1p(-probZero),  log(probZero)),
+           der  = ifelse(rawData != 0L, -1.0/(1.0-probZero),  1.0/probZero),
+           sLog = ifelse(rawData != 0L,   -log1p(-probZero),  log(probZero)),
+           stop("Unknown formula: ", formula))
 
+  rm(probZero)
+
+  dim(res) <- dim(rawData)
+  dimnames(res) <- dimnames(rawData)
+
+  return(res)
 }
 
 #' @details `getDataMatrix()` gives for each cell and each gene the result of
@@ -137,15 +141,29 @@ calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
 #'
 #' @rdname CalculatingCOEX
 #'
-getDataMatrix <- function(objCOTAN, dataMethod = "") {
+getDataMatrix <- function(objCOTAN,
+                          dataMethod = "") {
   if (isEmptyName(dataMethod)) {
     dataMethod <- "LogNormalized"
   }
 
-  binDiscr <- function(objCOTAN) {
-    zeroOne <- getZeroOneProj(objCOTAN)
-    probOne <- 1.0 - getProbabilityOfZero(objCOTAN)
-    return(zeroOne - probOne)
+  # A little helper to do non trivial binarized in less memory
+  binDiscr <- function(objCOTAN, formula) {
+    rawData <- getRawData(objCOTAN)
+    probZero <- getProbabilityOfZero(objCOTAN)
+
+    res <- switch(formula,
+                  raw  = ifelse(rawData != 0L, 1.0, 0.0),
+                  dis  = ifelse(rawData != 0L, probZero, probZero - 1.0),
+                  abs  = ifelse(rawData != 0L, probZero, 1.0 - probZero),
+                  stop("Unknown formula: ", formula))
+
+    rm(probZero)
+
+    dim(res) <- dim(rawData)
+    dimnames(res) <- dimnames(rawData)
+
+    return(res)
   }
 
   getLH <- function(objCOTAN, formula) {
@@ -158,14 +176,16 @@ getDataMatrix <- function(objCOTAN, dataMethod = "") {
     NN = , NuNorm   = , Normalized              = getNuNormData(objCOTAN),
     LN = , LogNorm  = , LogNormalized           = getLogNormData(objCOTAN),
     BI = , Bin      = , Binarized               = getZeroOneProj(objCOTAN),
-    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN),
-    AB = , AdjBin   = , AdjBinarized            = abs(binDiscr(objCOTAN)),
+    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN, "dis"),
+    AB = , AdjBin   = , AdjBinarized            = binDiscr(objCOTAN, "abs"),
     LH = , Like     = , Likelihood              = getLH(objCOTAN, "raw"),
     LL = , LogLike  = , LogLikelihood           = getLH(objCOTAN, "log"),
     DL = , DerLogL  = , DerivativeLogLikelihood = getLH(objCOTAN, "der"),
     SL = , SignLogL = , SignedLogLikelihood     = getLH(objCOTAN, "sLog"),
     stop("Unrecognised `dataMethod` passed in: ", dataMethod)
   ))
+
+  gc()
 
   return(dataMatrix)
 }
@@ -1745,33 +1765,33 @@ calculateReducedDataMatrix <-
 
   numComp <- min(numComp, getNumGenes(objCOTAN))
 
-  dataMat <- getDataMatrix(objCOTAN, dataMethod = dataMethod)
-
   cellsRDM <- NULL
   if (isTRUE(useCoexEigen)) {
     logThis("Elaborating COEX Eigen Vectors - START", logLevel = 3L)
 
     # calculate the most relenvat eigen-vectors of the COEX matrix
-    coex <- getGenesCoex(objCOTAN, zeroDiagonal = FALSE)
-    res <- eigs_sym(as.matrix(coex), k = numComp, which = "LM")
+    res <- eigs_sym(as.matrix(getGenesCoex(objCOTAN, zeroDiagonal = FALSE)),
+                    k = numComp, which = "LM")
     eigenVectors <- res$vectors[, seq_len(numComp)]
+    rm(res)
+    gc()
 
     logThis("Elaborating COEX Eigen Vectors - DONE", logLevel = 3L)
 
-    # retrive the relvant data matrix
-    dataMatrix <- dataMat
-
-    # project the data matrix onto the calcualted eigen-space
-    dataMatrix <- t(eigenVectors) %*% dataMatrix
+    # retrieve the the data matrix and project it onto the coex eigen-space
+    dataMatrix <- t(eigenVectors) %*%
+                    getDataMatrix(objCOTAN, dataMethod = dataMethod)
 
     # re-scale in the cells direction
     cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))
+    rm(dataMatrix)
 
     colnames(cellsRDM) <- paste0("EC_", seq_len(ncol(cellsRDM)))
   } else {
     selectedGenes <- getSelectedGenes(objCOTAN, genesSel = genesSel,
-                                   numGenes = numGenes)
-    cellsMatrix <- t(dataMat[selectedGenes, ])
+                                      numGenes = numGenes)
+    cellsMatrix <-
+      t(getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ])
 
     # re-scale so that all the genes have mean 0.0 and stdev 1.0
     cellsMatrix <- scale(cellsMatrix, center = TRUE, scale = TRUE)
@@ -1782,9 +1802,11 @@ calculateReducedDataMatrix <-
                        rank = min(numComp, ncol(cellsMatrix)),
                        BSPARAM = IrlbaParam(),
                        get.rotation = FALSE)[["x"]]
+    rm(cellsMatrix)
 
     logThis("Elaborating PCA - DONE", logLevel = 3L)
   }
+  gc()
 
   assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
               ncol(cellsRDM) <= numComp)
