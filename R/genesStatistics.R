@@ -39,24 +39,28 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
 
   ##  worker: operate on one batch of columns
   worker <- function(geneBatch, S, topRows) {
-    ## slice columns (single read avoids copying the rest)
-    subS <- as.matrix(S[, geneBatch, drop = FALSE])
+    tryCatch({
+      ## slice columns (single read avoids copying the rest)
+      subS <- as.matrix(S[, geneBatch, drop = FALSE])
 
-    ## 1. sort each column descending
-    subS <- colSort(subS, descending = TRUE)
+      ## 1. sort each column descending
+      subS <- colSort(subS, descending = TRUE)
 
-    ## 2. keep only the top rows
-    subS <- subS[seq_len(topRows), , drop = FALSE]
+      ## 2. keep only the top rows
+      subS <- subS[seq_len(topRows), , drop = FALSE]
 
-    ## 3. p-value of χ²₁ for each entry
-    subS <- stats::pchisq(subS, df = 1L, lower.tail = FALSE)
+      ## 3. p-value of χ²₁ for each entry
+      subS <- stats::pchisq(subS, df = 1L, lower.tail = FALSE)
 
-    ## 4. mean p-value per column → transform
-    gdi <- log(-log(colMeans(subS)))
+      ## 4. mean p-value per column → transform
+      gdi <- log(-log(colMeans(subS)))
 
-    rm(subS)
+      rm(subS)
 
-    return(gdi)
+      return(gdi)
+    }, error = function(e) {
+      structure(list(e), class = "try-error")
+    })
   }
 
   if (cores != 1L) {

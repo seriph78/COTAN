@@ -207,12 +207,16 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
   ## forward caller that allows for logging progress
   worker <- function(genesBatch, sumZeros, lambda, nu,
                      threshold, maxIterations) {
-    return(parallelDispersionBisection(genes         = genesBatch,
-                                       sumZeros      = sumZeros,
-                                       lambda        = lambda,
-                                       nu            = nu,
-                                       threshold     = threshold,
-                                       maxIterations = maxIterations))
+    tryCatch({
+      return(parallelDispersionBisection(genes         = genesBatch,
+                                         sumZeros      = sumZeros,
+                                         lambda        = lambda,
+                                         nu            = nu,
+                                         threshold     = threshold,
+                                         maxIterations = maxIterations))
+    }, error = function(e) {
+      structure(list(e), class = "try-error")
+    })
   }
 
   if (cores != 1L) {
@@ -379,13 +383,17 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
   ## forward caller that allows for logging progress
   worker <- function(batch, sumZeros, lambda, dispersion,
                      initialGuess, threshold, maxIterations) {
-    return(parallelNuBisection(batch,
-                               sumZeros      = sumZeros,
-                               lambda        = lambda,
-                               dispersion    = dispersion,
-                               initialGuess  = initialGuess,
-                               threshold     = threshold,
-                               maxIterations = maxIterations))
+    tryCatch({
+      return(parallelNuBisection(batch,
+                                 sumZeros      = sumZeros,
+                                 lambda        = lambda,
+                                 dispersion    = dispersion,
+                                 initialGuess  = initialGuess,
+                                 threshold     = threshold,
+                                 maxIterations = maxIterations))
+    }, error = function(e) {
+      structure(list(e), class = "try-error")
+    })
   }
 
   if (cores != 1L) {

@@ -113,6 +113,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
           logLevel = 3L)
 
   worker <- function(genesBatch, formula, rawData, probZero) {
+    tryCatch({
       subZ <- rawData [genesBatch, , drop = FALSE] != 0
       subP <- probZero[genesBatch, , drop = FALSE]
       resM <- switch(formula,
@@ -123,7 +124,10 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
                     stop("Unknown formula: ", formula))
       dim(resM) <- dim(subZ)
       return(resM)
-    }
+    }, error = function(e) {
+      structure(list(e), class = "try-error")
+    })
+  }
 
   res <- NULL
   if (cores != 1L) {
@@ -230,14 +234,18 @@ getDataMatrix <- function(objCOTAN,
             logLevel = 3L)
 
     worker <- function(genesBatch, formula, rawData, probZero) {
-      subZ <- rawData [genesBatch, , drop = FALSE] != 0
-      subP <- probZero[genesBatch, , drop = FALSE]
-      resM <- switch(formula,
-                     raw  = subZ + 0.0, # make numeric from logical
-                     dis  = subZ + subP - 1.0,
-                     abs  = abs(subZ + subP - 1.0),
-                     stop("Unknown formula: ", formula))
-      return(resM)
+      tryCatch({
+        subZ <- rawData [genesBatch, , drop = FALSE] != 0
+        subP <- probZero[genesBatch, , drop = FALSE]
+        resM <- switch(formula,
+                       raw  = subZ + 0.0, # make numeric from logical
+                       dis  = subZ + subP - 1.0,
+                       abs  = abs(subZ + subP - 1.0),
+                       stop("Unknown formula: ", formula))
+        return(resM)
+      }, error = function(e) {
+        structure(list(e), class = "try-error")
+      })
     }
 
     res <- NULL
