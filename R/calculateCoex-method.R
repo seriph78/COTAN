@@ -217,7 +217,7 @@ getDataMatrix <- function(objCOTAN,
   # A little helper to do all 3 from binarized in parallel
   binDiscr <- function(objCOTAN, formula) {
     # split columns (cells) into chunks
-    genes <- getCells(objCOTAN)
+    genes <- getGenes(objCOTAN)
 
     spIdx <- parallel::splitIndices(length(genes),
                                     ceiling(length(genes) / chunkSize))
