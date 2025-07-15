@@ -72,7 +72,6 @@ NULL
 #'   where \eqn{z} is the *binarized projection* and \eqn{p} is the *probability
 #'   of zero*
 #'
-
 #' @returns `calculateLikelihoodOfObserved()` returns a `matrix` with the
 #'   selected *formula* of the likelihood of the observed zero/one
 #'
@@ -83,20 +82,111 @@ NULL
 #'
 #' @rdname CalculatingCOEX
 #'
-calculateLikelihoodOfObserved <- function(objCOTAN, formula = "raw") {
-  zeroOne <- getZeroOneProj(objCOTAN)
+calculateLikelihoodOfObserved <- function(objCOTAN,
+                                          formula = "raw") {
+  rawData <- getRawData(objCOTAN)
 
   probZero <- getProbabilityOfZero(objCOTAN)
 
-  # estimate the likelihood of observed result
-  switch(
-    formula,
-    raw  = (1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero),
-    log  = (1.0 - zeroOne) * log(probZero) + zeroOne * log(1.0 - probZero),
-    der  = (1.0 - zeroOne) / probZero - zeroOne / (1.0 - probZero),
-    sLog = (1.0 - zeroOne) * log(probZero) - zeroOne * log(1.0 - probZero),
-    stop("Unrecognised `formula` passed in: ", formula)
-  )
+  res <-
+    switch(formula,
+           raw  = ifelse(rawData != 0L,       1.0-probZero,       probZero),
+           log  = ifelse(rawData != 0L,    log1p(-probZero),  log(probZero)),
+           der  = ifelse(rawData != 0L, -1.0/(1.0-probZero),  1.0/probZero),
+           sLog = ifelse(rawData != 0L,   -log1p(-probZero),  log(probZero)),
+           stop("Unknown formula: ", formula))
+
+  rm(probZero)
+
+  dim(res) <- dim(rawData)
+  dimnames(res) <- dimnames(rawData)
+
+  return(res)
+}
+
+#' @details `getDataMatrix()` gives for each cell and each gene the result of
+#'   the selected formula as function of the observed counts and their expected
+#'   value
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param dataMethod selects the method to use to create the `data.frame` to
+#'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
+#'   gene based on available data/model, the following methods are supported:
+#'   * `"RW", "Raw", "RawData"` uses the *raw* counts
+#'   * `"NN", "NuNorm", "Normalized"` uses the \eqn{\nu}*-normalized* counts
+#'   * `"LN", "LogNorm", "LogNormalized"` uses the *log-normalized* counts
+#'   (default)
+#'   * `"BI", "Bin", "Binarized"` uses the *binarized* data matrix
+#'   * `"BD", "BinDiscr", "BinarizedDiscrepancy"` uses the *difference* between
+#'   the *binarized* data matrix and the estimated *probability of one*
+#'   * `"AB", "AdjBin", "AdjBinarized"` uses the absolute value of
+#'   the *binarized discrepancy* above
+#'   * `"LH", "Like", "Likelihood"` uses the *likelihood* of *binarized*
+#'   data matrix
+#'   * `"LL", "LogLike", "LogLikelihood"` uses the *log-likelihood*
+#'   of *binarized* data matrix
+#'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
+#'   the *log-likelihood* of *binarized* data matrix
+#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
+#'   of *binarized* data matrix
+#'
+#'   For the last four options see [calculateLikelihoodOfObserved()] for more
+#'   details
+#'
+#' @returns `getDataMatrix()` returns a `matrix` with the same shape as the
+#'   *raw* data
+#'
+#' @export
+#'
+#' @rdname CalculatingCOEX
+#'
+getDataMatrix <- function(objCOTAN,
+                          dataMethod = "") {
+  if (isEmptyName(dataMethod)) {
+    dataMethod <- "LogNormalized"
+  }
+
+  # A little helper to do non trivial binarized in less memory
+  binDiscr <- function(objCOTAN, formula) {
+    rawData <- getRawData(objCOTAN)
+    probZero <- getProbabilityOfZero(objCOTAN)
+
+    res <- switch(formula,
+                  raw  = ifelse(rawData != 0L, 1.0, 0.0),
+                  dis  = ifelse(rawData != 0L, probZero, probZero - 1.0),
+                  abs  = ifelse(rawData != 0L, probZero, 1.0 - probZero),
+                  stop("Unknown formula: ", formula))
+
+    rm(probZero)
+
+    dim(res) <- dim(rawData)
+    dimnames(res) <- dimnames(rawData)
+
+    return(res)
+  }
+
+  getLH <- function(objCOTAN, formula) {
+    return(calculateLikelihoodOfObserved(objCOTAN, formula))
+  }
+
+  dataMatrix <- as.matrix(switch(
+    dataMethod,
+    RW = , Raw      = , RawData                 = getRawData(objCOTAN),
+    NN = , NuNorm   = , Normalized              = getNuNormData(objCOTAN),
+    LN = , LogNorm  = , LogNormalized           = getLogNormData(objCOTAN),
+    BI = , Bin      = , Binarized               = getZeroOneProj(objCOTAN),
+    BD = , BinDiscr = , BinarizedDiscrepancy    = binDiscr(objCOTAN, "dis"),
+    AB = , AdjBin   = , AdjBinarized            = binDiscr(objCOTAN, "abs"),
+    LH = , Like     = , Likelihood              = getLH(objCOTAN, "raw"),
+    LL = , LogLike  = , LogLikelihood           = getLH(objCOTAN, "log"),
+    DL = , DerLogL  = , DerivativeLogLikelihood = getLH(objCOTAN, "der"),
+    SL = , SignLogL = , SignedLogLikelihood     = getLH(objCOTAN, "sLog"),
+    stop("Unrecognised `dataMethod` passed in: ", dataMethod)
+  ))
+
+  gc()
+
+  return(dataMatrix)
 }
 
 
@@ -1497,4 +1587,105 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
   logThis("Calculating G: DONE", logLevel = 2L)
 
   return(G)
+}
+
+
+## -------- Genes selector -------
+
+#' @details `getSelectedGenes()` selects the *most representative* genes of the
+#'   `data.set`
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param genesSel Decides whether and how to perform the gene-selection. used
+#'   for the clustering and the `UMAP`. It is a string indicating one of the
+#'   following selection methods:
+#'   * `"HGDI"` Will pick-up the genes with highest `GDI` (default)
+#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
+#'   via the \pkg{Seurat} package
+#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
+#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
+#' @param numGenes the number of genes to select using the above method. Will be
+#'   ignored when an explicit list of genes has been passed in
+#'
+#' @returns `getSelectedGenes()` returns an array with the genes' names
+#'
+#' @export
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom Seurat CreateSeuratObject
+#' @importFrom Seurat NormalizeData
+#' @importFrom Seurat FindVariableFeatures
+#' @importFrom Seurat VariableFeatures
+#'
+#' @rdname CalculatingCOEX
+
+getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
+  logThis("Running genes' selection: START", logLevel = 2L)
+
+  numGenes <- min(numGenes, getNumGenes(objCOTAN))
+  selectedGenes <- NULL
+
+  getHighestGDIGenes <- function(objCOTAN, numGenes) {
+    gdi <- suppressWarnings(getGDI(objCOTAN))
+    if (is_empty(gdi)) {
+      gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
+                                          rowsFraction = 0.05), "GDI")
+    }
+
+    sortedCandidates <- names(gdi)[order(gdi, decreasing = TRUE)]
+    if (gdi[sortedCandidates[numGenes]] < 1.3) {
+      numLowGDIGenes <- sum(gdi[sortedCandidates[seq_len(numGenes)]] <1.3)
+      logThis(paste("Included", numLowGDIGenes, "genes with GDI below 1.3"),
+              logLevel = 1L)
+    }
+    return(sortedCandidates[seq_len(numGenes)])
+  }
+
+  getHighestVariableGenes <- function(objCOTAN, numGenes, useVST) {
+    srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
+                               project = "genes_selections")
+    srat <- NormalizeData(srat)
+
+    srat <- FindVariableFeatures(
+      srat, nfeatures = numGenes,
+      selection.method = ifelse(useVST, "vst", "mean.var.plot"))
+
+    return(VariableFeatures(object = srat))
+  }
+
+  selectedGenes <- NULL
+  if (length(genesSel) > 1L) {
+    assert_that(all(genesSel %in% getGenes(objCOTAN)),
+                msg = "Passed genes are not a subset of the relevant ones")
+
+    selectedGenes <- genesSel
+
+    logThis(paste("Given", length(selectedGenes), "genes as input"),
+            logLevel = 2L)
+  } else {
+    if (isEmptyName(genesSel)) {
+      genesSel = "HGDI"
+    }
+
+    selectedGenes <- switch(
+      genesSel,
+      HGDI = getHighestGDIGenes(objCOTAN, numGenes),
+      HVG_Seurat = , vst =
+        getHighestVariableGenes(objCOTAN, numGenes, TRUE),
+      HVG_Scanpy = , mean.var.plot =
+        getHighestVariableGenes(objCOTAN, numGenes, FALSE),
+      stop("Unrecognised `genesSel` passed in: ", genesSel)
+    )
+
+    logThis(paste("Selected", length(selectedGenes), "genes using",
+                  genesSel, "selector"), logLevel = 3L)
+  }
+
+  # align to sequence in input data
+  selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% selectedGenes]
+
+  logThis("Running genes' selection: DONE", logLevel = 2L)
+
+  return(selectedGenes)
 }

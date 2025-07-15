@@ -1,4 +1,5 @@
 options(COTAN.TorchWarning = NULL)
+options(parallelly.fork.enable = TRUE)
 
 
 test_that("COTAN getters", {
@@ -14,7 +15,7 @@ test_that("COTAN getters", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj)
+  obj <- estimateDispersionBisection(obj, cores = 2L)
 
   # set tag label as legacy value
   row <- getMetaInfoRow(getMetadataDataset(obj), datasetTags()[["gsync"]])
@@ -119,4 +120,94 @@ test_that("COTAN getters", {
   expect_identical(getDims(obj)[["raw"]], dim(getRawData(obj)))
   expect_identical(getDims(obj)[["metaCells"]], ncol(getMetadataCells(obj)))
   expect_null(getDims(obj)[["clusterCoex"]])
+
+  # getting data matrices
+  expect_identical(getZeroOneProj(obj), zeroOne)
+  expect_identical(getProbabilityOfZero(obj), probZero)
+
+  ## bound probablitities to avoid extremes
+  bProbZero <- pmax(1.0e-8, pmin(1.0 - 1.0e-8, probZero))
+
+
+  getLH <- function(objCOTAN, formula) {
+    return(calculateLikelihoodOfObserved(objCOTAN, formula))
+  }
+
+  asDataMatrix <- function(objCOTAN, array) {
+    matrix(array, nrow = getNumGenes(objCOTAN),
+           dimnames = list(getGenes(objCOTAN), getCells(objCOTAN)))
+  }
+
+  ## check default
+  expect_identical(calculateLikelihoodOfObserved(obj),
+                   getLH(obj, formula = "raw"))
+
+  expect_identical(
+    getLH(obj, formula = "raw"),
+    asDataMatrix(obj, ifelse(zeroOne, (1.0 - bProbZero), bProbZero)))
+  expect_identical(
+    getLH(obj, formula = "log"),
+    asDataMatrix(obj, ifelse(zeroOne, log1p(-bProbZero), log(bProbZero))))
+  expect_identical(
+    getLH(obj, formula = "der"),
+    asDataMatrix(obj,  ifelse(zeroOne, -1.0/(1.0 - bProbZero), 1.0/bProbZero)))
+  expect_identical(
+    getLH(obj, formula = "sLog"),
+    asDataMatrix(obj, ifelse(zeroOne, -log1p(-bProbZero), log(bProbZero))))
+
+  ## strings are case sensitive
+  expect_error(getLH(obj, formula = "SLog"))
+
+  # general data retrieval
+
+  ## check default
+  expect_identical(getDataMatrix(obj), as.matrix(getLogNormData(obj)))
+
+  expect_identical(getDataMatrix(obj, dataMethod = "RW"),                      as.matrix(getRawData(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "Raw"),                     as.matrix(getRawData(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "RawData"),                 as.matrix(getRawData(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "NN"),                      as.matrix(getNuNormData(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "NuNorm"),                  as.matrix(getNuNormData(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "Normalized"),              as.matrix(getNuNormData(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "LN"),                      as.matrix(getLogNormData(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "LogNorm"),                 as.matrix(getLogNormData(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "LogNormalized"),           as.matrix(getLogNormData(obj)))
+  expect_identical(getDataMatrix(obj, dataMethod = "BI"),                      as.matrix(zeroOne))
+  expect_identical(getDataMatrix(obj, dataMethod = "Bin"),                     as.matrix(zeroOne))
+  expect_identical(getDataMatrix(obj, dataMethod = "Binarized"),               as.matrix(zeroOne))
+  expect_identical(getDataMatrix(obj, dataMethod = "BD"),                      as.matrix(    zeroOne + probZero - 1.0))
+  expect_identical(getDataMatrix(obj, dataMethod = "BinDiscr"),                as.matrix(    zeroOne + probZero - 1.0))
+  expect_identical(getDataMatrix(obj, dataMethod = "BinarizedDiscrepancy"),    as.matrix(    zeroOne + probZero - 1.0))
+  expect_identical(getDataMatrix(obj, dataMethod = "AB"),                      as.matrix(abs(zeroOne + probZero - 1.0)))
+  expect_identical(getDataMatrix(obj, dataMethod = "AdjBin"),                  as.matrix(abs(zeroOne + probZero - 1.0)))
+  expect_identical(getDataMatrix(obj, dataMethod = "AdjBinarized"),            as.matrix(abs(zeroOne + probZero - 1.0)))
+  expect_identical(getDataMatrix(obj, dataMethod = "LH"),                      as.matrix(getLH(obj, "raw")))
+  expect_identical(getDataMatrix(obj, dataMethod = "Like"),                    as.matrix(getLH(obj, "raw")))
+  expect_identical(getDataMatrix(obj, dataMethod = "Likelihood"),              as.matrix(getLH(obj, "raw")))
+  expect_identical(getDataMatrix(obj, dataMethod = "LL"),                      as.matrix(getLH(obj, "log")))
+  expect_identical(getDataMatrix(obj, dataMethod = "LogLike"),                 as.matrix(getLH(obj, "log")))
+  expect_identical(getDataMatrix(obj, dataMethod = "LogLikelihood"),           as.matrix(getLH(obj, "log")))
+  expect_identical(getDataMatrix(obj, dataMethod = "DL"),                      as.matrix(getLH(obj, "der")))
+  expect_identical(getDataMatrix(obj, dataMethod = "DerLogL"),                 as.matrix(getLH(obj, "der")))
+  expect_identical(getDataMatrix(obj, dataMethod = "DerivativeLogLikelihood"), as.matrix(getLH(obj, "der")))
+  expect_identical(getDataMatrix(obj, dataMethod = "SL"),                      as.matrix(getLH(obj, "sLog")))
+  expect_identical(getDataMatrix(obj, dataMethod = "SignLogL"),                as.matrix(getLH(obj, "sLog")))
+  expect_identical(getDataMatrix(obj, dataMethod = "SignedLogLikelihood"),     as.matrix(getLH(obj, "sLog")))
+
+  ## strings are case sensitive
+  expect_error(getDataMatrix(obj, dataMethod = "signLogl"))
+
+  expect_message(getSelectedGenes(obj))
+  expect_identical(getSelectedGenes(obj),
+                   getSelectedGenes(obj, genesSel = "HGDI", numGenes = 2000L))
+
+  expect_identical(getSelectedGenes(obj, genesSel = "HGDI", numGenes = 5L),
+                   c("C", "D", "F", "G", "I"))
+  expect_identical(suppressWarnings(
+                     getSelectedGenes(obj, genesSel = "HVG_Seurat",
+                                      numGenes = 5L)[1L:4L]),
+                   c("B", "C", "D", "E"))
+  expect_error(getSelectedGenes(obj, genesSel = "HVG_Scanpy", numGenes = 5L))
+  expect_identical(getSelectedGenes(obj, genesSel = c("C", "A", "D", "E", "B")),
+                   LETTERS[1L:5L])
 })

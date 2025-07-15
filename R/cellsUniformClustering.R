@@ -12,90 +12,6 @@
 #' @name UniformClusters
 NULL
 
-
-## -------- Genes selector -------
-
-#' @details `genesSelector()` selects the *most representative* genes of the
-#'   `data.set`
-#'
-#' @param objCOTAN a `COTAN` object
-#' @param genesSel Decides whether and how to perform the gene-selection. used
-#'   for the clustering. It is a string indicating one of the following
-#'   selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest **GDI**
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'     via the \pkg{Seurat} package (the default method)
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'     according to the `Scanpy` package (using the \pkg{Seurat} implementation)
-#' @param numGenes The number of genes to return
-#'
-#' @returns `genesSelector()` returns an array with the genes' names
-#'
-#' @export
-#'
-#' @importFrom stringr str_equal
-#'
-#' @importFrom assertthat assert_that
-#'
-#' @importFrom Seurat CreateSeuratObject
-#' @importFrom Seurat NormalizeData
-#' @importFrom Seurat FindVariableFeatures
-#' @importFrom Seurat VariableFeatures
-#'
-#' @rdname UniformClusters
-
-genesSelector <- function(objCOTAN, genesSel, numGenes = 2000L) {
-  logThis("Running genes' selection: START", logLevel = 2L)
-
-  numGenes <- min(numGenes, getNumGenes(objCOTAN))
-  selectedGenes <- NULL
-
-  if (length(genesSel) > 1L) {
-    selectedGenes <- getGenes(objCOTAN)[getGenes(objCOTAN) %in% genesSel]
-    logThis(paste("Given", length(selectedGenes), "genes as input"),
-            logLevel = 2L)
-  } else {
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
-      gdi <- suppressWarnings(getGDI(objCOTAN))
-      if (is_empty(gdi)) {
-        gdi <- getColumnFromDF(calculateGDI(objCOTAN, statType = "S",
-                                            rowsFraction = 0.05), "GDI")
-      }
-
-      sortedCandidates <- names(gdi)[order(gdi, decreasing = TRUE)]
-      if (gdi[sortedCandidates[numGenes]] < 1.3) {
-        numLowGDIGenes <- sum(gdi[sortedCandidates[seq_len(numGenes)]] <1.3)
-        logThis(paste("Included", numLowGDIGenes, "genes with GDI below 1.3"),
-                logLevel = 1L)
-      }
-      selectedGenes <- sortedCandidates[seq_len(numGenes)]
-
-      rm(gdi)
-    } else if (str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE) ||
-               str_equal(genesSel, "HVG_Scanpy", ignore_case = TRUE)) {
-      srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
-                                 project = "genes_selections")
-      srat <- NormalizeData(srat)
-
-      useVST <- str_equal(genesSel, "HVG_Seurat", ignore_case = TRUE)
-      srat <- FindVariableFeatures(
-        srat, nfeatures = numGenes,
-        selection.method = ifelse(useVST, "vst", "mean.var.plot"))
-
-      selectedGenes <- VariableFeatures(object = srat)
-    } else {
-      stop("Unrecognised `genesSel` passed in: ", genesSel)
-    }
-    logThis(paste("Selected", length(selectedGenes), "genes using",
-                  genesSel, "selector"), logLevel = 3L)
-  }
-
-  logThis("Running genes' selection: DONE", logLevel = 2L)
-
-  return(selectedGenes)
-}
-
-
 ### ------ Seurat Clustering -------
 
 #' @title Get a clusterization running the `Seurat` package
@@ -389,8 +305,8 @@ cellsUniformClustering <- function(objCOTAN,
                       saveObj = FALSE, outDir = outDirCond)
     }
 
-    selectedGenes <- genesSelector(subObj, genesSel = genesSel,
-                                   numGenes = 2000L)
+    selectedGenes <- getSelectedGenes(subObj, genesSel = genesSel,
+                                      numGenes = 2000L)
 
     #Step 1
     minNumClusters <- floor(1.2 * numClustersToRecluster) + 1L
