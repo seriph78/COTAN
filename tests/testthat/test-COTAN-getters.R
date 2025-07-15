@@ -135,8 +135,8 @@ test_that("COTAN getters", {
   bProbZero <- pmax(1.0e-8, pmin(1.0 - 1.0e-8, probZero))
 
 
-  getLH <- function(objCOTAN, formula, cores = 1L) {
-    return(calculateLikelihoodOfObserved(objCOTAN, formula, cores))
+  getLH <- function(objCOTAN, formula) {
+    return(calculateLikelihoodOfObserved(objCOTAN, formula))
   }
 
   asDataMatrix <- function(objCOTAN, array) {
@@ -146,10 +146,10 @@ test_that("COTAN getters", {
 
   ## check default
   expect_identical(calculateLikelihoodOfObserved(obj),
-                   getLH(obj, formula = "raw", cores = 2L))
+                   getLH(obj, formula = "raw"))
 
   expect_identical(
-    getLH(obj, formula = "raw", cores = 4L),
+    getLH(obj, formula = "raw"),
     asDataMatrix(obj, ifelse(zeroOne, (1.0 - bProbZero), bProbZero)))
   expect_identical(
     getLH(obj, formula = "log"),
@@ -158,7 +158,7 @@ test_that("COTAN getters", {
     getLH(obj, formula = "der"),
     asDataMatrix(obj,  ifelse(zeroOne, -1.0/(1.0 - bProbZero), 1.0/bProbZero)))
   expect_identical(
-    getLH(obj, formula = "sLog", cores = 2L),
+    getLH(obj, formula = "sLog"),
     asDataMatrix(obj, ifelse(zeroOne, -log1p(-bProbZero), log(bProbZero))))
 
   ## strings are case sensitive
