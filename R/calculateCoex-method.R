@@ -71,15 +71,9 @@ NULL
 #'
 #'   where \eqn{z} is the *binarized projection* and \eqn{p} is the *probability
 #'   of zero*
-#' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
 #'
 #' @returns `calculateLikelihoodOfObserved()` returns a `matrix` with the
 #'   selected *formula* of the likelihood of the observed zero/one
-#'
-#' @importFrom parallel mclapply
-#' @importFrom parallel splitIndices
 #'
 #' @export
 #'
@@ -89,79 +83,24 @@ NULL
 #' @rdname CalculatingCOEX
 #'
 calculateLikelihoodOfObserved <- function(objCOTAN,
-                                          formula = "raw",
-                                          cores = 1L,
-                                          chunkSize = 1024L) {
-  cores <- handleMultiCore(cores)
-
+                                          formula = "raw") {
   rawData <- getRawData(objCOTAN)
 
   # bound the probabilities to avoid exact zero or one
   probZero <- pmin(pmax(getProbabilityOfZero(objCOTAN), 1.0e-8), 1.0 - 1.0e-8)
 
-  # split columns (cells) into chunks
-  genes <- getGenes(objCOTAN)
+  res <-
+    switch(formula,
+           raw  = ifelse(rawData != 0L,       1.0-probZero,       probZero),
+           log  = ifelse(rawData != 0L,    log1p(-probZero),  log(probZero)),
+           der  = ifelse(rawData != 0L, -1.0/(1.0-probZero),  1.0/probZero),
+           sLog = ifelse(rawData != 0L,   -log1p(-probZero),  log(probZero)),
+           stop("Unknown formula: ", formula))
 
-  spIdx <- parallel::splitIndices(length(genes),
-                                  ceiling(length(genes) / chunkSize))
+  rm(probZero)
 
-  spGenes <- lapply(spIdx, function(x) genes[x])
-
-  cores <- min(cores, length(spGenes))
-
-  logThis(paste0("Executing ", length(spGenes), " genes batches"),
-          logLevel = 3L)
-
-  worker <- function(genesBatch, formula, rawData, probZero) {
-    tryCatch({
-      subZ <- rawData [genesBatch, , drop = FALSE] != 0
-      subP <- probZero[genesBatch, , drop = FALSE]
-      resM <- switch(formula,
-                    raw  = ifelse(subZ,       1.0-subP,       subP),
-                    log  = ifelse(subZ,    log1p(-subP),  log(subP)),
-                    der  = ifelse(subZ, -1.0/(1.0-subP),  1.0/subP),
-                    sLog = ifelse(subZ,   -log1p(-subP),  log(subP)),
-                    stop("Unknown formula: ", formula))
-      dim(resM) <- dim(subZ)
-      return(resM)
-    }, error = function(e) {
-      structure(list(e), class = "try-error")
-    })
-  }
-
-  res <- NULL
-  if (cores != 1L) {
-    ##  tiny sandbox env to keep each worker lean
-    mini <- new.env(parent = baseenv())
-    mini$worker <- worker
-    environment(mini$worker) <- mini
-
-    ##  fork once, stream tasks
-    res <- parallel::mclapply(spGenes,
-                              worker,
-                              formula,
-                              rawData,
-                              probZero,
-                              mc.cores = cores,
-                              mc.preschedule = FALSE)
-
-    # spawned errors are stored as try-error classes
-    resError <- unlist(lapply(res, inherits, "try-error"))
-    if (any(resError)) {
-      stop(res[[which(resError)[[1L]]]], call. = FALSE)
-    }
-  } else {
-    res <- lapply(spGenes,
-                  worker,
-                  formula,
-                  rawData,
-                  probZero)
-  }
-
-  # now reassemble genes × cells
-  res <- do.call(rbind, res)
-  rownames(res) <- getGenes(objCOTAN)
-  colnames(res) <- getCells(objCOTAN)
+  dim(res) <- dim(rawData)
+  dimnames(res) <- dimnames(rawData)
 
   return(res)
 }
@@ -194,98 +133,41 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
 #'
 #'   For the last four options see [calculateLikelihoodOfObserved()] for more
 #'   details
-#' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
 #'
 #' @returns `getDataMatrix()` returns a `matrix` with the same shape as the
 #'   *raw* data
-#'
-#' @importFrom parallel mclapply
-#' @importFrom parallel splitIndices
 #'
 #' @export
 #'
 #' @rdname CalculatingCOEX
 #'
 getDataMatrix <- function(objCOTAN,
-                          dataMethod = "",
-                          cores = 1L,
-                          chunkSize = 1024L) {
+                          dataMethod = "") {
   if (isEmptyName(dataMethod)) {
     dataMethod <- "LogNormalized"
   }
 
-  cores <- handleMultiCore(cores)
-
-  # A little helper to do all 3 from binarized in parallel
+  # A little helper to do non trivial binarized in less memory
   binDiscr <- function(objCOTAN, formula) {
-    # split columns (cells) into chunks
-    genes <- getGenes(objCOTAN)
+    rawData <- getRawData(objCOTAN)
+    probZero <- getProbabilityOfZero(objCOTAN)
 
-    spIdx <- parallel::splitIndices(length(genes),
-                                    ceiling(length(genes) / chunkSize))
+    res <- switch(formula,
+                  raw  = ifelse(rawData != 0L, 1.0, 0.0),
+                  dis  = ifelse(rawData != 0L, probZero, probZero - 1.0),
+                  abs  = ifelse(rawData != 0L, probZero, 1.0 - probZero),
+                  stop("Unknown formula: ", formula))
 
-    spGenes <- lapply(spIdx, function(x) genes[x])
+    rm(probZero)
 
-    cores <- min(cores, length(spGenes))
-
-    logThis(paste0("Executing ", length(spGenes), " genes batches"),
-            logLevel = 3L)
-
-    worker <- function(genesBatch, formula, rawData, probZero) {
-      tryCatch({
-        subZ <- rawData [genesBatch, , drop = FALSE] != 0
-        subP <- probZero[genesBatch, , drop = FALSE]
-        resM <- switch(formula,
-                       raw  = subZ + 0.0, # make numeric from logical
-                       dis  = subZ + subP - 1.0,
-                       abs  = abs(subZ + subP - 1.0),
-                       stop("Unknown formula: ", formula))
-        return(resM)
-      }, error = function(e) {
-        structure(list(e), class = "try-error")
-      })
-    }
-
-    res <- NULL
-    if (cores != 1L) {
-      ##  tiny sandbox env to keep each worker lean
-      mini <- new.env(parent = baseenv())
-      mini$worker <- worker
-      environment(mini$worker) <- mini
-
-      res <- parallel::mclapply(spGenes,
-                                worker,
-                                formula,
-                                getRawData(objCOTAN),
-                                getProbabilityOfZero(objCOTAN),
-                                mc.cores       = cores,
-                                mc.preschedule = FALSE)
-
-      # spawned errors are stored as try-error classes
-      resError <- unlist(lapply(res, inherits, "try-error"))
-      if (any(resError)) {
-        stop(res[[which(resError)[[1L]]]], call. = FALSE)
-      }
-    } else {
-      res <- lapply(spGenes,
-                    worker,
-                    formula,
-                    getRawData(objCOTAN),
-                    getProbabilityOfZero(objCOTAN))
-    }
-
-    # now reassemble genes × cells
-    res <- do.call(rbind, res)
-    rownames(res) <- getGenes(objCOTAN)
-    colnames(res) <- getCells(objCOTAN)
+    dim(res) <- dim(rawData)
+    dimnames(res) <- dimnames(rawData)
 
     return(res)
   }
 
   getLH <- function(objCOTAN, formula) {
-    return(calculateLikelihoodOfObserved(objCOTAN, formula, cores, chunkSize))
+    return(calculateLikelihoodOfObserved(objCOTAN, formula))
   }
 
   dataMatrix <- as.matrix(switch(
@@ -1859,9 +1741,6 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
-#' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
 #'
 #' @returns `calculateReducedDataMatrix()` returns the reduced matrix. The
 #'   returned `matrix` has dimensions: (number of cells, number of components)
@@ -1880,8 +1759,7 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 calculateReducedDataMatrix <-
   function(objCOTAN, useCoexEigen = FALSE,
            dataMethod = "", numComp = 25L,
-           genesSel = "", numGenes = 2000L,
-           cores = 1L, chunkSize = 1024L) {
+           genesSel = "", numGenes = 2000L) {
   logThis("Elaborating Reduced dimensionality Data Matrix - START",
           logLevel = 2L)
 
@@ -1902,8 +1780,7 @@ calculateReducedDataMatrix <-
 
     # retrieve the the data matrix and project it onto the coex eigen-space
     dataMatrix <- t(eigenVectors) %*%
-                    getDataMatrix(objCOTAN, dataMethod = dataMethod,
-                                  cores = cores, chunkSize = chunkSize)
+                    getDataMatrix(objCOTAN, dataMethod = dataMethod)
 
     # re-scale in the cells direction
     cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))
@@ -1914,8 +1791,7 @@ calculateReducedDataMatrix <-
     selectedGenes <- getSelectedGenes(objCOTAN, genesSel = genesSel,
                                       numGenes = numGenes)
     cellsMatrix <-
-      t(getDataMatrix(objCOTAN, dataMethod = dataMethod,
-                      cores = cores, chunkSize = chunkSize)[selectedGenes, ])
+      t(getDataMatrix(objCOTAN, dataMethod = dataMethod)[selectedGenes, ])
 
     # re-scale so that all the genes have mean 0.0 and stdev 1.0
     cellsMatrix <- scale(cellsMatrix, center = TRUE, scale = TRUE)

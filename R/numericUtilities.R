@@ -245,6 +245,9 @@ parallelDispersionBisection <-
       disps1[nPos] <- disps[nPos]
     }
 
+    rm(mu)
+    gc()
+
     output[goodPos] <- disps
     return(output)
   }
