@@ -22,7 +22,7 @@ knitr::opts_chunk[["set"]](
   dev = "png",
   fig.width = 6L,
   fig.height = 4L,
-  dpi = 72
+  dpi = 72L
 )
 
 ```

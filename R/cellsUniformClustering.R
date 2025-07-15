@@ -170,7 +170,7 @@ seuratClustering <- function(objCOTAN,
 
     resolution <- initialResolution
     resolutionStep <- 0.5
-    maxResolution <- initialResolution + 10.0 * resolutionStep
+    maxResolution <- initialResolution + 30.0 * resolutionStep
 
     seuratClusters <- NULL
     usedMaxResolution <- FALSE
@@ -381,7 +381,7 @@ cellsUniformClustering <- function(objCOTAN,
     cellsToDrop <- getCells(objCOTAN)[!is.na(outputClusters)]
     subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-    if (str_equal(genesSel, "HGDI", ignore_case = TRUE)) {
+    if (str_equal(genesSel, "HGDI") && !isCoexAvailable(subObj)) {
       subObj <-
         proceedToCoex(subObj, calcCoex = TRUE, cores = cores,
                       optimizeForSpeed = optimizeForSpeed,
@@ -406,20 +406,28 @@ cellsUniformClustering <- function(objCOTAN,
       break
     }
 
+    if (iter == initialIteration && !is_null(initialClusters)) {
+      logThis("Using passed in clusterization", logLevel = 3L)
+      testClusters <- asClusterization(initialClusters, getCells(objCOTAN))
+    }
+
     ## print umap graph
     if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(splitOutDir, paste0("pdf_umap_", iter, ".pdf"))
       logThis(paste("Creating PDF UMAP in file: ", outFile), logLevel = 2L)
       pdf(outFile)
 
-      plot(UMAPPlot(dataIn = pca,
-                    clusters = getCondition(subObj),
-                    title = paste0("Cells number: ", nrow(pca))))
+      allCondNames <- getAllConditions(subObj)
+      condName <- ifelse(length(allCondNames) == 0L, "",
+                         allCondNames[[length(allCondNames)]])
+      title <- paste0("Cells number: ", nrow(pca))
+      plot(UMAPPlot(dataIn = pca, title = title,
+                    clusters = getCondition(subObj, condName)))
 
-      plot(UMAPPlot(dataIn = pca,
-                    clusters = testClusters,
-                    title = paste0("Cells number: ", nrow(pca), "\n",
-                                   "Cl. resolution: ", resolution)))
+      title <- paste0(title, "\nCl. resolution: ", resolution,
+                      ifelse(isTRUE(usedMaxResolution), " [max]", ""))
+      plot(UMAPPlot(dataIn = pca, title = title,
+                    clusters = testClusters))
     }, error = function(err) {
       logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)
     }, finally = {
@@ -437,10 +445,6 @@ cellsUniformClustering <- function(objCOTAN,
     numClustersToRecluster <- 0L
     cellsToRecluster <- vector(mode = "character")
 
-    if (iter == initialIteration && !is_null(initialClusters)) {
-      logThis("Using passed in clusterization", logLevel = 3L)
-      testClusters <- asClusterization(initialClusters, getCells(objCOTAN))
-    }
     allCells <- names(testClusters)
     testClList <- toClustersList(testClusters)
 
@@ -629,11 +633,13 @@ cellsUniformClustering <- function(objCOTAN,
     })
   names(allCheckResults) <- permMap[names(allCheckResults)]
 
-  outputList <- list("clusters" = factor(outputClusters), "coex" = outputCoexDF)
-
   if (isTRUE(saveObj)) tryCatch({
       outFile <- file.path(outDirCond, "split_check_results.csv")
       write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
+
+      outFile <- file.path(outDirCond, "split_clusterization.csv")
+      write.csv(as.data.frame(list("split" = outputClusters)),
+                file = outFile, na = "NaN")
     },
     error = function(err) {
       logThis(paste("While saving results csv", err), logLevel = 1L)
@@ -642,5 +648,5 @@ cellsUniformClustering <- function(objCOTAN,
 
   logThis("Creating cells' uniform clustering: DONE", logLevel = 2L)
 
-  return(outputList)
+  return(list("clusters" = outputClusters, "coex" = outputCoexDF))
 }

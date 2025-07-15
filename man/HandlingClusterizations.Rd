@@ -544,7 +544,7 @@ according to a \emph{DEA} (or \emph{Zero-One}) based distance
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calcCoex = FALSE,
+objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calcCoex = TRUE,
                           optimizeForSpeed = TRUE, saveObj = FALSE)
 
 data("test.dataset.clusters1")
@@ -572,7 +572,9 @@ lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
 umapPlot2 <- UMAPPlot(lfcDF, clusters = geneClusters)
 plot(umapPlot2)
 
-objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
+if (FALSE) {
+  objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
+}
 
 clSummaryPlotAndData <-
   clustersSummaryPlot(objCOTAN, clName = "first_clusterization",
@@ -586,24 +588,29 @@ if (FALSE) {
 clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 stopifnot(length(clusterizations) == 1)
 
-cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, dataMethod = "LogNormalized",
-                                    clName = "first_clusterization",
-                                    genesSel = "HVG_Seurat")
+cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN,
+                                    dataMethod = "LogLikelihood",
+                                    genesSel = "HGDI",
+                                    clName = "first_clusterization")
 plot(cellsUmapPlotAndDF[["plot"]])
 
 enrichment <- geneSetEnrichment(clustersCoex = coexDF,
                                 groupMarkers = groupMarkers)
 
 clHeatmapPlotAndData <- clustersMarkersHeatmapPlot(objCOTAN, groupMarkers)
+clHeatmapPlotAndData[["heatmapPlot"]]
 
 conditions <- as.integer(substring(getCells(objCOTAN), 3L))
 conditions <- factor(ifelse(conditions <= 600, "L", "H"))
 names(conditions) <- getCells(objCOTAN)
 
+objCOTAN <- addCondition(objCOTAN, condName = "High/Low",
+                         conditions = conditions)
+
 clHeatmapPlotAndData2 <-
   clustersMarkersHeatmapPlot(objCOTAN, groupMarkers, kCuts = 2,
-                             condNameList = list("High/Low"),
-                             conditionsList = list(conditions))
+                             condNameList = list("High/Low"))
+clHeatmapPlotAndData2[["heatmapPlot"]]
 
 clName <- getClusterizationName(objCOTAN)
 

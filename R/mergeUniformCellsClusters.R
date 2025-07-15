@@ -589,6 +589,10 @@ mergeUniformCellsClusters <- function(objCOTAN,
   if (isTRUE(saveObj)) tryCatch({
     outFile <- file.path(outDirCond, "merge_check_results.csv")
     write.csv(checkersToDF(allCheckResults), file = outFile, na = "NaN")
+
+    outFile <- file.path(outDirCond, "merge_clusterization.csv")
+    write.csv(as.data.frame(list("merge" = outputClusters)),
+              file = outFile, na = "NaN")
   })
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)

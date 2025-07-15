@@ -1,3 +1,8 @@
+
+Improved function `cellsUniformClustering()` mechanism in case of larger
+datasets when resolution ceiling was causing unnecessary slowdown and
+in cases early termination too
+
 ## 2.8.4
 
 Solved minor issue with `maxIterations` argument in the function

@@ -33,6 +33,7 @@ test_that("Cell Uniform Clustering", {
   expect_true(file.exists(file.path(tm, "test", "reclustering",
                                     "all_check_results_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "split_check_results.csv")))
+  expect_true(file.exists(file.path(tm, "test", "split_clusterization.csv")))
 
   gc()
 
