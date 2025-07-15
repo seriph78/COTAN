@@ -98,6 +98,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "all_check_results_4.csv")))
   expect_true(file.exists(file.path(tm, "test", "merge_check_results.csv")))
+  expect_true(file.exists(file.path(tm, "test", "merge_clusterization.csv")))
 
   allCheckDF <- read.csv(file.path(tm, "test", "leafs_merge",
                                    "all_check_results_4.csv"),
