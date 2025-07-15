@@ -86,7 +86,8 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
                                           formula = "raw") {
   rawData <- getRawData(objCOTAN)
 
-  probZero <- getProbabilityOfZero(objCOTAN)
+  # bound the probabilities to avoid exact zero or one
+  probZero <- pmin(pmax(getProbabilityOfZero(objCOTAN), 1.0e-8), 1.0 - 1.0e-8)
 
   res <-
     switch(formula,
