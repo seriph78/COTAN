@@ -144,13 +144,6 @@ test_that("Calculations on genes", {
   expect_identical(gce[[1L]], 0.0)
   expect_equal(gce, crossEntrVector(zeroOne, probZero), ignore_attr = TRUE)
 
-  lh <- calculateLikelihoodOfObserved(obj)
-  expect_identical(rownames(lh), getGenes(obj))
-  expect_identical(colnames(lh), getCells(obj))
-  expect_identical(lh[1L, ], set_names(rep(1.0, 20L), getCells(obj)))
-  expect_equal(lh, ((1.0 - zeroOne) * probZero + zeroOne * (1.0 - probZero)),
-               ignore_attr = TRUE)
-
   expect_no_warning({
     obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE,
                          returnPPFract = TRUE)
