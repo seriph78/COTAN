@@ -61,18 +61,22 @@ checkClusterUniformity <- function(
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-  objCOTAN <- proceedToCoex(objCOTAN, cores = cores,
-                            optimizeForSpeed = optimizeForSpeed,
-                            deviceStr = deviceStr, saveObj = FALSE)
-  gc()
+  if (!is_empty(cellsToDrop) || !isCoexAvailable(objCOTAN)) {
+    objCOTAN <- proceedToCoex(objCOTAN, cores = cores, calcCoex = TRUE,
+                              optimizeForSpeed = optimizeForSpeed,
+                              deviceStr = deviceStr, saveObj = FALSE)
+    gc()
+  }
 
   checker@clusterSize <- getNumCells(objCOTAN)
 
   logThis(paste0("Checking uniformity for the cluster '", clusterName,
                  "' with ", checker@clusterSize, " cells"), logLevel = 2L)
 
-  GDIData <- calculateGDI(objCOTAN)
-  objCOTAN <- storeGDI(objCOTAN, GDIData)
+  if (is_empty(suppressWarnings(getGDI(objCOTAN)))) {
+    GDIData <- calculateGDI(objCOTAN, cores = cores)
+    objCOTAN <- storeGDI(objCOTAN, GDIData)
+  }
 
   # Plots
   if (isTRUE(saveObj) && !dir.exists(outDir)) {

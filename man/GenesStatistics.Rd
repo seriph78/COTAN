@@ -10,6 +10,7 @@
 \alias{genesCoexSpace}
 \alias{establishGenesClusters}
 \alias{calculateGenesCE}
+\alias{calculateGDIGivenS}
 \alias{calculateGDIGivenCorr}
 \alias{calculateGDI}
 \alias{calculatePValue}
@@ -33,9 +34,17 @@ establishGenesClusters(
 
 calculateGenesCE(objCOTAN)
 
+calculateGDIGivenS(S, rowsFraction = 0.05, cores = 1L, chunkSize = 1024L)
+
 calculateGDIGivenCorr(corr, numDegreesOfFreedom, rowsFraction = 0.05)
 
-calculateGDI(objCOTAN, statType = "S", rowsFraction = 0.05)
+calculateGDI(
+  objCOTAN,
+  statType = "S",
+  rowsFraction = 0.05,
+  cores = 1L,
+  chunkSize = 1024L
+)
 
 calculatePValue(
   objCOTAN,
@@ -74,14 +83,21 @@ among those supported by \code{\link[parallelDist:parDist]{parallelDist::parDist
 \item{hclustMethod}{default is "ward.D2" but can be any method defined by
 \code{\link[stats:hclust]{stats::hclust()}} function}
 
+\item{S}{a \code{matrix} object}
+
+\item{rowsFraction}{The fraction of rows that will be averaged to calculate
+the \code{GDI}. Defaults to \eqn{5\%}}
+
+\item{cores}{number of cores to use. Default is 1.}
+
+\item{chunkSize}{number of elements to solve in batch in a single core.
+Default is 1024.}
+
 \item{corr}{a \code{matrix} object, possibly a subset of the columns of the full
 symmetric matrix}
 
 \item{numDegreesOfFreedom}{a \code{int} that determines the number of degree of
 freedom to use in the \eqn{\chi^{2}} test}
-
-\item{rowsFraction}{The fraction of rows that will be averaged to calculate
-the \code{GDI}. Defaults to \eqn{5\%}}
 
 \item{statType}{Which statistics to use to compute the p-values. By default
 it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
@@ -119,6 +135,9 @@ gives the \code{list} of primary markers that selected for it
 
 \code{calculateGenesCE()} returns a named \code{array} with the \emph{cross-entropy}
 of each gene
+
+\code{calculateGDIGivenS()} returns a \code{vector} with the \code{GDI} data for
+each column of the input
 
 \code{calculateGDIGivenCorr()} returns a \code{vector} with the \code{GDI} data for
 each column of the input
@@ -167,6 +186,9 @@ the expected probability of zero and the observed zeros across all cells
 for each gene as \emph{cross-entropy}: \eqn{-\sum_{c}{\mathbb{1}_{X_c == 0}
    \log(p_c) - \mathbb{1}_{X_c != 0} \log(1 - p_c)}} where \eqn{X_c} is the
 observed count and \eqn{p_c} the probability of zero
+
+\code{calculateGDIGivenS()} produces a \code{vector} with the \code{GDI} for each
+column based on the \code{S} matrix (\emph{Pearson's \emph{\eqn{\chi^{2}}} test})
 
 \code{calculateGDIGivenCorr()} produces a \code{vector} with the \code{GDI} for
 each column based on the given correlation matrix, using the \emph{Pearson's

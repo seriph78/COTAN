@@ -5,7 +5,7 @@ library(zeallot)
 library(rlang)
 
 options(COTAN.TorchWarning = NULL)
-
+options(parallelly.fork.enable = TRUE)
 
 crossEntrVector <- function(zeroOne, probZero) {
   crossEntr <- rep_len(0.0, nrow(zeroOne))

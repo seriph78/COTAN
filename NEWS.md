@@ -1,3 +1,15 @@
+
+## 2.9.5
+
+Reduced significantly the memory foot-print
+while use multi-process solvers
+Also improved speed of `GDI` and data-reduction calculations,
+by going multi-process there too
+
+Improved function `cellsUniformClustering()` mechanism in case of larger
+datasets when resolution ceiling was causing unnecessary slowdown and
+in cases early termination too
+
 ## 2.9.4
 
 Solved minor issue with `maxIterations` argument in the function
