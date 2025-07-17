@@ -116,9 +116,13 @@ checkClusterUniformity <- function(
   rm(objCOTAN)
   gc()
 
-  logThis(paste0(
-    "Cluster ", clusterName, ", with size ", checker@clusterSize, ", is ",
-    ifelse(checker@isUniform, "", "not "), "uniform"), logLevel = 1L)
+  logThis(paste0("Cluster ", clusterName, ", with size ",
+                 checker@clusterSize, ", is ",
+                 ifelse(checker@isUniform, "", "not "), "uniform"),
+          logLevel = 1L)
+  logThis(paste0("Cluster ", clusterName, "'s shift to uniformity: ",
+                 calculateThresholdShiftToUniformity(checker = checker)),
+          logLevel = 2L)
 
   if (TRUE) {
     dumpDF <- checkersToDF(checker)

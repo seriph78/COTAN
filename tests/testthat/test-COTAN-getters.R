@@ -42,7 +42,7 @@ test_that("COTAN getters", {
                                              colnames(raw)))
 
   metaInfo <- c("V", "10X", "Test", "20", "TRUE", "TRUE",
-                paste0(10.0 / 55.0), paste0(0L))
+                "NegativeBinomial", paste0(10.0 / 55.0), paste0(0L))
 
   zeroOne <- sign(getRawData(obj))
   probZero <- funProbZeroNegBin(getDispersion(obj),
@@ -65,9 +65,14 @@ test_that("COTAN getters", {
   expect_equal(getMetadataDataset(obj)[[1L]],
                datasetTags()[c(1L:6L, 9L, 7L, 8L)],
                ignore_attr = TRUE)
-  expect_identical(getMetadataDataset(obj)[[2L]],
-                   c("V", "10X", "Test", "20", "TRUE", "TRUE",
-                     "NegativeBinomial", paste0(10.0 / 55.0), paste0(0L)))
+  expect_identical(getMetadataDataset(obj)[[2L]], metaInfo)
+  expect_identical(getMetadataElement(obj, tag = "genes' coex is in sync:"),
+                   "TRUE")
+  expect_true(isCoexAvailable(obj, actOnCells = FALSE))
+  expect_true(isCoexAvailable(obj, actOnCells = FALSE, ignoreSync = TRUE))
+  expect_true(isCoexAvailable(obj, actOnCells = TRUE))
+  expect_true(isCoexAvailable(obj, actOnCells = TRUE, ignoreSync = TRUE))
+
   expect_setequal(colnames(getMetadataGenes(obj)),
                   c("lambda", "feGenes", "dispersion", "GDI"))
   expect_identical(rownames(getMetadataGenes(obj)), getGenes(obj))
