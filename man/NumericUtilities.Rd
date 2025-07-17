@@ -49,7 +49,7 @@ parallelLambdaNewton(
   avgCounts,
   nu,
   zeroPi,
-  threshold = 0.001,
+  threshold = 1e-04,
   maxIterations = 100L
 )
 
