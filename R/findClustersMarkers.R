@@ -16,8 +16,9 @@
 #'   on the one indicated by `clName`
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
-#' @param adjustmentMethod *p-value* multi-test adjustment method. Defaults to
-#'   `"bonferroni"`; use `"none"` for no adjustment
+#' @param adjustmentMethod *p-value* multi-test adjustment method, see
+#'   [stats::p.adjust.methods()]. Defaults to `"bonferroni"`; use `"none"` for
+#'   no adjustment
 #'
 #' @returns `findClustersMarkers()` returns a `data.frame` containing `n` genes
 #'   for each *cluster* scoring top/bottom `COEX` scores. The `data.frame` also
