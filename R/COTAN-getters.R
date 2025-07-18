@@ -752,6 +752,8 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importFrom stringr str_ends
+#'
 #' @export
 #'
 #' @examples
@@ -762,18 +764,20 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 getProbabilityOfZero <- function(objCOTAN) {
   modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
 
-  if (str_equal(modelUsed, "MixturePoisson")) {
+  mu <- getMu(objCOTAN)
+
+  if (str_ends(modelUsed, "MixturePoisson")) {
     pi <- suppressWarnings(getPi(objCOTAN))
     assert_that(!is_empty(pi),
                 msg = "`pi` must not be empty, estimate it")
 
-    return(funProbZeroMixPoi(pi, getMu(objCOTAN)))
+    return(funProbZeroMixPoi(pi, mu))
   } else {
     dispersion <- suppressWarnings(getDispersion(objCOTAN))
     assert_that(!is_empty(dispersion),
                 msg = "`dispersion` must not be empty, estimate it")
 
-    return(funProbZeroNegBin(dispersion, getMu(objCOTAN)))
+    return(funProbZeroNegBin(dispersion, mu))
   }
 }
 

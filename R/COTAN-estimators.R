@@ -227,7 +227,8 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     mini <- new.env(parent = baseenv())
     mini$parallelDispersionBisection <- parallelDispersionBisection
     mini$rowsums <- Rfast::rowsums
-    mini$funProbZero <- funProbZero
+    mini$assert_that <- assertthat::assert_that
+    mini$funProbZeroNegBin <- funProbZeroNegBin
     mini$logThis <- logThis
     mini$worker <- worker
 
@@ -255,7 +256,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     return(res)
   } else {
     res <- lapply(genesBatches,
-                  parallelDispersionBisection,
+                  worker,
                   sumZeros = sumZeros,
                   lambda = lambda,
                   nu = nu,
@@ -266,8 +267,6 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
   }
 }
 
-
-### ------ estimateDispersionBisection -----
 
 #' @aliases estimateDispersionBisection
 #'
@@ -327,8 +326,6 @@ setMethod(
     assert_that(!is_empty(lambda),
                 msg = "`lambda` must not be empty, estimate it")
 
-    dispList <- list()
-
     spIdx <- parallel::splitIndices(length(genes),
                                     ceiling(length(genes) / chunkSize))
 
@@ -386,27 +383,60 @@ setMethod(
 # local utility wrapper for parallel estimation of lambda in the mixture model
 runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts,
                             nu, zeroPi, threshold, maxIterations, cores) {
+
+  ## forward caller that allows for logging progress
+  worker <- function(batch, avgNumNonZeros, avgCounts,
+                     nu, zeroPi, threshold, maxIterations) {
+    tryCatch({
+      return(parallelLambdaNewton(batch,
+                                  avgNumNonZeros = avgNumNonZeros,
+                                  avgCounts      = avgCounts,
+                                  nu             = nu,
+                                  zeroPi         = zeroPi,
+                                  threshold      = threshold,
+                                  maxIterations  = maxIterations))
+    }, error = function(e) {
+      structure(list(e), class = "try-error")
+    })
+  }
+
   if (cores != 1L) {
+    ## create a tiny private env `mini` and a worker within it:
+    ## this reduces spawning memory foot-print
+    mini <- new.env(parent = baseenv())
+    mini$parallelLambdaNewton <- parallelLambdaNewton
+    mini$rowmeans <- Rfast::rowmeans
+    mini$assert_that <- assertthat::assert_that
+    mini$logThis <- logThis
+    mini$worker <- worker
+
+    ## set on the copy in `mini` to only use `mini`
+    environment(mini$parallelLambdaNewton) <- mini
+    environment(mini$worker) <- mini
+
     res <- parallel::mclapply(
       genesBatches,
-      parallelLambdaNewton,
+      worker,
       avgNumNonZeros = avgNumNonZeros,
       avgCounts = avgCounts,
       nu = nu,
       zeroPi = zeroPi,
       threshold = threshold,
       maxIterations = maxIterations,
-      mc.cores = cores)
+      mc.cores = cores,
+      mc.preschedule = FALSE)
+
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
     if (any(resError)) {
       stop(res[[which(resError)[[1L]]]], call. = FALSE)
     }
+
     return(res)
   } else {
     return(lapply(
       genesBatches,
-      parallelLambdaNewton,
+      worker,
       avgNumNonZeros = avgNumNonZeros,
       avgCounts = avgCounts,
       nu = nu,
@@ -426,6 +456,8 @@ runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts,
 #'   assumes [estimateNuLinear()] being already run.
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param allowNegativePi Boolean flag indicating whether we want to use an
+#'   affine mixture model, i.e. allow negative values for pi
 #' @param threshold minimal solution precision
 #' @param cores number of cores to use. Default is 1.
 #' @param maxIterations max number of iterations (avoids infinite loops)
@@ -460,12 +492,12 @@ runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts,
 setMethod(
   "estimateLambdaPiNewton",
   "COTAN",
-  function(objCOTAN, threshold = 0.0001, cores = 1L,
+  function(objCOTAN, allowNegativePi,
+           threshold = 0.0001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
     logThis("Estimate `lambda`: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
-
 
     nu <- suppressWarnings(getNu(objCOTAN))
     assert_that(!is_empty(nu),
@@ -473,10 +505,11 @@ setMethod(
 
     avgNumNonZeros <- getNumOfExpressingCells(objCOTAN) / getNumCells(objCOTAN)
     avgCounts <- rowMeans(getRawData(objCOTAN), dims = 1L)
-    zeroPi <- (abs(avgCounts - avgNumNonZeros) < 1.0e-6) |
-      (avgNumNonZeros > 1.0 - rowMeans(exp(-(avgCounts %o% nu))))
-
-    lambdaList <- list()
+    zeroPi <- (abs(avgCounts - avgNumNonZeros) < 1.0e-6)
+    if (isFALSE(allowNegativePi)) {
+      zeroPi <- zeroPi |
+        (avgNumNonZeros > 1.0 - rowMeans(exp(-(avgCounts %o% nu))))
+    }
 
     genes <- getGenes(objCOTAN)
 
@@ -485,59 +518,26 @@ setMethod(
 
     spGenes <- lapply(spIdx, function(x) genes[x])
 
-    numSplits <- length(spGenes)
-    splitStep <- max(4L, cores * 2L)
+    cores <- min(cores, length(spGenes))
 
-    gc()
+    logThis(paste0("Executing ", length(spGenes), " genes batches"),
+            logLevel = 3L)
 
-    pBegin <- 1L
-    while (pBegin <= numSplits) {
-      pEnd <- min(pBegin + splitStep - 1L, numSplits)
-
-      logThis(paste0("Executing ", (pEnd - pBegin + 1L), " genes batches from",
-                     " [", spIdx[pBegin], "] to [", spIdx[pEnd], "]"),
-              logLevel = 3L)
-
-      # as the runSolver() might trow, we force up to 5 reruns
-      res <- NULL
-      resError <- "No errors"
-      failCount <- 0L
-      while (!is_null(resError) && failCount < 5L) {
-        failCount <- failCount + 1L
-        c(res, resError) %<-%
-          tryCatch(list(runLambdaSolver(genesBatches = spGenes[pBegin:pEnd],
-                                        avgNumNonZeros = avgNumNonZeros,
-                                        avgCounts = avgCounts,
-                                        nu = nu,
-                                        zeroPi = zeroPi,
-                                        threshold = threshold,
-                                        maxIterations = maxIterations,
-                                        cores = cores), NULL),
-                   error = function(e) {
-                     logThis(paste("In genes batches -", e), logLevel = 2L)
-                     list(NULL, e) })
-      }
-
-      assert_that(is_null(resError),
-                  msg = paste("Genes batches failed", failCount,
-                              "times with", resError))
-      lambdaList <- append(lambdaList, res)
-      rm(res)
-
-      pBegin <- pEnd + 1L
-    }
-    logThis("Estimate `lambda`: DONE", logLevel = 2L)
+    lambdaList <- runLambdaSolver(spGenes,
+                                  avgNumNonZeros = avgNumNonZeros,
+                                  avgCounts = avgCounts,
+                                  nu = nu,
+                                  zeroPi = zeroPi,
+                                  threshold = threshold,
+                                  maxIterations = maxIterations,
+                                  cores = cores)
 
     gc()
 
     lambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
 
-    pi <- ifelse(lambda == 0.0, 0.0, 1.0 - avgCounts / lambda)
+    pi <- ifelse(zeroPi, 0.0, 1.0 - avgCounts / lambda)
     pi <- set_names(pi, getGenes(objCOTAN))
-
-    # for cases when the zeros are too few and strongly uneven nu
-    # it follows that sometimes pi < 0.0
-    goodPos <- pi > 0.0
 
     if (TRUE) {
       if (!identical(lambda, suppressWarnings(getLambda(objCOTAN)))) {
@@ -557,10 +557,12 @@ setMethod(
                                         "dispersion", genes)
     objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                            datasetTags()[["model"]],
-                                           "MixturePoisson")
+                                           ifelse(allowNegativePi,
+                                                  "AffineMixturePoisson",
+                                                  "MixturePoisson"))
 
     logThis(paste("`pi` | min:", min(pi), "| max:", max(pi),
-                  "| % non-positive:", mean(!goodPos) * 100.0), logLevel = 1L)
+                  "| % non-positive:", mean(pi <= 0.0) * 100.0), logLevel = 1L)
 
     return(objCOTAN)
   }
@@ -596,7 +598,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     mini$parallelNuBisection <- parallelNuBisection
     mini$assert_that <- assertthat::assert_that
     mini$colsums <- Rfast::colsums
-    mini$funProbZero <- funProbZero
+    mini$funProbZeroNegBin <- funProbZeroNegBin
     mini$logThis <- logThis
     mini$worker <- worker
 
@@ -625,7 +627,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     return(res)
   } else {
     res <- lapply(cellsBatches,
-                  parallelNuBisection,
+                  worker,
                   sumZeros = sumZeros,
                   lambda = lambda,
                   dispersion = dispersion,
@@ -704,8 +706,6 @@ setMethod(
 
     initialGuess <- nu
 
-    nuList <- list()
-
     spIdx <- parallel::splitIndices(length(cells),
                                     ceiling(length(cells) / chunkSize))
 
@@ -754,7 +754,7 @@ setMethod(
 )
 
 
-### ------ estimateDispersionNuBisection -----
+## ------ estimateDispersionNuBisection -----
 
 #' @aliases estimateDispersionNuBisection
 #'
@@ -872,7 +872,7 @@ setMethod(
 )
 
 
-### ------ estimateDispersionNuNlminb -----
+## ------ estimateDispersionNuNlminb -----
 
 #' @aliases estimateDispersionNuNlminb
 #'

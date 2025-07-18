@@ -45,6 +45,7 @@
 
 \S4method{estimateLambdaPiNewton}{COTAN}(
   objCOTAN,
+  allowNegativePi,
   threshold = 1e-04,
   cores = 1L,
   maxIterations = 100L,
@@ -105,6 +106,9 @@ getProbabilityOfZero(objCOTAN)
 
 \item{chunkSize}{number of elements to solve in batch in a single core.
 Default is 1024.}
+
+\item{allowNegativePi}{Boolean flag indicating whether we want to use an
+affine mixture model, i.e. allow negative values for pi}
 
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
