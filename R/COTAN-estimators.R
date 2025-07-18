@@ -483,7 +483,8 @@ runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts,
 #' @export
 #'
 #' @examples
-#' objCOTAN <- estimateLambdaPiNewton(objCOTAN, cores = 6L)
+#' objCOTAN <- estimateLambdaPiNewton(objCOTAN, cores = 6L,
+#'                                    allowNegativePi = FALSE)
 #' lambda <- getLambda(objCOTAN)
 #' pi <- getPi(objCOTAN)
 #'

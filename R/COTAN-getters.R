@@ -614,14 +614,16 @@ setMethod(
 estimatorsAreReady <- function(objCOTAN) {
   anyEmptyArrays <- is_empty(getLambda(objCOTAN)) ||
                     is_empty(getNu(objCOTAN)) ||
-                    (is_empty(getDispersion(objCOTAN)) &&
-                       is_empty(getPi(objCOTAN)))
+                    suppressWarnings(
+                      is_empty(getDispersion(objCOTAN)) &&
+                        is_empty(getPi(objCOTAN)))
   if (anyEmptyArrays) {
     logThis(paste0("Estimators are not ready - array sizes: `lambda` ",
                    length(getLambda(objCOTAN)), ", `nu` ",
                    length(getNu(objCOTAN)), ", `dispersion`/`pi` ",
-                   min(length(getDispersion(objCOTAN)),
-                       length(getPi(objCOTAN)))), logLevel = 2L)
+                   suppressWarnings(
+                     min(length(getDispersion(objCOTAN)),
+                         length(getPi(objCOTAN))))), logLevel = 2L)
   }
   return(!anyEmptyArrays)
 }

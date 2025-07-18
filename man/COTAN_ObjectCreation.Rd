@@ -64,7 +64,7 @@ to a specific device}
 
 \item{modelToUse}{select which statistical model to use in \code{COEX}
 calculations. Recognized strings are: \code{""} (default), \code{"NegativeBinomial"},
-\code{"MixturePoisson"}}
+\code{"MixturePoisson"} and \code{"AffineMixturePoisson"}}
 
 \item{cellsCutoff}{\code{clean()} will delete from the \code{raw} data any gene that is
 expressed in less cells than threshold times the total number of cells.

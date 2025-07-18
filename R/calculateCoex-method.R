@@ -894,6 +894,8 @@ expectedPartialContingencyTables <-
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom stringr str_ends
+#'
 #' @export
 #'
 #' @rdname CalculatingCOEX
@@ -936,7 +938,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
               msg = "`nu` must not be empty, estimate it")
 
   modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
-  if (str_equal(modelUsed, "MixturePoisson")) {
+  if (str_ends(modelUsed, "MixturePoisson")) {
     pi <- suppressWarnings(getPi(objCOTAN))
     assert_that(!is_empty(pi),
                 msg = "`pi` must not be empty, estimate it")
@@ -1367,6 +1369,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #'
 #' @importFrom methods new
 #'
+#' @importFrom stringr str_ends
+#'
 #' @export
 #'
 #' @rdname CalculatingCOEX
@@ -1400,7 +1404,7 @@ setMethod(
       # TODO: finish torch support: write probOneMixPoi() function
       modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
 
-      if (useTorch && !str_equal(modelUsed, "MixturePoisson")) {
+      if (useTorch && !str_ends(modelUsed, "MixturePoisson")) {
         c(coex, problematicPairsFraction) %<-%
           calculateCoex_Torch(objCOTAN, deviceStr = deviceStr,
                               returnPPFract = returnPPFract)

@@ -115,6 +115,8 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom stringr str_ends
+#'
 #' @export
 #'
 #' @rdname HandlingClusterizations
@@ -162,7 +164,7 @@ clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
               msg = "`nu` must not be empty, estimate it")
 
   modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
-  if (str_equal(modelUsed, "MixturePoisson")) {
+  if (str_ends(modelUsed, "MixturePoisson")) {
     pi <- suppressWarnings(getPi(objCOTAN))
     assert_that(!is_empty(pi),
                 msg = "`pi` must not be empty, estimate it")

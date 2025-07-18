@@ -255,7 +255,7 @@ setMethod(
 #' @param cores number of cores to use. Default is 1.
 #' @param modelToUse select which statistical model to use in `COEX`
 #'   calculations. Recognized strings are: `""` (default), `"NegativeBinomial"`,
-#'   `"MixturePoisson"`
+#'   `"MixturePoisson"` and `"AffineMixturePoisson"`
 #' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
 #'   expressed in less cells than threshold times the total number of cells.
 #'   Default cutoff is \eqn{0.003 \; (0.3\%)}

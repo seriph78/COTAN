@@ -239,7 +239,8 @@ nu <- getNu(objCOTAN)
 objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 dispersion <- getDispersion(objCOTAN)
 
-objCOTAN <- estimateLambdaPiNewton(objCOTAN, cores = 6L)
+objCOTAN <- estimateLambdaPiNewton(objCOTAN, cores = 6L,
+                                   allowNegativePi = FALSE)
 lambda <- getLambda(objCOTAN)
 pi <- getPi(objCOTAN)
 
