@@ -1096,6 +1096,10 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     numCells <- nu$size(1L)
     numGenes <- lambda$size(1L)
 
+    # single comparison mask, then both branches
+    neg <- disp <= 0.0
+    pos <- !neg
+
     # prepare output
     out <- torch::torch_empty(c(numCells, numGenes),
                               device = device, dtype = dType)
@@ -1105,24 +1109,19 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
       # outer product
       mu_blk <- torch::torch_ger(nu[i:i_end], lambda)
-      tmp    <- torch::torch_empty_like(mu_blk)
-
-      # single comparison mask, then both branches
-      neg <- disp <= 0.0
-      pos <- torch::logical_not(neg)
 
       # write both branches — empty masks are fine
-      tmp[, neg] <- torch::torch_exp(mu_blk[, neg] * (disp[neg] - 1.0))
-      tmp[, pos] <- torch::torch_pow(1.0 + mu_blk[, pos] * disp[pos],
-                                     -1.0 / disp[pos])
-
-      # finalize in place
-      invisible(tmp$sub_(1.0)$neg_())
+      out[i:i_end, neg] <- torch::torch_exp(mu_blk[, neg] * (disp[neg] - 1.0))
+      out[i:i_end, pos] <- torch::torch_pow(1.0 + mu_blk[, pos] * disp[pos],
+                                            -1.0 / disp[pos])
 
       # copy to output
-      out[i:i_end, ] <- tmp
-      rm(mu_blk, tmp)
+      rm(mu_blk)
     }
+
+    # finalize in place
+    invisible(out$sub_(1.0)$neg_())
+
     return(out)
   }
 
@@ -1159,7 +1158,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   logThis("Calculating genes COEX normalization factor", logLevel = 3L)
 
-  coex <- torch::torch_maximum(expectedYY, 1.0)$reciprocal_()
+  # 1.0 / max(1.0, eYY)  [new tensor]
+  coex <- torch::torch_clamp(expectedYY, min = 1.0)$reciprocal_()
 
   thresholdForPP <- 0.5
   problematicPairs <- NULL
@@ -1176,8 +1176,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     invisible(problematicPairs$bitwise_or_(mask));
     rm(mask)
   }
-  #TODO: use in-place torch_maximum_() as soon as it becomes available
-  invisible(tmp$sub_(1.0)$relu_()$add_(1.0)$reciprocal_())
+  # 1.0 / max(1.0, eYN) [in-place]
+  tmp <- torch::torch_threshold_(tmp, 1.0, 1.0)$reciprocal_()
   invisible(coex$add_(tmp))
 
   rm(tmp)
@@ -1189,7 +1189,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     invisible(problematicPairs$bitwise_or_(mask))
     rm(mask)
   }
-  invisible(tmp$sub_(1.0)$relu_()$add_(1.0)$reciprocal_())
+  # 1.0 / max(1.0, eNY) [in-place]
+  tmp <- torch::torch_threshold_(tmp, 1.0, 1.0)$reciprocal_()
   invisible(coex$add_(tmp))
 
   rm(tmp)
@@ -1203,13 +1204,14 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     invisible(problematicPairs$bitwise_or_(mask))
     rm(mask)
   }
-  invisible(tmp$sub_(1.0)$relu_()$add_(1.0)$reciprocal_())
+  # 1.0 / max(1.0, eNN) [in-place]
+  tmp <- torch::torch_threshold_(tmp, 1.0, 1.0)$reciprocal_()
   invisible(coex$add_(tmp))
 
   rm(tmp, expectedY)
   gc()
 
-  invisible(coex$divide_(nCel)$sqrt_())
+  invisible(coex$div_(nCel)$sqrt_())
 
   # count problematic pairs
   problematicPairsFraction <- NA
@@ -1235,7 +1237,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   # observedYY
   observedYY <- torch::torch_tensor(as.matrix(getZeroOneProj(objCOTAN)),
-                                    device = device, dtype = dtype)
+                                    device = device, dtype = dType)
 
   observedYY <- torch::torch_mm(observedYY, torch::torch_t(observedYY))
 
