@@ -980,6 +980,7 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
   } else {
     kind <- "genes'"
   }
+
   logThis(paste("Calculate", kind, "COEX (legacy): START"), logLevel = 1L)
 
   logThis(paste("Retrieving expected", kind, "contingency table"),
@@ -1076,10 +1077,10 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
 ## ------ Torch implementation ------
 
 calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
+  startTime <- Sys.time()
+
   logThis(paste0("Calculate genes COEX (torch) on device ", deviceStr,
                  ": START"), logLevel = 1L)
-
-  startTime <- Sys.time()
 
   logThis("Retrieving expected genes contingency table", logLevel = 3L)
 
@@ -1159,7 +1160,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   logThis("Calculating genes COEX normalization factor", logLevel = 3L)
 
   # 1.0 / max(1.0, eYY)  [new tensor]
-  coex <- torch::torch_clamp(expectedYY, min = 1.0)$reciprocal_()
+  coex <- expectedYY$clamp_min(1.0)$reciprocal_()
 
   thresholdForPP <- 0.5
   problematicPairs <- NULL
@@ -1177,7 +1178,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     rm(mask)
   }
   # 1.0 / max(1.0, eYN) [in-place]
-  tmp <- torch::torch_threshold_(tmp, 1.0, 1.0)$reciprocal_()
+  tmp <- tmp$clamp_min_(1.0)$reciprocal_()
   invisible(coex$add_(tmp))
 
   rm(tmp)
@@ -1190,7 +1191,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     rm(mask)
   }
   # 1.0 / max(1.0, eNY) [in-place]
-  tmp <- torch::torch_threshold_(tmp, 1.0, 1.0)$reciprocal_()
+  tmp <- tmp$clamp_min_(1.0)$reciprocal_()
   invisible(coex$add_(tmp))
 
   rm(tmp)
@@ -1205,7 +1206,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     rm(mask)
   }
   # 1.0 / max(1.0, eNN) [in-place]
-  tmp <- torch::torch_threshold_(tmp, 1.0, 1.0)$reciprocal_()
+  tmp <- tmp$clamp_min_(1.0)$reciprocal_()
   invisible(coex$add_(tmp))
 
   rm(tmp, expectedY)
@@ -1397,7 +1398,9 @@ calculatePartialCoex <- function(objCOTAN,
                                  zeroOne = NULL,
                                  actOnCells = FALSE,
                                  optimizeForSpeed = TRUE) {
-    if (isTRUE(actOnCells)) {
+  startTime <- Sys.time()
+
+  if (isTRUE(actOnCells)) {
       kind <- "cells'"
     } else {
       kind <- "genes'"
@@ -1461,6 +1464,12 @@ calculatePartialCoex <- function(objCOTAN,
     rm(observedYY, expectedYY)
     gc()
 
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
+
     logThis(paste("Calculate", kind, "partial COEX: DONE"), logLevel = 1L)
 
     return(coex)
@@ -1488,10 +1497,10 @@ calculatePartialCoex <- function(objCOTAN,
 #'
 calculateS <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
                        geneSubsetRow = vector(mode = "character")) {
+  logThis("Calculating S: START", logLevel = 3L)
+
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
   geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
-
-  logThis("Calculating S: START", logLevel = 3L)
 
   assert_that(isCoexAvailable(objCOTAN), msg = "Coex is missing")
 
@@ -1532,10 +1541,12 @@ calculateS <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 #'
 calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
                        geneSubsetRow = vector(mode = "character")) {
-  geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
-  geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
+  startTime <- Sys.time()
 
   logThis("Calculating G: START", logLevel = 2L)
+
+  geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
+  geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
   c(observedNN, observedNY, observedYN, observedYY) %<-%
     observedContingencyTables(objCOTAN, actOnCells = FALSE)
@@ -1579,6 +1590,12 @@ calculateG <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
 
   rm(tNN, tNY, tYN, tYY)
   gc()
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Calculating G: DONE", logLevel = 2L)
 
@@ -1755,6 +1772,8 @@ calculateReducedDataMatrix <-
   function(objCOTAN, useCoexEigen = FALSE,
            dataMethod = "", numComp = 25L,
            genesSel = "", numGenes = 2000L) {
+  startTime <- Sys.time()
+
   logThis("Elaborating Reduced dimensionality Data Matrix - START",
           logLevel = 2L)
 
@@ -1805,6 +1824,12 @@ calculateReducedDataMatrix <-
 
   assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
               ncol(cellsRDM) <= numComp)
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Elaborating Reduced dimensionality Data Matrix - DONE",
           logLevel = 2L)

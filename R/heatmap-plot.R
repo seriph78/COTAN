@@ -185,7 +185,9 @@ heatmapPlot <- function(objCOTAN = NULL,
                         pValueThreshold = 0.01,
                         conditions = NULL,
                         dir = ".") {
-  logThis("heatmap plot: START", logLevel = 2L)
+  startTime <- Sys.time()
+
+  logThis("Heatmap plot: START", logLevel = 2L)
 
   assert_that(is.null(objCOTAN) != is_empty(conditions),
               msg = paste("Please pass either a COTAN object",
@@ -242,6 +244,14 @@ heatmapPlot <- function(objCOTAN = NULL,
                                   guide = "colourbar", aesthetics = "fill",
                                   oob = squish) +
              plotTheme("heatmap", textSize = 9L)
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
+
+  logThis("Heatmap plot: DONE", logLevel = 2L)
 
   return(heatmap)
 }
