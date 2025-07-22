@@ -242,7 +242,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
       threshold = threshold,
       maxIterations = maxIterations,
       mc.cores = cores,
-      mc.preschedule = FALSE)
+      mc.preschedule = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
@@ -431,7 +431,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       threshold = threshold,
       maxIterations = maxIterations,
       mc.cores = cores,
-      mc.preschedule = FALSE)
+      mc.preschedule = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))

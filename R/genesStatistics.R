@@ -79,7 +79,7 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
                               S = S,
                               topRows = topRows,
                               mc.cores  = cores,
-                              mc.preschedule = FALSE)
+                              mc.preschedule = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
