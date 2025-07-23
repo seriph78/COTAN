@@ -1134,6 +1134,10 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   assert_that(!is_empty(nu),
               msg = "`nu` must not be empty, estimate it")
 
+  disp <- suppressWarnings(getDispersion(objCOTAN))
+  assert_that(!is_empty(disp),
+              msg = "`dispersion` must not be empty, estimate it")
+
   # Build all three in dtype_calc:
   lambda_t <- torch::torch_tensor(lambda, device = device, dtype = dType)
   nu_t     <- torch::torch_tensor(nu,     device = device, dtype = dType)
