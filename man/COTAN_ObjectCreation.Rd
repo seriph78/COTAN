@@ -20,7 +20,7 @@ COTAN(raw = "ANY")
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
   genesThreshold = 0.99,
-  saveObj = TRUE,
+  saveObj = FALSE,
   outDir = "."
 )
 
@@ -37,7 +37,7 @@ automaticCOTANObjectCreation(
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
   genesThreshold = 0.99,
-  saveObj = TRUE,
+  saveObj = FALSE,
   outDir = "."
 )
 }
