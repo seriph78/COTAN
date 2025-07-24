@@ -54,7 +54,9 @@ UMAPPlot <- function(dataIn,
                      colors = NULL,
                      numNeighbors = 0L,
                      minPointsDist = NaN) {
-  logThis("UMAP plot", logLevel = 2L)
+  startTime <- Sys.time()
+
+  logThis("UMAP plot: START", logLevel = 2L)
 
   assert_that(!is_empty(rownames(dataIn)),
               msg = "UMAPPlot - input matrix must have proper row-names")
@@ -224,6 +226,14 @@ UMAPPlot <- function(dataIn,
     plot <- plot +
       theme(legend.position = "none")
   }
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
+
+  logThis("UMAP plot: DONE", logLevel = 2L)
 
   return(plot)
 }

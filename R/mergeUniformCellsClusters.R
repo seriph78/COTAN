@@ -372,6 +372,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   # start analysis
 
+  startTime <- Sys.time()
+
   logThis("Merging cells' uniform clustering: START", logLevel = 2L)
 
   assert_that(estimatorsAreReady(objCOTAN),
@@ -451,6 +453,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
                    getCheckerThreshold(checker)),
             logLevel = 2L)
     repeat {
+      startLoopTime <- Sys.time()
+
       iter <- iter + 1L
       logThis(paste0("Start merging nearest clusters: iteration ", iter),
               logLevel = 3L)
@@ -539,6 +543,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
         logThis(paste("Executed", (oldNumClusters - newNumClusters), "merges"),
                 logLevel = 3L)
       }
+
+      endLoopTime <- Sys.time()
+
+      logThis(paste("Loop calculations elapsed time:",
+                    difftime(endLoopTime, startLoopTime, units = "secs")),
+              logLevel = 2L)
     }
     logThis(paste0("Executed all merges for threshold ",
                    getCheckerThreshold(checker), " out of ",
@@ -595,6 +605,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
     write.csv(as.data.frame(list("merge" = outputClusters)),
               file = outFile, na = "NaN")
   })
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 
