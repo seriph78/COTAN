@@ -342,15 +342,15 @@ handleNamesSubsets <- function(names, subset = vector(mode = "character")) {
 #'
 conditionsFromNames <-
   function(names, splitPattern = " ", fragmentNum = 2L) {
-  numNames <- length(names)
   conditions <- str_split_i(names, pattern = splitPattern, fragmentNum)
   if (anyNA(conditions) ||
-      length(unique(conditions)) == numNames) {
+      length(unique(conditions)) == length(names)) {
     warning("conditionsFromNames: no proper pattern has been recognized",
             " or given column number was too high")
-    conditions <- rep("1", numNames)
+    conditions <- rep_named(names, "1")
+  } else {
+    names(conditions) <- names
   }
-  names(conditions) <- names
   return(conditions)
 }
 
@@ -466,9 +466,9 @@ getColumnFromDF <- function(df, colName) {
 
 #' @details `setColumnInDF()` is a function to append, if missing, or resets, if
 #'   present, a column into a `data.frame`, whether the `data.frame` is empty or
-#'   not. The given `rowNames` are used only in the case the `data.frame` has
-#'   only the default row numbers, so this function cannot be used to override
-#'   row names
+#'   not; a `NULL` `colToSet` removes the column from the `data.frame`. The
+#'   given `rowNames` are used only in the case the `data.frame` has only the
+#'   default row numbers, so this function cannot be used to override row names
 #'
 #' @param df the `data.frame`
 #' @param colToSet the column to add
@@ -476,8 +476,8 @@ getColumnFromDF <- function(df, colName) {
 #' @param rowNames when not empty, if the input `data.frame` has no real row
 #'   names, the new row names of the resulting `data.frame`
 #'
-#' @returns `setColumnInDF()` returns the updated, or the newly created,
-#'   `data.frame`
+#' @returns `setColumnInDF()` returns input `data.frame` with the
+#'   newly-created/updated/removed column
 #'
 #' @export
 #'
@@ -493,7 +493,7 @@ setColumnInDF <- function(df, colToSet, colName,
   } else {
     if (colName %in% colnames(df)) {
       df[[colName]] <- colToSet
-    } else {
+    } else if (!is_empty(colToSet)) {
       df <- cbind(df, set_names(data.frame(colToSet), colName))
     }
   }

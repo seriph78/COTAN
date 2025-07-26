@@ -49,6 +49,8 @@ findClustersMarkers <- function(
     objCOTAN, n = 10L, markers = NULL,
     clName = "", clusters = NULL,
     coexDF = NULL, adjustmentMethod = "bonferroni") {
+  startTime <- Sys.time()
+
   logThis("findClustersMarkers - START", logLevel = 2L)
 
   marks <- unlist(markers)
@@ -103,6 +105,12 @@ findClustersMarkers <- function(
       rm(tmpDF)
     }
   }
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("findClustersMarkers - DONE", logLevel = 2L)
 

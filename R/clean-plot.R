@@ -21,6 +21,8 @@
 #' @export
 #'
 #' @importFrom rlang set_names
+#' @importFrom rlang rep_named
+#' @importFrom rlang na_dbl
 #'
 #' @importFrom tibble rownames_to_column
 #' @importFrom tibble column_to_rownames
@@ -74,12 +76,13 @@
 #' @rdname RawDataCleaning
 #'
 cleanPlots <- function(objCOTAN, includePCA = TRUE) {
+  startTime <- Sys.time()
+  logThis("Clean plots: START", logLevel = 2L)
+
   if (isTRUE(includePCA)) {
     logThis("PCA: START", logLevel = 2L)
 
     nuNormData <- getNuNormData(objCOTAN)
-
-    logThis("Elaborating PCA - START", logLevel = 3L)
 
     # re-scale so that all the genes have mean 0.0 and stdev 1.0
     cellsRDM <- runPCA(x = t(nuNormData),
@@ -87,27 +90,25 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
                        BSPARAM = IrlbaParam(),
                        get.rotation = FALSE)[["x"]]
 
-    logThis("Elaborating PCA - DONE", logLevel = 3L)
-
     assert_that(identical(rownames(cellsRDM), getCells(objCOTAN)),
                 msg = "Issues with pca output")
+
+    logThis("PCA: DONE", logLevel = 2L)
+
+    logThis("Hierarchical clustering: START", logLevel = 2L)
 
     distCells <- scale(cellsRDM)
     distCells <- calcDist(distCells, method = "euclidean") # mahlanobis
 
     cellsRDM <- as.data.frame(cellsRDM)
 
-    logThis("PCA: DONE", logLevel = 2L)
-
-    logThis("Hierarchical clustering: START", logLevel = 2L)
-
     # hclust cannot operate on more than 2^16 elements
     if (getNumCells(objCOTAN) <= 65500L) {
       hcCells <- hclust(distCells, method = "complete")
       groups <- cutree(hcCells, k = 2L)
     } else {
-      groups <- set_names(rep(1L, times = getNumCells(objCOTAN)),
-                          getCells(objCOTAN))
+      groups <- rep_named(getCells(objCOTAN), 1L)
+
       # ensure B group is not empty picking the first cell
       groups[[1L]] <- 2L
 
@@ -147,7 +148,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     rm(toClust)
 
-    D <- data.frame("means" = rowMeans(B), "n" = NA)
+    D <- data.frame("means" = rowMeans(B), "n" = na_dbl)
     rownames(D) <- rownames(B)
     D <- rownames_to_column(D)
     rm(B)
@@ -246,6 +247,14 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
                                        " should probably be removed"),
                         color = "darkred", size = 4.5)
   }
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
+
+  logThis("Clean plots: DONE", logLevel = 2L)
 
   return(list("pcaCells" = cellsRDMPlot, "pcaCellsData" = cellsRDM,
               "genes" = genesPlot, "UDE" = UDEPlot,

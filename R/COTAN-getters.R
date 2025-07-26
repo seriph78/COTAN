@@ -8,6 +8,9 @@
 #' @name RawDataGetters
 NULL
 
+
+## ---- getRawData ----
+
 #' @aliases getRawData
 #'
 #' @details `getRawData()` extracts the raw count table.
@@ -35,6 +38,8 @@ setMethod(
 )
 
 
+## ---- getNumCells ----
+
 #' @aliases getNumCells
 #'
 #' @details `getNumCells()` extracts the number of cells in the sample (\eqn{m})
@@ -58,6 +63,8 @@ setMethod(
   }
 )
 
+
+## ---- getNumGenes ----
 
 #' @aliases getNumGenes
 #'
@@ -83,6 +90,8 @@ setMethod(
 )
 
 
+## ---- getCells ----
+
 #' @aliases getCells
 #'
 #' @details `getCells()` extract all cells in the dataset.
@@ -107,6 +116,8 @@ setMethod(
 )
 
 
+## ---- getGenes ----
+
 #' @aliases getGenes
 #'
 #' @details `getGenes()` extract all genes in the dataset.
@@ -130,6 +141,8 @@ setMethod(
   }
 )
 
+
+## ---- getZeroOneProj ----
 
 #' @aliases getZeroOneProj
 #'
@@ -157,6 +170,8 @@ setMethod(
 )
 
 
+## ---- getCellsSize ----
+
 #' @aliases getCellsSize
 #'
 #' @details `getCellsSize()` extracts the cell raw library size.
@@ -182,6 +197,8 @@ setMethod(
   }
 )
 
+
+## ---- getNumExpressedGenes ----
 
 #' @aliases getNumExpressedGenes
 #'
@@ -211,6 +228,8 @@ setMethod(
 )
 
 
+## ---- getGenesSize ----
+
 #' @aliases getGenesSize
 #'
 #' @details `getGenesSize()` extracts the genes raw library size.
@@ -236,6 +255,8 @@ setMethod(
   }
 )
 
+
+## ---- getNumOfExpressingCells ----
 
 #' @aliases getNumOfExpressingCells
 #'
@@ -282,6 +303,9 @@ setMethod(
 #' @name HandleMetaData
 NULL
 
+
+## ---- getMetadataDataset ----
+
 #' @aliases getMetadataDataset
 #'
 #' @details `getMetadataDataset()` extracts the meta-data stored for the
@@ -317,6 +341,8 @@ setMethod(
 )
 
 
+## ---- getMetadataElement ----
+
 #' @aliases getMetadataElement
 #'
 #' @details `getMetadataElement()` extracts the value associated with the
@@ -349,6 +375,8 @@ setMethod(
 )
 
 
+## ---- getMetadataGenes ----
+
 #' @aliases getMetadataGenes
 #'
 #' @details `getMetadataGenes()` extracts the meta-data stored for the genes
@@ -373,6 +401,8 @@ setMethod(
 )
 
 
+## ---- getMetadataCells ----
+
 #' @aliases getMetadataCells
 #'
 #' @details `getMetadataCells()` extracts the meta-data stored for the cells
@@ -396,6 +426,8 @@ setMethod(
   }
 )
 
+
+## ---- getDims ----
 
 #' @aliases getDims
 #'
@@ -429,6 +461,8 @@ setMethod(
 
 # ------- `COTAN` estimated data accessors ------
 
+## ---- getNu ----
+
 #' @aliases getNu
 #'
 #' @details `getNu()` extracts the `nu` array (normalized cells' counts
@@ -460,6 +494,8 @@ setMethod(
   }
 )
 
+
+## ---- getLambda ----
 
 #' @aliases getLambda
 #'
@@ -493,6 +529,8 @@ setMethod(
 )
 
 
+## ---- getDispersion ----
+
 #' @aliases getDispersion
 #'
 #' @details `getDispersion()` extracts the `dispersion` array (one value for
@@ -524,6 +562,40 @@ setMethod(
   }
 )
 
+## ---- getPi ----
+
+#' @aliases getPi
+#'
+#' @details `getPi()` extracts the mixture probability array
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getPi()` returns the mixture probability array
+#'
+#' @importFrom rlang is_empty
+#'
+#' @export
+#'
+#' @rdname ParametersEstimations
+#'
+setMethod(
+  "getPi",
+  "COTAN",
+  function(objCOTAN) {
+    pi <- getMetadataGenes(objCOTAN)[["pi"]]
+
+    if (is_empty(pi)) {
+      warning("`pi` is empty")
+    } else {
+      names(pi) <- getGenes(objCOTAN)
+    }
+
+    return(pi)
+  }
+)
+
+
+## ---- estimatorsAreReady ----
 
 #' @details `estimatorsAreReady()` checks whether the estimators arrays
 #'   `lambda`, `nu`, `dispersion` are available
@@ -542,16 +614,22 @@ setMethod(
 estimatorsAreReady <- function(objCOTAN) {
   anyEmptyArrays <- is_empty(getLambda(objCOTAN)) ||
                     is_empty(getNu(objCOTAN)) ||
-                    is_empty(getDispersion(objCOTAN))
+                    suppressWarnings(
+                      is_empty(getDispersion(objCOTAN)) &&
+                        is_empty(getPi(objCOTAN)))
   if (anyEmptyArrays) {
     logThis(paste0("Estimators are not ready - array sizes: `lambda` ",
                    length(getLambda(objCOTAN)), ", `nu` ",
-                   length(getNu(objCOTAN)), ", `dispersion` ",
-                   length(getDispersion(objCOTAN))), logLevel = 2L)
+                   length(getNu(objCOTAN)), ", `dispersion`/`pi` ",
+                   suppressWarnings(
+                     min(length(getDispersion(objCOTAN)),
+                         length(getPi(objCOTAN))))), logLevel = 2L)
   }
   return(!anyEmptyArrays)
 }
 
+
+## ---- getMu ----
 
 #' @aliases getMu
 #' @aliases calculateMu
@@ -582,6 +660,8 @@ getMu <- function(objCOTAN) {
 }
 
 
+## ---- getNuNormData ----
+
 #' @details `getNuNormData()` extracts the \eqn{\nu}*-normalized* count table
 #'   (i.e. where each column is divided by `nu`) and returns it
 #'
@@ -607,6 +687,9 @@ getNuNormData <- function(objCOTAN) {
   return(t(t(getRawData(objCOTAN)) * (1.0 / nu)))
 }
 
+
+## ---- getLogNormData ----
+
 #' @details `getLogNormData()` extracts the *log-normalized* count table (i.e.
 #'   where each column is divided by the [getCellsSize()]), takes its `log10`
 #'   and returns it.
@@ -630,6 +713,9 @@ getLogNormData <- function(objCOTAN) {
 
   return(log1p(normData) / log(10.0))
 }
+
+
+## ---- getNormalizedData ----
 
 #' @details `getNormalizedData()` is deprecated: please use [getNuNormData()] or
 #'   [getLogNormData()] directly as appropriate
@@ -655,8 +741,11 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 }
 
 
+## ---- getProbabilityOfZero ----
+
 #' @details `getProbabilityOfZero()` gives for each cell and each gene the
-#'   probability of observing zero reads
+#'   probability of observing zero reads. The result depends on the statistical
+#'   model chosen for the estimators
 #'
 #' @param objCOTAN a `COTAN` object
 #'
@@ -664,6 +753,8 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 #'   probabilities of zero
 #'
 #' @importFrom rlang is_empty
+#'
+#' @importFrom stringr str_ends
 #'
 #' @export
 #'
@@ -673,12 +764,23 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 #' @rdname ParametersEstimations
 #'
 getProbabilityOfZero <- function(objCOTAN) {
-  dispersion <- suppressWarnings(getDispersion(objCOTAN))
-  assert_that(!is_empty(dispersion),
-              msg = "`dispersion` must not be empty, estimate it")
+  modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
 
-  # estimate Probabilities of 0 with internal function funProbZero
-  return(funProbZero(dispersion, getMu(objCOTAN)))
+  mu <- getMu(objCOTAN)
+
+  if (str_ends(modelUsed, "MixturePoisson")) {
+    pi <- suppressWarnings(getPi(objCOTAN))
+    assert_that(!is_empty(pi),
+                msg = "`pi` must not be empty, estimate it")
+
+    return(funProbZeroMixPoi(pi, mu))
+  } else {
+    dispersion <- suppressWarnings(getDispersion(objCOTAN))
+    assert_that(!is_empty(dispersion),
+                msg = "`dispersion` must not be empty, estimate it")
+
+    return(funProbZeroNegBin(dispersion, mu))
+  }
 }
 
 
@@ -697,6 +799,9 @@ getProbabilityOfZero <- function(objCOTAN) {
 #'
 #' @name RawDataCleaning
 NULL
+
+
+## ---- flagNotFullyExpressedGenes ----
 
 #' @aliases flagNotFullyExpressedGenes
 #'
@@ -743,6 +848,8 @@ setMethod(
 )
 
 
+## ---- flagNotFullyExpressingCells ----
+
 #' @aliases flagNotFullyExpressingCells
 #'
 #' @details `flagNotFullyExpressingCells()`returns a Boolean vector with TRUE
@@ -777,6 +884,8 @@ setMethod(
 )
 
 
+## ---- getFullyExpressedGenes ----
+
 #' @aliases getFullyExpressedGenes
 #'
 #' @details `getFullyExpressedGenes()` returns the genes expressed in all cells
@@ -802,6 +911,8 @@ setMethod(
   }
 )
 
+
+## ---- getFullyExpressingCells ----
 
 #' @aliases getFullyExpressingCells
 #'
@@ -834,6 +945,8 @@ setMethod(
 #'
 #' @name CalculatingCOEX
 NULL
+
+## ---- getGenesCoex ----
 
 #' @aliases getGenesCoex
 #'
@@ -974,6 +1087,8 @@ setMethod(
 )
 
 
+## ---- getCellsCoex ----
+
 #' @aliases getCellsCoex
 #'
 #' @details `getCellsCoex()` extracts a complete (or a partial after cells
@@ -1039,6 +1154,8 @@ setMethod(
 )
 
 
+## ---- isCoexAvailable ----
+
 #' @aliases isCoexAvailable
 #'
 #' @details `isCoexAvailable()` allows to query whether the relevant `COEX`
@@ -1080,6 +1197,8 @@ setMethod(
 )
 
 
+## ---- getGDI ----
+
 #' @aliases getGDI
 #'
 #' @details `getGDI()` extracts the genes' `GDI` array as it was stored by the
@@ -1112,6 +1231,10 @@ setMethod(
   }
 )
 
+
+# ------- `COTAN` clusterizations accessors ------
+
+## ---- getClusterizations ----
 
 #' @aliases getClusterizations
 #'
@@ -1229,6 +1352,9 @@ setMethod(
   }
 )
 
+
+## ---- getClusterizationName ----
+
 #' @aliases getClusterizationName
 #'
 #' @details `getClusterizationName()` normalizes the given *clusterization* name
@@ -1281,6 +1407,9 @@ setMethod(
   }
 )
 
+
+## ---- getClusterizationData ----
+
 #' @aliases getClusterizationData
 #'
 #' @details `getClusterizationData()` extracts the asked *clusterization* and
@@ -1326,7 +1455,9 @@ setMethod(
   }
 )
 
-#'
+
+## ---- getClusters ----
+
 #' @details `getClusters()` extracts the asked *clusterization* from the `COTAN`
 #'   object
 #'
@@ -1347,6 +1478,9 @@ setMethod(
 getClusters <- function(objCOTAN, clName = "") {
   return(getClusterizationData(objCOTAN, clName = clName)[["clusters"]])
 }
+
+
+## ---- getClustersCoex ----
 
 #' @aliases getClustersCoex
 #'
@@ -1386,6 +1520,8 @@ setMethod(
 #'
 #' @name HandlingConditions
 NULL
+
+## ---- getAllConditions ----
 
 #' @aliases getAllConditions
 #'
@@ -1440,6 +1576,9 @@ setMethod(
   }
 )
 
+
+## ---- getConditionName ----
+
 #' @aliases getConditionName
 #'
 #' @details `getConditionName()` normalizes the given *condition* name or, if
@@ -1490,6 +1629,9 @@ setMethod(
   }
 )
 
+
+## ---- getCondition ----
+
 #' @aliases getCondition
 #'
 #' @details `getCondition()` extracts the asked *condition* from the `COTAN`
@@ -1530,6 +1672,8 @@ setMethod(
   }
 )
 
+
+## ---- normalizeNameAndLabels ----
 
 #' @details `normalizeNameAndLabels()` takes a pair of name/labels and
 #'   normalize them based on the available information in the `COTAN` object

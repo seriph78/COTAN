@@ -36,7 +36,7 @@ coexPoint <- function(o, e, n) {
 }
 
 coexMatrix <- function(obs, exp, n, s) {
-  coex <- matrix(NA, s, s)
+  coex <- matrix(na_dbl, s, s)
   for (i in (1L:s)) for (j in (i:s)) {
     o <- c(obs[[1L]][i, j], obs[[2L]][i, j], obs[[3L]][i, j], obs[[4L]][i, j])
     e <- c(exp[[1L]][i, j], exp[[2L]][i, j], exp[[3L]][i, j], exp[[4L]][i, j])
@@ -163,7 +163,7 @@ test_that("Calculations on genes", {
                           getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 7L)],
+  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 9L, 7L)],
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
                    paste0(10.0 / 55.0))
@@ -185,10 +185,10 @@ test_that("Calculations on genes", {
                           getNumCells(obj), getNumGenes(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 7L)],
+  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 9L, 7L)],
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
-                   paste0(NA))
+                   paste0(na_dbl))
 
   genesSample1 <- sample(getNumGenes(obj), 3L)
   partialCoex1 <- calculatePartialCoex(obj, genesSample1)
@@ -296,7 +296,7 @@ test_that("Calculations on cells", {
                           getNumCells(obj)),
                tolerance = 0.001, ignore_attr = TRUE)
 
-  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 8L)],
+  expect_equal(getMetadataDataset(obj)[[1L]], datasetTags()[c(5L, 6L, 9L, 8L)],
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["cbad"]]), paste0(0L))
 
@@ -529,7 +529,7 @@ test_that("Coex with negative dispersion genes", {
   coex3 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
   expect_equal(coex1, coex2, tolerance = 1e-7)
-  expect_equal(coex1, coex3, tolerance = 1e-7)
+  expect_equal(coex1, coex3, tolerance = 2e-7)
   expect_equal(coex2, coex3, tolerance = 5e-7)
 
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),

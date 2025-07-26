@@ -2,15 +2,20 @@
 % Please edit documentation in R/numericUtilities.R
 \name{NumericUtilities}
 \alias{NumericUtilities}
-\alias{funProbZero}
+\alias{funProbZeroNegBin}
+\alias{funProbZeroMixPoi}
 \alias{dispersionBisection}
 \alias{parallelDispersionBisection}
+\alias{lambdaNewton}
+\alias{parallelLambdaNewton}
 \alias{nuBisection}
 \alias{parallelNuBisection}
 \alias{calcDist}
 \title{Numeric Utilities}
 \usage{
-funProbZero(dispersion, mu)
+funProbZeroNegBin(dispersion, mu)
+
+funProbZeroMixPoi(pi, mu)
 
 dispersionBisection(
   sumZeros,
@@ -26,6 +31,25 @@ parallelDispersionBisection(
   lambda,
   nu,
   threshold = 0.001,
+  maxIterations = 100L
+)
+
+lambdaNewton(
+  avgNumNonZeros,
+  avgCounts,
+  nu,
+  zeroPi,
+  threshold = 1e-04,
+  maxIterations = 100L
+)
+
+parallelLambdaNewton(
+  genes,
+  avgNumNonZeros,
+  avgCounts,
+  nu,
+  zeroPi,
+  threshold = 1e-04,
   maxIterations = 100L
 )
 
@@ -55,6 +79,9 @@ calcDist(data, method, diag = FALSE, upper = FALSE)
 
 \item{mu}{the \code{lambda} times \code{nu} values (a \eqn{n \times m} matrix)}
 
+\item{pi}{the estimated \emph{probability} that a cell does not express a given
+gene (a \eqn{n}-sized vector)}
+
 \item{sumZeros}{the number of genes not expressed in the relevant cell (a
 \eqn{m}-sized vector)}
 
@@ -66,7 +93,15 @@ calcDist(data, method, diag = FALSE, upper = FALSE)
 
 \item{maxIterations}{max number of iterations (avoids infinite loops)}
 
-\item{genes}{names of the relevant genes}
+\item{genes}{names of the relevant genes (a \eqn{n}-sized vector)}
+
+\item{avgNumNonZeros}{the average number of cells that express the gene  (a
+\eqn{n}-sized vector)}
+
+\item{avgCounts}{the average expression of the gene  (a \eqn{n}-sized vector)}
+
+\item{zeroPi}{whether this genes is a special case where \eqn{p \equiv 0} and
+only the zero probability marginals are calibrated (a \eqn{n}-sized vector)}
 
 \item{initialGuess}{the initial guess for \code{nu}  (a \eqn{m}-sized vector)}
 
@@ -85,11 +120,21 @@ matrix should be printed by print.dist.upper}
 distance matrix should be printed by print.dist}
 }
 \value{
-the probability \code{matrix} that a \emph{read count} is identically zero
+\code{funProbZeroNegBin()} returns the probability \code{matrix} that a \emph{read
+count} is identically zero
 
-the \code{dispersion} value
+\code{funProbZeroMixPoi()} returns the probability \code{matrix} that a \emph{read
+count} is identically zero
 
-the dispersion values
+\code{dispersionBisection()} returns the \code{dispersion} value
+
+\code{parallelDispersionBisection()} returns the dispersion values
+
+\code{lambdaNewton()} returns the lambda value
+
+\code{lambdaNewton()} returns the lambda value
+
+\code{parallelLambdaNewton()} returns the \code{lambda} values
 
 the nu value
 
@@ -102,8 +147,9 @@ A set of function helper related to the statistical model
 underlying the \code{COTAN} package
 }
 \details{
-\code{funProbZero} is a private function that gives the probability that
-a sample gene's reads are zero, given the \code{dispersion} and \code{mu} parameters.
+\code{funProbZeroNegBin} is a private function that gives the probability
+that a sample gene's reads are zero, given the \code{dispersion} and \code{mu}
+parameters of a \emph{Negative Binomial} model
 
 Using \eqn{d}{`disp`} for \code{disp} and \eqn{\mu}{`mu`} for \code{mu},
 it returns:
@@ -114,20 +160,48 @@ The function is continuous in \eqn{d = 0}{`disp = 0`},
 increasing in \eqn{d}{`disp`} and decreasing in \eqn{\mu}{`mu`}.
 It returns 0 when \eqn{d = -\infty}{`disp = -Inf`} or
 \eqn{\mu = \infty}{`mu = Inf`}.
-It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
+It returns \eqn{1.0} when \eqn{\mu = 0}{`mu = 0`}.
 
-\code{dispersionBisection} is a private function for the estimation of
+\code{funProbZeroMixPoi} is a private function that gives the probability
+that a sample gene's reads are zero, given the \code{pi} and \code{mu} parameters of
+a \emph{Mixture with Poisson} model
+
+Using \eqn{\pi}{`pi`} for \code{pi} and \eqn{\mu}{`mu`} for \code{mu}, it
+returns: \eqn{\pi + (1 - \pi) e^{-\mu}}
+It returns \eqn{1.0} when \eqn{\mu = 0}{`mu = 0`}.
+
+\code{dispersionBisection()} is a private function for the estimation of
 \code{dispersion} slot of a \code{COTAN} object via a bisection solver
 
-The goal is to find a \code{dispersion} value that reduces to zero the
-difference between the number of estimated and counted zeros
+The goal of \code{dispersionBisection()} is to find a \code{dispersion} value
+that reduces to zero the difference between the number of estimated and
+counted zeros
 
-\code{parallelDispersionBisection} is a private function invoked by
+\code{parallelDispersionBisection()} is a private function invoked by
 \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} for the estimation of the \code{dispersion} slot
 of a \code{COTAN} object via a parallel bisection solver
 
-The goal is to find a \code{dispersion} \code{array} that reduces to zero the
-difference between the number of estimated and counted zeros
+The goal of \code{parallelDispersionBisection()} is to find a
+\code{dispersion} \code{array} that reduces to zero the difference between the number
+of estimated and counted zeros
+
+\code{lambdaNewton()} is a private function for the estimation of
+\code{lambda} slot of a \code{COTAN} object via a Newton-Raphson solver
+
+The goal of \code{lambdaNewton()} is to find a \code{lambda} value by which
+the equation \eqn{\frac{1 - e^{-\lambda}}{\lambda} = \frac{1 - z}{m}},
+coming from the mixture model, so to match contemporaneously both average
+and number of zero in the model. The formula is actually \eqn{\nu} weighted
+
+\code{parallelLambdaNewton()} is a private function invoked by
+\code{\link[=estimateLambdaPiNewton]{estimateLambdaPiNewton()}} for the estimation of the \code{lambda} slot of a
+\code{COTAN} object via a Newton-Raphson solver
+
+The goal of \code{parallelLambdaNewton()} is to find a \verb{lambda array}
+that solves the equation \eqn{\frac{1 - e^{-\lambda}}{\lambda} = \frac{1 -
+  z}{m}}, coming from the mixture model, so to match contemporaneously both
+average and number of zero in the model. The formula is actually \eqn{\nu}
+weighted
 
 \code{nuBisection} is a private function for the estimation of \code{nu} slot
 of a \code{COTAN} object via a bisection solver

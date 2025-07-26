@@ -200,6 +200,8 @@ setMethod(
 )
 
 
+## ---- estimateDispersionBisection ----
+
 # local utility wrapper for parallel estimation of dispersion
 runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
                           threshold, maxIterations, cores) {
@@ -225,7 +227,8 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     mini <- new.env(parent = baseenv())
     mini$parallelDispersionBisection <- parallelDispersionBisection
     mini$rowsums <- Rfast::rowsums
-    mini$funProbZero <- funProbZero
+    mini$assert_that <- assertthat::assert_that
+    mini$funProbZeroNegBin <- funProbZeroNegBin
     mini$logThis <- logThis
     mini$worker <- worker
 
@@ -242,7 +245,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
       threshold = threshold,
       maxIterations = maxIterations,
       mc.cores = cores,
-      mc.preschedule = FALSE)
+      mc.preschedule = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
@@ -253,7 +256,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     return(res)
   } else {
     res <- lapply(genesBatches,
-                  parallelDispersionBisection,
+                  worker,
                   sumZeros = sumZeros,
                   lambda = lambda,
                   nu = nu,
@@ -264,8 +267,6 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
   }
 }
 
-
-### ------ estimateDispersionBisection -----
 
 #' @aliases estimateDispersionBisection
 #'
@@ -310,6 +311,8 @@ setMethod(
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
+    startTime <- Sys.time()
+
     logThis("Estimate `dispersion`: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
@@ -317,15 +320,13 @@ setMethod(
     genes <- getGenes(objCOTAN)
     sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)[genes]
 
+    nu <- suppressWarnings(getNu(objCOTAN))
+    assert_that(!is_empty(nu),
+                msg = "nu must not be empty, estimate it")
+
     lambda <- suppressWarnings(getLambda(objCOTAN))
     assert_that(!is_empty(lambda),
                 msg = "`lambda` must not be empty, estimate it")
-
-    nu <- suppressWarnings(getNu(objCOTAN))
-    assert_that(!is_empty(nu),
-                msg = "`nu` must not be empty, estimate it")
-
-    dispList <- list()
 
     spIdx <- parallel::splitIndices(length(genes),
                                     ceiling(length(genes) / chunkSize))
@@ -347,6 +348,14 @@ setMethod(
 
     gc()
 
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
+
+    logThis("Estimate `dispersion`: DONE", logLevel = 2L)
+
     dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
     if (TRUE) {
       oldDispersion <-  getMetadataGenes(objCOTAN)[["dispersion"]]
@@ -361,13 +370,17 @@ setMethod(
 
     objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
                                         "dispersion", genes)
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, NULL,
+                                        "pi", genes)
+    objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                           datasetTags()[["model"]],
+                                           "NegativeBinomial")
 
     goodPos <- is.finite(getDispersion(objCOTAN))
     logThis(paste("`dispersion`",
                   "| min:", min(getDispersion(objCOTAN)[goodPos]),
                   "| max:", max(getDispersion(objCOTAN)[goodPos]),
-                  "| % negative:", (sum(getDispersion(objCOTAN) < 0.0) * 100.0 /
-                                    getNumGenes(objCOTAN))),
+                  "| % negative:", mean(getDispersion(objCOTAN) < 0.0) * 100.0),
             logLevel = 1L)
 
     return(objCOTAN)
@@ -375,6 +388,199 @@ setMethod(
 )
 
 
+## ---- estimateLambdaPiNewton ----
+
+# local utility wrapper for parallel estimation of lambda in the mixture model
+runLambdaSolver <- function(genesBatches, avgNumNonZeros, avgCounts,
+                            nu, zeroPi, threshold, maxIterations, cores) {
+
+  ## forward caller that allows for logging progress
+  worker <- function(batch, avgNumNonZeros, avgCounts,
+                     nu, zeroPi, threshold, maxIterations) {
+    tryCatch({
+      return(parallelLambdaNewton(batch,
+                                  avgNumNonZeros = avgNumNonZeros,
+                                  avgCounts      = avgCounts,
+                                  nu             = nu,
+                                  zeroPi         = zeroPi,
+                                  threshold      = threshold,
+                                  maxIterations  = maxIterations))
+    }, error = function(e) {
+      structure(list(e), class = "try-error")
+    })
+  }
+
+  if (cores != 1L) {
+    ## create a tiny private env `mini` and a worker within it:
+    ## this reduces spawning memory foot-print
+    mini <- new.env(parent = baseenv())
+    mini$parallelLambdaNewton <- parallelLambdaNewton
+    mini$rowmeans <- Rfast::rowmeans
+    mini$assert_that <- assertthat::assert_that
+    mini$logThis <- logThis
+    mini$worker <- worker
+
+    ## set on the copy in `mini` to only use `mini`
+    environment(mini$parallelLambdaNewton) <- mini
+    environment(mini$worker) <- mini
+
+    res <- parallel::mclapply(
+      genesBatches,
+      worker,
+      avgNumNonZeros = avgNumNonZeros,
+      avgCounts = avgCounts,
+      nu = nu,
+      zeroPi = zeroPi,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      mc.cores = cores,
+      mc.preschedule = FALSE)
+
+    # spawned errors are stored as try-error classes
+    resError <- unlist(lapply(res, inherits, "try-error"))
+    if (any(resError)) {
+      stop(res[[which(resError)[[1L]]]], call. = FALSE)
+    }
+
+    return(res)
+  } else {
+    return(lapply(
+      genesBatches,
+      worker,
+      avgNumNonZeros = avgNumNonZeros,
+      avgCounts = avgCounts,
+      nu = nu,
+      zeroPi = zeroPi,
+      threshold = threshold,
+      maxIterations = maxIterations))
+  }
+}
+
+
+#' @aliases estimateLambdaPiNewton
+#'
+#' @details `estimateLambdaPiNewton()` estimates the mixture Poisson model
+#'   `lambda` and `pi` factor for each gene (a). Determines the `lambda` and
+#'   `pi` such that, for each gene, the probability of zero count matches the
+#'   number of observed zeros, while also matching the observed average. It
+#'   assumes [estimateNuLinear()] being already run.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param allowNegativePi Boolean flag indicating whether we want to use an
+#'   affine mixture model, i.e. allow negative values for pi
+#' @param threshold minimal solution precision
+#' @param cores number of cores to use. Default is 1.
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#' @param chunkSize number of genes to solve in batch in a single core. Default
+#'   is 1024.
+#'
+#' @returns `estimateLambdaPiNewton()` returns the updated `COTAN` object
+#'
+#' @importFrom rlang is_null
+#' @importFrom rlang is_empty
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom parallel mclapply
+#' @importFrom parallel splitIndices
+#'
+#' @importFrom parallelly supportsMulticore
+#' @importFrom parallelly availableCores
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @export
+#'
+#' @examples
+#' objCOTAN <- estimateLambdaPiNewton(objCOTAN, cores = 6L,
+#'                                    allowNegativePi = FALSE)
+#' lambda <- getLambda(objCOTAN)
+#' pi <- getPi(objCOTAN)
+#'
+#' @rdname ParametersEstimations
+#'
+setMethod(
+  "estimateLambdaPiNewton",
+  "COTAN",
+  function(objCOTAN, allowNegativePi,
+           threshold = 0.0001, cores = 1L,
+           maxIterations = 100L, chunkSize = 1024L) {
+    logThis("Estimate `lambda`: START", logLevel = 2L)
+
+    cores <- handleMultiCore(cores)
+
+    nu <- suppressWarnings(getNu(objCOTAN))
+    assert_that(!is_empty(nu),
+                msg = "`nu` must not be empty, estimate it")
+
+    avgNumNonZeros <- getNumOfExpressingCells(objCOTAN) / getNumCells(objCOTAN)
+    avgCounts <- rowMeans(getRawData(objCOTAN), dims = 1L)
+    zeroPi <- (abs(avgCounts - avgNumNonZeros) < 1.0e-6)
+    if (isFALSE(allowNegativePi)) {
+      zeroPi <- zeroPi |
+        (avgNumNonZeros > 1.0 - rowMeans(exp(-(avgCounts %o% nu))))
+    }
+
+    genes <- getGenes(objCOTAN)
+
+    spIdx <- parallel::splitIndices(length(genes),
+                                    ceiling(length(genes) / chunkSize))
+
+    spGenes <- lapply(spIdx, function(x) genes[x])
+
+    cores <- min(cores, length(spGenes))
+
+    logThis(paste0("Executing ", length(spGenes), " genes batches"),
+            logLevel = 3L)
+
+    lambdaList <- runLambdaSolver(spGenes,
+                                  avgNumNonZeros = avgNumNonZeros,
+                                  avgCounts = avgCounts,
+                                  nu = nu,
+                                  zeroPi = zeroPi,
+                                  threshold = threshold,
+                                  maxIterations = maxIterations,
+                                  cores = cores)
+
+    gc()
+
+    lambda <- unlist(lambdaList, recursive = TRUE, use.names = FALSE)
+
+    pi <- ifelse(zeroPi, 0.0, 1.0 - avgCounts / lambda)
+    pi <- set_names(pi, getGenes(objCOTAN))
+
+    if (TRUE) {
+      if (!identical(lambda, suppressWarnings(getLambda(objCOTAN)))) {
+        # flag the coex slots are out of sync (if any)!
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["gsync"]], FALSE)
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["csync"]], FALSE)
+      }
+    }
+
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, lambda,
+                                        "lambda", genes)
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, pi,
+                                        "pi", genes)
+    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, NULL,
+                                        "dispersion", genes)
+    objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                           datasetTags()[["model"]],
+                                           ifelse(allowNegativePi,
+                                                  "AffineMixturePoisson",
+                                                  "MixturePoisson"))
+
+    logThis(paste("`pi` | min:", min(pi), "| max:", max(pi),
+                  "| % non-positive:", mean(pi <= 0.0) * 100.0), logLevel = 1L)
+
+    return(objCOTAN)
+  }
+)
+
+
+## ---- estimateNuBisection ----
 
 # local utility wrapper for parallel estimation of nu
 runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
@@ -403,7 +609,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     mini$parallelNuBisection <- parallelNuBisection
     mini$assert_that <- assertthat::assert_that
     mini$colsums <- Rfast::colsums
-    mini$funProbZero <- funProbZero
+    mini$funProbZeroNegBin <- funProbZeroNegBin
     mini$logThis <- logThis
     mini$worker <- worker
 
@@ -421,7 +627,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       threshold = threshold,
       maxIterations = maxIterations,
       mc.cores = cores,
-      mc.preschedule = FALSE)
+      mc.preschedule = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
@@ -432,7 +638,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     return(res)
   } else {
     res <- lapply(cellsBatches,
-                  parallelNuBisection,
+                  worker,
                   sumZeros = sumZeros,
                   lambda = lambda,
                   dispersion = dispersion,
@@ -445,7 +651,6 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
 }
 
 
-### ------ estimateNuBisection -----
 
 #' @aliases estimateNuBisection
 #'
@@ -488,12 +693,13 @@ setMethod(
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
+    startTime <- Sys.time()
+
     logThis("Estimate `nu`: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
 
     # parameters estimation
-
 
     cells <- getCells(objCOTAN)
     sumZeros <- getNumGenes(objCOTAN) - getNumExpressedGenes(objCOTAN)
@@ -511,8 +717,6 @@ setMethod(
                 msg = "`dispersion` must not be empty, estimate it")
 
     initialGuess <- nu
-
-    nuList <- list()
 
     spIdx <- parallel::splitIndices(length(cells),
                                     ceiling(length(cells) / chunkSize))
@@ -534,6 +738,13 @@ setMethod(
                           cores = cores)
 
     gc()
+
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
+
     logThis("Estimate `nu`: DONE", logLevel = 2L)
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
@@ -562,7 +773,7 @@ setMethod(
 )
 
 
-### ------ estimateDispersionNuBisection -----
+## ------ estimateDispersionNuBisection -----
 
 #' @aliases estimateDispersionNuBisection
 #'
@@ -603,6 +814,8 @@ setMethod(
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
+    startTime <- Sys.time()
+
     logThis("Estimate `dispersion`/`nu`: START", logLevel = 2L)
 
     # getNu() would show a warning when no `nu` present
@@ -673,6 +886,12 @@ setMethod(
       iter <- iter + 1L
     }
 
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
+
     logThis("Estimate `dispersion`/`nu`: DONE", logLevel = 2L)
 
     return(objCOTAN)
@@ -680,7 +899,7 @@ setMethod(
 )
 
 
-### ------ estimateDispersionNuNlminb -----
+## ------ estimateDispersionNuNlminb -----
 
 #' @aliases estimateDispersionNuNlminb
 #'
@@ -718,6 +937,8 @@ setMethod(
   function(objCOTAN, threshold = 0.001,
            maxIterations = 50L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
+    startTime <- Sys.time()
+
     logThis("Estimate `dispersion`/`nu`: START", logLevel = 2L)
 
     lambda <- suppressWarnings(getLambda(objCOTAN))
@@ -744,7 +965,7 @@ setMethod(
       dispersion <- params[1L:numGenes]
       nu <- exp(params[(numGenes + 1L):length(params)])
 
-      probZero <- funProbZero(dispersion, lambda %o% nu)
+      probZero <- funProbZeroNegBin(dispersion, lambda %o% nu)
 
       diffGenes <- rowsums(probZero, parallel = TRUE) - zeroGenes
       diffCells <- colsums(probZero, parallel = TRUE) - zeroCells
@@ -776,6 +997,15 @@ setMethod(
 
     objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
                                         "nu", getCells(objCOTAN))
+    objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                           datasetTags()[["model"]],
+                                           "NegativeBinomial")
+
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
 
     logThis("Estimate `dispersion`/`nu`: DONE", logLevel = 2L)
 

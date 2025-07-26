@@ -62,6 +62,8 @@ runSingleDEA <- function(clName, cellsInList,
 #' @rdname HandlingClusterizations
 #'
 DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
+  startTime <- Sys.time()
+
   logThis("Differential Expression Analysis - START", logLevel = 2L)
 
   # picks up the last clusterization if none was given
@@ -93,6 +95,12 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
   coexDF <- as.data.frame(coexCls)
   colnames(coexDF) <- names(cellsInList)
 
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
+
   logThis("Differential Expression Analysis - DONE", logLevel = 2L)
 
   return(coexDF)
@@ -114,6 +122,8 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 #' @importFrom Matrix rowSums
 #'
 #' @importFrom assertthat assert_that
+#'
+#' @importFrom stringr str_ends
 #'
 #' @export
 #'
@@ -161,11 +171,20 @@ clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
   assert_that(!is_empty(nu),
               msg = "`nu` must not be empty, estimate it")
 
-  dispersion <- suppressWarnings(getDispersion(objCOTAN))
-  assert_that(!is_empty(dispersion),
-              msg = "`dispersion` must not be empty, estimate it")
+  modelUsed <- getMetadataElement(objCOTAN, datasetTags()[["model"]])
+  if (str_ends(modelUsed, "MixturePoisson")) {
+    pi <- suppressWarnings(getPi(objCOTAN))
+    assert_that(!is_empty(pi),
+                msg = "`pi` must not be empty, estimate it")
 
-  probZero <- funProbZero(dispersion[gene], lambda[gene] * nu)
+    probZero <- funProbZeroMixPoi(pi[gene], lambda[gene] * nu)
+  } else {
+    dispersion <- suppressWarnings(getDispersion(objCOTAN))
+    assert_that(!is_empty(dispersion),
+                msg = "`dispersion` must not be empty, estimate it")
+
+    probZero <- funProbZeroNegBin(dispersion[gene], lambda[gene] * nu)
+  }
 
   if (anyNA(probZero)) {
     warning("Some NA in estimated probability of zero matrix")
@@ -269,6 +288,8 @@ pValueFromDEA <- function(coexDF, numCells, adjustmentMethod) {
 #'
 logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
                                     floorLambdaFraction = 0.05) {
+  startTime <- Sys.time()
+
   logThis("Log Fold Change Analysis - START", logLevel = 2L)
 
   # picks up the last clusterization if none was given
@@ -323,6 +344,12 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
                            colName = cl, rowNames = rownames(normData))
   }
   logThis("", logLevel = 1L)
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Log Fold Change Analysis - DONE", logLevel = 2L)
 

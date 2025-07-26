@@ -23,6 +23,7 @@ datasetTags <- function() {
          , "csync" = "cells' COEX is in sync:"                          # 6
          , "gbad"  = "genes' pairs fraction with small expected count:" # 7
          , "cbad"  = "cells' pairs fraction with small expected count:" # 8
+         , "model" = "used model for UMI counts:"                       # 9
          ))
 }
 

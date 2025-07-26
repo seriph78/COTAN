@@ -96,8 +96,8 @@ updated \code{metaDataset}
 \code{getColumnFromDF()} returns the column in the \code{data.frame} as named
 \code{array}, \code{NULL} if the wanted column is not available
 
-\code{setColumnInDF()} returns the updated, or the newly created,
-\code{data.frame}
+\code{setColumnInDF()} returns input \code{data.frame} with the
+newly-created/updated/removed column
 
 \code{getMetaInfoRow()} returns the last relevant row position if any or
 zero otherwise.
@@ -144,9 +144,9 @@ associated value(s) instead
 
 \code{setColumnInDF()} is a function to append, if missing, or resets, if
 present, a column into a \code{data.frame}, whether the \code{data.frame} is empty or
-not. The given \code{rowNames} are used only in the case the \code{data.frame} has
-only the default row numbers, so this function cannot be used to override
-row names
+not; a \code{NULL} \code{colToSet} removes the column from the \code{data.frame}. The
+given \code{rowNames} are used only in the case the \code{data.frame} has only the
+default row numbers, so this function cannot be used to override row names
 
 \code{getMetaInfoRow()} is an internal function: it extracts the row\
 associated with the given tag if present or zero otherwise.

@@ -1,11 +1,18 @@
 
 setGeneric(
   "proceedToCoex",
-  function(objCOTAN, calcCoex = TRUE, optimizeForSpeed = TRUE,
-           deviceStr = "cuda", cores = 1L,
-           cellsCutoff = 0.003, genesCutoff = 0.002,
-           cellsThreshold = 0.99, genesThreshold = 0.99,
-           saveObj = TRUE, outDir = ".") {
+  function(objCOTAN,
+           calcCoex = TRUE,
+           modelToUse = "",
+           optimizeForSpeed = TRUE,
+           deviceStr = "cuda",
+           cores = 1L,
+           cellsCutoff = 0.003,
+           genesCutoff = 0.002,
+           cellsThreshold = 0.99,
+           genesThreshold = 0.99,
+           saveObj = FALSE,
+           outDir = ".") {
     standardGeneric("proceedToCoex")
   }
 )
@@ -85,6 +92,11 @@ setGeneric(
 setGeneric(
   "getDispersion",
   function(objCOTAN) standardGeneric("getDispersion")
+)
+
+setGeneric(
+  "getPi",
+  function(objCOTAN) standardGeneric("getPi")
 )
 
 setGeneric(
@@ -312,6 +324,15 @@ setGeneric(
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 50L, chunkSize = 1024L) {
     standardGeneric("estimateDispersionBisection")
+  }
+)
+
+setGeneric(
+  "estimateLambdaPiNewton",
+  function(objCOTAN, allowNegativePi,
+           threshold = 0.0001, cores = 1L,
+           maxIterations = 50L, chunkSize = 1024L) {
+    standardGeneric("estimateLambdaPiNewton")
   }
 )
 

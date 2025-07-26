@@ -1,4 +1,5 @@
 library(Matrix)
+library(rlang)
 
 tm <- tempdir()
 stopifnot(file.exists(tm))
@@ -121,9 +122,9 @@ test_that("Adding/extracting columns to/from data.frames", {
   expect_identical(rownames(df), LETTERS[1L:10L])
   expect_identical(colnames(df), c("constant", "sequence"))
   expect_identical(getColumnFromDF(df, "constant"),
-                   rlang::set_names(rep(1L, 10L), LETTERS[1L:10L]))
+                   rep_named(LETTERS[1L:10L], 1L))
   expect_identical(getColumnFromDF(df, 2L),
-                   rlang::set_names(seq_len(10L), LETTERS[1L:10L]))
+                   set_names(seq_len(10L), LETTERS[1L:10L]))
 
   df <- setColumnInDF(df, colName = "constant", colToSet = rep(2L, 10L))
   expect_identical(colnames(df), c("constant", "sequence"))
@@ -131,49 +132,79 @@ test_that("Adding/extracting columns to/from data.frames", {
 })
 
 
-test_that("funProbZero", {
+test_that("funProbZeroNegBin", {
   # Cases with mu = 0 are not actually in use
-  expect_identical(funProbZero(-Inf, 0.0), NaN)
-  expect_identical(funProbZero(-1.0, 0.0), 1.0)
-  expect_identical(funProbZero( 0.0, 0.0), 1.0)
-  expect_identical(funProbZero( 1.0, 0.0), 1.0)
-  expect_identical(funProbZero(10.0, 0.0), 1.0)
-  expect_identical(funProbZero( Inf, 0.0), NaN)
+  expect_identical(funProbZeroNegBin(-Inf, 0.0), NaN)
+  expect_identical(funProbZeroNegBin(-1.0, 0.0), 1.0)
+  expect_identical(funProbZeroNegBin( 0.0, 0.0), 1.0)
+  expect_identical(funProbZeroNegBin( 1.0, 0.0), 1.0)
+  expect_identical(funProbZeroNegBin(10.0, 0.0), 1.0)
+  expect_identical(funProbZeroNegBin( Inf, 0.0), NaN)
 
   # Cases with infinite disp can happen
-  expect_identical(funProbZero(-Inf, 1.0),                0.0)
-  expect_identical(funProbZero(-1.0, 1.0),          exp(-2.0))
-  expect_identical(funProbZero( 0.0, 1.0),          exp(-1.0))
-  expect_identical(funProbZero( 1.0, 1.0),          1.0 / 2.0)
-  expect_identical(funProbZero(10.0, 1.0), 11.0^(-1.0 / 10.0))
-  expect_identical(funProbZero( Inf, 1.0),                1.0)
+  expect_identical(funProbZeroNegBin(-Inf, 1.0),                0.0)
+  expect_identical(funProbZeroNegBin(-1.0, 1.0),          exp(-2.0))
+  expect_identical(funProbZeroNegBin( 0.0, 1.0),          exp(-1.0))
+  expect_identical(funProbZeroNegBin( 1.0, 1.0),          1.0 / 2.0)
+  expect_identical(funProbZeroNegBin(10.0, 1.0), 11.0^(-1.0 / 10.0))
+  expect_identical(funProbZeroNegBin( Inf, 1.0),                1.0)
 
   # Cases with mu = Inf are not actually in use
-  expect_identical(funProbZero(-Inf, Inf), 0.0)
-  expect_identical(funProbZero(-1.0, Inf), 0.0)
-  expect_identical(funProbZero( 0.0, Inf), NaN)
-  expect_identical(funProbZero( 1.0, Inf), 0.0)
-  expect_identical(funProbZero(10.0, Inf), 0.0)
-  expect_identical(funProbZero( Inf, Inf), 1.0)
+  expect_identical(funProbZeroNegBin(-Inf, Inf), 0.0)
+  expect_identical(funProbZeroNegBin(-1.0, Inf), 0.0)
+  expect_identical(funProbZeroNegBin( 0.0, Inf), NaN)
+  expect_identical(funProbZeroNegBin( 1.0, Inf), 0.0)
+  expect_identical(funProbZeroNegBin(10.0, Inf), 0.0)
+  expect_identical(funProbZeroNegBin( Inf, Inf), 1.0)
 })
 
 
-test_that("funProbZero with matrices", {
+test_that("funProbZeroNegBin with matrices", {
   mu <- matrix((1L:25L) / 7.0, nrow = 10L, ncol = 10L)
   disp <- (-1L:8L) / 3.0
 
-  p <- funProbZero(disp, mu)
+  p <- funProbZeroNegBin(disp, mu)
 
   expect_identical(dim(p), dim(mu))
 
-  expect_identical(p[ 1L,  1L], funProbZero(disp[[ 1L]], mu[ 1L,  1L]))
-  expect_identical(p[ 1L, 10L], funProbZero(disp[[ 1L]], mu[ 1L, 10L]))
+  expect_identical(p[ 1L,  1L], funProbZeroNegBin(disp[[ 1L]], mu[ 1L,  1L]))
+  expect_identical(p[ 1L, 10L], funProbZeroNegBin(disp[[ 1L]], mu[ 1L, 10L]))
 
-  expect_identical(p[ 3L,  7L], funProbZero(disp[[ 3L]], mu[ 3L,  7L]))
-  expect_identical(p[ 6L,  4L], funProbZero(disp[[ 6L]], mu[ 6L,  4L]))
+  expect_identical(p[ 3L,  7L], funProbZeroNegBin(disp[[ 3L]], mu[ 3L,  7L]))
+  expect_identical(p[ 6L,  4L], funProbZeroNegBin(disp[[ 6L]], mu[ 6L,  4L]))
 
-  expect_identical(p[10L,  1L], funProbZero(disp[[10L]], mu[10L,  1L]))
-  expect_identical(p[10L, 10L], funProbZero(disp[[10L]], mu[10L, 10L]))
+  expect_identical(p[10L,  1L], funProbZeroNegBin(disp[[10L]], mu[10L,  1L]))
+  expect_identical(p[10L, 10L], funProbZeroNegBin(disp[[10L]], mu[10L, 10L]))
+})
+
+
+test_that("funProbZeroMixPoi", {
+  # Cases with mu = 0 are not actually in use
+  expect_identical(funProbZeroMixPoi(0.0, 1.0), 0.0 + 1.0 * exp(-1.0))
+  expect_identical(funProbZeroMixPoi(1.0, 1.0), 1.0 + 0.0 * exp(-1.0))
+  expect_identical(funProbZeroMixPoi(0.5, 2.0), 0.5 + 0.5 * exp(-2.0))
+  expect_identical(funProbZeroMixPoi(0.2, 0.5), 0.2 + 0.8 * exp(-0.5))
+  expect_identical(funProbZeroMixPoi(0.8, 4.0), 0.8 + 0.2 * exp(-4.0))
+  expect_identical(funProbZeroMixPoi(0.6, 0.8), 0.6 + 0.4 * exp(-0.8))
+})
+
+
+test_that("funProbZeroMixPoi with matrices", {
+  mu <- matrix((1L:25L) / 7.0, nrow = 10L, ncol = 10L)
+  pi <- (0L:9L) / 9.0
+
+  p <- funProbZeroMixPoi(pi, mu)
+
+  expect_identical(dim(p), dim(mu))
+
+  expect_identical(p[ 1L,  1L], funProbZeroMixPoi(pi[[ 1L]], mu[ 1L,  1L]))
+  expect_identical(p[ 1L, 10L], funProbZeroMixPoi(pi[[ 1L]], mu[ 1L, 10L]))
+
+  expect_identical(p[ 3L,  8L], funProbZeroMixPoi(pi[[ 3L]], mu[ 3L,  8L]))
+  expect_identical(p[ 6L,  4L], funProbZeroMixPoi(pi[[ 6L]], mu[ 6L,  4L]))
+
+  expect_identical(p[10L,  1L], funProbZeroMixPoi(pi[[10L]], mu[10L,  1L]))
+  expect_identical(p[10L, 10L], funProbZeroMixPoi(pi[[10L]], mu[10L, 10L]))
 })
 
 
@@ -188,6 +219,41 @@ test_that("dispersionBisection", {
                              lambda = lambda[[2L]], nu = nu))
 
   expect_identical(d, c(-Inf, 1.98046875))
+})
+
+
+test_that("lambdaNewton", {
+  nu <- rep(c(0.5, 1.5), 5L)
+  avgNumNonZeros <- c(0.0, 0.1, 0.4, 0.6, 0.8,  1.0)
+  avgCounts      <- c(0.0, 0.1, 1.0, 1.3, 3.0, 10.0)
+  zeroPi <- (rowSums(exp(-(avgCounts %o% nu))) / 10.0 + avgNumNonZeros > 1.0)
+  zeroPi <- (zeroPi | avgNumNonZeros == avgCounts)
+
+  lambda <- mapply(lambdaNewton,
+                   avgNumNonZeros = avgNumNonZeros,
+                   avgCounts = avgCounts,
+                   zeroPi = zeroPi,
+                   MoreArgs = list(nu = nu))
+
+  expectedRes <- c(0.0, 0.1067852, 1.9671601, 1.5695487, 3.3949319, +Inf)
+  expect_equal(lambda, expectedRes,
+               tolerance = 1e-6)
+
+  pi <- ifelse(zeroPi, 0.0, 1.0 - avgCounts / lambda)
+
+  piError <- avgNumNonZeros -
+    (1.0 - rowSums(funProbZeroMixPoi(pi, lambda %o% nu)) / 10.0)
+
+  expect_identical(piError[c(1L, 6L)], c(0.0, 0.0))
+  expect_lt(max(abs(piError[2L:5L])), 5.0e-5)
+
+  lambda2 <- parallelLambdaNewton(genes = rep_len(TRUE, 6L),
+                                  avgNumNonZeros = avgNumNonZeros,
+                                  avgCounts = avgCounts,
+                                  nu = nu,
+                                  zeroPi = zeroPi)
+
+  expect_equal(lambda2, expectedRes, tolerance = 1e-6)
 })
 
 

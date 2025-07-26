@@ -13,6 +13,7 @@ COTAN(raw = "ANY")
 \S4method{proceedToCoex}{COTAN}(
   objCOTAN,
   calcCoex = TRUE,
+  modelToUse = "",
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   cores = 1L,
@@ -20,7 +21,7 @@ COTAN(raw = "ANY")
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
   genesThreshold = 0.99,
-  saveObj = TRUE,
+  saveObj = FALSE,
   outDir = "."
 )
 
@@ -30,6 +31,7 @@ automaticCOTANObjectCreation(
   sequencingMethod,
   sampleCondition,
   calcCoex = TRUE,
+  modelToUse = "",
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   cores = 1L,
@@ -37,7 +39,7 @@ automaticCOTANObjectCreation(
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
   genesThreshold = 0.99,
-  saveObj = TRUE,
+  saveObj = FALSE,
   outDir = "."
 )
 }
@@ -48,6 +50,10 @@ automaticCOTANObjectCreation(
 
 \item{calcCoex}{a Boolean to determine whether to calculate the genes' \code{COEX}
 or stop just after the \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} step}
+
+\item{modelToUse}{select which statistical model to use in \code{COEX}
+calculations. Recognized strings are: \code{""} (default), \code{"NegativeBinomial"},
+\code{"MixturePoisson"} and \code{"AffineMixturePoisson"}}
 
 \item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
 library to run the matrix calculations. Otherwise, or when the library is
@@ -121,28 +127,29 @@ obj <- COTAN(raw = test.dataset)
 # In case one needs to run more steps to clean the datatset
 # the following might apply
 if (FALSE) {
-  objCOTAN <- initializeMetaDataset(objCOTAN,
-                                    GEO = "test",
-                                    sequencingMethod = "artificial",
-                                    sampleCondition = "test dataset")
+  obj <- initializeMetaDataset(obj,
+                               GEO = "test",
+                               sequencingMethod = "artificial",
+                               sampleCondition = "test dataset")
 #
 # doing all the cleaning...
 #
 # in case the genes' `COEX` is not needed it can be skipped
 # (e.g. when calling [cellsUniformClustering()])
-  objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-                            cores = 6L, optimizeForSpeed = TRUE,
-                            deviceStr = "cuda", saveObj = FALSE)
+  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 6L,
+                       optimizeForSpeed = TRUE, deviceStr = "cuda",
+                       modelToUse = "NegBin", saveObj = FALSE)
 }
 
 
 ## Otherwise it is possible to run all at once.
-objCOTAN <- automaticCOTANObjectCreation(
+obj <- automaticCOTANObjectCreation(
   raw = test.dataset,
   GEO = "code",
   sequencingMethod = "10X",
   sampleCondition = "mouse_dataset",
   calcCoex = TRUE,
+  modelToUse = "MixturePoisson",
   saveObj = FALSE,
   outDir = tempdir(),
   cores = 6L)
