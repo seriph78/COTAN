@@ -381,7 +381,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   if (is_empty(checkers)) {
     GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.43)
 
-    # keep old behaviour
+    # keep old behavior
     thresholdGap <- max(GDIThreshold - 1.37, 0.0)
     numThresholds <- ceiling(thresholdGap / 0.03)
     allThresholds <- 1.37 +

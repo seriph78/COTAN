@@ -48,19 +48,7 @@ setMethod(
   function(objCOTAN) {
     lambda <- rowMeans(getRawData(objCOTAN), dims = 1L)
 
-    if (TRUE) {
-      oldLambda <- getMetadataGenes(objCOTAN)[["lambda"]]
-      if (!identical(lambda, oldLambda)) {
-        # flag the COEX slots are out of sync (if any)!
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["gsync"]], FALSE)
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["csync"]], FALSE)
-      }
-    }
-
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, lambda,
-                                        "lambda", getGenes(objCOTAN))
+    objCOTAN <- setLambda(objCOTAN, lambda = lambda)
 
     return(objCOTAN)
   }
@@ -96,19 +84,7 @@ setMethod(
     nu <- colSums(getRawData(objCOTAN), dims = 1L)
     nu <- nu / mean(nu)
 
-    if (TRUE) {
-      oldNu <- getMetadataCells(objCOTAN)[["nu"]]
-      if (!identical(nu, oldNu)) {
-        # flag the COEX slots are out of sync (if any)!
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["gsync"]], FALSE)
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["csync"]], FALSE)
-      }
-    }
-
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
-                                        "nu", getCells(objCOTAN))
+    objCOTAN <- setNu(objCOTAN, nu)
 
     return(objCOTAN)
   }
@@ -181,19 +157,7 @@ setMethod(
       nu[c] <- nu[c] / mean(nu[c])
     }
 
-    if (TRUE) {
-      oldNu <- getMetadataCells(objCOTAN)[["nu"]]
-      if (!identical(nu, oldNu)) {
-        # flag the COEX slots are out of sync (if any)!
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["gsync"]], FALSE)
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["csync"]], FALSE)
-      }
-    }
-
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
-                                        "nu", getCells(objCOTAN))
+    objCOTAN <- setNu(objCOTAN, nu)
 
     return(objCOTAN)
   }
@@ -348,19 +312,8 @@ setMethod(
     gc()
 
     dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
-    if (TRUE) {
-      oldDispersion <-  getMetadataGenes(objCOTAN)[["dispersion"]]
-      if (!identical(dispersion, oldDispersion)) {
-        # flag the COEX slots are out of sync (if any)!
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["gsync"]], FALSE)
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["csync"]], FALSE)
-      }
-    }
 
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
-                                        "dispersion", genes)
+    objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
 
     goodPos <- is.finite(getDispersion(objCOTAN))
     logThis(paste("`dispersion`",
@@ -537,16 +490,8 @@ setMethod(
     logThis("Estimate `nu`: DONE", logLevel = 2L)
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
-    if (!identical(nu, initialGuess)) {
-      # flag the COEX slots are out of sync (if any)!
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["gsync"]], FALSE)
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["csync"]], FALSE)
-    }
 
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
-                                        "nu", cells)
+    objCOTAN <- setNu(objCOTAN, nu = nu)
 
     if (TRUE) {
       nuChange <- abs(nu - initialGuess)
@@ -771,11 +716,8 @@ setMethod(
     dispersion <- solution[["par"]][1L:numGenes]
     nu <- exp(solution[["par"]][(numGenes + 1L):length(solution[["par"]])])
 
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
-                                        "dispersion", getGenes(objCOTAN))
-
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
-                                        "nu", getCells(objCOTAN))
+    objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
+    objCOTAN <- setNu(objCOTAN, nu = nu)
 
     logThis("Estimate `dispersion`/`nu`: DONE", logLevel = 2L)
 

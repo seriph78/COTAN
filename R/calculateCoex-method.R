@@ -1329,8 +1329,8 @@ setMethod(
 
     if (isTRUE(actOnCells)) {
       if (isTRUE(optimizeForSpeed)) {
-        warning("The 'torch' package is not supported yet for cells' COEX",
-                " Falling back to legacy code.")
+        warning("The 'torch' package is not supported yet for cells' COEX:",
+                " falling back to legacy code")
       }
       c(coex, problematicPairsFraction) %<-%
         calculateCoex_Legacy(objCOTAN, actOnCells = TRUE,

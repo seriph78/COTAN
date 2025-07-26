@@ -134,7 +134,6 @@ test_that("COTAN getters", {
   ## bound probablitities to avoid extremes
   bProbZero <- pmax(1.0e-8, pmin(1.0 - 1.0e-8, probZero))
 
-
   getLH <- function(objCOTAN, formula) {
     return(calculateLikelihoodOfObserved(objCOTAN, formula))
   }
@@ -215,14 +214,13 @@ test_that("COTAN getters", {
 
   expect_identical(getSelectedGenes(obj, genesSel = "HGDI", numGenes = 5L),
                    c("C", "D", "F", "G", "I"))
-  expect_identical(suppressWarnings(
-                     getSelectedGenes(obj, genesSel = "HVG_Seurat",
+  expect_identical(
+    suppressWarnings(getSelectedGenes(obj, genesSel = "HVG_Seurat",
                                       numGenes = 5L)[1L:4L]),
-                   c("B", "C", "D", "E"))
+    c("B", "C", "D", "E"))
   expect_error(getSelectedGenes(obj, genesSel = "HVG_Scanpy", numGenes = 5L))
   expect_identical(getSelectedGenes(obj, genesSel = c("C", "A", "D", "E", "B")),
                    LETTERS[1L:5L])
-
 
   calcRDM <- function(objCOTAN, useCoexEigen, dataMethod,
                       numComp, genesSel = "", numGenes = 2000L) {
@@ -242,7 +240,7 @@ test_that("COTAN getters", {
                tolerance = 1.0e-12)
 
   m1 <- as.matrix(cbind(rep(2.756809750418045, times = 20L),
-                  rep(0.0, times = 20L), rep(0.0, times = 20L)))
+                        rep(0.0, times = 20L), rep(0.0, times = 20L)))
   colnames(m1) <- paste0("PC", c(1L:3L))
   rownames(m1) <- letters[1L:20L]
 
@@ -267,7 +265,7 @@ test_that("COTAN getters", {
               letters[1L:20L])
 
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
-                           dataMethod = "BinDiscr", numComp = 3L),
+                       dataMethod = "BinDiscr", numComp = 3L),
                m2, tolerance = 5.0e-5)
 
   m3 <- cbind(
@@ -281,7 +279,7 @@ test_that("COTAN getters", {
               letters[1L:20L])
 
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
-                           dataMethod = "DerLogL", numComp = 3L),
+                       dataMethod = "DerLogL", numComp = 3L),
                m3, tolerance = 5.0e-5)
 })
 

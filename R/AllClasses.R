@@ -497,12 +497,14 @@ setIs(
 getScCOTANSlots <- function(from) {
   lambda <- vector(mode = "numeric")
   if (!is_empty(from@metaGenes[["lambda"]])) {
-    lambda <- set_names(from@metaGenes[["lambda"]], rownames(from@metaGenes))
+    lambda <- set_names(from@metaGenes[["lambda"]],
+                        rownames(from@metaGenes))
   }
 
   a <- vector(mode = "numeric")
   if (!is_empty(from@metaGenes[["dispersion"]])) {
-    a <- set_names(from@metaGenes[["dispersion"]], rownames(from@metaGenes))
+    a <- set_names(from@metaGenes[["dispersion"]],
+                   rownames(from@metaGenes))
   }
 
   nu <- vector(mode = "numeric")

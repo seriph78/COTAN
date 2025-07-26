@@ -7,6 +7,9 @@ test_that("Linear estimates", {
   colnames(raw) <- letters[1L:20L]
 
   obj <- COTAN(raw = raw)
+  obj <-
+    addCondition(obj, condName = "batch",
+                 conditions = rlang::rep_named(getCells(obj), c("TA", "TB")))
 
   obj <- estimateLambdaLinear(obj)
 
