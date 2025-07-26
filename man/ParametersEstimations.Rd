@@ -66,9 +66,9 @@
 
 \S4method{getNu}{COTAN}(objCOTAN)
 
-\S4method{getLambda}{COTAN}(objCOTAN)
+\S4method{getLambda}{COTAN}(objCOTAN, batchName = "NoCond")
 
-\S4method{getDispersion}{COTAN}(objCOTAN)
+\S4method{getDispersion}{COTAN}(objCOTAN, batchName = "NoCond")
 
 estimatorsAreReady(objCOTAN)
 
@@ -95,6 +95,11 @@ Default is 1024.}
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
 
+\item{batchName}{the name of a batch to return the corresponding lambda. If
+no batches are present default value will return the global lambda \code{array}.
+If the passed name is \code{"All"} and batches are in use the function will
+return a \code{matrix} with the appropriate lambda for each cell}
+
 \item{retLog}{When \code{TRUE} calls \code{\link[=getLogNormData]{getLogNormData()}}, calls \code{\link[=getNuNormData]{getNuNormData()}}}
 }
 \value{
@@ -112,9 +117,11 @@ equal to 1}
 
 \code{getNu()} returns the \code{nu} array
 
-\code{getLambda()} returns the \code{lambda} array
+\code{getLambda()} returns the \code{lambda} \code{array} or \code{matrix} as
+appropriate
 
-\code{getDispersion()} returns the \code{dispersion} array
+\code{getDispersion()} returns the \code{dispersion} \code{array} or \code{matrix} as
+appropriate
 
 \code{estimatorsAreReady()} returns a boolean specifying whether all
 three arrays are non-empty

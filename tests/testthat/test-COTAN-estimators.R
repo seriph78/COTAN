@@ -7,6 +7,8 @@ test_that("Linear estimates", {
   colnames(raw) <- letters[1L:20L]
 
   obj <- COTAN(raw = raw)
+  obj <- addCondition(obj, condName = "batch",
+                      conditions = rlang::rep_named(getCells(obj), c(1L, 2L)))
 
   obj <- estimateLambdaLinear(obj)
 
@@ -21,11 +23,16 @@ test_that("Linear estimates", {
                    Matrix::colMeans(getRawData(obj)) /
                      mean(Matrix::colMeans(getRawData(obj))))
 
-  clusters <- set_names(rep(1L:2L, times = 10L), getCells(obj))
-  obj <- estimateNuLinearByCluster(obj, clusters = clusters)
+  obj <- resetBatches(obj, conditionToUse = "batch")
 
-  expect_identical(getNu(obj), set_names(rep_len(1.0, getNumCells(obj)),
-                                         getCells(obj)))
+  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 6L, saveObj = FALSE)
+
+  expect_identical(getNu(obj), rlang::rep_named(getCells(obj), 1.0))
+
+  expect_identical(getLambda(obj, batchName = "All"),
+                   as.matrix(getRawData(obj)))
+  expect_identical(getLambda(obj, batchName = "1"), getRawData(obj)[, 1L])
+  expect_identical(getLambda(obj, batchName = "2"), getRawData(obj)[, 2L])
 })
 
 

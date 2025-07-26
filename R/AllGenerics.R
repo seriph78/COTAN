@@ -1,8 +1,8 @@
 
 setGeneric(
   "proceedToCoex",
-  function(objCOTAN, calcCoex = TRUE, optimizeForSpeed = TRUE,
-           deviceStr = "cuda", cores = 1L,
+  function(objCOTAN, calcCoex = TRUE,
+           optimizeForSpeed = TRUE, deviceStr = "cuda", cores = 1L,
            cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
            saveObj = TRUE, outDir = ".") {
@@ -79,12 +79,12 @@ setGeneric(
 
 setGeneric(
   "getLambda",
-  function(objCOTAN) standardGeneric("getLambda")
+  function(objCOTAN, batchName = "NoCond") standardGeneric("getLambda")
 )
 
 setGeneric(
   "getDispersion",
-  function(objCOTAN) standardGeneric("getDispersion")
+  function(objCOTAN, batchName = "NoCond") standardGeneric("getDispersion")
 )
 
 setGeneric(
@@ -207,7 +207,7 @@ setGeneric(
 
 setGeneric(
   "initializeMetaDataset",
-  function(objCOTAN, GEO, sequencingMethod, sampleCondition) {
+  function(objCOTAN, GEO, sequencingMethod, sampleCondition, batches = NULL) {
     standardGeneric("initializeMetaDataset")
   }
 )
@@ -215,6 +215,13 @@ setGeneric(
 setGeneric(
   "addElementToMetaDataset",
   function(objCOTAN, tag, value) standardGeneric("addElementToMetaDataset")
+)
+
+setGeneric(
+  "resetBatches",
+  function(objCOTAN, conditionToUse = "") {
+    standardGeneric("resetBatches")
+  }
 )
 
 setGeneric(
@@ -232,6 +239,25 @@ setGeneric(
 )
 
 setGeneric(
+  "setLambda",
+  function(objCOTAN, lambda, batchName = "NoCond") {
+    standardGeneric("setLambda")
+  }
+)
+
+setGeneric(
+  "setDispersion",
+  function(objCOTAN, dispersion, batchName = "NoCond") {
+    standardGeneric("setDispersion")
+  }
+)
+
+setGeneric(
+  "setNu",
+  function(objCOTAN, nu) standardGeneric("setNu")
+)
+
+setGeneric(
   "dropGenesCells",
   function(objCOTAN, genes = vector(mode = "character"),
            cells = vector(mode = "character")) {
@@ -241,8 +267,7 @@ setGeneric(
 
 setGeneric(
   "clean",
-  function(objCOTAN,
-           cellsCutoff = 0.003, genesCutoff = 0.002,
+  function(objCOTAN, cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99) {
     standardGeneric("clean")
   }
@@ -298,13 +323,6 @@ setGeneric(
 setGeneric(
   "estimateNuLinear",
   function(objCOTAN) standardGeneric("estimateNuLinear")
-)
-
-setGeneric(
-  "estimateNuLinearByCluster",
-  function(objCOTAN, clName = "", clusters = NULL) {
-    standardGeneric("estimateNuLinearByCluster")
-  }
 )
 
 setGeneric(

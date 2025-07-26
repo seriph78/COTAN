@@ -396,6 +396,26 @@ setMethod(
   }
 )
 
+#' @details `getBatches()` extracts the with the condition uses to define the
+#'   batches that are needed to refine the model
+#'
+#' @param objCOTAN a `COTAN` object
+#'
+#' @returns `getBatches()` returns a named `list` with the batches if any or a
+#'   constant condition otherwise
+#'
+#' @export
+#'
+#' @examples
+#' batches <- getBatches(objCOTAN)
+#'
+#' @rdname HandleMetaData
+#'
+getBatches <- function(objCOTAN) {
+  return(getCondition(objCOTAN,
+                      condName = getMetadataElement(objCOTAN,
+                                                    datasetTags()[["batch"]])))
+}
 
 #' @aliases getDims
 #'
@@ -417,6 +437,7 @@ setMethod(
   "COTAN",
   function(objCOTAN) {
     return(list("raw"          = dim(objCOTAN@raw),
+                "numBatches"   = nlevels(getBatches(objCOTAN)),
                 "genesCoex"    = dim(objCOTAN@genesCoex),
                 "cellsCoex"    = dim(objCOTAN@cellsCoex),
                 "metaDataset"  = nrow(objCOTAN@metaDataset),
@@ -467,10 +488,16 @@ setMethod(
 #'   gene)
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param batchName the name of a batch to return the corresponding lambda. If
+#'   no batches are present default value will return the global lambda `array`.
+#'   If the passed name is `"All"` and batches are in use the function will
+#'   return a `matrix` with the appropriate lambda for each cell
 #'
-#' @returns `getLambda()` returns the `lambda` array
+#' @returns `getLambda()` returns the `lambda` `array` or `matrix` as
+#'   appropriate
 #'
 #' @importFrom rlang is_empty
+#' @importFrom stringr str_equal
 #'
 #' @export
 #'
@@ -479,8 +506,33 @@ setMethod(
 setMethod(
   "getLambda",
   "COTAN",
-  function(objCOTAN) {
-    lambda <- getMetadataGenes(objCOTAN)[["lambda"]]
+  function(objCOTAN, batchName = "NoCond") {
+    # matrix for batches
+    if (str_equal(batchName, "All", ignore_case = TRUE)) {
+      batches <- getBatches(objCOTAN)
+      if (any(batches != "NoCond")) {
+        lambdaM <- matrix(data = NaN,
+                          nrow = getNumGenes(objCOTAN),
+                          ncol = getNumCells(objCOTAN),
+                          dimnames = list(getGenes(objCOTAN),
+                                          getCells(objCOTAN)))
+        for (batch in levels(batches)) {
+          lambdaM[ , names(batches)[batches == batch]] <-
+            getLambda(objCOTAN, batchName = batch)
+        }
+
+        return(lambdaM)
+      } else {
+        batchName <- "NoCond"
+      }
+    } else {
+      assert_that(batchName %in% levels(getBatches(objCOTAN)))
+    }
+
+    # default case
+    currName <- ifelse(batchName == "NoCond", "lambda",
+                       paste0("lambda_", batchName))
+    lambda <- getMetadataGenes(objCOTAN)[[currName]]
 
     if (is_empty(lambda)) {
       warning("`lambda` is empty")
@@ -499,8 +551,13 @@ setMethod(
 #'   each gene)
 #'
 #' @param objCOTAN a `COTAN` object
+#' @param batchName the name of a batch to return the corresponding lambda. If
+#'   no batches are present default value will return the global lambda `array`.
+#'   If the passed name is `"All"` and batches are in use the function will
+#'   return a `matrix` with the appropriate lambda for each cell
 #'
-#' @returns `getDispersion()` returns the `dispersion` array
+#' @returns `getDispersion()` returns the `dispersion` `array` or `matrix` as
+#'   appropriate
 #'
 #' @importFrom rlang is_empty
 #'
@@ -511,8 +568,34 @@ setMethod(
 setMethod(
   "getDispersion",
   "COTAN",
-  function(objCOTAN) {
-    dispersion <- getMetadataGenes(objCOTAN)[["dispersion"]]
+  function(objCOTAN, batchName = "NoCond") {
+    # matrix for batches
+    if (str_equal(batchName, "All", ignore_case = TRUE)) {
+      batches <- getBatches(objCOTAN)
+      if (any(batches != "NoCond")) {
+        dispersionM <- matrix(data = NaN,
+                              nrow = getNumGenes(objCOTAN),
+                              ncol = getNumCells(objCOTAN),
+                              dimnames = list(getGenes(objCOTAN),
+                                              getCells(objCOTAN)))
+
+        for (batch in levels(batches)) {
+          dispersionM[ , names(batches)[batches == batch]] <-
+            getDispersion(objCOTAN, batchName = batch)
+        }
+
+        return(dispersionM)
+      } else {
+        batchName <- "NoCond"
+      }
+    } else {
+      assert_that(batchName %in% levels(getBatches(objCOTAN)))
+    }
+
+    # default case
+    currName <- ifelse(batchName == "NoCond", "dispersion",
+                       paste0("dispersion_", batchName))
+    dispersion <- getMetadataGenes(objCOTAN)[[currName]]
 
     if (is_empty(dispersion)) {
       warning("`dispersion` is empty")
@@ -540,16 +623,25 @@ setMethod(
 #' @rdname ParametersEstimations
 #'
 estimatorsAreReady <- function(objCOTAN) {
-  anyEmptyArrays <- is_empty(getLambda(objCOTAN)) ||
-                    is_empty(getNu(objCOTAN)) ||
-                    is_empty(getDispersion(objCOTAN))
-  if (anyEmptyArrays) {
-    logThis(paste0("Estimators are not ready - array sizes: `lambda` ",
-                   length(getLambda(objCOTAN)), ", `nu` ",
-                   length(getNu(objCOTAN)), ", `dispersion` ",
-                   length(getDispersion(objCOTAN))), logLevel = 2L)
+  lambdaLength <- getNumGenes(objCOTAN)
+  dispersionLength <- getNumGenes(objCOTAN)
+  for (batch in getBatches(objCOTAN)) {
+    lambdaLength <- min(lambdaLength,
+                        length(getLambda(objCOTAN, batchName = batch)))
+    dispersionLength <- min(dispersionLength,
+                            length(getDispersion(objCOTAN, batchName = batch)))
   }
-  return(!anyEmptyArrays)
+
+  nuLength <- length(getNu(objCOTAN))
+  anyTrouble <- nuLength < getNumCells(objCOTAN) ||
+    min(lambdaLength, dispersionLength) < getNumGenes(objCOTAN)
+  if (anyTrouble) {
+    logThis(paste0("Estimators are not ready - array sizes:",
+                   " `nu` ", nuLength,
+                   ", `lambda` ", lambdaLength,
+                   ", `dispersion` ", dispersionLength), logLevel = 2L)
+  }
+  return(!anyTrouble)
 }
 
 
@@ -570,7 +662,7 @@ estimatorsAreReady <- function(objCOTAN) {
 #' @rdname CalculatingCOEX
 #'
 getMu <- function(objCOTAN) {
-  lambda <- suppressWarnings(getLambda(objCOTAN))
+  lambda <- suppressWarnings(getLambda(objCOTAN, "All"))
   assert_that(!is_empty(lambda),
               msg = "`lambda` must not be empty, estimate it")
 
@@ -578,7 +670,11 @@ getMu <- function(objCOTAN) {
   assert_that(!is_empty(nu),
               msg = "`nu` must not be empty, estimate it")
 
-  return(lambda %o% nu)
+  if (is.matrix(lambda)) {
+    return(t(t(lambda) * nu))
+  } else {
+    return(getLambda(objCOTAN) %o% getNu(objCOTAN))
+  }
 }
 
 
@@ -673,7 +769,7 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 #' @rdname ParametersEstimations
 #'
 getProbabilityOfZero <- function(objCOTAN) {
-  dispersion <- suppressWarnings(getDispersion(objCOTAN))
+  dispersion <- suppressWarnings(getDispersion(objCOTAN, "All"))
   assert_that(!is_empty(dispersion),
               msg = "`dispersion` must not be empty, estimate it")
 
@@ -1112,6 +1208,30 @@ setMethod(
   }
 )
 
+# ------- `COTAN` clusterization data accessors ------
+
+#' @title Handling cells' *clusterization* and related functions
+#'
+#' @description These functions manage the *clusterizations* and their
+#'   associated *cluster* `COEX` `data.frame`s.
+#'
+#'   A *clusterization* is any partition of the cells where to each cell it is
+#'   assigned a **label**; a group of cells with the same label is called
+#'   *cluster*.
+#'
+#'   For each *cluster* is also possible to define a `COEX` value for each gene,
+#'   indicating its increased or decreased expression in the *cluster* compared
+#'   to the whole background. A `data.frame` with these values listed in a
+#'   column for each *cluster* is stored separately for each *clusterization* in
+#'   the `clustersCoex` member.
+#'
+#'   The formulae for this *In/Out* `COEX` are similar to those used in the
+#'   [calculateCoex()] method, with the **role** of the second gene taken by the
+#'   *In/Out* status of the cells with respect to each *cluster*.
+#'
+#' @name HandlingClusterizations
+NULL
+
 
 #' @aliases getClusterizations
 #'
@@ -1163,10 +1283,6 @@ setMethod(
 #' lfcDF <- logFoldChangeOnClusters(objCOTAN, clusters = clusters)
 #' umapPlot2 <- UMAPPlot(lfcDF, clusters = geneClusters)
 #' plot(umapPlot2)
-#'
-#' if (FALSE) {
-#'   objCOTAN <- estimateNuLinearByCluster(objCOTAN, clusters = clusters)
-#' }
 #'
 #' clSummaryPlotAndData <-
 #'   clustersSummaryPlot(objCOTAN, clName = "first_clusterization",

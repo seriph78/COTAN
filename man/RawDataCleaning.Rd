@@ -16,6 +16,12 @@
 \alias{findFullyExpressedGenes}
 \alias{findFullyExpressingCells,COTAN-method}
 \alias{findFullyExpressingCells}
+\alias{setLambda,COTAN-method}
+\alias{setLambda}
+\alias{setDispersion,COTAN-method}
+\alias{setDispersion}
+\alias{setNu,COTAN-method}
+\alias{setNu}
 \alias{dropGenesCells,COTAN-method}
 \alias{dropGenesCells}
 \alias{ECDPlot}
@@ -40,6 +46,12 @@
 \S4method{findFullyExpressedGenes}{COTAN}(objCOTAN, cellsThreshold = 0.99)
 
 \S4method{findFullyExpressingCells}{COTAN}(objCOTAN, genesThreshold = 0.99)
+
+\S4method{setLambda}{COTAN}(objCOTAN, lambda, batchName = "NoCond")
+
+\S4method{setDispersion}{COTAN}(objCOTAN, dispersion, batchName = "NoCond")
+
+\S4method{setNu}{COTAN}(objCOTAN, nu)
 
 \S4method{dropGenesCells}{COTAN}(
   objCOTAN,
@@ -84,6 +96,17 @@ Default threshold is \eqn{0.99 \; (99.0\%)}}
 \item{genesThreshold}{any cell that is expressing more genes than threshold
 times the total number of genes will be marked as \strong{fully-expressing}.
 Default threshold is \eqn{0.99 \; (99.0\%)}}
+
+\item{lambda}{a named array that gives the values for lambda on the given
+batch}
+
+\item{batchName}{the name of the batch the lambdas refer to. It must be one
+of the levels of the \strong{condition} used to discriminate between batches}
+
+\item{dispersion}{a named array that gives the values for lambda on the given
+batch}
+
+\item{nu}{A named array that gives}
 
 \item{genes}{an array of gene names}
 
@@ -138,6 +161,12 @@ updated \strong{fully-expressed} genes' information
 
 \code{findFullyExpressingCells()} returns the given \code{COTAN} object  with
 updated \strong{fully-expressing} cells' information
+
+\code{setLambda()} returns the updated \code{COTAN} object
+
+\code{setDispersion()} returns the updated \code{COTAN} object
+
+\code{setNu()} returns the updated \code{COTAN} object
 
 \code{dropGenesCells()} returns a completely new \code{COTAN} object with the
 new raw data obtained after the indicated genes/cells were expunged. All
@@ -207,6 +236,14 @@ inside the raw data
 
 \code{findFullyExpressingCells()} determines the cells that are
 expressing all genes in the dataset
+
+\code{setLambda()} adds a column to the genes' metadata with the lambda
+(genes' counts averages) for the given batch
+
+\code{setDispersion()} adds a column to the genes' metadata with the
+negative binomial dispersion factor for the given batch
+
+\code{setNu()}
 
 \code{dropGenesCells()} removes an array of genes and/or cells from the
 current \code{COTAN} object.

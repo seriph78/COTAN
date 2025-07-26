@@ -72,8 +72,8 @@
 setMethod(
   "proceedToCoex",
   "COTAN",
-  function(objCOTAN, calcCoex = TRUE, optimizeForSpeed = TRUE,
-           deviceStr = "cuda", cores = 1L,
+  function(objCOTAN, calcCoex = TRUE,
+           optimizeForSpeed = TRUE, deviceStr = "cuda", cores = 1L,
            cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
            saveObj = TRUE, outDir = ".") {
@@ -143,8 +143,35 @@ setMethod(
 
     analysisTime <- Sys.time()
 
-    objCOTAN <- estimateLambdaLinear(objCOTAN)
-    objCOTAN <- estimateDispersionBisection(objCOTAN, cores = cores)
+    batches <- getBatches(objCOTAN)
+    for (batch in levels(batches)) {
+      logThis(paste("Handling batch", batch), logLevel = 3L)
+
+      lambda     = rep_len(NaN, getNumGenes(objCOTAN))
+      dispersion = rep_len(NaN, getNumGenes(objCOTAN))
+
+      cellsToDrop <- names(batches)[batches != batch]
+      if (length(cellsToDrop) != getNumCells(objCOTAN)) {
+        subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
+        subObj <- resetBatches(subObj)
+
+        subObj <- setNu(subObj, nu = getNu(objCOTAN)[getCells(subObj)])
+
+        subObj <- estimateLambdaLinear(subObj)
+        subObj <- estimateDispersionBisection(subObj, cores = cores)
+
+        lambda <- getLambda(subObj)
+        dispersion <- getDispersion(subObj)
+
+        rm(subObj)
+      }
+
+      # store a separate dispersion for each batch
+      objCOTAN <- setLambda(objCOTAN, lambda = lambda,
+                            batchName = paste0(batch))
+      objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion,
+                                batchName = paste0(batch))
+    }
 
     gc()
 
@@ -210,6 +237,7 @@ setMethod(
 #' @param sequencingMethod a string reporting the method used for the sequencing
 #' @param sampleCondition a string reporting the specific sample condition or
 #'   time point.
+#' @param batches ...
 #' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
 #'   or stop just after the [estimateDispersionBisection()] step
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
@@ -258,7 +286,7 @@ setMethod(
 #' @rdname COTAN_ObjectCreation
 
 automaticCOTANObjectCreation <-
-  function(raw, GEO, sequencingMethod, sampleCondition,
+  function(raw, GEO, sequencingMethod, sampleCondition, batches = NULL,
            calcCoex = TRUE, optimizeForSpeed = TRUE,
            deviceStr = "cuda", cores = 1L,
            cellsCutoff = 0.003, genesCutoff = 0.002,
@@ -268,7 +296,8 @@ automaticCOTANObjectCreation <-
     objCOTAN <- COTAN(raw = raw)
     objCOTAN <- initializeMetaDataset(objCOTAN, GEO = GEO,
                                       sequencingMethod = sequencingMethod,
-                                      sampleCondition = sampleCondition)
+                                      sampleCondition = sampleCondition,
+                                      batches = batches)
 
     logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
     logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)

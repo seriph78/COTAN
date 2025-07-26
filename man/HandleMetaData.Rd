@@ -11,6 +11,7 @@
 \alias{getMetadataGenes}
 \alias{getMetadataCells,COTAN-method}
 \alias{getMetadataCells}
+\alias{getBatches}
 \alias{getDims,COTAN-method}
 \alias{getDims}
 \alias{datasetTags}
@@ -18,6 +19,8 @@
 \alias{initializeMetaDataset}
 \alias{addElementToMetaDataset,COTAN-method}
 \alias{addElementToMetaDataset}
+\alias{resetBatches,COTAN-method}
+\alias{resetBatches}
 \alias{getColumnFromDF}
 \alias{setColumnInDF}
 \alias{getMetaInfoRow}
@@ -32,13 +35,23 @@
 
 \S4method{getMetadataCells}{COTAN}(objCOTAN)
 
+getBatches(objCOTAN)
+
 \S4method{getDims}{COTAN}(objCOTAN)
 
 datasetTags()
 
-\S4method{initializeMetaDataset}{COTAN}(objCOTAN, GEO, sequencingMethod, sampleCondition)
+\S4method{initializeMetaDataset}{COTAN}(
+  objCOTAN,
+  GEO,
+  sequencingMethod,
+  sampleCondition,
+  batches = NULL
+)
 
 \S4method{addElementToMetaDataset}{COTAN}(objCOTAN, tag, value)
+
+\S4method{resetBatches}{COTAN}(objCOTAN, conditionToUse = "")
 
 getColumnFromDF(df, colName)
 
@@ -61,7 +74,13 @@ code}
 \item{sampleCondition}{a string reporting the specific sample condition or
 time point}
 
+\item{batches}{...}
+
 \item{value}{The value or the values to associate to the tag}
+
+\item{conditionToUse}{the name of the \emph{condition} to be used as batches
+discriminator. If no name is given behavior will return to standard
+no-batches}
 
 \item{df}{the \code{data.frame}}
 
@@ -83,6 +102,9 @@ names, the new row names of the resulting \code{data.frame}}
 
 \code{getMetadataCells()} returns the cells' meta-data \code{data.frame}
 
+\code{getBatches()} returns a named \code{list} with the batches if any or a
+constant condition otherwise
+
 \code{getDims()} returns a named \code{list} with the sizes of the slots
 
 \code{datasetTags()} a named \verb{character array} with the standard labels
@@ -92,6 +114,8 @@ used in the \code{metaDataset} of the \code{COTAN} objects
 updated \code{metaDataset}
 
 \code{addElementToMetaDataset()} returns the updated \code{COTAN} object
+
+\code{resetBatches()} returns the updated \code{COTAN} object
 
 \code{getColumnFromDF()} returns the column in the \code{data.frame} as named
 \code{array}, \code{NULL} if the wanted column is not available
@@ -127,6 +151,9 @@ given tag if present or an empty string otherwise.
 
 \code{getMetadataCells()} extracts the meta-data stored for the cells
 
+\code{getBatches()} extracts the with the condition uses to define the
+batches that are needed to refine the model
+
 \code{getDims()} extracts the sizes of all slots of the \code{COTAN} object
 
 \code{datasetTags()} defines a list of short names associated to an
@@ -138,6 +165,9 @@ meta-data
 \code{addElementToMetaDataset()} is used to add a line of information to
 the meta-data \code{data.frame}. If the tag was already used it will update the
 associated value(s) instead
+
+\code{resetBatches()} is used to change the condition to use as driver
+for the batches.
 
 \code{getColumnFromDF()} is a function to extract a column from a
 \code{data.frame}, while keeping the \code{rowNames} as \code{vector} names
@@ -172,6 +202,8 @@ numInitialCells <- getMetadataElement(objCOTAN, datasetTags()[["cells"]])
 metaGenes <- getMetadataGenes(objCOTAN)
 
 metaCells <- getMetadataCells(objCOTAN)
+
+batches <- getBatches(objCOTAN)
 
 allSizes <- getDims(objCOTAN)
 

@@ -46,21 +46,11 @@ setMethod(
   "estimateLambdaLinear",
   "COTAN",
   function(objCOTAN) {
+    assert_that(isEmptyName(getMetadataElement(objCOTAN,
+                                               datasetTags()[["batch"]])))
     lambda <- rowMeans(getRawData(objCOTAN), dims = 1L)
 
-    if (TRUE) {
-      oldLambda <- getMetadataGenes(objCOTAN)[["lambda"]]
-      if (!identical(lambda, oldLambda)) {
-        # flag the COEX slots are out of sync (if any)!
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["gsync"]], FALSE)
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["csync"]], FALSE)
-      }
-    }
-
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, lambda,
-                                        "lambda", getGenes(objCOTAN))
+    objCOTAN <- setLambda(objCOTAN, lambda = lambda)
 
     return(objCOTAN)
   }
@@ -96,104 +86,7 @@ setMethod(
     nu <- colSums(getRawData(objCOTAN), dims = 1L)
     nu <- nu / mean(nu)
 
-    if (TRUE) {
-      oldNu <- getMetadataCells(objCOTAN)[["nu"]]
-      if (!identical(nu, oldNu)) {
-        # flag the COEX slots are out of sync (if any)!
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["gsync"]], FALSE)
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["csync"]], FALSE)
-      }
-    }
-
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
-                                        "nu", getCells(objCOTAN))
-
-    return(objCOTAN)
-  }
-)
-
-
-# ------- `COTAN` clusterization data accessors ------
-
-#' @title Handling cells' *clusterization* and related functions
-#'
-#' @description These functions manage the *clusterizations* and their
-#'   associated *cluster* `COEX` `data.frame`s.
-#'
-#'   A *clusterization* is any partition of the cells where to each cell it is
-#'   assigned a **label**; a group of cells with the same label is called
-#'   *cluster*.
-#'
-#'   For each *cluster* is also possible to define a `COEX` value for each gene,
-#'   indicating its increased or decreased expression in the *cluster* compared
-#'   to the whole background. A `data.frame` with these values listed in a
-#'   column for each *cluster* is stored separately for each *clusterization* in
-#'   the `clustersCoex` member.
-#'
-#'   The formulae for this *In/Out* `COEX` are similar to those used in the
-#'   [calculateCoex()] method, with the **role** of the second gene taken by the
-#'   *In/Out* status of the cells with respect to each *cluster*.
-#'
-#' @name HandlingClusterizations
-NULL
-
-
-### ------ estimateNuLinearByCluster -----
-
-#' @aliases estimateNuLinearByCluster
-#'
-#' @details `estimateNuLinearByCluster()` does a linear estimation of `nu`:
-#'   cells' counts averages normalized *cluster* by *cluster*
-#'
-#' @param objCOTAN a `COTAN` object
-#' @param clName The name of the *clusterization*. If not given the last
-#'   available *clusterization* will be used, as it is probably the most
-#'   significant!
-#' @param clusters A *clusterization* to use. If given it will take precedence
-#'   on the one indicated by `clName`
-#'
-#' @returns `estimateNuLinearByCluster()` returns the updated `COTAN` object
-#'
-#' @importFrom rlang is_empty
-#' @importFrom rlang set_names
-#'
-#' @importFrom Matrix colSums
-#'
-#' @export
-#'
-#' @rdname HandlingClusterizations
-#'
-setMethod(
-  "estimateNuLinearByCluster",
-  "COTAN",
-  function(objCOTAN, clName = "", clusters = NULL) {
-    c(clName, clusters) %<-%
-      normalizeNameAndLabels(objCOTAN, name = clName,
-                             labels = clusters, isCond = FALSE)
-
-    # raw column sums divided by cluster average
-    nu <- colSums(getRawData(objCOTAN), dims = 1L)
-
-    for (cl in levels(clusters)) {
-      c <- clusters == cl
-      nu[c] <- nu[c] / mean(nu[c])
-    }
-
-    if (TRUE) {
-      oldNu <- getMetadataCells(objCOTAN)[["nu"]]
-      if (!identical(nu, oldNu)) {
-        # flag the COEX slots are out of sync (if any)!
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["gsync"]], FALSE)
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["csync"]], FALSE)
-      }
-    }
-
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
-                                        "nu", getCells(objCOTAN))
+    objCOTAN <- setNu(objCOTAN, nu)
 
     return(objCOTAN)
   }
@@ -310,6 +203,8 @@ setMethod(
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
+    assert_that(isEmptyName(getMetadataElement(objCOTAN,
+                                               datasetTags()[["batch"]])))
     logThis("Estimate `dispersion`: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
@@ -348,19 +243,8 @@ setMethod(
     gc()
 
     dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
-    if (TRUE) {
-      oldDispersion <-  getMetadataGenes(objCOTAN)[["dispersion"]]
-      if (!identical(dispersion, oldDispersion)) {
-        # flag the COEX slots are out of sync (if any)!
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["gsync"]], FALSE)
-        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                               datasetTags()[["csync"]], FALSE)
-      }
-    }
 
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
-                                        "dispersion", genes)
+    objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
 
     goodPos <- is.finite(getDispersion(objCOTAN))
     logThis(paste("`dispersion`",
@@ -537,16 +421,8 @@ setMethod(
     logThis("Estimate `nu`: DONE", logLevel = 2L)
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
-    if (!identical(nu, initialGuess)) {
-      # flag the COEX slots are out of sync (if any)!
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["gsync"]], FALSE)
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["csync"]], FALSE)
-    }
 
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
-                                        "nu", cells)
+    objCOTAN <- setNu(objCOTAN, nu = nu)
 
     if (TRUE) {
       nuChange <- abs(nu - initialGuess)
@@ -718,6 +594,8 @@ setMethod(
   function(objCOTAN, threshold = 0.001,
            maxIterations = 50L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
+    assert_that(isEmptyName(getMetadataElement(objCOTAN,
+                                               datasetTags()[["batch"]])))
     logThis("Estimate `dispersion`/`nu`: START", logLevel = 2L)
 
     lambda <- suppressWarnings(getLambda(objCOTAN))
@@ -771,11 +649,8 @@ setMethod(
     dispersion <- solution[["par"]][1L:numGenes]
     nu <- exp(solution[["par"]][(numGenes + 1L):length(solution[["par"]])])
 
-    objCOTAN@metaGenes <- setColumnInDF(objCOTAN@metaGenes, dispersion,
-                                        "dispersion", getGenes(objCOTAN))
-
-    objCOTAN@metaCells <- setColumnInDF(objCOTAN@metaCells, nu,
-                                        "nu", getCells(objCOTAN))
+    objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
+    objCOTAN <- setNu(objCOTAN, nu = nu)
 
     logThis("Estimate `dispersion`/`nu`: DONE", logLevel = 2L)
 

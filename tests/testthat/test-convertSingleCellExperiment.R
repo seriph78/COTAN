@@ -90,9 +90,9 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
   sce <- suppressWarnings(Seurat::as.SingleCellExperiment(srat))
   obj <- convertFromSingleCellExperiment(sce)
 
-  allDims <- set_names(c(600L, 1200L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),
-    c("raw1", "raw2", "genesCoex1", "genesCoex2", "cellsCoex1", "cellsCoex2",
-      "metaDataset", "metaGenes", "metaCells", "clustersCoex"))
+  allDims <- set_names(c(600L, 1200L, 1L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),
+    c("raw1", "raw2", "numBatches", "genesCoex1", "genesCoex2", "cellsCoex1",
+      "cellsCoex2", "metaDataset", "metaGenes", "metaCells", "clustersCoex"))
   expect_identical(unlist(getDims(obj)), allDims)
   expect_identical(getRawData(obj), rawData)
   expect_identical(getClusterizations(obj),
