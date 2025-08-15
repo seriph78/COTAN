@@ -178,16 +178,32 @@ test_that("funProbZero with matrices", {
 
 
 test_that("dispersionBisection", {
-  lambda   <- c(3.0, 1.75)
+  lambda   <- c(3.0, 1.75, 2.0)
   nu       <- rep(c(0.5, 1.5), 5L)
-  sumZeros <- c(0.0, 5.0)
+  sumZeros <- c(0.0, 5.0, 1.0)
 
-  d <- c(dispersionBisection(sumZeros = sumZeros[[1L]],
-                             lambda = lambda[[1L]], nu = nu),
-         dispersionBisection(sumZeros = sumZeros[[2L]],
-                             lambda = lambda[[2L]], nu = nu))
+  d <- mapply(
+    FUN       = dispersionBisection,
+    lambda    = lambda,
+    sumZeros  = sumZeros,
+    MoreArgs  = list("nu" = nu),
+    SIMPLIFY  = TRUE,    # collapse to atomic vector
+    USE.NAMES = FALSE)
 
-  expect_identical(d, c(-Inf, 1.98046875))
+  expect_identical(d, c(-Inf, 1.98046875, -0.646484375))
+
+  d2 <- mapply(
+    FUN       = dispersionNewton,
+    lambda    = lambda,
+    sumZeros  = sumZeros,
+    MoreArgs  = list("nu" = nu),
+    SIMPLIFY  = TRUE,    # collapse to atomic vector
+    USE.NAMES = FALSE)
+
+  expect_identical(d2, c(-Inf, 1.98046875, -0.646484375))
+
+  dispersionNewton(sumZeros = sumZeros[[3L]],
+                   lambda = lambda[[3L]], nu = nu)
 })
 
 

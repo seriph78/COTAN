@@ -5,6 +5,7 @@
 \alias{funProbZero}
 \alias{dispersionBisection}
 \alias{parallelDispersionBisection}
+\alias{dispersionNewton}
 \alias{nuBisection}
 \alias{parallelNuBisection}
 \alias{calcDist}
@@ -28,6 +29,8 @@ parallelDispersionBisection(
   threshold = 0.001,
   maxIterations = 100L
 )
+
+dispersionNewton(sumZeros, lambda, nu, threshold = 0.001, maxIterations = 100L)
 
 nuBisection(
   sumZeros,
@@ -91,6 +94,8 @@ the \code{dispersion} value
 
 the dispersion values
 
+the \code{dispersion} value
+
 the nu value
 
 the dispersion values
@@ -127,6 +132,12 @@ difference between the number of estimated and counted zeros
 of a \code{COTAN} object via a parallel bisection solver
 
 The goal is to find a \code{dispersion} \code{array} that reduces to zero the
+difference between the number of estimated and counted zeros
+
+\code{dispersionNewton} is a private function for the estimation of
+\code{dispersion} slot of a \code{COTAN} object via a Newton-Raphson solver
+
+The goal is to find a \code{dispersion} value that reduces to zero the
 difference between the number of estimated and counted zeros
 
 \code{nuBisection} is a private function for the estimation of \code{nu} slot

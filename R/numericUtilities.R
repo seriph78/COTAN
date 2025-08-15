@@ -253,6 +253,82 @@ parallelDispersionBisection <-
   }
 
 
+#' @details `dispersionNewton` is a private function for the estimation of
+#'   `dispersion` slot of a `COTAN` object via a Newton-Raphson solver
+#'
+#' @details The goal is to find a `dispersion` value that reduces to zero the
+#'   difference between the number of estimated and counted zeros
+#'
+#' @param sumZeros the number of cells that didn't express the gene
+#' @param lambda the estimated `lambda` (a \eqn{n}-sized vector)
+#' @param nu the estimated `nu` (a \eqn{m}-sized vector)
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#'
+#' @returns the `dispersion` value
+#'
+#' @rdname NumericUtilities
+#'
+dispersionNewton <-
+  function(sumZeros,
+           lambda,
+           nu,
+           threshold = 0.001,
+           maxIterations = 100L) {
+    if (sumZeros == 0L) {
+      # cannot match exactly zero prob of zeros with finite values
+      return(-Inf)
+    } else if (sumZeros == length(nu)) {
+      # in case of zero lambda dispersion is irrelevant. We return 1.0
+      return(1.0)
+    }
+    mu <- lambda * nu
+
+    # we look for two dispersion values where the first leads to a
+    # diffZeros negative and the second positive
+    disp <- 0.0
+    diff <- sum(funProbZero(disp, mu)) - sumZeros
+    if (abs(diff) <= threshold) {
+      return(disp)
+    }
+
+    # we assume error is an increasing function of disp
+    dispIsNeg <- sign(diff) >= 0.0
+    disp <- ifelse(dispIsNeg, -1.0, 1.0)
+    iter <- 1L
+    repeat {
+      onePlusDispMu <- 1.0 + disp * mu
+
+      if (dispIsNeg) {
+        logProbZero <- onePlusDispMu - 1.0 + mu
+      } else {
+        logProbZero <- log(onePlusDispMu) / disp
+      }
+
+      probZero <- exp(logProbZero)
+
+      diff <- sum(probZero) - sumZeros
+
+      if (abs(diff) <= threshold) {
+        return(disp)
+      }
+
+      if (iter >= maxIterations) {
+        stop("Max number of iterations reached ",
+             "while finding the solution straddling intervals")
+      }
+      iter <- iter + 1L
+
+      denom <- ifelse(dispIsNeg,
+                      sum(disp * mu * probZero),
+                      sum((mu / onePlusDispMu + logProbZero) * probZero))
+      factor <- (denom - diff) / denom
+
+      disp <- disp * factor
+    }
+  }
+
+
 #------------------------- nu solvers ---------------------
 
 #' @details `nuBisection` is a private function for the estimation of `nu` slot
