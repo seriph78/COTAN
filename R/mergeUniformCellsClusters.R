@@ -220,8 +220,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     untestedPairs <-
       vapply(pNamesList, function(pName, check, allRes) {
-        # we exploit the convention that a non-avalable result is marked by a
-        # zero clusterSize
+        # we exploit the convention that
+        # a non-available result is marked by a zero clusterSize
         updateChecker(pName, check, allRes)@clusterSize == 0L
       }, FUN.VALUE = logical(1L), checker, allCheckResults)
 
