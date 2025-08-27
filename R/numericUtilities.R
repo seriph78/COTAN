@@ -100,6 +100,8 @@ dispersionBisection <-
 
       disp2 <- 2.0 * disp2 # we double at each step
     }
+    logThis(paste("Dispersion bisection: straddling used",
+                  iter, "iterations"), logLevel = 3L)
 
     # once we have found the two bounds to the dispersion value we use bisection
     iter <- 1L
@@ -109,6 +111,8 @@ dispersionBisection <-
       diff <- sum(funProbZero(disp, mu)) - sumZeros
 
       if (abs(diff) <= threshold) {
+        logThis(paste("Dispersion bisection: used",
+                      iter, "iterations"), logLevel = 3L)
         return(disp)
       }
 
@@ -169,7 +173,7 @@ parallelDispersionBisection <-
 
     goodPos <- goodPos & sumZeros != 0L
 
-    if (sum(goodPos) == 0L) {
+    if (!any(goodPos)) {
       return(output)
     }
 
@@ -213,6 +217,8 @@ parallelDispersionBisection <-
 
       disps2[runPos] <- 2.0 * disps2[runPos] # we double at each step
     }
+    logThis(paste("parallel dispersion bisection: straddling used up to",
+                  iter, "iterations"), logLevel = 3L)
 
     # once we have found the two bounds to the dispersion value we use bisection
     runNum <- length(diffs1)
@@ -244,6 +250,8 @@ parallelDispersionBisection <-
       nPos <- runPos & !pPos
       disps1[nPos] <- disps[nPos]
     }
+    logThis(paste("Parallel dispersion bisection: used up to",
+                  iter, "iterations"), logLevel = 3L)
 
     rm(mu)
     gc()
@@ -297,12 +305,12 @@ dispersionNewton <-
     disp <- ifelse(dispIsNeg, -1.0, 1.0)
     iter <- 1L
     repeat {
-      onePlusDispMu <- 1.0 + disp * mu
+      dispMu <- as.matrix(disp * mu)
 
       if (dispIsNeg) {
-        logProbZero <- onePlusDispMu - 1.0 + mu
+        logProbZero <- dispMu - mu
       } else {
-        logProbZero <- log(onePlusDispMu) / disp
+        logProbZero <- -1.0 * log1p(dispMu) / disp
       }
 
       probZero <- exp(logProbZero)
@@ -310,6 +318,8 @@ dispersionNewton <-
       diff <- sum(probZero) - sumZeros
 
       if (abs(diff) <= threshold) {
+        logThis(paste("Dispersion Newton-Raphson: used up to",
+                      iter, "iterations"), logLevel = 3L)
         return(disp)
       }
 
@@ -320,12 +330,132 @@ dispersionNewton <-
       iter <- iter + 1L
 
       denom <- ifelse(dispIsNeg,
-                      sum(disp * mu * probZero),
-                      sum((mu / onePlusDispMu + logProbZero) * probZero))
-      factor <- (denom - diff) / denom
+                      sum(dispMu * probZero),
+                      sum((mu / (dispMu + 1.0) + logProbZero) * probZero))
+      factor <- ifelse(dispIsNeg, denom - diff, denom + diff) / denom
 
       disp <- disp * factor
     }
+  }
+
+
+
+
+#' @details `parallelDispersionNewton` is a private function invoked by
+#'   [parallelDispersionNewton()] for the estimation of the `dispersion` slot
+#'   of a `COTAN` object via a parallel Newton-Raphson solver
+#'
+#' @details The goal is to find a `dispersion` `array` that reduces to zero the
+#'   difference between the number of estimated and counted zeros
+#'
+#' @param genes names of the relevant genes
+#' @param sumZeros the number of cells that didn't express the relevant gene (a
+#'   \eqn{n}-sized vector)
+#' @param lambda the estimated `lambda` (a \eqn{n}-sized vector)
+#' @param nu the estimated `nu` (a \eqn{m}-sized vector)
+#' @param threshold minimal solution precision
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#'
+#' @returns the dispersion values
+#'
+#' @importFrom Rfast rowsums
+#'
+#' @rdname NumericUtilities
+#'
+parallelDispersionNewton <-
+  function(genes,
+           sumZeros,
+           lambda,
+           nu,
+           threshold = 0.001,
+           maxIterations = 100L) {
+    sumZeros <- sumZeros[genes]
+    lambda <- lambda[genes]
+
+    # cannot match exactly zero prob of zeros with finite values
+    # so we ignore the rows with no zeros from the solver and return -Inf
+    output <- rep(-Inf, length(sumZeros))
+
+    # in case of zero lambda dispersion is irrelevant. We return 1.0
+    goodPos <- sumZeros != length(nu)
+    output[!goodPos] <- 1.0
+
+    goodPos <- goodPos & sumZeros != 0L
+
+    if (!any(goodPos)) {
+      return(output)
+    }
+
+    sumZeros <- sumZeros[goodPos]
+    lambda <- lambda[goodPos]
+
+    mu <- lambda %o% nu
+
+    # we look for two dispersion values where the first leads to a
+    # diffZeros negative and the second positive
+    disps <- rep(0.0, length(sumZeros))
+    diffs <- rowsums(funProbZero(disps, mu)) - sumZeros
+    if (all(abs(diffs) <= threshold)) {
+      output[goodPos] <- disps
+      return(output)
+    }
+
+    # we assume error is an increasing function of the dispersion
+    dispsIsNeg <- sign(diffs) >= 0.0
+    disps <- ifelse(dispsIsNeg, -1.0, 1.0)
+    runPos <- rep(TRUE, length(disps))
+    iter <- 1L
+    repeat {
+      dispsMu <- disps[runPos] * mu[runPos, , drop = FALSE]
+
+      isNeg <- dispsIsNeg[runPos]
+
+      logProbsZero <- matrix(NaN, nrow(dispsMu), ncol(dispsMu))
+      logProbsZero[ isNeg, ] <-
+        (dispsMu[isNeg, , drop = FALSE] -
+           mu[runPos & dispsIsNeg, , drop = FALSE])
+      logProbsZero[!isNeg, ] <-
+        ((-1.0 / disps[runPos & !dispsIsNeg]) *
+           log1p(dispsMu[!isNeg, , drop = FALSE]))
+
+      probsZero <- exp(logProbsZero)
+
+      diffs[runPos] <- rowsums(probsZero) - sumZeros[runPos]
+
+      runPos <- abs(diffs) > threshold
+      if (!any(runPos)) {
+        break
+      }
+
+      if (iter >= maxIterations) {
+        stop("Max number of iterations reached while finding the solutions")
+      }
+      iter <- iter + 1L
+
+      denoms <- rep(1.0, length(disps))
+      denoms[runPos &  dispsIsNeg] <-
+        rowsums(dispsMu[isNeg, , drop = FALSE] *
+                  probsZero[isNeg, , drop = FALSE])
+      denoms[runPos & !dispsIsNeg] <-
+        rowsums((mu[runPos & !dispsIsNeg, , drop = FALSE] /
+                   (dispsMu[!isNeg, , drop = FALSE] + 1.0) +
+                     logProbsZero[!isNeg, , drop = FALSE]) *
+                  probsZero[!isNeg, , drop = FALSE])
+
+      rm(dispsMu, logProbsZero, probsZero)
+
+      diffs[runPos & dispsIsNeg] <- -1.0 * diffs[runPos & dispsIsNeg]
+      factors <- (denoms + diffs) / denoms
+
+      disps[runPos] <- disps[runPos] * factors[runPos]
+    }
+    logThis(paste("Parallel dispersion Newton-Raphson: used up to",
+                  iter, "iterations"), logLevel = 3L)
+    rm(mu)
+    gc()
+
+    output[goodPos] <- disps
+    return(output)
   }
 
 
