@@ -333,7 +333,9 @@ dispersionNewton <-
       denom <- ifelse(dispIsNeg,
                       sum(dispMu * probZero),
                       sum((mu / (dispMu + 1.0) + logProbZero) * probZero))
-      factor <- ifelse(dispIsNeg, denom - diff, denom + diff) / denom
+
+      factor <-
+        max((denom + ifelse(dispIsNeg, -1.0, 1.0) * diff) / denom, 1.0e-8)
 
       disp <- disp * factor
     }
@@ -447,7 +449,7 @@ parallelDispersionNewton <-
       }
       iter <- iter + 1L
 
-      factors <- (denoms + diffs) / denoms
+      factors <- pmax((denoms + diffs) / denoms, 1e-8)
 
       disps[runPos] <- disps[runPos] * factors[runPos]
     }

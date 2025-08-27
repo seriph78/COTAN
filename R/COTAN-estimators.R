@@ -316,6 +316,8 @@ setMethod(
 
     objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
 
+    logThis("Estimate `dispersion`: DONE", logLevel = 2L)
+
     goodPos <- is.finite(getDispersion(objCOTAN))
     logThis(paste("`dispersion`",
                   "| min:", min(getDispersion(objCOTAN)[goodPos]),
