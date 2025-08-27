@@ -132,9 +132,10 @@ dispersionBisection <-
   }
 
 
-#' @details `parallelDispersionBisection` is a private function invoked by
-#'   [estimateDispersionBisection()] for the estimation of the `dispersion` slot
-#'   of a `COTAN` object via a parallel bisection solver
+#' @details `parallelDispersionBisection` is a private function that was invoked
+#'   by [estimateDispersionViaSolver()] for the estimation of the `dispersion`
+#'   slot of a `COTAN` object via a parallel bisection solver. It is now
+#'   deprecated
 #'
 #' @details The goal is to find a `dispersion` `array` that reduces to zero the
 #'   difference between the number of estimated and counted zeros
@@ -422,6 +423,20 @@ parallelDispersionNewton <-
 
       diffs[runPos] <- rowsums(probsZero) - sumZeros[runPos]
 
+      denoms <- rep(1.0, length(disps))
+      denoms[runPos &  dispsIsNeg] <-
+        rowsums(dispsMu[isNeg, , drop = FALSE] *
+                  probsZero[isNeg, , drop = FALSE])
+      denoms[runPos & !dispsIsNeg] <-
+        rowsums(((mu[runPos & !dispsIsNeg, , drop = FALSE] /
+                    (dispsMu[!isNeg, , drop = FALSE] + 1.0)) +
+                   logProbsZero[!isNeg, , drop = FALSE]) *
+                  probsZero[!isNeg, , drop = FALSE])
+
+      rm(dispsMu, logProbsZero, probsZero)
+
+      diffs[runPos & dispsIsNeg] <- -1.0 * diffs[runPos & dispsIsNeg]
+
       runPos <- abs(diffs) > threshold
       if (!any(runPos)) {
         break
@@ -432,19 +447,6 @@ parallelDispersionNewton <-
       }
       iter <- iter + 1L
 
-      denoms <- rep(1.0, length(disps))
-      denoms[runPos &  dispsIsNeg] <-
-        rowsums(dispsMu[isNeg, , drop = FALSE] *
-                  probsZero[isNeg, , drop = FALSE])
-      denoms[runPos & !dispsIsNeg] <-
-        rowsums((mu[runPos & !dispsIsNeg, , drop = FALSE] /
-                   (dispsMu[!isNeg, , drop = FALSE] + 1.0) +
-                     logProbsZero[!isNeg, , drop = FALSE]) *
-                  probsZero[!isNeg, , drop = FALSE])
-
-      rm(dispsMu, logProbsZero, probsZero)
-
-      diffs[runPos & dispsIsNeg] <- -1.0 * diffs[runPos & dispsIsNeg]
       factors <- (denoms + diffs) / denoms
 
       disps[runPos] <- disps[runPos] * factors[runPos]

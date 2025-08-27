@@ -322,10 +322,10 @@ setGeneric(
 )
 
 setGeneric(
-  "estimateDispersionBisection",
+  "estimateDispersionViaSolver",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 50L, chunkSize = 1024L) {
-    standardGeneric("estimateDispersionBisection")
+    standardGeneric("estimateDispersionViaSolver")
   }
 )
 

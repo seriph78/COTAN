@@ -15,7 +15,7 @@ test_that("COTAN getters", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj, cores = 2L)
+  obj <- estimateDispersionViaSolver(obj, cores = 2L)
 
   # set tag label as legacy value
   row <- getMetaInfoRow(getMetadataDataset(obj), datasetTags()[["gsync"]])

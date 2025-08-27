@@ -139,9 +139,10 @@ It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
 The goal is to find a \code{dispersion} value that reduces to zero the
 difference between the number of estimated and counted zeros
 
-\code{parallelDispersionBisection} is a private function invoked by
-\code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} for the estimation of the \code{dispersion} slot
-of a \code{COTAN} object via a parallel bisection solver
+\code{parallelDispersionBisection} is a private function that was invoked
+by \code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}} for the estimation of the \code{dispersion}
+slot of a \code{COTAN} object via a parallel bisection solver. It is now
+deprecated
 
 The goal is to find a \code{dispersion} \code{array} that reduces to zero the
 difference between the number of estimated and counted zeros

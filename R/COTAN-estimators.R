@@ -172,12 +172,12 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
   worker <- function(genesBatch, sumZeros, lambda, nu,
                      threshold, maxIterations) {
     tryCatch({
-      return(parallelDispersionBisection(genes         = genesBatch,
-                                         sumZeros      = sumZeros,
-                                         lambda        = lambda,
-                                         nu            = nu,
-                                         threshold     = threshold,
-                                         maxIterations = maxIterations))
+      return(parallelDispersionNewton(genes         = genesBatch,
+                                      sumZeros      = sumZeros,
+                                      lambda        = lambda,
+                                      nu            = nu,
+                                      threshold     = threshold,
+                                      maxIterations = maxIterations))
     }, error = function(e) {
       structure(list(e), class = "try-error")
     })
@@ -187,14 +187,14 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     ## create a tiny private env `mini` and a worker within it:
     ## this reduces spawning memory foot-print
     mini <- new.env(parent = baseenv())
-    mini$parallelDispersionBisection <- parallelDispersionBisection
+    mini$parallelDispersionNewton <- parallelDispersionNewton
     mini$rowsums <- Rfast::rowsums
     mini$funProbZero <- funProbZero
     mini$logThis <- logThis
     mini$worker <- worker
 
     ## set on the copy in `mini` to only use `mini`
-    environment(mini$parallelDispersionBisection) <- mini
+    environment(mini$parallelDispersionNewton) <- mini
     environment(mini$worker) <- mini
 
     res <- parallel::mclapply(
@@ -217,7 +217,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     return(res)
   } else {
     res <- lapply(genesBatches,
-                  parallelDispersionBisection,
+                  parallelDispersionNewton,
                   sumZeros = sumZeros,
                   lambda = lambda,
                   nu = nu,
@@ -229,11 +229,12 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 }
 
 
-### ------ estimateDispersionBisection -----
+### ------ estimateDispersionViaSolver -----
 
+#' @aliases estimateDispersionViaSolver
 #' @aliases estimateDispersionBisection
 #'
-#' @details `estimateDispersionBisection()` estimates the negative binomial
+#' @details `estimateDispersionViaSolver()` estimates the negative binomial
 #'   dispersion factor for each gene (`dispersion`). Determines the value such
 #'   that, for each gene, the probability of zero count matches the number of
 #'   observed zeros. It assumes [estimateNuLinear()] being already run.
@@ -245,7 +246,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 #' @param chunkSize number of elements to solve in batch in a single core.
 #'   Default is 1024.
 #'
-#' @returns `estimateDispersionBisection()` returns the updated `COTAN` object
+#' @returns `estimateDispersionViaSolver()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_null
 #' @importFrom rlang is_empty
@@ -264,13 +265,13 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 #' @export
 #'
 #' @examples
-#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
+#' objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = 6L)
 #' dispersion <- getDispersion(objCOTAN)
 #'
 #' @rdname ParametersEstimations
 #'
 setMethod(
-  "estimateDispersionBisection",
+  "estimateDispersionViaSolver",
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
@@ -326,6 +327,17 @@ setMethod(
     return(objCOTAN)
   }
 )
+
+# backward compatibility alias
+estimateDispersionBisection <-
+  function(objCOTAN, threshold = 0.001, cores = 1L,
+           maxIterations = 100L, chunkSize = 1024L) {
+    return(estimateDispersionViaSolver(objCOTAN = objCOTAN,
+                                       threshold = threshold,
+                                       cores = cores,
+                                       maxIterations = maxIterations,
+                                       chunkSize = chunkSize))
+  }
 
 
 
@@ -405,7 +417,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
 #' @details `estimateNuBisection()` estimates the `nu` vector of a `COTAN`
 #'   object by bisection. It determines the `nu` parameters such that, for each
 #'   cell, the probability of zero counts matches the number of observed zeros.
-#'   It assumes [estimateDispersionBisection()] being already run. Since this
+#'   It assumes [estimateDispersionViaSolver()] being already run. Since this
 #'   breaks the assumption that the average `nu` is one, it is recommended not
 #'   to run this in isolation but use [estimateDispersionNuBisection()] instead.
 #'
@@ -560,7 +572,7 @@ setMethod(
     iter <- 1L
     repeat {
       # a smaller threshold is used in order to ensure the global convergence
-      objCOTAN <- estimateDispersionBisection(objCOTAN,
+      objCOTAN <- estimateDispersionViaSolver(objCOTAN,
                                               threshold = threshold / 10.0,
                                               cores = cores,
                                               maxIterations = maxIterations,

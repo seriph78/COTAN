@@ -43,7 +43,7 @@ test_that("Bisection estimates", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj, cores = 3L, chunkSize = 2L)
+  obj <- estimateDispersionViaSolver(obj, cores = 3L, chunkSize = 2L)
 
   expect_length(getDispersion(obj), getNumGenes(obj))
   expect_equal(getDispersion(obj)[[1L]], -Inf, ignore_attr = TRUE)
