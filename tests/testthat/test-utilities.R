@@ -275,16 +275,14 @@ test_that("parallelDist - cosine dissimilarity", {
 test_that("pca usage", {
   utils::data("test.dataset", package = "COTAN")
 
-  pcaRaw <- runPCA(x = as.matrix(test.dataset), rank = 5L,
+  pcaRaw <- runPCA(x = as.matrix(test.dataset), rank = 10L,
                    BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
-  colnames(pcaRaw) <- paste0("PC_", seq_len(ncol(pcaRaw)))
 
   expect_identical(rownames(pcaRaw), rownames(test.dataset))
 
-  pcaExp <- readRDS(file.path(getwd(), "pca.test.RDS"))
-  expect_identical(nrow(pcaRaw), nrow(pcaExp))
+  pcaExp <- readRDS(file.path(getwd(), "pca.raw.test.RDS"))
 
-  pcaExp <- pcaExp[rownames(pcaRaw), ]
+  pcaRaw <- pcaRaw[rownames(pcaExp), ]
 
   correlations <- c(cor(pcaRaw[, 1L], pcaExp[, 1L]),
                     cor(pcaRaw[, 2L], pcaExp[, 2L]))

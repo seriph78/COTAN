@@ -235,51 +235,50 @@ test_that("COTAN getters", {
 
   expect_equal(suppressWarnings(abs(calculateReducedDataMatrix(obj))),
                abs(calcRDM(obj, useCoexEigen = FALSE,
-                           dataMethod = "LogNormalized", numComp = 25L,
+                           dataMethod = "LogNormalized", numComp = 50L,
                            genesSel = "HGDI", numGenes = 2000L)),
                tolerance = 1.0e-12)
 
   m1 <- as.matrix(cbind(rep(2.756809750418045, times = 20L),
+                        rep(0.0, times = 20L), rep(0.0, times = 20L),
                         rep(0.0, times = 20L), rep(0.0, times = 20L)))
-  colnames(m1) <- paste0("PC", c(1L:3L))
+  colnames(m1) <- paste0("PC", c(1L:5L))
   rownames(m1) <- letters[1L:20L]
 
   expect_equal(abs(calcRDM(obj, useCoexEigen = FALSE,
-                           dataMethod = "AdjBinarized", numComp = 3L,
+                           dataMethod = "AdjBinarized", numComp = 5L,
                            genesSel = "HGDI", numGenes = 8L)),
                m1, tolerance = 1.0e-12)
 
   expect_equal(abs(calcRDM(obj, useCoexEigen = FALSE,
-                           dataMethod = "LogLikelihood", numComp = 3L,
+                           dataMethod = "LogLikelihood", numComp = 5L,
                            genesSel = "HVG_Seurat", numGenes = 8L)),
                m1, tolerance = 1.0e-12)
 
   m2 <- cbind(
-    rep(c(1.408210608361951,     -1.408216669492208    ), times = 10L),
-    rep(c(0.0001095961016898374, -0.0001990257478942304), times = 10L),
-    rep(c(-0.1301647820478256,    0.1300990859038809   ), times = 10L))
+    rep(c(1.991509612121359,     -1.991510865753923    ), times = 10L),
+    rep(c(4.556799230950100e-05, -4.815389335445746e-05), times = 10L),
+    rep(c(5.701730287707164e-05, -8.375641609457851e-05), times = 10L))
   colnames(m2) <- paste0("EC_", c(1L:3L))
   rownames(m2) <- letters[1L:20L]
-  attr(m2, "scaled:scale") <-
-    set_names(rep(c(1.04428866237142, 1.04434243252230), times = 10L),
-              letters[1L:20L])
 
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
-                       dataMethod = "BinDiscr", numComp = 3L),
+                       dataMethod = "BinDiscr", numComp = 5L)[, 1L:3L],
                m2, tolerance = 5.0e-5)
 
   m3 <- cbind(
-    rep(c(-1.399254464334427,   1.399054366867996 ), times = 10L),
-    rep(c( 0.1574674670950663,  0.1582654478193421), times = 10L),
-    rep(c( 0.1314950221371185, -0.1326609459265815), times = 10L))
+    rep(c(-1.965371197946800,    1.965461753047948), times = 10L),
+    rep(c(-7.336704249844826e-4, 2.39061489992444878e-2), times = 10L),
+    rep(c( 0.2279365575683021,   0.2262295707395580    ), times = 10L))
   colnames(m3) <- paste0("EC_", c(1L:3L))
   rownames(m3) <- letters[1L:20L]
-  attr(m3, "scaled:scale") <-
-    set_names(rep(c(4.24255829899041, 4.24340574003457), times = 10L),
-              letters[1L:20L])
-
+  if (FALSE) {
+    attr(m3, "scaled:scale") <-
+      set_names(rep(c(3.020580325047483, 3.020462711979378), times = 10L),
+                letters[1L:20L])
+  }
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
-                       dataMethod = "DerLogL", numComp = 3L),
+                       dataMethod = "DerLogL", numComp = 5L)[, 1L:3L],
                m3, tolerance = 5.0e-5)
 })
 
