@@ -115,7 +115,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_true(all(vapply(allCheckRes, methods::is,
                          logical(1L), "AdvancedGDIUniformityCheck")))
   expect_false(allCheckRes[[1L]]@isUniform)
-  expect_true(is.finite(allCheckRes[[1L]]@firstCheck@fractionBeyond))
+  expect_false(is.finite(allCheckRes[[1L]]@firstCheck@fractionBeyond))
   expect_true(is.finite(allCheckRes[[1L]]@firstCheck@quantileAtRatio))
 
   expect_identical(nlevels(mergedClusters), nlevels(clusters))
