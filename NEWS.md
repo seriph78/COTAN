@@ -1,3 +1,6 @@
+Upgraded dispersion solver to use Newton-Raphson method
+Minor variations of the model parameters are expected
+
 Improved the `torch coex` code so to use less memory and do less calculations
 
 ## 2.9.5

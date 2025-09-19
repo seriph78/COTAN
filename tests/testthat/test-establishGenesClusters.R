@@ -4,7 +4,7 @@ test_that("Establish genes clusters", {
   data("test.dataset")
   objCOTAN <- COTAN(raw = test.dataset)
   objCOTAN <- proceedToCoex(objCOTAN, cores = 6L,
-                            optimizeForSpeed = FALSE, saveObj = FALSE)
+                            optimizeForSpeed = TRUE, saveObj = FALSE)
 
   c(secondaryMarkers, GCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN = objCOTAN,
@@ -19,24 +19,27 @@ test_that("Establish genes clusters", {
   expect_lte(max(abs(GCS)), 1L)
 
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-                       G2 = c("g-000300", "g-000330"),
+                       G2 = c("g-000300", "g-000330", "g-000660"),
                        G3 = c("g-000510", "g-000530", "g-000550",
                               "g-000570", "g-000590"))
 
-  c(secondaryMarkers, GCS, rankGenes) %<-%
+  expect_warning(
+    c(secondaryMarkers, GCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN = objCOTAN,
                    primaryMarkers = unlist(groupMarkers),
-                   numGenesPerMarker = 11L)
+                   numGenesPerMarker = 11L))
 
   expect_gt(length(secondaryMarkers), length(unlist(groupMarkers)))
-  expect_equal(colnames(rankGenes), unlist(groupMarkers), ignore_attr = TRUE)
+  expect_equal(colnames(rankGenes), unlist(groupMarkers)[-6L],
+               ignore_attr = TRUE)
   expect_identical(rownames(rankGenes), secondaryMarkers)
 
   expect_identical(colnames(GCS), secondaryMarkers)
   expect_lte(max(abs(GCS)), 1L)
 
   if (TRUE) {
-    GCS_old <- as.matrix(readRDS(file.path(getwd(), "genes.coex.space.RDS")))
+    GCS_old <-
+      as.matrix(readRDS(file.path(getwd(), "genes.coex.space.test.RDS")))
     expect_equal(GCS, GCS_old, tolerance = 1.0e-8)
   }
 
@@ -57,7 +60,7 @@ test_that("Establish genes clusters", {
                    c(paste0("PC", (1L:10L)), pcaExtraCols))
 
   if (TRUE) {
-    pcaClustersExp <- readRDS(file.path(getwd(), "pca.clusters.RDS"))
+    pcaClustersExp <- readRDS(file.path(getwd(), "pca.genes.clusters.test.RDS"))
     expect_identical(dim(pcaClusters), dim(pcaClustersExp))
     expect_identical(colnames(pcaClusters), colnames(pcaClustersExp))
     expect_identical(rownames(pcaClusters), rownames(pcaClustersExp))

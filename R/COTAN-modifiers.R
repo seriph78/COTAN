@@ -156,7 +156,131 @@ setMethod(
     feCells <- getNumExpressedGenes(objCOTAN) >= threshold
 
     objCOTAN@metaCells <-
-      setColumnInDF(objCOTAN@metaCells, feCells, "feCells", getCells(objCOTAN))
+      setColumnInDF(objCOTAN@metaCells, feCells,
+                    "feCells", getCells(objCOTAN))
+
+    return(objCOTAN)
+  }
+)
+
+#' @aliases setLambda
+#'
+#' @details `setLambda()` adds a column to the genes' metadata with the lambda
+#'   (genes' counts averages) for the given batch
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param lambda a named array that gives the values for lambda
+#'
+#' @returns `setLambda()` returns the updated `COTAN` object
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+#'
+#' @rdname RawDataCleaning
+#'
+setMethod(
+  "setLambda",
+  "COTAN",
+  function(objCOTAN, lambda) {
+    assert_that(length(lambda) == getNumGenes(objCOTAN))
+
+    if (TRUE) {
+      oldLambda <- getMetadataGenes(objCOTAN)[["lambda"]]
+      if (!identical(lambda, oldLambda)) {
+        # flag the COEX slots are out of sync (if any)!
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["gsync"]], FALSE)
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["csync"]], FALSE)
+      }
+    }
+
+    objCOTAN@metaGenes <-
+      setColumnInDF(objCOTAN@metaGenes, lambda,
+                    "lambda", getGenes(objCOTAN))
+
+    return(objCOTAN)
+  }
+)
+
+
+#' @aliases setDispersion
+#'
+#' @details `setDispersion()` adds a column to the genes' metadata with the
+#'   negative binomial dispersion factor for the given batch
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param dispersion a named array that gives the values for the dispersion
+#'
+#' @returns `setDispersion()` returns the updated `COTAN` object
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+#'
+#' @rdname RawDataCleaning
+#'
+setMethod(
+  "setDispersion",
+  "COTAN",
+  function(objCOTAN, dispersion) {
+    assert_that(length(dispersion) == getNumGenes(objCOTAN))
+
+    if (TRUE) {
+      oldDispersion <-  getMetadataGenes(objCOTAN)[["dispersion"]]
+      if (!identical(dispersion, oldDispersion)) {
+        # flag the COEX slots are out of sync (if any)!
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["gsync"]], FALSE)
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["csync"]], FALSE)
+      }
+    }
+
+    objCOTAN@metaGenes <-
+      setColumnInDF(objCOTAN@metaGenes, dispersion,
+                    "dispersion", getGenes(objCOTAN))
+
+    return(objCOTAN)
+  }
+)
+
+#' @aliases setNu
+#'
+#' @details `setNu()`
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param nu A named array that gives
+#'
+#' @returns `setNu()` returns the updated `COTAN` object
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @export
+#'
+#' @rdname RawDataCleaning
+#'
+setMethod(
+  "setNu",
+  "COTAN",
+  function(objCOTAN, nu) {
+    assert_that(length(nu) == getNumCells(objCOTAN))
+
+    if (TRUE) {
+      oldNu <- getMetadataCells(objCOTAN)[["nu"]]
+      if (!identical(nu, oldNu)) {
+        # flag the COEX slots are out of sync (if any)!
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["gsync"]], FALSE)
+        objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                               datasetTags()[["csync"]], FALSE)
+      }
+    }
+
+    objCOTAN@metaCells <-
+      setColumnInDF(objCOTAN@metaCells, nu,
+                    "nu", getCells(objCOTAN))
 
     return(objCOTAN)
   }

@@ -7,6 +7,9 @@ test_that("Linear estimates", {
   colnames(raw) <- letters[1L:20L]
 
   obj <- COTAN(raw = raw)
+  obj <-
+    addCondition(obj, condName = "batch",
+                 conditions = rlang::rep_named(getCells(obj), c("TA", "TB")))
 
   obj <- estimateLambdaLinear(obj)
 
@@ -40,7 +43,7 @@ test_that("Bisection estimates", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj, cores = 3L, chunkSize = 2L)
+  obj <- estimateDispersionViaSolver(obj, cores = 3L, chunkSize = 2L)
 
   expect_length(getDispersion(obj), getNumGenes(obj))
   expect_equal(getDispersion(obj)[[1L]], -Inf, ignore_attr = TRUE)

@@ -220,8 +220,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     untestedPairs <-
       vapply(pNamesList, function(pName, check, allRes) {
-        # we exploit the convention that a non-avalable result is marked by a
-        # zero clusterSize
+        # we exploit the convention that
+        # a non-available result is marked by a zero clusterSize
         updateChecker(pName, check, allRes)@clusterSize == 0L
       }, FUN.VALUE = logical(1L), checker, allCheckResults)
 
@@ -383,7 +383,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   if (is_empty(checkers)) {
     GDIThreshold <- ifelse(is.finite(GDIThreshold), GDIThreshold, 1.43)
 
-    # keep old behaviour
+    # keep old behavior
     thresholdGap <- max(GDIThreshold - 1.37, 0.0)
     numThresholds <- ceiling(thresholdGap / 0.03)
     allThresholds <- 1.37 +
