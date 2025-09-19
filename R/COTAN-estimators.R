@@ -206,7 +206,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
       threshold = threshold,
       maxIterations = maxIterations,
       mc.cores = cores,
-      mc.preschedule = FALSE)
+      mc.preschedule = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
@@ -275,6 +275,8 @@ setMethod(
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
+    startTime <- Sys.time()
+
     logThis("Estimate `dispersion`: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
@@ -311,6 +313,14 @@ setMethod(
                               cores         = cores)
 
     gc()
+
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
+
+    logThis("Estimate `dispersion`: DONE", logLevel = 2L)
 
     dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
 
@@ -388,7 +398,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       threshold = threshold,
       maxIterations = maxIterations,
       mc.cores = cores,
-      mc.preschedule = FALSE)
+      mc.preschedule = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
@@ -455,12 +465,13 @@ setMethod(
   "COTAN",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
+    startTime <- Sys.time()
+
     logThis("Estimate `nu`: START", logLevel = 2L)
 
     cores <- handleMultiCore(cores)
 
     # parameters estimation
-
 
     cells <- getCells(objCOTAN)
     sumZeros <- getNumGenes(objCOTAN) - getNumExpressedGenes(objCOTAN)
@@ -501,6 +512,13 @@ setMethod(
                           cores = cores)
 
     gc()
+
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
+
     logThis("Estimate `nu`: DONE", logLevel = 2L)
 
     nu <- unlist(nuList, recursive = TRUE, use.names = FALSE)
@@ -562,6 +580,8 @@ setMethod(
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
+    startTime <- Sys.time()
+
     logThis("Estimate `dispersion`/`nu`: START", logLevel = 2L)
 
     # getNu() would show a warning when no `nu` present
@@ -632,6 +652,12 @@ setMethod(
       iter <- iter + 1L
     }
 
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
+
     logThis("Estimate `dispersion`/`nu`: DONE", logLevel = 2L)
 
     return(objCOTAN)
@@ -677,6 +703,8 @@ setMethod(
   function(objCOTAN, threshold = 0.001,
            maxIterations = 50L, chunkSize = 1024L,
            enforceNuAverageToOne = TRUE) {
+    startTime <- Sys.time()
+
     logThis("Estimate `dispersion`/`nu`: START", logLevel = 2L)
 
     lambda <- suppressWarnings(getLambda(objCOTAN))
@@ -732,6 +760,12 @@ setMethod(
 
     objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
     objCOTAN <- setNu(objCOTAN, nu = nu)
+
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
 
     logThis("Estimate `dispersion`/`nu`: DONE", logLevel = 2L)
 

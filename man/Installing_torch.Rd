@@ -2,13 +2,16 @@
 % Please edit documentation in R/data.R
 \name{Installing_torch}
 \alias{Installing_torch}
-\title{Installing torch R library (on Linux)}
+\title{Installing \code{torch} \code{R} library (on \code{WSL-Linux})}
 \description{
 A brief explanation of how to install the torch package on
-\code{WSL2} (Windows Subsystem for Linux), but it might work the same for other
-\code{Linux} systems. Naturally it makes a difference whether one wants to
+\code{WSL2} (\verb{Windows Subsystem for Linux}), but it might work the same for
+other \code{Linux} systems. Naturally it makes a difference whether one wants to
 install support only for the \code{CPU} or also have the system \code{GPU} at the
 ready!
+
+This are just \emph{suggestions}, no guarantees are given:
+\strong{try at your own peril!}
 
 The main resources to install \code{torch} is
 \url{https://torch.mlverse.org/docs/articles/installation.html} or
@@ -24,13 +27,32 @@ For the \code{GPU}, currently only \code{cuda} devices are supported. Moreover
 only some specific versions of \code{cuda} (and corresponding \code{cudnn}) are
 effectively usable, so one needs to install them to actually use the \code{GPU}.
 
-As of today only \code{cuda} 11.7 and 11.8 are supported, but check the \code{torch}
+As of today only \code{cuda} 12.8 is supported, but check the \code{torch}
 documentation for more up-to-date information. Before downgrading your
 \code{cuda} version, please be aware that it is possible to maintain separate
-main versions of \code{cuda} at the same time on the system: that is one can
-have installed both 11.8 and a 12.4 \code{cuda} versions on the same system.
+main versions of \code{cuda} at the same time on the system.
 
-Below a link to install \code{cuda} 11.8 for \code{WSL2} given: use a local installer
+Below a link to install \code{cuda} 12.8 for \code{WSL2} given: use a local installer
 to be sure the wanted \code{cuda} version is being installed, and not the latest
-one: \href{https://developer.nvidia.com/cuda-11-8-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_local}{\code{cuda} 11.8 for \code{WSL2}}
+one: \href{https://developer.nvidia.com/cuda-12-8-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_local}{\code{cuda} 12.8 for \code{WSL2}}
+
+It can happen that after the installation of the new \code{torch} version,
+including the dependencies, \code{torch} actually fails to run claiming that
+\code{lantern} dependency was not installed.
+This can happen due to presence of old cache files, so one can simply
+delete the relevant cache folder as in the example below...
+}
+\examples{
+\dontshow{if (FALSE) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+  # find the relevant cache folder and delete it
+  folder <- tools::R_user_dir("torch","cache")
+  print(folder)
+  unlink(folder, recursive = TRUE, force = TRUE)
+
+  # reinstall explicitly for the toolchain you want
+  torch::install_torch(cuda_version = "12.8", reinstall = TRUE)
+
+  # run this only **AFTER** restarting `R`
+  COTAN:::canUseTorch(TRUE, "cuda")
+\dontshow{\}) # examplesIf}
 }

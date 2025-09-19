@@ -79,7 +79,7 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
                               S = S,
                               topRows = topRows,
                               mc.cores  = cores,
-                              mc.preschedule = FALSE)
+                              mc.preschedule = TRUE)
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
@@ -129,11 +129,13 @@ calculateGDIGivenS  <- function(S,
                                 rowsFraction = 0.05,
                                 cores        = 1L,
                                 chunkSize    = 1024L) {
+  startTime <- Sys.time()
+
+  logThis("Calculate `GDI`: START", logLevel = 2L)
+
   # Beware S might not be square!
   assertthat::assert_that(length(dim(S)) == 2L,
                           rowsFraction > 0, rowsFraction <= 1)
-
-  logThis("Calculate `GDI`: START", logLevel = 2L)
 
   cores <- handleMultiCore(cores)
 
@@ -160,6 +162,12 @@ calculateGDIGivenS  <- function(S,
   GDI <- unlist(gdiList, use.names = FALSE, recursive = TRUE)
 
   names(GDI) <- genes
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Calculate `GDI`: DONE", logLevel = 2L)
 
@@ -227,6 +235,8 @@ calculateGDI <- function(objCOTAN,
                          rowsFraction = 0.05,
                          cores        = 1L,
                          chunkSize    = 1024L) {
+  startTime <- Sys.time()
+
   logThis("Calculate GDI dataframe: START", logLevel = 2L)
 
   if (statType == "S") {
@@ -259,6 +269,12 @@ calculateGDI <- function(objCOTAN,
   gc()
 
   GDI <- GDI[, c("sum.raw.norm", "GDI", "exp.cells")]
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Calculate GDI dataframe: DONE", logLevel = 2L)
 
@@ -294,6 +310,8 @@ calculateGDI <- function(objCOTAN,
 calculatePValue <- function(objCOTAN, statType = "S",
                             geneSubsetCol = vector(mode = "character"),
                             geneSubsetRow = vector(mode = "character")) {
+  startTime <- Sys.time()
+
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
   geneSubsetRow <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetRow)
 
@@ -326,6 +344,12 @@ calculatePValue <- function(objCOTAN, statType = "S",
   if (allCols && allRows) {
     pValues <- pack(forceSymmetric(pValues))
   }
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("calculating PValues: DONE", logLevel = 2L)
 
