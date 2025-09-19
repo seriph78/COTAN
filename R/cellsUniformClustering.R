@@ -61,7 +61,9 @@ seuratClustering <- function(objCOTAN,
                              selectedGenes, numPCAComp = 25L,
                              initialResolution, minNumClusters) {
   tryCatch({
-    logThis("Creating Seurat object: START", logLevel = 2L)
+    startTime <- Sys.time()
+
+    logThis("Creating new clusterization: START", logLevel = 2L)
 
     assert_that(all(selectedGenes %in% getGenes(objCOTAN)),
                 msg = "Passed genes' list is not compatible with the data")
@@ -116,7 +118,13 @@ seuratClustering <- function(objCOTAN,
     logThis(paste("Used resolution for Seurat clusterization is:", resolution),
             logLevel = 2L)
 
-    logThis("Creating Seurat object: DONE", logLevel = 2L)
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
+
+    logThis("Creating new clusterization: DONE", logLevel = 2L)
 
     rm(srat)
     gc()
@@ -242,6 +250,8 @@ cellsUniformClustering <- function(objCOTAN,
                                    initialIteration = 1L,
                                    saveObj = TRUE,
                                    outDir = ".") {
+  startTime <- Sys.time()
+
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
 
   assert_that(estimatorsAreReady(objCOTAN),
@@ -287,6 +297,7 @@ cellsUniformClustering <- function(objCOTAN,
 
   repeat {
     iter <- iter + 1L
+    startLoopTime <- Sys.time()
 
     logThis(paste0("In iteration ", iter, " "), logLevel = 1L, appendLF = FALSE)
     logThis(paste("the number of cells to re-cluster is",
@@ -501,6 +512,12 @@ cellsUniformClustering <- function(objCOTAN,
 
     rm(cellsToRecluster)
     gc()
+
+    endLoopTime <- Sys.time()
+
+    logThis(paste("Loop calculations elapsed time:",
+                  difftime(endLoopTime, startLoopTime, units = "secs")),
+            logLevel = 2L)
   } # End repeat
 
   logThis(paste("The final raw clusterization contains [",
@@ -561,6 +578,12 @@ cellsUniformClustering <- function(objCOTAN,
       logThis(paste("While saving results csv", err), logLevel = 1L)
     }
   )
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Creating cells' uniform clustering: DONE", logLevel = 2L)
 
