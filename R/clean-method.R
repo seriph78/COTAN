@@ -30,8 +30,7 @@
 setMethod(
   "clean",
   "COTAN",
-  function(objCOTAN,
-           cellsCutoff = 0.003, genesCutoff = 0.002,
+  function(objCOTAN, cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99) {
 
     # We want to discard genes having less than given cutoff
@@ -67,8 +66,6 @@ setMethod(
                                         cellsThreshold = cellsThreshold)
     objCOTAN <- findFullyExpressingCells(objCOTAN,
                                          genesThreshold = genesThreshold)
-
-    gc()
 
     objCOTAN <- estimateNuLinear(objCOTAN)
 

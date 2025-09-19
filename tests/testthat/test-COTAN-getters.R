@@ -15,7 +15,7 @@ test_that("COTAN getters", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj, cores = 2L)
+  obj <- estimateDispersionViaSolver(obj, cores = 2L)
 
   # set tag label as legacy value
   row <- getMetaInfoRow(getMetadataDataset(obj), datasetTags()[["gsync"]])
@@ -211,10 +211,10 @@ test_that("COTAN getters", {
 
   expect_identical(getSelectedGenes(obj, genesSel = "HGDI", numGenes = 5L),
                    c("C", "D", "F", "G", "I"))
-  expect_identical(suppressWarnings(
-                     getSelectedGenes(obj, genesSel = "HVG_Seurat",
+  expect_identical(
+    suppressWarnings(getSelectedGenes(obj, genesSel = "HVG_Seurat",
                                       numGenes = 5L)[1L:4L]),
-                   c("B", "C", "D", "E"))
+    c("B", "C", "D", "E"))
   expect_error(getSelectedGenes(obj, genesSel = "HVG_Scanpy", numGenes = 5L))
   expect_identical(getSelectedGenes(obj, genesSel = c("C", "A", "D", "E", "B")),
                    LETTERS[1L:5L])

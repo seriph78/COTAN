@@ -233,7 +233,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
     tryCatch({
       if (!torch::torch_is_installed()) {
         stop("The `torch` library is installed but the required",
-             " additional libraries are not avalable yet")
+             " additional libraries are not available yet")
       }
       if (!require("torch", character.only = TRUE)) {
         stop("The `torch` library is installed but cannot be loaded")

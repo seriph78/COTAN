@@ -26,7 +26,7 @@ test_that("Clean on test dataset", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj, cores = 6L)
+  obj <- estimateDispersionViaSolver(obj, cores = 6L)
 
   raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
   lambda <- readRDS(file.path(getwd(), "lambda.test.RDS"))
