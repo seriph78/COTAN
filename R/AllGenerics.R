@@ -5,7 +5,7 @@ setGeneric(
            deviceStr = "cuda", cores = 1L,
            cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
-           saveObj = FALSE, outDir = ".") {
+           saveObj = TRUE, outDir = ".") {
     standardGeneric("proceedToCoex")
   }
 )

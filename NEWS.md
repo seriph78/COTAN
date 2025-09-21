@@ -1,4 +1,3 @@
-Improved the `torch coex` code so to use less memory and do less calculations
 
 ## 2.8.5
 

@@ -70,32 +70,24 @@
 #' @rdname RawDataCleaning
 #'
 cleanPlots <- function(objCOTAN, includePCA = TRUE) {
-  startTime <- Sys.time()
-  logThis("Clean plots: START", logLevel = 2L)
-
   if (isTRUE(includePCA)) {
     logThis("PCA: START", logLevel = 2L)
 
-    nuNormData <- getNuNormData(objCOTAN)
+    rawNorm <- getNuNormData(objCOTAN)
 
-    # re-scale so that all the genes have mean 0.0 and stdev 1.0
-    cellsRDM <- runPCA(x = t(nuNormData),
-                       rank = 5L,
-                       BSPARAM = IrlbaParam(),
-                       get.rotation = FALSE)[["x"]]
-
-    assert_that(identical(rownames(cellsRDM), getCells(objCOTAN)),
+    pcaCells <- runPCA(x = t(rawNorm), rank = 5L,
+                       BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
+    assert_that(identical(rownames(pcaCells), getCells(objCOTAN)),
                 msg = "Issues with pca output")
+
+    distCells <- scale(pcaCells)
+    distCells <- calcDist(distCells, method = "euclidean") # mahlanobis
+
+    pcaCells <- as.data.frame(pcaCells)
 
     logThis("PCA: DONE", logLevel = 2L)
 
     logThis("Hierarchical clustering: START", logLevel = 2L)
-
-    distCells <- scale(cellsRDM)
-
-    distCells <- calcDist(distCells, method = "euclidean") # mahlanobis
-
-    pcaCells <- as.data.frame(pcaCells)
 
     # hclust cannot operate on more than 2^16 elements
     if (getNumCells(objCOTAN) <= 65500L) {
@@ -238,15 +230,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
                         color = "darkred", size = 4.5)
   }
 
-  endTime <- Sys.time()
-
-  logThis(paste("Total calculations elapsed time:",
-                difftime(endTime, startTime, units = "secs")),
-          logLevel = 2L)
-
-  logThis("Clean plots: DONE", logLevel = 2L)
-
-  return(list("pcaCells" = cellsRDMPlot, "pcaCellsData" = cellsRDM,
+  return(list("pcaCells" = pcaCellsPlot, "pcaCellsData" = pcaCells,
               "genes" = genesPlot, "UDE" = UDEPlot,
               "nu" = nuPlot, "zoomedNu" = zNuPlot))
 }
