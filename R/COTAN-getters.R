@@ -866,7 +866,7 @@ NULL
 #' objCOTAN <- clean(objCOTAN)
 #'
 #' objCOTAN <- estimateLambdaLinear(objCOTAN)
-#' objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = 6L)
+#' objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
 #'
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 #'

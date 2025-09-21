@@ -38,7 +38,7 @@ test_that("'scCOTAN' converters", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionViaSolver(obj)
+  obj <- estimateDispersionBisection(obj)
 
   obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
 

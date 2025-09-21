@@ -8,8 +8,11 @@ ECD
 ERCC
 GDI
 GPUs
-RDM
-Raphson
+GSM
+PCAtools
+Rfast
+UDE
+UMAP
 UMI
 WSL
 aarch

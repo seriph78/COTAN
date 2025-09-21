@@ -177,45 +177,19 @@ test_that("funProbZero with matrices", {
 })
 
 
-test_that("dispersionSolvers", {
-  lambda   <- c(3.0, 1.75, 2.0)
+test_that("dispersionBisection", {
+  lambda   <- c(3.0, 1.75)
   nu       <- rep(c(0.5, 1.5), 5L)
-  sumZeros <- c(0.0, 5.0, 1.0)
+  sumZeros <- c(0.0, 5.0)
 
-  d1 <- mapply(
-    FUN       = dispersionBisection,
-    lambda    = lambda,
-    sumZeros  = sumZeros,
-    MoreArgs  = list("nu" = nu),
-    SIMPLIFY  = TRUE,    # collapse to atomic vector
-    USE.NAMES = FALSE)
+  d <- c(dispersionBisection(sumZeros = sumZeros[[1L]],
+                             lambda = lambda[[1L]], nu = nu),
+         dispersionBisection(sumZeros = sumZeros[[2L]],
+                             lambda = lambda[[2L]], nu = nu))
 
-  expect_identical(d1, c(-Inf, 1.980468750, -0.646484375))
-
-  expect_lt(max(abs(rowSums(funProbZero(d1, lambda %o% nu)) - sumZeros)),
-            1.0e-3)
-
-  d2 <- mapply(
-    FUN       = dispersionNewton,
-    lambda    = lambda,
-    sumZeros  = sumZeros,
-    MoreArgs  = list("nu" = nu),
-    SIMPLIFY  = TRUE,    # collapse to atomic vector
-    USE.NAMES = FALSE)
-
-  expect_equal(d2, c(-Inf, 1.980664643877, -0.645937418860), tolerance = 1e-12)
-
-  expect_lt(max(abs(rowSums(funProbZero(d2, lambda %o% nu)) - sumZeros)),
-            2.0e-5)
-
-  d1p <- parallelDispersionBisection(1L:3L, sumZeros, lambda, nu)
-
-  expect_identical(d1p, d1)
-
-  d2p <- parallelDispersionNewton(1L:3L, sumZeros, lambda, nu)
-
-  expect_equal(d2p, d2, tolerance = 1e-12)
+  expect_identical(d, c(-Inf, 1.98046875))
 })
+
 
 test_that("nuBisection", {
   lambda       <- c(5.5,  4.0, 2.0, 1.0, 5.5, 1.5, 3.0, 3.5, 1.0, 4.5)
@@ -275,14 +249,16 @@ test_that("parallelDist - cosine dissimilarity", {
 test_that("pca usage", {
   utils::data("test.dataset", package = "COTAN")
 
-  pcaRaw <- runPCA(x = as.matrix(test.dataset), rank = 10L,
+  pcaRaw <- runPCA(x = as.matrix(test.dataset), rank = 5L,
                    BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
+  colnames(pcaRaw) <- paste0("PC_", seq_len(ncol(pcaRaw)))
 
   expect_identical(rownames(pcaRaw), rownames(test.dataset))
 
-  pcaExp <- readRDS(file.path(getwd(), "pca.raw.test.RDS"))
+  pcaExp <- readRDS(file.path(getwd(), "pca.test.RDS"))
+  expect_identical(nrow(pcaRaw), nrow(pcaExp))
 
-  pcaRaw <- pcaRaw[rownames(pcaExp), ]
+  pcaExp <- pcaExp[rownames(pcaRaw), ]
 
   correlations <- c(cor(pcaRaw[, 1L], pcaExp[, 1L]),
                     cor(pcaRaw[, 2L], pcaExp[, 2L]))
