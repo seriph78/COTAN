@@ -423,20 +423,20 @@ test_that("Coex vs saved results", {
   expect_true(isCoexAvailable(obj))
   expect_equal(getGenesCoex(obj, genes = genes.names.test,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = 1.0e-12)
+               coex_test, tolerance = 1.0e-6)
 
   pval <- calculatePValue(obj,
                           geneSubsetCol = genes.names.test,
                           geneSubsetRow = genes.names.test)
 
   pval_exp <- readRDS(file.path(getwd(), "pvalues.test.RDS"))
-  expect_equal(pval, pval_exp, tolerance = 1.0e-12)
+  expect_equal(pval, pval_exp, tolerance = 1.0e-6)
 
   GDI <- calculateGDI(obj)[genes.names.test, ]
 
   GDI_exp <- readRDS(file.path(getwd(), "GDI.test.RDS"))
 
-  expect_equal(GDI, GDI_exp, tolerance = 1.0e-12)
+  expect_equal(GDI, GDI_exp, tolerance = 1.0e-6)
 
   # Torch CPU
   suppressWarnings({
@@ -527,9 +527,9 @@ test_that("Coex with negative dispersion genes", {
   })
   coex3 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
-  expect_equal(coex1, coex2, tolerance = 1e-7)
-  expect_equal(coex1, coex3, tolerance = 2e-7)
-  expect_equal(coex2, coex3, tolerance = 5e-7)
+  expect_equal(coex1, coex2, tolerance = 1.0e-6)
+  expect_equal(coex1, coex3, tolerance = 1.0e-6)
+  expect_equal(coex2, coex3, tolerance = 1.0e-6)
 
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
                        G2 = c("g-000300", "g-000330", "g-000660"),

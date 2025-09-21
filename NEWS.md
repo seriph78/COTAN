@@ -1,3 +1,5 @@
+## 2.9.6
+
 Upgraded dispersion solver to use Newton-Raphson method
 Minor variations of the model parameters are expected
 

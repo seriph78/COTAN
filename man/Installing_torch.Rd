@@ -43,7 +43,7 @@ This can happen due to presence of old cache files, so one can simply
 delete the relevant cache folder as in the example below...
 }
 \examples{
-\dontshow{if (FALSE) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (FALSE) withAutoprint(\{ # examplesIf}
   # find the relevant cache folder and delete it
   folder <- tools::R_user_dir("torch","cache")
   print(folder)

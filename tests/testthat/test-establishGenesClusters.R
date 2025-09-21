@@ -40,7 +40,7 @@ test_that("Establish genes clusters", {
   if (TRUE) {
     GCS_old <-
       as.matrix(readRDS(file.path(getwd(), "genes.coex.space.test.RDS")))
-    expect_equal(GCS, GCS_old, tolerance = 1.0e-8)
+    expect_equal(GCS, GCS_old, tolerance = 5.0e-6)
   }
 
   c(gSpace, plotEigen, pcaClusters, treePlot) %<-%
@@ -66,9 +66,9 @@ test_that("Establish genes clusters", {
     expect_identical(rownames(pcaClusters), rownames(pcaClustersExp))
     expect_identical(ncol(pcaClusters), 16L)
     expect_equal(abs(pcaClusters[, 1L:4L]),
-                 abs(pcaClustersExp[, 1L:4L]), tolerance = 5.0e-7)
+                 abs(pcaClustersExp[, 1L:4L]), tolerance = 5.0e-6)
     expect_equal(abs(pcaClusters[, 5L:7L]),
-                 abs(pcaClustersExp[, 5L:7L]), tolerance = 5.0e-7)
+                 abs(pcaClustersExp[, 5L:7L]), tolerance = 5.0e-6)
     expect_equal(abs(pcaClusters[, 8L:9L]),
                  abs(pcaClustersExp[, 8L:9L]), tolerance = 5.0e-5)
     expect_equal(abs(pcaClusters[, 10L]),

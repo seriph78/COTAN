@@ -111,34 +111,36 @@ test_that("Cell Uniform Clustering", {
   clusters2 <- factor(clusters, levels = c("-1", levels(clusters)))
   clusters2[1L:50L] <- "-1"
   coexDF2 <- DEAOnClusters(objCOTAN = obj, clusters = clusters2)
-  roerderRes <-
+  reorderRes2 <-
     reorderClusterization(objCOTAN = obj, reverse = TRUE, keepMinusOne = TRUE,
                           clusters = clusters2, coexDF = coexDF2)
-  rClusters2 <- roerderRes[["clusters"]]
+  rClusters2 <- reorderRes2[["clusters"]]
 
   expect_identical(levels(rClusters2)[rClusters2[1L:50L]],
                    levels(clusters2)[clusters2[1L:50L]])
   expect_identical(rClusters2 == "-1", clusters2 == "-1")
   # this is an happenstance
-  expect_identical(colnames(roerderRes[["coex"]]), rev(levels(rClusters2)))
-  expect_identical(roerderRes[["permMap"]],
+  expect_identical(colnames(reorderRes2[["coex"]]), rev(levels(rClusters2)))
+  expect_identical(reorderRes2[["permMap"]],
                    set_names(paste0(c(2L, 1L, -1L)),
                              nm = paste0(c(1L:2L, -1L))))
 
   clusters3 <- factor(clusters, levels = c(levels(clusters), "-1"))
   clusters3[51L:100L] <- "-1"
-  c(clusters3, coexDF3, permMap3) %<-%
+  reorderRes3 <-
     reorderClusterization(objCOTAN = obj, useDEA = FALSE,
                           reverse = FALSE, keepMinusOne = TRUE,
                           clusters = clusters3, coexDF = coexDF2)
+  clusters3 <- reorderRes3[["clusters"]]
 
   expect_identical(levels(clusters3)[clusters3[51L:100L]],
                    levels(clusters2)[clusters2[1L:50L]])
   expect_identical((clusters3 == "-1")[51L:150L], (clusters2 == "-1")[1L:100L])
   # this is an happenstance
-  expect_identical(colnames(coexDF3)[-3L], levels(clusters3)[-1L])
-  expect_identical(permMap3, set_names(paste0(c(1L:2L, -1L)),
-                                       nm = paste0(c(1L:2L, -1L))))
+  expect_identical(colnames(reorderRes3[["coex"]])[-3L], levels(clusters3)[-1L])
+  expect_identical(reorderRes3[["permMap"]],
+                   set_names(paste0(c(1L:2L, -1L)),
+                             nm = paste0(c(1L:2L, -1L))))
 
   exactClusters <- set_names(rep(1L:2L, each = 600L), nm = getCells(obj))
 
@@ -187,9 +189,11 @@ test_that("Cell Uniform Clustering", {
   expect_identical(clMarkersDF3, clMarkersDF)
 
   # Test cluster/gene contingency tables
-  c(observedCT, expectedCT) %<-%
+  contingencyTables <-
     clusterGeneContingencyTables(objCOTAN = obj, gene = "g-000200",
                                  cells = toClustersList(exactClusters)[[1L]])
+  observedCT <- contingencyTables[["observed"]]
+  expectedCT <- contingencyTables[["expected"]]
 
   expect_identical(rownames(observedCT), rownames(expectedCT))
   expect_identical(rownames(observedCT), c("g-000200.yes", "g-000200.no"))
