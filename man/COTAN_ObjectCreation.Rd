@@ -117,6 +117,8 @@ initializes a \code{COTAN} object and runs \code{\link[=proceedToCoex]{proceedTo
 data("test.dataset")
 obj <- COTAN(raw = test.dataset)
 
+options(parallelly.fork.enable = TRUE)
+
 #
 # In case one needs to run more steps to clean the datatset
 # the following might apply

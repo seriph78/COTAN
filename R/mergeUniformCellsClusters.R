@@ -94,6 +94,8 @@
 #'                                          cores = 6L,
 #'                                          saveObj = FALSE)
 #'
+#' objCOTAN <- storeGDI(objCOTAN, genesGDI = calculateGDI(objCOTAN, cores = 6L))
+#'
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
 #'                      G2 = c("g-000300", "g-000330"),
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
@@ -116,9 +118,12 @@
 #' stopifnot(identical(checker2@firstCheck@GDIThreshold, 1.397))
 #'
 #' splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
-#'                                     optimizeForSpeed = TRUE,
-#'                                     deviceStr = "cuda",
-#'                                     initialResolution = 0.8,
+#'                                     dataMethod = "LogLikelihood",
+#'                                     useCoexEigen = TRUE,
+#'                                     genesSel = "HGDI",
+#'                                     numGenes = 2000L,
+#'                                     numReducedComp = 50L,
+#'                                     initialResolution = 1.1,
 #'                                     checker = checker2,
 #'                                     saveObj = FALSE)
 #'

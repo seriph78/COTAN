@@ -294,6 +294,8 @@ NULL
 #' @export
 #'
 #' @examples
+#' options(parallelly.fork.enable = TRUE)
+#'
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
@@ -858,6 +860,8 @@ NULL
 #' @export
 #'
 #' @examples
+#' options(parallelly.fork.enable = TRUE)
+#'
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
 #' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",

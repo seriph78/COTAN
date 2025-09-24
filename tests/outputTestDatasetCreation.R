@@ -89,9 +89,9 @@ outputTestDatasetCreation <-
                                       initialResolution = initialResolution,
                                       useCoexEigen = TRUE,
                                       dataMethod = "LL",
-                                      numGenes = 50L,
-                                      cores = 6L,
-                                      saveObj = FALSE)
+                                      numReducedComp = 50L,
+                                      cores = 6L, optimizeForSpeed = TRUE,
+                                      deviceStr = "cuda", saveObj = FALSE)
 
   split.clusters.test <- splitData[["clusters"]]
   saveRDS(split.clusters.test, file.path(testsDir, "split.clusters.test.RDS"))

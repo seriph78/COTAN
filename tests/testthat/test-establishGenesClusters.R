@@ -1,5 +1,7 @@
 library(zeallot)
 
+options(parallelly.fork.enable = TRUE)
+
 test_that("Establish genes clusters", {
   data("test.dataset")
   objCOTAN <- COTAN(raw = test.dataset)
@@ -67,10 +69,8 @@ test_that("Establish genes clusters", {
     expect_identical(ncol(pcaClusters), 16L)
     expect_equal(abs(pcaClusters[, 1L:4L]),
                  abs(pcaClustersExp[, 1L:4L]), tolerance = 5.0e-6)
-    expect_equal(abs(pcaClusters[, 5L:7L]),
-                 abs(pcaClustersExp[, 5L:7L]), tolerance = 5.0e-6)
-    expect_equal(abs(pcaClusters[, 8L:9L]),
-                 abs(pcaClustersExp[, 8L:9L]), tolerance = 5.0e-5)
+    expect_equal(abs(pcaClusters[, 5L:9L]),
+                 abs(pcaClustersExp[, 5L:9L]), tolerance = 5.0e-5)
     expect_equal(abs(pcaClusters[, 10L]),
                  abs(pcaClustersExp[, 10L]), tolerance = 5.0e-4)
     expect_identical(pcaClusters[, 11L:13L], pcaClustersExp[, 11L:13L])

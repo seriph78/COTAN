@@ -509,6 +509,8 @@ the same value on all elements. This value is the number of genes/cells
 depending on the parameter \code{actOnCells} being \code{TRUE/FALSE}.
 }
 \examples{
+options(parallelly.fork.enable = TRUE)
+
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",

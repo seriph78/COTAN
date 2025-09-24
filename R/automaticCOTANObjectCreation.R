@@ -49,6 +49,8 @@
 #' @importFrom ggplot2 annotate
 #'
 #' @examples
+#' options(parallelly.fork.enable = TRUE)
+#'
 #' #
 #' # In case one needs to run more steps to clean the datatset
 #' # the following might apply
@@ -172,7 +174,7 @@ setMethod(
     } else {
       logThis("COTAN genes' COEX estimation not requested", logLevel = 2L)
     }
-    
+
     gc()
 
     endTime <- Sys.time()

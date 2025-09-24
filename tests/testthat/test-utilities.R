@@ -1,7 +1,9 @@
-library(Matrix)
-
 tm <- tempdir()
 stopifnot(file.exists(tm))
+
+library(Matrix)
+
+options(parallelly.fork.enable = TRUE)
 
 test_that("Logging", {
   logPath <- file.path(tm, "COTAN_Test.log")

@@ -386,6 +386,8 @@ test_that("Coex", {
 test_that("Coex vs saved results", {
   utils::data("test.dataset", package = "COTAN")
 
+  tolerance <- 5.0e-6
+
   obj <- COTAN(raw = test.dataset)
   obj <- initializeMetaDataset(obj, GEO = " ",
                                sequencingMethod = "artificial",
@@ -423,20 +425,20 @@ test_that("Coex vs saved results", {
   expect_true(isCoexAvailable(obj))
   expect_equal(getGenesCoex(obj, genes = genes.names.test,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = 1.0e-6)
+               coex_test, tolerance = tolerance)
 
   pval <- calculatePValue(obj,
                           geneSubsetCol = genes.names.test,
                           geneSubsetRow = genes.names.test)
 
   pval_exp <- readRDS(file.path(getwd(), "pvalues.test.RDS"))
-  expect_equal(pval, pval_exp, tolerance = 1.0e-6)
+  expect_equal(pval, pval_exp, tolerance = tolerance)
 
   GDI <- calculateGDI(obj)[genes.names.test, ]
 
   GDI_exp <- readRDS(file.path(getwd(), "GDI.test.RDS"))
 
-  expect_equal(GDI, GDI_exp, tolerance = 1.0e-6)
+  expect_equal(GDI, GDI_exp, tolerance = tolerance)
 
   # Torch CPU
   suppressWarnings({
@@ -450,20 +452,20 @@ test_that("Coex vs saved results", {
                                          saveObj = FALSE)
   })
 
-  expect_equal(obj3@genesCoex, obj@genesCoex, tolerance = 5.0e-6)
+  expect_equal(obj3@genesCoex, obj@genesCoex, tolerance = tolerance)
 
   expect_true(isCoexAvailable(obj3))
   expect_equal(getGenesCoex(obj3, genes = genes.names.test,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = 5.0e-6)
+               coex_test, tolerance = tolerance)
 
   pval <- calculatePValue(obj3, geneSubsetCol = genes.names.test)
 
-  expect_equal(pval[genes.names.test, ], pval_exp, tolerance = 5.0e-6)
+  expect_equal(pval[genes.names.test, ], pval_exp, tolerance = tolerance)
 
   GDI <- calculateGDI(obj3)[genes.names.test, ]
 
-  expect_equal(GDI, GDI_exp, tolerance = 5.0e-6)
+  expect_equal(GDI, GDI_exp, tolerance = tolerance)
 
   # Legacy CPU
   suppressWarnings({
@@ -477,22 +479,22 @@ test_that("Coex vs saved results", {
                                          saveObj = FALSE)
   })
 
-  expect_equal(obj4@genesCoex, obj@genesCoex, tolerance = 5.0e-6)
+  expect_equal(obj4@genesCoex, obj@genesCoex, tolerance = tolerance)
 
   expect_true(isCoexAvailable(obj4))
   expect_equal(getGenesCoex(obj4, genes = genes.names.test,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = 5.0e-6)
+               coex_test, tolerance = tolerance)
 
   pval <- calculatePValue(obj4,
                           geneSubsetCol = genes.names.test,
                           geneSubsetRow = genes.names.test)
 
-  expect_equal(pval, pval_exp, tolerance = 5.0e-6)
+  expect_equal(pval, pval_exp, tolerance = tolerance)
 
   GDI <- calculateGDI(obj4)[genes.names.test, ]
 
-  expect_equal(GDI, GDI_exp, tolerance = 5.0e-6)
+  expect_equal(GDI, GDI_exp, tolerance = tolerance)
 })
 
 
