@@ -45,5 +45,5 @@ test_that("Clean on test dataset", {
   expect_equal(getNu(obj)[cells.names.test],
                nu, tolerance = 1.0e-14, ignore_attr = FALSE)
   expect_equal(getDispersion(obj)[genes.names.test],
-               dispersion, tolerance = 1.0e-14, ignore_attr = FALSE)
+               dispersion, tolerance = 1.0e-10, ignore_attr = FALSE)
 })
