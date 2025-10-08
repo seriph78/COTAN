@@ -205,9 +205,10 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
       nu = nu,
       threshold = threshold,
       maxIterations = maxIterations,
-      mc.cores = cores,
-      mc.cleanup = TRUE,
-      mc.preschedule = FALSE)
+      mc.cores       = cores,
+      mc.preschedule = TRUE, # default
+      mc.cleanup     = TRUE, # default
+      mc.set.seed    = TRUE) # default
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))
@@ -398,9 +399,10 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
       initialGuess = initialGuess,
       threshold = threshold,
       maxIterations = maxIterations,
-      mc.cores = cores,
-      mc.cleanup = TRUE,
-      mc.preschedule = FALSE)
+      mc.cores       = cores,
+      mc.preschedule = TRUE, # default
+      mc.cleanup     = TRUE, # default
+      mc.set.seed    = TRUE) # default
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))

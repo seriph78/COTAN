@@ -31,7 +31,7 @@ NULL
 #'
 setLoggingLevel <- function(newLevel = 1L) {
   message("Setting new log level to ", newLevel)
-  oldLevel <- options(COTAN.LogLevel = newLevel)
+  oldLevel <- unlist(options(COTAN.LogLevel = newLevel))
   if (is.null(oldLevel)) {
     oldLevel <- 1L
   }

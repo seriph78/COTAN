@@ -32,10 +32,54 @@ NULL
 #' @rdname NumericUtilities
 #'
 funProbZero <- function(dispersion, mu) {
-  neg <- (dispersion <= 0.0)
-  ad <- abs(dispersion)
-  return(( neg) * (exp(-(1.0 + ad) * mu)) +
-         (!neg) * (1.0 + ad * mu)^(-1.0 / ad))
+  disp <- as.numeric(dispersion)
+  numGenes <- length(disp)
+
+  assert_that(numGenes != 0L, msg = "empty input given")
+
+  returnArray <- is.null(dim(mu))
+
+  if (returnArray) {
+    mu <- matrix(mu, nrow = numGenes)
+  }
+
+  # if mu is a matrix
+  assert_that(nrow(mu) == numGenes,
+              msg = "misaligned dimensions between given `mu` and `dispersion`")
+
+  eps <- 1.0e-5
+
+  mif_idx <- which(disp == -Inf)
+  neg_idx <- which(disp <  eps & disp != -Inf)
+  pos_idx <- which(disp >= eps & disp != +Inf)
+  pif_idx <- which(disp == +Inf)
+
+  out <- disp * mu
+
+  if (length(mif_idx)) {
+    out[mif_idx, ] <- -Inf
+  }
+  if (length(neg_idx)) {
+    # out = dispersion * mu - mu
+    out[neg_idx, ] <-
+      out[neg_idx, , drop = FALSE] - mu[neg_idx, , drop = FALSE]
+  }
+  if (length(pos_idx)) {
+    # out = -(1/disp)*log1p(disp*mu)
+    out[pos_idx, ] <-
+      -(1.0 / disp[pos_idx]) * log1p(out[pos_idx, , drop = FALSE])
+  }
+  if (length(pif_idx)) {
+    out[pif_idx, ] <- 0.0
+  }
+
+  out <- exp(out)
+
+  if (returnArray) {
+    out <- as.vector(out)
+  }
+
+  return(out)
 }
 
 
