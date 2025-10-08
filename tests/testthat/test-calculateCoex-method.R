@@ -533,7 +533,7 @@ test_that("Coex with negative dispersion genes", {
   expect_equal(coex1, coex3, tolerance = 1.0e-6)
   expect_equal(coex2, coex3, tolerance = 1.0e-6)
 
-  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+  groupMarkers <- list(G1 = c("g-000010", "g-000030", "g-000138"),
                        G2 = c("g-000300", "g-000330", "g-000660"),
                        G3 = c("g-000510", "g-000530", "g-000550",
                               "g-000570", "g-000590"))

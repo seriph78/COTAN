@@ -85,7 +85,7 @@ outputTestDatasetCreation <-
   checker <- new("AdvancedGDIUniformityCheck")
   checker <- shiftCheckerThresholds(checker, 0.1)
 
-  initialResolution <- 0.8
+  initialResolution <- 1.3
   splitData <- cellsUniformClustering(objCOTAN = obj,
                                       checker = checker,
                                       initialResolution = initialResolution,
@@ -117,6 +117,7 @@ outputTestDatasetCreation <-
   mergedData <- mergeUniformCellsClusters(objCOTAN = obj,
                                           clusters = splitData[["clusters"]],
                                           checkers = checker,
+                                          batchSize = 1L,
                                           cores = 6L,
                                           distance = "cosine",
                                           hclustMethod = "ward.D2",

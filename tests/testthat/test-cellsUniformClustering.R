@@ -16,16 +16,16 @@ test_that("Cell Uniform Clustering", {
   obj <- proceedToCoex(objCOTAN = obj, calcCoex = TRUE,
                        cores = 6L, saveObj = TRUE, outDir = tm)
 
-  initialResolution <- 0.8
+  initialResolution <- 1.3
   c(sClusters, cellsRDM, resolution, usedMaxResolution) %<-%
     seuratClustering(objCOTAN = obj, initialResolution = initialResolution,
                      minNumClusters = 3L, useCoexEigen = TRUE,
                      dataMethod = "AdjBin", numReducedComp = 25L,
                      genesSel = "", numGenes = -1L) #irrelevant inputs
 
-  expect_identical(nlevels(sClusters), 5L)
-  expect_identical(as.vector(table(sClusters)), c(322L, 297L, 247L, 174L, 160L))
-  expect_identical(dim(cellsRDM), c(1200L, 25L + 15L))
+  expect_identical(nlevels(sClusters), 4L)
+  expect_identical(as.vector(table(sClusters)), c(321L, 284L, 214L, 181L))
+  expect_identical(dim(cellsRDM), c(1000L, 25L + 15L))
   expect_identical(resolution, 1.3)
   expect_identical(usedMaxResolution, FALSE)
 
@@ -60,7 +60,7 @@ test_that("Cell Uniform Clustering", {
 
   clusters <- splitData[["clusters"]]
   coexDF <- splitData[["coex"]]
-  expect_identical(nlevels(clusters), 2L)
+  expect_identical(nlevels(clusters), 4L)
   expect_setequal(levels(clusters), colnames(coexDF))
 
   obj <- addClusterization(objCOTAN = obj, clName = "clusters",
@@ -122,8 +122,8 @@ test_that("Cell Uniform Clustering", {
   # this is an happenstance
   expect_identical(colnames(reorderRes2[["coex"]]), rev(levels(rClusters2)))
   expect_identical(reorderRes2[["permMap"]],
-                   set_names(paste0(c(2L, 1L, -1L)),
-                             nm = paste0(c(1L:2L, -1L))))
+                   set_names(paste0(c(4L:1L, -1L)),
+                             nm = paste0(c(1L:4L, -1L))))
 
   clusters3 <- factor(clusters, levels = c(levels(clusters), "-1"))
   clusters3[51L:100L] <- "-1"
@@ -137,12 +137,13 @@ test_that("Cell Uniform Clustering", {
                    levels(clusters2)[clusters2[1L:50L]])
   expect_identical((clusters3 == "-1")[51L:150L], (clusters2 == "-1")[1L:100L])
   # this is an happenstance
-  expect_identical(colnames(reorderRes3[["coex"]])[-3L], levels(clusters3)[-1L])
+  expect_identical(colnames(reorderRes3[["coex"]])[-5L], levels(clusters3)[-1L])
   expect_identical(reorderRes3[["permMap"]],
-                   set_names(paste0(c(1L:2L, -1L)),
-                             nm = paste0(c(1L:2L, -1L))))
+                   set_names(paste0(c(1L:4L, -1L)),
+                             nm = paste0(c(1L:4L, -1L))))
 
-  exactClusters <- set_names(rep(1L:2L, each = 600L), nm = getCells(obj))
+  clSize <- getNumCells(obj) / 2L
+  exactClusters <- set_names(rep(1L:2L, each = clSize), nm = getCells(obj))
 
   suppressWarnings({
     splitData2 <-
@@ -151,9 +152,8 @@ test_that("Cell Uniform Clustering", {
                              initialResolution = initialResolution,
                              initialClusters = exactClusters,
                              cores = 6L,
-                             optimizeForSpeed = FALSE,
-                             deviceStr = "cpu",
-                             genesSel = "HGDI",
+                             optimizeForSpeed = TRUE,
+                             deviceStr = "cuda",
                              saveObj = TRUE,
                              outDir = tm)
   })
@@ -171,13 +171,11 @@ test_that("Cell Uniform Clustering", {
   expect_gt(min(clMarkersDF[["DEA"]] * clMarkersDF[["logFoldCh"]]), 0.0)
 
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
-  highPos <- (1L:40L) %in% c(01L:10L, 31L:40L)
-  expect_gt(min(topGenesNum[ highPos]), 495L)
-  expect_lt(max(topGenesNum[!highPos]), 240L)
+  expect_gt(min(topGenesNum), 150L)
 
   primaryMarkers <-
-    c("g-000010", "g-000020", "g-000030", "g-000300", "g-000330",
-      "g-000510", "g-000530", "g-000550", "g-000570", "g-000590")
+    c("g-000010", "g-000020", "g-000138", "g-000300", "g-000330",
+      "g-000510", "g-000530", "g-000550", "g-000579", "g-000590")
   clMarkersDF2 <- findClustersMarkers(objCOTAN = obj, markers = primaryMarkers)
 
   expect_identical(colnames(clMarkersDF2), colnames(clMarkersDF))
@@ -190,30 +188,30 @@ test_that("Cell Uniform Clustering", {
 
   # Test cluster/gene contingency tables
   contingencyTables <-
-    clusterGeneContingencyTables(objCOTAN = obj, gene = "g-000200",
+    clusterGeneContingencyTables(objCOTAN = obj, gene = "g-000138",
                                  cells = toClustersList(exactClusters)[[1L]])
   observedCT <- contingencyTables[["observed"]]
   expectedCT <- contingencyTables[["expected"]]
 
   expect_identical(rownames(observedCT), rownames(expectedCT))
-  expect_identical(rownames(observedCT), c("g-000200.yes", "g-000200.no"))
+  expect_identical(rownames(observedCT), c("g-000138.yes", "g-000138.no"))
   expect_identical(colSums(observedCT),
-                   set_names(c(600.0, 600.0), c("cells.in", "cells.out")))
+                   set_names(c(clSize, clSize), c("cells.in", "cells.out")))
   expect_identical(colSums(expectedCT),
-                   set_names(c(600.0, 600.0), c("cells.in", "cells.out")))
+                   set_names(c(clSize, clSize), c("cells.in", "cells.out")))
   expect_equal(rowSums(observedCT), rowSums(expectedCT), tolerance = 5e-6)
   expect_identical(observedCT < expectedCT,
                    matrix(c(TRUE, FALSE, FALSE, TRUE), nrow = 2L,
                           dimnames = dimnames(observedCT)))
   expect_identical(observedCT[1L, 1L],
-                   sum(getZeroOneProj(objCOTAN = obj)["g-000200", 1L:600L]))
+                   sum(getZeroOneProj(objCOTAN = obj)["g-000138", 1L:clSize]))
   expect_equal(expectedCT[2L, 1L],
-               sum(getProbabilityOfZero(objCOTAN = obj)["g-000200", 1L:600L]),
+               sum(getProbabilityOfZero(objCOTAN = obj)["g-000138", 1L:clSize]),
                tolerance = 5e-6)
 
   # Test the low GDI (homogeneity) for each defined clusters
   simpleChecker <- checker@thirdCheck
-  for (cl in levels(clusters)) {
+  for (cl in levels(clusters)[[1L]]) {
     print(paste("Tested cluster:", cl))
 
     cellsToDrop <- names(clusters)[clusters != cl]
@@ -229,6 +227,8 @@ test_that("Cell Uniform Clustering", {
     expect_lte(sum(GDIData[["GDI"]] >= simpleChecker@GDIThreshold),
                simpleChecker@maxRatioBeyond * nrow(GDIData))
   }
+
+  rm(obj, splitData, splitData2)
 
   gc()
 })

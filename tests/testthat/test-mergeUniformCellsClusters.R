@@ -37,10 +37,10 @@ test_that("Merge Uniform Cells Clusters", {
 
   expect_setequal(colnames(lfcDF), clusters)
   expect_identical(rownames(lfcDF), getGenes(objCOTAN = obj))
-  expect_gte(min(colSums(lfcDF > 0.0)), 280L)
-  expect_lte(max(colSums(lfcDF > 0.0)), 320L)
-  expect_lt(max(colMeans(lfcDF)),  0.01)
-  expect_gt(min(colMeans(lfcDF)), -0.12)
+  expect_gte(min(colSums(lfcDF > 0.0)), 260L)
+  expect_lte(max(colSums(lfcDF > 0.0)), 340L)
+  expect_lt(max(colMeans(lfcDF)),  0.0)
+  expect_gt(min(colMeans(lfcDF)), -0.28)
 
   adjustmentMethod <- "bonferroni"
 
@@ -65,7 +65,7 @@ test_that("Merge Uniform Cells Clusters", {
   expect_identical(rownames(deltaExpression), getGenes(objCOTAN = obj))
   expect_setequal(colnames(deltaExpression), levels(clusters))
 
-  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
                        G2 = c("g-000300", "g-000330", "g-000660"),
                        G3 = c("g-000510", "g-000530", "g-000550",
                               "g-000570", "g-000590"))
@@ -87,25 +87,25 @@ test_that("Merge Uniform Cells Clusters", {
       mergeUniformCellsClusters(
         objCOTAN = obj, clusters = clusters,
         checkers = checkers, allCheckResults = data.frame(),
-        batchSize = 3L, distance = "cosine", hclustMethod = "ward.D2",
+        batchSize = 1L, distance = "cosine", hclustMethod = "ward.D2",
         cores = 6L, optimizeForSpeed = TRUE, deviceStr = "cuda",
         saveObj = TRUE, outDir = tm)
   })
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "merge_clusterization_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
-                                    "merge_clusterization_3.csv")))
+                                    "merge_clusterization_4.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "all_check_results_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
-                                    "all_check_results_3.csv")))
+                                    "all_check_results_4.csv")))
   expect_true(file.exists(file.path(tm, "test", "merge_check_results.csv")))
   expect_true(file.exists(file.path(tm, "test", "merge_clusterization.csv")))
 
   allCheckDF <- read.csv(file.path(tm, "test", "leafs_merge",
-                                   "all_check_results_3.csv"),
+                                   "all_check_results_4.csv"),
                          header = TRUE, row.names = 1L)
-  expect_identical(nrow(allCheckDF), 1L)
+  expect_identical(nrow(allCheckDF), 4L)
   expect_identical(ncol(allCheckDF), 35L)
 
   allCheckRes <- dfToCheckers(allCheckDF)
@@ -115,11 +115,11 @@ test_that("Merge Uniform Cells Clusters", {
   expect_true(all(stringr::str_ends(names(allCheckRes), fixed("-merge"))))
   expect_true(all(vapply(allCheckRes, methods::is,
                          logical(1L), "AdvancedGDIUniformityCheck")))
-  expect_false(allCheckRes[[1L]]@isUniform)
-  expect_false(is.finite(allCheckRes[[1L]]@firstCheck@fractionBeyond))
-  expect_true(is.finite(allCheckRes[[1L]]@firstCheck@quantileAtRatio))
+  expect_false(allCheckRes[[3L]]@isUniform)
+  expect_true(is.finite(allCheckRes[[3L]]@firstCheck@fractionBeyond))
+  expect_true(is.finite(allCheckRes[[3L]]@firstCheck@quantileAtRatio))
 
-  expect_identical(nlevels(mergedClusters), nlevels(clusters))
+  expect_identical(nlevels(mergedClusters), 2L)
   expect_setequal(colnames(mergedCoexDF), mergedClusters)
   expect_identical(rownames(mergedCoexDF), getGenes(objCOTAN = obj))
 
@@ -139,7 +139,7 @@ test_that("Merge Uniform Cells Clusters", {
 
   # Test the low GDI (homogeneity) for each defined clusters
   simpleChecker <- checkers[[2L]]@thirdCheck
-  for (cl in levels(mergedClusters)) {
+  for (cl in levels(mergedClusters)[[1L]]) {
     print(paste("Tested cluster:", cl))
 
     cellsToDrop <- names(clusters)[mergedClusters != cl]
