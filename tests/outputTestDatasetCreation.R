@@ -18,8 +18,10 @@ outputTestDatasetCreation <-
     saveRDS(obj, file = file.path(testsDir,"test.COTAN.RDS"))
   }
 
-  cells.names.test <- getCells(objCOTAN = obj)[c(1L:10L, 591L:610L, 991L:1000L)]
-  genes.names.test <- getGenes(objCOTAN = obj)[c(1L:10L, 291L:310L, 591L: 600L)]
+  cells.names.test <-
+    getCells(objCOTAN = obj)[c(1L:10L, 591L:610L, 991L:1000L)]
+  genes.names.test <-
+    getGenes(objCOTAN = obj)[c(131L:140L, 291L:310L, 591L: 600L)]
   saveRDS(cells.names.test, file.path(testsDir, "cells.names.test.RDS"))
   saveRDS(genes.names.test, file.path(testsDir, "genes.names.test.RDS"))
 
@@ -55,7 +57,7 @@ outputTestDatasetCreation <-
                                   geneSubsetRow = genes.names.test)
   saveRDS(pvalues.test, file.path(testsDir, "pvalues.test.RDS"))
 
-  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
                        G2 = c("g-000300", "g-000330", "g-000660"),
                        G3 = c("g-000510", "g-000530", "g-000550",
                               "g-000570", "g-000590"))
