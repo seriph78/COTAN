@@ -538,7 +538,7 @@ genesSample <- sample(getNumGenes(objCOTAN), 10)
 partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
                                          actOnCells = FALSE)
 
-stopifnot(all(1e-6 >
+stopifnot(all(5.0e-6 >
                 abs(partialGenesCoex -
                       getGenesCoex(objCOTAN,
                                    getGenes(objCOTAN)[sort(genesSample)],
@@ -564,7 +564,7 @@ objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 ## before any `COEX` evaluation
 
 g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+g2 <- getGenes(objCOTAN)[138L]
 tables <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
 tables
 

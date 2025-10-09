@@ -96,7 +96,12 @@ outputTestDatasetCreation <-
                                       deviceStr = "cuda", saveObj = FALSE)
 
   split.clusters.test <- splitData[["clusters"]]
-  saveRDS(split.clusters.test, file.path(testsDir, "split.clusters.test.RDS"))
+  saveRDS(split.clusters.test,
+          file = file.path(testsDir, "split.clusters.test.RDS"))
+
+  test.dataset.clusters1 <- split.clusters.test
+  save(test.dataset.clusters1, compress = TRUE,
+       file = file.path("data", "test.dataset.clusters1.rda"))
 
   obj <- addClusterization(objCOTAN = obj,
                            clName = "split",
@@ -124,7 +129,12 @@ outputTestDatasetCreation <-
                                           saveObj = FALSE)
 
   merge.clusters.test <- mergedData[["clusters"]]
-  saveRDS(merge.clusters.test, file.path(testsDir, "merge.clusters.test.RDS"))
+  saveRDS(merge.clusters.test,
+          file = file.path(testsDir, "merge.clusters.test.RDS"))
+
+  test.dataset.clusters2 <- merge.clusters.test
+  save(test.dataset.clusters2, compress = TRUE,
+       file = file.path("data", "test.dataset.clusters2.rda"))
 
   obj <- addClusterization(objCOTAN = obj,
                            clName = "merge",

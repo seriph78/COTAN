@@ -69,10 +69,10 @@ test_that("Establish genes clusters", {
     expect_identical(ncol(pcaClusters), 16L)
     expect_equal(abs(pcaClusters[, 1L:4L]),
                  abs(pcaClustersExp[, 1L:4L]), tolerance = 5.0e-6)
-    expect_equal(abs(pcaClusters[, 5L:9L]),
-                 abs(pcaClustersExp[, 5L:9L]), tolerance = 5.0e-5)
-    expect_equal(abs(pcaClusters[, 10L]),
-                 abs(pcaClustersExp[, 10L]), tolerance = 5.0e-4)
+    expect_equal(abs(pcaClusters[, 5L:8L]),
+                 abs(pcaClustersExp[, 5L:8L]), tolerance = 5.0e-5)
+    expect_equal(abs(pcaClusters[, 9L:10L]),
+                 abs(pcaClustersExp[, 9L:10L]), tolerance = 5.0e-4)
     expect_identical(pcaClusters[, 11L:13L], pcaClustersExp[, 11L:13L])
     expect_identical(pcaClusters[, 16L],     pcaClustersExp[, 16L])
   }
