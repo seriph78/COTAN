@@ -229,7 +229,7 @@ test_that("dispersionSolvers", {
 
   expect_identical(d1, c(-Inf, 1.980468750, -0.646484375))
 
-  expect_lt(max(abs(rowSums(funProbZero(d1, lambda %o% nu)) - sumZeros)),
+  expect_lt(max(abs(rowSums(funProbZeroNegBin(d1, lambda %o% nu)) - sumZeros)),
             1.0e-3)
 
   d2 <- mapply(
@@ -242,7 +242,7 @@ test_that("dispersionSolvers", {
 
   expect_equal(d2, c(-Inf, 1.980664643877, -0.645937418860), tolerance = 1e-12)
 
-  expect_lt(max(abs(rowSums(funProbZero(d2, lambda %o% nu)) - sumZeros)),
+  expect_lt(max(abs(rowSums(funProbZeroNegBin(d2, lambda %o% nu)) - sumZeros)),
             2.0e-5)
 
   d1p <- parallelDispersionBisection(1L:3L, sumZeros, lambda, nu)

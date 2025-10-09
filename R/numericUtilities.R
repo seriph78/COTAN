@@ -369,7 +369,7 @@ dispersionNewton <-
     # we look for two dispersion values where the first leads to a
     # diffZeros negative and the second positive
     disp <- 0.0
-    diff <- sum(funProbZero(disp, mu)) - sumZeros
+    diff <- sum(funProbZeroNegBin(disp, mu)) - sumZeros
     if (abs(diff) <= threshold) {
       return(disp)
     }
@@ -470,7 +470,7 @@ parallelDispersionNewton <-
     # we look for two dispersion values where the first leads to a
     # diffZeros negative and the second positive
     disps <- rep(0.0, length(sumZeros))
-    diffs <- rowsums(funProbZero(disps, mu)) - sumZeros
+    diffs <- rowsums(funProbZeroNegBin(disps, mu)) - sumZeros
     if (all(abs(diffs) <= threshold)) {
       output[goodPos] <- disps
       return(output)
