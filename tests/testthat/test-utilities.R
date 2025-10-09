@@ -135,25 +135,28 @@ test_that("Adding/extracting columns to/from data.frames", {
 
 test_that("funProbZero", {
   # Cases with mu = 0 are not actually in use
-  expect_identical(funProbZero(-Inf, 0.0), NaN)
+  expect_identical(funProbZero(-Inf, 0.0), 0.0)
   expect_identical(funProbZero(-1.0, 0.0), 1.0)
   expect_identical(funProbZero( 0.0, 0.0), 1.0)
+  expect_identical(funProbZero(1e-6, 0.0), 1.0)
   expect_identical(funProbZero( 1.0, 0.0), 1.0)
   expect_identical(funProbZero(10.0, 0.0), 1.0)
-  expect_identical(funProbZero( Inf, 0.0), NaN)
+  expect_identical(funProbZero( Inf, 0.0), 1.0)
 
   # Cases with infinite disp can happen
-  expect_identical(funProbZero(-Inf, 1.0),                0.0)
-  expect_identical(funProbZero(-1.0, 1.0),          exp(-2.0))
-  expect_identical(funProbZero( 0.0, 1.0),          exp(-1.0))
-  expect_identical(funProbZero( 1.0, 1.0),          1.0 / 2.0)
-  expect_identical(funProbZero(10.0, 1.0), 11.0^(-1.0 / 10.0))
-  expect_identical(funProbZero( Inf, 1.0),                1.0)
+  expect_identical(funProbZero(-Inf, 1.0),            0.0)
+  expect_identical(funProbZero(-1.0, 1.0),      exp(-2.0))
+  expect_identical(funProbZero( 0.0, 1.0),      exp(-1.0))
+  expect_identical(funProbZero(1e-6, 1.0), exp(-0.999999))
+  expect_identical(funProbZero( 1.0, 1.0),      1.0 / 2.0)
+  expect_identical(funProbZero(10.0, 1.0),      11.0^-0.1)
+  expect_identical(funProbZero( Inf, 1.0),            1.0)
 
   # Cases with mu = Inf are not actually in use
   expect_identical(funProbZero(-Inf, Inf), 0.0)
   expect_identical(funProbZero(-1.0, Inf), 0.0)
   expect_identical(funProbZero( 0.0, Inf), NaN)
+  expect_identical(funProbZero(1e-6, Inf), NaN)
   expect_identical(funProbZero( 1.0, Inf), 0.0)
   expect_identical(funProbZero(10.0, Inf), 0.0)
   expect_identical(funProbZero( Inf, Inf), 1.0)
@@ -162,7 +165,7 @@ test_that("funProbZero", {
 
 test_that("funProbZero with matrices", {
   mu <- matrix((1L:25L) / 7.0, nrow = 10L, ncol = 10L)
-  disp <- (-1L:8L) / 3.0
+  disp <- c(-Inf, -1.0/3.0, 1e-6, (1L:6L) / 3.0, Inf)
 
   p <- funProbZero(disp, mu)
 
@@ -171,6 +174,7 @@ test_that("funProbZero with matrices", {
   expect_identical(p[ 1L,  1L], funProbZero(disp[[ 1L]], mu[ 1L,  1L]))
   expect_identical(p[ 1L, 10L], funProbZero(disp[[ 1L]], mu[ 1L, 10L]))
 
+  expect_identical(p[ 2L,  2L], funProbZero(disp[[ 2L]], mu[ 2L,  2L]))
   expect_identical(p[ 3L,  7L], funProbZero(disp[[ 3L]], mu[ 3L,  7L]))
   expect_identical(p[ 6L,  4L], funProbZero(disp[[ 6L]], mu[ 6L,  4L]))
 

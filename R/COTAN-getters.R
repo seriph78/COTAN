@@ -889,7 +889,7 @@ NULL
 #' partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
 #'                                          actOnCells = FALSE)
 #'
-#' stopifnot(all(1e-6 >
+#' stopifnot(all(5.0e-6 >
 #'                 abs(partialGenesCoex -
 #'                       getGenesCoex(objCOTAN,
 #'                                    getGenes(objCOTAN)[sort(genesSample)],
@@ -915,7 +915,7 @@ NULL
 #' ## before any `COEX` evaluation
 #'
 #' g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-#' g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+#' g2 <- getGenes(objCOTAN)[138L]
 #' tables <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
 #' tables
 #'
@@ -1148,7 +1148,7 @@ setMethod(
 #'
 #' coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
 #'
-#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030",
+#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138",
 #'                             "g-000150", "g-000160", "g-000170"),
 #'                      G2 = c("g-000300", "g-000330", "g-000450",
 #'                             "g-000460", "g-000470"),

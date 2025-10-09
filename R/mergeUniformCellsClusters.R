@@ -96,7 +96,7 @@
 #'
 #' objCOTAN <- storeGDI(objCOTAN, genesGDI = calculateGDI(objCOTAN, cores = 6L))
 #'
-#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
 #'                      G2 = c("g-000300", "g-000330"),
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
 #'                             "g-000570", "g-000590"))
@@ -123,7 +123,7 @@
 #'                                     genesSel = "HGDI",
 #'                                     numGenes = 2000L,
 #'                                     numReducedComp = 50L,
-#'                                     initialResolution = 1.1,
+#'                                     initialResolution = 0.8,
 #'                                     checker = checker2,
 #'                                     saveObj = FALSE)
 #'
@@ -152,7 +152,6 @@
 #'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
 #'                                         checkers = c(checker, checker2),
-#'                                         batchSize = 2L,
 #'                                         clusters = clusters,
 #'                                         cores = 6L,
 #'                                         optimizeForSpeed = TRUE,

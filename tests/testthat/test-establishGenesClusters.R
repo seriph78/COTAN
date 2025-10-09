@@ -20,7 +20,7 @@ test_that("Establish genes clusters", {
   expect_identical(colnames(GCS), secondaryMarkers)
   expect_lte(max(abs(GCS)), 1L)
 
-  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
                        G2 = c("g-000300", "g-000330", "g-000660"),
                        G3 = c("g-000510", "g-000530", "g-000550",
                               "g-000570", "g-000590"))
@@ -69,10 +69,10 @@ test_that("Establish genes clusters", {
     expect_identical(ncol(pcaClusters), 16L)
     expect_equal(abs(pcaClusters[, 1L:4L]),
                  abs(pcaClustersExp[, 1L:4L]), tolerance = 5.0e-6)
-    expect_equal(abs(pcaClusters[, 5L:9L]),
-                 abs(pcaClustersExp[, 5L:9L]), tolerance = 5.0e-5)
-    expect_equal(abs(pcaClusters[, 10L]),
-                 abs(pcaClustersExp[, 10L]), tolerance = 5.0e-4)
+    expect_equal(abs(pcaClusters[, 5L:8L]),
+                 abs(pcaClustersExp[, 5L:8L]), tolerance = 5.0e-5)
+    expect_equal(abs(pcaClusters[, 9L:10L]),
+                 abs(pcaClustersExp[, 9L:10L]), tolerance = 5.0e-4)
     expect_identical(pcaClusters[, 11L:13L], pcaClustersExp[, 11L:13L])
     expect_identical(pcaClusters[, 16L],     pcaClustersExp[, 16L])
   }

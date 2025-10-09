@@ -1097,9 +1097,11 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     numCells <- nu$size(1L)
     numGenes <- lambda$size(1L)
 
-    # single comparison mask, then both branches
-    neg <- disp <= 0.0
-    pos <- !neg
+    # comparison masks
+    mif <- disp == -Inf
+    pif <- disp == +Inf
+    neg <- disp < 1.0e-5 & !mif # use neg expr for very small disp
+    pos <- !neg & !mif & !pif
 
     # prepare output
     out <- torch::torch_empty(c(numCells, numGenes),
@@ -1111,10 +1113,13 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
       # outer product
       mu_blk <- torch::torch_ger(nu[i:i_end], lambda)
 
-      # write both branches — empty masks are fine
-      out[i:i_end, neg] <- torch::torch_exp(mu_blk[, neg] * (disp[neg] - 1.0))
-      out[i:i_end, pos] <- torch::torch_pow(1.0 + mu_blk[, pos] * disp[pos],
-                                            -1.0 / disp[pos])
+      out[i:i_end, mif] <- -Inf
+      out[i:i_end, neg] <- mu_blk[, neg] * (disp[neg] - 1.0)
+      out[i:i_end, pos] <- -torch::torch_reciprocal(disp[pos]) *
+        torch::torch_log1p(mu_blk[, pos] * disp[pos])
+      out[i:i_end, pif] <- 0.0
+
+      out[i:i_end, ] <- torch::torch_exp(out[i:i_end, ])
 
       # copy to output
       rm(mu_blk)
@@ -1159,18 +1164,21 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
                 difftime(expectedTime, startTime, units = "secs")),
           logLevel = 3L)
 
-  logThis("Calculating genes COEX normalization factor", logLevel = 3L)
 
-  # 1.0 / max(1.0, eYY)  [new tensor]
-  coex <- expectedYY$clamp_min(1.0)$reciprocal_()
+  logThis("Calculating genes COEX normalization factor", logLevel = 3L)
 
   thresholdForPP <- 0.5
   problematicPairs <- NULL
+
+  # expectedYY
   if (isTRUE(returnPPFract)) {
     problematicPairs <-
       torch::torch_tensor(expectedYY < thresholdForPP,
                           dtype = torch::torch_bool(), device = device)
   }
+  # 1.0 / max(1.0, eYY)  [new tensor]
+  coex <- expectedYY$clamp_min(1.0)
+  invisible(coex$reciprocal_())
 
   # expectedYN
   tmp <- expectedY$view(c(-1L, 1L)) - expectedYY
@@ -1239,8 +1247,9 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   logThis("Retrieving observed genes yes/yes contingency table", logLevel = 3L)
 
   # observedYY
-  observedYY <- torch::torch_tensor(as.matrix(getZeroOneProj(objCOTAN)),
-                                    device = device, dtype = dType)
+  observedYY <-
+    torch::torch_tensor(suppressWarnings(as.matrix(getZeroOneProj(objCOTAN))),
+                        device = device, dtype = dType)
 
   observedYY <- torch::torch_mm(observedYY, torch::torch_t(observedYY))
 
