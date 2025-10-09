@@ -329,7 +329,7 @@ setMethod(
 
     if (TRUE) {
       oldNu <- getMetadataCells(objCOTAN)[["nu"]]
-      if (!identical(nu[getCells(objCOTAN)], oldNu)) {
+      if (!identical(nu, oldNu)) {
         # flag the coex slots are out of sync (if any)!
         objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
                                                datasetTags()[["gsync"]], FALSE)

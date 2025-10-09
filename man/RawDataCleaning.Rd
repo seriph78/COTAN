@@ -304,10 +304,10 @@ plot(ecdPlot)
 # This creates many infomative plots useful to determine whether
 # there is still something to drop...
 # Here we use the tuple-like assignment feature of the `zeallot` package
-c(pcaCellsPlot, ., genesPlot, UDEPlot, ., zNuPlot) \%<-\% cleanPlots(objCOTAN)
-plot(pcaCellsPlot)
-plot(UDEPlot)
-plot(zNuPlot)
+clPlots <- cleanPlots(objCOTAN)
+plot(clPlots[["pcaCells"]])
+plot(clPlots[["UDE"]])
+plot(clPlots[["zoomedNu"]])
 
 lsPlot <- cellSizePlot(objCOTAN)
 plot(lsPlot)

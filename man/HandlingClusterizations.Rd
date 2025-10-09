@@ -518,7 +518,7 @@ clusters <- test.dataset.clusters1
 
 coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
 
-groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030",
+groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138",
                             "g-000150", "g-000160", "g-000170"),
                      G2 = c("g-000300", "g-000330", "g-000450",
                             "g-000460", "g-000470"),

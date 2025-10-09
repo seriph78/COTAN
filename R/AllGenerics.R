@@ -5,7 +5,7 @@ setGeneric(
            optimizeForSpeed = TRUE, deviceStr = "cuda", cores = 1L,
            cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
-           saveObj = TRUE, outDir = ".") {
+           saveObj = FALSE, outDir = ".") {
     standardGeneric("proceedToCoex")
   }
 )
@@ -326,10 +326,10 @@ setGeneric(
 )
 
 setGeneric(
-  "estimateDispersionBisection",
+  "estimateDispersionViaSolver",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 50L, chunkSize = 1024L) {
-    standardGeneric("estimateDispersionBisection")
+    standardGeneric("estimateDispersionViaSolver")
   }
 )
 

@@ -1,4 +1,6 @@
 
+options(parallelly.fork.enable = TRUE)
+
 test_that("Linear estimates", {
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
                   10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
@@ -7,8 +9,9 @@ test_that("Linear estimates", {
   colnames(raw) <- letters[1L:20L]
 
   obj <- COTAN(raw = raw)
-  obj <- addCondition(obj, condName = "batch",
-                      conditions = rlang::rep_named(getCells(obj), c(1L, 2L)))
+  obj <-
+    addCondition(obj, condName = "batch",
+                 conditions = rlang::rep_named(getCells(obj), c("TA", "TB")))
 
   obj <- estimateLambdaLinear(obj)
 
@@ -47,7 +50,7 @@ test_that("Bisection estimates", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj, cores = 3L, chunkSize = 2L)
+  obj <- estimateDispersionViaSolver(obj, cores = 3L, chunkSize = 2L)
 
   expect_length(getDispersion(obj), getNumGenes(obj))
   expect_equal(getDispersion(obj)[[1L]], -Inf, ignore_attr = TRUE)

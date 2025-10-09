@@ -1,3 +1,15 @@
+## 2.9.7
+
+Fixed underflow error appearing when the dispersion is very small
+
+Improved the `test.dataset` to be somewhat more realistic
+
+## 2.9.6
+
+Upgraded dispersion solver to use Newton-Raphson method
+Minor variations of the model parameters are expected
+
+Improved the `torch coex` code so to use less memory and do less calculations
 
 ## 2.9.5
 

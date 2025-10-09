@@ -56,7 +56,9 @@ NULL
 #'
 genesCoexSpace <-
   function(objCOTAN, primaryMarkers, numGenesPerMarker = 25L) {
-  logThis("Calculating gene co-expression space - START", logLevel = 2L)
+    startTime <- Sys.time()
+
+    logThis("Calculating gene co-expression space - START", logLevel = 2L)
 
   if (TRUE) {
     genesBelong <- primaryMarkers %in% getGenes(objCOTAN)
@@ -116,6 +118,12 @@ genesCoexSpace <-
                  dim(GCS)[[2L]]), logLevel = 3L)
   logThis(paste0("Number of rows (U set): ", dim(GCS)[[1L]]), logLevel = 3L)
 
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
+
   logThis("Calculating gene co-expression space - DONE", logLevel = 2L)
 
   return(list("SecondaryMarkers" = secondaryMarkers, "GCS" = GCS,
@@ -166,7 +174,7 @@ genesCoexSpace <-
 #' @importFrom zeallot %->%
 #'
 #' @examples
-#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
 #'                      G2 = c("g-000300"),
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
 #'                             "g-000570", "g-000590"))
@@ -179,6 +187,8 @@ genesCoexSpace <-
 establishGenesClusters <-
   function(objCOTAN, groupMarkers, numGenesPerMarker = 25L,
            kCuts = 6L, distance = "cosine", hclustMethod = "ward.D2") {
+  startTime <- Sys.time()
+
   logThis("Establishing gene clusters - START", logLevel = 2L)
 
   assert_that(!is.null(names(groupMarkers)),
@@ -303,6 +313,12 @@ establishGenesClusters <-
     dendextend::set("labels",
                     ifelse(labels(dend) %in% rownames(pca1)[relPos],
                            labels(dend), ""))
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Establishing gene clusters - DONE", logLevel = 2L)
 

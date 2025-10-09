@@ -5,6 +5,8 @@
 \alias{funProbZero}
 \alias{dispersionBisection}
 \alias{parallelDispersionBisection}
+\alias{dispersionNewton}
+\alias{parallelDispersionNewton}
 \alias{nuBisection}
 \alias{parallelNuBisection}
 \alias{calcDist}
@@ -21,6 +23,17 @@ dispersionBisection(
 )
 
 parallelDispersionBisection(
+  genes,
+  sumZeros,
+  lambda,
+  nu,
+  threshold = 0.001,
+  maxIterations = 100L
+)
+
+dispersionNewton(sumZeros, lambda, nu, threshold = 0.001, maxIterations = 100L)
+
+parallelDispersionNewton(
   genes,
   sumZeros,
   lambda,
@@ -91,6 +104,10 @@ the \code{dispersion} value
 
 the dispersion values
 
+the \code{dispersion} value
+
+the dispersion values
+
 the nu value
 
 the dispersion values
@@ -122,9 +139,23 @@ It returns 1 when \eqn{\mu = 0}{`mu = 0`}.
 The goal is to find a \code{dispersion} value that reduces to zero the
 difference between the number of estimated and counted zeros
 
-\code{parallelDispersionBisection} is a private function invoked by
-\code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} for the estimation of the \code{dispersion} slot
-of a \code{COTAN} object via a parallel bisection solver
+\code{parallelDispersionBisection} is a private function that was invoked
+by \code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}} for the estimation of the \code{dispersion}
+slot of a \code{COTAN} object via a parallel bisection solver. It is now
+deprecated
+
+The goal is to find a \code{dispersion} \code{array} that reduces to zero the
+difference between the number of estimated and counted zeros
+
+\code{dispersionNewton} is a private function for the estimation of
+\code{dispersion} slot of a \code{COTAN} object via a Newton-Raphson solver
+
+The goal is to find a \code{dispersion} value that reduces to zero the
+difference between the number of estimated and counted zeros
+
+\code{parallelDispersionNewton} is a private function invoked by
+\code{\link[=parallelDispersionNewton]{parallelDispersionNewton()}} for the estimation of the \code{dispersion} slot
+of a \code{COTAN} object via a parallel Newton-Raphson solver
 
 The goal is to find a \code{dispersion} \code{array} that reduces to zero the
 difference between the number of estimated and counted zeros

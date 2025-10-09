@@ -20,7 +20,7 @@ COTAN(raw = "ANY")
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
   genesThreshold = 0.99,
-  saveObj = TRUE,
+  saveObj = FALSE,
   outDir = "."
 )
 
@@ -38,7 +38,7 @@ automaticCOTANObjectCreation(
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
   genesThreshold = 0.99,
-  saveObj = TRUE,
+  saveObj = FALSE,
   outDir = "."
 )
 }
@@ -48,7 +48,7 @@ automaticCOTANObjectCreation(
 \item{objCOTAN}{a newly created \code{COTAN} object}
 
 \item{calcCoex}{a Boolean to determine whether to calculate the genes' \code{COEX}
-or stop just after the \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} step}
+or stop just after the \code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}} step}
 
 \item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
 library to run the matrix calculations. Otherwise, or when the library is
@@ -119,6 +119,8 @@ initializes a \code{COTAN} object and runs \code{\link[=proceedToCoex]{proceedTo
 \examples{
 data("test.dataset")
 obj <- COTAN(raw = test.dataset)
+
+options(parallelly.fork.enable = TRUE)
 
 #
 # In case one needs to run more steps to clean the datatset

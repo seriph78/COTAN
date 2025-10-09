@@ -62,6 +62,8 @@ runSingleDEA <- function(clName, cellsInList,
 #' @rdname HandlingClusterizations
 #'
 DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
+  startTime <- Sys.time()
+
   logThis("Differential Expression Analysis - START", logLevel = 2L)
 
   # picks up the last clusterization if none was given
@@ -92,6 +94,12 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 
   coexDF <- as.data.frame(coexCls)
   colnames(coexDF) <- names(cellsInList)
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Differential Expression Analysis - DONE", logLevel = 2L)
 
@@ -269,6 +277,8 @@ pValueFromDEA <- function(coexDF, numCells, adjustmentMethod) {
 #'
 logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
                                     floorLambdaFraction = 0.05) {
+  startTime <- Sys.time()
+
   logThis("Log Fold Change Analysis - START", logLevel = 2L)
 
   # picks up the last clusterization if none was given
@@ -323,6 +333,12 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
                            colName = cl, rowNames = rownames(normData))
   }
   logThis("", logLevel = 1L)
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Log Fold Change Analysis - DONE", logLevel = 2L)
 

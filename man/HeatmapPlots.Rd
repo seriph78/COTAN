@@ -107,7 +107,7 @@ objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
 
 ## some genes
-primaryMarkers <- c("g-000010", "g-000020", "g-000030")
+primaryMarkers <- c("g-000010", "g-000020", "g-000138")
 
 ## an example of named list of different gene set
 groupMarkers <- list(G1 = primaryMarkers,

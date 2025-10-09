@@ -1,6 +1,6 @@
+
 options(COTAN.TorchWarning = NULL)
 options(parallelly.fork.enable = TRUE)
-
 
 test_that("COTAN getters", {
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
@@ -15,7 +15,7 @@ test_that("COTAN getters", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj, cores = 2L)
+  obj <- estimateDispersionViaSolver(obj, cores = 2L)
 
   # set tag label as legacy value
   row <- getMetaInfoRow(getMetadataDataset(obj), datasetTags()[["gsync"]])
@@ -136,7 +136,6 @@ test_that("COTAN getters", {
 
   ## bound probablitities to avoid extremes
   bProbZero <- pmax(1.0e-8, pmin(1.0 - 1.0e-8, probZero))
-
 
   getLH <- function(objCOTAN, formula) {
     return(calculateLikelihoodOfObserved(objCOTAN, formula))
@@ -462,7 +461,7 @@ test_that("COTAN getters with batches", {
   expect_identical(suppressWarnings(
                      getSelectedGenes(obj, genesSel = "HVG_Seurat",
                                       numGenes = 5L)[1L:4L]),
-                   c("B", "C", "D", "E"))
+    c("B", "C", "D", "E"))
   expect_error(getSelectedGenes(obj, genesSel = "HVG_Scanpy", numGenes = 5L))
   expect_identical(getSelectedGenes(obj, genesSel = c("C", "A", "D", "E", "B")),
                    LETTERS[1L:5L])
@@ -480,53 +479,51 @@ test_that("COTAN getters with batches", {
 
   expect_equal(suppressWarnings(abs(calculateReducedDataMatrix(obj))),
                abs(calcRDM(obj, useCoexEigen = FALSE,
-                           dataMethod = "LogNormalized", numComp = 25L,
+                           dataMethod = "LogNormalized", numComp = 50L,
                            genesSel = "HGDI", numGenes = 2000L)),
                tolerance = 1.0e-12)
 
   if (FALSE) {
   m1 <- as.matrix(cbind(rep(2.756809750418045, times = 20L),
-                  rep(0.0, times = 20L), rep(0.0, times = 20L)))
-  colnames(m1) <- paste0("PC", c(1L:3L))
+                        rep(0.0, times = 20L), rep(0.0, times = 20L),
+                        rep(0.0, times = 20L), rep(0.0, times = 20L)))
+  colnames(m1) <- paste0("PC", c(1L:5L))
   rownames(m1) <- letters[1L:20L]
 
   expect_equal(abs(calcRDM(obj, useCoexEigen = FALSE,
-                           dataMethod = "AdjBinarized", numComp = 3L,
+                           dataMethod = "AdjBinarized", numComp = 5L,
                            genesSel = "HGDI", numGenes = 8L)),
                m1, tolerance = 1.0e-12)
 
   expect_equal(abs(calcRDM(obj, useCoexEigen = FALSE,
-                           dataMethod = "LogLikelihood", numComp = 3L,
+                           dataMethod = "LogLikelihood", numComp = 5L,
                            genesSel = "HVG_Seurat", numGenes = 8L)),
                m1, tolerance = 1.0e-12)
 
   m2 <- cbind(
-    rep(c(1.408210608361951,     -1.408216669492208    ), times = 10L),
-    rep(c(0.0001095961016898374, -0.0001990257478942304), times = 10L),
-    rep(c(-0.1301647820478256,    0.1300990859038809   ), times = 10L))
+    rep(c(1.991509612121359,     -1.991510865753923    ), times = 10L),
+    rep(c(4.556799230950100e-05, -4.815389335445746e-05), times = 10L),
+    rep(c(5.701730287707164e-05, -8.375641609457851e-05), times = 10L))
   colnames(m2) <- paste0("EC_", c(1L:3L))
   rownames(m2) <- letters[1L:20L]
-  attr(m2, "scaled:scale") <-
-    set_names(rep(c(1.04428866237142, 1.04434243252230), times = 10L),
-              letters[1L:20L])
 
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
-                           dataMethod = "BinDiscr", numComp = 3L),
+                       dataMethod = "BinDiscr", numComp = 5L)[, 1L:3L],
                m2, tolerance = 5.0e-5)
 
   m3 <- cbind(
-    rep(c(-1.399254464334427,   1.399054366867996 ), times = 10L),
-    rep(c( 0.1574674670950663,  0.1582654478193421), times = 10L),
-    rep(c( 0.1314950221371185, -0.1326609459265815), times = 10L))
+    rep(c(-1.96537974590724,    1.96547022027574     ), times = 10L),
+    rep(c(-5.14674535931154e-4, 2.4124745673443485e-2), times = 10L),
+    rep(c( 0.227956910102598,   0.226238243931497    ), times = 10L))
   colnames(m3) <- paste0("EC_", c(1L:3L))
   rownames(m3) <- letters[1L:20L]
-  attr(m3, "scaled:scale") <-
-    set_names(rep(c(4.24255829899041, 4.24340574003457), times = 10L),
-              letters[1L:20L])
-
-  expect_equal(calcRDM(obj, useCoexEigen = TRUE,
-                           dataMethod = "DerLogL", numComp = 3L),
-               m3, tolerance = 5.0e-5)
+  if (FALSE) {
+    attr(m3, "scaled:scale") <-
+      set_names(rep(c(3.020580325047483, 3.020462711979378), times = 10L),
+                letters[1L:20L])
   }
+  expect_equal(calcRDM(obj, useCoexEigen = TRUE,
+                       dataMethod = "DerLogL", numComp = 5L)[, 1L:3L],
+               m3, tolerance = 5.0e-4)
 })
 

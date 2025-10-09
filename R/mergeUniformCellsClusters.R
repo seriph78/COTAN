@@ -94,7 +94,9 @@
 #'                                          cores = 6L,
 #'                                          saveObj = FALSE)
 #'
-#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
+#' objCOTAN <- storeGDI(objCOTAN, genesGDI = calculateGDI(objCOTAN, cores = 6L))
+#'
+#' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
 #'                      G2 = c("g-000300", "g-000330"),
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
 #'                             "g-000570", "g-000590"))
@@ -116,8 +118,11 @@
 #' stopifnot(identical(checker2@firstCheck@GDIThreshold, 1.397))
 #'
 #' splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
-#'                                     optimizeForSpeed = TRUE,
-#'                                     deviceStr = "cuda",
+#'                                     dataMethod = "LogLikelihood",
+#'                                     useCoexEigen = TRUE,
+#'                                     genesSel = "HGDI",
+#'                                     numGenes = 2000L,
+#'                                     numReducedComp = 50L,
 #'                                     initialResolution = 0.8,
 #'                                     checker = checker2,
 #'                                     saveObj = FALSE)
@@ -147,7 +152,6 @@
 #'
 #' mergedList <- mergeUniformCellsClusters(objCOTAN,
 #'                                         checkers = c(checker, checker2),
-#'                                         batchSize = 2L,
 #'                                         clusters = clusters,
 #'                                         cores = 6L,
 #'                                         optimizeForSpeed = TRUE,
@@ -220,8 +224,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
     untestedPairs <-
       vapply(pNamesList, function(pName, check, allRes) {
-        # we exploit the convention that a non-avalable result is marked by a
-        # zero clusterSize
+        # we exploit the convention that
+        # a non-available result is marked by a zero clusterSize
         updateChecker(pName, check, allRes)@clusterSize == 0L
       }, FUN.VALUE = logical(1L), checker, allCheckResults)
 
@@ -372,6 +376,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   # start analysis
 
+  startTime <- Sys.time()
+
   logThis("Merging cells' uniform clustering: START", logLevel = 2L)
 
   assert_that(estimatorsAreReady(objCOTAN),
@@ -451,6 +457,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
                    getCheckerThreshold(checker)),
             logLevel = 2L)
     repeat {
+      startLoopTime <- Sys.time()
+
       iter <- iter + 1L
       logThis(paste0("Start merging nearest clusters: iteration ", iter),
               logLevel = 3L)
@@ -539,6 +547,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
         logThis(paste("Executed", (oldNumClusters - newNumClusters), "merges"),
                 logLevel = 3L)
       }
+
+      endLoopTime <- Sys.time()
+
+      logThis(paste("Loop calculations elapsed time:",
+                    difftime(endLoopTime, startLoopTime, units = "secs")),
+              logLevel = 2L)
     }
     logThis(paste0("Executed all merges for threshold ",
                    getCheckerThreshold(checker), " out of ",
@@ -595,6 +609,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
     write.csv(as.data.frame(list("merge" = outputClusters)),
               file = outFile, na = "NaN")
   })
+
+  endTime <- Sys.time()
+
+  logThis(paste("Total calculations elapsed time:",
+                difftime(endTime, startTime, units = "secs")),
+          logLevel = 2L)
 
   logThis("Merging cells' uniform clustering: DONE", logLevel = 2L)
 
