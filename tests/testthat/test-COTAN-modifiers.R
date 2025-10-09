@@ -1,4 +1,6 @@
 
+options(parallelly.fork.enable = TRUE)
+
 test_that("metaDataset", {
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
                   10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),

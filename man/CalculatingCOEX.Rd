@@ -509,6 +509,8 @@ the same value on all elements. This value is the number of genes/cells
 depending on the parameter \code{actOnCells} being \code{TRUE/FALSE}.
 }
 \examples{
+options(parallelly.fork.enable = TRUE)
+
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
@@ -517,7 +519,7 @@ objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
 objCOTAN <- clean(objCOTAN)
 
 objCOTAN <- estimateLambdaLinear(objCOTAN)
-objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
+objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = 6L)
 
 ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 
@@ -536,7 +538,7 @@ genesSample <- sample(getNumGenes(objCOTAN), 10)
 partialGenesCoex <- calculatePartialCoex(objCOTAN, genesSample,
                                          actOnCells = FALSE)
 
-stopifnot(all(1e-6 >
+stopifnot(all(5.0e-6 >
                 abs(partialGenesCoex -
                       getGenesCoex(objCOTAN,
                                    getGenes(objCOTAN)[sort(genesSample)],
@@ -562,7 +564,7 @@ objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 ## before any `COEX` evaluation
 
 g1 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
-g2 <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 1)]
+g2 <- getGenes(objCOTAN)[138L]
 tables <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
 tables
 

@@ -1,8 +1,10 @@
+tm <- tempdir()
+stopifnot(file.exists(tm))
+
 library(Matrix)
 library(rlang)
 
-tm <- tempdir()
-stopifnot(file.exists(tm))
+options(parallelly.fork.enable = TRUE)
 
 test_that("Logging", {
   logPath <- file.path(tm, "COTAN_Test.log")
@@ -134,25 +136,28 @@ test_that("Adding/extracting columns to/from data.frames", {
 
 test_that("funProbZeroNegBin", {
   # Cases with mu = 0 are not actually in use
-  expect_identical(funProbZeroNegBin(-Inf, 0.0), NaN)
+  expect_identical(funProbZeroNegBin(-Inf, 0.0), 0.0)
   expect_identical(funProbZeroNegBin(-1.0, 0.0), 1.0)
   expect_identical(funProbZeroNegBin( 0.0, 0.0), 1.0)
+  expect_identical(funProbZeroNegBin(1e-6, 0.0), 1.0)
   expect_identical(funProbZeroNegBin( 1.0, 0.0), 1.0)
   expect_identical(funProbZeroNegBin(10.0, 0.0), 1.0)
-  expect_identical(funProbZeroNegBin( Inf, 0.0), NaN)
+  expect_identical(funProbZeroNegBin( Inf, 0.0), 1.0)
 
   # Cases with infinite disp can happen
-  expect_identical(funProbZeroNegBin(-Inf, 1.0),                0.0)
-  expect_identical(funProbZeroNegBin(-1.0, 1.0),          exp(-2.0))
-  expect_identical(funProbZeroNegBin( 0.0, 1.0),          exp(-1.0))
-  expect_identical(funProbZeroNegBin( 1.0, 1.0),          1.0 / 2.0)
-  expect_identical(funProbZeroNegBin(10.0, 1.0), 11.0^(-1.0 / 10.0))
-  expect_identical(funProbZeroNegBin( Inf, 1.0),                1.0)
+  expect_identical(funProbZeroNegBin(-Inf, 1.0),            0.0)
+  expect_identical(funProbZeroNegBin(-1.0, 1.0),      exp(-2.0))
+  expect_identical(funProbZeroNegBin( 0.0, 1.0),      exp(-1.0))
+  expect_identical(funProbZeroNegBin(1e-6, 1.0), exp(-0.999999))
+  expect_identical(funProbZeroNegBin( 1.0, 1.0),      1.0 / 2.0)
+  expect_identical(funProbZeroNegBin(10.0, 1.0),      11.0^-0.1)
+  expect_identical(funProbZeroNegBin( Inf, 1.0),            1.0)
 
   # Cases with mu = Inf are not actually in use
   expect_identical(funProbZeroNegBin(-Inf, Inf), 0.0)
   expect_identical(funProbZeroNegBin(-1.0, Inf), 0.0)
   expect_identical(funProbZeroNegBin( 0.0, Inf), NaN)
+  expect_identical(funProbZeroNegBin(1e-6, Inf), NaN)
   expect_identical(funProbZeroNegBin( 1.0, Inf), 0.0)
   expect_identical(funProbZeroNegBin(10.0, Inf), 0.0)
   expect_identical(funProbZeroNegBin( Inf, Inf), 1.0)
@@ -161,7 +166,7 @@ test_that("funProbZeroNegBin", {
 
 test_that("funProbZeroNegBin with matrices", {
   mu <- matrix((1L:25L) / 7.0, nrow = 10L, ncol = 10L)
-  disp <- (-1L:8L) / 3.0
+  disp <- c(-Inf, -1.0/3.0, 1e-6, (1L:6L) / 3.0, Inf)
 
   p <- funProbZeroNegBin(disp, mu)
 
@@ -170,6 +175,7 @@ test_that("funProbZeroNegBin with matrices", {
   expect_identical(p[ 1L,  1L], funProbZeroNegBin(disp[[ 1L]], mu[ 1L,  1L]))
   expect_identical(p[ 1L, 10L], funProbZeroNegBin(disp[[ 1L]], mu[ 1L, 10L]))
 
+  expect_identical(p[ 2L,  2L], funProbZeroNegBin(disp[[ 2L]], mu[ 2L,  2L]))
   expect_identical(p[ 3L,  7L], funProbZeroNegBin(disp[[ 3L]], mu[ 3L,  7L]))
   expect_identical(p[ 6L,  4L], funProbZeroNegBin(disp[[ 6L]], mu[ 6L,  4L]))
 
@@ -208,19 +214,45 @@ test_that("funProbZeroMixPoi with matrices", {
 })
 
 
-test_that("dispersionBisection", {
-  lambda   <- c(3.0, 1.75)
+test_that("dispersionSolvers", {
+  lambda   <- c(3.0, 1.75, 2.0)
   nu       <- rep(c(0.5, 1.5), 5L)
-  sumZeros <- c(0.0, 5.0)
+  sumZeros <- c(0.0, 5.0, 1.0)
 
-  d <- c(dispersionBisection(sumZeros = sumZeros[[1L]],
-                             lambda = lambda[[1L]], nu = nu),
-         dispersionBisection(sumZeros = sumZeros[[2L]],
-                             lambda = lambda[[2L]], nu = nu))
+  d1 <- mapply(
+    FUN       = dispersionBisection,
+    lambda    = lambda,
+    sumZeros  = sumZeros,
+    MoreArgs  = list("nu" = nu),
+    SIMPLIFY  = TRUE,    # collapse to atomic vector
+    USE.NAMES = FALSE)
 
-  expect_identical(d, c(-Inf, 1.98046875))
+  expect_identical(d1, c(-Inf, 1.980468750, -0.646484375))
+
+  expect_lt(max(abs(rowSums(funProbZero(d1, lambda %o% nu)) - sumZeros)),
+            1.0e-3)
+
+  d2 <- mapply(
+    FUN       = dispersionNewton,
+    lambda    = lambda,
+    sumZeros  = sumZeros,
+    MoreArgs  = list("nu" = nu),
+    SIMPLIFY  = TRUE,    # collapse to atomic vector
+    USE.NAMES = FALSE)
+
+  expect_equal(d2, c(-Inf, 1.980664643877, -0.645937418860), tolerance = 1e-12)
+
+  expect_lt(max(abs(rowSums(funProbZero(d2, lambda %o% nu)) - sumZeros)),
+            2.0e-5)
+
+  d1p <- parallelDispersionBisection(1L:3L, sumZeros, lambda, nu)
+
+  expect_identical(d1p, d1)
+
+  d2p <- parallelDispersionNewton(1L:3L, sumZeros, lambda, nu)
+
+  expect_equal(d2p, d2, tolerance = 1e-12)
 })
-
 
 test_that("lambdaNewton", {
   nu <- rep(c(0.5, 1.5), 5L)
@@ -315,16 +347,14 @@ test_that("parallelDist - cosine dissimilarity", {
 test_that("pca usage", {
   utils::data("test.dataset", package = "COTAN")
 
-  pcaRaw <- runPCA(x = as.matrix(test.dataset), rank = 5L,
+  pcaRaw <- runPCA(x = as.matrix(test.dataset), rank = 10L,
                    BSPARAM = IrlbaParam(), get.rotation = FALSE)[["x"]]
-  colnames(pcaRaw) <- paste0("PC_", seq_len(ncol(pcaRaw)))
 
   expect_identical(rownames(pcaRaw), rownames(test.dataset))
 
-  pcaExp <- readRDS(file.path(getwd(), "pca.test.RDS"))
-  expect_identical(nrow(pcaRaw), nrow(pcaExp))
+  pcaExp <- readRDS(file.path(getwd(), "pca.raw.test.RDS"))
 
-  pcaExp <- pcaExp[rownames(pcaRaw), ]
+  pcaRaw <- pcaRaw[rownames(pcaExp), ]
 
   correlations <- c(cor(pcaRaw[, 1L], pcaExp[, 1L]),
                     cor(pcaRaw[, 2L], pcaExp[, 2L]))

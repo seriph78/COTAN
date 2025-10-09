@@ -9,7 +9,7 @@
 #'
 #' @param objCOTAN a newly created `COTAN` object
 #' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
-#'   or stop just before at the [estimateDispersionBisection()] step
+#'   or stop just before at the [estimateDispersionViaSolver()] step
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
 #'   not available will run the slower legacy code
@@ -54,6 +54,8 @@
 #' @importFrom ggplot2 annotate
 #'
 #' @examples
+#' options(parallelly.fork.enable = TRUE)
+#'
 #' #
 #' # In case one needs to run more steps to clean the datatset
 #' # the following might apply
@@ -183,8 +185,9 @@ setMethod(
                estimateLambdaPiNewton(objCOTAN,
                                       allowNegativePi = TRUE, cores = cores),
              NegBin = ,
-             NegativeBinomial = ,
-               estimateDispersionBisection(objCOTAN, cores = cores))
+             NegativeBinomial =
+               estimateDispersionViaSolver(objCOTAN, cores = cores)
+      )
 
     gc()
 
@@ -240,7 +243,6 @@ setMethod(
   }
 )
 
-
 ## ---- automaticCOTANObjectCreation ----
 
 #' @details `automaticCOTANObjectCreation()` takes a raw dataset, creates and
@@ -253,7 +255,7 @@ setMethod(
 #' @param sampleCondition a string reporting the specific sample condition or
 #'   time point.
 #' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
-#'   or stop just after the [estimateDispersionBisection()] step
+#'   or stop just after the [estimateDispersionViaSolver()] step
 #' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
 #'   library to run the matrix calculations. Otherwise, or when the library is
 #'   not available will run the slower legacy code

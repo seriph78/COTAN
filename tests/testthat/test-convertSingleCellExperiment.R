@@ -64,7 +64,7 @@ test_that("Convert COTAN to and from SCE on test dataset", {
   expect_equal(getNu(newObj)[cells.names.test],
                nu, tolerance = 1.0e-14, ignore_attr = FALSE)
   expect_equal(getDispersion(newObj)[genes.names.test],
-               dispersion, tolerance = 1.0e-14, ignore_attr = FALSE)
+               dispersion, tolerance = 1.0e-10, ignore_attr = FALSE)
   expect_identical(getGenesCoex(newObj, zeroDiagonal = FALSE), coex)
 })
 
@@ -90,7 +90,7 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
   sce <- suppressWarnings(Seurat::as.SingleCellExperiment(srat))
   obj <- convertFromSingleCellExperiment(sce)
 
-  allDims <- set_names(c(600L, 1200L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),
+  allDims <- set_names(c(600L, 1000L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),
     c("raw1", "raw2", "genesCoex1", "genesCoex2", "cellsCoex1", "cellsCoex2",
       "metaDataset", "metaGenes", "metaCells", "clustersCoex"))
   expect_identical(unlist(getDims(obj)), allDims)

@@ -6,6 +6,8 @@
 \alias{funProbZeroMixPoi}
 \alias{dispersionBisection}
 \alias{parallelDispersionBisection}
+\alias{dispersionNewton}
+\alias{parallelDispersionNewton}
 \alias{lambdaNewton}
 \alias{parallelLambdaNewton}
 \alias{nuBisection}
@@ -26,6 +28,17 @@ dispersionBisection(
 )
 
 parallelDispersionBisection(
+  genes,
+  sumZeros,
+  lambda,
+  nu,
+  threshold = 0.001,
+  maxIterations = 100L
+)
+
+dispersionNewton(sumZeros, lambda, nu, threshold = 0.001, maxIterations = 100L)
+
+parallelDispersionNewton(
   genes,
   sumZeros,
   lambda,
@@ -130,6 +143,10 @@ count} is identically zero
 
 \code{parallelDispersionBisection()} returns the dispersion values
 
+the \code{dispersion} value
+
+the dispersion values
+
 \code{lambdaNewton()} returns the lambda value
 
 \code{lambdaNewton()} returns the lambda value
@@ -177,13 +194,27 @@ The goal of \code{dispersionBisection()} is to find a \code{dispersion} value
 that reduces to zero the difference between the number of estimated and
 counted zeros
 
-\code{parallelDispersionBisection()} is a private function invoked by
-\code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} for the estimation of the \code{dispersion} slot
-of a \code{COTAN} object via a parallel bisection solver
+\code{parallelDispersionBisection} is a private function that was invoked
+by \code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}} for the estimation of the \code{dispersion}
+slot of a \code{COTAN} object via a parallel bisection solver. It is now
+deprecated
 
 The goal of \code{parallelDispersionBisection()} is to find a
 \code{dispersion} \code{array} that reduces to zero the difference between the number
 of estimated and counted zeros
+
+\code{dispersionNewton} is a private function for the estimation of
+\code{dispersion} slot of a \code{COTAN} object via a Newton-Raphson solver
+
+The goal is to find a \code{dispersion} value that reduces to zero the
+difference between the number of estimated and counted zeros
+
+\code{parallelDispersionNewton} is a private function invoked by
+\code{\link[=parallelDispersionNewton]{parallelDispersionNewton()}} for the estimation of the \code{dispersion} slot
+of a \code{COTAN} object via a parallel Newton-Raphson solver
+
+The goal is to find a \code{dispersion} \code{array} that reduces to zero the
+difference between the number of estimated and counted zeros
 
 \code{lambdaNewton()} is a private function for the estimation of
 \code{lambda} slot of a \code{COTAN} object via a Newton-Raphson solver

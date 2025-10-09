@@ -6,7 +6,8 @@
 \alias{estimateLambdaLinear}
 \alias{estimateNuLinear,COTAN-method}
 \alias{estimateNuLinear}
-\alias{estimateDispersionBisection,COTAN-method}
+\alias{estimateDispersionViaSolver,COTAN-method}
+\alias{estimateDispersionViaSolver}
 \alias{estimateDispersionBisection}
 \alias{estimateLambdaPiNewton,COTAN-method}
 \alias{estimateLambdaPiNewton}
@@ -35,7 +36,7 @@
 
 \S4method{estimateNuLinear}{COTAN}(objCOTAN)
 
-\S4method{estimateDispersionBisection}{COTAN}(
+\S4method{estimateDispersionViaSolver}{COTAN}(
   objCOTAN,
   threshold = 0.001,
   cores = 1L,
@@ -120,7 +121,7 @@ equal to 1}
 
 \code{estimateNuLinear()} returns the updated \code{COTAN} object
 
-\code{estimateDispersionBisection()} returns the updated \code{COTAN} object
+\code{estimateDispersionViaSolver()} returns the updated \code{COTAN} object
 
 \code{estimateLambdaPiNewton()} returns the updated \code{COTAN} object
 
@@ -170,7 +171,7 @@ parallel bisection solver.
 \code{estimateNuLinear()} does a linear estimation of \code{nu} (normalized
 cells' counts averages)
 
-\code{estimateDispersionBisection()} estimates the negative binomial
+\code{estimateDispersionViaSolver()} estimates the negative binomial
 dispersion factor for each gene (\code{dispersion}). Determines the value such
 that, for each gene, the probability of zero count matches the number of
 observed zeros. It assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being already run.
@@ -184,7 +185,7 @@ assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being already run.
 \code{estimateNuBisection()} estimates the \code{nu} vector of a \code{COTAN}
 object by bisection. It determines the \code{nu} parameters such that, for each
 cell, the probability of zero counts matches the number of observed zeros.
-It assumes \code{\link[=estimateDispersionBisection]{estimateDispersionBisection()}} being already run. Since this
+It assumes \code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}} being already run. Since this
 breaks the assumption that the average \code{nu} is one, it is recommended not
 to run this in isolation but use \code{\link[=estimateDispersionNuBisection]{estimateDispersionNuBisection()}} instead.
 
@@ -236,7 +237,7 @@ lambda <- getLambda(objCOTAN)
 objCOTAN <- estimateNuLinear(objCOTAN)
 nu <- getNu(objCOTAN)
 
-objCOTAN <- estimateDispersionBisection(objCOTAN, cores = 6L)
+objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = 6L)
 dispersion <- getDispersion(objCOTAN)
 
 objCOTAN <- estimateLambdaPiNewton(objCOTAN, cores = 6L,

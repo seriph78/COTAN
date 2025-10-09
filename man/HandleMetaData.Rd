@@ -155,6 +155,8 @@ associated with the given tag if present or zero otherwise.
 \code{data.frame}
 }
 \examples{
+options(parallelly.fork.enable = TRUE)
+
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
 

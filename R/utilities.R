@@ -31,7 +31,7 @@ NULL
 #'
 setLoggingLevel <- function(newLevel = 1L) {
   message("Setting new log level to ", newLevel)
-  oldLevel <- options(COTAN.LogLevel = newLevel)
+  oldLevel <- unlist(options(COTAN.LogLevel = newLevel))
   if (is.null(oldLevel)) {
     oldLevel <- 1L
   }
@@ -234,7 +234,7 @@ canUseTorch <- function(optimizeForSpeed, deviceStr) {
       }
       if (!torch::torch_is_installed()) {
         stop("The `torch` library is installed but the required",
-             " additional libraries are not avalable yet")
+             " additional libraries are not available yet")
       }
       # Call a simple torch function to check if it's working
       if (is.null(torch::torch_tensor(1L))) {

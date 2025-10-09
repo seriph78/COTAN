@@ -244,6 +244,21 @@ setGeneric(
 )
 
 setGeneric(
+  "setLambda",
+  function(objCOTAN, lambda) standardGeneric("setLambda")
+)
+
+setGeneric(
+  "setDispersion",
+  function(objCOTAN, dispersion) standardGeneric("setDispersion")
+)
+
+setGeneric(
+  "setNu",
+  function(objCOTAN, nu) standardGeneric("setNu")
+)
+
+setGeneric(
   "dropGenesCells",
   function(objCOTAN, genes = vector(mode = "character"),
            cells = vector(mode = "character")) {
@@ -253,8 +268,7 @@ setGeneric(
 
 setGeneric(
   "clean",
-  function(objCOTAN,
-           cellsCutoff = 0.003, genesCutoff = 0.002,
+  function(objCOTAN, cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99) {
     standardGeneric("clean")
   }
@@ -320,10 +334,10 @@ setGeneric(
 )
 
 setGeneric(
-  "estimateDispersionBisection",
+  "estimateDispersionViaSolver",
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 50L, chunkSize = 1024L) {
-    standardGeneric("estimateDispersionBisection")
+    standardGeneric("estimateDispersionViaSolver")
   }
 )
 

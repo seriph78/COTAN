@@ -1,4 +1,5 @@
 Sys.setenv(R_TESTS = "")
 library(testthat)
 library(COTAN)
+library(zeallot)
 test_check("COTAN")

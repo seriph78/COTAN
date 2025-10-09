@@ -324,9 +324,11 @@ cellsUniformClustering <- function(objCOTAN,
     iter <- iter + 1L
     startLoopTime <- Sys.time()
 
+    unassignedCells <- is.na(outputClusters)
+
     logThis(paste0("In iteration ", iter, " "), logLevel = 1L, appendLF = FALSE)
     logThis(paste("the number of cells to re-cluster is",
-                  sum(is.na(outputClusters)), "cells belonging to",
+                  sum(unassignedCells), "cells belonging to",
                   numClustersToRecluster, "clusters"), logLevel = 2L)
 
     # create COTAN sub-object
@@ -357,7 +359,7 @@ cellsUniformClustering <- function(objCOTAN,
 
     if (is_null(testClusters)) {
       logThis(paste("NO new possible uniform clusters!",
-                    "Unclustered cell left:", sum(is.na(outputClusters))),
+                    "Unclustered cell left:", sum(unassignedCells)),
               logLevel = 1L)
       break
     }

@@ -25,7 +25,7 @@ calculateGenesCE <- function(objCOTAN) {
 
   minusEntrM <- matrix(0.0, nrow = getNumGenes(objCOTAN),
                        ncol = getNumCells(objCOTAN))
-  minusEntrM[!feg, ] <- (zeroOne[!feg, ] * log(1.0 - probZero[!feg, ])) +
+  minusEntrM[!feg, ] <- (zeroOne[!feg, ] * log1p(-probZero[!feg, ])) +
                         ((1.0 - zeroOne[!feg, ]) * log(probZero[!feg, ]))
 
   return(set_names(-rowsums(minusEntrM, parallel = TRUE) /
@@ -77,8 +77,10 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
                               worker,
                               S = S,
                               topRows = topRows,
-                              mc.cores  = cores,
-                              mc.preschedule = TRUE)
+                              mc.cores       = cores,
+                              mc.preschedule = TRUE, # default
+                              mc.cleanup     = TRUE, # default
+                              mc.set.seed    = TRUE) # default
 
     # spawned errors are stored as try-error classes
     resError <- unlist(lapply(res, inherits, "try-error"))

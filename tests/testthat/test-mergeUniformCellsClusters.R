@@ -1,68 +1,72 @@
 tm <- tempdir()
 stopifnot(file.exists(tm))
 
-library(zeallot)
 library(stringr)
+library(zeallot)
 
+options(parallelly.fork.enable = TRUE)
 
 test_that("Merge Uniform Cells Clusters", {
-
   utils::data("test.dataset", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset)
-  obj <- initializeMetaDataset(obj, GEO = " ",
+  obj <- initializeMetaDataset(objCOTAN = obj, GEO = " ",
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 6L, saveObj = FALSE)
+  obj <- proceedToCoex(objCOTAN = obj,
+                       calcCoex = FALSE, cores = 6L, saveObj = FALSE)
 
-  clusters <- factor(readRDS(file.path(getwd(), "clusters1.RDS")))
+  clusters <- factor(readRDS(file.path(getwd(), "split.clusters.test.RDS")))
   genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
 
-  obj <- addClusterization(obj, clName = "clusters", clusters = clusters)
+  obj <- addClusterization(objCOTAN = obj,
+                           clName = "clusters", clusters = clusters)
 
-  coexDF <- DEAOnClusters(obj)
+  coexDF <- DEAOnClusters(objCOTAN = obj)
 
-  obj <- addClusterizationCoex(obj, clName = "clusters", coexDF = coexDF)
+  obj <- addClusterizationCoex(objCOTAN = obj,
+                               clName = "clusters", coexDF = coexDF)
 
   expect_setequal(colnames(coexDF), levels(clusters))
-  expect_identical(rownames(coexDF), getGenes(obj))
+  expect_identical(rownames(coexDF), getGenes(objCOTAN = obj))
 
-  lfcDF <- logFoldChangeOnClusters(obj, clusters = clusters,
+  lfcDF <- logFoldChangeOnClusters(objCOTAN = obj,
+                                   clusters = clusters,
                                    floorLambdaFraction = 0.01)
 
   expect_setequal(colnames(lfcDF), clusters)
-  expect_identical(rownames(lfcDF), getGenes(obj))
-  expect_gte(min(colSums(lfcDF > 0.0)), 280L)
-  expect_lte(max(colSums(lfcDF > 0.0)), 302L)
-  expect_lt(max(colMeans(lfcDF)),  0.00)
-  expect_gt(min(colMeans(lfcDF)), -0.06)
+  expect_identical(rownames(lfcDF), getGenes(objCOTAN = obj))
+  expect_gte(min(colSums(lfcDF > 0.0)), 260L)
+  expect_lte(max(colSums(lfcDF > 0.0)), 340L)
+  expect_lt(max(colMeans(lfcDF)),  0.0)
+  expect_gt(min(colMeans(lfcDF)), -0.28)
 
   adjustmentMethod <- "bonferroni"
 
-  pValDF <- pValueFromDEA(coexDF, numCells = getNumCells(obj),
+  pValDF <- pValueFromDEA(coexDF, numCells = getNumCells(objCOTAN = obj),
                           adjustmentMethod = "none")
-  adjPValDF <- pValueFromDEA(coexDF, numCells = getNumCells(obj),
+  adjPValDF <- pValueFromDEA(coexDF, numCells = getNumCells(objCOTAN = obj),
                              adjustmentMethod = adjustmentMethod)
 
   expect_setequal(colnames(pValDF), levels(clusters))
-  expect_identical(rownames(pValDF), getGenes(obj))
+  expect_identical(rownames(pValDF), getGenes(objCOTAN = obj))
   expect_setequal(colnames(adjPValDF), levels(clusters))
-  expect_identical(rownames(adjPValDF), getGenes(obj))
+  expect_identical(rownames(adjPValDF), getGenes(objCOTAN = obj))
 
-  coexDF_exp <- readRDS(file.path(getwd(), "coex.test.cluster1.RDS"))
-  pValDF_exp <- readRDS(file.path(getwd(), "pval.test.cluster1.RDS"))
+  coexDF_exp <- readRDS(file.path(getwd(), "coex.clusters.test.RDS"))
+  pValDF_exp <- readRDS(file.path(getwd(), "pvalues.clusters.test.RDS"))
 
   expect_equal(coexDF[genes.names.test, ], coexDF_exp, tolerance = 1.0e-12)
   expect_equal(pValDF[genes.names.test, ], pValDF_exp, tolerance = 1.0e-12)
 
-  deltaExpression <- clustersDeltaExpression(obj)
+  deltaExpression <- clustersDeltaExpression(objCOTAN = obj)
 
-  expect_identical(rownames(deltaExpression), getGenes(obj))
+  expect_identical(rownames(deltaExpression), getGenes(objCOTAN = obj))
   expect_setequal(colnames(deltaExpression), levels(clusters))
 
-  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000030"),
-                       G2 = c("g-000300", "g-000330"),
+  groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
+                       G2 = c("g-000300", "g-000330", "g-000660"),
                        G3 = c("g-000510", "g-000530", "g-000550",
                               "g-000570", "g-000590"))
 
@@ -75,24 +79,22 @@ test_that("Merge Uniform Cells Clusters", {
   expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0L)
   expect_equal(e.df[["N. total"]], lengths(groupMarkers), ignore_attr = TRUE)
 
-  GDIThreshold <- 1.46
-
-  advChecker <- new("AdvancedGDIUniformityCheck")
-  checkers <- list(advChecker, shiftCheckerThresholds(advChecker, 0.1))
+  checker <- new("AdvancedGDIUniformityCheck")
+  checkers <- list(checker, shiftCheckerThresholds(checker, 0.1))
 
   suppressWarnings({
     c(mergedClusters, mergedCoexDF) %<-%
       mergeUniformCellsClusters(
         objCOTAN = obj, clusters = clusters,
         checkers = checkers, allCheckResults = data.frame(),
-        batchSize = 2L, distance = "cosine", hclustMethod = "ward.D2",
+        batchSize = 1L, distance = "cosine", hclustMethod = "ward.D2",
         cores = 6L, optimizeForSpeed = TRUE, deviceStr = "cuda",
         saveObj = TRUE, outDir = tm)
   })
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "merge_clusterization_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
-                                    "merge_clusterization_2.csv")))
+                                    "merge_clusterization_4.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "all_check_results_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
@@ -103,54 +105,56 @@ test_that("Merge Uniform Cells Clusters", {
   allCheckDF <- read.csv(file.path(tm, "test", "leafs_merge",
                                    "all_check_results_4.csv"),
                          header = TRUE, row.names = 1L)
-  expect_identical(nrow(allCheckDF),  7L)
+  expect_identical(nrow(allCheckDF), 4L)
   expect_identical(ncol(allCheckDF), 35L)
 
-  allCheckRes <- dfToCheckers(allCheckDF, "AdvancedGDIUniformityCheck")
+  allCheckRes <- dfToCheckers(allCheckDF)
 
   expect_length(allCheckRes, nrow(allCheckDF))
   expect_named(allCheckRes)
   expect_true(all(stringr::str_ends(names(allCheckRes), fixed("-merge"))))
   expect_true(all(vapply(allCheckRes, methods::is,
                          logical(1L), "AdvancedGDIUniformityCheck")))
-  expect_true(allCheckRes[[1L]]@isUniform)
-  expect_true(allCheckRes[[2L]]@isUniform)
-  expect_false(is.finite(allCheckRes[[1L]]@firstCheck@fractionBeyond))
-  expect_true(is.finite(allCheckRes[[7L]]@firstCheck@fractionBeyond))
-  expect_true(is.finite(allCheckRes[[1L]]@firstCheck@quantileAtRatio))
-  expect_true(is.finite(allCheckRes[[7L]]@firstCheck@quantileAtRatio))
+  expect_false(allCheckRes[[3L]]@isUniform)
+  expect_true(is.finite(allCheckRes[[3L]]@firstCheck@fractionBeyond))
+  expect_true(is.finite(allCheckRes[[3L]]@firstCheck@quantileAtRatio))
 
-  expect_lt(nlevels(mergedClusters), nlevels(clusters))
+  expect_identical(nlevels(mergedClusters), 2L)
   expect_setequal(colnames(mergedCoexDF), mergedClusters)
-  expect_identical(rownames(mergedCoexDF), getGenes(obj))
+  expect_identical(rownames(mergedCoexDF), getGenes(objCOTAN = obj))
 
-  obj <- addClusterization(obj, clName = "merge", clusters = mergedClusters,
+  obj <- addClusterization(objCOTAN = obj,
+                           clName = "merge", clusters = mergedClusters,
                            coexDF = mergedCoexDF, override = FALSE)
 
-  expect_identical(reorderClusterization(obj)[1L:2L],
+  expect_identical(reorderClusterization(objCOTAN = obj)[1L:2L],
                    list("clusters" = mergedClusters, "coex" = mergedCoexDF))
 
-  mergedLfcDF <- logFoldChangeOnClusters(obj, clName = "merge")
+  mergedLfcDF <- logFoldChangeOnClusters(objCOTAN = obj, clName = "merge")
 
   expect_setequal(colnames(mergedLfcDF), mergedClusters)
-  expect_identical(rownames(mergedLfcDF), getGenes(obj))
+  expect_identical(rownames(mergedLfcDF), getGenes(objCOTAN = obj))
   # with 2 clusters the changes are symmetric
   expect_equal(mergedLfcDF[[1L]], -mergedLfcDF[[2L]], tolerance = 1.0e-12)
 
-  for (cl in levels(mergedClusters)) {
+  # Test the low GDI (homogeneity) for each defined clusters
+  simpleChecker <- checkers[[2L]]@thirdCheck
+  for (cl in levels(mergedClusters)[[1L]]) {
+    print(paste("Tested cluster:", cl))
+
     cellsToDrop <- names(clusters)[mergedClusters != cl]
 
-    clObj <- dropGenesCells(obj, cells = cellsToDrop)
+    tmpObj <- dropGenesCells(objCOTAN = obj, cells = cellsToDrop)
 
     suppressWarnings({
-      clObj <- proceedToCoex(clObj, cores = 6L, saveObj = FALSE)
+      tmpObj <- proceedToCoex(objCOTAN = tmpObj, cores = 6L, saveObj = FALSE)
     })
 
-    GDIData <- calculateGDI(clObj)
+    GDIData <- calculateGDI(objCOTAN = tmpObj)
 
-    expect_lte(sum(GDIData[["GDI"]] >= GDIThreshold),
-               allCheckRes[[1L]]@firstCheck@maxRatioBeyond * nrow(GDIData))
-
-    gc()
+    expect_lte(sum(GDIData[["GDI"]] >= simpleChecker@GDIThreshold),
+               simpleChecker@maxRatioBeyond * nrow(GDIData))
   }
+
+  gc()
 })

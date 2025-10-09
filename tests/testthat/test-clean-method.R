@@ -1,4 +1,6 @@
 
+options(parallelly.fork.enable = TRUE)
+
 test_that("clean COTAN object", {
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
                   10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
@@ -26,7 +28,7 @@ test_that("Clean on test dataset", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionBisection(obj, cores = 6L)
+  obj <- estimateDispersionViaSolver(obj, cores = 6L)
 
   raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
   lambda <- readRDS(file.path(getwd(), "lambda.test.RDS"))
@@ -43,5 +45,5 @@ test_that("Clean on test dataset", {
   expect_equal(getNu(obj)[cells.names.test],
                nu, tolerance = 1.0e-14, ignore_attr = FALSE)
   expect_equal(getDispersion(obj)[genes.names.test],
-               dispersion, tolerance = 1.0e-14, ignore_attr = FALSE)
+               dispersion, tolerance = 1.0e-10, ignore_attr = FALSE)
 })
