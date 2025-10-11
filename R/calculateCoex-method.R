@@ -1121,7 +1121,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
       # outer product
       mu_blk <- torch::torch_ger(nu[i:i_end], lambda)
-      
+
       out[i:i_end, mif] <- -Inf
       out[i:i_end, neg] <- mu_blk[, neg] * (disp[neg] - 1.0)
       out[i:i_end, pos] <- -torch::torch_reciprocal(disp[pos]) *
@@ -1142,14 +1142,13 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
   probOneMixPoi <- function(lambda, nu, pi) {
     # mu = nu %o% lambda
-    mu <- torch::torch_ger(nu, lambda)          # cells × genes
+    out <- torch::torch_ger(nu, lambda)          # cells × genes
 
-    # exp(-mu) in-place on mu
-    mu$neg_()$exp_()                            # mu <- exp(-mu)
+    # -exp(-mu) in-place on mu
+    out$neg_()$exp_()$neg_()$add_(1.0)           # mu <- (1.0 - exp(-mu))
 
     # out = mu * (1 - pi) + pi   (all in-place)
-    out <- mu                                   # reuse the same buffer
-    out$mul_(1.0 - pi)$add_(pi)
+    out$mul_((1.0 - pi)$view(c(1L, -1L)))
 
     return(out)
   }

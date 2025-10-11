@@ -186,7 +186,8 @@ setMethod(
                                       allowNegativePi = TRUE, cores = cores),
              NegBin = ,
              NegativeBinomial =
-               estimateDispersionViaSolver(objCOTAN, cores = cores)
+               estimateDispersionViaSolver(objCOTAN, cores = cores),
+             stop("Given wrong model")
       )
 
     gc()
