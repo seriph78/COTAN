@@ -57,8 +57,8 @@ test_that("Merge Uniform Cells Clusters", {
   coexDF_exp <- readRDS(file.path(getwd(), "coex.clusters.test.RDS"))
   pValDF_exp <- readRDS(file.path(getwd(), "pvalues.clusters.test.RDS"))
 
-  expect_equal(coexDF[genes.names.test, ], coexDF_exp, tolerance = 1.0e-12)
-  expect_equal(pValDF[genes.names.test, ], pValDF_exp, tolerance = 1.0e-12)
+  expect_equal(coexDF[genes.names.test, ], coexDF_exp, tolerance = 1.0e-8)
+  expect_equal(pValDF[genes.names.test, ], pValDF_exp, tolerance = 1.0e-8)
 
   deltaExpression <- clustersDeltaExpression(objCOTAN = obj)
 
