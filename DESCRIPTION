@@ -69,6 +69,7 @@ Suggests:
     proto,
     spelling,
     knitr,
+    conflicted,
     data.table,
     gsubfn,
     R.utils,
