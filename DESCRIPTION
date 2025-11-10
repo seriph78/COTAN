@@ -37,7 +37,7 @@ Imports:
     Matrix,
     ggplot2,
     ggrepel,
-    gghalves,
+    ggdist,
     ggthemes,
     graphics,
     parallel,

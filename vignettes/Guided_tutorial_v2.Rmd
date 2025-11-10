@@ -51,6 +51,7 @@ Download the data-set for `"mouse cortex E17.5"`.
 
 ```{r eval=TRUE, include=TRUE}
 dataDir <- tempdir()
+print(dataDir)
 
 GEO <- "GSM2861514"
 fName <- "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"
