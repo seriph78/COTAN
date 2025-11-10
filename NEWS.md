@@ -1,3 +1,10 @@
+Dropped dependency from `gghalves` package as it is deprecated:
+using `ggdist` instead
+
+## 2.11.0
+
+Moved to new version
+
 ## 2.9.7
 
 Fixed underflow error appearing when the dispersion is very small

@@ -1,4 +1,6 @@
 
+## ----- Mitochondrial percentage plot -----
+
 #' @details `mitochondrialPercentagePlot()` plots the raw library size for each
 #'   cell and sample.
 #'
@@ -19,9 +21,10 @@
 #' @importFrom ggplot2 geom_boxplot
 #' @importFrom ggplot2 labs
 #' @importFrom ggplot2 scale_y_continuous
-#' @importFrom ggplot2 ylim
+#' @importFrom ggplot2 coord_cartesian
+#' @importFrom ggplot2 after_stat
 #'
-#' @importFrom gghalves geom_half_violin
+#' @importFrom ggdist stat_slabinterval
 #'
 #' @importFrom Matrix rowSums
 #'
@@ -30,7 +33,7 @@
 #' @importFrom stringr str_detect
 #'
 #' @returns `mitochondrialPercentagePlot()` returns a `list` with:
-#'   * `"plot"` a `violin-boxplot` object
+#'   * `"plot"` a `half-violin-boxplot` object
 #'   * `"sizes"` a sizes `data.frame`
 #'
 #' @export
@@ -77,20 +80,36 @@ mitochondrialPercentagePlot <- function(objCOTAN, genePrefix = "^MT-",
     sizes %>%
     ggplot(aes(x = .data$sample, y = .data$mit.percentage,
                fill = .data$sample)) +
-    #geom_point(size = 0.5) +
-    geom_half_violin(side = "r", position = position_nudge(x = 0.15),
-                     adjust = 2.0, alpha = 0.5, trim = TRUE) +
-    geom_point(position = position_jitter(width = 0.1),
-               size = 0.4, color = "black", alpha = 0.5) +
-    geom_boxplot(aes(x = .data$sample, y = .data$mit.percentage,
-                     fill = .data$sample),
-                 outlier.shape = NA, alpha = 0.8,
-                 width = 0.15, colour = "gray65", size = 0.6) +
-    labs(title = "Mitochondrial percentage of reads",
-         y = "% (mit. reads / tot reads * 100)",
-         x = "") +
-    scale_y_continuous(expand = c(0.0, 0.0)) +
-    #ylim(0L, max(sizes[["sizes"]])) +
+    ggdist::stat_slabinterval(
+      aes(thickness = after_stat(pdf)),
+      side = "right",                 # half-violin to the right
+      show_point = FALSE,             # slab only
+      show_interval = FALSE,          # no intervals
+      position = position_nudge(x = 0.15),
+      normalize = "groups",
+      adjust = 2.0,
+      trim = TRUE,
+      alpha = 0.5,
+      slab_colour = "black",      # outline color
+      slab_linewidth = 0.6,       # outline width (ggplot2 ≥ 3.4)
+      slab_alpha = 0.5            # fill alpha only; leaves stroke opaque
+    ) +
+    geom_point(
+      position = position_jitter(width = 0.1),
+      size = 0.4, color = "black", alpha = 0.5
+    ) +
+    geom_boxplot(
+      aes(x = .data$sample, y = .data$mit.percentage, fill = .data$sample),
+      outlier.shape = NA, alpha = 0.8,
+      width = 0.15, colour = "gray65", size = 0.6
+    ) +
+    labs(
+      title = "Mitochondrial percentage of reads",
+      y = "% (mit. reads / tot reads * 100)",
+      x = ""
+    ) +
+    scale_y_continuous(expand = c(0, 0)) +
+    coord_cartesian(ylim = c(0.0, max(sizes[["mit.percentage"]]))) +
     plotTheme("size-plot")
 
   return(list("plot" = plot, "sizes" = sizes))
