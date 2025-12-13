@@ -236,7 +236,7 @@ convertFromSingleCellExperiment <- function(objSCE,
   # Create the COTAN object
   objCOTAN <- new(
     "COTAN",
-    raw = rawMatrix,
+    raw = as(as(rawMatrix, "Matrix"), "sparseMatrix"),
     genesCoex = genesCoex,
     cellsCoex = cellsCoex,
     metaDataset = as.data.frame(datasetMeta),
