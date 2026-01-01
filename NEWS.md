@@ -1,3 +1,6 @@
+Fixed issue with `isCoexAvailable()` fro cases when the global meta-data
+have multiple columns
+
 Fixed issue with dispersion solver
 
 Dropped dependency from `gghalves` package as it is deprecated:

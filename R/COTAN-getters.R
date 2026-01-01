@@ -282,6 +282,8 @@ setMethod(
 #' @name HandleMetaData
 NULL
 
+## -------- getMetadataDataset --------
+
 #' @aliases getMetadataDataset
 #'
 #' @details `getMetadataDataset()` extracts the meta-data stored for the
@@ -318,6 +320,7 @@ setMethod(
   }
 )
 
+## -------- getMetadataElement --------
 
 #' @aliases getMetadataElement
 #'
@@ -350,6 +353,7 @@ setMethod(
   }
 )
 
+## -------- getMetadataGenes --------
 
 #' @aliases getMetadataGenes
 #'
@@ -375,6 +379,8 @@ setMethod(
 )
 
 
+## -------- getMetadataCells --------
+
 #' @aliases getMetadataCells
 #'
 #' @details `getMetadataCells()` extracts the meta-data stored for the cells
@@ -398,6 +404,8 @@ setMethod(
   }
 )
 
+
+## -------- getDims --------
 
 #' @aliases getDims
 #'
@@ -1069,13 +1077,13 @@ setMethod(
   function(objCOTAN, actOnCells = FALSE, ignoreSync = FALSE) {
     if (isTRUE(actOnCells)) {
       isInSync <-
-        as.logical(getMetadataElement(objCOTAN, datasetTags()[["csync"]]))
+        as.logical(getMetadataElement(objCOTAN, datasetTags()[["csync"]]))[[1L]]
 
       return(!is_empty(objCOTAN@cellsCoex) &&
                (isTRUE(ignoreSync) || isTRUE(isInSync)))
     } else {
       isInSync <-
-        as.logical(getMetadataElement(objCOTAN, datasetTags()[["gsync"]]))
+        as.logical(getMetadataElement(objCOTAN, datasetTags()[["gsync"]]))[[1L]]
 
       return(!is_empty(objCOTAN@genesCoex) &&
                (isTRUE(ignoreSync) || isTRUE(isInSync)))
