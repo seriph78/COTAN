@@ -1,7 +1,7 @@
 Dropped dependency from `gghalves` package as it is deprecated:
 using `ggdist` instead
 
-## 2.11.0
+## 2.10.0
 
 Moved to new version
 
