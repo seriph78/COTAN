@@ -1506,7 +1506,8 @@ calculatePartialCoex <- function(objCOTAN,
 #'
 #' @rdname CalculatingCOEX
 #'
-calculateS <- function(objCOTAN, geneSubsetCol = vector(mode = "character"),
+calculateS <- function(objCOTAN,
+                       geneSubsetCol = vector(mode = "character"),
                        geneSubsetRow = vector(mode = "character")) {
   logThis("Calculating S: START", logLevel = 3L)
 
