@@ -37,7 +37,7 @@ cellSizePlot <- function(objCOTAN, condName = "", conditions = NULL) {
   sizes <- sort(getCellsSize(objCOTAN))
   sizes <- as.data.frame(sizes)
 
-  sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
+  sizes <- setColumnInDF(sizes, colToSet = seq_len(nrow(sizes)), colName = "n")
 
   c(., conditions) %<-%
     normalizeNameAndLabels(objCOTAN, name = condName,

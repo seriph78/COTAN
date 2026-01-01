@@ -180,8 +180,18 @@ convertFromSingleCellExperiment <- function(objSCE,
   # Extract gene metadata
   genesMeta <- rowData(objSCE)
 
+  # Sanity check: same order and length
+  assert_that(is.null(rownames(genesMeta)) ||
+                identical(rownames(rawMatrix), rownames(genesMeta)),
+              msg = "Row names of counts and gene metadata differ.")
+
   # Extract cell metadata
   cellsMetaSCE <- colData(objSCE)
+
+  # Sanity check: same order and length
+  assert_that(is.null(rownames(cellsMetaSCE)) ||
+                identical(colnames(rawMatrix), rownames(cellsMetaSCE)),
+              msg = "Column names of counts and cell metadata differ.")
 
   # Identify clustering columns according to given pattern
   # (e.g., 'COTAN_clusters_', 'seurat_clusters', ...)
@@ -226,7 +236,7 @@ convertFromSingleCellExperiment <- function(objSCE,
   # Create the COTAN object
   objCOTAN <- new(
     "COTAN",
-    raw = rawMatrix,
+    raw = as(as(rawMatrix, "Matrix"), "sparseMatrix"),
     genesCoex = genesCoex,
     cellsCoex = cellsCoex,
     metaDataset = as.data.frame(datasetMeta),
