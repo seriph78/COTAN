@@ -191,13 +191,13 @@ for the low \code{nu} threshold that defines problematic cells
 
 \code{screePlot()} returns a \code{ggplot2} plot for the explained variances
 
-\code{cellSizePlot()} returns the \code{violin-boxplot} plot
+\code{cellSizePlot()} returns a \code{half-violin-boxplot} object
 
-\code{genesSizePlot()} returns the \code{violin-boxplot} plot
+\code{genesSizePlot()} returns a \code{half-violin-boxplot} object
 
 \code{mitochondrialPercentagePlot()} returns a \code{list} with:
 \itemize{
-\item \code{"plot"} a \code{violin-boxplot} object
+\item \code{"plot"} a \code{half-violin-boxplot} object
 \item \code{"sizes"} a sizes \code{data.frame}
 }
 
