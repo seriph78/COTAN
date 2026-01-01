@@ -190,7 +190,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
                        aes(x = .data$n, y = .data$means,
                            label = rownames(D)[lowD]),
                        #nudge_y = 0.05,
-                       nudge_x = 400.0
+                       nudge_x = 100.0
                        #direction = "x",
                        #angle = 90.0,
                        #vjust = 0L,
