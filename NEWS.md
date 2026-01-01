@@ -1,3 +1,5 @@
+Fixed issue with dispersion solver
+
 Dropped dependency from `gghalves` package as it is deprecated:
 using `ggdist` instead
 
