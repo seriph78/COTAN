@@ -246,11 +246,10 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
   resError <- vapply(res, inherits, logical(1), "try-error")
   if (any(resError)) {
     first <- which(resError)[[1L]]
-    e <- res[[first]]$condition
     stop(sprintf(
       "Dispersion solver failed on batch %d/%d (%s): %s",
       first, length(res), ifelse(useBisection, "bisection", "newton"),
-      conditionMessage(e)
+      conditionMessage(res[[first]][[1L]])
     ), call. = FALSE)
   }
 
@@ -473,10 +472,9 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
   resError <- vapply(res, inherits, logical(1), "try-error")
   if (any(resError)) {
     first <- which(resError)[[1L]]
-    e <- res[[first]]$condition
     stop(sprintf(
       "Nu solver failed on batch %d/%d: %s",
-      first, length(res), conditionMessage(e)
+      first, length(res), conditionMessage(res[[first]][[1L]])
     ), call. = FALSE)
   }
 
