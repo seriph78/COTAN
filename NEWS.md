@@ -1,3 +1,5 @@
+## 2.11.1
+
 Fixed issue with `isCoexAvailable()` fro cases when the global meta-data
 have multiple columns
 
