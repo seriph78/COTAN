@@ -31,6 +31,7 @@
 \alias{screePlot}
 \alias{cellSizePlot}
 \alias{genesSizePlot}
+\alias{genesPercentagePlot}
 \alias{mitochondrialPercentagePlot}
 \alias{scatterPlot}
 \title{Raw data cleaning}
@@ -76,6 +77,14 @@ screePlot(pcaStdDev)
 cellSizePlot(objCOTAN, condName = "", conditions = NULL)
 
 genesSizePlot(objCOTAN, condName = "", conditions = NULL)
+
+genesPercentagePlot(
+  objCOTAN,
+  genes,
+  title = "Genes' percentage of reads",
+  condName = "",
+  conditions = NULL
+)
 
 mitochondrialPercentagePlot(
   objCOTAN,
@@ -132,8 +141,10 @@ elements of the returned list will be \code{NULL}}
 \item{pcaStdDev}{a \code{vector} with the standard deviations of the various
 components}
 
-\item{genePrefix}{Prefix for the mitochondrial genes (default "^MT-" for
-Human, mouse "^mt-")}
+\item{title}{The title of the plot; it defaults to \code{"Genes' percentage of reads"}}
+
+\item{genePrefix}{Prefix for the mitochondrial genes; use \code{"^MT-"} for
+Human (default) and \code{"^mt-"} for Mouse}
 
 \item{splitSamples}{Boolean. Whether to plot each sample in a different panel
 (default \code{FALSE})}
@@ -194,6 +205,12 @@ for the low \code{nu} threshold that defines problematic cells
 \code{cellSizePlot()} returns a \code{half-violin-boxplot} object
 
 \code{genesSizePlot()} returns a \code{half-violin-boxplot} object
+
+\code{genesPercentagePlot()} returns a \code{list} with:
+\itemize{
+\item \code{"plot"} a \code{half-violin-boxplot} object
+\item \code{"sizes"} a sizes \code{data.frame}
+}
 
 \code{mitochondrialPercentagePlot()} returns a \code{list} with:
 \itemize{
@@ -264,8 +281,11 @@ sample.
 \code{genesSizePlot()} plots the raw gene number (reads > 0) for each
 cell and sample
 
-\code{mitochondrialPercentagePlot()} plots the raw library size for each
-cell and sample.
+\code{genesPercentagePlot()} plots the percentage of expression of the
+passed-in genes against the overall cell's library size
+
+\code{mitochondrialPercentagePlot()} plots the percentage of expression
+of the mitochondrial genes against the overall cell's library size
 
 \code{scatterPlot()} creates a plot that check the relation between the
 library size and the number of genes detected.
@@ -309,6 +329,11 @@ plot(lsPlot)
 
 gsPlot <- genesSizePlot(objCOTAN)
 plot(gsPlot)
+
+genes <- getGenes(objCOTAN)[1:30]
+genesPercPlot <-
+  genesPercentagePlot(objCOTAN, genes = genes)[["plot"]]
+plot(genesPercPlot)
 
 mitPercPlot <-
   mitochondrialPercentagePlot(objCOTAN, genePrefix = "g-0000")[["plot"]]

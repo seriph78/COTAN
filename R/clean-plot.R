@@ -170,12 +170,12 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
         cellsRDM_A,
         aes(x = .data$PC1, y = .data$PC2, colour = .data$groups)
       ) +
-      geom_point(alpha = 0.5, size = 3L) +
+      geom_point(alpha = 0.5, size = 1.0) +
       geom_point(
         data = cellsRDM_B,
         aes(x = .data$PC1, y = .data$PC2, colour = .data$groups),
         alpha = 0.8,
-        size = 3L
+        size = 1.5
       ) +
       scale_color_manual(
         name = "groups",
@@ -200,17 +200,21 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
         aes(x = .data$n,
             y = .data$means,
             label = rownames(D)[lowD]),
+        #vjust = 0L,
         #nudge_y = 0.05,
-        nudge_x = 100.0
+        hjust = 0L,
+        nudge_x = 50.0
         #direction = "x",
         #angle = 90.0,
-        #vjust = 0L,
         #segment.size = 0.2
       ) +
       plotTheme("genes") +
       theme(
-        plot.title = element_text(hjust = 1.0),
-        plot.subtitle = element_text(hjust = 0.95, vjust = -25.0))
+        plot.title    = element_text(hjust = 1.0),
+        plot.subtitle = element_text(hjust = 0.95, vjust = -25.0)
+        # extra right margin for long labels
+        # plot.margin   = margin(5.5, 40, 5.5, 5.5)
+      )
 
     nuEst <- round(getNu(objCOTAN), digits = 7L)
     UDEPlot <-
