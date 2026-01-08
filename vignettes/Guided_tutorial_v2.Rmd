@@ -204,7 +204,7 @@ plot(mitPlot)
 mitPercThr <- 1.0
 obj <- addElementToMetaDataset(obj, "Mitoc. perc. threshold", mitPercThr)
 
-cells_to_rem <- rownames(mitSizes)[mitSizes[["mit.percentage"]] > mitPercThr]
+cells_to_rem <- rownames(mitSizes)[mitSizes[["percentage"]] > mitPercThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
 c(mitPlot, mitSizes) %<-%
@@ -628,6 +628,9 @@ quickly with the number of *clusters*), the function relies on a *related*
 distance the find the cluster pairs that have the highest chance to be merged.
 
 ```{r eval=FALSE, include=TRUE}
+# default constructed checker is OK
+advChecker <- new("AdvancedGDIUniformityCheck")
+
 c(mergedClusters, mergedCoexDF) %<-%
   mergeUniformCellsClusters(
     obj,

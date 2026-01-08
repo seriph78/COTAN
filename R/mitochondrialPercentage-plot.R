@@ -62,7 +62,7 @@ genesPercentagePlot <- function(objCOTAN,
   assert_that(!is_empty(conditions),
               identical(rownames(df), names(conditions)))
 
-  df <- setColumnInDF(df, colToSet = conditions, colName = "condition")
+  df <- setColumnInDF(df, colToSet = conditions, colName = "sample")
 
   genesInObj <- genes %in% getGenes(objCOTAN)
   genes <- genes[genesInObj]
@@ -86,7 +86,7 @@ genesPercentagePlot <- function(objCOTAN,
   plot <-
     df %>%
     ggplot(
-      aes(x = .data$condition, y = .data$percentage, fill = .data$condition)
+      aes(x = .data$sample, y = .data$percentage, fill = .data$sample)
     ) +
     ggdist::stat_slabinterval(
       aes(thickness = after_stat(pdf)),
@@ -107,7 +107,7 @@ genesPercentagePlot <- function(objCOTAN,
       size = 0.4, color = "black", alpha = 0.5
     ) +
     geom_boxplot(
-      aes(x = .data$condition, y = .data$percentage, fill = .data$condition),
+      aes(x = .data$sample, y = .data$percentage, fill = .data$sample),
       outlier.shape = NA, alpha = 0.8,
       width = 0.15, colour = "gray65", size = 0.6
     ) +
