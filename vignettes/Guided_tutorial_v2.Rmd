@@ -204,7 +204,7 @@ plot(mitPlot)
 mitPercThr <- 1.0
 obj <- addElementToMetaDataset(obj, "Mitoc. perc. threshold", mitPercThr)
 
-cells_to_rem <- rownames(mitSizes)[mitSizes[["percentage"]] > mitPercThr]
+cells_to_rem <- rownames(mitSizes)[mitSizes[["mit.percentage"]] > mitPercThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
 c(mitPlot, mitSizes) %<-%
