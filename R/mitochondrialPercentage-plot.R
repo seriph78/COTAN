@@ -140,6 +140,8 @@ genesPercentagePlot <- function(objCOTAN,
 #'   on the one indicated by `condName` that will only indicate the relevant
 #'   column name in the returned `data.frame`
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @importFrom rlang is_empty
 #'
 #' @importFrom stringr str_detect
@@ -169,6 +171,14 @@ mitochondrialPercentagePlot <- function(objCOTAN,
 
   title <- "Mitochondrial percentage of reads"
 
-  return(genesPercentagePlot(objCOTAN, genes = mitGenes, title = title,
-                             condName = condName, conditions = conditions))
+  res <- genesPercentagePlot(objCOTAN, genes = mitGenes, title = title,
+                             condName = condName, conditions = conditions)
+  assert_that(identical(colnames(res[["sizes"]]),
+                        c("sizes", "n", "sample", "sum", "percentage")))
+
+  # ensures backward compatibility
+  colnames(res[["sizes"]]) <-
+    c("sizes", "n", "sample", "sum.mit", "mit.percentage")
+
+  return(res)
 }
