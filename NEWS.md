@@ -1,3 +1,8 @@
+Improvements for plot functions:
+- fixed label placements genes' plot in `cleanPlots()`
+- added `genesPercentagePlot()` as generalization of
+  `mitochondrialPercentagePlot()`
+
 ## 2.11.1
 
 Fixed issue with `isCoexAvailable()` fro cases when the global meta-data
