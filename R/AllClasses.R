@@ -88,11 +88,11 @@ setClass(
     numGenes <- nrow(object@raw)
     numCells <- ncol(object@raw)
 
-    if (length(rownames(object@raw)) != numGenes) {
-      stop("Input 'raw' data must have row names")
+    if (length(unique(rownames(object@raw))) != numGenes) {
+      stop("Input 'raw' data must have unique row names")
     }
-    if (length(colnames(object@raw)) != numCells) {
-      stop("Input 'raw' data must have column names")
+    if (length(unique(colnames(object@raw))) != numCells) {
+      stop("Input 'raw' data must have unique column names")
     }
 
     if (!is_empty(object@genesCoex)) {

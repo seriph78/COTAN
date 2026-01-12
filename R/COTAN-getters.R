@@ -9,7 +9,7 @@
 NULL
 
 
-## ---- getRawData ----
+## -------- getRawData --------
 
 #' @aliases getRawData
 #'
@@ -38,7 +38,7 @@ setMethod(
 )
 
 
-## ---- getNumCells ----
+## -------- getNumCells --------
 
 #' @aliases getNumCells
 #'
@@ -64,7 +64,7 @@ setMethod(
 )
 
 
-## ---- getNumGenes ----
+## -------- getNumGenes --------
 
 #' @aliases getNumGenes
 #'
@@ -90,7 +90,7 @@ setMethod(
 )
 
 
-## ---- getCells ----
+## -------- getCells --------
 
 #' @aliases getCells
 #'
@@ -116,7 +116,7 @@ setMethod(
 )
 
 
-## ---- getGenes ----
+## -------- getGenes --------
 
 #' @aliases getGenes
 #'
@@ -142,7 +142,7 @@ setMethod(
 )
 
 
-## ---- getZeroOneProj ----
+## -------- getZeroOneProj --------
 
 #' @aliases getZeroOneProj
 #'
@@ -170,7 +170,7 @@ setMethod(
 )
 
 
-## ---- getCellsSize ----
+## -------- getCellsSize --------
 
 #' @aliases getCellsSize
 #'
@@ -198,7 +198,7 @@ setMethod(
 )
 
 
-## ---- getNumExpressedGenes ----
+## -------- getNumExpressedGenes --------
 
 #' @aliases getNumExpressedGenes
 #'
@@ -228,7 +228,7 @@ setMethod(
 )
 
 
-## ---- getGenesSize ----
+## -------- getGenesSize --------
 
 #' @aliases getGenesSize
 #'
@@ -256,7 +256,7 @@ setMethod(
 )
 
 
-## ---- getNumOfExpressingCells ----
+## -------- getNumOfExpressingCells --------
 
 #' @aliases getNumOfExpressingCells
 #'
@@ -303,8 +303,7 @@ setMethod(
 #' @name HandleMetaData
 NULL
 
-
-## ---- getMetadataDataset ----
+## -------- getMetadataDataset --------
 
 #' @aliases getMetadataDataset
 #'
@@ -342,6 +341,7 @@ setMethod(
   }
 )
 
+## -------- getMetadataElement --------
 
 ## ---- getMetadataElement ----
 
@@ -376,6 +376,7 @@ setMethod(
   }
 )
 
+## -------- getMetadataGenes --------
 
 ## ---- getMetadataGenes ----
 
@@ -403,7 +404,7 @@ setMethod(
 )
 
 
-## ---- getMetadataCells ----
+## -------- getMetadataCells --------
 
 #' @aliases getMetadataCells
 #'
@@ -429,7 +430,7 @@ setMethod(
 )
 
 
-## ---- getDims ----
+## -------- getDims --------
 
 #' @aliases getDims
 #'
@@ -463,7 +464,7 @@ setMethod(
 
 # ------- `COTAN` estimated data accessors ------
 
-## ---- getNu ----
+## -------- getNu --------
 
 #' @aliases getNu
 #'
@@ -497,7 +498,7 @@ setMethod(
 )
 
 
-## ---- getLambda ----
+## -------- getLambda --------
 
 #' @aliases getLambda
 #'
@@ -531,7 +532,7 @@ setMethod(
 )
 
 
-## ---- getDispersion ----
+## -------- getDispersion --------
 
 #' @aliases getDispersion
 #'
@@ -599,6 +600,8 @@ setMethod(
 
 ## ---- estimatorsAreReady ----
 
+## -------- estimatorsAreReady --------
+
 #' @details `estimatorsAreReady()` checks whether the estimators arrays
 #'   `lambda`, `nu`, `dispersion` are available
 #'
@@ -631,7 +634,7 @@ estimatorsAreReady <- function(objCOTAN) {
 }
 
 
-## ---- getMu ----
+## -------- getMu --------
 
 #' @aliases getMu
 #' @aliases calculateMu
@@ -662,7 +665,7 @@ getMu <- function(objCOTAN) {
 }
 
 
-## ---- getNuNormData ----
+## -------- getNuNormData --------
 
 #' @details `getNuNormData()` extracts the \eqn{\nu}*-normalized* count table
 #'   (i.e. where each column is divided by `nu`) and returns it
@@ -690,7 +693,7 @@ getNuNormData <- function(objCOTAN) {
 }
 
 
-## ---- getLogNormData ----
+## -------- getLogNormData --------
 
 #' @details `getLogNormData()` extracts the *log-normalized* count table (i.e.
 #'   where each column is divided by the [getCellsSize()]), takes its `log10`
@@ -717,7 +720,7 @@ getLogNormData <- function(objCOTAN) {
 }
 
 
-## ---- getNormalizedData ----
+## -------- getNormalizedData --------
 
 #' @details `getNormalizedData()` is deprecated: please use [getNuNormData()] or
 #'   [getLogNormData()] directly as appropriate
@@ -743,7 +746,7 @@ getNormalizedData <- function(objCOTAN, retLog = FALSE) {
 }
 
 
-## ---- getProbabilityOfZero ----
+## -------- getProbabilityOfZero --------
 
 #' @details `getProbabilityOfZero()` gives for each cell and each gene the
 #'   probability of observing zero reads. The result depends on the statistical
@@ -948,7 +951,7 @@ setMethod(
 #' @name CalculatingCOEX
 NULL
 
-## ---- getGenesCoex ----
+## -------- getGenesCoex --------
 
 #' @aliases getGenesCoex
 #'
@@ -1091,7 +1094,7 @@ setMethod(
 )
 
 
-## ---- getCellsCoex ----
+## -------- getCellsCoex --------
 
 #' @aliases getCellsCoex
 #'
@@ -1158,7 +1161,7 @@ setMethod(
 )
 
 
-## ---- isCoexAvailable ----
+## -------- isCoexAvailable --------
 
 #' @aliases isCoexAvailable
 #'
@@ -1186,13 +1189,13 @@ setMethod(
   function(objCOTAN, actOnCells = FALSE, ignoreSync = FALSE) {
     if (isTRUE(actOnCells)) {
       isInSync <-
-        as.logical(getMetadataElement(objCOTAN, datasetTags()[["csync"]]))
+        as.logical(getMetadataElement(objCOTAN, datasetTags()[["csync"]])[[1L]])
 
       return(!is_empty(objCOTAN@cellsCoex) &&
                (isTRUE(ignoreSync) || isTRUE(isInSync)))
     } else {
       isInSync <-
-        as.logical(getMetadataElement(objCOTAN, datasetTags()[["gsync"]]))
+        as.logical(getMetadataElement(objCOTAN, datasetTags()[["gsync"]])[[1L]])
 
       return(!is_empty(objCOTAN@genesCoex) &&
                (isTRUE(ignoreSync) || isTRUE(isInSync)))
@@ -1201,7 +1204,7 @@ setMethod(
 )
 
 
-## ---- getGDI ----
+## -------- getGDI --------
 
 #' @aliases getGDI
 #'
@@ -1238,7 +1241,7 @@ setMethod(
 
 # ------- `COTAN` clusterizations accessors ------
 
-## ---- getClusterizations ----
+## -------- getClusterizations --------
 
 #' @aliases getClusterizations
 #'
@@ -1357,7 +1360,7 @@ setMethod(
 )
 
 
-## ---- getClusterizationName ----
+## -------- getClusterizationName --------
 
 #' @aliases getClusterizationName
 #'
@@ -1412,7 +1415,7 @@ setMethod(
 )
 
 
-## ---- getClusterizationData ----
+## -------- getClusterizationData --------
 
 #' @aliases getClusterizationData
 #'
@@ -1460,7 +1463,7 @@ setMethod(
 )
 
 
-## ---- getClusters ----
+## -------- getClusters --------
 
 #' @details `getClusters()` extracts the asked *clusterization* from the `COTAN`
 #'   object
@@ -1484,7 +1487,7 @@ getClusters <- function(objCOTAN, clName = "") {
 }
 
 
-## ---- getClustersCoex ----
+## -------- getClustersCoex --------
 
 #' @aliases getClustersCoex
 #'
@@ -1525,7 +1528,8 @@ setMethod(
 #' @name HandlingConditions
 NULL
 
-## ---- getAllConditions ----
+
+## -------- getAllConditions --------
 
 #' @aliases getAllConditions
 #'
@@ -1581,7 +1585,7 @@ setMethod(
 )
 
 
-## ---- getConditionName ----
+## -------- getConditionName --------
 
 #' @aliases getConditionName
 #'
@@ -1634,7 +1638,7 @@ setMethod(
 )
 
 
-## ---- getCondition ----
+## -------- getCondition --------
 
 #' @aliases getCondition
 #'
@@ -1677,7 +1681,7 @@ setMethod(
 )
 
 
-## ---- normalizeNameAndLabels ----
+## -------- normalizeNameAndLabels --------
 
 #' @details `normalizeNameAndLabels()` takes a pair of name/labels and
 #'   normalize them based on the available information in the `COTAN` object

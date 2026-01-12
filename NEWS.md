@@ -1,3 +1,22 @@
+Improvements for plot functions:
+- fixed label placements genes' plot in `cleanPlots()`
+- added `genesPercentagePlot()` as generalization of
+  `mitochondrialPercentagePlot()`
+
+## 2.11.1
+
+Fixed issue with `isCoexAvailable()` fro cases when the global meta-data
+have multiple columns
+
+Fixed issue with dispersion solver
+
+Dropped dependency from `gghalves` package as it is deprecated:
+using `ggdist` instead
+
+## 2.11.0
+
+Moved to new version
+
 ## 2.9.7
 
 Fixed underflow error appearing when the dispersion is very small

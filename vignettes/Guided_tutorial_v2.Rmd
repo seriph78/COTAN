@@ -30,12 +30,9 @@ knitr::opts_chunk[["set"]](
 ```{r message=FALSE, warning=FALSE}
 library(COTAN)
 library(zeallot)
-library(rlang)
-library(data.table)
-library(Rtsne)
-library(qpdf)
-library(GEOquery)
-library(ComplexHeatmap)
+
+# necessary to solve precedence of overloads
+conflicted::conflict_prefer("%<-%", "zeallot")
 
 options(parallelly.fork.enable = TRUE)
 ```
@@ -51,6 +48,7 @@ Download the data-set for `"mouse cortex E17.5"`.
 
 ```{r eval=TRUE, include=TRUE}
 dataDir <- tempdir()
+print(dataDir)
 
 GEO <- "GSM2861514"
 fName <- "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz"
@@ -60,9 +58,13 @@ dataSetFile <- file.path(dataDir, GEO, fName)
 dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
 
 if (!file.exists(dataSetFile)) {
-  getGEOSuppFiles(GEO, makeDirectory = TRUE,
-                  baseDir = dataDir, fetch_files = TRUE,
-                  filter_regex = fName)
+  GEOquery::getGEOSuppFiles(
+    GEO,
+    makeDirectory = TRUE,
+    baseDir = dataDir,
+    fetch_files = TRUE,
+    filter_regex = fName
+  )
 }
 
 sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
@@ -110,10 +112,13 @@ the metadata for the experiment.
 cond <- "mouse_cortex_E17.5"
 
 obj <- COTAN(raw = sample.dataset)
-obj <- initializeMetaDataset(obj,
-                             GEO = GEO,
-                             sequencingMethod = "Drop_seq",
-                             sampleCondition = cond)
+obj <-
+  initializeMetaDataset(
+    obj,
+    GEO = GEO,
+    sequencingMethod = "Drop_seq",
+    sampleCondition = cond
+  )
 
 logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
         logLevel = 1L)
@@ -163,8 +168,8 @@ To drop cells by gene number: high genes count might also indicate doublets...
 
 ```{r}
 genesSizeHighThr <- 3000L
-obj <- addElementToMetaDataset(obj, "Num genes high threshold",
-                               genesSizeHighThr)
+obj <-
+  addElementToMetaDataset(obj, "Num genes high threshold", genesSizeHighThr)
 
 cells_to_rem <- getCells(obj)[getNumExpressedGenes(obj) > genesSizeHighThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
@@ -189,7 +194,8 @@ Cells with a too high percentage of mitochondrial genes are
 likely dead (or at the last problematic) cells. So we drop them!
 
 ```{r}
-c(mitPlot, mitSizes) %<-% mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
+c(mitPlot, mitSizes) %<-%
+  mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
 
 plot(mitPlot)
 ```
@@ -201,7 +207,8 @@ obj <- addElementToMetaDataset(obj, "Mitoc. perc. threshold", mitPercThr)
 cells_to_rem <- rownames(mitSizes)[mitSizes[["mit.percentage"]] > mitPercThr]
 obj <- dropGenesCells(obj, cells = cells_to_rem)
 
-c(mitPlot, mitSizes) %<-% mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
+c(mitPlot, mitSizes) %<-%
+  mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
 
 plot(mitPlot)
 ```
@@ -316,9 +323,16 @@ In this part, all the contingency tables are computed
 and used to get the statistics necessary to `COEX` evaluation and storing
 
 ```{r}
-obj <- proceedToCoex(obj, calcCoex = TRUE,
-                     optimizeForSpeed = TRUE, cores = 6L, deviceStr = "cuda",
-                     saveObj = FALSE, outDir = outDir)
+obj <-
+  proceedToCoex(
+    obj,
+    calcCoex = TRUE,
+    optimizeForSpeed = TRUE,
+    cores = 6L,
+    deviceStr = "cuda",
+    saveObj = FALSE,
+    outDir = outDir
+  )
 ```
 
 When `saveObj == TRUE`, in the previous step, this step can be skipped
@@ -335,13 +349,18 @@ It is also possible to run directly a single function
 if we don't want to clean anything.
 
 ```{r eval=FALSE, include=TRUE}
-obj2 <- automaticCOTANObjectCreation(
-  raw = sample.dataset,
-  GEO = GEO,
-  sequencingMethod = "Drop_seq",
-  sampleCondition = cond,
-  calcCoex = TRUE, cores = 6L, optimizeForSpeed = TRUE,
-  saveObj = TRUE, outDir = outDir)
+obj2 <-
+  automaticCOTANObjectCreation(
+    raw = sample.dataset,
+    GEO = GEO,
+    sequencingMethod = "Drop_seq",
+    sampleCondition = cond,
+    calcCoex = TRUE,
+    cores = 6L,
+    optimizeForSpeed = TRUE,
+    saveObj = TRUE,
+    outDir = outDir
+  )
 ```
 
 # Analysis of the elaborated data
@@ -403,15 +422,25 @@ the following one.
 
 ```{r, eval=TRUE, include=TRUE}
 invisible(
-  genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Vim", "Hes1"),
-                   pValueThreshold = 0.001, symmetric = TRUE))
+  genesHeatmapPlot(
+    obj,
+    primaryMarkers = c("Satb2", "Bcl11b", "Vim", "Hes1"),
+    pValueThreshold = 0.001,
+    symmetric = TRUE
+  )
+)
 ```
 
 ```{r, eval=FALSE, include=TRUE}
 invisible(
-  genesHeatmapPlot(obj, primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
-                   secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
-                   pValueThreshold = 0.001, symmetric = FALSE))
+  genesHeatmapPlot(
+    obj,
+    primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
+    secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
+    pValueThreshold = 0.001,
+    symmetric = FALSE
+  )
+)
 ```
 
 ## Get data tables
@@ -457,8 +486,12 @@ layersGenes <- list(
   "Prog" = c("Vim",    "Hes1", "Dummy")
 )
 c(gSpace, eigPlot, pcaGenesClDF, treePlot) %<-%
-  establishGenesClusters(obj, groupMarkers = layersGenes,
-                         numGenesPerMarker = 25L, kCuts = 5L)
+  establishGenesClusters(
+    obj,
+    groupMarkers = layersGenes,
+    numGenesPerMarker = 25L,
+    kCuts = 5
+  )
 
 plot(eigPlot)
 ```
@@ -469,11 +502,15 @@ plot(treePlot)
 
 ```{r eval=TRUE, include=TRUE}
 colSelection <- vapply(pcaGenesClDF, is.numeric, logical(1L))
-genesUmapPl <- UMAPPlot(pcaGenesClDF[, colSelection, drop = FALSE],
-                        clusters = getColumnFromDF(pcaGenesClDF, "hclust"),
-                        elements = layersGenes,
-                        title = "Genes' clusters UMAP Plot",
-                        numNeighbors = 32L, minPointsDist = 0.25)
+genesUmapPl <-
+  UMAPPlot(
+    pcaGenesClDF[, colSelection, drop = FALSE],
+    clusters = getColumnFromDF(pcaGenesClDF, "hclust"),
+    elements = layersGenes,
+    title = "Genes' clusters UMAP Plot",
+    numNeighbors = 32L,
+    minPointsDist = 0.25
+  )
 
 plot(genesUmapPl)
 ```
@@ -502,13 +539,25 @@ guarantee of uniformity for the *cluster*.
 advChecker <- new("AdvancedGDIUniformityCheck")
 
 c(splitClusters, splitCoexDF) %<-%
-  cellsUniformClustering(obj, initialResolution = 0.8, checker = advChecker,
-                         optimizeForSpeed = TRUE, deviceStr = "cuda",
-                         cores = 6L, genesSel = "HGDI",
-                         saveObj = TRUE, outDir = outDir)
+  cellsUniformClustering(
+    obj,
+    initialResolution = 0.8,
+    checker = advChecker,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    cores = 6L,
+    genesSel = "HGDI",
+    saveObj = TRUE,
+    outDir = outDir
+  )
 
-obj <- addClusterization(obj, clName = "split",
-                         clusters = splitClusters, coexDF = splitCoexDF)
+obj <-
+  addClusterization(
+    obj,
+    clName = "split",
+    clusters = splitClusters,
+    coexDF = splitCoexDF
+  )
 
 table(splitClusters)
 ```
@@ -521,14 +570,24 @@ splitClusters <- vignette.split.clusters[getCells(obj)]
 
 splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
 
-obj <- addClusterization(obj, clName = "split", clusters = splitClusters,
-                         coexDF = splitCoexDF, override = FALSE)
+obj <-
+  addClusterization(
+    obj,
+    clName = "split",
+    clusters = splitClusters,
+    coexDF = splitCoexDF,
+    override = FALSE
+  )
 ```
 
 It is possible to have some statistics about the *clusterization*
 ```{r eval=TRUE, include=TRUE}
 c(summaryData, summaryPlot) %<-%
-  clustersSummaryPlot(obj, clName = "split", plotTitle = "split summary")
+  clustersSummaryPlot(
+    obj,
+    clName = "split",
+    plotTitle = "split summary"
+  )
 
 summaryData
 ```
@@ -544,11 +603,15 @@ It is possible to visualize how relevant are the *marker genes'* `lists` with
 respect to the given *clusterization*
 ```{r eval=TRUE, include=TRUE}
 c(splitHeatmap, scoreDF, pValueDF) %<-%
-  clustersMarkersHeatmapPlot(obj, groupMarkers = layersGenes,
-                             clName = "split", kCuts = 5L,
-                             adjustmentMethod = "holm")
+  clustersMarkersHeatmapPlot(
+    obj,
+    groupMarkers = layersGenes,
+    clName = "split",
+    kCuts = 5L,
+    adjustmentMethod = "holm"
+  )
 
-draw(splitHeatmap)
+ComplexHeatmap::draw(splitHeatmap)
 ```
 
 
@@ -565,11 +628,20 @@ quickly with the number of *clusters*), the function relies on a *related*
 distance the find the cluster pairs that have the highest chance to be merged.
 
 ```{r eval=FALSE, include=TRUE}
+# default constructed checker is OK
+advChecker <- new("AdvancedGDIUniformityCheck")
+
 c(mergedClusters, mergedCoexDF) %<-%
-  mergeUniformCellsClusters(obj, clusters = splitClusters,
-                            checkers = advChecker,
-                            optimizeForSpeed = TRUE, deviceStr = "cuda",
-                            cores = 6L, saveObj = TRUE, outDir = outDir)
+  mergeUniformCellsClusters(
+    obj,
+    clusters = splitClusters,
+    checkers = advChecker,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    cores = 6L,
+    saveObj = TRUE,
+    outDir = outDir
+  )
 
 # merges are:
 #  1 <- 06 + 07
@@ -581,8 +653,14 @@ c(mergedClusters, mergedCoexDF) %<-%
 #  7 <- 03 + 04 + 10 + 13
 #  8 <- 05
 
-obj <- addClusterization(obj, clName = "merge", override = TRUE,
-                         clusters = mergedClusters, coexDF = mergedCoexDF)
+obj <-
+  addClusterization(
+    obj,
+    clName = "merge",
+    override = TRUE,
+    clusters = mergedClusters,
+    coexDF = mergedCoexDF
+  )
 
 table(mergedClusters)
 ```
@@ -597,9 +675,12 @@ stricter checker are performed, than those that satisfy the second, and so on.
 
 ```{r eval=FALSE, include=TRUE}
 
-checkersList <- list(advChecker,
-                     shiftCheckerThresholds(advChecker, 0.01),
-                     shiftCheckerThresholds(advChecker, 0.03))
+checkersList <-
+  list(
+    advChecker,
+    shiftCheckerThresholds(advChecker, 0.01),
+    shiftCheckerThresholds(advChecker, 0.03)
+  )
 
 prevCheckRes <- data.frame()
 
@@ -611,19 +692,29 @@ prevCheckRes <- data.frame()
 if (TRUE) {
   # read from the last file among those named all_check_results_XX.csv
   mergeDir <- file.path(outDir, cond, "leafs_merge")
-  resFiles <- list.files(path = mergeDir, pattern = "all_check_results_.*csv",
-                         full.names = TRUE)
+  resFiles <-
+    list.files(
+      path = mergeDir,
+      pattern = "all_check_results_.*csv",
+      full.names = TRUE
+    )
 
-  prevCheckRes <- read.csv(resFiles[length(resFiles)],
-                           header = TRUE, row.names = 1L)
+  prevCheckRes <- 
+    read.csv(resFiles[length(resFiles)], header = TRUE, row.names = 1L)
 }
 
 c(mergedClusters2, mergedCoexDF2) %<-%
-  mergeUniformCellsClusters(obj, clusters = splitClusters,
-                            checkers = checkersList,
-                            allCheckResults = prevCheckRes,
-                            optimizeForSpeed = TRUE, deviceStr = "cuda",
-                            cores = 6L, saveObj = TRUE, outDir = outDir)
+  mergeUniformCellsClusters(
+    obj,
+    clusters = splitClusters,
+    checkers = checkersList,
+    allCheckResults = prevCheckRes,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    cores = 6L,
+    saveObj = TRUE,
+    outDir = outDir
+  )
 
 # merges are:
 #  1 <- '-1' + 06 + 09
@@ -633,8 +724,14 @@ c(mergedClusters2, mergedCoexDF2) %<-%
 #  5 <- 01 + 08 + 11
 #  6 <- 02 + 05
 
-obj <- addClusterization(obj, clName = "merge2", override = TRUE,
-                         clusters = mergedClusters2, coexDF = mergedCoexDF2)
+obj <-
+  addClusterization(
+    obj,
+    clName = "merge2",
+    override = TRUE,
+    clusters = mergedClusters2,
+    coexDF = mergedCoexDF2
+  )
 
 table(mergedClusters2)
 ```
@@ -648,16 +745,28 @@ mergedClusters <- vignette.merge.clusters[getCells(obj)]
 
 mergedCoexDF <- DEAOnClusters(obj, clusters = mergedClusters)
 
-obj <- addClusterization(obj, clName = "merge", clusters = mergedClusters,
-                         coexDF = mergedCoexDF, override = FALSE)
+obj <-
+  addClusterization(
+    obj,
+    clName = "merge",
+    clusters = mergedClusters,
+    coexDF = mergedCoexDF,
+    override = FALSE
+  )
 
 data("vignette.merge2.clusters", package = "COTAN")
 mergedClusters2 <- vignette.merge2.clusters[getCells(obj)]
 
 mergedCoexDF2 <- DEAOnClusters(obj, clusters = mergedClusters2)
 
-obj <- addClusterization(obj, clName = "merge2", clusters = mergedClusters2,
-                         coexDF = mergedCoexDF2, override = FALSE)
+obj <-
+  addClusterization(
+    obj,
+    clName = "merge2",
+    clusters = mergedClusters2,
+    coexDF = mergedCoexDF2,
+    override = FALSE
+  )
 
 table(mergedClusters2, mergedClusters)
 ```
@@ -668,14 +777,25 @@ Here is possible to visualize how the `split` clusters are merged in to
 
 ```{r eval=TRUE, include=TRUE}
 c(mergeHeatmap, mergeScoresDF, mergePValuesDF) %<-%
-  clustersMarkersHeatmapPlot(obj, clName = "merge", condNameList = "split",
-                             conditionsList = list(splitClusters))
-draw(mergeHeatmap)
+  clustersMarkersHeatmapPlot(
+    obj,
+    clName = "merge",
+    condNameList = "split",
+    conditionsList = list(splitClusters)
+  )
+
+ComplexHeatmap::draw(mergeHeatmap)
+
 
 c(merge2Heatmap, merge2ScoresDF, merge2PValuesDF) %<-%
-  clustersMarkersHeatmapPlot(obj, clName = "merge2", condNameList = "split",
-                             conditionsList = list(splitClusters))
-draw(merge2Heatmap)
+  clustersMarkersHeatmapPlot(
+    obj,
+    clName = "merge2",
+    condNameList = "split",
+    conditionsList = list(splitClusters)
+  )
+
+ComplexHeatmap::draw(merge2Heatmap)
 ```
 
 In the following graph, it is possible to check that the found clusters align
@@ -684,16 +804,20 @@ very well to the expression of the layers' genes defined above...
 It is possible to plot the *clusterization* on a `UMAP` plot
 
 ```{r}
-c(umapPlot, cellsRDM) %<-% cellsUMAPPlot(obj, clName = "merge2",
-                                         clusters = NULL,
-                                         useCoexEigen = TRUE,
-                                         dataMethod = "LogLikelihood",
-                                         numComp = 50L,
-                                         genesSel = "HGDI",
-                                         numGenes = 200L,
-                                         colors = NULL,
-                                         numNeighbors = 30L,
-                                         minPointsDist = 0.3)
+c(umapPlot, cellsRDM) %<-%
+  cellsUMAPPlot(
+    obj,
+    clName = "merge2",
+    clusters = NULL,
+    useCoexEigen = TRUE,
+    dataMethod = "LogLikelihood",
+    numComp = 50L,
+    genesSel = "HGDI",
+    numGenes = 200L,
+    colors = NULL,
+    numNeighbors = 30L,
+    minPointsDist = 0.3
+  )
 
 plot(umapPlot)
 ```

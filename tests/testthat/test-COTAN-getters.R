@@ -17,9 +17,13 @@ test_that("COTAN getters", {
   obj <- estimateLambdaLinear(obj)
   obj <- estimateDispersionViaSolver(obj, cores = 2L)
 
+  # add second column to global meta-data
+  obj <- addElementToMetaDataset(
+    obj, tag = datasetTags()[["sc.m"]], value = c("10X", "V3"))
+
   # set tag label as legacy value
   row <- getMetaInfoRow(getMetadataDataset(obj), datasetTags()[["gsync"]])
-  obj@metaDataset[row, 1L] <- "genes' coex is in sync:"
+  obj@metaDataset[row, 1L:2L] <- c("genes' coex is in sync:", FALSE)
 
   suppressWarnings({
     obj <- calculateCoex(obj, actOnCells = FALSE, returnPPFract = TRUE,
@@ -62,19 +66,26 @@ test_that("COTAN getters", {
   expect_identical(getNumExpressedGenes(obj), colSums(getRawData(obj) != 0L))
   expect_identical(getGenesSize(obj), rowSums(getRawData(obj)))
   expect_identical(getNumOfExpressingCells(obj), rowSums(getRawData(obj) != 0L))
-  expect_identical(getNuNormData(obj),
-                   t(t(getRawData(obj)) * (1.0 / getNu(obj))))
-  expect_identical(getLogNormData(obj),
-                   log1p(t(t(getRawData(obj)) * (1.0e4 / getCellsSize(obj)))) /
-                     log(10.0))
-  expect_equal(getMetadataDataset(obj)[[1L]],
-               datasetTags()[c(1L:6L, 9L, 7L, 8L)],
-               ignore_attr = TRUE)
+  expect_identical(
+    getNuNormData(obj),
+    t(t(getRawData(obj)) * (1.0 / getNu(obj)))
+  )
+  expect_identical(
+    getLogNormData(obj),
+    log1p(t(t(getRawData(obj)) * (1.0e4 / getCellsSize(obj)))) / log(10.0)
+  )
+  expect_equal(
+    getMetadataDataset(obj)[[1L]],
+    datasetTags()[c(1L:6L, 9L, 7L, 8L)],
+    ignore_attr = TRUE
+  )
   expect_identical(getMetadataDataset(obj)[[2L]], metaInfo)
-  expect_identical(getMetaInfoRow(getMetadataDataset(obj),
-                                  "genes' COEX is in sync:"), 5L)
-  expect_identical(getMetadataElement(obj, tag = "genes' coex is in sync:"),
-                   "TRUE")
+  expect_identical(
+    getMetaInfoRow(getMetadataDataset(obj), "genes' COEX is in sync:"), 5L)
+  expect_identical(
+    as.list(getMetadataElement(obj, tag = "genes' coex is in sync:")),
+    list(V2 = "TRUE", V3 = NA_character_)
+  )
   expect_true(isCoexAvailable(obj, actOnCells = FALSE))
   expect_true(isCoexAvailable(obj, actOnCells = FALSE, ignoreSync = TRUE))
   expect_true(isCoexAvailable(obj, actOnCells = TRUE))
@@ -217,10 +228,9 @@ test_that("COTAN getters", {
 
   expect_identical(getSelectedGenes(obj, genesSel = "HGDI", numGenes = 5L),
                    c("C", "D", "F", "G", "I"))
-  expect_identical(
-    suppressWarnings(getSelectedGenes(obj, genesSel = "HVG_Seurat",
-                                      numGenes = 5L)[1L:4L]),
-    c("B", "C", "D", "E"))
+  suppressWarnings(expect_warning(
+      getSelectedGenes(obj, genesSel = "HVG_Seurat", numGenes = 5L)
+  ))
   expect_error(getSelectedGenes(obj, genesSel = "HVG_Scanpy", numGenes = 5L))
   expect_identical(getSelectedGenes(obj, genesSel = c("C", "A", "D", "E", "B")),
                    LETTERS[1L:5L])

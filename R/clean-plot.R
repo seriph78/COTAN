@@ -49,8 +49,7 @@
 #' @importFrom ggplot2 ylab
 #' @importFrom ggplot2 scale_color_gradient2
 #' @importFrom ggplot2 scale_color_manual
-#' @importFrom ggplot2 xlim
-#' @importFrom ggplot2 ylim
+#' @importFrom ggplot2 coord_cartesian
 #' @importFrom ggplot2 geom_label
 #' @importFrom ggrepel geom_text_repel
 #'
@@ -168,50 +167,73 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     cellsRDM_A <- filter(cellsRDM, .data$groups == "A")
     cellsRDM_B <- filter(cellsRDM, .data$groups != "A")
 
-    cellsRDMPlot <- ggplot(cellsRDM_A,
-                           aes(x = .data$PC1, y = .data$PC2,
-                               colour = .data$groups)) +
-                    geom_point(alpha = 0.5, size = 3L) +
-                    geom_point(data = cellsRDM_B,
-                               aes(x = .data$PC1, y = .data$PC2,
-                                   colour = .data$groups),
-                               alpha = 0.8, size = 3L) +
-                    scale_color_manual(name = "groups",
-                                       values = c("A" = "#8491B4B2",
-                                                  "B" = "#E64B35FF")) +
-                    plotTheme("pca")
+    cellsRDMPlot <-
+      ggplot(
+        cellsRDM_A,
+        aes(x = .data$PC1, y = .data$PC2, colour = .data$groups)
+      ) +
+      geom_point(alpha = 0.5, size = 1.0) +
+      geom_point(
+        data = cellsRDM_B,
+        aes(x = .data$PC1, y = .data$PC2, colour = .data$groups),
+        alpha = 0.8,
+        size = 1.5
+      ) +
+      scale_color_manual(
+        name = "groups",
+        values = c("A" = "#8491B4B2", "B" = "#E64B35FF")
+      ) +
+      plotTheme("pca")
 
     minN <- min(D[["n"]]) + 15.0
     lowD <- D[["n"]] < minN
-    genesPlot <- ggplot(D, aes(x = .data$n, y = .data$means)) +
-                 geom_point() +
-                 ggtitle(label = "B cell group genes mean expression"
-                         #subtitle = " - B group NOT removed -"
-                         ) +
-                 geom_label(data = subset(D, lowD),
-                       aes(x = .data$n, y = .data$means,
-                           label = rownames(D)[lowD]),
-                       #nudge_y = 0.05,
-                       nudge_x = 400.0
-                       #direction = "x",
-                       #angle = 90.0,
-                       #vjust = 0L,
-                       #segment.size = 0.2
-                       ) +
-                 plotTheme("genes") +
-    theme(plot.title = element_text(hjust = 1.0),
-          plot.subtitle = element_text(hjust = 0.95, vjust = -25.0))
+    genesPlot <-
+      ggplot(
+        D,
+        aes(x = .data$n, y = .data$means)
+      ) +
+      geom_point() +
+      ggtitle(
+        label = "B cell group genes mean expression"
+        #subtitle = " - B group NOT removed -"
+      ) +
+      geom_label(
+        data = subset(D, lowD),
+        aes(x = .data$n,
+            y = .data$means,
+            label = rownames(D)[lowD]),
+        #vjust = 0L,
+        #nudge_y = 0.05,
+        hjust = 0L,
+        nudge_x = 50.0
+        #direction = "x",
+        #angle = 90.0,
+        #segment.size = 0.2
+      ) +
+      plotTheme("genes") +
+      theme(
+        plot.title    = element_text(hjust = 1.0),
+        plot.subtitle = element_text(hjust = 0.95, vjust = -25.0)
+        # extra right margin for long labels
+        # plot.margin   = margin(5.5, 40, 5.5, 5.5)
+      )
 
     nuEst <- round(getNu(objCOTAN), digits = 7L)
-    UDEPlot <- ggplot(cellsRDM, aes(x = .data$PC1, y = .data$PC2,
-                                    colour = log(nuEst))) +
-               geom_point(size = 1L, alpha = 0.8) +
-               scale_color_gradient2(low = "#E64B35B2", mid = "#4DBBD5B2",
-                                     high = "#3C5488B2",
-                                     midpoint = log(mean(nuEst)),
-                                     name = "ln(nu)") +
-               ggtitle("Cells PCA coloured by cells efficiency") +
-               plotTheme("UDE")
+    UDEPlot <-
+      ggplot(
+        cellsRDM,
+        aes(x = .data$PC1, y = .data$PC2, colour = log(nuEst))
+      ) +
+      geom_point(size = 1L, alpha = 0.8) +
+      scale_color_gradient2(
+        low = "#E64B35B2",
+        mid = "#4DBBD5B2",
+        high = "#3C5488B2",
+        midpoint = log(mean(nuEst)),
+        name = "ln(nu)"
+        ) +
+      ggtitle("Cells PCA coloured by cells efficiency") +
+      plotTheme("UDE")
   } else {
     cellsRDMPlot <- NULL
     cellsRDM <- NULL
@@ -221,31 +243,48 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
   nuDf <- data.frame("nu" = sort(getNu(objCOTAN)),
                      "n" = seq_len(getNumCells(objCOTAN)))
-  nuPlot <- ggplot(nuDf, aes(x = .data$n, y = .data$nu)) +
-            geom_point(colour = "#8491B4B2", size = 1L) +
-            plotTheme("common")
+  nuPlot <-
+    ggplot(
+      nuDf,
+      aes(x = .data$n, y = .data$nu)
+    ) +
+    geom_point(colour = "#8491B4B2", size = 1L) +
+    plotTheme("common")
 
   nuDf <- nuDf[seq_len(min(400L, nrow(nuDf))), ]
-  zNuPlot <- ggplot(nuDf, aes(x = .data$n, y = .data$nu)) +
-             geom_point(colour = "#8491B4B2", size = 1L) +
-             plotTheme("common") +
-             xlim(0L, nrow(nuDf)) +
-             ylim(0.0, round(max(nuDf[["nu"]]) + 0.05, digits = 2L))
+  zNuPlot <-
+    ggplot(
+      nuDf,
+      aes(x = .data$n, y = .data$nu)
+    ) +
+    geom_point(colour = "#8491B4B2", size = 1L) +
+    coord_cartesian(
+      xlim = c(0L, nrow(nuDf)),
+      ylim = c(0.0, round(max(nuDf[["nu"]]) + 0.05, digits = 2L))
+    ) +
+    plotTheme("common")
 
   # estimate the elbow point if any...
   secondDer <- diff(nuDf[seq_len(min(100L, nrow(nuDf))), "nu"],
                     differences = 2L)
   if (min(secondDer) < -0.01) {
     lowUDEThr <- nuDf[(max(which(secondDer < -0.01)) + 1L), "nu"] - 0.005
-    zNuPlot <- zNuPlot +
-               geom_hline(yintercept = lowUDEThr, linetype = "dashed",
-                          color = "darkred") +
-               annotate(geom = "text",
-                        x = (nrow(nuDf) / 2.0),
-                        y = (lowUDEThr - 0.05),
-                        label = paste0("cells with nu < ", lowUDEThr,
-                                       " should probably be removed"),
-                        color = "darkred", size = 4.5)
+    zNuPlot <-
+      zNuPlot +
+      geom_hline(
+        yintercept = lowUDEThr,
+        linetype = "dashed",
+        color = "darkred"
+      ) +
+      annotate(
+        geom = "text",
+        x = (nrow(nuDf) / 2.0),
+        y = (lowUDEThr - 0.05),
+        label = paste0("cells with nu < ", lowUDEThr,
+                       " should probably be removed"),
+        color = "darkred",
+        size = 4.5
+      )
   }
 
   endTime <- Sys.time()
@@ -291,12 +330,18 @@ screePlot <- function(pcaStdDev) {
   screeDF <- data.frame(PC = seq_along(varExplained), Variance = varExplained)
 
   # Create ggplot scree plot
-  ggplot(screeDF, aes(x = .data$PC, y = .data$Variance)) +
-    geom_bar(stat = "identity", fill = "steelblue") +
-    geom_point(color = "red", size = 3L) +
-    geom_line(group = 1L, color = "red") +
-    labs(title = "Scree Plot", x = "Principal Component",
-         y = "Explained Variance") +
-    plotTheme("pca")
+  ggplot(
+    screeDF,
+    aes(x = .data$PC, y = .data$Variance)
+  ) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_point(color = "red", size = 3L) +
+  geom_line(group = 1L, color = "red") +
+  labs(
+    title = "Scree Plot",
+    x = "Principal Component",
+    y = "Explained Variance"
+  ) +
+  plotTheme("pca")
 }
 

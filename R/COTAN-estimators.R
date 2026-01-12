@@ -168,19 +168,34 @@ setMethod(
 
 # local utility wrapper for parallel estimation of dispersion
 runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
-                          threshold, maxIterations, cores) {
+                          threshold, maxIterations, cores, useBisection) {
 
   ## forward caller that allows for logging progress
   worker <- function(genesBatch, sumZeros, lambda, nu,
-                     threshold, maxIterations) {
+                     threshold, maxIterations, useBisection) {
     tryCatch({
-      return(parallelDispersionNewton(genes         = genesBatch,
-                                      sumZeros      = sumZeros,
-                                      lambda        = lambda,
-                                      nu            = nu,
-                                      threshold     = threshold,
-                                      maxIterations = maxIterations))
+      if (useBisection) {
+        return(parallelDispersionBisection(
+            genes         = genesBatch,
+            sumZeros      = sumZeros,
+            lambda        = lambda,
+            nu            = nu,
+            threshold     = threshold,
+            maxIterations = maxIterations
+          ))
+      } else {
+        return(parallelDispersionNewton(
+            genes         = genesBatch,
+            sumZeros      = sumZeros,
+            lambda        = lambda,
+            nu            = nu,
+            threshold     = threshold,
+            maxIterations = maxIterations
+          ))
+      }
     }, error = function(e) {
+      # do not “fallback” on user interrupt
+      if (inherits(e, "interrupt")) stop(e)
       structure(list(e), class = "try-error")
     })
   }
@@ -189,48 +204,59 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
     ## create a tiny private env `mini` and a worker within it:
     ## this reduces spawning memory foot-print
     mini <- new.env(parent = baseenv())
-    mini$parallelDispersionNewton <- parallelDispersionNewton
-    mini$rowsums <- Rfast::rowsums
-    mini$assert_that <- assertthat::assert_that
-    mini$funProbZeroNegBin <- funProbZeroNegBin
-    mini$logThis <- logThis
-    mini$worker <- worker
+
+    mini$parallelDispersionNewton     <- parallelDispersionNewton
+    mini$parallelDispersionBisection  <- parallelDispersionBisection
+    mini$rowsums                      <- Rfast::rowsums
+    mini$assert_that                  <- assertthat::assert_that
+    mini$funProbZeroNegBin            <- funProbZeroNegBin
+    mini$logThis                      <- logThis
+    mini$worker                       <- worker
 
     ## set on the copy in `mini` to only use `mini`
-    environment(mini$parallelDispersionNewton) <- mini
-    environment(mini$worker) <- mini
+    environment(mini$parallelDispersionNewton)    <- mini
+    environment(mini$parallelDispersionBisection) <- mini
+    environment(mini$worker)                      <- mini
 
     res <- parallel::mclapply(
       genesBatches,
       worker,
-      sumZeros = sumZeros,
-      lambda = lambda,
-      nu = nu,
-      threshold = threshold,
-      maxIterations = maxIterations,
+      sumZeros       = sumZeros,
+      lambda         = lambda,
+      nu             = nu,
+      threshold      = threshold,
+      maxIterations  = maxIterations,
+      useBisection   = useBisection,
       mc.cores       = cores,
       mc.preschedule = TRUE, # default
       mc.cleanup     = TRUE, # default
-      mc.set.seed    = TRUE) # default
-
-    # spawned errors are stored as try-error classes
-    resError <- unlist(lapply(res, inherits, "try-error"))
-    if (any(resError)) {
-      stop(res[[which(resError)[[1L]]]], call. = FALSE)
-    }
-
-    return(res)
+      mc.set.seed    = TRUE  # default
+    )
   } else {
-    res <- lapply(genesBatches,
-                  worker,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  nu = nu,
-                  threshold = threshold,
-                  maxIterations = maxIterations)
-
-    return(res)
+    res <- lapply(
+      genesBatches,
+      worker,
+      sumZeros      = sumZeros,
+      lambda        = lambda,
+      nu            = nu,
+      threshold     = threshold,
+      maxIterations = maxIterations,
+      useBisection  = useBisection
+    )
   }
+
+  # spawned errors are stored as try-error classes
+  resError <- vapply(res, inherits, logical(1), "try-error")
+  if (any(resError)) {
+    first <- which(resError)[[1L]]
+    stop(sprintf(
+      "Dispersion solver failed on batch %d/%d (%s): %s",
+      first, length(res), ifelse(useBisection, "bisection", "newton"),
+      conditionMessage(res[[first]][[1L]])
+    ), call. = FALSE)
+  }
+
+  return(res)
 }
 
 
@@ -307,13 +333,36 @@ setMethod(
     logThis(paste0("Executing ", length(spGenes), " genes batches"),
             logLevel = 3L)
 
-    dispList <- runDispSolver(spGenes,
-                              sumZeros      = sumZeros,
-                              lambda        = lambda,
-                              nu            = nu,
-                              threshold     = threshold,
-                              maxIterations = maxIterations,
-                              cores         = cores)
+    dispList <- tryCatch(
+      runDispSolver(
+        spGenes,
+        sumZeros      = sumZeros,
+        lambda        = lambda,
+        nu            = nu,
+        threshold     = threshold,
+        maxIterations = maxIterations,
+        cores         = cores,
+        useBisection  = FALSE
+      ),
+      error = function(eNewton) {
+        if (inherits(eNewton, "interrupt")) stop(eNewton)
+        msg = paste0("Newton dispersion solver failed: ",
+                     conditionMessage(eNewton), " | retrying with bisection")
+        warning(msg)
+        logThis(msg, logLevel = 3L)
+
+        runDispSolver(
+          spGenes,
+          sumZeros      = sumZeros,
+          lambda        = lambda,
+          nu            = nu,
+          threshold     = threshold,
+          maxIterations = maxIterations,
+          cores         = cores,
+          useBisection  = TRUE
+        )
+      }
+    )
 
     gc()
 
@@ -569,6 +618,8 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
                                  threshold     = threshold,
                                  maxIterations = maxIterations))
     }, error = function(e) {
+      # do not “fallback” on user interrupt
+      if (inherits(e, "interrupt")) stop(e)
       structure(list(e), class = "try-error")
     })
   }
@@ -578,49 +629,54 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
     # it reduces spawning memory foot-print
     mini <- new.env(parent = baseenv())
     mini$parallelNuBisection <- parallelNuBisection
-    mini$assert_that <- assertthat::assert_that
-    mini$colsums <- Rfast::colsums
-    mini$funProbZeroNegBin <- funProbZeroNegBin
-    mini$logThis <- logThis
-    mini$worker <- worker
+    mini$assert_that         <- assertthat::assert_that
+    mini$colsums             <- Rfast::colsums
+    mini$funProbZeroNegBin   <- funProbZeroNegBin
+    mini$logThis             <- logThis
+    mini$worker              <- worker
 
     ## set on the copy in `mini` to only use `mini`
     environment(mini$parallelNuBisection) <- mini
-    environment(mini$worker) <- mini
+    environment(mini$worker)              <- mini
 
     res <- parallel::mclapply(
       cellsBatches,
-      parallelNuBisection,
-      sumZeros = sumZeros,
-      lambda = lambda,
-      dispersion = dispersion,
-      initialGuess = initialGuess,
-      threshold = threshold,
-      maxIterations = maxIterations,
+      worker,
+      sumZeros       = sumZeros,
+      lambda         = lambda,
+      dispersion     = dispersion,
+      initialGuess   = initialGuess,
+      threshold      = threshold,
+      maxIterations  = maxIterations,
       mc.cores       = cores,
       mc.preschedule = TRUE, # default
       mc.cleanup     = TRUE, # default
-      mc.set.seed    = TRUE) # default
-
-    # spawned errors are stored as try-error classes
-    resError <- unlist(lapply(res, inherits, "try-error"))
-    if (any(resError)) {
-      stop(res[[which(resError)[[1L]]]], call. = FALSE)
-    }
-
-    return(res)
+      mc.set.seed    = TRUE # default
+    )
   } else {
-    res <- lapply(cellsBatches,
-                  worker,
-                  sumZeros = sumZeros,
-                  lambda = lambda,
-                  dispersion = dispersion,
-                  initialGuess = initialGuess,
-                  threshold = threshold,
-                  maxIterations = maxIterations)
-
-    return(res)
+    res <- lapply(
+      cellsBatches,
+      worker,
+      sumZeros      = sumZeros,
+      lambda        = lambda,
+      dispersion    = dispersion,
+      initialGuess  = initialGuess,
+      threshold     = threshold,
+      maxIterations = maxIterations
+    )
   }
+
+  # spawned errors are stored as try-error classes
+  resError <- vapply(res, inherits, logical(1), "try-error")
+  if (any(resError)) {
+    first <- which(resError)[[1L]]
+    stop(sprintf(
+      "Nu solver failed on batch %d/%d: %s",
+      first, length(res), conditionMessage(res[[first]][[1L]])
+    ), call. = FALSE)
+  }
+
+  return(res)
 }
 
 
