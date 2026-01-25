@@ -1,4 +1,4 @@
-# ---------- Conversion to/from other classes ----------
+# ---- Conversion to/from other classes ----
 
 #' @title Data class conversions
 #'
@@ -19,6 +19,8 @@
 #'   stopifnot(identical(getDims(newObj), getDims(obj)))
 #'
 NULL
+
+## ---- Convert to SingleCellExperiment ----
 
 # convertToSingleCellExperiment
 
@@ -68,22 +70,42 @@ NULL
 #'
 
 convertToSingleCellExperiment <- function(objCOTAN) {
-  assert_that(is(objCOTAN, "COTAN"), validObject(objCOTAN))
+  assert_that(is(objCOTAN, "COTAN"), validObject(objCOTAN),
+              msg = "Input object should be of type `COTAN`.")
 
   # Identify clustering and condition columns
+  genesMeta <- getMetadataGenes(objCOTAN)
+
+  hasGenesNameCol <-
+    !is_empty(grep(x = colnames(genesMeta), pattern = "Genes?Names?",
+                   ignore.case = TRUE))
+  if (!hasGenesNameCol) {
+    genesMeta <- rownames_to_column(genesMeta, var = "GenesNames")
+    rownames(genesMeta) <- getGenes(objCOTAN)
+  }
+
   cellsMeta <- getMetadataCells(objCOTAN)
 
-  # Rename clustering columns replacing the "CL_" prefix with
-  # 'COTAN_clusters_'
-  clCols <- grep("^CL_", names(cellsMeta), value = FALSE)
-  names(cellsMeta)[clCols] <-
-    paste0("COTAN_clusters_", sub("^CL_", "", names(cellsMeta)[clCols]))
+  hasCellsIDCol <-
+    !is_empty(grep(colnames(cellsMeta), pattern = "Cells?IDs?",
+                   ignore.case = TRUE))
+  if (!hasCellsIDCol) {
+    cellsMeta <- rownames_to_column(cellsMeta, var = "CellsIDs")
+    rownames(cellsMeta) <- getCells(objCOTAN)
+  }
 
-  # Rename conditions columns replacing the "COND_" prefix with
+  # Identify clustering and condition columns
+
+  # Rename clustering columns replacing the 'CL_' prefix with 'COTAN_clusters_'
+  colnames(cellsMeta) <-
+    sub(x = colnames(cellsMeta), pattern = "^CL_",
+        replacement = "COTAN_clusters_")
+
+  # Rename conditions columns replacing the 'COND_' prefix with
   # 'COTAN_conditions_'
-  condCols <- grep("^COND_", names(cellsMeta), value = FALSE)
-  names(cellsMeta)[condCols] <-
-    paste0("COTAN_conditions_", sub("^COND_", "", names(cellsMeta)[condCols]))
+  colnames(cellsMeta) <-
+    sub(x = colnames(cellsMeta), pattern = "^COND_",
+        replacement = "COTAN_conditions_")
 
   # retrieves the genes' COEX if available
   genesCoex <- emptySymmetricMatrix()
@@ -100,7 +122,7 @@ convertToSingleCellExperiment <- function(objCOTAN) {
   # Create the SingleCellExperiment object
   objSCE <- SingleCellExperiment(
     assays = list(counts = getRawData(objCOTAN)),
-    rowData = S4Vectors::DataFrame(getMetadataGenes(objCOTAN)),
+    rowData = S4Vectors::DataFrame(genesMeta),
     colData = S4Vectors::DataFrame(cellsMeta),
     metadata = list(
       genesCoex = genesCoex,
@@ -115,6 +137,7 @@ convertToSingleCellExperiment <- function(objCOTAN) {
   return(objSCE)
 }
 
+## ---- Convert from SingleCellExperiment ----
 
 #' convertFromSingleCellExperiment
 #'
@@ -126,25 +149,36 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #'   *co-expression* matrices (if available), and reconstructs the `COTAN`
 #'   object accordingly.
 
-#'   The function performs the following steps:
+#' The function performs the following steps:
 #'   * Extracts the raw matrix from the `"counts"`
-#'     [SummarizedExperiment::Assays-class]
+#' [SummarizedExperiment::Assays-class]
 #'   * Extracts gene metadata from `rowData`
 #'   * Extracts cell metadata from `colData`, excluding any *clusterizations* or
 #'     *conditions* present
 #'   * Attempts to retrieve *co-expression* matrices from the `metadata` slot if
-#'     they exist
+#' they exist
 #'   * Constructs a `COTAN` object using the extracted data
 #'   * Adds back the *clusterizations* and *conditions* using `COTAN` methods
-#'   If the COEX is not present (e.g., in `SCE` objects created from `Seurat`),
-#'   the `genesCoex` and `cellsCoex` slots in the resulting `COTAN` object will
-#'   be empty matrices
+#' If the COEX is not present (e.g., in `SCE` objects created from `Seurat`),
+#' the `genesCoex` and `cellsCoex` slots in the resulting `COTAN` object will be
+#' empty matrices
 #'
 #' @param objSCE A [SingleCellExperiment::SingleCellExperiment-class] object to
 #'   be converted
 #' @param clNamesPattern A regular expression pattern used to identify the
 #'   clustering columns in `colData`. Default supports `Seurat` conventions:
 #'   `"^(COTAN_clusters_|seurat_clusters$|.*_snn_res\\..*|wsnn_res\\..*)"`
+#' @param condNamesPattern A regular expression pattern used to identify the
+#'   condition columns in `colData`. Default supports `Seurat` conventions:
+#'   `"^(COTAN_conditions_|condition$|orig.ident$)"`
+#' @param genesNamesPattern A regular expression pattern (case insentitive) used
+#'   to identify the genes' names column in `rowData`. It used only if no names
+#'   are available from the data matrix or the genes' data-set. Default supports
+#'   is: `"Genes?Names?`
+#' @param cellsIDsPattern A regular expression pattern (case insensitive) used
+#'   to identify the cells' names column in `colData`. It used only if no names
+#'   are available from the data matrix or the cells' data-set. Default supports
+#'   is: `"Cells?IDs?"`
 #'
 #' @returns A [COTAN-class] object containing the data extracted from the input
 #'   [SingleCellExperiment::SingleCellExperiment-class] object
@@ -154,6 +188,8 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #' @importFrom methods new
 #' @importFrom methods is
 #' @importFrom methods validObject
+#'
+#' @importFrom rlang is_empty
 #'
 #' @importFrom SingleCellExperiment counts
 #' @importFrom SingleCellExperiment rowData
@@ -165,25 +201,56 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #'
 #' @rdname Conversions
 #'
-convertFromSingleCellExperiment <- function(objSCE,
-                                            clNamesPattern = "") {
+convertFromSingleCellExperiment <- function(
+    objSCE,
+    clNamesPattern = "",
+    condNamesPattern = "",
+    genesNamesPattern = "",
+    cellsIDsPattern = ""
+  ) {
   assert_that(is(objSCE, "SingleCellExperiment"),
-              msg = "The input object must be of class 'SingleCellExperiment'.")
+              msg = "Input object should be of type `SingleCellExperiment`.")
 
   # Extract counts matrix
   assert_that("counts" %in% SummarizedExperiment::assayNames(objSCE),
-              msg = paste("The 'counts' assay is missing",
+              msg = paste("The required 'counts' assay is missing",
                           "in the SingleCellExperiment object."))
 
   rawMatrix <- counts(objSCE)
 
   # Extract gene metadata
-  genesMeta <- rowData(objSCE)
+  genesMetaSCE <- rowData(objSCE)
 
   # Sanity check: same order and length
-  assert_that(is.null(rownames(genesMeta)) ||
-                identical(rownames(rawMatrix), rownames(genesMeta)),
+  assert_that(is.null(rownames(genesMetaSCE)) || is.null(rownames(rawMatrix)) ||
+                identical(rownames(rawMatrix), rownames(genesMetaSCE)),
               msg = "Row names of counts and gene metadata differ.")
+
+  genesNames <- ifelse(is_empty(rownames(rawMatrix)),
+                       rownames(rawMatrix),
+                       rownames(genesMetaSCE))
+
+  # retrieve gene names from appropriate meta column
+  if (is_empty(genesNames)) {
+    genesNamesPattern <- ifelse(isEmptyName(genesNamesPattern),
+                                "Genes?Names?",
+                                genesNamesPattern)
+
+    colToUse <- grep(x = colnames(genesMetaSCE),
+                     pattern = genesNamesPattern,
+                     ignore.case = TRUE)
+
+    if (!is_empty(colToUse)) {
+      # use first match
+      genesNames <- genesMetaSCE[, colToUse[[1L]]]
+    }
+  }
+  if (is_empty(genesNames)) {
+    warning("Could not retrieve genes' names from the input")
+  } else {
+    rownames(rawMatrix)    <- make.unique(genesNames)
+    rownames(genesMetaSCE) <- make.unique(genesNames)
+  }
 
   # Extract cell metadata
   cellsMetaSCE <- colData(objSCE)
@@ -192,6 +259,31 @@ convertFromSingleCellExperiment <- function(objSCE,
   assert_that(is.null(rownames(cellsMetaSCE)) ||
                 identical(colnames(rawMatrix), rownames(cellsMetaSCE)),
               msg = "Column names of counts and cell metadata differ.")
+
+  cellsIDs <- ifelse(is_empty(colnames(rawMatrix)),
+                     colnames(rawMatrix),
+                     rownames(cellsMetaSCE))
+
+  # retrieve cells IDs from appropriate meta column
+  if (is_empty(cellsIDs)) {
+    cellsIDsPattern <- ifelse(isEmptyName(cellsIDsPattern),
+                              "CELLS?IDS?",
+                              cellsIDsPattern)
+
+    colToUse <- grep(x = colnames(cellsMetaSCE),
+                     pattern = cellsIDsPattern,
+                     ignore.case = TRUE)
+
+        if (!is_empty(colToUse)) {
+      cellsIDs <- cellsMetaSCE[, colToUse]
+    }
+  }
+  if (is_empty(cellsIDs)) {
+    warning("Could not retrieve cells' IDs from the input")
+  } else {
+    colnames(rawMatrix)    <- make.unique(cellsIDs)
+    rownames(cellsMetaSCE) <- make.unique(cellsIDs)
+  }
 
   # Identify clustering columns according to given pattern
   # (e.g., 'COTAN_clusters_', 'seurat_clusters', ...)
@@ -285,6 +377,9 @@ convertFromSingleCellExperiment <- function(objSCE,
                                conditions = conditions, override = FALSE)
     }
   }
+
+  # Validate the COTAN object
+  validObject(objCOTAN)
 
   return(objCOTAN)
 }
