@@ -16,7 +16,9 @@
 #'
 #'   newObj <- convertFromSingleCellExperiment(sce)
 #'
-#'   stopifnot(identical(getDims(newObj), getDims(obj)))
+#'   stopifnot(identical(getDims(newObj)[-5:-6], getDims(obj)[-5:-6]),
+#'             identical(unlist(getDims(newObj)[5:6]),
+#'                       unlist(getDims(obj)[5:6]) + 1L))
 #'
 NULL
 
@@ -60,6 +62,8 @@ NULL
 #'
 #' @importFrom assertthat assert_that
 #'
+#' @importFrom tibble rownames_to_column
+#'
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #'
 #' @export
@@ -77,7 +81,7 @@ convertToSingleCellExperiment <- function(objCOTAN) {
   genesMeta <- getMetadataGenes(objCOTAN)
 
   hasGenesNameCol <-
-    !is_empty(grep(x = colnames(genesMeta), pattern = "Genes?Names?",
+    !is_empty(grep(x = colnames(genesMeta), pattern = "Genes?[ -_]?Names?",
                    ignore.case = TRUE))
   if (!hasGenesNameCol) {
     genesMeta <- rownames_to_column(genesMeta, var = "GenesNames")
@@ -87,7 +91,7 @@ convertToSingleCellExperiment <- function(objCOTAN) {
   cellsMeta <- getMetadataCells(objCOTAN)
 
   hasCellsIDCol <-
-    !is_empty(grep(colnames(cellsMeta), pattern = "Cells?IDs?",
+    !is_empty(grep(colnames(cellsMeta), pattern = "Cells?[ -_]?IDs?",
                    ignore.case = TRUE))
   if (!hasCellsIDCol) {
     cellsMeta <- rownames_to_column(cellsMeta, var = "CellsIDs")
@@ -165,20 +169,23 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #'
 #' @param objSCE A [SingleCellExperiment::SingleCellExperiment-class] object to
 #'   be converted
+#' @param assayName Name of the assay in `objSCE` to be used as raw counts.
+#'   Default is `"counts"`. If not found, the function falls back to `"X"` and
+#'   then to the first available assay, emitting a warning in both cases.
 #' @param clNamesPattern A regular expression pattern used to identify the
 #'   clustering columns in `colData`. Default supports `Seurat` conventions:
 #'   `"^(COTAN_clusters_|seurat_clusters$|.*_snn_res\\..*|wsnn_res\\..*)"`
 #' @param condNamesPattern A regular expression pattern used to identify the
 #'   condition columns in `colData`. Default supports `Seurat` conventions:
 #'   `"^(COTAN_conditions_|condition$|orig.ident$)"`
-#' @param genesNamesPattern A regular expression pattern (case insentitive) used
+#' @param genesNamesPattern A regular expression pattern (case insensitive) used
 #'   to identify the genes' names column in `rowData`. It used only if no names
 #'   are available from the data matrix or the genes' data-set. Default supports
-#'   is: `"Genes?Names?`
+#'   is: `"^((Gene|Feature)s?[ -_]?(Name|ID)s?|IDs?|Symbols?)$"`
 #' @param cellsIDsPattern A regular expression pattern (case insensitive) used
 #'   to identify the cells' names column in `colData`. It used only if no names
 #'   are available from the data matrix or the cells' data-set. Default supports
-#'   is: `"Cells?IDs?"`
+#'   is: `"^(Cells?[ -_]?IDs?|Barcodes?|Cells?)$"`
 #'
 #' @returns A [COTAN-class] object containing the data extracted from the input
 #'   [SingleCellExperiment::SingleCellExperiment-class] object
@@ -191,9 +198,19 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #'
 #' @importFrom rlang is_empty
 #'
+#' @importClassesFrom Matrix dgCMatrix
+#' @importClassesFrom Matrix dspMatrix
+#'
 #' @importFrom SingleCellExperiment counts
 #' @importFrom SingleCellExperiment rowData
 #' @importFrom SingleCellExperiment colData
+#'
+#' @importFrom SummarizedExperiment assay
+#' @importFrom SummarizedExperiment assayNames
+#' @importFrom SingleCellExperiment altExp
+#' @importFrom SingleCellExperiment altExpNames
+#' @importFrom SummarizedExperiment rowRanges
+#' @importFrom SingleCellExperiment reducedDimNames
 #'
 #' @export
 #'
@@ -203,6 +220,7 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 #'
 convertFromSingleCellExperiment <- function(
     objSCE,
+    assayName = "counts",
     clNamesPattern = "",
     condNamesPattern = "",
     genesNamesPattern = "",
@@ -211,30 +229,122 @@ convertFromSingleCellExperiment <- function(
   assert_that(is(objSCE, "SingleCellExperiment"),
               msg = "Input object should be of type `SingleCellExperiment`.")
 
-  # Extract counts matrix
-  assert_that("counts" %in% SummarizedExperiment::assayNames(objSCE),
-              msg = paste("The required 'counts' assay is missing",
-                          "in the SingleCellExperiment object."))
+  # ---- Choose assay and extract raw matrix ----
+  chooseAssay <- function(sceObj, assayName) {
+    avail <- SummarizedExperiment::assayNames(sceObj)
+    if (length(avail) < 1L) {
+      stop("No assays present in the SingleCellExperiment object.")
+    }
+    if (!isEmptyName(assayName) && assayName %in% avail) {
+      return(assayName)
+    }
+    # common fallbacks (e.g. zellkonverter uses 'X')
+    fallback <- intersect(c("counts", "X"), avail)
+    if (length(fallback) > 0L) {
+        warning(sprintf("Assay '%s' not found; using '%s'.",
+                        assayName, fallback[[1L]]))
+        return(fallback[[1L]])
+    }
+    warning(sprintf("Assay '%s' not found; using first assay '%s'.",
+                    assayName, avail[[1L]]))
+    return(avail[[1L]])
+  }
 
-  rawMatrix <- counts(objSCE)
+  rawSourceSCE <- objSCE
+  chosenAssay <- chooseAssay(rawSourceSCE, assayName)
+
+  # If requested, try altExp 'raw' when the desired assay is absent at top-level
+  if (TRUE) {
+    topAvail <- assayNames(objSCE)
+    if (!(chosenAssay %in% topAvail)) {
+      altNames <- tryCatch(altExpNames(objSCE),
+                           error = function(e) character())
+      if ("raw" %in% altNames) {
+        rawSourceSCE <- altExp(objSCE, "raw")
+        chosenAssay <- chooseAssay(rawSourceSCE, assayName)
+      }
+    }
+  }
+
+  rawMatrix <- assay(rawSourceSCE, chosenAssay)
+  rawMatrix <- coerceToDgCMatrix(rawMatrix)
+
+  validateRawCounts(rawMatrix)
+
+  if (TRUE) {
+    if (!identical(rawSourceSCE, objSCE)) {
+      topAssays <- assayNames(objSCE)
+      if (length(topAssays) > 0L) {
+        warning("Dropping top-level assays: ",
+                paste(topAssays, collapse = ", "))
+      }
+    }
+
+    # assays
+    keptAssay <- chosenAssay
+    droppedAssays <- setdiff(assayNames(rawSourceSCE), keptAssay)
+    if (length(droppedAssays) > 0L) {
+      warning("Dropping assays: ", paste(droppedAssays, collapse = ", "))
+    }
+
+    # reducedDims (if available)
+    redNames <- tryCatch(reducedDimNames(objSCE),
+                         error = function(e) character())
+    if (length(redNames) > 0L) {
+      warning("Dropping reducedDims: ", paste(redNames, collapse = ", "))
+    }
+
+    # altExps
+    altNames <- tryCatch(altExpNames(objSCE),
+                         error = function(e) character())
+    # don't warn about 'raw' if you actually used it
+    if (identical(rawSourceSCE, objSCE)) {
+      usedAlt <- character()
+    } else {
+      usedAlt <- "raw"
+    }
+    droppedAlt <- setdiff(altNames, usedAlt)
+    if (length(droppedAlt) > 0L) {
+      warning("Dropping altExps: ", paste(droppedAlt, collapse = ", "))
+    }
+  }
+
 
   # Extract gene metadata
-  genesMetaSCE <- rowData(objSCE)
+  genesMetaSCE <- rowData(rawSourceSCE)
+
+  ftCol <- intersect(c("feature_type", "FeatureType", "Type", "type"),
+                     colnames(genesMetaSCE))
+  if (length(ftCol) > 0L) {
+    ft <- as.character(genesMetaSCE[[ftCol[[1L]]]])
+    ft <- ft[!is.na(ft)]
+    if (length(unique(ft)) > 1L) {
+      stop(
+        "Multiple feature types detected in rowData ('", ftCol[[1L]],
+        "'). Subset the SingleCellExperiment to RNA features before conversion."
+      )
+    }
+  }
 
   # Sanity check: same order and length
   assert_that(is.null(rownames(genesMetaSCE)) || is.null(rownames(rawMatrix)) ||
                 identical(rownames(rawMatrix), rownames(genesMetaSCE)),
               msg = "Row names of counts and gene metadata differ.")
 
-  genesNames <- ifelse(is_empty(rownames(rawMatrix)),
-                       rownames(rawMatrix),
-                       rownames(genesMetaSCE))
+  if (!is_empty(rownames(rawMatrix))) {
+    genesNames <- rownames(rawMatrix)
+  } else {
+    genesNames <- rownames(genesMetaSCE)
+  }
 
   # retrieve gene names from appropriate meta column
   if (is_empty(genesNames)) {
-    genesNamesPattern <- ifelse(isEmptyName(genesNamesPattern),
-                                "Genes?Names?",
-                                genesNamesPattern)
+    genesNamesPattern <-
+      ifelse(
+        isEmptyName(genesNamesPattern),
+        # broadened default for common SCE conventions (10X / scater / zellkonverter)
+        "^((Gene|Feature)s?[ -_]?(Name|ID)s?|IDs?|Symbols?)$",
+        genesNamesPattern)
 
     colToUse <- grep(x = colnames(genesMetaSCE),
                      pattern = genesNamesPattern,
@@ -242,47 +352,55 @@ convertFromSingleCellExperiment <- function(
 
     if (!is_empty(colToUse)) {
       # use first match
-      genesNames <- genesMetaSCE[, colToUse[[1L]]]
+      genesNames <- genesMetaSCE[, colToUse[[1L]], drop = TRUE]
     }
   }
   if (is_empty(genesNames)) {
     warning("Could not retrieve genes' names from the input")
   } else {
-    rownames(rawMatrix)    <- make.unique(genesNames)
-    rownames(genesMetaSCE) <- make.unique(genesNames)
+    genesNames <- make.unique(as.character(genesNames))
+    rownames(rawMatrix)    <- genesNames
+    rownames(genesMetaSCE) <- genesNames
   }
+  genesMeta <- genesMetaSCE
 
   # Extract cell metadata
-  cellsMetaSCE <- colData(objSCE)
+  cellsMetaSCE <- colData(rawSourceSCE)
 
   # Sanity check: same order and length
   assert_that(is.null(rownames(cellsMetaSCE)) ||
                 identical(colnames(rawMatrix), rownames(cellsMetaSCE)),
               msg = "Column names of counts and cell metadata differ.")
 
-  cellsIDs <- ifelse(is_empty(colnames(rawMatrix)),
-                     colnames(rawMatrix),
-                     rownames(cellsMetaSCE))
+  if (!is_empty(colnames(rawMatrix))) {
+    cellsIDs <- colnames(rawMatrix)
+  } else {
+    cellsIDs <- rownames(cellsMetaSCE)
+  }
 
   # retrieve cells IDs from appropriate meta column
   if (is_empty(cellsIDs)) {
-    cellsIDsPattern <- ifelse(isEmptyName(cellsIDsPattern),
-                              "CELLS?IDS?",
-                              cellsIDsPattern)
+    cellsIDsPattern <-
+      ifelse(
+        isEmptyName(cellsIDsPattern),
+        # broadened default for common SCE conventions
+        "^(Cells?[ -_]?IDs?|barcodes?|cells?)$",
+        cellsIDsPattern)
 
     colToUse <- grep(x = colnames(cellsMetaSCE),
                      pattern = cellsIDsPattern,
                      ignore.case = TRUE)
 
-        if (!is_empty(colToUse)) {
-      cellsIDs <- cellsMetaSCE[, colToUse]
+    if (!is_empty(colToUse)) {
+      cellsIDs <- cellsMetaSCE[, colToUse[[1L]], drop = TRUE]
     }
   }
   if (is_empty(cellsIDs)) {
     warning("Could not retrieve cells' IDs from the input")
   } else {
-    colnames(rawMatrix)    <- make.unique(cellsIDs)
-    rownames(cellsMetaSCE) <- make.unique(cellsIDs)
+    cellsIDs <- make.unique(as.character(cellsIDs))
+    colnames(rawMatrix)    <- cellsIDs
+    rownames(cellsMetaSCE) <- cellsIDs
   }
 
   # Identify clustering columns according to given pattern
@@ -296,8 +414,11 @@ convertFromSingleCellExperiment <- function(
 
   # Identify condition columns
   # (e.g., 'COTAN_conditions_', 'condition', 'orig.ident', etc.)
-  condCols <- grep("^(COTAN_conditions_|condition$|orig.ident$)",
-                   names(cellsMetaSCE), value = FALSE)
+
+  if (isEmptyName(condNamesPattern)) {
+    condNamesPattern <- "^(COTAN_conditions_|condition$|orig.ident$)"
+  }
+  condCols <- grep(condNamesPattern, names(cellsMetaSCE), value = FALSE)
 
   colsToKeep <- !(seq_len(ncol(cellsMetaSCE)) %in% union(clCols, condCols))
   cellsMeta <- cellsMetaSCE[, colsToKeep, drop = FALSE]
@@ -305,14 +426,55 @@ convertFromSingleCellExperiment <- function(
   # Attempt to retrieve co-expression matrices from metadata
   sceMetadataList <- S4Vectors::metadata(objSCE)
 
+  keptMd <- c("genesCoex", "cellsCoex", "datasetMetadata", "project.name")
+  droppedMd <- setdiff(names(sceMetadataList), keptMd)
+  if (length(droppedMd) > 0L) {
+    warning("Dropping metadata entries: ", paste(droppedMd, collapse = ", "))
+  }
+
   genesCoex <- emptySymmetricMatrix()
   if ("genesCoex" %in% names(sceMetadataList)) {
     genesCoex <- sceMetadataList[["genesCoex"]]
   }
 
+  if (!is_empty(genesCoex)) {
+    gd <- dim(genesCoex)
+    if (length(gd) != 2L ||
+        gd[[1L]] != nrow(rawMatrix) ||
+        gd[[2L]] != nrow(rawMatrix)) {
+      warning(paste("genesCoex dimensions do not match nrow(counts);",
+              "dropping genesCoex."))
+      genesCoex <- emptySymmetricMatrix()
+    }
+    genesCoex <-
+      tryCatch(as(genesCoex, "dspMatrix"),
+               error = function(e) {
+                 warning("genesCoex cannot be made into a symmetric matrix")
+                 emptySymmetricMatrix()
+               })
+  }
+
   cellsCoex <- emptySymmetricMatrix()
   if ("cellsCoex" %in% names(sceMetadataList)) {
     cellsCoex <- sceMetadataList[["cellsCoex"]]
+  }
+
+  if (!is_empty(cellsCoex)) {
+    cd <- dim(cellsCoex)
+    if (length(cd) != 2L ||
+        cd[[1L]] != ncol(rawMatrix) ||
+        cd[[2L]] != ncol(rawMatrix)) {
+      warning(paste("cellsCoex dimensions do not match ncol(counts);",
+                    "dropping cellsCoex."))
+      cellsCoex <- emptySymmetricMatrix()
+    }
+
+    cellsCoex <-
+      tryCatch(as(cellsCoex, "dspMatrix"),
+               error = function(e) {
+                 warning("cellsCoex cannot be made into a symmetric matrix")
+                 emptySymmetricMatrix()
+               })
   }
 
   # Extract dataset metadata if available
@@ -328,7 +490,7 @@ convertFromSingleCellExperiment <- function(
   # Create the COTAN object
   objCOTAN <- new(
     "COTAN",
-    raw = as(as(rawMatrix, "Matrix"), "sparseMatrix"),
+    raw = rawMatrix,
     genesCoex = genesCoex,
     cellsCoex = cellsCoex,
     metaDataset = as.data.frame(datasetMeta),

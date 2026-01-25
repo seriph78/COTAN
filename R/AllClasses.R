@@ -9,8 +9,7 @@
 #' @noRd
 #'
 emptySparseMatrix <- function() {
-  return(as(as(as(matrix(0.0, 0L, 0L), "dMatrix"),
-               "generalMatrix"), "CsparseMatrix"))
+  return(as(matrix(0.0, 0L, 0L), "dgCMatrix"))
 }
 
 #' @title emptySymmetricMatrix
@@ -24,8 +23,7 @@ emptySparseMatrix <- function() {
 #' @noRd
 #'
 emptySymmetricMatrix <- function() {
-  return(as(as(as(matrix(0.0, 0L, 0L), "dMatrix"),
-               "symmetricMatrix"), "packedMatrix"))
+  return(as(matrix(0.0, 0L, 0L), "packedMatrix"))
 }
 
 #---------- COTAN class --------------
@@ -73,16 +71,6 @@ setClass(
   validity = function(object) {
     if (is_empty(object@raw)) {
       stop("'raw' is empty")
-    } else if (is_empty(object@metaGenes)) { #run the test only at the beginning
-      if (anyNA(object@raw)) {
-        stop("Input 'raw' data contains NA!")
-      }
-      if (isFALSE(all.equal(object@raw, round(object@raw), tolerance = 0.0))) {
-        stop("Input 'raw' data contains non integer numbers.")
-      }
-      if (any(object@raw < 0.0)) {
-        stop("Input 'raw' data must contain only non negative integers.")
-      }
     }
 
     numGenes <- nrow(object@raw)
@@ -162,17 +150,14 @@ setClass(
     for (name in colnames(object@metaCells)) {
       if (startsWith(name, "CL_")) {
         if (!inherits(object@metaCells[[name]], "factor")) {
-          # ensure the clusters are factors
-          object@metaCells[[name]] <- factor(object@metaCells[[name]])
+          stop("Clusterization '", name, "' must be a factor.")
         }
         if (!name %in% names(object@clustersCoex)) {
-          stop("The clusterization name '", name, "' does not have",
-               " an element in the 'clusterCoex' list")
+          stop("Clusterization '", name, "' has no entry in 'clustersCoex'.")
         }
       } else if (startsWith(name, "COND_")) {
         if (!inherits(object@metaCells[[name]], "factor")) {
-          # ensure the clusters are factors
-          object@metaCells[[name]] <- factor(object@metaCells[[name]])
+          stop("Condition '", name, "' must be a factor.")
         }
       }
     }
@@ -213,10 +198,12 @@ NULL
 #' @rdname COTAN_ObjectCreation
 #'
 COTAN <- function(raw = "ANY") {
-  raw <- as(as(raw, "Matrix"), "sparseMatrix")
+  raw <- coerceToDgCMatrix(raw)
 
   assert_that(!is_empty(rownames(raw)), !is_empty(colnames(raw)),
               msg = "Inputs must have both row and column names!")
+
+  validateRawCounts(raw)
 
   new("COTAN", raw = raw)
 }
@@ -311,9 +298,10 @@ getCOTANSlots <- function(from) {
     raw <- emptySparseMatrix()
   } else if (isa(from@raw, "dgCMatrix")) {
     raw <- from@raw
+  } else if (is.data.frame(from@raw)) {
+    raw <- as(as.matrix(from@raw), "dgCMatrix")
   } else {
-    raw <- as(as(as(as.matrix(from@raw), "dMatrix"),
-                 "generalMatrix"), "CsparseMatrix")
+    raw <- as(as(from@raw, "Matrix"), "dgCMatrix")
   }
 
   genesCoex <- emptySymmetricMatrix()
