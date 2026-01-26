@@ -8,7 +8,14 @@
 \usage{
 convertToSingleCellExperiment(objCOTAN)
 
-convertFromSingleCellExperiment(objSCE, clNamesPattern = "")
+convertFromSingleCellExperiment(
+  objSCE,
+  assayName = "counts",
+  clNamesPattern = "",
+  condNamesPattern = "",
+  genesNamesPattern = "",
+  cellsIDsPattern = ""
+)
 }
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
@@ -16,9 +23,27 @@ convertFromSingleCellExperiment(objSCE, clNamesPattern = "")
 \item{objSCE}{A \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object to
 be converted}
 
+\item{assayName}{Name of the assay in \code{objSCE} to be used as raw counts.
+Default is \code{"counts"}. If not found, the function falls back to \code{"X"} and
+then to the first available assay, emitting a warning in both cases.}
+
 \item{clNamesPattern}{A regular expression pattern used to identify the
 clustering columns in \code{colData}. Default supports \code{Seurat} conventions:
 \code{"^(COTAN_clusters_|seurat_clusters$|.*_snn_res\\\\..*|wsnn_res\\\\..*)"}}
+
+\item{condNamesPattern}{A regular expression pattern used to identify the
+condition columns in \code{colData}. Default supports \code{Seurat} conventions:
+\code{"^(COTAN_conditions_|condition$|orig.ident$)"}}
+
+\item{genesNamesPattern}{A regular expression pattern (case insensitive) used
+to identify the genes' names column in \code{rowData}. It used only if no names
+are available from the data matrix or the genes' data-set. Default supports
+is: \code{"^((Gene|Feature)s?[ -_]?(Name|ID)s?|IDs?|Symbols?)$"}}
+
+\item{cellsIDsPattern}{A regular expression pattern (case insensitive) used
+to identify the cells' names column in \code{colData}. It used only if no names
+are available from the data matrix or the cells' data-set. Default supports
+is: \code{"^(Cells?[ -_]?IDs?|Barcodes?|Cells?)$"}}
 }
 \value{
 A \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object
@@ -77,8 +102,8 @@ they exist
 \item Constructs a \code{COTAN} object using the extracted data
 \item Adds back the \emph{clusterizations} and \emph{conditions} using \code{COTAN} methods
 If the COEX is not present (e.g., in \code{SCE} objects created from \code{Seurat}),
-the \code{genesCoex} and \code{cellsCoex} slots in the resulting \code{COTAN} object will
-be empty matrices
+the \code{genesCoex} and \code{cellsCoex} slots in the resulting \code{COTAN} object will be
+empty matrices
 }
 }
 \examples{
@@ -90,7 +115,9 @@ be empty matrices
 
   newObj <- convertFromSingleCellExperiment(sce)
 
-  stopifnot(identical(getDims(newObj), getDims(obj)))
+  stopifnot(identical(getDims(newObj)[-5:-6], getDims(obj)[-5:-6]),
+            identical(unlist(getDims(newObj)[5:6]),
+                      unlist(getDims(obj)[5:6]) + 1L))
 
 }
 \seealso{

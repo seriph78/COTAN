@@ -56,7 +56,7 @@ test_that("COTAN getters", {
   zeroOne <- sign(getRawData(obj))
   probZero <- funProbZero(getDispersion(obj), getLambda(obj) %o% getNu(obj))
 
-  expect_identical(getRawData(obj), as(as(raw, "dMatrix"), "sparseMatrix"))
+  expect_identical(getRawData(obj), as(as(raw, "Matrix"), "dgCMatrix"))
   expect_identical(getNumGenes(obj), 10L)
   expect_identical(getNumCells(obj), 20L)
   expect_identical(getGenes(obj), head(LETTERS, getNumGenes(obj)))

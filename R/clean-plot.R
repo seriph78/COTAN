@@ -48,7 +48,6 @@
 #' @importFrom ggplot2 scale_color_gradient2
 #' @importFrom ggplot2 scale_color_manual
 #' @importFrom ggplot2 coord_cartesian
-#' @importFrom ggplot2 geom_label
 #' @importFrom ggrepel geom_text_repel
 #'
 #' @importFrom graphics par
@@ -145,19 +144,25 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     rm(toClust)
 
-    D <- data.frame("means" = rowMeans(B), "n" = NA)
-    rownames(D) <- rownames(B)
-    D <- rownames_to_column(D)
+    D <- data.frame(
+      means = rowMeans(B),
+      stringsAsFactors = FALSE
+    )
+    geneNames <- rownames(B)
+    rownames(D) <- geneNames
+
     rm(B)
-
-    D <- D[order(D[["means"]], decreasing = TRUE), ]
-    rownames(D) <- NULL
-    D <- column_to_rownames(D)
-
-    D <- D[D[["means"]] > 0.0, ]
-    D[["n"]] <- seq_along(D[["means"]])
-
     gc()
+
+    ## keep only strctly positive means (so log10 is well-defined)
+    D <- D[D[["means"]] > .Machine$double.eps, , drop = FALSE]
+
+    ## sort by mean decreasing
+    D <- D[order(D[["means"]], decreasing = TRUE), , drop = FALSE]
+
+    ## add rank/index
+    D[["n"]] <- seq_len(nrow(D))
+
 
     #check if the PCA plot is clean enough and from the printed genes,
     #if the smallest group of cells are characterized by particular genes
@@ -183,8 +188,10 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
       ) +
       plotTheme("pca")
 
-    minN <- min(D[["n"]]) + 15.0
-    lowD <- D[["n"]] < minN
+    nLabel <- min(20L, nrow(D))
+    labelDf <- D[seq_len(nLabel), , drop = FALSE]
+    labelDf[["geneName"]] <- rownames(labelDf)
+
     genesPlot <-
       ggplot(
         D,
@@ -193,28 +200,17 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
       geom_point() +
       ggtitle(
         label = "B cell group genes mean expression"
-        #subtitle = " - B group NOT removed -"
       ) +
-      geom_label(
-        data = subset(D, lowD),
-        aes(x = .data$n,
-            y = .data$means,
-            label = rownames(D)[lowD]),
-        #vjust = 0L,
-        #nudge_y = 0.05,
-        hjust = 0L,
-        nudge_x = 50.0
-        #direction = "x",
-        #angle = 90.0,
-        #segment.size = 0.2
+      geom_label_repel(
+        data = labelDf,
+        aes(label = .data$geneName),
+        min.segment.length = 0,
+        box.padding = 0.35,
+        point.padding = 0.2,
+        max.overlaps = Inf
       ) +
-      plotTheme("genes") +
-      theme(
-        plot.title    = element_text(hjust = 1.0),
-        plot.subtitle = element_text(hjust = 0.95, vjust = -25.0)
-        # extra right margin for long labels
-        # plot.margin   = margin(5.5, 40, 5.5, 5.5)
-      )
+      scale_y_log10() +
+      plotTheme("genes")
 
     nuEst <- round(getNu(objCOTAN), digits = 7L)
     UDEPlot <-

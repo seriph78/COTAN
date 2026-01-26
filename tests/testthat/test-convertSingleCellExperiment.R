@@ -9,9 +9,9 @@ test_that("Convert COTAN to and from SCE on test dataset", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 6L, saveObj = FALSE)
+  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 1L, saveObj = FALSE)
 
-  coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
+  coex_test <- readRDS(test_path("coex.test.RDS"))
 
   fold15 <- function(m) {
     mm <- cbind(m, m, m, m, m)
@@ -28,9 +28,12 @@ test_that("Convert COTAN to and from SCE on test dataset", {
 
   objSCE <- convertToSingleCellExperiment(objCOTAN = obj)
 
+  genesMeta <- cbind(GenesNames = getGenes(obj), getMetadataGenes(obj))
+  cellsMeta <- cbind(CellsIDs   = getCells(obj), getMetadataCells(obj))
+
   expect_identical(counts(objSCE), getRawData(obj))
-  expect_identical(rowData(objSCE), S4Vectors::DataFrame(getMetadataGenes(obj)))
-  expect_identical(colData(objSCE), S4Vectors::DataFrame(getMetadataCells(obj)))
+  expect_identical(rowData(objSCE), S4Vectors::DataFrame(genesMeta))
+  expect_identical(colData(objSCE), S4Vectors::DataFrame(cellsMeta))
   expect_named(S4Vectors::metadata(objSCE),
                c("genesCoex", "cellsCoex", "datasetMetadata"))
   expect_identical(S4Vectors::metadata(objSCE)[["datasetMetadata"]],
@@ -42,8 +45,8 @@ test_that("Convert COTAN to and from SCE on test dataset", {
   newObj <- convertFromSingleCellExperiment(objSCE = objSCE)
 
   expect_identical(getRawData(newObj), getRawData(obj))
-  expect_identical(getMetadataGenes(newObj), getMetadataGenes(obj))
-  expect_identical(getMetadataCells(newObj), getMetadataCells(obj))
+  expect_identical(getMetadataGenes(newObj), genesMeta)
+  expect_identical(getMetadataCells(newObj), cellsMeta)
   expect_identical(getMetadataDataset(newObj), getMetadataDataset(obj))
   expect_identical(getMetadataElement(obj, datasetTags()[["gsync"]]),
                    getMetadataElement(newObj, datasetTags()[["gsync"]]))
@@ -87,8 +90,8 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
 
   srat <- Seurat::FindClusters(srat, resolution = 0.8, algorithm = 2L)
 
-  sce <- suppressWarnings(Seurat::as.SingleCellExperiment(srat))
-  obj <- convertFromSingleCellExperiment(sce)
+  sce <- Seurat::as.SingleCellExperiment(srat)
+  suppressWarnings(expect_warning(obj <- convertFromSingleCellExperiment(sce)))
 
   allDims <- set_names(c(600L, 1000L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),
     c("raw1", "raw2", "genesCoex1", "genesCoex2", "cellsCoex1", "cellsCoex2",
@@ -104,7 +107,7 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
                    asClusterization(Seurat::FetchData(srat, var = "orig.ident"),
                                     getCells(obj)))
 
-  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 6L, saveObj = FALSE)
+  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 1L, saveObj = FALSE)
 
   expect_identical(colnames(getMetadataGenes(obj)),
                    c("feGenes", "lambda", "dispersion"))

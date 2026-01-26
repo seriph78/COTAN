@@ -16,7 +16,7 @@ From version 2.0.0 new functions and plots to check and clean the data-set were 
 
 ## Examples
 
-Main source of examples for the `COTAN v2` is the *vignette*: [Guided_tutorial_v2](https://github.com/seriph78/COTAN/blob/devel/vignettes/Guided_tutorial_v2.Rmd). There it is illustrated the preparatory cleaning steps, various analysis results and plots done on the data-set `"Mouse Cortex E17.5, <GEO:GSM2861514>"`
+Main source of examples for the `COTAN v2` is the *vignette*: [Guided_tutorial_v2](https://bioconductor.org/packages/devel/bioc/vignettes/COTAN/inst/doc/Guided_tutorial_v2.html) or as script [here](https://github.com/seriph78/COTAN/blob/devel/vignettes/Guided_tutorial_v2.Rmd). There it is illustrated the preparatory cleaning steps, various analysis results and plots done on the data-set `"Mouse Cortex E17.5, <GEO:GSM2861514>"`
 
 Further more it is possible to look at some other examples on real data-sets at [COTAN paper](https://seriph78.github.io/Cotan_paper/index.html) and more extensively at [COTAN Datasets analysis](https://seriph78.github.io/COTAN_Datasets_analysis/).
 

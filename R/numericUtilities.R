@@ -775,6 +775,45 @@ calcDist <- function(data, method, diag = FALSE, upper = FALSE) {
   return(ret)
 }
 
+#----------------- Matrix utilities --------------------
+
+coerceToDgCMatrix <- function(x) {
+  if (is.data.frame(x)) {
+    x <- as.matrix(x)
+  }
+
+  # DelayedArray / HDF5-backed etc.
+  if (inherits(x, "DelayedMatrix")) {
+    # prefer sparse realization if available
+    x <- tryCatch(as(x, "dgCMatrix"),
+                  error = function(e) as.matrix(x))
+  }
+
+  if (!inherits(x, "Matrix")) {
+    x <- Matrix::Matrix(x, sparse = TRUE)
+  }
+
+  return(as(x, "dgCMatrix"))
+}
+
+validateRawCounts <- function(rawData) {
+  if (!inherits(rawData, "dgCMatrix")) {
+    stop("Input 'raw' data must be of type dgCMatrix for this check")
+  }
+  x <- rawData@x
+  if (anyNA(x)) {
+    stop("Input 'raw' data contains NA!")
+  }
+  if (any(x < 0)) {
+    stop("Input 'raw' data must contain only non negative integers.")
+  }
+  # integer check on nonzeros only
+  if (any(x != round(x))) {
+    stop("Input 'raw' data contains non integer numbers.")
+  }
+  return(TRUE)
+}
+
 
 #----------------- depreacetd functions --------------------
 
