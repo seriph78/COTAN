@@ -10,7 +10,7 @@ other \code{Linux} systems. Naturally it makes a difference whether one wants to
 install support only for the \code{CPU} or also have the system \code{GPU} at the
 ready!
 
-This are just \emph{suggestions}, no guarantees are given:
+These are just \emph{suggestions}, no guarantees are given:
 \strong{try at your own peril!}
 
 The main resources to install \code{torch} is
