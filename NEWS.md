@@ -5,7 +5,7 @@ Improvements for plot functions:
 
 ## 2.11.1
 
-Fixed issue with `isCoexAvailable()` fro cases when the global meta-data
+Fixed issue with `isCoexAvailable()` for cases when the global meta-data
 have multiple columns
 
 Fixed issue with dispersion solver
