@@ -1,3 +1,13 @@
+Improved conversions to/from SingleCellExperiment objects
+
+Solved inconsistencies in cell/genes names between raw data and
+meta-data
+
+Improvements for plot functions:
+- fixed label placements genes' plot in `cleanPlots()`
+- added `genesPercentagePlot()` as generalization of
+  `mitochondrialPercentagePlot()`
+
 ## 2.10.1
 
 Fixed issue with `isCoexAvailable()` fro cases when the global meta-data

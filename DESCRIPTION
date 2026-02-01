@@ -61,6 +61,7 @@ Imports:
     zeallot,
     assertthat,
     withr,
+    SummarizedExperiment,
     SingleCellExperiment,
     proxy,
     RSpectra
@@ -85,7 +86,6 @@ Suggests:
     GEOquery,
     sf,
     torch,
-    SummarizedExperiment,
     S4Vectors
 Config/testthat/edition: 3
 Language: en-US

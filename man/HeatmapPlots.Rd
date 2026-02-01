@@ -104,7 +104,8 @@ objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateLambdaLinear(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
-objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE)
+objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE,
+                          optimizeForSpeed = FALSE)
 
 ## some genes
 primaryMarkers <- c("g-000010", "g-000020", "g-000138")

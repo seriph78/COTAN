@@ -954,12 +954,21 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   }
 
   if (plotKind == "genes") {
-    return(basicTheme +
-           theme(plot.title = element_text(size = 20L, hjust = 0.02,
-                                           vjust = -10.0, face = "italic",
-                                           color = myDarkBlue),
-                 plot.subtitle = element_text(vjust = -15.0, hjust = 0.01,
-                                              color = "darkred")))
+    return(
+      basicTheme +
+        theme(
+          plot.title.position = "plot",  # title sits above the panel
+          plot.title = element_text(
+            size = 20L,
+            hjust = 0.02,
+            vjust = 1.0,                 # no negative vjust
+            face = "italic",
+            color = myDarkBlue
+            #margin = margin(b = 8)       # spacing between title and panel
+          )
+          #plot.margin = margin(t = 8, r = 6, b = 6, l = 6)
+        )
+    )
   }
 
   if (plotKind == "UDE") {
