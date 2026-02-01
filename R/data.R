@@ -141,7 +141,7 @@ NULL
 #'   install support only for the `CPU` or also have the system `GPU` at the
 #'   ready!
 #'
-#'   This are just *suggestions*, no guarantees are given:
+#'   These are just *suggestions*, no guarantees are given:
 #'   **try at your own peril!**
 #'
 #' @description The main resources to install `torch` is
