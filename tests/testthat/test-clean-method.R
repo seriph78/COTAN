@@ -1,5 +1,5 @@
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("clean COTAN object", {
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
@@ -47,3 +47,5 @@ test_that("Clean on test dataset", {
   expect_equal(getDispersion(obj)[genesNamesTest],
                dispersion, tolerance = 1.0e-10, ignore_attr = FALSE)
 })
+
+options(prevOptState)

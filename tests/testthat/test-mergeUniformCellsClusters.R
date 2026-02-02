@@ -4,7 +4,7 @@ stopifnot(file.exists(tm))
 library(stringr)
 library(zeallot)
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("Merge Uniform Cells Clusters", {
   utils::data("test.dataset", package = "COTAN")
@@ -158,3 +158,5 @@ test_that("Merge Uniform Cells Clusters", {
 
   gc()
 })
+
+options(prevOptState)

@@ -1,6 +1,6 @@
 
+prevOptState <- options(parallelly.fork.enable = TRUE)
 options(COTAN.TorchWarning = NULL)
-options(parallelly.fork.enable = TRUE)
 
 test_that("COTAN getters", {
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
@@ -302,3 +302,5 @@ test_that("COTAN getters", {
                m3, tolerance = 5.0e-4)
   # nolint end
 })
+
+options(prevOptState)

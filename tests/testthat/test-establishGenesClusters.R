@@ -1,6 +1,6 @@
 library(zeallot)
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("Establish genes clusters", {
   data("test.dataset")
@@ -83,3 +83,5 @@ test_that("Establish genes clusters", {
 
   expect_s3_class(treePlot, "dendrogram")
 })
+
+options(prevOptState)

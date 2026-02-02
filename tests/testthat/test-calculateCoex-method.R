@@ -2,8 +2,8 @@
 library(rlang)
 library(zeallot)
 
+prevOptState <- options(parallelly.fork.enable = TRUE)
 options(COTAN.TorchWarning = NULL)
-options(parallelly.fork.enable = TRUE)
 
 crossEntrVector <- function(zeroOne, probZero) {
   crossEntr <- rep_len(0.0, nrow(zeroOne))
@@ -560,3 +560,5 @@ test_that("Coex with negative dispersion genes", {
   expect_true(all(hmDF[["pValue"]] > 0.05))
   expect_true(all(hmDF[["coex"]] == 0.0))
 })
+
+options(prevOptState)

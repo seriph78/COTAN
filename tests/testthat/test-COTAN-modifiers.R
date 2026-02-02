@@ -1,5 +1,5 @@
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("metaDataset", {
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
@@ -230,3 +230,5 @@ test_that("Managed clusterizations and conditions", {
                                  clusters = rep(c("3", "4"), 20L),
                                  coexDF = coexDF))
 })
+
+options(prevOptState)

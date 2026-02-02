@@ -3,7 +3,7 @@ stopifnot(file.exists(tm))
 
 library(zeallot)
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("Cell Uniform Clustering", {
   utils::data("test.dataset", package = "COTAN")
@@ -20,6 +20,7 @@ test_that("Cell Uniform Clustering", {
   c(sClusters, cellsRDM, resolution, usedMaxResolution) %<-%
     seuratClustering(objCOTAN = obj,
                      initialResolution = initialResolution,
+                     resolutionStep = 0.5,
                      minNumClusters = 3L,
                      useCoexEigen = TRUE,
                      dataMethod = "AdjBin",
@@ -236,3 +237,5 @@ test_that("Cell Uniform Clustering", {
 
   gc()
 })
+
+options(prevOptState)

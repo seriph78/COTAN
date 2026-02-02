@@ -3,7 +3,7 @@ stopifnot(file.exists(tm))
 
 library(Matrix)
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("Logging", {
   logPath <- file.path(tm, "COTAN_Test.log")
@@ -328,3 +328,5 @@ test_that("mat2vec_rfast", {
 
   expect_equal(vec, mat2vec_rfast(vec2mat_rfast(vec)), ignore_attr = TRUE)
 })
+
+options(prevOptState)

@@ -1,11 +1,11 @@
 
 # Creates the files to be reloaded by the tests for comparisons
 
+# nolint start: object_name_linter
 outputTestDatasetCreation <-
   function(testsDir = file.path("tests", "testthat")) {
-  #nolint start: object_name_linter
   utils::data("test.dataset", package = "COTAN")
-  options(parallelly.fork.enable = TRUE)
+  prevOptState <- options(parallelly.fork.enable = TRUE)
   setLoggingLevel(3L)
 
   obj <- COTAN(raw = test.dataset)
@@ -141,5 +141,7 @@ outputTestDatasetCreation <-
                            clName = "merge",
                            clusters = mergedData[["clusters"]],
                            coexDF = mergedData[["coex"]])
-  # nolint end
+
+  options(prevOptState)
 }
+# nolint end

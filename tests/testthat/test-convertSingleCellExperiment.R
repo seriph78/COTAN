@@ -1,5 +1,5 @@
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("Convert COTAN to and from SCE on test dataset", {
   utils::data("test.dataset", package = "COTAN")
@@ -118,3 +118,5 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
                      "CL_RNA_snn_res.0.8", "CL_seurat_clusters",
                      "COND_orig.ident", "feCells", "nu"))
 })
+
+options(prevOptState)
