@@ -159,21 +159,30 @@ test_that("COTAN getters", {
                         ifelse(rawData != 0L, probZero, probZero - 1.0)))
   }
   ## check default
-  expect_identical(calculateLikelihoodOfObserved(obj),
-                   getLH(obj, formula = "raw"))
+  expect_identical(
+    calculateLikelihoodOfObserved(obj),
+    getLH(obj, formula = "raw")
+  )
 
   expect_identical(
     getLH(obj, formula = "raw"),
-    asDataMatrix(obj, ifelse(zeroOne, (1.0 - bProbZero), bProbZero)))
+    asDataMatrix(obj, ifelse(zeroOne, (1.0 - bProbZero), bProbZero))
+  )
   expect_identical(
     getLH(obj, formula = "log"),
-    asDataMatrix(obj, ifelse(zeroOne, log1p(-bProbZero), log(bProbZero))))
+    asDataMatrix(obj, ifelse(zeroOne, log1p(-bProbZero), log(bProbZero)))
+  )
   expect_identical(
     getLH(obj, formula = "der"),
-    asDataMatrix(obj,  ifelse(zeroOne, -1.0/(1.0 - bProbZero), 1.0/bProbZero)))
+    asDataMatrix(
+      obj,
+      ifelse(zeroOne, -1.0 / (1.0 - bProbZero), 1.0 / bProbZero)
+    )
+  )
   expect_identical(
     getLH(obj, formula = "sLog"),
-    asDataMatrix(obj, ifelse(zeroOne, -log1p(-bProbZero), log(bProbZero))))
+    asDataMatrix(obj, ifelse(zeroOne, -log1p(-bProbZero), log(bProbZero)))
+  )
 
   ## strings are case sensitive
   expect_error(getLH(obj, formula = "SLog"))
@@ -183,6 +192,7 @@ test_that("COTAN getters", {
   ## check default
   expect_identical(getDataMatrix(obj), as.matrix(getLogNormData(obj)))
 
+  # nolint start: line_length_linter
   expect_identical(getDataMatrix(obj, dataMethod = "RW"),                      as.matrix(getRawData(obj)))
   expect_identical(getDataMatrix(obj, dataMethod = "Raw"),                     as.matrix(getRawData(obj)))
   expect_identical(getDataMatrix(obj, dataMethod = "RawData"),                 as.matrix(getRawData(obj)))
@@ -213,6 +223,7 @@ test_that("COTAN getters", {
   expect_identical(getDataMatrix(obj, dataMethod = "SL"),                      as.matrix(getLH(obj, "sLog")))
   expect_identical(getDataMatrix(obj, dataMethod = "SignLogL"),                as.matrix(getLH(obj, "sLog")))
   expect_identical(getDataMatrix(obj, dataMethod = "SignedLogLikelihood"),     as.matrix(getLH(obj, "sLog")))
+  # nolint end
 
   ## strings are case sensitive
   expect_error(getDataMatrix(obj, dataMethod = "signLogl"))

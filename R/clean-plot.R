@@ -204,7 +204,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
       geom_label_repel(
         data = labelDf,
         aes(label = .data$geneName),
-        min.segment.length = 0,
+        min.segment.length = 0.0,
         box.padding = 0.35,
         point.padding = 0.2,
         max.overlaps = Inf
@@ -338,4 +338,3 @@ screePlot <- function(pcaStdDev) {
   ) +
   plotTheme("pca")
 }
-

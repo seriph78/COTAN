@@ -244,14 +244,14 @@ mergeUniformCellsClusters <- function(objCOTAN,
             logLevel = 1L)
 
     if (TRUE) {
-      allNames <- names(allCheckResults)
+      resNames <- names(allCheckResults)
       allCheckResults <-
         lapply(seq_along(allCheckResults),
                function(r, check, allRes) {
                  updateChecker(names(allCheckResults)[[r]], check, allRes)
                }, checker, allCheckResults)
-      names(allCheckResults) <- allNames
-      rm(allNames)
+      names(allCheckResults) <- resNames
+      rm(resNames)
     }
 
     logThis(paste0(length(pList), " new clusters pairs to be tested for",

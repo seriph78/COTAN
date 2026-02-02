@@ -56,10 +56,12 @@ scatterPlot <-
     labs(title = "Scatter plot of library size VS gene detected for each cell",
          y = "Gene number",
          x = "Library size (UMI)") +
+    # nolint start: implicit_integer_linter
     scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x))) +
     scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
                   labels = trans_format("log10", math_format(10^.x))) +
+    # nolint end
     plotTheme("size-plot")
 
   if (isTRUE(splitSamples)) {

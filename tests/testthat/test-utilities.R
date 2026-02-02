@@ -46,7 +46,7 @@ test_that("Logging", {
 
 test_that("Clusterizations manipulations", {
   set.seed(1675787192L)
-  elemValues <- paste0("", as.roman(sample(7L, 100L, replace = TRUE)))
+  elemValues <- paste0("", as.roman(sample.int(7L, 100L, replace = TRUE)))
   elemNames <- paste0("el_", 1L:100L)
 
   clusters <- as.data.frame(list("a" = elemNames, "b" = elemValues))
@@ -132,7 +132,7 @@ test_that("Adding/extracting columns to/from data.frames", {
   expect_setequal(df[["constant"]], 2L)
 })
 
-
+# nolint start: spaces_inside_linter
 test_that("funProbZero", {
   # Cases with mu = 0 are not actually in use
   expect_identical(funProbZero(-Inf, 0.0), 0.0)
@@ -161,11 +161,12 @@ test_that("funProbZero", {
   expect_identical(funProbZero(10.0, Inf), 0.0)
   expect_identical(funProbZero( Inf, Inf), 1.0)
 })
+# nolint end
 
 
 test_that("funProbZero with matrices", {
   mu <- matrix((1L:25L) / 7.0, nrow = 10L, ncol = 10L)
-  disp <- c(-Inf, -1.0/3.0, 1e-6, (1L:6L) / 3.0, Inf)
+  disp <- c(-Inf, -1.0 / 3.0, 1e-6, (1L:6L) / 3.0, Inf)
 
   p <- funProbZero(disp, mu)
 

@@ -118,10 +118,10 @@ UMAPPlot <- function(dataIn,
                        n.neighbors = numNeighbors, #30L
                        n.components = 2L,
                        metric = "cosine",
-                       learning.rate = 1,
+                       learning.rate = 1.0,
                        min.dist = minPointsDist, # 0.3
                        uwot.sgd = FALSE,
-                       seed.use = 42,
+                       seed.use = 42L,
                        verbose = TRUE)))
 
   plotDF <- data.frame(x = umap[, 1L],
@@ -323,7 +323,7 @@ cellsUMAPPlot <- function(objCOTAN,
     genesSel = genesSel, numGenes = numGenes)
 
   tailMsg <- ifelse(useCoexEigen, "COEX eigenvectors projection",
-                    ifelse(length(genesSel) == 1,
+                    ifelse(length(genesSel) == 1L,
                            paste(genesSel, "genes selector"),
                            "user provided genes"))
 

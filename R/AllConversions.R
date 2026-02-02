@@ -342,7 +342,8 @@ convertFromSingleCellExperiment <- function(
     genesNamesPattern <-
       ifelse(
         isEmptyName(genesNamesPattern),
-        # broadened default for common SCE conventions (10X / scater / zellkonverter)
+        # broadened default for common SCE conventions
+        # (10X / scater / zellkonverter)
         "^((Gene|Feature)s?[ -_]?(Name|ID)s?|IDs?|Symbols?)$",
         genesNamesPattern)
 

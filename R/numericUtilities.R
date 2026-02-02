@@ -804,7 +804,7 @@ validateRawCounts <- function(rawData) {
   if (anyNA(x)) {
     stop("Input 'raw' data contains NA!")
   }
-  if (any(x < 0)) {
+  if (any(x < 0.0)) {
     stop("Input 'raw' data must contain only non negative integers.")
   }
   # integer check on nonzeros only
@@ -931,7 +931,7 @@ vec2mat_rfast <- function(x, genes = "all") {
 mat2vec_rfast <- function(mat) {
   mat <- as.matrix(mat)
 
-  if (!dim(mat)[[1L]] == dim(mat)[[2L]]) {
+  if (dim(mat)[[1L]] != dim(mat)[[2L]]) {
     stop("The matrix is not square!")
   }
 

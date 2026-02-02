@@ -225,8 +225,8 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     cluster_columns = FALSE,  # Columns are not clustered but grouped
     col = colorFunc,
     column_split = genesGroupMap,      # Group columns by gene groups
-    column_gap = unit(1, "mm"),        # Gap between gene groups
-    column_names_gp = gpar(fontsize = 10L, angle = 45, hjust = 1),
+    column_gap = unit(1.0, "mm"),        # Gap between gene groups
+    column_names_gp = gpar(fontsize = 10L, angle = 45.0, hjust = 1.0),
     row_names_gp = gpar(fontsize = 10L),
     cell_fun = cellFunc,
     top_annotation = NULL,

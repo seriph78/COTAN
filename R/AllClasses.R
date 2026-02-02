@@ -295,13 +295,13 @@ getCOTANSlots <- function(from) {
   }
 
   if (is_empty(from@raw)) {
-    raw <- emptySparseMatrix()
+    rawM <- emptySparseMatrix()
   } else if (isa(from@raw, "dgCMatrix")) {
-    raw <- from@raw
+    rawM <- from@raw
   } else if (is.data.frame(from@raw)) {
-    raw <- as(as.matrix(from@raw), "dgCMatrix")
+    rawM <- as(as.matrix(from@raw), "dgCMatrix")
   } else {
-    raw <- as(as(from@raw, "Matrix"), "dgCMatrix")
+    rawM <- as(as(from@raw, "Matrix"), "dgCMatrix")
   }
 
   genesCoex <- emptySymmetricMatrix()
@@ -414,7 +414,7 @@ getCOTANSlots <- function(from) {
     }
   }
 
-  return(list(raw, genesCoex, cellsCoex, metaGenes, metaCells, clustersCoex))
+  return(list(rawM, genesCoex, cellsCoex, metaGenes, metaCells, clustersCoex))
 }
 
 #' @details Automatically converts an object from class `scCOTAN` into `COTAN`

@@ -21,6 +21,7 @@ crossEntrVector <- function(zeroOne, probZero) {
   return(crossEntr)
 }
 
+# nolint start: spaces_inside_linter
 coexPoint <- function(o, e, n) {
   num <- ( ((o[[1L]] - e[[1L]]) / max(1.0, e[[1L]])) -
            ((o[[2L]] - e[[2L]]) / max(1.0, e[[2L]])) -
@@ -32,6 +33,7 @@ coexPoint <- function(o, e, n) {
                     (1.0 / max(1.0, e[[4L]])) ))
   return(num / den)
 }
+# nolint end
 
 coexMatrix <- function(obs, exp, n, s) {
   coex <- matrix(NA, s, s)
@@ -61,6 +63,7 @@ test_that("Calculations on genes", {
   mu <- getMu(obj)
 
   expect_identical(dim(mu), dim(getRawData(obj)))
+# nolint start: spaces_inside_linter
   expect_equal(mu[ 1L,  1L], lambda[[ 1L]] * getNu(obj)[[ 1L]],
                ignore_attr = TRUE)
   expect_equal(mu[10L,  1L], lambda[[10L]] * getNu(obj)[[ 1L]],
@@ -69,6 +72,7 @@ test_that("Calculations on genes", {
                ignore_attr = TRUE)
   expect_equal(mu[10L, 10L], lambda[[10L]] * getNu(obj)[[10L]],
                ignore_attr = TRUE)
+  # nolint end
 
   c(observedYY, observedY) %<-%
     observedContingencyTablesYY(obj, actOnCells = FALSE, asDspMatrices = FALSE)

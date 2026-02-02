@@ -907,7 +907,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
   assert_that(c(g1) %in% genes, msg = "the first gene is unknown")
   assert_that(c(g2) %in% genes, msg = "the second gene is unknown")
 
-  dimnames <- list(c(paste(g2, "yes", sep = "."), paste(g2, "no", sep = ".")),
+  dimNames <- list(c(paste(g2, "yes", sep = "."), paste(g2, "no", sep = ".")),
                    c(paste(g1, "yes", sep = "."), paste(g1, "no", sep = ".")))
 
   # observed
@@ -926,7 +926,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 
   observedCT <- matrix(c(observedYY[g1, g2], observedNY[g2, g1],
                          observedNY[g1, g2], observedNN[g1, g2]),
-                       ncol = 2L, nrow = 2L, dimnames = dimnames)
+                       ncol = 2L, nrow = 2L, dimnames = dimNames)
 
   # estimated
   lambda <- suppressWarnings(getLambda(objCOTAN))
@@ -959,7 +959,7 @@ contingencyTables <- function(objCOTAN, g1, g2) {
 
   expectedCT <- matrix(c(expectedYY[g1, g2], expectedYN[g1, g2],
                          expectedYN[g2, g1], expectedNN[g1, g2]),
-                       ncol = 2L, nrow = 2L, dimnames = dimnames)
+                       ncol = 2L, nrow = 2L, dimnames = dimNames)
 
 
   return(list("observed" = observedCT, "expected" = expectedCT))
@@ -1002,10 +1002,10 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
           logLevel = 3L)
 
   if (isTRUE(actOnCells)) {
-    allNames <- getCells(objCOTAN)
+    relNames <- getCells(objCOTAN)
     normFact <- 1.0 / sqrt(getNumGenes(objCOTAN)) # divided by sqrt(n)
   } else {
-    allNames <- getGenes(objCOTAN)
+    relNames <- getGenes(objCOTAN)
     normFact <- 1.0 / sqrt(getNumCells(objCOTAN)) # divided by sqrt(m)
   }
 
@@ -1051,11 +1051,11 @@ calculateCoex_Legacy <- function(objCOTAN, actOnCells, returnPPFract) {
 
   coex <- coex * (observedYY@x - expectedYY@x)
 
-  assert_that(2L * length(coex) == length(allNames) * (length(allNames) + 1L),
+  assert_that(2L * length(coex) == length(relNames) * (length(relNames) + 1L),
               msg = "Output coex@x has the wrong size")
 
   coex <- new("dspMatrix", Dim = dim(expectedYY), x = coex)
-  rownames(coex) <- colnames(coex) <- allNames
+  rownames(coex) <- colnames(coex) <- relNames
 
   gc()
 
@@ -1184,7 +1184,7 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
   tmp <- expectedY$view(c(-1L, 1L)) - expectedYY
   if (isTRUE(returnPPFract)) {
     mask <- tmp$lt(thresholdForPP)
-    invisible(problematicPairs$bitwise_or_(mask));
+    invisible(problematicPairs$bitwise_or_(mask))
     rm(mask)
   }
   # 1.0 / max(1.0, eYN) [in-place]
@@ -1661,7 +1661,7 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 
     sortedCandidates <- names(gdi)[order(gdi, decreasing = TRUE)]
     if (gdi[sortedCandidates[numGenes]] < 1.3) {
-      numLowGDIGenes <- sum(gdi[sortedCandidates[seq_len(numGenes)]] <1.3)
+      numLowGDIGenes <- sum(gdi[sortedCandidates[seq_len(numGenes)]] < 1.3)
       logThis(paste("Included", numLowGDIGenes, "genes with GDI below 1.3"),
               logLevel = 1L)
     }
@@ -1748,8 +1748,8 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #'   of *binarized* data matrix
 #'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
 #'   the *log-likelihood* of *binarized* data matrix
-#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
-#'   of *binarized* data matrix
+#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed
+#'   log-likelihood* of *binarized* data matrix
 #'
 #'   For the last four options see [calculateLikelihoodOfObserved()] for more
 #'   details

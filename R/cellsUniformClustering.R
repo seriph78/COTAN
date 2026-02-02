@@ -109,7 +109,7 @@ seuratClustering <- function(objCOTAN,
         srat,
         resolution = resolution,
         algorithm = 2L,      # Louvain (refined)
-        random.seed = 137    # controls igraph::cluster_louvain()
+        random.seed = 137L   # controls igraph::cluster_louvain()
       ))
 
       # The next lines are necessary to make cluster smaller while
@@ -300,7 +300,6 @@ cellsUniformClustering <- function(objCOTAN,
   iterReset <- -1L
   resolutionStep <- 0.5
   numClustersToRecluster <- 0L
-  srat <- NULL
   allCheckResults <- list()
 
   if (is.null(checker)) {

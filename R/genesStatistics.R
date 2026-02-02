@@ -137,7 +137,7 @@ calculateGDIGivenS  <- function(S,
 
   # Beware S might not be square!
   assertthat::assert_that(length(dim(S)) == 2L,
-                          rowsFraction > 0, rowsFraction <= 1)
+                          rowsFraction > 0.0, rowsFraction <= 1.0)
 
   cores <- handleMultiCore(cores)
 

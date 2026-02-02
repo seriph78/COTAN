@@ -187,4 +187,3 @@ NULL
 #' @name Installing_torch
 #'
 NULL
-

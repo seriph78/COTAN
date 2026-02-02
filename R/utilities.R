@@ -198,6 +198,8 @@ handleMultiCore <- function(cores) {
 #'   installation. Note the [torch::torch_set_num_threads()] has effect also on
 #'   the \pkg{Rfast} package methods
 #'
+#' @export
+#'
 #' @rdname MultiThreading
 #'
 canUseTorch <- function(optimizeForSpeed, deviceStr) {
@@ -387,7 +389,7 @@ isEmptyName <- function(name) {
 #' @rdname HandleStrings
 #'
 niceFactorLevels <- function(v) {
-  names <- names(v)
+  vNames <- names(v)
   if (is.factor(v)) {
     v <- factorToVector(v)
   }
@@ -399,7 +401,7 @@ niceFactorLevels <- function(v) {
     numChars <- max(nchar(v))
     v <- str_pad(v, width = numChars, side = "left", pad = "_")
   }
-  names(v) <- names
+  names(v) <- vNames
   return(factor(v))
 }
 

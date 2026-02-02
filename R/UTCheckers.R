@@ -418,12 +418,12 @@ dfToCheckers <- function(df, checkerClass = "") {
               msg = "A valid checker type must be given")
 
   if (isEmptyName(checkerClass)) {
-    assert_that(nrow(df) != 0,
+    assert_that(nrow(df) != 0L,
                 "class" %in% colnames(df),
                 msg = paste("Cannot recover checker type: not present",
                             "in data.frame and not given by user"))
 
-    checkerClass <- df[1, "class"]
+    checkerClass <- df[1L, "class"]
 
     assert_that(all(df[["class"]] == checkerClass),
                 msg = "All checks in the data.frame must be of the same type")
