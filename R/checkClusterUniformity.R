@@ -129,10 +129,10 @@ checkClusterUniformity <- function(
           logLevel = 2L)
 
   if (TRUE) {
-    dumpDF <- checkersToDF(checker)
-    logThis(paste0(colnames(dumpDF), " = ", unlist(dumpDF[1L, ]),
+    tempDF <- checkersToDF(checker)
+    logThis(paste0(colnames(tempDF), " = ", unlist(tempDF[1L, ]),
                    collapse = ", "), logLevel = 3L)
-    rm(dumpDF)
+    rm(tempDF)
   }
 
   if (isTRUE(saveObj)) tryCatch({

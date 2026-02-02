@@ -172,6 +172,7 @@ test_that("funProbZero with matrices", {
 
   expect_identical(dim(p), dim(mu))
 
+  # nolint start: spaces_inside_linter
   expect_identical(p[ 1L,  1L], funProbZero(disp[[ 1L]], mu[ 1L,  1L]))
   expect_identical(p[ 1L, 10L], funProbZero(disp[[ 1L]], mu[ 1L, 10L]))
 
@@ -181,6 +182,7 @@ test_that("funProbZero with matrices", {
 
   expect_identical(p[10L,  1L], funProbZero(disp[[10L]], mu[10L,  1L]))
   expect_identical(p[10L, 10L], funProbZero(disp[[10L]], mu[10L, 10L]))
+  # nolint end
 })
 
 

@@ -182,7 +182,7 @@ NULL
 #'   torch::install_torch(cuda_version = "12.8", reinstall = TRUE)
 #'
 #'   # run this only **AFTER** restarting `R`
-#'   COTAN:::canUseTorch(TRUE, "cuda")
+#'   COTAN::canUseTorch(TRUE, "cuda")
 #'
 #' @name Installing_torch
 #'

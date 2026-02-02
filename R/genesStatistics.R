@@ -150,7 +150,7 @@ calculateGDIGivenS  <- function(S,
   spIdx <- parallel::splitIndices(length(genes),
                                   ceiling(length(genes) / chunkSize))
 
-  spGenes <- lapply(spIdx, function(x) genes[x])
+  spGenes <- lapply(spIdx, \(x) genes[x])
 
   cores <- min(cores, length(spGenes))
 

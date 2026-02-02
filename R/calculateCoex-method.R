@@ -89,6 +89,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
   # bound the probabilities to avoid exact zero or one
   probZero <- pmin(pmax(getProbabilityOfZero(objCOTAN), 1.0e-8), 1.0 - 1.0e-8)
 
+  #nolint start: infix_space_linter, spaces_left_parentheses_linter
   res <-
     switch(formula,
            raw  = ifelse(rawData != 0L,       1.0-probZero,       probZero),
@@ -96,6 +97,7 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
            der  = ifelse(rawData != 0L, -1.0/(1.0-probZero),  1.0/probZero),
            sLog = ifelse(rawData != 0L,   -log1p(-probZero),  log(probZero)),
            stop("Unknown formula: ", formula))
+  #nolint end
 
   rm(probZero)
 
@@ -128,8 +130,8 @@ calculateLikelihoodOfObserved <- function(objCOTAN,
 #'   of *binarized* data matrix
 #'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
 #'   the *log-likelihood* of *binarized* data matrix
-#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed log-likelihood*
-#'   of *binarized* data matrix
+#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed
+#'   log-likelihood* of *binarized* data matrix
 #'
 #'   For the last four options see [calculateLikelihoodOfObserved()] for more
 #'   details
@@ -406,6 +408,7 @@ observedContingencyTables <- function(objCOTAN,
     observedYY <- pack(observedYY)
     # these operation drops the lower triangle values
     # but the other matrix contains them anyway
+    # nolint start: spaces_inside_linter
     if (isTRUE(actOnCells)) {
       observedNY <- pack(forceSymmetric(t(observedYN)))
       observedYN <- pack(forceSymmetric(  observedYN) )
@@ -413,6 +416,7 @@ observedContingencyTables <- function(objCOTAN,
       observedYN <- pack(forceSymmetric(t(observedNY)))
       observedNY <- pack(forceSymmetric(  observedNY) )
     }
+    #nolint end
   } else {
     if (isTRUE(actOnCells)) {
       observedNY <- t(observedYN)
@@ -760,6 +764,7 @@ expectedContingencyTables <- function(objCOTAN,
     expectedYY <- pack(expectedYY)
     # these operation drops the lower triangle values
     # but the other matrix contains them anyway
+    # nolint start: spaces_inside_linter
     if (isTRUE(actOnCells)) {
       expectedYN <- pack(forceSymmetric(t(expectedNY)))
       expectedNY <- pack(forceSymmetric(  expectedNY) )
@@ -767,6 +772,7 @@ expectedContingencyTables <- function(objCOTAN,
       expectedNY <- pack(forceSymmetric(t(expectedYN)))
       expectedYN <- pack(forceSymmetric(  expectedYN) )
     }
+    # nolint end
   } else {
     if (isTRUE(actOnCells)) {
       expectedYN <- t(expectedNY)

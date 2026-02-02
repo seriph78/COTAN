@@ -270,16 +270,16 @@ establishGenesClusters <-
   pca1[["sec_markers"]] <- 0.0
   pca1[["sec_markers"]][rownames(pca1) %in% secondaryMarkers] <- 1.0
 
-  colors <- rep("#B09C85FF", nrow(pca1))
-  c <- 1L
+  pcaColors <- rep("#B09C85FF", nrow(pca1))
+  pos <- 1L
   for (to.color in unique(highlight)) {
     if (to.color == "not_marked") {
       next
     }
-    colors[highlight == to.color] <- colVector[c]
-    c <- c + 1L
+    pcaColors[highlight == to.color] <- colVector[pos]
+    pos <- pos + 1L
   }
-  pca1[["colors"]] <- colors
+  pca1[["colors"]] <- pcaColors
 
   pca1 <- pca1[labels(dend), ]
 
@@ -292,7 +292,7 @@ establishGenesClusters <-
         if (!marker %in% rownames(pca1[clPos, ])) {
           next
         }
-        colBranches[clPos] <- colors[rownames(pca1) %in% marker]
+        colBranches[clPos] <- pcaColors[rownames(pca1) %in% marker]
         groupLabels[clPos] <- groupName
       }
     }
@@ -306,13 +306,14 @@ establishGenesClusters <-
                          col         = colBranches[uniquePos],
                          groupLabels = groupLabels[uniquePos])
 
-  dend <- color_labels(dend, labels = rownames(pca1), col = colors)
+  dend <- color_labels(dend, labels = rownames(pca1), col = pcaColors)
 
   relPos <- rownames(pca1) %in% colnames(GCS)
-  dend <- dend %>%
-    dendextend::set("labels",
-                    ifelse(labels(dend) %in% rownames(pca1)[relPos],
-                           labels(dend), ""))
+  dend <- dend |>
+    dendextend::set(
+      "labels",
+      ifelse(labels(dend) %in% rownames(pca1)[relPos], labels(dend), "")
+    )
 
   endTime <- Sys.time()
 

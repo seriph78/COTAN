@@ -34,7 +34,7 @@ library(zeallot)
 # necessary to solve precedence of overloads
 conflicted::conflict_prefer("%<-%", "zeallot")
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 ```
 
 ## Introduction
@@ -88,7 +88,7 @@ message("Run the command 'options(COTAN.UseTorch = FALSE)'",
         " in your session to disable `torch` completely!")
 
 # this command does check whether the torch library is properly installed
-c(useTorch, deviceStr) %<-% COTAN:::canUseTorch(TRUE, "cuda")
+c(useTorch, deviceStr) %<-% COTAN::canUseTorch(TRUE, "cuda")
 if (useTorch) {
   message("The `torch` library is available and ready to use")
   if (deviceStr == "cuda") {
@@ -158,8 +158,8 @@ Drop cells with too many reads as they are probably doublets or multiplets
 cellsSizeThr <- 6000L
 obj <- addElementToMetaDataset(obj, "Cells size threshold", cellsSizeThr)
 
-cells_to_rem <- getCells(obj)[getCellsSize(obj) > cellsSizeThr]
-obj <- dropGenesCells(obj, cells = cells_to_rem)
+cellsToRem <- getCells(obj)[getCellsSize(obj) > cellsSizeThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
 
 plot(cellSizePlot(obj))
 ```
@@ -171,8 +171,8 @@ genesSizeHighThr <- 3000L
 obj <-
   addElementToMetaDataset(obj, "Num genes high threshold", genesSizeHighThr)
 
-cells_to_rem <- getCells(obj)[getNumExpressedGenes(obj) > genesSizeHighThr]
-obj <- dropGenesCells(obj, cells = cells_to_rem)
+cellsToRem <- getCells(obj)[getNumExpressedGenes(obj) > genesSizeHighThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
 
 plot(genesSizePlot(obj))
 ```
@@ -183,8 +183,8 @@ Drop cells with too low genes expression as they are probably dead
 genesSizeLowThr <- 500L
 obj <- addElementToMetaDataset(obj, "Num genes low threshold", genesSizeLowThr)
 
-cells_to_rem <- getCells(obj)[getNumExpressedGenes(obj) < genesSizeLowThr]
-obj <- dropGenesCells(obj, cells = cells_to_rem)
+cellsToRem <- getCells(obj)[getNumExpressedGenes(obj) < genesSizeLowThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
 
 plot(genesSizePlot(obj))
 ```
@@ -204,8 +204,8 @@ plot(mitPlot)
 mitPercThr <- 1.0
 obj <- addElementToMetaDataset(obj, "Mitoc. perc. threshold", mitPercThr)
 
-cells_to_rem <- rownames(mitSizes)[mitSizes[["mit.percentage"]] > mitPercThr]
-obj <- dropGenesCells(obj, cells = cells_to_rem)
+cellsToRem <- rownames(mitSizes)[mitSizes[["mit.percentage"]] > mitPercThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
 
 c(mitPlot, mitSizes) %<-%
   mitochondrialPercentagePlot(obj, genePrefix = "^Mt")
@@ -218,10 +218,11 @@ If we do not want to consider the mitochondrial genes we can remove them
 before starting the analysis.
 
 ```{r}
-genes_to_rem <- getGenes(obj)[grep("^Mt", getGenes(obj))]
-cells_to_rem <- getCells(obj)[which(getCellsSize(obj) == 0L)]
+genesToRem <- getGenes(obj)[grep("^Mt", getGenes(obj))]
+obj <- dropGenesCells(obj, genes = genesToRem)
 
-obj <- dropGenesCells(obj, genes_to_rem, cells_to_rem)
+cellsToRem <- getCells(obj)[getCellsSize(obj) == 0L]
+obj <- dropGenesCells(obj, cells = cellsToRem)
 ```
 
 We want also to log the current status.
@@ -250,8 +251,8 @@ plot(genesPlot)
 We can observe here that the red cells are really enriched in hemoglobin genes so we prefer to remove them. They can be extracted from the `pcaCellsData` object and removed.
 
 ```{r eval=TRUE, include=TRUE}
-cells_to_rem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
-obj <- dropGenesCells(obj, cells = cells_to_rem)
+cellsToRem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
+obj <- dropGenesCells(obj, cells = cellsToRem)
 
 obj <- addElementToMetaDataset(obj, "Num drop B group", 1L)
 
@@ -294,8 +295,8 @@ obj <- addElementToMetaDataset(obj, "Num drop B group", 2L)
 
 obj <- estimateNuLinear(obj)
 
-cells_to_rem <- getCells(obj)[getNu(obj) < UDELowThr]
-obj <- dropGenesCells(obj, cells = cells_to_rem)
+cellsToRem <- getCells(obj)[getNu(obj) < UDELowThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
 ```
 
 Repeat the estimation after the cells are removed
@@ -451,10 +452,10 @@ contingency tables for two specific genes. To get them we can use two functions:
 `contingencyTables()` to produce the observed and expected data
 
 ```{r}
-print("Contingency Tables:")
+cat("Contingency Tables:")
 contingencyTables(obj, g1 = "Satb2", g2 = "Bcl11b")
 
-print("Corresponding Coex")
+cat("Corresponding Coex")
 getGenesCoex(obj)["Satb2", "Bcl11b"]
 ```
 
@@ -490,7 +491,7 @@ c(gSpace, eigPlot, pcaGenesClDF, treePlot) %<-%
     obj,
     groupMarkers = layersGenes,
     numGenesPerMarker = 25L,
-    kCuts = 5
+    kCuts = 5L
   )
 
 plot(eigPlot)
@@ -699,7 +700,7 @@ if (TRUE) {
       full.names = TRUE
     )
 
-  prevCheckRes <- 
+  prevCheckRes <-
     read.csv(resFiles[length(resFiles)], header = TRUE, row.names = 1L)
 }
 
@@ -847,7 +848,7 @@ if (dir.exists(file.path(outDir, GEO))) {
 setLoggingFile("")
 file.remove(file.path(outDir, "vignette_v2.log"))
 
-options(parallelly.fork.enable = FALSE)
+options(prevOptState)
 ```
 
 ```{r}

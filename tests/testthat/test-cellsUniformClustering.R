@@ -27,7 +27,7 @@ test_that("Cell Uniform Clustering", {
   expect_identical(as.vector(table(sClusters)), c(321L, 284L, 214L, 181L))
   expect_identical(dim(cellsRDM), c(1000L, 25L + 15L))
   expect_identical(resolution, 1.3)
-  expect_identical(usedMaxResolution, FALSE)
+  expect_false(usedMaxResolution)
 
   # Make it a less strict check as it is only for testing
   checker <- new("AdvancedGDIUniformityCheck")
@@ -212,7 +212,7 @@ test_that("Cell Uniform Clustering", {
   # Test the low GDI (homogeneity) for each defined clusters
   simpleChecker <- checker@thirdCheck
   for (cl in levels(clusters)[[1L]]) {
-    print(paste("Tested cluster:", cl))
+    cat(paste("Tested cluster:", cl))
 
     cellsToDrop <- names(clusters)[clusters != cl]
 

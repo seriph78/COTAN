@@ -140,7 +140,7 @@ test_that("Merge Uniform Cells Clusters", {
   # Test the low GDI (homogeneity) for each defined clusters
   simpleChecker <- checkers[[2L]]@thirdCheck
   for (cl in levels(mergedClusters)[[1L]]) {
-    print(paste("Tested cluster:", cl))
+    cat(paste("Tested cluster:", cl))
 
     cellsToDrop <- names(clusters)[mergedClusters != cl]
 

@@ -261,7 +261,7 @@ test_that("COTAN getters", {
   m1 <- as.matrix(cbind(rep(2.756809750418045, times = 20L),
                         rep(0.0, times = 20L), rep(0.0, times = 20L),
                         rep(0.0, times = 20L), rep(0.0, times = 20L)))
-  colnames(m1) <- paste0("PC", c(1L:5L))
+  colnames(m1) <- paste0("PC", 1L:5L)
   rownames(m1) <- letters[1L:20L]
 
   expect_equal(abs(calcRDM(obj, useCoexEigen = FALSE,
@@ -278,7 +278,7 @@ test_that("COTAN getters", {
     rep(c(1.991509612121359,     -1.991510865753923    ), times = 10L),
     rep(c(4.556799230950100e-05, -4.815389335445746e-05), times = 10L),
     rep(c(5.701730287707164e-05, -8.375641609457851e-05), times = 10L))
-  colnames(m2) <- paste0("EC_", c(1L:3L))
+  colnames(m2) <- paste0("EC_", 1L:3L)
   rownames(m2) <- letters[1L:20L]
 
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
@@ -289,7 +289,7 @@ test_that("COTAN getters", {
     rep(c(-1.96537974590724,    1.96547022027574     ), times = 10L),
     rep(c(-5.14674535931154e-4, 2.4124745673443485e-2), times = 10L),
     rep(c( 0.227956910102598,   0.226238243931497    ), times = 10L))
-  colnames(m3) <- paste0("EC_", c(1L:3L))
+  colnames(m3) <- paste0("EC_", 1L:3L)
   rownames(m3) <- letters[1L:20L]
   if (FALSE) {
     attr(m3, "scaled:scale") <-
@@ -300,4 +300,3 @@ test_that("COTAN getters", {
                        dataMethod = "DerLogL", numComp = 5L)[, 1L:3L],
                m3, tolerance = 5.0e-4)
 })
-

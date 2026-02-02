@@ -3,6 +3,7 @@
 
 outputTestDatasetCreation <-
   function(testsDir = file.path("tests", "testthat")) {
+  #nolint start: object_name_linter
   utils::data("test.dataset", package = "COTAN")
   options(parallelly.fork.enable = TRUE)
   setLoggingLevel(3L)
@@ -15,7 +16,7 @@ outputTestDatasetCreation <-
   obj <- proceedToCoex(objCOTAN = obj, cores = 6L, saveObj = FALSE)
 
   if (FALSE) {
-    saveRDS(obj, file = file.path(testsDir,"test.COTAN.RDS"))
+    saveRDS(obj, file = file.path(testsDir, "test.COTAN.RDS"))
   }
 
   cells.names.test <-
@@ -140,4 +141,5 @@ outputTestDatasetCreation <-
                            clName = "merge",
                            clusters = mergedData[["clusters"]],
                            coexDF = mergedData[["coex"]])
+  # nolint end
 }

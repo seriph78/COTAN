@@ -144,24 +144,20 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     rm(toClust)
 
-    D <- data.frame(
-      means = rowMeans(B),
-      stringsAsFactors = FALSE
-    )
-    geneNames <- rownames(B)
-    rownames(D) <- geneNames
+    bDf <- data.frame(means = rowMeans(B))
+    rownames(bDf) <- rownames(B)
 
     rm(B)
     gc()
 
     ## keep only strctly positive means (so log10 is well-defined)
-    D <- D[D[["means"]] > .Machine$double.eps, , drop = FALSE]
+    bDf <- bDf[bDf[["means"]] > .Machine$double.eps, , drop = FALSE]
 
     ## sort by mean decreasing
-    D <- D[order(D[["means"]], decreasing = TRUE), , drop = FALSE]
+    bDf <- bDf[order(bDf[["means"]], decreasing = TRUE), , drop = FALSE]
 
     ## add rank/index
-    D[["n"]] <- seq_len(nrow(D))
+    bDf[["n"]] <- seq_len(nrow(bDf))
 
 
     #check if the PCA plot is clean enough and from the printed genes,
@@ -188,13 +184,13 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
       ) +
       plotTheme("pca")
 
-    nLabel <- min(20L, nrow(D))
-    labelDf <- D[seq_len(nLabel), , drop = FALSE]
+    nLabel <- min(20L, nrow(bDf))
+    labelDf <- bDf[seq_len(nLabel), , drop = FALSE]
     labelDf[["geneName"]] <- rownames(labelDf)
 
     genesPlot <-
       ggplot(
-        D,
+        bDf,
         aes(x = .data$n, y = .data$means)
       ) +
       geom_point() +

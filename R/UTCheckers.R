@@ -38,10 +38,11 @@ setMethod(
               checker@check@maxRankBeyond  == 0L)
     }
 
-    assert_that(checkerIsOK(currentC))
-    assert_that(is.null(previousC) ||
-                  is(previousC, "SimpleGDIUniformityCheck"))
-    assert_that(is.null(objCOTAN) || is(objCOTAN, "COTAN"))
+    assert_that(
+      checkerIsOK(currentC),
+      is.null(previousC) || is(previousC, "SimpleGDIUniformityCheck"),
+      is.null(objCOTAN)  || is(objCOTAN, "COTAN")
+    )
 
     previousCheckIsSufficient <- FALSE
     currentC@clusterSize <- ifelse(is.null(objCOTAN), 0L, getNumCells(objCOTAN))
@@ -145,10 +146,11 @@ setMethod(
              checker@thirdCheck@maxRankBeyond  == 0L &&
              !is.finite(checker@fourthCheck@maxRatioBeyond))
     }
-    assert_that(checkerIsOK(currentC))
-    assert_that(is.null(previousC) ||
-                  is(previousC, "AdvancedGDIUniformityCheck"))
-    assert_that(is.null(objCOTAN) || is(objCOTAN, "COTAN"))
+    assert_that(
+      checkerIsOK(currentC),
+      is.null(previousC) || is(previousC, "AdvancedGDIUniformityCheck"),
+      is.null(objCOTAN)  || is(objCOTAN, "COTAN")
+    )
 
     previousCheckIsSufficient <- FALSE
     currentC@clusterSize <- ifelse(is.null(objCOTAN), 0L, getNumCells(objCOTAN))
@@ -337,7 +339,7 @@ checkersToDF <- function(checkers) {
   if (!is_list(checkers)) {
     checkers <- list(checkers)
   }
-  df <- data.frame()
+  chDf <- data.frame()
   for (checker in checkers) {
     # check argument is a checker
     assert_that(is(checker, "BaseUniformityCheck"))
@@ -364,17 +366,17 @@ checkersToDF <- function(checkers) {
     checkerDF <- as.data.frame(checkerAsList)
 
     # Bind the data frame row to the main data frame
-    if (is_empty(df)) {
-      df <- checkerDF
+    if (is_empty(chDf)) {
+      chDf <- checkerDF
     } else {
-      assert_that(identical(colnames(df), colnames(checkerDF)))
-      df <- rbind(df, checkerDF)
+      assert_that(identical(colnames(chDf), colnames(checkerDF)))
+      chDf <- rbind(chDf, checkerDF)
     }
   }
 
-  rownames(df) <- names(checkers)
+  rownames(chDf) <- names(checkers)
 
-  return(df)
+  return(chDf)
 }
 
 

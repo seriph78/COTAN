@@ -376,13 +376,13 @@ cellsUniformClustering <- function(objCOTAN,
       allCondNames <- getAllConditions(subObj)
       condName <- ifelse(length(allCondNames) == 0L, "",
                          allCondNames[[length(allCondNames)]])
-      title <- paste0("Cells number: ", nrow(cellsRDM))
-      plot(UMAPPlot(dataIn = cellsRDM, title = title,
+      colTitle <- paste0("Cells number: ", nrow(cellsRDM))
+      plot(UMAPPlot(dataIn = cellsRDM, title = colTitle,
                     clusters = getCondition(subObj, condName)))
 
-      title <- paste0(title, "\nCl. resolution: ", resolution,
-                      ifelse(isTRUE(usedMaxResolution), " [max]", ""))
-      plot(UMAPPlot(dataIn = cellsRDM, title = title,
+      colTitle <- paste0(colTitle, "\nCl. resolution: ", resolution,
+                         ifelse(isTRUE(usedMaxResolution), " [max]", ""))
+      plot(UMAPPlot(dataIn = cellsRDM, title = colTitle,
                     clusters = testClusters))
     }, error = function(err) {
       logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)
