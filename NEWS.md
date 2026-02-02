@@ -1,4 +1,6 @@
-Improved conversions to/from SingleCellExperiment objects
+## 2.10.2
+
+Improved conversions to/from `SingleCellExperiment` objects
 
 Solved inconsistencies in cell/genes names between raw data and
 meta-data
