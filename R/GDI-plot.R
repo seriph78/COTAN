@@ -46,6 +46,8 @@
 #'
 #' @rdname UniformClusters
 #'
+
+# nolint start: object_name_linter
 GDIPlot <- function(objCOTAN, genes, condition = "",
                     statType = "S", GDIThreshold = 1.43,
                     GDIIn = NULL) {
@@ -90,22 +92,20 @@ GDIPlot <- function(objCOTAN, genes, condition = "",
   myColours <- set_names(getColorsVector(length(names(genes))), names(genes))
 
   labelledGenes <- GDIDf[["colors"]] != "none"
+# nolint end
 
   if (isEmptyName(condition)) {
     condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
   }
 
-  df_none <- filter(GDIDf, .data$colors == "none")
-  df_col  <- filter(GDIDf, .data$colors != "none")
-
   gdiPl <-
     ggplot(
-      df_none,
+      filter(GDIDf, .data$colors == "none"),
       aes(x = .data$sum.raw.norm, y = .data$GDI)
     ) +
     geom_point(alpha = 0.3, color = "#8491B4B2", size = 2.5) +
     geom_point(
-      data = df_col,
+      data = filter(GDIDf, .data$colors != "none"),
       aes(x = .data$sum.raw.norm, y = .data$GDI, colour = .data$colors),
       size = 2.5,
       alpha = 0.8

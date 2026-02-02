@@ -18,7 +18,7 @@ test_that("Merge Uniform Cells Clusters", {
                        calcCoex = FALSE, cores = 6L, saveObj = FALSE)
 
   clusters <- factor(readRDS(file.path(getwd(), "split.clusters.test.RDS")))
-  genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
+  genesNamesTest <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
 
   obj <- addClusterization(objCOTAN = obj,
                            clName = "clusters", clusters = clusters)
@@ -54,11 +54,11 @@ test_that("Merge Uniform Cells Clusters", {
   expect_setequal(colnames(adjPValDF), levels(clusters))
   expect_identical(rownames(adjPValDF), getGenes(objCOTAN = obj))
 
-  coexDF_exp <- readRDS(file.path(getwd(), "coex.clusters.test.RDS"))
-  pValDF_exp <- readRDS(file.path(getwd(), "pvalues.clusters.test.RDS"))
+  coexDfExp <- readRDS(file.path(getwd(), "coex.clusters.test.RDS"))
+  pValDfExp <- readRDS(file.path(getwd(), "pvalues.clusters.test.RDS"))
 
-  expect_equal(coexDF[genes.names.test, ], coexDF_exp, tolerance = 1.0e-8)
-  expect_equal(pValDF[genes.names.test, ], pValDF_exp, tolerance = 1.0e-8)
+  expect_equal(coexDF[genesNamesTest, ], coexDfExp, tolerance = 1.0e-8)
+  expect_equal(pValDF[genesNamesTest, ], pValDfExp, tolerance = 1.0e-8)
 
   deltaExpression <- clustersDeltaExpression(objCOTAN = obj)
 
@@ -70,14 +70,14 @@ test_that("Merge Uniform Cells Clusters", {
                        G3 = c("g-000510", "g-000530", "g-000550",
                               "g-000570", "g-000590"))
 
-  e.df <- geneSetEnrichment(clustersCoex = coexDF, groupMarkers = groupMarkers)
+  eDf <- geneSetEnrichment(clustersCoex = coexDF, groupMarkers = groupMarkers)
 
-  expect_identical(nrow(e.df), length(groupMarkers))
-  expect_identical(ncol(e.df), ncol(coexDF) + 2L)
-  expect_lte(max(e.df[, 1L:(ncol(e.df) - 2L)]), 1L)
-  expect_gte(min(e.df[, 1L:(ncol(e.df) - 2L)]), 0L)
-  expect_gte(min(e.df[["N. total"]] - e.df[["N. detected"]]), 0L)
-  expect_equal(e.df[["N. total"]], lengths(groupMarkers), ignore_attr = TRUE)
+  expect_identical(nrow(eDf), length(groupMarkers))
+  expect_identical(ncol(eDf), ncol(coexDF) + 2L)
+  expect_lte(max(eDf[, 1L:(ncol(eDf) - 2L)]), 1L)
+  expect_gte(min(eDf[, 1L:(ncol(eDf) - 2L)]), 0L)
+  expect_gte(min(eDf[["N. total"]] - eDf[["N. detected"]]), 0L)
+  expect_equal(eDf[["N. total"]], lengths(groupMarkers), ignore_attr = TRUE)
 
   checker <- new("AdvancedGDIUniformityCheck")
   checkers <- list(checker, shiftCheckerThresholds(checker, 0.1))
@@ -150,10 +150,10 @@ test_that("Merge Uniform Cells Clusters", {
       tmpObj <- proceedToCoex(objCOTAN = tmpObj, cores = 6L, saveObj = FALSE)
     })
 
-    GDIData <- calculateGDI(objCOTAN = tmpObj)
+    gdiData <- calculateGDI(objCOTAN = tmpObj)
 
-    expect_lte(sum(GDIData[["GDI"]] >= simpleChecker@GDIThreshold),
-               simpleChecker@maxRatioBeyond * nrow(GDIData))
+    expect_lte(sum(gdiData[["GDI"]] >= simpleChecker@GDIThreshold),
+               simpleChecker@maxRatioBeyond * nrow(gdiData))
   }
 
   gc()

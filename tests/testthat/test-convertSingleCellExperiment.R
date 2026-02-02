@@ -11,14 +11,14 @@ test_that("Convert COTAN to and from SCE on test dataset", {
 
   obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 1L, saveObj = FALSE)
 
-  coex_test <- readRDS(test_path("coex.test.RDS"))
+  coexTest <- readRDS(test_path("coex.test.RDS"))
 
   fold15 <- function(m) {
     mm <- cbind(m, m, m, m, m)
     return(cbind(mm, mm, mm))
   }
-  coex <- cbind(fold15(coex_test[,  1L:10L]), fold15(coex_test[, 11L:20L]),
-                fold15(coex_test[, 21L:30L]), fold15(coex_test[, 31L:40L]))
+  coex <- cbind(fold15(coexTest[,  1L:10L]), fold15(coexTest[, 11L:20L]),
+                fold15(coexTest[, 21L:30L]), fold15(coexTest[, 31L:40L]))
   colnames(coex) <- rownames(coex)
   coex <- pack(forceSymmetric(coex, uplo = "U"))
 
@@ -52,21 +52,21 @@ test_that("Convert COTAN to and from SCE on test dataset", {
                    getMetadataElement(newObj, datasetTags()[["gsync"]]))
   expect_identical(getGenesCoex(newObj), getGenesCoex(obj))
 
-  raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
+  rawNorm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
   lambda <- readRDS(file.path(getwd(), "lambda.test.RDS"))
   dispersion <- readRDS(file.path(getwd(), "dispersion.test.RDS"))
   nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
 
-  genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
-  cells.names.test <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
+  genesNamesTest <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
+  cellsNamesTest <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
 
-  expect_equal(getNuNormData(newObj)[genes.names.test, cells.names.test],
-               raw.norm, tolerance = 1.0e-14, ignore_attr = FALSE)
-  expect_equal(getLambda(newObj)[genes.names.test],
+  expect_equal(getNuNormData(newObj)[genesNamesTest, cellsNamesTest],
+               rawNorm, tolerance = 1.0e-14, ignore_attr = FALSE)
+  expect_equal(getLambda(newObj)[genesNamesTest],
                lambda, tolerance = 1.0e-14, ignore_attr = FALSE)
-  expect_equal(getNu(newObj)[cells.names.test],
+  expect_equal(getNu(newObj)[cellsNamesTest],
                nu, tolerance = 1.0e-14, ignore_attr = FALSE)
-  expect_equal(getDispersion(newObj)[genes.names.test],
+  expect_equal(getDispersion(newObj)[genesNamesTest],
                dispersion, tolerance = 1.0e-10, ignore_attr = FALSE)
   expect_identical(getGenesCoex(newObj, zeroDiagonal = FALSE), coex)
 })
@@ -91,7 +91,9 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
   srat <- Seurat::FindClusters(srat, resolution = 0.8, algorithm = 2L)
 
   sce <- Seurat::as.SingleCellExperiment(srat)
-  suppressWarnings(expect_warning(obj <- convertFromSingleCellExperiment(sce)))
+  suppressWarnings({
+    expect_warning(obj <- convertFromSingleCellExperiment(sce))
+  })
 
   allDims <- set_names(c(600L, 1000L, 0L, 0L, 0L, 0L, 0L, 0L, 6L, 2L),
     c("raw1", "raw2", "genesCoex1", "genesCoex2", "cellsCoex1", "cellsCoex2",

@@ -49,7 +49,7 @@ NULL
 #' objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, saveObj = FALSE)
 #'
 #' markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
-#' GCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
+#' gCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
 #'                       numGenesPerMarker = 15)
 #'
 #' @rdname GenesStatistics
@@ -110,13 +110,13 @@ genesCoexSpace <-
   lowLDIGenes <- LDI >= quantile(LDI, probs = 0.9)
   goodGenes <- getGenes(objCOTAN) %in% names(LDI)[lowLDIGenes]
 
-  GCS <- as.matrix(getGenesCoex(objCOTAN,
+  gCS <- as.matrix(getGenesCoex(objCOTAN,
                                 genes = secondaryMarkers))[goodGenes, ]
-  GCS <- tanh(GCS * sqrt(getNumCells(objCOTAN)))
+  gCS <- tanh(gCS * sqrt(getNumCells(objCOTAN)))
 
   logThis(paste0("Number of columns (V set - secondary markers): ",
-                 dim(GCS)[[2L]]), logLevel = 3L)
-  logThis(paste0("Number of rows (U set): ", dim(GCS)[[1L]]), logLevel = 3L)
+                 dim(gCS)[[2L]]), logLevel = 3L)
+  logThis(paste0("Number of rows (U set): ", dim(gCS)[[1L]]), logLevel = 3L)
 
   endTime <- Sys.time()
 
@@ -126,7 +126,7 @@ genesCoexSpace <-
 
   logThis("Calculating gene co-expression space - DONE", logLevel = 2L)
 
-  return(list("SecondaryMarkers" = secondaryMarkers, "GCS" = GCS,
+  return(list("SecondaryMarkers" = secondaryMarkers, "GCS" = gCS,
               "rankGenes" = rankGenes))
 }
 
@@ -205,24 +205,24 @@ establishGenesClusters <-
 
   primaryMarkers <- unlist(groupMarkers)
 
-  c(secondaryMarkers, GCS, rankGenes) %<-%
+  c(secondaryMarkers, gCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN,
                    numGenesPerMarker = numGenesPerMarker,
                    primaryMarkers = primaryMarkers)
 
-  GCSPca <- runPCA(x = GCS, rank = 10L,
+  gCSPca <- runPCA(x = gCS, rank = 10L,
                    BSPARAM = IrlbaParam(), get.rotation = FALSE)
-  assert_that(identical(rownames(GCSPca[["x"]]), rownames(GCS)),
-              (ncol(GCSPca[["x"]]) == 10L), msg = "Issues with PCA output")
+  assert_that(identical(rownames(gCSPca[["x"]]), rownames(gCS)),
+              (ncol(gCSPca[["x"]]) == 10L), msg = "Issues with PCA output")
 
-  SMRelevance <- matrix(nrow = length(secondaryMarkers),
+  sMRelevance <- matrix(nrow = length(secondaryMarkers),
                         ncol = length(groupMarkers),
                         dimnames = list(secondaryMarkers, names(groupMarkers)))
 
   for (name in names(groupMarkers)) {
-    SMRelevance[, name] <- rowSums(rankGenes[, groupMarkers[[name]],
+    sMRelevance[, name] <- rowSums(rankGenes[, groupMarkers[[name]],
                                              drop = FALSE])
-    SMRelevance[groupMarkers[[name]], name] <- 1L
+    sMRelevance[groupMarkers[[name]], name] <- 1L
   }
 
   tempCoex <-
@@ -232,29 +232,29 @@ establishGenesClusters <-
   for (name in names(groupMarkers)) {
     antiCorrelated <- tempCoex[, groupMarkers[[name]], drop = FALSE] < 0.0
     toChange <- rownames(tempCoex)[rowSums(antiCorrelated) > 0L]
-    SMRelevance[toChange, name] <- 100000.0
+    sMRelevance[toChange, name] <- 100000.0
   }
 
   posLink <- set_names(vector("list", length(groupMarkers)),
                         names(groupMarkers))
 
   for (g in secondaryMarkers) {
-    w <- which(SMRelevance[g, ] == min(SMRelevance[g, ]))
+    w <- which(sMRelevance[g, ] == min(sMRelevance[g, ]))
     if (length(w) != 1L) {
       next
     }
     posLink[[w]] <- c(posLink[[w]], g)
   }
 
-  plotEigen <- screePlot(GCSPca[["sdev"]])
+  plotEigen <- screePlot(gCSPca[["sdev"]])
 
-  coexDist <- calcDist(GCS, method = distance)
+  coexDist <- calcDist(gCS, method = distance)
 
   hcNorm <- hclust(coexDist, method = hclustMethod)
 
   dend <- as.dendrogram(hcNorm)
 
-  pca1 <- as.data.frame(GCSPca[["x"]])
+  pca1 <- as.data.frame(gCSPca[["x"]])
   pca1 <- pca1[order.dendrogram(dend), ]
 
   highlight <- rep("not_marked", nrow(pca1))
@@ -308,9 +308,10 @@ establishGenesClusters <-
 
   dend <- color_labels(dend, labels = rownames(pca1), col = pcaColors)
 
-  relPos <- rownames(pca1) %in% colnames(GCS)
-  dend <- dend |>
+  relPos <- rownames(pca1) %in% colnames(gCS)
+  dend <-
     dendextend::set(
+      dend,
       "labels",
       ifelse(labels(dend) %in% rownames(pca1)[relPos], labels(dend), "")
     )
@@ -323,6 +324,6 @@ establishGenesClusters <-
 
   logThis("Establishing gene clusters - DONE", logLevel = 2L)
 
-  return(list("g.space" = GCS, "plot.eig" = plotEigen,
+  return(list("g.space" = gCS, "plot.eig" = plotEigen,
               "pca_clusters" = pca1, "tree_plot" = dend))
 }

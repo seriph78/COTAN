@@ -52,28 +52,28 @@ test_that("'scCOTAN' converters", {
                            coexDF = coexDF)
 
   # coerce 'COTAN' -> 'scCOTAN'
-  obj_sc <- as(obj, "scCOTAN")
+  objSc <- as(obj, "scCOTAN")
 
-  expect_identical(obj_sc@raw,      obj@raw)
-  expect_identical(obj_sc@raw.norm, getNuNormData(obj))
-  expect_identical(obj_sc@coex,     obj@genesCoex)
-  expect_identical(obj_sc@nu,       getNu(obj))
-  expect_identical(obj_sc@lambda,   getLambda(obj))
-  expect_identical(obj_sc@nu,       getNu(obj))
-  expect_identical(obj_sc@a,        getDispersion(obj))
-  expect_identical(obj_sc@hk,       getFullyExpressedGenes(obj))
-  expect_identical(obj_sc@meta,     obj@metaDataset)
-  expect_null(obj_sc@yes_yes)
-  expect_length(obj_sc@clusters, ncol(obj_sc@raw))
-  if (!all(is.na(obj_sc@clusters))) {
-    expect_identical(obj_sc@clusters, factorToVector(getClusters(obj)))
-    expect_identical(obj_sc@cluster_data, getClusterizationData(obj)[["coex"]])
+  expect_identical(objSc@raw,      obj@raw)
+  expect_identical(objSc@raw.norm, getNuNormData(obj))
+  expect_identical(objSc@coex,     obj@genesCoex)
+  expect_identical(objSc@nu,       getNu(obj))
+  expect_identical(objSc@lambda,   getLambda(obj))
+  expect_identical(objSc@nu,       getNu(obj))
+  expect_identical(objSc@a,        getDispersion(obj))
+  expect_identical(objSc@hk,       getFullyExpressedGenes(obj))
+  expect_identical(objSc@meta,     obj@metaDataset)
+  expect_null(objSc@yes_yes)
+  expect_length(objSc@clusters, ncol(objSc@raw))
+  if (!all(is.na(objSc@clusters))) {
+    expect_identical(objSc@clusters, factorToVector(getClusters(obj)))
+    expect_identical(objSc@cluster_data, getClusterizationData(obj)[["coex"]])
   } else {
-    expect_length(obj_sc@cluster_data, 0L)
+    expect_length(objSc@cluster_data, 0L)
   }
 
   # coerce 'scCOTAN' -> 'COTAN'
-  obj2 <- as(obj_sc, "COTAN")
+  obj2 <- as(objSc, "COTAN")
 
   if (all(flagNotFullyExpressedGenes(obj))) {
     #drop the fe column as it won't appear in the obj2 in this case!

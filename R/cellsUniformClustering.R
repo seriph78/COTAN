@@ -63,13 +63,16 @@ NULL
 #'
 
 seuratClustering <- function(objCOTAN,
-                             initialResolution = 0.8,
-                             resolutionStep = 0.5,
-                             minNumClusters = 1L,
-                             useCoexEigen, dataMethod,
-                             genesSel, numGenes,
+                             initialResolution,
+                             resolutionStep,
+                             minNumClusters,
+                             useCoexEigen,
+                             dataMethod,
+                             genesSel,
+                             numGenes,
                              numReducedComp,
-                             cores = 1L, chunkSize = 1024L) {
+                             cores = 1L,
+                             chunkSize = 1024L) {
   tryCatch({
     startTime <- Sys.time()
 
@@ -352,7 +355,8 @@ cellsUniformClustering <- function(objCOTAN,
                        useCoexEigen = useCoexEigen,
                        dataMethod = dataMethod,
                        numReducedComp = numReducedComp,
-                       genesSel = genesSel, numGenes = numGenes,
+                       genesSel = genesSel,
+                       numGenes = numGenes,
                        cores = cores)
 
     if (is_null(testClusters)) {

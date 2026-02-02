@@ -18,10 +18,14 @@ test_that("Cell Uniform Clustering", {
 
   initialResolution <- 1.3
   c(sClusters, cellsRDM, resolution, usedMaxResolution) %<-%
-    seuratClustering(objCOTAN = obj, initialResolution = initialResolution,
-                     minNumClusters = 3L, useCoexEigen = TRUE,
-                     dataMethod = "AdjBin", numReducedComp = 25L,
-                     genesSel = "", numGenes = -1L) #irrelevant inputs
+    seuratClustering(objCOTAN = obj,
+                     initialResolution = initialResolution,
+                     minNumClusters = 3L,
+                     useCoexEigen = TRUE,
+                     dataMethod = "AdjBin",
+                     numReducedComp = 25L,
+                     genesSel = "",
+                     numGenes = -1L)
 
   expect_identical(nlevels(sClusters), 4L)
   expect_identical(as.vector(table(sClusters)), c(321L, 284L, 214L, 181L))
@@ -222,10 +226,10 @@ test_that("Cell Uniform Clustering", {
       tmpObj <- proceedToCoex(objCOTAN = tmpObj, cores = 6L, saveObj = FALSE)
     })
 
-    GDIData <- calculateGDI(objCOTAN = tmpObj)
+    gdiData <- calculateGDI(objCOTAN = tmpObj)
 
-    expect_lte(sum(GDIData[["GDI"]] >= simpleChecker@GDIThreshold),
-               simpleChecker@maxRatioBeyond * nrow(GDIData))
+    expect_lte(sum(gdiData[["GDI"]] >= simpleChecker@GDIThreshold),
+               simpleChecker@maxRatioBeyond * nrow(gdiData))
   }
 
   rm(obj, splitData, splitData2)

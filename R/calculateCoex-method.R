@@ -1114,21 +1114,22 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
                               device = device, dtype = dType)
 
     for (i in seq.int(1L, numCells, by = numGenes)) {
-      i_end  <- min(i + numGenes - 1L, numCells)
+      iEnd  <- min(i + numGenes - 1L, numCells)
 
       # outer product
-      mu_blk <- torch::torch_ger(nu[i:i_end], lambda)
+      muBlk <- torch::torch_ger(nu[i:iEnd], lambda)
 
-      out[i:i_end, mif] <- -Inf
-      out[i:i_end, neg] <- mu_blk[, neg] * (disp[neg] - 1.0)
-      out[i:i_end, pos] <- -torch::torch_reciprocal(disp[pos]) *
-        torch::torch_log1p(mu_blk[, pos] * disp[pos])
-      out[i:i_end, pif] <- 0.0
+      out[i:iEnd, mif] <- -Inf
+      out[i:iEnd, neg] <- muBlk[, neg] * (disp[neg] - 1.0)
+      out[i:iEnd, pos] <-
+        -torch::torch_reciprocal(disp[pos]) *
+          torch::torch_log1p(muBlk[, pos] * disp[pos])
+      out[i:iEnd, pif] <- 0.0
 
-      out[i:i_end, ] <- torch::torch_exp(out[i:i_end, ])
+      out[i:iEnd, ] <- torch::torch_exp(out[i:iEnd, ])
 
       # copy to output
-      rm(mu_blk)
+      rm(muBlk)
     }
 
     # finalize in place

@@ -163,17 +163,17 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     #check if the PCA plot is clean enough and from the printed genes,
     #if the smallest group of cells are characterized by particular genes
 
-    cellsRDM_A <- filter(cellsRDM, .data$groups == "A")
-    cellsRDM_B <- filter(cellsRDM, .data$groups != "A")
+    cellsRDMa <- filter(cellsRDM, .data$groups == "A")
+    cellsRDMb <- filter(cellsRDM, .data$groups != "A")
 
     cellsRDMPlot <-
       ggplot(
-        cellsRDM_A,
+        cellsRDMa,
         aes(x = .data$PC1, y = .data$PC2, colour = .data$groups)
       ) +
       geom_point(alpha = 0.5, size = 1.0) +
       geom_point(
-        data = cellsRDM_B,
+        data = cellsRDMb,
         aes(x = .data$PC1, y = .data$PC2, colour = .data$groups),
         alpha = 0.8,
         size = 1.5
@@ -209,7 +209,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
       plotTheme("genes")
 
     nuEst <- round(getNu(objCOTAN), digits = 7L)
-    UDEPlot <-
+    udePlot <-
       ggplot(
         cellsRDM,
         aes(x = .data$PC1, y = .data$PC2, colour = log(nuEst))
@@ -228,7 +228,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     cellsRDMPlot <- NULL
     cellsRDM <- NULL
     genesPlot <- NULL
-    UDEPlot <- NULL
+    udePlot <- NULL
   }
 
   nuDf <- data.frame("nu" = sort(getNu(objCOTAN)),
@@ -286,7 +286,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
   logThis("Clean plots: DONE", logLevel = 2L)
 
   return(list("pcaCells" = cellsRDMPlot, "pcaCellsData" = cellsRDM,
-              "genes" = genesPlot, "UDE" = UDEPlot,
+              "genes" = genesPlot, "UDE" = udePlot,
               "nu" = nuPlot, "zoomedNu" = zNuPlot))
 }
 

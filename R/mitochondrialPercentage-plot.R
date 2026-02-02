@@ -55,7 +55,7 @@ genesPercentagePlot <- function(objCOTAN,
   clDf <-
     setColumnInDF(clDf, colToSet = getCellsSize(objCOTAN), colName = "sizes")
   clDf <-
-    setColumnInDF(clDf, colToSet = seq_len(nrow(clDf)),    colName = "n"    )
+    setColumnInDF(clDf, colToSet = seq_len(nrow(clDf)),    colName = "n")
   assert_that(identical(rownames(clDf), getCells(objCOTAN)))
 
   c(., conditions) %<-%

@@ -250,15 +250,15 @@ test_that("plotTheme", {
 
 test_that("Raw data normalization", {
   utils::data("test.dataset", package = "COTAN")
-  genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
-  cells.names.test <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
+  genesNamesTest <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
+  cellsNamesTest <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
 
-  raw <- test.dataset[genes.names.test, cells.names.test]
+  raw <- test.dataset[genesNamesTest, cellsNamesTest]
 
   nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
-  raw.norm <- as.matrix(readRDS(file.path(getwd(), "raw.norm.test.RDS")))
+  rawNorm <- as.matrix(readRDS(file.path(getwd(), "raw.norm.test.RDS")))
 
-  expect_identical(t(t(raw) * (1.0 / nu)), raw.norm)
+  expect_identical(t(t(raw) * (1.0 / nu)), rawNorm)
 })
 
 

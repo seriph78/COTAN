@@ -274,6 +274,7 @@ test_that("COTAN getters", {
                            genesSel = "HVG_Seurat", numGenes = 8L)),
                m1, tolerance = 1.0e-12)
 
+  # nolint start: spaces_inside_linter
   m2 <- cbind(
     rep(c(1.991509612121359,     -1.991510865753923    ), times = 10L),
     rep(c(4.556799230950100e-05, -4.815389335445746e-05), times = 10L),
@@ -299,4 +300,5 @@ test_that("COTAN getters", {
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
                        dataMethod = "DerLogL", numComp = 5L)[, 1L:3L],
                m3, tolerance = 5.0e-4)
+  # nolint end
 })

@@ -67,7 +67,7 @@ if (!file.exists(dataSetFile)) {
   )
 }
 
-sample.dataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
+sampleDataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 ```
 
 Define a directory where the output will be stored.
@@ -111,7 +111,7 @@ the metadata for the experiment.
 ```{r}
 cond <- "mouse_cortex_E17.5"
 
-obj <- COTAN(raw = sample.dataset)
+obj <- COTAN(raw = sampleDataset)
 obj <-
   initializeMetaDataset(
     obj,
@@ -288,14 +288,14 @@ plot(zoomedNuPlot)
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r}
-UDELowThr <- 0.30
-obj <- addElementToMetaDataset(obj, "Low UDE cells' threshold", UDELowThr)
+udeLowThr <- 0.30
+obj <- addElementToMetaDataset(obj, "Low UDE cells' threshold", udeLowThr)
 
 obj <- addElementToMetaDataset(obj, "Num drop B group", 2L)
 
 obj <- estimateNuLinear(obj)
 
-cellsToRem <- getCells(obj)[getNu(obj) < UDELowThr]
+cellsToRem <- getCells(obj)[getNu(obj) < udeLowThr]
 obj <- dropGenesCells(obj, cells = cellsToRem)
 ```
 
@@ -352,7 +352,7 @@ if we don't want to clean anything.
 ```{r eval=FALSE, include=TRUE}
 obj2 <-
   automaticCOTANObjectCreation(
-    raw = sample.dataset,
+    raw = sampleDataset,
     GEO = GEO,
     sequencingMethod = "Drop_seq",
     sampleCondition = cond,

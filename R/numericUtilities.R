@@ -49,28 +49,28 @@ funProbZero <- function(dispersion, mu) {
 
   eps <- 1.0e-5
 
-  mif_idx <- which(disp == -Inf)
-  neg_idx <- which(disp <  eps & disp != -Inf)
-  pos_idx <- which(disp >= eps & disp != +Inf)
-  pif_idx <- which(disp == +Inf)
+  mifIdx <- which(disp == -Inf)
+  negIdx <- which(disp <  eps & disp != -Inf)
+  posIdx <- which(disp >= eps & disp != +Inf)
+  pifIdx <- which(disp == +Inf)
 
   out <- disp * mu
 
-  if (length(mif_idx)) {
-    out[mif_idx, ] <- -Inf
+  if (length(mifIdx)) {
+    out[mifIdx, ] <- -Inf
   }
-  if (length(neg_idx)) {
+  if (length(negIdx)) {
     # out = dispersion * mu - mu
-    out[neg_idx, ] <-
-      out[neg_idx, , drop = FALSE] - mu[neg_idx, , drop = FALSE]
+    out[negIdx, ] <-
+      out[negIdx, , drop = FALSE] - mu[negIdx, , drop = FALSE]
   }
-  if (length(pos_idx)) {
+  if (length(posIdx)) {
     # out = -(1/disp)*log1p(disp*mu)
-    out[pos_idx, ] <-
-      -(1.0 / disp[pos_idx]) * log1p(out[pos_idx, , drop = FALSE])
+    out[posIdx, ] <-
+      -(1.0 / disp[posIdx]) * log1p(out[posIdx, , drop = FALSE])
   }
-  if (length(pif_idx)) {
-    out[pif_idx, ] <- 0.0
+  if (length(pifIdx)) {
+    out[pifIdx, ] <- 0.0
   }
 
   out <- exp(out)
