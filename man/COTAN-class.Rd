@@ -3,7 +3,10 @@
 \docType{class}
 \name{COTAN-class}
 \alias{COTAN-class}
-\title{Definition of the \code{COTAN} class}
+\title{The \code{COTAN} class}
+\value{
+A \code{\linkS4class{COTAN}} object.
+}
 \description{
 Definition of the \code{COTAN} class
 }

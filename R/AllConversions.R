@@ -24,11 +24,6 @@ NULL
 
 ## ---- Convert to SingleCellExperiment ----
 
-# convertToSingleCellExperiment
-
-# @format `raw.dataset` is a data frame with \eqn{2000} genes and \eqn{815}
-#   cells
-
 #' @details `convertToSingleCellExperiment()` converts a [COTAN-class] object
 #'   into a [SingleCellExperiment::SingleCellExperiment-class] object. Stores
 #'   the raw counts in the `"counts"` [SummarizedExperiment::Assays-class], the
@@ -143,8 +138,6 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 
 ## ---- Convert from SingleCellExperiment ----
 
-#' convertFromSingleCellExperiment
-#'
 #' @details `convertFromSingleCellExperiment()` converts a
 #'   [SingleCellExperiment::SingleCellExperiment-class] object back into a
 #'   [COTAN-class] object. It supports `SCE` objects that were originally

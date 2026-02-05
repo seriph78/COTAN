@@ -28,7 +28,11 @@ emptySymmetricMatrix <- function() {
 
 #---------- COTAN class --------------
 
-#' Definition of the `COTAN` class
+#' @title The `COTAN` class
+#'
+#' @description Definition of the `COTAN` class
+#'
+#' @return A \code{\linkS4class{COTAN}} object.
 #'
 #' @slot raw `dgCMatrix` - the raw `UMI` count matrix \eqn{n \times m} (gene
 #'   number × cell number)

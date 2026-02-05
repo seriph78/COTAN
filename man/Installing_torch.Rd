@@ -3,6 +3,9 @@
 \name{Installing_torch}
 \alias{Installing_torch}
 \title{Installing \code{torch} \code{R} library (on \code{WSL-Linux})}
+\value{
+No return value. This topic is documentation-only.
+}
 \description{
 A brief explanation of how to install the torch package on
 \code{WSL2} (\verb{Windows Subsystem for Linux}), but it might work the same for
@@ -27,7 +30,7 @@ For the \code{GPU}, currently only \code{cuda} devices are supported. Moreover
 only some specific versions of \code{cuda} (and corresponding \code{cudnn}) are
 effectively usable, so one needs to install them to actually use the \code{GPU}.
 
-As of today only \code{cuda} 12.8 is supported, but check the \code{torch}
+At the time of writing only \code{cuda} 12.8 is supported, but check the \code{torch}
 documentation for more up-to-date information. Before downgrading your
 \code{cuda} version, please be aware that it is possible to maintain separate
 main versions of \code{cuda} at the same time on the system.
@@ -55,4 +58,14 @@ delete the relevant cache folder as in the example below...
   # run this only **AFTER** restarting `R`
   COTAN::canUseTorch(TRUE, "cuda")
 \dontshow{\}) # examplesIf}
+}
+\references{
+\itemize{
+\item \code{torch} installation guide:
+\url{https://torch.mlverse.org/docs/articles/installation.html}
+\item CRAN \code{torch} installation vignette:
+\url{https://cran.r-project.org/web/packages/torch/vignettes/installation.html}
+\item NVIDIA \verb{CUDA 12.8} for \code{WSL2} download archive:
+\url{https://developer.nvidia.com/cuda-12-8-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_local}
+}
 }
