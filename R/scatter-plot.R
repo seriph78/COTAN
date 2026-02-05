@@ -51,20 +51,32 @@ scatterPlot <-
 
   sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
 
-  plot <- ggplot(sizes, aes(x = cellsSize, y = genesSize, color = sample)) +
+  scPl <-
+    ggplot(
+      sizes,
+      aes(x = cellsSize, y = genesSize, color = sample)
+    ) +
     geom_point(size = 0.5, alpha = 0.8) +
-    labs(title = "Scatter plot of library size VS gene detected for each cell",
-         y = "Gene number",
-         x = "Library size (UMI)") +
-    scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                  labels = trans_format("log10", math_format(10^.x))) +
-    scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                  labels = trans_format("log10", math_format(10^.x))) +
+    labs(
+      title = "Scatter plot of library size VS gene detected for each cell",
+      y = "Gene number",
+      x = "Library size (UMI)"
+    ) +
+    # nolint start: implicit_integer_linter
+    scale_x_log10(
+      breaks = trans_breaks("log10", function(x) 10^x),
+      labels = trans_format("log10", math_format(10^.x))
+    ) +
+    scale_y_log10(
+      breaks = trans_breaks("log10", function(x) 10^x),
+      labels = trans_format("log10", math_format(10^.x))
+    ) +
+    # nolint end
     plotTheme("size-plot")
 
   if (isTRUE(splitSamples)) {
-    plot <- plot + facet_grid(cols = vars(sample))
+    scPl <- scPl + facet_grid(cols = vars(sample))
   }
 
-  return(plot)
+  return(scPl)
 }

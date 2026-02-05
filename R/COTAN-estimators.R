@@ -153,8 +153,8 @@ setMethod(
     nu <- colSums(getRawData(objCOTAN), dims = 1L)
 
     for (cl in levels(clusters)) {
-      c <- clusters == cl
-      nu[c] <- nu[c] / mean(nu[c])
+      pos <- clusters == cl
+      nu[pos] <- nu[pos] / mean(nu[pos])
     }
 
     objCOTAN <- setNu(objCOTAN, nu)
@@ -243,7 +243,7 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
   }
 
   # spawned errors are stored as try-error classes
-  resError <- vapply(res, inherits, logical(1), "try-error")
+  resError <- vapply(res, inherits, logical(1L), "try-error")
   if (any(resError)) {
     first <- which(resError)[[1L]]
     stop(sprintf(
@@ -325,7 +325,7 @@ setMethod(
     spIdx <- parallel::splitIndices(length(genes),
                                     ceiling(length(genes) / chunkSize))
 
-    spGenes <- lapply(spIdx, function(x) genes[x])
+    spGenes <- lapply(spIdx, \(x) genes[x])
 
     cores <- min(cores, length(spGenes))
 
@@ -469,7 +469,7 @@ runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
   }
 
   # spawned errors are stored as try-error classes
-  resError <- vapply(res, inherits, logical(1), "try-error")
+  resError <- vapply(res, inherits, logical(1L), "try-error")
   if (any(resError)) {
     first <- which(resError)[[1L]]
     stop(sprintf(
@@ -555,7 +555,7 @@ setMethod(
     spIdx <- parallel::splitIndices(length(cells),
                                     ceiling(length(cells) / chunkSize))
 
-    spCells <- lapply(spIdx, function(x) cells[x])
+    spCells <- lapply(spIdx, \(x) cells[x])
 
     cores <- min(cores, length(spCells))
 
@@ -801,8 +801,8 @@ setMethod(
         diffNu <- mean(nu) - 1.0
       }
 
-      diff <- c(diffGenes, diffCells, diffNu)
-      error <- sqrt(sum(diff^2L) / length(diff))
+      diffs <- c(diffGenes, diffCells, diffNu)
+      error <- sqrt(sum(diffs^2L) / length(diffs))
       return(error)
     }
 

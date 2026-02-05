@@ -87,8 +87,8 @@ reorderClusterization <- function(objCOTAN,
   }
 
   logThis("Applied reordering to clusterization is:", logLevel = 1L)
-  logThis(paste(paste0(names(clMap)), " -> ", paste0(clMap), collapse = ", "),
-          logLevel = 1L)
+  logThis(paste(paste0(names(clMap)), " -> ", paste0(clMap),
+                collapse = ", "), logLevel = 1L)
 
   outputClusters <- factorToVector(factor(clusters))
   outputClusters <- set_names(clMap[outputClusters], names(outputClusters))

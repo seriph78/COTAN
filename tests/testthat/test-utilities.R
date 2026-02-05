@@ -3,7 +3,7 @@ stopifnot(file.exists(tm))
 
 library(Matrix)
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("Logging", {
   logPath <- file.path(tm, "COTAN_Test.log")
@@ -22,6 +22,7 @@ test_that("Logging", {
   expect_no_message(suppressMessages(logThis("This should not appear",
                                              logLevel = 0L, appendLF = FALSE)))
 
+  # nolint start: space_inside_linter
   expect_message(   logThis("This should appear",     logLevel = 0L))
   expect_no_message(logThis("This should not appear", logLevel = 1L))
 
@@ -29,6 +30,7 @@ test_that("Logging", {
 
   expect_message(   logThis("This should appear",     logLevel = 1L))
   expect_no_message(logThis("This should not appear"))
+  # nolint end
 
   suppressMessages(setLoggingLevel(3L))
   suppressMessages(setLoggingFile(logPath))
@@ -46,7 +48,7 @@ test_that("Logging", {
 
 test_that("Clusterizations manipulations", {
   set.seed(1675787192L)
-  elemValues <- paste0("", as.roman(sample(7L, 100L, replace = TRUE)))
+  elemValues <- paste0("", as.roman(sample.int(7L, 100L, replace = TRUE)))
   elemNames <- paste0("el_", 1L:100L)
 
   clusters <- as.data.frame(list("a" = elemNames, "b" = elemValues))
@@ -132,7 +134,7 @@ test_that("Adding/extracting columns to/from data.frames", {
   expect_setequal(df[["constant"]], 2L)
 })
 
-
+# nolint start: spaces_inside_linter
 test_that("funProbZero", {
   # Cases with mu = 0 are not actually in use
   expect_identical(funProbZero(-Inf, 0.0), 0.0)
@@ -161,16 +163,18 @@ test_that("funProbZero", {
   expect_identical(funProbZero(10.0, Inf), 0.0)
   expect_identical(funProbZero( Inf, Inf), 1.0)
 })
+# nolint end
 
 
 test_that("funProbZero with matrices", {
   mu <- matrix((1L:25L) / 7.0, nrow = 10L, ncol = 10L)
-  disp <- c(-Inf, -1.0/3.0, 1e-6, (1L:6L) / 3.0, Inf)
+  disp <- c(-Inf, -1.0 / 3.0, 1e-6, (1L:6L) / 3.0, Inf)
 
   p <- funProbZero(disp, mu)
 
   expect_identical(dim(p), dim(mu))
 
+  # nolint start: spaces_inside_linter
   expect_identical(p[ 1L,  1L], funProbZero(disp[[ 1L]], mu[ 1L,  1L]))
   expect_identical(p[ 1L, 10L], funProbZero(disp[[ 1L]], mu[ 1L, 10L]))
 
@@ -180,6 +184,7 @@ test_that("funProbZero with matrices", {
 
   expect_identical(p[10L,  1L], funProbZero(disp[[10L]], mu[10L,  1L]))
   expect_identical(p[10L, 10L], funProbZero(disp[[10L]], mu[10L, 10L]))
+  # nolint end
 })
 
 
@@ -247,15 +252,15 @@ test_that("plotTheme", {
 
 test_that("Raw data normalization", {
   utils::data("test.dataset", package = "COTAN")
-  genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
-  cells.names.test <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
+  genesNamesTest <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
+  cellsNamesTest <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
 
-  raw <- test.dataset[genes.names.test, cells.names.test]
+  raw <- test.dataset[genesNamesTest, cellsNamesTest]
 
   nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
-  raw.norm <- as.matrix(readRDS(file.path(getwd(), "raw.norm.test.RDS")))
+  rawNorm <- as.matrix(readRDS(file.path(getwd(), "raw.norm.test.RDS")))
 
-  expect_identical(t(t(raw) * (1.0 / nu)), raw.norm)
+  expect_identical(t(t(raw) * (1.0 / nu)), rawNorm)
 })
 
 
@@ -325,3 +330,5 @@ test_that("mat2vec_rfast", {
 
   expect_equal(vec, mat2vec_rfast(vec2mat_rfast(vec)), ignore_attr = TRUE)
 })
+
+options(prevOptState)

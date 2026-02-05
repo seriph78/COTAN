@@ -213,7 +213,7 @@ objCOTAN <- COTAN(raw = test.dataset)
 objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, saveObj = FALSE)
 
 markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
-GCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
+gCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
                       numGenesPerMarker = 15)
 
 groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),

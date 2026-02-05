@@ -209,8 +209,8 @@ data matrix
 of \emph{binarized} data matrix
 \item \verb{"DL", "DerLogL", "DerivativeLogLikelihood"} uses the \emph{derivative} of
 the \emph{log-likelihood} of \emph{binarized} data matrix
-\item \verb{"SL", "SignLogL", "SignedLogLikelihood"} uses the \emph{signed log-likelihood}
-of \emph{binarized} data matrix
+\item \verb{"SL", "SignLogL", "SignedLogLikelihood"} uses the \emph{signed
+log-likelihood} of \emph{binarized} data matrix
 }
 
 For the last four options see \code{\link[=calculateLikelihoodOfObserved]{calculateLikelihoodOfObserved()}} for more

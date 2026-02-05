@@ -63,13 +63,16 @@ NULL
 #'
 
 seuratClustering <- function(objCOTAN,
-                             initialResolution = 0.8,
-                             resolutionStep = 0.5,
-                             minNumClusters = 1L,
-                             useCoexEigen, dataMethod,
-                             genesSel, numGenes,
+                             initialResolution,
+                             resolutionStep,
+                             minNumClusters,
+                             useCoexEigen,
+                             dataMethod,
+                             genesSel,
+                             numGenes,
                              numReducedComp,
-                             cores = 1L, chunkSize = 1024L) {
+                             cores = 1L,
+                             chunkSize = 1024L) {
   tryCatch({
     startTime <- Sys.time()
 
@@ -109,7 +112,7 @@ seuratClustering <- function(objCOTAN,
         srat,
         resolution = resolution,
         algorithm = 2L,      # Louvain (refined)
-        random.seed = 137    # controls igraph::cluster_louvain()
+        random.seed = 137L   # controls igraph::cluster_louvain()
       ))
 
       # The next lines are necessary to make cluster smaller while
@@ -300,7 +303,6 @@ cellsUniformClustering <- function(objCOTAN,
   iterReset <- -1L
   resolutionStep <- 0.5
   numClustersToRecluster <- 0L
-  srat <- NULL
   allCheckResults <- list()
 
   if (is.null(checker)) {
@@ -353,7 +355,8 @@ cellsUniformClustering <- function(objCOTAN,
                        useCoexEigen = useCoexEigen,
                        dataMethod = dataMethod,
                        numReducedComp = numReducedComp,
-                       genesSel = genesSel, numGenes = numGenes,
+                       genesSel = genesSel,
+                       numGenes = numGenes,
                        cores = cores)
 
     if (is_null(testClusters)) {
@@ -377,13 +380,13 @@ cellsUniformClustering <- function(objCOTAN,
       allCondNames <- getAllConditions(subObj)
       condName <- ifelse(length(allCondNames) == 0L, "",
                          allCondNames[[length(allCondNames)]])
-      title <- paste0("Cells number: ", nrow(cellsRDM))
-      plot(UMAPPlot(dataIn = cellsRDM, title = title,
+      colTitle <- paste0("Cells number: ", nrow(cellsRDM))
+      plot(UMAPPlot(dataIn = cellsRDM, title = colTitle,
                     clusters = getCondition(subObj, condName)))
 
-      title <- paste0(title, "\nCl. resolution: ", resolution,
-                      ifelse(isTRUE(usedMaxResolution), " [max]", ""))
-      plot(UMAPPlot(dataIn = cellsRDM, title = title,
+      colTitle <- paste0(colTitle, "\nCl. resolution: ", resolution,
+                         ifelse(isTRUE(usedMaxResolution), " [max]", ""))
+      plot(UMAPPlot(dataIn = cellsRDM, title = colTitle,
                     clusters = testClusters))
     }, error = function(err) {
       logThis(paste("While saving seurat UMAP plot", err), logLevel = 1L)

@@ -51,18 +51,20 @@ genesPercentagePlot <- function(objCOTAN,
                                 title = "Genes' percentage of reads",
                                 condName = "",
                                 conditions = NULL) {
-  df <- data.frame()
-  df <- setColumnInDF(df, colToSet = getCellsSize(objCOTAN), colName = "sizes")
-  df <- setColumnInDF(df, colToSet = seq_len(nrow(df)),      colName = "n")
-  assert_that(identical(rownames(df), getCells(objCOTAN)))
+  clDf <- data.frame()
+  clDf <-
+    setColumnInDF(clDf, colToSet = getCellsSize(objCOTAN), colName = "sizes")
+  clDf <-
+    setColumnInDF(clDf, colToSet = seq_len(nrow(clDf)),    colName = "n")
+  assert_that(identical(rownames(clDf), getCells(objCOTAN)))
 
   c(., conditions) %<-%
     normalizeNameAndLabels(objCOTAN, name = condName,
                            labels = conditions, isCond = TRUE)
   assert_that(!is_empty(conditions),
-              identical(rownames(df), names(conditions)))
+              identical(rownames(clDf), names(conditions)))
 
-  df <- setColumnInDF(df, colToSet = conditions, colName = "sample")
+  clDf <- setColumnInDF(clDf, colToSet = conditions, colName = "sample")
 
   genesInObj <- genes %in% getGenes(objCOTAN)
   genes <- genes[genesInObj]
@@ -75,17 +77,17 @@ genesPercentagePlot <- function(objCOTAN,
 
   genesData <-
     getRawData(objCOTAN)[getGenes(objCOTAN) %in% genes, , drop = FALSE]
-  if (!identical(colnames(genesData), rownames(df))) {
+  if (!identical(colnames(genesData), rownames(clDf))) {
     warning("Problem with cells' order!")
   }
-  df <- setColumnInDF(df, colToSet = colSums(genesData), colName = "sum")
+  clDf <- setColumnInDF(clDf, colToSet = colSums(genesData), colName = "sum")
 
-  perc <- round(100.0 * df[["sum"]] / df[["sizes"]], digits = 2L)
-  df <- setColumnInDF(df, colToSet = perc, colName = "percentage")
+  perc <- round(100.0 * clDf[["sum"]] / clDf[["sizes"]], digits = 2L)
+  clDf <- setColumnInDF(clDf, colToSet = perc, colName = "percentage")
 
-  plot <-
-    df %>%
+  gPPl <-
     ggplot(
+      clDf,
       aes(x = .data$sample, y = .data$percentage, fill = .data$sample)
     ) +
     ggdist::stat_slabinterval(
@@ -117,10 +119,10 @@ genesPercentagePlot <- function(objCOTAN,
       x     = ""
     ) +
     scale_y_continuous(expand = c(0.0, 0.0)) +
-    coord_cartesian(ylim = c(0.0, max(df[["percentage"]]))) +
+    coord_cartesian(ylim = c(0.0, max(clDf[["percentage"]]))) +
     plotTheme("size-plot")
 
-  return(list("plot" = plot, "sizes" = df))
+  return(list("plot" = gPPl, "sizes" = clDf))
 }
 
 
@@ -169,9 +171,9 @@ mitochondrialPercentagePlot <- function(objCOTAN,
     stop("gene prefix resulted in no matches")
   }
 
-  title <- "Mitochondrial percentage of reads"
+  plTitle <- "Mitochondrial percentage of reads"
 
-  res <- genesPercentagePlot(objCOTAN, genes = mitGenes, title = title,
+  res <- genesPercentagePlot(objCOTAN, genes = mitGenes, title = plTitle,
                              condName = condName, conditions = conditions)
   assert_that(identical(colnames(res[["sizes"]]),
                         c("sizes", "n", "sample", "sum", "percentage")))

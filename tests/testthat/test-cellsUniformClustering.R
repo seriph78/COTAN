@@ -3,7 +3,7 @@ stopifnot(file.exists(tm))
 
 library(zeallot)
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("Cell Uniform Clustering", {
   utils::data("test.dataset", package = "COTAN")
@@ -18,16 +18,21 @@ test_that("Cell Uniform Clustering", {
 
   initialResolution <- 1.3
   c(sClusters, cellsRDM, resolution, usedMaxResolution) %<-%
-    seuratClustering(objCOTAN = obj, initialResolution = initialResolution,
-                     minNumClusters = 3L, useCoexEigen = TRUE,
-                     dataMethod = "AdjBin", numReducedComp = 25L,
-                     genesSel = "", numGenes = -1L) #irrelevant inputs
+    seuratClustering(objCOTAN = obj,
+                     initialResolution = initialResolution,
+                     resolutionStep = 0.5,
+                     minNumClusters = 3L,
+                     useCoexEigen = TRUE,
+                     dataMethod = "AdjBin",
+                     numReducedComp = 25L,
+                     genesSel = "",
+                     numGenes = -1L)
 
   expect_identical(nlevels(sClusters), 4L)
   expect_identical(as.vector(table(sClusters)), c(321L, 284L, 214L, 181L))
   expect_identical(dim(cellsRDM), c(1000L, 25L + 15L))
   expect_identical(resolution, 1.3)
-  expect_identical(usedMaxResolution, FALSE)
+  expect_false(usedMaxResolution)
 
   # Make it a less strict check as it is only for testing
   checker <- new("AdvancedGDIUniformityCheck")
@@ -212,7 +217,7 @@ test_that("Cell Uniform Clustering", {
   # Test the low GDI (homogeneity) for each defined clusters
   simpleChecker <- checker@thirdCheck
   for (cl in levels(clusters)[[1L]]) {
-    print(paste("Tested cluster:", cl))
+    cat(paste("Tested cluster:", cl))
 
     cellsToDrop <- names(clusters)[clusters != cl]
 
@@ -222,13 +227,15 @@ test_that("Cell Uniform Clustering", {
       tmpObj <- proceedToCoex(objCOTAN = tmpObj, cores = 6L, saveObj = FALSE)
     })
 
-    GDIData <- calculateGDI(objCOTAN = tmpObj)
+    gdiData <- calculateGDI(objCOTAN = tmpObj)
 
-    expect_lte(sum(GDIData[["GDI"]] >= simpleChecker@GDIThreshold),
-               simpleChecker@maxRatioBeyond * nrow(GDIData))
+    expect_lte(sum(gdiData[["GDI"]] >= simpleChecker@GDIThreshold),
+               simpleChecker@maxRatioBeyond * nrow(gdiData))
   }
 
   rm(obj, splitData, splitData2)
 
   gc()
 })
+
+options(prevOptState)

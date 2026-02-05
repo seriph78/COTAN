@@ -1,10 +1,11 @@
 
 # Creates the files to be reloaded by the tests for comparisons
 
+# nolint start: object_name_linter
 outputTestDatasetCreation <-
   function(testsDir = file.path("tests", "testthat")) {
   utils::data("test.dataset", package = "COTAN")
-  options(parallelly.fork.enable = TRUE)
+  prevOptState <- options(parallelly.fork.enable = TRUE)
   setLoggingLevel(3L)
 
   obj <- COTAN(raw = test.dataset)
@@ -15,7 +16,7 @@ outputTestDatasetCreation <-
   obj <- proceedToCoex(objCOTAN = obj, cores = 6L, saveObj = FALSE)
 
   if (FALSE) {
-    saveRDS(obj, file = file.path(testsDir,"test.COTAN.RDS"))
+    saveRDS(obj, file = file.path(testsDir, "test.COTAN.RDS"))
   }
 
   cells.names.test <-
@@ -140,4 +141,7 @@ outputTestDatasetCreation <-
                            clName = "merge",
                            clusters = mergedData[["clusters"]],
                            coexDF = mergedData[["coex"]])
+
+  options(prevOptState)
 }
+# nolint end

@@ -1,6 +1,6 @@
 library(zeallot)
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("Establish genes clusters", {
   data("test.dataset")
@@ -8,7 +8,7 @@ test_that("Establish genes clusters", {
   objCOTAN <- proceedToCoex(objCOTAN, cores = 6L,
                             optimizeForSpeed = TRUE, saveObj = FALSE)
 
-  c(secondaryMarkers, GCS, rankGenes) %<-%
+  c(secondaryMarkers, gCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN = objCOTAN,
                    primaryMarkers = "g-000300",
                    numGenesPerMarker = 5L)
@@ -17,8 +17,8 @@ test_that("Establish genes clusters", {
   expect_equal(colnames(rankGenes), "g-000300", ignore_attr = TRUE)
   expect_identical(rownames(rankGenes), secondaryMarkers)
 
-  expect_identical(colnames(GCS), secondaryMarkers)
-  expect_lte(max(abs(GCS)), 1L)
+  expect_identical(colnames(gCS), secondaryMarkers)
+  expect_lte(max(abs(gCS)), 1L)
 
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
                        G2 = c("g-000300", "g-000330", "g-000660"),
@@ -26,7 +26,7 @@ test_that("Establish genes clusters", {
                               "g-000570", "g-000590"))
 
   expect_warning(
-    c(secondaryMarkers, GCS, rankGenes) %<-%
+    c(secondaryMarkers, gCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN = objCOTAN,
                    primaryMarkers = unlist(groupMarkers),
                    numGenesPerMarker = 11L))
@@ -36,13 +36,13 @@ test_that("Establish genes clusters", {
                ignore_attr = TRUE)
   expect_identical(rownames(rankGenes), secondaryMarkers)
 
-  expect_identical(colnames(GCS), secondaryMarkers)
-  expect_lte(max(abs(GCS)), 1L)
+  expect_identical(colnames(gCS), secondaryMarkers)
+  expect_lte(max(abs(gCS)), 1L)
 
   if (TRUE) {
-    GCS_old <-
+    gcsOld <-
       as.matrix(readRDS(file.path(getwd(), "genes.coex.space.test.RDS")))
-    expect_equal(GCS, GCS_old, tolerance = 5.0e-6)
+    expect_equal(gCS, gcsOld, tolerance = 5.0e-6)
   }
 
   c(gSpace, plotEigen, pcaClusters, treePlot) %<-%
@@ -76,10 +76,12 @@ test_that("Establish genes clusters", {
   }
 
   expect_identical(nrow(gSpace), nrow(pcaClusters))
-  expect_identical(GCS, gSpace)
+  expect_identical(gCS, gSpace)
 
   expect_s3_class(plotEigen, "ggplot")
   expect_identical(dim(plotEigen[["data"]]), c(10L, 2L))
 
   expect_s3_class(treePlot, "dendrogram")
 })
+
+options(prevOptState)

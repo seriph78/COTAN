@@ -4,8 +4,14 @@
 #'
 #' @description Simple data-sets included in the package
 #'
-#' @name Datasets
+#' @return Objects loaded by `data()`:
+#'   - `raw.dataset`, `ERCCraw`, `test.dataset`: `data.frame`s
+#'   - `test.dataset.clusters1`, `test.dataset.clusters2`:
+#'     character vectors of cluster labels
+#'   - `vignette.split.clusters`, `vignette.merge.clusters`,
+#'     `vignette.merge2.clusters`: factors of cluster labels
 #'
+#' @name Datasets
 NULL
 
 # Raw sample dataset
@@ -27,9 +33,9 @@ NULL
 
 # Raw `ERCC` dataset
 
-#' @details `ERCCRaw` dataset
+#' @details `ERCCraw` dataset
 #'
-#' @format `ERCCRaw` is a `data.frame`
+#' @format `ERCCraw` is a `data.frame`
 #'
 #' @docType data
 #'
@@ -133,6 +139,8 @@ NULL
 
 # ---------- Torch library section ----------
 
+# nolint start: line_length_linter
+
 #' @title Installing `torch` `R` library (on `WSL-Linux`)
 #'
 #' @description A brief explanation of how to install the torch package on
@@ -157,7 +165,7 @@ NULL
 #'   only some specific versions of `cuda` (and corresponding `cudnn`) are
 #'   effectively usable, so one needs to install them to actually use the `GPU`.
 #'
-#'   As of today only `cuda` 12.8 is supported, but check the `torch`
+#'   At the time of writing only `cuda` 12.8 is supported, but check the `torch`
 #'   documentation for more up-to-date information. Before downgrading your
 #'   `cuda` version, please be aware that it is possible to maintain separate
 #'   main versions of `cuda` at the same time on the system.
@@ -182,9 +190,20 @@ NULL
 #'   torch::install_torch(cuda_version = "12.8", reinstall = TRUE)
 #'
 #'   # run this only **AFTER** restarting `R`
-#'   COTAN:::canUseTorch(TRUE, "cuda")
+#'   COTAN::canUseTorch(TRUE, "cuda")
+#'
+#' @references
+#'   * `torch` installation guide:
+#'     \url{https://torch.mlverse.org/docs/articles/installation.html}
+#'   * CRAN `torch` installation vignette:
+#'     \url{https://cran.r-project.org/web/packages/torch/vignettes/installation.html}
+#'   * NVIDIA `CUDA 12.8` for `WSL2` download archive:
+#'     \url{https://developer.nvidia.com/cuda-12-8-0-download-archive?target_os=Linux&target_arch=x86_64&Distribution=WSL-Ubuntu&target_version=2.0&target_type=deb_local}
+#'
+#' @return No return value. This topic is documentation-only.
 #'
 #' @name Installing_torch
 #'
 NULL
 
+# nolint end

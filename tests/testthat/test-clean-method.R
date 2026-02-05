@@ -1,5 +1,5 @@
 
-options(parallelly.fork.enable = TRUE)
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("clean COTAN object", {
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
@@ -30,20 +30,22 @@ test_that("Clean on test dataset", {
   obj <- estimateLambdaLinear(obj)
   obj <- estimateDispersionViaSolver(obj, cores = 6L)
 
-  raw.norm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
+  rawNorm <- readRDS(file.path(getwd(), "raw.norm.test.RDS"))
   lambda <- readRDS(file.path(getwd(), "lambda.test.RDS"))
   dispersion <- readRDS(file.path(getwd(), "dispersion.test.RDS"))
   nu <- readRDS(file.path(getwd(), "nu.test.RDS"))
 
-  genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
-  cells.names.test <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
+  genesNamesTest <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
+  cellsNamesTest <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
 
-  expect_equal(getNuNormData(obj)[genes.names.test, cells.names.test],
-               raw.norm, tolerance = 1.0e-14, ignore_attr = FALSE)
-  expect_equal(getLambda(obj)[genes.names.test],
+  expect_equal(getNuNormData(obj)[genesNamesTest, cellsNamesTest],
+               rawNorm, tolerance = 1.0e-14, ignore_attr = FALSE)
+  expect_equal(getLambda(obj)[genesNamesTest],
                lambda, tolerance = 1.0e-14, ignore_attr = FALSE)
-  expect_equal(getNu(obj)[cells.names.test],
+  expect_equal(getNu(obj)[cellsNamesTest],
                nu, tolerance = 1.0e-14, ignore_attr = FALSE)
-  expect_equal(getDispersion(obj)[genes.names.test],
+  expect_equal(getDispersion(obj)[genesNamesTest],
                dispersion, tolerance = 1.0e-10, ignore_attr = FALSE)
 })
+
+options(prevOptState)

@@ -16,7 +16,7 @@
 \code{raw.dataset} is a data frame with \eqn{2000} genes and \eqn{815}
 cells
 
-\code{ERCCRaw} is a \code{data.frame}
+\code{ERCCraw} is a \code{data.frame}
 
 \code{test.dataset} is a \code{data.frame} with \eqn{600} genes and \eqn{1200}
 cells
@@ -53,13 +53,23 @@ data(vignette.merge.clusters)
 
 data(vignette.merge2.clusters)
 }
+\value{
+Objects loaded by \code{data()}:
+\itemize{
+\item \code{raw.dataset}, \code{ERCCraw}, \code{test.dataset}: \code{data.frame}s
+\item \code{test.dataset.clusters1}, \code{test.dataset.clusters2}:
+character vectors of cluster labels
+\item \code{vignette.split.clusters}, \code{vignette.merge.clusters},
+\code{vignette.merge2.clusters}: factors of cluster labels
+}
+}
 \description{
 Simple data-sets included in the package
 }
 \details{
 \code{raw.dataset} is a sub-sample of a real \emph{scRNA-seq} data-set
 
-\code{ERCCRaw} dataset
+\code{ERCCraw} dataset
 
 \code{test.dataset} is an artificial data set obtained by sampling target
 negative binomial distributions on a set of \eqn{600} genes on \eqn{2} two

@@ -49,7 +49,6 @@
 #' @importFrom dendextend set
 #'
 #' @importFrom tidyr pivot_wider
-#' @importFrom tidyr %>%
 #'
 #' @importFrom grid unit
 #' @importFrom grid gpar
@@ -98,10 +97,14 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
 
   genesGroupMap <- NULL
   if (!is_empty(groupMarkers)) {
-    genesGroupMap <- unlist(lapply(names(groupMarkers), function(group) {
-      genes <- groupMarkers[[group]]
-      set_names(rep_len(group, length(genes)), genes)
-    }))
+    genesGroupMap <-
+      unlist(lapply(
+        names(groupMarkers),
+        \(group) {
+          genes <- groupMarkers[[group]]
+          set_names(rep_len(group, length(genes)), genes)
+        }
+      ))
 
     genesGroupMap <- factor(genesGroupMap, levels = names(groupMarkers))
   }
@@ -135,8 +138,9 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
 
       cNames <- c(clName, condName, "CellNumber")
 
-      condDF <- condDF[, cNames] %>% pivot_wider(names_from = condName,
-                                                 values_from = cNames[[3L]])
+      condDF <- pivot_wider(condDF[, cNames],
+                            names_from = condName,
+                            values_from = cNames[[3L]])
 
       # Here we have a column per condition alternative plus 1
       nCols <- ncol(condDF)
@@ -201,22 +205,24 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
   colorFunc <- colorRamp2(c(-colExtr, 0.0, colExtr),
                           c("#E64B35FF", "gray93", "#3C5488FF"))
 
-  cutpoints <- c(0.0,        0.001,       0.01,      0.05,      0.1,     1.0)
-  symbols   <- c(     "***",        "**",       "*",       ".",      " ")
+  # nolint start: spaces_inside_linter
+  cutPoints <- c(0.0,        0.001,       0.01,      0.05,      0.1,     1.0)
+  marks     <- c(     "***",        "**",       "*",       ".",      " "    )
+  # nolint end
 
   # Define the function to annotate each cell with its significance
   cellFunc <- function(j, i, x, y, width, height, fill) {
-    p_value <- pValueDF[j, i]
+    pValue <- pValueDF[j, i]
 
-    # Use symnum() to get the significance stars
-    stars <- symnum(p_value, corr = FALSE, na = FALSE,
-                    cutpoints = cutpoints, symbols = symbols)
+    # Use symnum() to get the significance mark
+    mark <- symnum(pValue, corr = FALSE, na = FALSE,
+                   cutpoints = cutPoints, symbols = marks)
 
-    # Display the stars in the cell
-    grid.text(stars, x, y, gp = gpar(fontsize = 12L, fontface = "bold"))
+    # Display the mark in the cell
+    grid.text(mark, x, y, gp = gpar(fontsize = 12L, fontface = "bold"))
   }
 
-  heatmap <- Heatmap(
+  heatMapPl <- Heatmap(
     t(scoreDF),
     name = "Score",
     rect_gp = gpar(col = "white", lwd = 1L),
@@ -225,8 +231,8 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     cluster_columns = FALSE,  # Columns are not clustered but grouped
     col = colorFunc,
     column_split = genesGroupMap,      # Group columns by gene groups
-    column_gap = unit(1, "mm"),        # Gap between gene groups
-    column_names_gp = gpar(fontsize = 10L, angle = 45, hjust = 1),
+    column_gap = unit(1.0, "mm"),        # Gap between gene groups
+    column_names_gp = gpar(fontsize = 10L, angle = 45.0, hjust = 1.0),
     row_names_gp = gpar(fontsize = 10L),
     cell_fun = cellFunc,
     top_annotation = NULL,
@@ -237,9 +243,10 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
 
   # If there are additional legends, add them
   if (!is.null(lgdList)) {
-    heatmap <- heatmap + lgdList
+    heatMapPl <- heatMapPl + lgdList
   }
 
-  return(list("heatmapPlot" = heatmap,
-              "dataScore" = scoreDF, "pValues" = pValueDF))
+  return(list("heatmapPlot" = heatMapPl,
+              "dataScore" = scoreDF,
+              "pValues" = pValueDF))
 }

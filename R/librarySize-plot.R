@@ -46,9 +46,8 @@ cellSizePlot <- function(objCOTAN, condName = "", conditions = NULL) {
 
   sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
 
-  plot <-
-    sizes %>%
-    ggplot(aes(x = sample, y = sizes, fill = sample)) +
+  csPl <-
+    ggplot(sizes, aes(x = sample, y = sizes, fill = sample)) +
     stat_slabinterval(
       aes(thickness = after_stat(pdf)),
       side = "right",                   # draw only the right half
@@ -80,7 +79,7 @@ cellSizePlot <- function(objCOTAN, condName = "", conditions = NULL) {
     coord_cartesian(ylim = c(0.0, max(sizes[["sizes"]]))) +
     plotTheme("size-plot")
 
-  return(plot)
+  return(csPl)
 }
 
 
@@ -133,9 +132,8 @@ genesSizePlot <- function(objCOTAN, condName = "", conditions = NULL) {
 
   sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
 
-  plot <-
-    sizes %>%
-    ggplot(aes(x = sample, y = sizes, fill = sample)) +
+  gsPl <-
+    ggplot(sizes, aes(x = sample, y = sizes, fill = sample)) +
     stat_slabinterval(
       aes(thickness = after_stat(pdf)),
       side = "right",                 # half-violin to the right
@@ -167,5 +165,5 @@ genesSizePlot <- function(objCOTAN, condName = "", conditions = NULL) {
     coord_cartesian(ylim = c(0.0, max(sizes[["sizes"]]))) +
     plotTheme("size-plot")
 
-  return(plot)
+  return(gsPl)
 }
