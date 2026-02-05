@@ -150,14 +150,14 @@ dispersionBisection <-
     # once we have found the two bounds to the dispersion value we use bisection
     iter <- 1L
     repeat {
-      disp <- (disp1 + disp2) / 2.0
+      disp3 <- (disp1 + disp2) / 2.0
 
-      diff <- sum(funProbZero(disp, mu)) - sumZeros
+      diff3 <- sum(funProbZero(disp3, mu)) - sumZeros
 
-      if (abs(diff) <= threshold) {
+      if (abs(diff3) <= threshold) {
         logThis(paste("Dispersion bisection: used",
                       iter, "iterations"), logLevel = 3L)
-        return(disp)
+        return(disp3)
       }
 
       if (iter >= maxIterations) {
@@ -167,10 +167,10 @@ dispersionBisection <-
       iter <- iter + 1L
 
       # drop same sign diff point
-      if (diff * diff2 > 0.0) {
-        disp2 <- disp
+      if (diff3 * diff2 > 0.0) {
+        disp2 <- disp3
       } else {
-        disp1 <- disp
+        disp1 <- disp3
       }
     }
   }
@@ -339,33 +339,33 @@ dispersionNewton <-
 
     # we look for two dispersion values where the first leads to a
     # diffZeros negative and the second positive
-    disp <- 0.0
-    diff <- sum(funProbZero(disp, mu)) - sumZeros
-    if (abs(diff) <= threshold) {
-      return(disp)
+    disp1 <- 0.0
+    diff1 <- sum(funProbZero(disp1, mu)) - sumZeros
+    if (abs(diff1) <= threshold) {
+      return(disp1)
     }
 
-    # we assume error is an increasing function of disp
-    dispIsNeg <- sign(diff) >= 0.0
-    disp <- ifelse(dispIsNeg, -1.0, 1.0)
+    # we assume error is an increasing function of disp1
+    dispIsNeg <- sign(diff1) >= 0.0
+    disp1 <- ifelse(dispIsNeg, -1.0, 1.0)
     iter <- 1L
     repeat {
-      dispMu <- as.matrix(disp * mu)
+      dispMu <- as.matrix(disp1 * mu)
 
       if (dispIsNeg) {
         logProbZero <- dispMu - mu
       } else {
-        logProbZero <- -1.0 * log1p(dispMu) / disp
+        logProbZero <- -1.0 * log1p(dispMu) / disp1
       }
 
       probZero <- exp(logProbZero)
 
-      diff <- sum(probZero) - sumZeros
+      diff1 <- sum(probZero) - sumZeros
 
-      if (abs(diff) <= threshold) {
+      if (abs(diff1) <= threshold) {
         logThis(paste("Dispersion Newton-Raphson: used up to",
                       iter, "iterations"), logLevel = 3L)
-        return(disp)
+        return(disp1)
       }
 
       if (iter >= maxIterations) {
@@ -378,10 +378,10 @@ dispersionNewton <-
                       sum(dispMu * probZero),
                       sum((mu / (dispMu + 1.0) + logProbZero) * probZero))
 
-      factor <-
-        max((denom + ifelse(dispIsNeg, -1.0, 1.0) * diff) / denom, 1.0e-8)
+      fact <-
+        max((denom + ifelse(dispIsNeg, -1.0, 1.0) * diff1) / denom, 1.0e-8)
 
-      disp <- disp * factor
+      disp1 <- disp1 * fact
     }
   }
 
@@ -546,8 +546,8 @@ nuBisection <-
       return(nu1)
     }
 
-    factor <- 2.0 ^ sign(diff1)
-    nu2 <- nu1 * factor # we assume error is an decreasing function of nu
+    fact <- 2.0 ^ sign(diff1)
+    nu2 <- nu1 * fact # we assume error is an decreasing function of nu
     iter <- 1L
     repeat {
       diff2 <- sum(funProbZero(dispersion, nu2 * lambda)) - sumZeros
@@ -564,18 +564,18 @@ nuBisection <-
 
       nu1 <- nu2 # nu2 is closer to producing 0
 
-      nu2 <- nu2 * factor # we double/half at each step
+      nu2 <- nu2 * fact # we double/half at each step
     }
 
     # once we have found the two bounds to the dispersion value we use bisection
     iter <- 1L
     repeat {
-      nu <- (nu1 + nu2) / 2.0
+      nu3 <- (nu1 + nu2) / 2.0
 
-      diff <- sum(funProbZero(dispersion, nu * lambda)) - sumZeros
+      diff3 <- sum(funProbZero(dispersion, nu3 * lambda)) - sumZeros
 
-      if (abs(diff) <= threshold) {
-        return(nu)
+      if (abs(diff3) <= threshold) {
+        return(nu3)
       }
 
       if (iter >= maxIterations) {
@@ -585,10 +585,10 @@ nuBisection <-
       iter <- iter + 1L
 
       # drop same sign diff point
-      if (diff * diff2 > 0L) {
-        nu2 <- nu
+      if (diff3 * diff2 > 0L) {
+        nu2 <- nu3
       } else {
-        nu1 <- nu
+        nu1 <- nu3
       }
     }
   }

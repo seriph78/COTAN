@@ -17,6 +17,8 @@ linters: linters_with_defaults(
   if_not_else_linter = NULL,
   commented_code_linter = NULL,
   unnecessary_nesting_linter = NULL,
+  undesirable_function_linter = NULL,
+  nonportable_path_linter = NULL,
   # Style/formatting nag: often too strict for R S4 / long args formatting
   indentation_linter = NULL
   )

@@ -22,6 +22,7 @@ test_that("Logging", {
   expect_no_message(suppressMessages(logThis("This should not appear",
                                              logLevel = 0L, appendLF = FALSE)))
 
+  # nolint start: space_inside_linter
   expect_message(   logThis("This should appear",     logLevel = 0L))
   expect_no_message(logThis("This should not appear", logLevel = 1L))
 
@@ -29,6 +30,7 @@ test_that("Logging", {
 
   expect_message(   logThis("This should appear",     logLevel = 1L))
   expect_no_message(logThis("This should not appear"))
+  # nolint end
 
   suppressMessages(setLoggingLevel(3L))
   suppressMessages(setLoggingFile(logPath))
