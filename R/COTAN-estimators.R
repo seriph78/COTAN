@@ -345,8 +345,8 @@ setMethod(
       ),
       error = function(eNewton) {
         if (inherits(eNewton, "interrupt")) stop(eNewton)
-        msg = paste0("Newton dispersion solver failed: ",
-                     conditionMessage(eNewton), " | retrying with bisection")
+        msg <- paste0("Newton dispersion solver failed: ",
+                      conditionMessage(eNewton), " | retrying with bisection")
         warning(msg)
         logThis(msg, logLevel = 3L)
 

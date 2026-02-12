@@ -1698,7 +1698,7 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
             logLevel = 2L)
   } else {
     if (isEmptyName(genesSel)) {
-      genesSel = "HGDI"
+      genesSel <- "HGDI"
     }
 
     selectedGenes <- switch(

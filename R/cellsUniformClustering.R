@@ -318,7 +318,7 @@ cellsUniformClustering <- function(objCOTAN,
   }
 
   if (isEmptyName(dataMethod)) {
-    dataMethod = "LogNormalized"
+    dataMethod <- "LogNormalized"
   }
 
   repeat {
