@@ -45,41 +45,49 @@
 #'
 #' @rdname RawDataCleaning
 #'
-mitochondrialPercentagePlot <- function(objCOTAN, genePrefix = "^MT-",
-                                        condName = "", conditions = NULL) {
-  sizes <- getCellsSize(objCOTAN)
-  sizes <- as.data.frame(sizes)
 
-  sizes <- setColumnInDF(sizes, seq_len(nrow(sizes)), colName = "n")
+mitochondrialPercentagePlot <- function(objCOTAN,
+                                        genePrefix = "^MT-",
+                                        condName = "",
+                                        conditions = NULL) {
+  clDf <- data.frame()
+  clDf <-
+    setColumnInDF(clDf, colToSet = getCellsSize(objCOTAN), colName = "sizes")
+  clDf <-
+    setColumnInDF(clDf, colToSet = seq_len(nrow(clDf)),    colName = "n")
+  assert_that(identical(rownames(clDf), getCells(objCOTAN)))
 
   c(., conditions) %<-%
     normalizeNameAndLabels(objCOTAN, name = condName,
                            labels = conditions, isCond = TRUE)
-  assert_that(!is_empty(conditions))
+  assert_that(!is_empty(conditions),
+              identical(rownames(clDf), names(conditions)))
 
-  sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
+  clDf <- setColumnInDF(clDf, colToSet = conditions, colName = "sample")
 
-  mitGenes <- getGenes(objCOTAN)[str_detect(getGenes(objCOTAN),
-                                            pattern = genePrefix)]
+  isMitoch <- str_detect(getGenes(objCOTAN), pattern = genePrefix)
+  mitGenes <- getGenes(objCOTAN)[isMitoch]
   if (is_empty(mitGenes)) {
     stop("gene prefix resulted in no matches")
   }
 
   mitGenesData <-
     getRawData(objCOTAN)[getGenes(objCOTAN) %in% mitGenes, , drop = FALSE]
-  if (!identical(colnames(mitGenesData), rownames(sizes))) {
+  if (!identical(colnames(mitGenesData), rownames(clDf))) {
     warning("Problem with cells' order!")
   }
-  mitGenesData <- t(mitGenesData)
-  sizes <- setColumnInDF(sizes, rowSums(mitGenesData), colName = "sum.mit")
-  sizes <- setColumnInDF(sizes, colName = "mit.percentage",
-                         colToSet = round(100.0 * sizes[["sum.mit"]] /
-                                            sizes[["sizes"]], digits = 2L))
+  clDf <-
+    setColumnInDF(clDf, colToSet = colSums(genesData), colName = "sum.mit")
 
-  plot <-
-    sizes %>%
-    ggplot(aes(x = .data$sample, y = .data$mit.percentage,
-               fill = .data$sample)) +
+  perc <- round(100.0 * clDf[["sum"]] / clDf[["sizes"]], digits = 2L)
+  clDf <-
+    setColumnInDF(clDf, colToSet = perc, colName = "mit.percentage")
+
+  gPPl <-
+    ggplot(
+      clDf,
+      aes(x = .data$sample, y = .data$percentage, fill = .data$sample)
+    ) +
     ggdist::stat_slabinterval(
       aes(thickness = after_stat(pdf)),
       side = "right",                 # half-violin to the right
@@ -108,9 +116,9 @@ mitochondrialPercentagePlot <- function(objCOTAN, genePrefix = "^MT-",
       y = "% (mit. reads / tot reads * 100)",
       x = ""
     ) +
-    scale_y_continuous(expand = c(0, 0)) +
-    coord_cartesian(ylim = c(0.0, max(sizes[["mit.percentage"]]))) +
+    scale_y_continuous(expand = c(0.0, 0.0)) +
+    coord_cartesian(ylim = c(0.0, max(clDf[["mit.percentage"]]))) +
     plotTheme("size-plot")
 
-  return(list("plot" = plot, "sizes" = sizes))
+  return(list("plot" = gPPl, "sizes" = clDf))
 }

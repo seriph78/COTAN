@@ -1,6 +1,6 @@
 
+prevOptState <- options(parallelly.fork.enable = TRUE)
 options(COTAN.TorchWarning = NULL)
-options(parallelly.fork.enable = TRUE)
 
 test_that("COTAN getters", {
   raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
@@ -159,21 +159,30 @@ test_that("COTAN getters", {
                         ifelse(rawData != 0L, probZero, probZero - 1.0)))
   }
   ## check default
-  expect_identical(calculateLikelihoodOfObserved(obj),
-                   getLH(obj, formula = "raw"))
+  expect_identical(
+    calculateLikelihoodOfObserved(obj),
+    getLH(obj, formula = "raw")
+  )
 
   expect_identical(
     getLH(obj, formula = "raw"),
-    asDataMatrix(obj, ifelse(zeroOne, (1.0 - bProbZero), bProbZero)))
+    asDataMatrix(obj, ifelse(zeroOne, (1.0 - bProbZero), bProbZero))
+  )
   expect_identical(
     getLH(obj, formula = "log"),
-    asDataMatrix(obj, ifelse(zeroOne, log1p(-bProbZero), log(bProbZero))))
+    asDataMatrix(obj, ifelse(zeroOne, log1p(-bProbZero), log(bProbZero)))
+  )
   expect_identical(
     getLH(obj, formula = "der"),
-    asDataMatrix(obj,  ifelse(zeroOne, -1.0/(1.0 - bProbZero), 1.0/bProbZero)))
+    asDataMatrix(
+      obj,
+      ifelse(zeroOne, -1.0 / (1.0 - bProbZero), 1.0 / bProbZero)
+    )
+  )
   expect_identical(
     getLH(obj, formula = "sLog"),
-    asDataMatrix(obj, ifelse(zeroOne, -log1p(-bProbZero), log(bProbZero))))
+    asDataMatrix(obj, ifelse(zeroOne, -log1p(-bProbZero), log(bProbZero)))
+  )
 
   ## strings are case sensitive
   expect_error(getLH(obj, formula = "SLog"))
@@ -183,6 +192,7 @@ test_that("COTAN getters", {
   ## check default
   expect_identical(getDataMatrix(obj), as.matrix(getLogNormData(obj)))
 
+  # nolint start: line_length_linter
   expect_identical(getDataMatrix(obj, dataMethod = "RW"),                      as.matrix(getRawData(obj)))
   expect_identical(getDataMatrix(obj, dataMethod = "Raw"),                     as.matrix(getRawData(obj)))
   expect_identical(getDataMatrix(obj, dataMethod = "RawData"),                 as.matrix(getRawData(obj)))
@@ -213,6 +223,7 @@ test_that("COTAN getters", {
   expect_identical(getDataMatrix(obj, dataMethod = "SL"),                      as.matrix(getLH(obj, "sLog")))
   expect_identical(getDataMatrix(obj, dataMethod = "SignLogL"),                as.matrix(getLH(obj, "sLog")))
   expect_identical(getDataMatrix(obj, dataMethod = "SignedLogLikelihood"),     as.matrix(getLH(obj, "sLog")))
+  # nolint end
 
   ## strings are case sensitive
   expect_error(getDataMatrix(obj, dataMethod = "signLogl"))
@@ -250,7 +261,7 @@ test_that("COTAN getters", {
   m1 <- as.matrix(cbind(rep(2.756809750418045, times = 20L),
                         rep(0.0, times = 20L), rep(0.0, times = 20L),
                         rep(0.0, times = 20L), rep(0.0, times = 20L)))
-  colnames(m1) <- paste0("PC", c(1L:5L))
+  colnames(m1) <- paste0("PC", 1L:5L)
   rownames(m1) <- letters[1L:20L]
 
   expect_equal(abs(calcRDM(obj, useCoexEigen = FALSE,
@@ -263,11 +274,12 @@ test_that("COTAN getters", {
                            genesSel = "HVG_Seurat", numGenes = 8L)),
                m1, tolerance = 1.0e-12)
 
+  # nolint start: spaces_inside_linter
   m2 <- cbind(
     rep(c(1.991509612121359,     -1.991510865753923    ), times = 10L),
     rep(c(4.556799230950100e-05, -4.815389335445746e-05), times = 10L),
     rep(c(5.701730287707164e-05, -8.375641609457851e-05), times = 10L))
-  colnames(m2) <- paste0("EC_", c(1L:3L))
+  colnames(m2) <- paste0("EC_", 1L:3L)
   rownames(m2) <- letters[1L:20L]
 
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
@@ -278,7 +290,7 @@ test_that("COTAN getters", {
     rep(c(-1.96537974590724,    1.96547022027574     ), times = 10L),
     rep(c(-5.14674535931154e-4, 2.4124745673443485e-2), times = 10L),
     rep(c( 0.227956910102598,   0.226238243931497    ), times = 10L))
-  colnames(m3) <- paste0("EC_", c(1L:3L))
+  colnames(m3) <- paste0("EC_", 1L:3L)
   rownames(m3) <- letters[1L:20L]
   if (FALSE) {
     attr(m3, "scaled:scale") <-
@@ -288,5 +300,7 @@ test_that("COTAN getters", {
   expect_equal(calcRDM(obj, useCoexEigen = TRUE,
                        dataMethod = "DerLogL", numComp = 5L)[, 1L:3L],
                m3, tolerance = 5.0e-4)
+  # nolint end
 })
 
+options(prevOptState)

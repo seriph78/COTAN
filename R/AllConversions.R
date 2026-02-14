@@ -24,11 +24,6 @@ NULL
 
 ## ---- Convert to SingleCellExperiment ----
 
-# convertToSingleCellExperiment
-
-# @format `raw.dataset` is a data frame with \eqn{2000} genes and \eqn{815}
-#   cells
-
 #' @details `convertToSingleCellExperiment()` converts a [COTAN-class] object
 #'   into a [SingleCellExperiment::SingleCellExperiment-class] object. Stores
 #'   the raw counts in the `"counts"` [SummarizedExperiment::Assays-class], the
@@ -143,8 +138,6 @@ convertToSingleCellExperiment <- function(objCOTAN) {
 
 ## ---- Convert from SingleCellExperiment ----
 
-#' convertFromSingleCellExperiment
-#'
 #' @details `convertFromSingleCellExperiment()` converts a
 #'   [SingleCellExperiment::SingleCellExperiment-class] object back into a
 #'   [COTAN-class] object. It supports `SCE` objects that were originally
@@ -275,8 +268,7 @@ convertFromSingleCellExperiment <- function(
     if (!identical(rawSourceSCE, objSCE)) {
       topAssays <- assayNames(objSCE)
       if (length(topAssays) > 0L) {
-        warning("Dropping top-level assays: ",
-                paste(topAssays, collapse = ", "))
+        warning("Dropping top-level assays: ", toString(topAssays))
       }
     }
 
@@ -284,14 +276,14 @@ convertFromSingleCellExperiment <- function(
     keptAssay <- chosenAssay
     droppedAssays <- setdiff(assayNames(rawSourceSCE), keptAssay)
     if (length(droppedAssays) > 0L) {
-      warning("Dropping assays: ", paste(droppedAssays, collapse = ", "))
+      warning("Dropping assays: ", toString(droppedAssays))
     }
 
     # reducedDims (if available)
     redNames <- tryCatch(reducedDimNames(objSCE),
                          error = function(e) character())
     if (length(redNames) > 0L) {
-      warning("Dropping reducedDims: ", paste(redNames, collapse = ", "))
+      warning("Dropping reducedDims: ", toString(redNames))
     }
 
     # altExps
@@ -305,7 +297,7 @@ convertFromSingleCellExperiment <- function(
     }
     droppedAlt <- setdiff(altNames, usedAlt)
     if (length(droppedAlt) > 0L) {
-      warning("Dropping altExps: ", paste(droppedAlt, collapse = ", "))
+      warning("Dropping altExps: ", toString(droppedAlt))
     }
   }
 
@@ -342,7 +334,8 @@ convertFromSingleCellExperiment <- function(
     genesNamesPattern <-
       ifelse(
         isEmptyName(genesNamesPattern),
-        # broadened default for common SCE conventions (10X / scater / zellkonverter)
+        # broadened default for common SCE conventions
+        # (10X / scater / zellkonverter)
         "^((Gene|Feature)s?[ -_]?(Name|ID)s?|IDs?|Symbols?)$",
         genesNamesPattern)
 
@@ -429,7 +422,7 @@ convertFromSingleCellExperiment <- function(
   keptMd <- c("genesCoex", "cellsCoex", "datasetMetadata", "project.name")
   droppedMd <- setdiff(names(sceMetadataList), keptMd)
   if (length(droppedMd) > 0L) {
-    warning("Dropping metadata entries: ", paste(droppedMd, collapse = ", "))
+    warning("Dropping metadata entries: ", toString(droppedMd))
   }
 
   genesCoex <- emptySymmetricMatrix()
@@ -442,8 +435,8 @@ convertFromSingleCellExperiment <- function(
     if (length(gd) != 2L ||
         gd[[1L]] != nrow(rawMatrix) ||
         gd[[2L]] != nrow(rawMatrix)) {
-      warning(paste("genesCoex dimensions do not match nrow(counts);",
-              "dropping genesCoex."))
+      warning(c("genesCoex dimensions do not match nrow(counts);",
+                "dropping genesCoex."))
       genesCoex <- emptySymmetricMatrix()
     }
     genesCoex <-
@@ -464,8 +457,8 @@ convertFromSingleCellExperiment <- function(
     if (length(cd) != 2L ||
         cd[[1L]] != ncol(rawMatrix) ||
         cd[[2L]] != ncol(rawMatrix)) {
-      warning(paste("cellsCoex dimensions do not match ncol(counts);",
-                    "dropping cellsCoex."))
+      warning(c("cellsCoex dimensions do not match ncol(counts);",
+                "dropping cellsCoex."))
       cellsCoex <- emptySymmetricMatrix()
     }
 

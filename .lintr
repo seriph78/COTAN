@@ -1,10 +1,32 @@
 linters: linters_with_defaults(
-  defaults = linters_with_tags(tags = NULL,
-                               packages = "lintr"),
-  object_name_linter(styles = c("camelCase", "symbols", "UPPERCASE")),
-  cyclocomp_linter(complexity_limit = 20L),
-  assignment_linter(allow_cascading_assign = FALSE),
-  strings_as_factors_linter = NULL
-  ) # see vignette("lintr")
+  # Start from lint "everything"
+  defaults = linters_with_tags(tags = NULL, packages = "lintr"),
+  # Limit allowed object names
+  object_name_linter = object_name_linter(styles = c("camelCase", "UPPERCASE")),
+  object_length_linter = object_length_linter(length = 50L),
+  # Allow relatively complex functions
+  cyclocomp_linter = cyclocomp_linter(complexity_limit = 50L),
+  # Limit assignments to use only '<-'
+  assignment_linter = assignment_linter(operator = "<-"),
+  # Disable outdated / low-signal
+  strings_as_factors_linter = NULL,
+  # suppressed checks:
+  return_linter = NULL,
+  condition_call_linter = NULL,
+  keyword_quote_linter = NULL,
+  if_not_else_linter = NULL,
+  commented_code_linter = NULL,
+  unnecessary_nesting_linter = NULL,
+  undesirable_function_linter = NULL,
+  nonportable_path_linter = NULL,
+  # Style/formatting nag: often too strict for R S4 / long args formatting
+  indentation_linter = NULL
+  )
 encoding: "UTF-8"
-exclusions: list("renv", "packrat")  # see ?lintr::exclude
+exclusions: list(
+  "renv",
+  "packrat",
+  ".Rproj.user",
+  ".Rhistory",
+  ".RData"
+  )

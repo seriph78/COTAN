@@ -93,6 +93,9 @@ biocViews:
     SystemsBiology, 
     Transcriptomics,
     GeneExpression,
-    SingleCell
+    SingleCell,
+    DifferentialExpression,
+    Clustering,
+    GPU
 VignetteBuilder: knitr
 LazyData: false

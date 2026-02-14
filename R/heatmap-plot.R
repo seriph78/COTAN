@@ -228,23 +228,41 @@ heatmapPlot <- function(objCOTAN = NULL,
                 "max COEX:", max(dfToPrint[["coex"]], na.rm = TRUE)),
           logLevel = 2L)
 
-  filteredDF <- dfToPrint %>%
+  filteredDF <-
+    dfToPrint |>
     filter(.data$type %in% names(genesLists)[sets])
 
-  heatmap <- ggplot(filteredDF,
-                    aes(x = .data$cond,
-                        y = factor(.data$g2,
-                                   levels = rev(levels(factor(.data$g2)))))) +
-             geom_tile(aes(fill = .data$coex),
-                       colour = "black", show.legend = TRUE) +
-             facet_grid(rows = vars(.data$type), cols = vars(.data$g1),
-                        scales = "free", space = "free") +
-             scale_fill_gradient2(low = "#E64B35FF", mid = "gray93",
-                                  high = "#3C5488FF", midpoint = 0L,
-                                  na.value = "grey80", space = "Lab",
-                                  guide = "colourbar", aesthetics = "fill",
-                                  oob = squish) +
-             plotTheme("heatmap", textSize = 9L)
+  heatMapPl <-
+    ggplot(
+      filteredDF,
+      aes(
+        x = .data$cond,
+        y = factor(.data$g2, levels = rev(levels(factor(.data$g2))))
+      )
+    ) +
+    geom_tile(
+      aes(fill = .data$coex),
+      colour = "black",
+      show.legend = TRUE
+    ) +
+    facet_grid(
+      rows = vars(.data$type),
+      cols = vars(.data$g1),
+      scales = "free",
+      space = "free"
+    ) +
+    scale_fill_gradient2(
+      low = "#E64B35FF",
+      mid = "gray93",
+      high = "#3C5488FF",
+      midpoint = 0L,
+      na.value = "grey80",
+      space = "Lab",
+      guide = "colourbar",
+      aesthetics = "fill",
+      oob = squish
+    ) +
+    plotTheme("heatmap", textSize = 9L)
 
   endTime <- Sys.time()
 
@@ -254,7 +272,7 @@ heatmapPlot <- function(objCOTAN = NULL,
 
   logThis("Heatmap plot: DONE", logLevel = 2L)
 
-  return(heatmap)
+  return(heatMapPl)
 }
 
 

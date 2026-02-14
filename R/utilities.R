@@ -198,6 +198,8 @@ handleMultiCore <- function(cores) {
 #'   installation. Note the [torch::torch_set_num_threads()] has effect also on
 #'   the \pkg{Rfast} package methods
 #'
+#' @export
+#'
 #' @rdname MultiThreading
 #'
 canUseTorch <- function(optimizeForSpeed, deviceStr) {
@@ -387,7 +389,7 @@ isEmptyName <- function(name) {
 #' @rdname HandleStrings
 #'
 niceFactorLevels <- function(v) {
-  names <- names(v)
+  vNames <- names(v)
   if (is.factor(v)) {
     v <- factorToVector(v)
   }
@@ -399,7 +401,7 @@ niceFactorLevels <- function(v) {
     numChars <- max(nchar(v))
     v <- str_pad(v, width = numChars, side = "left", pad = "_")
   }
-  names(v) <- names
+  names(v) <- vNames
   return(factor(v))
 }
 
@@ -527,9 +529,9 @@ getMetaInfoRow <- function(meta, tag) {
     return(0L)
   }
 
-  #get all matches
+  # get all matches
   matches <- str_equal(tag, meta[[1L]], ignore_case = TRUE)
-  if (all(!matches)) {
+  if (!any(matches)) {
     return(0L)
   }
 
@@ -929,16 +931,16 @@ multiMergeClusters <- function(clusters, namesList, mergedNames = NULL) {
 #'
 plotTheme <- function(plotKind = "common", textSize = 14L) {
   myDarkBlue <- "#3C5488FF"
-  ts <- textSize
+  s <- textSize
 
   basicTheme <- theme(
-    axis.text.x  = element_text(size = ts, angle = 0L, hjust = 0.5, vjust = 0.5,
+    axis.text.x  = element_text(size = s, angle =  0L, hjust = 0.5, vjust = 0.5,
                                 face = "plain", colour = myDarkBlue),
-    axis.text.y  = element_text(size = ts, angle = 0L, hjust = 0.0, vjust = 0.5,
+    axis.text.y  = element_text(size = s, angle =  0L, hjust = 0.0, vjust = 0.5,
                                 face = "plain", colour = myDarkBlue),
-    axis.title.x = element_text(size = ts, angle = 0L, hjust = 0.5, vjust = 0.0,
+    axis.title.x = element_text(size = s, angle =  0L, hjust = 0.5, vjust = 0.0,
                                 face = "plain", colour = myDarkBlue),
-    axis.title.y = element_text(size = ts, angle =90L, hjust = 0.5, vjust = 0.5,
+    axis.title.y = element_text(size = s, angle = 90L, hjust = 0.5, vjust = 0.5,
                                 face = "plain", colour = myDarkBlue))
 
   if (plotKind == "common") {
@@ -987,8 +989,8 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
                  axis.title.y = element_blank(),
                  panel.spacing = unit(0.0, "lines"),
                  strip.background = element_rect(fill = "#8491B44C"),
-                 strip.text.y = element_text(size = ts, colour = myDarkBlue),
-                 strip.text.x = element_text(size = ts, angle = 90L,
+                 strip.text.y = element_text(size = s, colour = myDarkBlue),
+                 strip.text.x = element_text(size = s, angle = 90L,
                                              colour = myDarkBlue),
                  legend.text = element_text(color = myDarkBlue,
                                             face = "italic"),
@@ -1000,7 +1002,7 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   if (plotKind == "GDI") {
     return(basicTheme +
            theme(legend.title = element_blank(),
-                 plot.title = element_text(size = ts + 2L,
+                 plot.title = element_text(size = s + 2L,
                                            face = "bold.italic",
                                            color = myDarkBlue),
                  legend.text = element_text(color = myDarkBlue,
@@ -1011,7 +1013,7 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   if (plotKind == "UMAP") {
     return(basicTheme +
              theme(legend.title = element_blank(),
-                   plot.title = element_text(size = ts + 2L,
+                   plot.title = element_text(size = s + 2L,
                                              face = "bold.italic",
                                              color = myDarkBlue),
                    legend.text = element_text(color = myDarkBlue,
@@ -1022,8 +1024,6 @@ plotTheme <- function(plotKind = "common", textSize = 14L) {
   if (plotKind == "size-plot") {
     return(ggthemes::theme_tufte() +
            theme(legend.position = "none"))
-                 # axis.text.x  = element_blank(),
-                 # axis.ticks.x = element_blank()) )
   }
 
   warning("plotTheme: no match found in listed themes for: ", plotKind)

@@ -6,5 +6,4 @@
 }
 
 #' @importFrom rlang .data
-utils::globalVariables(c(".data"))
-utils::globalVariables(c(".x"))
+utils::globalVariables(c(".data", ".x"))

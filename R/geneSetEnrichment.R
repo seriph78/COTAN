@@ -32,11 +32,11 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers = list()) {
                          str_remove(colnames(clustersCoex), fixed("cl.")))
   clustersTags <- names(clTagsMap)
 
-  df <- as.data.frame(matrix(nrow = length(groupMarkers),
-                             ncol = ncol(clustersCoex) + 2L))
+  gDf <- as.data.frame(matrix(nrow = length(groupMarkers),
+                              ncol = ncol(clustersCoex) + 2L))
 
-  colnames(df) <- c(clustersTags, "N. detected", "N. total")
-  rownames(df) <- names(groupMarkers)
+  colnames(gDf) <- c(clustersTags, "N. detected", "N. total")
+  rownames(gDf) <- names(groupMarkers)
 
   # TODO: add comment on this constant in the @details above!
   theta <- -1.0 / 0.1 * log(0.25) # ~ 13.86294
@@ -56,13 +56,13 @@ geneSetEnrichment <- function(clustersCoex, groupMarkers = list()) {
     ex <- 1.0 - exp(-theta * ex)
 
     for (cl in clustersTags) {
-      df[groupName, cl] <-
+      gDf[groupName, cl] <-
         sum(ex[, clTagsMap[cl], drop = TRUE], na.rm = TRUE) / length(genes)
     }
 
-    df[groupName, "N. detected"] <- numDetected
-    df[groupName, "N. total"] <- length(genes)
+    gDf[groupName, "N. detected"] <- numDetected
+    gDf[groupName, "N. total"] <- length(genes)
   }
 
-  return(df)
+  return(gDf)
 }

@@ -46,6 +46,8 @@
 #'
 #' @rdname UniformClusters
 #'
+
+# nolint start: object_name_linter
 GDIPlot <- function(objCOTAN, genes, condition = "",
                     statType = "S", GDIThreshold = 1.43,
                     GDIIn = NULL) {
@@ -90,40 +92,57 @@ GDIPlot <- function(objCOTAN, genes, condition = "",
   myColours <- set_names(getColorsVector(length(names(genes))), names(genes))
 
   labelledGenes <- GDIDf[["colors"]] != "none"
+# nolint end
 
   if (isEmptyName(condition)) {
     condition <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
   }
-  title <- paste0("GDI plot - ", condition)
 
-  df_none <- filter(GDIDf, .data$colors == "none")
-  df_col  <- filter(GDIDf, .data$colors != "none")
+  gdiPl <-
+    ggplot(
+      filter(GDIDf, .data$colors == "none"),
+      aes(x = .data$sum.raw.norm, y = .data$GDI)
+    ) +
+    geom_point(alpha = 0.3, color = "#8491B4B2", size = 2.5) +
+    geom_point(
+      data = filter(GDIDf, .data$colors != "none"),
+      aes(x = .data$sum.raw.norm, y = .data$GDI, colour = .data$colors),
+      size = 2.5,
+      alpha = 0.8
+    ) +
+    geom_hline(
+      yintercept = quantile(GDIDf[["GDI"]])[[4L]],
+      linetype = "dashed",
+      color = "darkblue"
+    ) +
+    geom_hline(
+      yintercept = quantile(GDIDf[["GDI"]])[[3L]],
+      linetype = "dashed",
+      color = "darkblue"
+    ) +
+    geom_hline(
+      yintercept = GDIThreshold,
+      linetype = "dotted",
+      color = "red",
+      linewidth = 0.5
+    ) +
+    scale_color_manual("Status", values = myColours) +
+    scale_fill_manual( "Status", values = myColours) +
+    xlab("log normalized counts") +
+    ylab("GDI") +
+    geom_label_repel(
+      data = GDIDf[labelledGenes, ],
+      aes(x = .data$sum.raw.norm, y = .data$GDI, fill = .data$colors),
+      label = rownames(GDIDf)[labelledGenes],
+      label.size = NA,
+      max.overlaps = 40L,
+      alpha = 0.8,
+      direction = "both",
+      na.rm = TRUE,
+      seed = 1234L
+    ) +
+    ggtitle(paste0("GDI plot - ", condition)) +
+    plotTheme("GDI", textSize = 10L)
 
-  plot <- ggplot(df_none,
-                 aes(x = .data$sum.raw.norm, y = .data$GDI)) +
-          geom_point(alpha = 0.3, color = "#8491B4B2", size = 2.5) +
-          geom_point(data = df_col,
-                     aes(x = .data$sum.raw.norm, y = .data$GDI,
-                         colour = .data$colors),
-                     size = 2.5, alpha = 0.8) +
-          geom_hline(yintercept = quantile(GDIDf[["GDI"]])[[4L]],
-                     linetype = "dashed", color = "darkblue") +
-          geom_hline(yintercept = quantile(GDIDf[["GDI"]])[[3L]],
-                     linetype = "dashed", color = "darkblue") +
-          geom_hline(yintercept = GDIThreshold, linetype = "dotted",
-                     color = "red", linewidth = 0.5) +
-          scale_color_manual("Status", values = myColours) +
-          scale_fill_manual( "Status", values = myColours) +
-          xlab("log normalized counts") +
-          ylab("GDI") +
-          geom_label_repel(data = GDIDf[labelledGenes, ],
-                           aes(x = .data$sum.raw.norm, y = .data$GDI,
-                               fill = .data$colors),
-                           label = rownames(GDIDf)[labelledGenes],
-                           label.size = NA, max.overlaps = 40L, alpha = 0.8,
-                           direction = "both", na.rm = TRUE, seed = 1234L) +
-          ggtitle(title) +
-          plotTheme("GDI", textSize = 10L)
-
-  return(plot)
+  return(gdiPl)
 }

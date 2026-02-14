@@ -61,7 +61,8 @@ UMAPPlot <- function(dataIn,
   assert_that(!is_empty(rownames(dataIn)),
               msg = "UMAPPlot - input matrix must have proper row-names")
 
-  assert_that(is_empty(clusters) || identical(names(clusters), rownames(dataIn)),
+  assert_that(is_empty(clusters) ||
+                identical(names(clusters), rownames(dataIn)),
               msg = paste("UMAPPlot - clusters' names must be the same",
                           "as the row-names of the input matrix"))
 
@@ -118,10 +119,10 @@ UMAPPlot <- function(dataIn,
                        n.neighbors = numNeighbors, #30L
                        n.components = 2L,
                        metric = "cosine",
-                       learning.rate = 1,
+                       learning.rate = 1.0,
                        min.dist = minPointsDist, # 0.3
                        uwot.sgd = FALSE,
-                       seed.use = 42,
+                       seed.use = 42L,
                        verbose = TRUE)))
 
   plotDF <- data.frame(x = umap[, 1L],
@@ -181,21 +182,22 @@ UMAPPlot <- function(dataIn,
 
   pointSize <- min(max(0.33, 5000.0 / nrow(plotDF)), 2.0)
 
-  plot <- ggplot() +
+  umapPl <-
+    ggplot() +
     scale_color_manual("Status", values = myColours) +
     labs(x = "UMAP 1", y = "UMAP 2") +
     ggtitle(title) +
     plotTheme("UMAP", textSize = 10L)
 
   if (any(generic)) {
-    plot <- plot +
+    umapPl <- umapPl +
       geom_point(data = plotDF[generic, , drop = FALSE],
                  aes(.data$x, .data$y, colour = .data$types),
                  size = pointSize, alpha = 0.3)
   }
 
   if (any(clustered | centroids)) {
-    plot <- plot +
+    umapPl <- umapPl +
       geom_point(data = plotDF[clustered, , drop = FALSE],
                  aes(.data$x, .data$y, colour = .data$types),
                  size = pointSize, alpha = 0.5) +
@@ -206,12 +208,12 @@ UMAPPlot <- function(dataIn,
                       show.legend = FALSE, alpha = 0.8)
   }
   if (any(labelled | clustered | centroids)) {
-    plot <- plot +
+    umapPl <- umapPl +
       scale_fill_manual("Status", values = myColours)
   }
 
   if (any(labelled)) {
-    plot <- plot +
+    umapPl <- umapPl +
       geom_point(data = plotDF[labelled, , drop = FALSE],
                  aes(.data$x, .data$y, colour = .data$types),
                  size = 1.2 * pointSize, alpha = 0.8) +
@@ -223,7 +225,7 @@ UMAPPlot <- function(dataIn,
                        max.overlaps = 40L, alpha = 0.8,
                        direction = "both", na.rm = TRUE, seed = 1234L)
   } else {
-    plot <- plot +
+    umapPl <- umapPl +
       theme(legend.position = "none")
   }
 
@@ -235,7 +237,7 @@ UMAPPlot <- function(dataIn,
 
   logThis("UMAP plot: DONE", logLevel = 2L)
 
-  return(plot)
+  return(umapPl)
 }
 
 
@@ -274,6 +276,8 @@ UMAPPlot <- function(dataIn,
 #'  * `"cellsRDM"` the *Reduced Data Matrix* used to create the plot
 #'
 #' @importFrom rlang is_empty
+#'
+#' @importFrom dplyr case_when
 #'
 #' @importFrom zeallot %<-%
 #' @importFrom zeallot %->%
@@ -322,10 +326,12 @@ cellsUMAPPlot <- function(objCOTAN,
     dataMethod = dataMethod, numComp = numComp,
     genesSel = genesSel, numGenes = numGenes)
 
-  tailMsg <- ifelse(useCoexEigen, "COEX eigenvectors projection",
-                    ifelse(length(genesSel) == 1,
-                           paste(genesSel, "genes selector"),
-                           "user provided genes"))
+  tailMsg <-
+    case_when(
+      useCoexEigen           ~ "COEX eigenvectors projection",
+      length(genesSel) == 1L ~ paste(genesSel, "genes selector"),
+      .default =               "user provided genes"
+    )
 
   umapTitle <- paste("UMAP of clusterization", clName,
                      "using", dataMethod, "matrix with", tailMsg)

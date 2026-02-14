@@ -258,10 +258,16 @@ plot(gdiPlot)
 ##
 
 checker <- new("AdvancedGDIUniformityCheck")
-stopifnot(identical(checker@firstCheck@GDIThreshold, 1.297))
+stopifnot(identical(
+  methods::slot(methods::slot(checker, "firstCheck"), "GDIThreshold"),
+  1.297
+))
 
 checker2 <- shiftCheckerThresholds(checker, 0.1)
-stopifnot(identical(checker2@firstCheck@GDIThreshold, 1.397))
+stopifnot(identical(
+  methods::slot(methods::slot(checker2, "firstCheck"), "GDIThreshold"),
+  1.397
+))
 
 splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
                                     dataMethod = "LogLikelihood",
