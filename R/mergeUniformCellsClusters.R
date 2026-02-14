@@ -113,13 +113,13 @@
 #'
 #' checker <- new("AdvancedGDIUniformityCheck")
 #' stopifnot(identical(
-#'   checker |> methods::slot("firstCheck") |> methods::slot("GDIThreshold")
+#'   checker |> methods::slot("firstCheck") |> methods::slot("GDIThreshold"),
 #'   1.297
 #' ))
 #'
 #' checker2 <- shiftCheckerThresholds(checker, 0.1)
 #' stopifnot(identical(
-#'   checker2 |> methods::slot("firstCheck") |> methods::slot("GDIThreshold")
+#'   checker2 |> methods::slot("firstCheck") |> methods::slot("GDIThreshold"),
 #'   1.397
 #' ))
 #'

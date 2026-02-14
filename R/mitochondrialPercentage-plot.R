@@ -77,16 +77,16 @@ mitochondrialPercentagePlot <- function(objCOTAN,
     warning("Problem with cells' order!")
   }
   clDf <-
-    setColumnInDF(clDf, colToSet = colSums(genesData), colName = "sum.mit")
+    setColumnInDF(clDf, colToSet = colSums(mitGenesData), colName = "sum.mit")
 
-  perc <- round(100.0 * clDf[["sum"]] / clDf[["sizes"]], digits = 2L)
+  perc <- round(100.0 * clDf[["sum.mit"]] / clDf[["sizes"]], digits = 2L)
   clDf <-
     setColumnInDF(clDf, colToSet = perc, colName = "mit.percentage")
 
   gPPl <-
     ggplot(
       clDf,
-      aes(x = .data$sample, y = .data$percentage, fill = .data$sample)
+      aes(x = .data$sample, y = .data$mit.percentage, fill = .data$sample)
     ) +
     ggdist::stat_slabinterval(
       aes(thickness = after_stat(pdf)),
