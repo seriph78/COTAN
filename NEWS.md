@@ -1,4 +1,11 @@
 
+## 2.11.3
+
+Solved various linting issues and `BiocCheck` warning
+
+Now the function `canUseTorch()` is exported
+
+
 ## 2.11.2
 
 Improved conversions to/from `SingleCellExperiment` objects
