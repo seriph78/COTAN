@@ -63,44 +63,44 @@ clustersSummaryData <- function(objCOTAN, clName = "", clusters = NULL,
     condName <- "NoCond"
   }
 
-  df <- as.data.frame(cbind(factorToVector(clusters),
-                            factorToVector(conditions)))
-  df <- as.data.frame(table(df))
-  assert_that(ncol(df) == 3L, msg = "Internal error creating frequency table")
+  sDf <- as.data.frame(cbind(factorToVector(clusters),
+                             factorToVector(conditions)))
+  sDf <- as.data.frame(table(sDf))
+  assert_that(ncol(sDf) == 3L, msg = "Internal error creating frequency table")
 
-  colnames(df) <- c(clName, condName, "CellNumber")
+  colnames(sDf) <- c(clName, condName, "CellNumber")
 
-  cellsPerc <- round(df[["CellNumber"]] / getNumCells(objCOTAN) * 100.0,
+  cellsPerc <- round(sDf[["CellNumber"]] / getNumCells(objCOTAN) * 100.0,
                      digits = 1L)
 
-  df <- setColumnInDF(df, colToSet = cellsPerc, colName = "CellPercentage")
+  sDf <- setColumnInDF(sDf, colToSet = cellsPerc, colName = "CellPercentage")
 
-  df <- setColumnInDF(df, NA, colName = "MeanUDE")
-  df <- setColumnInDF(df, NA, colName = "MedianUDE")
-  df <- setColumnInDF(df, NA, colName = "ExpGenes25")
-  df <- setColumnInDF(df, NA, colName = "ExpGenes")
+  sDf <- setColumnInDF(sDf, NA, colName = "MeanUDE")
+  sDf <- setColumnInDF(sDf, NA, colName = "MedianUDE")
+  sDf <- setColumnInDF(sDf, NA, colName = "ExpGenes25")
+  sDf <- setColumnInDF(sDf, NA, colName = "ExpGenes")
 
-  for (cond in levels(factor(df[[condName]]))) {
-    condPosInDF <- df[[condName]] == cond
+  for (cond in levels(factor(sDf[[condName]]))) {
+    condPosInDF <- sDf[[condName]] == cond
     condPosInMeta <- conditions == cond
 
-    for (cl in levels(factor(df[[clName]]))) {
-      posInDF   <- (df[[clName]] == cl) & condPosInDF
+    for (cl in levels(factor(sDf[[clName]]))) {
+      posInDF   <- (sDf[[clName]] == cl) & condPosInDF
       posInMeta <- (clusters == cl) & condPosInMeta
 
       nu <- getNu(objCOTAN)[posInMeta]
-      df[posInDF, "MeanUDE"]   <- round(mean(nu),   digits = 2L)
-      df[posInDF, "MedianUDE"] <- round(median(nu), digits = 2L)
+      sDf[posInDF, "MeanUDE"]   <- round(mean(nu),   digits = 2L)
+      sDf[posInDF, "MedianUDE"] <- round(median(nu), digits = 2L)
 
       numTimesGeneIsExpr <- rowSums(getZeroOneProj(objCOTAN)[, posInMeta,
                                                              drop = FALSE])
 
-      df[posInDF, "ExpGenes25"] <- sum(numTimesGeneIsExpr > length(nu) * 0.25)
-      df[posInDF, "ExpGenes"]   <- sum(numTimesGeneIsExpr > 0L)
+      sDf[posInDF, "ExpGenes25"] <- sum(numTimesGeneIsExpr > length(nu) * 0.25)
+      sDf[posInDF, "ExpGenes"]   <- sum(numTimesGeneIsExpr > 0L)
     }
   }
 
-  return(df)
+  return(sDf)
 }
 
 #' @details `clustersSummaryPlot()` calculates various statistics about each
@@ -152,22 +152,24 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
                                 condName = "", conditions = NULL,
                                 plotTitle = "") {
 
-  df <- clustersSummaryData(objCOTAN, clName = clName, clusters = clusters,
-                            condName = condName, conditions = conditions)
+  clDf <- clustersSummaryData(objCOTAN, clName = clName, clusters = clusters,
+                              condName = condName, conditions = conditions)
 
-  dfNames <- colnames(df)
-  colRng <- which(dfNames=="CellNumber") : which(dfNames=="ExpGenes")
-  plotDF <- df %>%
-    pivot_longer(cols      = all_of(dfNames[colRng]),
-                 names_to  = "keys",
-                 values_to = "values")
+  clDfNames <- colnames(clDf)
+  colRng <- (which(clDfNames == "CellNumber"):which(clDfNames == "ExpGenes"))
+  plotDF <- clDf |>
+    pivot_longer(
+      cols      = all_of(clDfNames[colRng]),
+      names_to  = "keys",
+      values_to = "values"
+    )
 
   # normalize col names
-  cNames <- colnames(df)
+  cNames <- colnames(clDf)
   plotDF[["Cluster"]] <- plotDF[[cNames[[1L]]]]
   plotDF[["Condition"]] <- plotDF[[cNames[[2L]]]]
 
-  plot <- ggplot(plotDF, aes(.data$Cluster, .data$values,
+  cSPl <- ggplot(plotDF, aes(.data$Cluster, .data$values,
                              fill = .data$Condition)) +
     geom_bar(position = "dodge", stat = "identity", color = "black") +
     geom_text(aes(x = .data$Cluster, y = .data$values, label = .data$values,
@@ -180,7 +182,7 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
     ggtitle(plotTitle) +
     scale_fill_brewer(palette = "Accent")
 
-  return(list("data" = df, "plot" = plot))
+  return(list("data" = clDf, "plot" = cSPl))
 }
 
 

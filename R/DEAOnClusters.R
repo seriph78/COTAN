@@ -13,9 +13,9 @@ runSingleDEA <- function(clName, cellsInList,
   numCells <- ncol(zeroOne)
   numCellsIn  <- sum(cellsIn)
 
-  observedYI <- rowSums(zeroOne [ , cellsIn, drop = FALSE])
+  observedYI <- rowSums(zeroOne [, cellsIn, drop = FALSE])
 
-  expectedNI <- rowsums(probZero[ , cellsIn, drop = FALSE], parallel = TRUE)
+  expectedNI <- rowsums(probZero[, cellsIn, drop = FALSE], parallel = TRUE)
   expectedNO <- rowSumsProbZero - expectedNI
   expectedYI <- numCellsIn  - expectedNI
   expectedYO <- (numCells - numCellsIn) - expectedNO
@@ -83,7 +83,7 @@ DEAOnClusters <- function(objCOTAN, clName = "", clusters = NULL) {
 
   rowSumsProbZero <- rowsums(probZero, parallel = TRUE)
 
-  cellsInList <- lapply(clustersList, function(cl) getCells(objCOTAN) %in% cl)
+  cellsInList <- lapply(clustersList, \(cl) getCells(objCOTAN) %in% cl)
 
   coexCls <- lapply(names(cellsInList), runSingleDEA,
                     cellsInList = cellsInList,
@@ -135,7 +135,7 @@ clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
   assert_that(all(cells %in% allCells),
               msg = "some of the given cells are unknown")
 
-  dimnames <- list(c(paste(gene, "yes", sep = "."),
+  dimNames <- list(c(paste(gene, "yes", sep = "."),
                      paste(gene, "no", sep = ".")),
                    c("cells.in", "cells.out"))
 
@@ -158,7 +158,7 @@ clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
   observedNO <- numCellsOut - observedYO
 
   observedCT <- matrix(c(observedYI, observedNI, observedYO, observedNO),
-                       ncol = 2L, nrow = 2L, dimnames = dimnames)
+                       ncol = 2L, nrow = 2L, dimnames = dimNames)
 
   # estimated
   lambda <- suppressWarnings(getLambda(objCOTAN))
@@ -187,7 +187,7 @@ clusterGeneContingencyTables <- function(objCOTAN, gene, cells) {
   expectedYO <- numCellsOut - expectedNO
 
   expectedCT <- matrix(c(expectedYI, expectedNI, expectedYO, expectedNO),
-                       ncol = 2L, nrow = 2L, dimnames = dimnames)
+                       ncol = 2L, nrow = 2L, dimnames = dimNames)
 
   return(list("observed" = observedCT, "expected" = expectedCT))
 }

@@ -2,8 +2,8 @@
 library(rlang)
 library(zeallot)
 
+prevOptState <- options(parallelly.fork.enable = TRUE)
 options(COTAN.TorchWarning = NULL)
-options(parallelly.fork.enable = TRUE)
 
 crossEntrVector <- function(zeroOne, probZero) {
   crossEntr <- rep_len(0.0, nrow(zeroOne))
@@ -21,6 +21,7 @@ crossEntrVector <- function(zeroOne, probZero) {
   return(crossEntr)
 }
 
+# nolint start: spaces_inside_linter
 coexPoint <- function(o, e, n) {
   num <- ( ((o[[1L]] - e[[1L]]) / max(1.0, e[[1L]])) -
            ((o[[2L]] - e[[2L]]) / max(1.0, e[[2L]])) -
@@ -32,6 +33,7 @@ coexPoint <- function(o, e, n) {
                     (1.0 / max(1.0, e[[4L]])) ))
   return(num / den)
 }
+# nolint end
 
 coexMatrix <- function(obs, exp, n, s) {
   coex <- matrix(NA, s, s)
@@ -61,6 +63,7 @@ test_that("Calculations on genes", {
   mu <- getMu(obj)
 
   expect_identical(dim(mu), dim(getRawData(obj)))
+# nolint start: spaces_inside_linter
   expect_equal(mu[ 1L,  1L], lambda[[ 1L]] * getNu(obj)[[ 1L]],
                ignore_attr = TRUE)
   expect_equal(mu[10L,  1L], lambda[[10L]] * getNu(obj)[[ 1L]],
@@ -69,6 +72,7 @@ test_that("Calculations on genes", {
                ignore_attr = TRUE)
   expect_equal(mu[10L, 10L], lambda[[10L]] * getNu(obj)[[10L]],
                ignore_attr = TRUE)
+  # nolint end
 
   c(observedYY, observedY) %<-%
     observedContingencyTablesYY(obj, actOnCells = FALSE, asDspMatrices = FALSE)
@@ -361,6 +365,7 @@ test_that("Coex", {
   expect_true(all((pVS / (pVG * 50.0)) < 1.1))
   expect_true(all(((pVG * 50.0) / pVS) < 2.5))
 
+  # nolint start: object_name_linter
   GDI_S <- calculateGDI(obj, statType = "S")
   GDI_G <- calculateGDI(obj, statType = "G")
 
@@ -380,6 +385,7 @@ test_that("Coex", {
 
   expect_equal(GDI_S[["GDI"]], GDI_S_2, ignore_attr = TRUE)
   expect_identical(GDI_S_2, GDI_S_3)
+  # nolint end
 })
 
 
@@ -418,27 +424,27 @@ test_that("Coex vs saved results", {
 
   expect_identical(obj2, obj)
 
-  genes.names.test <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
+  genesNamesTest <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
 
-  coex_test <- readRDS(file.path(getwd(), "coex.test.RDS"))
+  coexTest <- readRDS(file.path(getwd(), "coex.test.RDS"))
 
   expect_true(isCoexAvailable(obj))
-  expect_equal(getGenesCoex(obj, genes = genes.names.test,
+  expect_equal(getGenesCoex(obj, genes = genesNamesTest,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = tolerance)
+               coexTest, tolerance = tolerance)
 
   pval <- calculatePValue(obj,
-                          geneSubsetCol = genes.names.test,
-                          geneSubsetRow = genes.names.test)
+                          geneSubsetCol = genesNamesTest,
+                          geneSubsetRow = genesNamesTest)
 
-  pval_exp <- readRDS(file.path(getwd(), "pvalues.test.RDS"))
-  expect_equal(pval, pval_exp, tolerance = tolerance)
+  pValExp <- readRDS(file.path(getwd(), "pvalues.test.RDS"))
+  expect_equal(pval, pValExp, tolerance = tolerance)
 
-  GDI <- calculateGDI(obj)[genes.names.test, ]
+  GDI <- calculateGDI(obj)[genesNamesTest, ]
 
-  GDI_exp <- readRDS(file.path(getwd(), "GDI.test.RDS"))
+  gdiExp <- readRDS(file.path(getwd(), "GDI.test.RDS"))
 
-  expect_equal(GDI, GDI_exp, tolerance = tolerance)
+  expect_equal(GDI, gdiExp, tolerance = tolerance)
 
   # Torch CPU
   suppressWarnings({
@@ -455,17 +461,17 @@ test_that("Coex vs saved results", {
   expect_equal(obj3@genesCoex, obj@genesCoex, tolerance = tolerance)
 
   expect_true(isCoexAvailable(obj3))
-  expect_equal(getGenesCoex(obj3, genes = genes.names.test,
+  expect_equal(getGenesCoex(obj3, genes = genesNamesTest,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = tolerance)
+               coexTest, tolerance = tolerance)
 
-  pval <- calculatePValue(obj3, geneSubsetCol = genes.names.test)
+  pval <- calculatePValue(obj3, geneSubsetCol = genesNamesTest)
 
-  expect_equal(pval[genes.names.test, ], pval_exp, tolerance = tolerance)
+  expect_equal(pval[genesNamesTest, ], pValExp, tolerance = tolerance)
 
-  GDI <- calculateGDI(obj3)[genes.names.test, ]
+  GDI <- calculateGDI(obj3)[genesNamesTest, ]
 
-  expect_equal(GDI, GDI_exp, tolerance = tolerance)
+  expect_equal(GDI, gdiExp, tolerance = tolerance)
 
   # Legacy CPU
   suppressWarnings({
@@ -482,19 +488,19 @@ test_that("Coex vs saved results", {
   expect_equal(obj4@genesCoex, obj@genesCoex, tolerance = tolerance)
 
   expect_true(isCoexAvailable(obj4))
-  expect_equal(getGenesCoex(obj4, genes = genes.names.test,
+  expect_equal(getGenesCoex(obj4, genes = genesNamesTest,
                             zeroDiagonal = FALSE),
-               coex_test, tolerance = tolerance)
+               coexTest, tolerance = tolerance)
 
   pval <- calculatePValue(obj4,
-                          geneSubsetCol = genes.names.test,
-                          geneSubsetRow = genes.names.test)
+                          geneSubsetCol = genesNamesTest,
+                          geneSubsetRow = genesNamesTest)
 
-  expect_equal(pval, pval_exp, tolerance = tolerance)
+  expect_equal(pval, pValExp, tolerance = tolerance)
 
-  GDI <- calculateGDI(obj4)[genes.names.test, ]
+  GDI <- calculateGDI(obj4)[genesNamesTest, ]
 
-  expect_equal(GDI, GDI_exp, tolerance = tolerance)
+  expect_equal(GDI, gdiExp, tolerance = tolerance)
 })
 
 
@@ -506,8 +512,8 @@ test_that("Coex with negative dispersion genes", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  cells.names.test <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
-  cellsToDrop <- getCells(obj)[!getCells(obj) %in% cells.names.test]
+  cellsNamesTest <- readRDS(file.path(getwd(), "cells.names.test.RDS"))
+  cellsToDrop <- getCells(obj)[!getCells(obj) %in% cellsNamesTest]
   obj <- dropGenesCells(obj, cells = cellsToDrop)
 
   obj <- proceedToCoex(obj, cores = 6L, calcCoex = FALSE, saveObj = FALSE)
@@ -554,3 +560,5 @@ test_that("Coex with negative dispersion genes", {
   expect_true(all(hmDF[["pValue"]] > 0.05))
   expect_true(all(hmDF[["coex"]] == 0.0))
 })
+
+options(prevOptState)

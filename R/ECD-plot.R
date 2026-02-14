@@ -43,13 +43,16 @@ ECDPlot <- function(objCOTAN, yCut = NaN,
 
   sizes <- setColumnInDF(sizes, conditions[rownames(sizes)], colName = "sample")
 
-  plot <- ggplot(sizes, aes(x = log(n), y = log(libSize),
-                            fill = sample, colour = sample)) +
+  ecdPlot <-
+    ggplot(
+      sizes,
+      aes(x = log(n), y = log(libSize), fill = sample, colour = sample)
+    ) +
     geom_point()
 
   if (!is.nan(yCut)) {
-    plot <- plot +
+    ecdPlot <- ecdPlot +
       geom_hline(yintercept = log(yCut), linetype = "dashed", color = "red")
   }
-  return(plot)
+  return(ecdPlot)
 }

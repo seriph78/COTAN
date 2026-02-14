@@ -144,40 +144,36 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
 
     rm(toClust)
 
-    D <- data.frame(
-      means = rowMeans(B),
-      stringsAsFactors = FALSE
-    )
-    geneNames <- rownames(B)
-    rownames(D) <- geneNames
+    bDf <- data.frame(means = rowMeans(B))
+    rownames(bDf) <- rownames(B)
 
     rm(B)
     gc()
 
     ## keep only strctly positive means (so log10 is well-defined)
-    D <- D[D[["means"]] > .Machine$double.eps, , drop = FALSE]
+    bDf <- bDf[bDf[["means"]] > .Machine$double.eps, , drop = FALSE]
 
     ## sort by mean decreasing
-    D <- D[order(D[["means"]], decreasing = TRUE), , drop = FALSE]
+    bDf <- bDf[order(bDf[["means"]], decreasing = TRUE), , drop = FALSE]
 
     ## add rank/index
-    D[["n"]] <- seq_len(nrow(D))
+    bDf[["n"]] <- seq_len(nrow(bDf))
 
 
     #check if the PCA plot is clean enough and from the printed genes,
     #if the smallest group of cells are characterized by particular genes
 
-    cellsRDM_A <- filter(cellsRDM, .data$groups == "A")
-    cellsRDM_B <- filter(cellsRDM, .data$groups != "A")
+    cellsRDMa <- filter(cellsRDM, .data$groups == "A")
+    cellsRDMb <- filter(cellsRDM, .data$groups != "A")
 
     cellsRDMPlot <-
       ggplot(
-        cellsRDM_A,
+        cellsRDMa,
         aes(x = .data$PC1, y = .data$PC2, colour = .data$groups)
       ) +
       geom_point(alpha = 0.5, size = 1.0) +
       geom_point(
-        data = cellsRDM_B,
+        data = cellsRDMb,
         aes(x = .data$PC1, y = .data$PC2, colour = .data$groups),
         alpha = 0.8,
         size = 1.5
@@ -188,13 +184,13 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
       ) +
       plotTheme("pca")
 
-    nLabel <- min(20L, nrow(D))
-    labelDf <- D[seq_len(nLabel), , drop = FALSE]
+    nLabel <- min(20L, nrow(bDf))
+    labelDf <- bDf[seq_len(nLabel), , drop = FALSE]
     labelDf[["geneName"]] <- rownames(labelDf)
 
     genesPlot <-
       ggplot(
-        D,
+        bDf,
         aes(x = .data$n, y = .data$means)
       ) +
       geom_point() +
@@ -204,7 +200,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
       geom_label_repel(
         data = labelDf,
         aes(label = .data$geneName),
-        min.segment.length = 0,
+        min.segment.length = 0.0,
         box.padding = 0.35,
         point.padding = 0.2,
         max.overlaps = Inf
@@ -213,7 +209,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
       plotTheme("genes")
 
     nuEst <- round(getNu(objCOTAN), digits = 7L)
-    UDEPlot <-
+    udePlot <-
       ggplot(
         cellsRDM,
         aes(x = .data$PC1, y = .data$PC2, colour = log(nuEst))
@@ -232,7 +228,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
     cellsRDMPlot <- NULL
     cellsRDM <- NULL
     genesPlot <- NULL
-    UDEPlot <- NULL
+    udePlot <- NULL
   }
 
   nuDf <- data.frame("nu" = sort(getNu(objCOTAN)),
@@ -290,7 +286,7 @@ cleanPlots <- function(objCOTAN, includePCA = TRUE) {
   logThis("Clean plots: DONE", logLevel = 2L)
 
   return(list("pcaCells" = cellsRDMPlot, "pcaCellsData" = cellsRDM,
-              "genes" = genesPlot, "UDE" = UDEPlot,
+              "genes" = genesPlot, "UDE" = udePlot,
               "nu" = nuPlot, "zoomedNu" = zNuPlot))
 }
 
@@ -338,4 +334,3 @@ screePlot <- function(pcaStdDev) {
   ) +
   plotTheme("pca")
 }
-

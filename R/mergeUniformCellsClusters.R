@@ -112,10 +112,16 @@
 #' ##
 #'
 #' checker <- new("AdvancedGDIUniformityCheck")
-#' stopifnot(identical(checker@firstCheck@GDIThreshold, 1.297))
+#' stopifnot(identical(
+#'   checker |> methods::slot("firstCheck") |> methods::slot("GDIThreshold")
+#'   1.297
+#' ))
 #'
 #' checker2 <- shiftCheckerThresholds(checker, 0.1)
-#' stopifnot(identical(checker2@firstCheck@GDIThreshold, 1.397))
+#' stopifnot(identical(
+#'   checker2 |> methods::slot("firstCheck") |> methods::slot("GDIThreshold")
+#'   1.397
+#' ))
 #'
 #' splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
 #'                                     dataMethod = "LogLikelihood",
@@ -194,9 +200,13 @@ mergeUniformCellsClusters <- function(objCOTAN,
 
   # returns underlying names given merged name
   fromMergedName <- function(mergedClName, currentClNames) {
-    partialMatch <- vapply(currentClNames, function(clName, mergedName) {
-      return(str_detect(mergedName, clName))
-    }, FUN.VALUE = logical(1L), mergedClName)
+    partialMatch <-
+      vapply(
+        currentClNames,
+        \(clName, mergedName) str_detect(mergedName, clName),
+        FUN.VALUE = logical(1L),
+        mergedClName
+      )
 
     c(clName1, clName2) %<-% c("", "")
     if (sum(partialMatch) == 2L) {
@@ -220,14 +230,20 @@ mergeUniformCellsClusters <- function(objCOTAN,
   # select all clusters pairings to be checked for this batch
   selectPairsList <- function(pList, batchSize, checker, allCheckResults) {
     # drop the already tested pairs
-    pNamesList <- lapply(pList, function(p) toMergedName(p[[1L]], p[[2L]]))
+    pNamesList <- lapply(pList, \(p) toMergedName(p[[1L]], p[[2L]]))
 
     untestedPairs <-
-      vapply(pNamesList, function(pName, check, allRes) {
-        # we exploit the convention that
-        # a non-available result is marked by a zero clusterSize
-        updateChecker(pName, check, allRes)@clusterSize == 0L
-      }, FUN.VALUE = logical(1L), checker, allCheckResults)
+      vapply(
+        pNamesList,
+        \(pName, check, allRes) {
+          # we exploit the convention that
+          # a non-available result is marked by a zero clusterSize
+          updateChecker(pName, check, allRes)@clusterSize == 0L
+        },
+        FUN.VALUE = logical(1L),
+        checker,
+        allCheckResults
+      )
 
     pList <- pList[untestedPairs]
 
@@ -244,14 +260,14 @@ mergeUniformCellsClusters <- function(objCOTAN,
             logLevel = 1L)
 
     if (TRUE) {
-      allNames <- names(allCheckResults)
+      resNames <- names(allCheckResults)
       allCheckResults <-
         lapply(seq_along(allCheckResults),
                function(r, check, allRes) {
                  updateChecker(names(allCheckResults)[[r]], check, allRes)
                }, checker, allCheckResults)
-      names(allCheckResults) <- allNames
-      rm(allNames)
+      names(allCheckResults) <- resNames
+      rm(resNames)
     }
 
     logThis(paste0(length(pList), " new clusters pairs to be tested for",
