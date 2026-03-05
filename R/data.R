@@ -92,6 +92,22 @@ NULL
 "test.dataset.clusters2"
 
 
+#' @details `vignette.cells.origin` is the factor discriminating between the
+#'   *cortical* cells and the *other* cells. This was constructed comparing the
+#'   composition of the two dataset afferring to the following **GEO**:
+#'   Mouse Cortex E17.5, `GEO`: `GSM2861514`
+#'
+#' @format `vignette.cells.origin` is a `factor`
+#'
+#' @docType data
+#'
+#' @usage data(vignette.cells.origin)
+#'
+#' @rdname Datasets
+#'
+"vignette.cells.origin"
+
+
 #' @details `vignette.split.clusters` is the clusterization obtained running
 #'   `cellsUniformClustering()` on the vignette dataset (mouse cortex E17.5,
 #'   `GEO`: `GSM2861514`)

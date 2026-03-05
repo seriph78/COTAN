@@ -1,5 +1,5 @@
 ---
-title: "Guided tutorial to datasets cleaning using COTAN"
+title: "Guided tutorial to genes' clustering using COTAN"
 author: 
 - name: "Silvia Giulia Galfrè"
   affiliation: "Department of Computer Science, University of Pisa"
@@ -11,7 +11,7 @@ output:
   BiocStyle::html_document:
     keep_md: true
 vignette: >
-  %\VignetteIndexEntry{Cleaning tutorial using COTAN}
+  %\VignetteIndexEntry{Genes' clustering using COTAN}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -50,11 +50,11 @@ prevOptState <- options(parallelly.fork.enable = TRUE)
 
 # Introduction
 
-This tutorial shows the available tools in COTAN to help with datasets cleaning
+This tutorial shows the available tools in COTAN to help with genes' clustering
 
 ### Setup
 
-Define a directory where the data and the output will be stored.
+Define a directory where the data and the output will be stored
 
 ```{r Setup and log}
 dataDir <- tempdir()
@@ -68,8 +68,9 @@ setLoggingLevel(2L)
 
 # This file will contain all the logs produced by the package
 # as if at the highest logging level
-setLoggingFile(file.path(outDir, "vignette_dataset_cleaning.log"))
+setLoggingFile(file.path(outDir, "vignette_genes_clustering.log"))
 ```
+
 
 ## Retrieving the data-set
 
@@ -137,6 +138,8 @@ head(vignette.cells.origin, 18)
 obj <- 
   addCondition(obj, condName = "origin", conditions = vignette.cells.origin)
 ```
+
+
 
 # Data cleaning
 
@@ -286,6 +289,32 @@ in the cells of the `B` group
 plot(genesPlot)
 ```
 
+We can observe here that the `B` group cells are really enriched in hemoglobin
+genes so we prefer to remove them.
+They can be extracted from the `pcaCellsData` object and removed.
+
+```{r Cull B group cells and re-calculate, eval=TRUE, include=TRUE}
+cellsToRem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
+obj <- dropGenesCells(obj, cells = cellsToRem)
+
+# Store how many times the B group was dropped
+obj <- addElementToMetaDataset(obj, "Num drop B group", 1L)
+
+obj <- clean(obj)
+
+c(pcaCellsPlot, pcaCellsData, genesPlot,
+  UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
+
+plot(pcaCellsPlot)
+```
+
+Checking which genes are typical of the new `B` group, shows that there is no
+need of further culling
+
+```{r Show most expressed genes of B group (2)}
+plot(genesPlot)
+```
+
 To color the PCA based on `nu` (so the cells' efficiency)
 
 ```{r Cells efficiency PCA plot}
@@ -307,18 +336,6 @@ we can decide to remove the cells.
 plot(zoomedNuPlot)
 ```
 
-We can observe here that the `B` group cells are really enriched in hemoglobin
-genes so we prefer to remove them.
-They can be extracted from the `pcaCellsData` object and removed.
-
-```{r Cull B group cells and re-calculate, eval=TRUE, include=TRUE}
-cellsToRem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
-obj <- dropGenesCells(obj, cells = cellsToRem)
-
-# Store how many times the B group was dropped
-obj <- addElementToMetaDataset(obj, "Num drop B group", 1L)
-```
-
 We also save the defined threshold in the metadata and re-run the estimation
 
 ```{r Cull cells with too low efficiency}
@@ -334,8 +351,6 @@ obj <- dropGenesCells(obj, cells = cellsToRem)
 ### Check all good
 
 We repeat all the plots now that the *low quality* cells are removed
-In many practical cases the last few steps are repeated multiple times until 
-deemed appropriate
 
 ```{r Raw plots}
 plot(ECDPlot(obj, condName = "origin"))
@@ -352,8 +367,7 @@ c(mitPlot, mitSizes) %<-%
 plot(mitPlot)
 ```
 
-Then we rerun also the cleaning and associated plots and
-notice that all is essentially fine
+Then we repeat also the cleaning and associated plots
 
 ```{r Re-calculate clean-plots}
 obj <- clean(obj)
@@ -372,7 +386,7 @@ plot(UDEPlot)
 plot(nuPlot)
 plot(zoomedNuPlot)
 
-# It is also possible to directly plot the PCA results
+# It si also possible to directly plot the PCA results
 plot(pcaCellsData)
 ```
 
@@ -406,7 +420,7 @@ if (dir.exists(file.path(outDir, cond))) {
 
 # stop logging to file
 setLoggingFile("")
-file.remove(file.path(outDir, "vignette_dataset_cleaning.log"))
+file.remove(file.path(outDir, "vignette_v2.log"))
 
 options(prevOptState)
 ```
