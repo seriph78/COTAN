@@ -7,8 +7,9 @@ author:
   affiliation: "University of Parma"
 
 package: COTAN
-output: 
-    BiocStyle::html_document
+output:
+  BiocStyle::html_document:
+    keep_md: true
 vignette: >
   %\VignetteIndexEntry{Cleaning tutorial using COTAN}
   %\VignetteEngine{knitr::rmarkdown}
@@ -130,7 +131,7 @@ logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
 
 Assign to each cell its origin
 
-```{R}
+```{r Add origing to the COTAn object as a condition}
 obj <- addCondition(obj, condName = "origin", conditions = cellOrigin)
 ```
 
@@ -194,7 +195,7 @@ plot(cellSizePlot(obj, condName = "origin"))
 
 To drop cells by gene number: high genes count might also indicate doublets...
 
-```{r Cull probable doublets or multiplets - 2}
+```{r Cull probable doublets or multiplets (2)}
 # Store the used threshold in the COTAN object for later reference
 genesSizeHighThr <- 3000L
 obj <-
@@ -230,7 +231,7 @@ c(mitPlot, mitSizes) %<-%
 plot(mitPlot)
 ```
 
-```{r Cull probable dead cells - 2}
+```{r Cull probable dead cells (2)}
 # Store the used threshold in the COTAN object for later reference
 mitPercThr <- 3.5
 obj <- addElementToMetaDataset(obj, "Mitoc. perc. threshold", mitPercThr)
@@ -248,7 +249,7 @@ As last plot we can check the scatter plot between the library size and
 the number of detected genes: cells far away from the main group are usually
 problematic
 
-```{r Scatter plot: Cells size vs Number of detected genes - II}
+```{r Scatter plot: Cells size vs Number of detected genes (2)}
 plot(scatterPlot(obj, condName = "origin"))
 ```
 
@@ -304,7 +305,7 @@ plot(pcaCellsPlot)
 Checking which genes are typica of the new `B` group, shows that there is no
 need of further culling
 
-```{r Show most expressed genes of B group - II}
+```{r Show most expressed genes of B group (2)}
 plot(genesPlot)
 ```
 
@@ -369,7 +370,7 @@ c(pcaCellsPlot, pcaCellsData, genesPlot,
   UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
 ```
 
-```{r}
+```{r Show the clean plots}
 plot(pcaCellsPlot)
 
 plot(genesPlot)
@@ -391,52 +392,6 @@ logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
 table(getCondition(obj, condName = "origin"))
 ```
 
-
-## COTAN analysis
-
-In this part, all the contingency tables are computed
-and used to get the statistics necessary to `COEX` evaluation and storing
-
-```{r Calculate and store COEX matrix}
-obj <-
-  proceedToCoex(
-    obj,
-    calcCoex = TRUE,
-    optimizeForSpeed = TRUE,
-    cores = 6L,
-    deviceStr = "cuda",
-    saveObj = FALSE,
-    outDir = outDir
-  )
-```
-
-When `saveObj == TRUE`, in the previous step, this step can be skipped
-as the `COTAN` object has already been saved in the `outDir`.
-
-```{r Save COTAN obj to file, eval=FALSE, include=TRUE}
-# saving the structure
-saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
-```
-
-## Automatic run
-
-It is also possible to run directly a single function
-if we don't want to clean anything.
-
-```{r COTAN object construction for no cleaning case, eval=FALSE, include=TRUE}
-obj2 <-
-  automaticCOTANObjectCreation(
-    raw = sampleDataset,
-    GEO = GEO,
-    sequencingMethod = "Drop_seq",
-    sampleCondition = cond,
-    calcCoex = TRUE,
-    cores = 6L,
-    optimizeForSpeed = TRUE,
-    saveObj = TRUE,
-    outDir = outDir
-  )
-```
 ## Vignette clean-up stage
 
 The next few lines are just to clean.

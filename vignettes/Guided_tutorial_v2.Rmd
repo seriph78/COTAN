@@ -5,12 +5,13 @@ author:
   affiliation: "Department of Computer Science, University of Pisa"
 
 package: COTAN
-output: 
-    BiocStyle::html_document
+output:
+  BiocStyle::html_document:
+    keep_md: true
 vignette: >
   %\VignetteIndexEntry{Guided tutorial to COTAN V.2}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8} 
+  %\VignetteEncoding{UTF-8}
 ---
 
 ## Preamble
