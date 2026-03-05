@@ -140,8 +140,87 @@ obj <-
 ```
 
 
+### Drop low quality cells
 
-# Data cleaning
+```{r Drop low quality cells}
+data(vignette.split.clusters)
+
+cellsToDrop <-
+  getCells(obj)[!(getCells(obj) %in% names(vignette.split.clusters))]
+
+obj <- dropGenesCells(obj, cells = cellsToDrop)
+
+# Log the remaining number of cells
+
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
+
+table(getCondition(obj, condName = "origin"))
+
+rm(vignette.split.clusters)
+```
+
+# Establish genes' clusters
+
+## COTAN analysis
+
+In this part, all the contingency tables are computed
+and used to get the statistics necessary to `COEX` evaluation and storing
+
+```{r Calculate and store COEX matrix}
+obj <-
+  proceedToCoex(
+    obj,
+    calcCoex = TRUE,
+    optimizeForSpeed = TRUE,
+    cores = 6L,
+    deviceStr = "cuda",
+    saveObj = FALSE,
+    outDir = outDir
+  )
+```
+
+When `saveObj == TRUE`, in the previous step, this step can be skipped
+as the `COTAN` object has already been saved in the `outDir`.
+
+```{r Save COTAN obj to file, eval=FALSE, include=TRUE}
+# saving the structure
+saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
+```
+
+## Automatic run
+
+It is also possible to run directly a single function
+if we don't want to clean anything.
+
+```{r COTAN object construction for no cleaning case, eval=FALSE, include=TRUE}
+obj2 <-
+  automaticCOTANObjectCreation(
+    raw = sampleDataset,
+    GEO = GEO,
+    sequencingMethod = "Drop_seq",
+    sampleCondition = cond,
+    calcCoex = TRUE,
+    cores = 6L,
+    optimizeForSpeed = TRUE,
+    saveObj = TRUE,
+    outDir = outDir
+  )
+```
+
+# Analysis of the elaborated data
+
+## `GDI`
+
+To calculate and store the Global Differentiation Index (`GDI`) we can run:
+
+```{r Calculate and store GDI}
+gdiDF <- calculateGDI(obj)
+
+head(gdiDF)
+
+# This will store only the $GDI column
+obj <- storeGDI(obj, genesGDI = gdiDF)
+```
 
 Before proceeding with the analysis, it might be necessary to clean the data.
 
@@ -390,13 +469,6 @@ plot(zoomedNuPlot)
 plot(pcaCellsData)
 ```
 
-Log the remaining number of cells
-
-```{r Log updated dataset status}
-logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
-
-table(getCondition(obj, condName = "origin"))
-```
 
 ## Vignette clean-up stage
 
