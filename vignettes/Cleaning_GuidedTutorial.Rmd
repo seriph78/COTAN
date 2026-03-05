@@ -24,7 +24,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 7L,
   fig.height = 5L,
-  dpi = 200
+  dpi = 100,
+  out.width = "85%"
 )
 
 if (requireNamespace("ragg", quietly = TRUE)) {
@@ -416,9 +417,9 @@ if (file.exists(file.path(outDir, paste0(cond, "_times.csv")))) {
 if (dir.exists(file.path(outDir, cond))) {
   unlink(file.path(outDir, cond), recursive = TRUE)
 }
-if (dir.exists(file.path(outDir, GEO))) {
-  unlink(file.path(outDir, GEO), recursive = TRUE)
-}
+# if (dir.exists(file.path(outDir, GEO))) {
+#   unlink(file.path(outDir, GEO), recursive = TRUE)
+# }
 
 # stop logging to file
 setLoggingFile("")
