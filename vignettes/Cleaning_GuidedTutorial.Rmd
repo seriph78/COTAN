@@ -23,15 +23,16 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 7L,
-  fig.height = 5L
+  fig.height = 5L,
+  dpi = 200
 )
 
-if (requireNamespace("svglite", quietly = TRUE)) {
-  knitr::opts_chunk$set(dev = "svglite")
-} else if (requireNamespace("ragg", quietly = TRUE)) {
-  knitr::opts_chunk$set(dev = "ragg_png", dpi = 200)
+if (requireNamespace("ragg", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "ragg_png")
+} else if (requireNamespace("Cairo", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "cairo_png")
 } else {
-  knitr::opts_chunk$set(dev = "cairo_png", dpi = 200)
+  knitr::opts_chunk$set(dev = "png")
 }
 ```
 
