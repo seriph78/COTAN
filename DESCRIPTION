@@ -70,6 +70,7 @@ Suggests:
     proto,
     spelling,
     knitr,
+    svglite,
     conflicted,
     data.table,
     gsubfn,

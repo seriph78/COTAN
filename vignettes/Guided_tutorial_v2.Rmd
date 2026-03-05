@@ -17,14 +17,20 @@ vignette: >
 ## Preamble
 
 ```{r knitr options, echo = FALSE, include = FALSE}
-knitr::opts_chunk[["set"]](
+knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  dev = "png",
-  fig.width = 6L,
-  fig.height = 4L,
-  dpi = 72L
+  fig.width = 7L,
+  fig.height = 5L
 )
+
+if (requireNamespace("svglite", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "svglite")
+} else if (requireNamespace("ragg", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "ragg_png", dpi = 200)
+} else {
+  knitr::opts_chunk$set(dev = "cairo_png", dpi = 200)
+}
 ```
 
 ```{r Preamble, message=FALSE, warning=FALSE}
