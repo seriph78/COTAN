@@ -1,0 +1,471 @@
+---
+title: "Guided tutorial to datasets cleaning using COTAN"
+author: 
+- name: "Silvia Giulia Galfrè"
+  affiliation: "Department of Computer Science, University of Pisa"
+- name: "Marco Fantozzi"
+  affiliation: "University of Parma"
+
+package: COTAN
+output: 
+    BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Cleaning tutorial using COTAN}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Preamble
+
+```{r knitr options, echo = FALSE, include = FALSE}
+knitr::opts_chunk[["set"]](
+  collapse = TRUE,
+  comment = "#>",
+  dev = "png",
+  fig.width = 6L,
+  fig.height = 4L,
+  dpi = 72L
+)
+```
+
+
+```{r Preamble, message=FALSE, warning=FALSE}
+library(COTAN)
+library(zeallot)
+
+# necessary to solve precedence of overloads
+conflicted::conflict_prefer("%<-%", "zeallot")
+
+# enable multi-processing (not on Windows)
+prevOptState <- options(parallelly.fork.enable = TRUE)
+```
+
+# Introduction
+
+This tutorial shows the available tools in COTAN to help with datasets cleaning
+
+### Setup
+
+Define a directory where the output will be stored.
+
+```{r Setup and log}
+dataDir <- tempdir()
+print(dataDir)
+
+outDir <- dataDir
+
+# Log-level 2 was chosen to showcase better how the package works
+# In normal usage a level of 0 or 1 is more appropriate
+setLoggingLevel(2L)
+
+# This file will contain all the logs produced by the package
+# as if at the highest logging level
+setLoggingFile(file.path(outDir, "vignette_v2.log"))
+```
+
+## Retrieving the data-set
+
+Download the data-set for `"mouse cortex E17.5"` from Yuzwa et al. (2017).
+
+```{r Download data, eval=TRUE, include=TRUE}
+GEO <- "GSM2861514"
+
+dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
+
+allCellsFileName <-
+  file.path(dataDir, GEO, "GSM2861514_E175_All_Cells_DGE.txt.gz")
+corticalCellsFileName <-
+  file.path(dataDir, GEO, "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
+
+if (!file.exists(allCellsFileName) || !file.exists(corticalCellsFileName)) {
+  GEOquery::getGEOSuppFiles(
+    GEO,
+    makeDirectory = TRUE,
+    baseDir = dataDir,
+#   filter_regex = fName,
+    fetch_files = TRUE
+  )
+}
+
+# From source:
+#   Two processed data files are included per age.
+#   One containing all data for all cells and one containing only cells
+#   predicted as cortical in origin.
+
+fullDataset     <- read.csv(allCellsFileName,      sep = "\t", row.names = 1L)
+corticalDataset <- read.csv(corticalCellsFileName, sep = "\t", row.names = 1L)
+
+# mark cells origin
+
+cellOrigin <- rep.int("Other", ncol(fullDataset))
+names(cellOrigin) <- colnames(fullDataset)
+
+cellOrigin[colnames(corticalDataset)] <- "Cortical"
+
+rm(corticalDataset)
+
+head(cellOrigin, 18)
+```
+
+### Create the COTAN object
+
+Initialize the `COTAN` object with the row count table and
+the metadata from the experiment.
+
+```{r Create the COTAN object}
+cond <- "mouse_cortex_E17.5"
+
+obj <- COTAN(raw = fullDataset)
+obj <-
+  initializeMetaDataset(
+    obj,
+    GEO = GEO,
+    sequencingMethod = "Drop_seq",
+    sampleCondition = cond
+  )
+
+logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
+        logLevel = 1L)
+```
+
+Assign to each cell its origin
+
+```{R}
+obj <- addCondition(obj, condName = "origin", conditions = cellOrigin)
+```
+
+# Data cleaning
+
+Before proceeding with the analysis, it might be necessary to clean the data.
+
+The analysis uses a matrix of raw `UMI` counts as the input.
+However the given raw data might not satisfy the needed minimal quality
+requirements: it is better to remove any potential cell doublets or
+multiplets, as well as any low quality or dying cells.
+
+## Plots from the raw counts
+
+We can check the library size (`UMI` number) with an *Empirical Cumulative
+Distribution* function discriminating the cells by their origin
+
+```{r ECD plot}
+plot(ECDPlot(obj, condName = "origin"))
+```
+
+The we can also plot directly the distribution of the library size
+
+```{r Cells size plot}
+plot(cellSizePlot(obj, condName = "origin"))
+```
+
+and we can plot the distribution of the numbef of detected genes in each cell,
+usefull to identify possible doublets
+
+```{r Number of detected genes}
+plot(genesSizePlot(obj, condName = "origin"))
+```
+
+As last plot we can check the scatter plot between the library size and
+the number of detected genes: cells far away from the main group are usually
+problematic
+
+```{r Scatter plot: Cells size vs Number of detected genes}
+plot(scatterPlot(obj, condName = "origin"))
+```
+
+## Dropping problematic cells
+
+During the cleaning, every time we want to remove cells or genes
+we can use the `dropGenesCells()` function.
+
+Drop cells with too many reads as they are probably doublets or multiplets
+and show the updated plot 
+
+```{r Cull probable doublets or multiplets}
+# Store the used threshold in the COTAN object for later reference
+cellsSizeThr <- 6000L
+obj <- addElementToMetaDataset(obj, "Cells size threshold", cellsSizeThr)
+
+cellsToRem <- getCells(obj)[getCellsSize(obj) > cellsSizeThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
+
+plot(cellSizePlot(obj, condName = "origin"))
+```
+
+To drop cells by gene number: high genes count might also indicate doublets...
+
+```{r Cull probable doublets or multiplets - 2}
+# Store the used threshold in the COTAN object for later reference
+genesSizeHighThr <- 3000L
+obj <-
+  addElementToMetaDataset(obj, "Num genes high threshold", genesSizeHighThr)
+
+cellsToRem <- getCells(obj)[getNumExpressedGenes(obj) > genesSizeHighThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
+
+plot(genesSizePlot(obj, condName = "origin"))
+```
+
+Drop cells with too low genes expression as they are probably dead
+
+```{r Cull probable dead cells}
+# Store the used threshold in the COTAN object for later reference
+genesSizeLowThr <- 500L
+obj <- addElementToMetaDataset(obj, "Num genes low threshold", genesSizeLowThr)
+
+cellsToRem <- getCells(obj)[getNumExpressedGenes(obj) < genesSizeLowThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
+
+plot(genesSizePlot(obj, condName = "origin"))
+```
+
+
+Cells with a too high percentage of mitochondrial genes are
+likely dead (or at the last problematic) cells. So we drop them!
+
+```{r Calculate percentage of mitochondrial genes}
+c(mitPlot, mitSizes) %<-%
+  mitochondrialPercentagePlot(obj, genePrefix = "^mt-", condName = "origin")
+
+plot(mitPlot)
+```
+
+```{r Cull probable dead cells - 2}
+# Store the used threshold in the COTAN object for later reference
+mitPercThr <- 3.5
+obj <- addElementToMetaDataset(obj, "Mitoc. perc. threshold", mitPercThr)
+
+cellsToRem <- rownames(mitSizes)[mitSizes[["mit.percentage"]] > mitPercThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
+
+c(mitPlot, mitSizes) %<-%
+  mitochondrialPercentagePlot(obj, genePrefix = "^mt-", condName = "origin")
+
+plot(mitPlot)
+```
+
+As last plot we can check the scatter plot between the library size and
+the number of detected genes: cells far away from the main group are usually
+problematic
+
+```{r Scatter plot: Cells size vs Number of detected genes - II}
+plot(scatterPlot(obj, condName = "origin"))
+```
+
+We want also to log the current status.
+
+```{r Log current dataset status}
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
+```
+
+The `clean()` function estimates the `nu` parameters from the data and drops genes/cells that do not satisfy the minimal expression thresholds.
+Therefore, it need to be run again every time any genes or cells are dropped
+from the data.
+
+```{r Calculate B group for spurious cells according to PCA}
+obj <- addElementToMetaDataset(obj, "Num drop B group", 0L)
+
+obj <- clean(obj)
+
+c(pcaCellsPlot, pcaCellsData, genesPlot,
+  UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
+
+plot(pcaCellsPlot)
+```
+
+The above plot shows a sub-group of cells `B` that is samewhat distinct from
+the other cells
+With the plot below it is possible to see the most expressed genes
+in the cells of the `B` group
+
+```{r Show most expressed genes of B group}
+plot(genesPlot)
+```
+
+We can observe here that the `B` group cells are really enriched in hemoglobin
+genes so we prefer to remove them.
+They can be extracted from the `pcaCellsData` object and removed.
+
+```{r Cull B group cells and re-calculate, eval=TRUE, include=TRUE}
+cellsToRem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
+obj <- dropGenesCells(obj, cells = cellsToRem)
+
+# Store how many times the B group was dropped
+obj <- addElementToMetaDataset(obj, "Num drop B group", 1L)
+
+obj <- clean(obj)
+
+c(pcaCellsPlot, pcaCellsData, genesPlot,
+  UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
+
+plot(pcaCellsPlot)
+```
+
+Checking which genes are typica of the new `B` group, shows that there is no
+need of further culling
+
+```{r Show most expressed genes of B group}
+plot(genesPlot)
+```
+
+To color the PCA based on `nu` (so the cells' efficiency)
+
+```{r Cells efficiency PCA plot}
+plot(UDEPlot)
+```
+
+`UDE` (color) should not correlate with principal components! This is very important.
+
+The next part is used to remove the cells with efficiency too low.
+
+```{r Cells efficiency plot}
+plot(nuPlot)
+```
+
+We can zoom on the smallest values and, if COTAN detects a clear elbow,
+we can decide to remove the cells.
+
+```{r Cells efficiency plot (low tail)}
+plot(zoomedNuPlot)
+```
+
+We also save the defined threshold in the metadata and re-run the estimation
+
+```{r Cull cells with too low efficiency}
+udeLowThr <- 0.34
+obj <- addElementToMetaDataset(obj, "Low UDE cells' threshold", udeLowThr)
+
+obj <- estimateNuLinear(obj)
+
+cellsToRem <- getCells(obj)[getNu(obj) < udeLowThr]
+obj <- dropGenesCells(obj, cells = cellsToRem)
+```
+
+### Check all good
+
+We repeat all the plots now that the *low quality* cells are removed
+
+```{r Raw plots}
+plot(ECDPlot(obj, condName = "origin"))
+
+plot(cellSizePlot(obj, condName = "origin"))
+
+plot(genesSizePlot(obj, condName = "origin"))
+
+plot(scatterPlot(obj, condName = "origin"))
+
+c(mitPlot, mitSizes) %<-%
+  mitochondrialPercentagePlot(obj, genePrefix = "^mt-", condName = "origin")
+
+plot(mitPlot)
+```
+
+Then we repeat also the cleaning and associated plots
+
+```{r Re-calculate clean-plots}
+obj <- clean(obj)
+
+c(pcaCellsPlot, pcaCellsData, genesPlot,
+  UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
+```
+
+```{r}
+plot(pcaCellsPlot)
+
+plot(genesPlot)
+
+plot(UDEPlot)
+
+plot(nuPlot)
+plot(zoomedNuPlot)
+
+# It si also possible to directly plot the PCA results
+plot(pcaCellsData)
+```
+
+Log the remaining number of cells
+
+```{r Log updated dataset status}
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
+
+table(getCondition(obj, condName = "origin"))
+```
+
+
+## COTAN analysis
+
+In this part, all the contingency tables are computed
+and used to get the statistics necessary to `COEX` evaluation and storing
+
+```{r Calculate and store COEX matrix}
+obj <-
+  proceedToCoex(
+    obj,
+    calcCoex = TRUE,
+    optimizeForSpeed = TRUE,
+    cores = 6L,
+    deviceStr = "cuda",
+    saveObj = FALSE,
+    outDir = outDir
+  )
+```
+
+When `saveObj == TRUE`, in the previous step, this step can be skipped
+as the `COTAN` object has already been saved in the `outDir`.
+
+```{r Save COTAN obj to file, eval=FALSE, include=TRUE}
+# saving the structure
+saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
+```
+
+## Automatic run
+
+It is also possible to run directly a single function
+if we don't want to clean anything.
+
+```{r COTAN object construction for no cleaning case, eval=FALSE, include=TRUE}
+obj2 <-
+  automaticCOTANObjectCreation(
+    raw = sampleDataset,
+    GEO = GEO,
+    sequencingMethod = "Drop_seq",
+    sampleCondition = cond,
+    calcCoex = TRUE,
+    cores = 6L,
+    optimizeForSpeed = TRUE,
+    saveObj = TRUE,
+    outDir = outDir
+  )
+```
+## Vignette clean-up stage
+
+The next few lines are just to clean.
+
+```{r Clean-up}
+if (file.exists(file.path(outDir, paste0(cond, ".cotan.RDS")))) {
+  # delete file if it exists
+  file.remove(file.path(outDir, paste0(cond, ".cotan.RDS")))
+}
+if (file.exists(file.path(outDir, paste0(cond, "_times.csv")))) {
+  # delete file if it exists
+  file.remove(file.path(outDir, paste0(cond, "_times.csv")))
+}
+if (dir.exists(file.path(outDir, cond))) {
+  unlink(file.path(outDir, cond), recursive = TRUE)
+}
+if (dir.exists(file.path(outDir, GEO))) {
+  unlink(file.path(outDir, GEO), recursive = TRUE)
+}
+
+# stop logging to file
+setLoggingFile("")
+file.remove(file.path(outDir, "vignette_v2.log"))
+
+options(prevOptState)
+```
+
+```{r Closing}
+Sys.time()
+
+sessionInfo()
+```
