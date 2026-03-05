@@ -304,7 +304,7 @@ plot(pcaCellsPlot)
 Checking which genes are typica of the new `B` group, shows that there is no
 need of further culling
 
-```{r Show most expressed genes of B group}
+```{r Show most expressed genes of B group - II}
 plot(genesPlot)
 ```
 
