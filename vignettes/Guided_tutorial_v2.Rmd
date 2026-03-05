@@ -22,8 +22,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 7L,
   fig.height = 5L,
-  dpi = 100,
-  out.width = "85%"
+  dpi = 100
 )
 
 if (requireNamespace("ragg", quietly = TRUE)) {
