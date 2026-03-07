@@ -96,11 +96,6 @@ if (!file.exists(datasetFileName)) {
   )
 }
 
-# From source:
-#   Two processed data files are included per age.
-#   One containing all data for all cells and one containing only cells
-#   predicted as cortical in origin.
-
 rawDataset <- read.csv(datasetFileName, sep = "\t", row.names = 1L)
 
 print(dim(rawDataset))
@@ -151,6 +146,9 @@ multiplets, as well as any low quality or dying cells.
 
 We can check the library size (`UMI` number) with an *Empirical Cumulative
 Distribution* function discriminating the cells by their origin
+
+Please note that in the following plots it is **not** necessary
+to specify a *condition*
 
 ```{r ECD plot}
 plot(ECDPlot(obj, condName = "origin"))
