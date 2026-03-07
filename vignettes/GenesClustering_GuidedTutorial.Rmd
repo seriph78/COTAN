@@ -210,7 +210,7 @@ To calculate and store the *Global Differentiation Index* (`GDI`)
 use the following:
 
 ```{r Calculate and store GDI}
-gdiDF <- calculateGDI(obj)
+gdiDF <- calculateGDI(obj, cores = 3L)
 
 # Show the most *differentially expressed* genes
 perm <- order(gdiDF[["GDI"]], decreasing = TRUE)
@@ -220,6 +220,42 @@ head(gdiDF[perm, ], n = 10)
 obj <- storeGDI(obj, genesGDI = gdiDF)
 ```
 
+The other two columns return the sum of the normalized data rows
+and the percentage of cells expressing the gene respectively.
+
+### Define genes lists
+
+```{r}
+genesLists <- list(
+  # Neural Progenitor Genes
+  "NPGs" = c("Nes", "Vim", "Sox2", "Sox1", "Notch1", "Hes1", "Hes5", "Pax6"),
+  # Pan Neural Genes
+  "PNGs" = c("Map2", "Tubb3", "Neurod1", "Nefm", "Nefl", "Dcx", "Tbr1"),
+  # House Keeping
+  "hk"   = c("Calm1", "Cox6b1", "Ppia", "Rpl18", "Cox7c", "Erh", "H3f3a",
+             "Taf1", "Taf2", "Gapdh", "Actb", "Golph3", "Zfr", "Sub1",
+             "Tars", "Amacr")
+)
+```
+
+### GDI Plot
+
+The next function can either plot the `GDI` from the dataset directly or
+use the already stored data.
+
+It marks the given threshold 1.40 (in red) and
+the 50% and 75% quantiles (in blue).
+We can also specify some gene sets (three in this case) that
+we want to label explicitly in the `GDI` plot.
+
+```{r GDI plot with marked genes}
+GDIPlot(obj, genes = genesLists, GDIThreshold = 1.40)
+```
+
+In the picture above it is possible to see how, as expected,
+the house-keeping genes (`hk`) have generally a low `GDI` value.
+
+
 ### Store the calibrated object for future analysis
 
 ```{r Save COTAN obj to file, eval=FALSE}
@@ -228,6 +264,95 @@ saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
 ```
 
 
+## Heatmaps
+
+To perform the Gene Pair Analysis, we can plot a heatmap of the `COEX` values
+between two gene sets.
+
+We have to define the different gene sets (`list.genes`) in a list.
+The first set will be used to define the columns;
+then we can choose which sets to use in the function parameter sets
+(for example, from 1 to 3).
+
+```{r Heatmap plot of coex for selected genes}
+plot(heatmapPlot(obj, genesLists = genesLists, sets = 1L:3L))
+```
+
+
+```{r Define layers specific genes}
+layersGenes <- list(
+  "L1"   = c("Reln",   "Lhx5"),
+  "L2/3" = c("Cux1",   "Satb2"),
+  "L4"   = c("Rorb",   "Sox5"),
+  "L5/6" = c("Bcl11b", "Fezf2"),
+  "Prog" = c("Hes1",    "Vim", "Dummy")
+)
+```
+
+We can also plot a general heatmap of `COEX` values based on some markers like
+the following one.
+
+```{r Heatmap plot of coex given primary marker genes}
+# take the first marker per layer
+layersMarkers <- lapply(layersGenes, \(gl){gl[[1L]]})
+invisible(
+  genesHeatmapPlot(
+    obj,
+    primaryMarkers = layersMarkers,
+    pValueThreshold = 0.0001,
+    symmetric = TRUE,
+  )
+)
+```
+
+```{r Heatmap plot of coex given two genes sets, eval=FALSE, include=TRUE}
+invisible(
+  genesHeatmapPlot(
+    obj,
+    primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
+    secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
+    pValueThreshold = 0.001,
+    symmetric = FALSE
+  )
+)
+```
+
+## Establishing genes' clusters
+
+`COTAN` provides a way to establish genes' clusters given some lists of markers
+
+```{r Establish genes clusters}
+c(gSpace, eigPlot, pcaGenesClDF, treePlot) %<-%
+  establishGenesClusters(
+    obj,
+    groupMarkers = layersGenes,
+    numGenesPerMarker = 25L,
+    kCuts = 5L
+  )
+
+plot(eigPlot)
+```
+
+```{r Genes tree plot, eval=TRUE, include=TRUE}
+plot(treePlot)
+```
+
+### UMAP plot
+
+```{r Genes UMAP plot, eval=TRUE, include=TRUE}
+colSelection <- vapply(pcaGenesClDF, is.numeric, logical(1L))
+genesUmapPl <-
+  UMAPPlot(
+    pcaGenesClDF[, colSelection, drop = FALSE],
+    clusters = getColumnFromDF(pcaGenesClDF, "hclust"),
+    elements = layersGenes,
+    title = "Genes' clusters UMAP Plot",
+    numNeighbors = 32L,
+    minPointsDist = 0.25
+  )
+
+plot(genesUmapPl)
+```
 
 
 ## Vignette clean-up stage

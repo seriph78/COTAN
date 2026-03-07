@@ -747,7 +747,7 @@ table(mergedClusters2)
 
 In the case one already has existing *clusterizations*, it is possible to
 calculate their *DEA* `data.frame` and add them to the `COTAN` object.
-```{r Calculate and store DEA using clusterizations, eval=TRUE, include=TRUE}
+```{r Calculate and store DEA using clusterizations, eval=FALSE, include=TRUE}
 data("vignette.merge.clusters", package = "COTAN")
 mergedClusters <- vignette.merge.clusters[getCells(obj)]
 
@@ -783,7 +783,7 @@ table(mergedClusters2, mergedClusters)
 Here is possible to visualize how the `split` clusters are merged in to 
 `merge` and `merge2`
 
-```{r  Clusterizations data visualization, eval=TRUE, include=TRUE}
+```{r  Clusterizations data visualization, eval=FALSE, include=TRUE}
 c(mergeHeatmap, mergeScoresDF, mergePValuesDF) %<-%
   clustersMarkersHeatmapPlot(
     obj,
@@ -811,7 +811,7 @@ very well to the expression of the layers' genes defined above...
 
 It is possible to plot the *clusterization* on a `UMAP` plot
 
-```{r Clusterization UMAP plot using Dimensionality Reduction}
+```{r Clusterization UMAP plot using Dimensionality Reduction, eval=FALSE}
 c(umapPlot, cellsRDM) %<-%
   cellsUMAPPlot(
     obj,
