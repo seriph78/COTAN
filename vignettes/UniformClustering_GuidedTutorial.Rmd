@@ -204,7 +204,10 @@ c(splitClusters, splitCoexDF) %<-%
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",
     cores = 6L,
-    genesSel = "HGDI",
+    useCoexEigen = TRUE,
+    useDEA = TRUE,
+    dataMethod = "LogLikelihood",
+    numReducedComp = 50L,
     saveObj = TRUE,
     outDir = outDir
   )
@@ -222,11 +225,9 @@ table(splitClusters)
 
 In the case one already has an existing *clusterization*, it is possible to
 calculate the *DEA* `data.frame` and add it to the `COTAN` object.
-```{r Load pre-calculated clusterization, eval=TRUE, include=TRUE}
+```{r Load pre-calculated clusterization}
 data("vignette.split.clusters", package = "COTAN")
-splitClusters <- vignette.split.clusters[getCells(obj)]
-splitClusters[is.na(splitClusters)] <- "-1"
-names(splitClusters) <- getCells(obj)
+splitClusters <- vignette.split.clusters
 
 splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
 
@@ -246,10 +247,11 @@ c(summaryData, summaryPlot) %<-%
   clustersSummaryPlot(
     obj,
     clName = "split",
-    plotTitle = "split summary"
+    plotTitle = "split summary",
+    condName = "origin"
   )
 
-summaryData
+head(summaryData, n = 10L)
 ```
 
 The `ExpGenes` column contains the number of genes that are expressed in any
@@ -262,16 +264,41 @@ plot(summaryPlot)
 It is possible to visualize how relevant are the *marker genes'* `lists` with
 respect to the given *clusterization*
 ```{r More complete clusterization data visualization}
+layersGenes <- list(
+  "L1"   = c("Reln",   "Lhx5"),
+  "L2/3" = c("Satb2",  "Cux1"),
+  "L4"   = c("Rorb",   "Sox5"),
+  "L5/6" = c("Bcl11b", "Fezf2"),
+  "Prog" = c("Vim",    "Hes1", "Dummy")
+)
+
 c(splitHeatmap, scoreDF, pValueDF) %<-%
   clustersMarkersHeatmapPlot(
     obj,
     groupMarkers = layersGenes,
     clName = "split",
-    kCuts = 5L,
+    kCuts = 2L,
     adjustmentMethod = "holm"
   )
 
 ComplexHeatmap::draw(splitHeatmap)
+```
+
+```{r Clusterization UMAP plot using Dimensionality Reduction (`split`)}
+c(umapPlot, cellsRDM) %<-%
+  cellsUMAPPlot(
+    obj,
+    clName = "split",
+    clusters = NULL,
+    useCoexEigen = TRUE,
+    dataMethod = "LogLikelihood",
+    numComp = 50L,
+    colors = NULL,
+    numNeighbors = 30L,
+    minPointsDist = 0.3
+  )
+
+plot(umapPlot)
 ```
 
 
@@ -299,6 +326,10 @@ c(mergedClusters, mergedCoexDF) %<-%
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",
     cores = 6L,
+    useCoexEigen = TRUE,
+    useDEA = TRUE,
+    dataMethod = "LogLikelihood",
+    numReducedComp = 50L,
     saveObj = TRUE,
     outDir = outDir
   )
@@ -349,7 +380,7 @@ prevCheckRes <- data.frame()
 # the split method, is also useful in the cases the execution is interrupted
 # prematurely...
 #
-if (TRUE) {
+if (FALSE) {
   # read from the last file among those named all_check_results_XX.csv
   mergeDir <- file.path(outDir, cond, "leafs_merge")
   resFiles <-
@@ -363,7 +394,7 @@ if (TRUE) {
     read.csv(resFiles[length(resFiles)], header = TRUE, row.names = 1L)
 }
 
-c(mergedClusters2, mergedCoexDF2) %<-%
+c(mergedClusters, mergedCoexDF) %<-%
   mergeUniformCellsClusters(
     obj,
     clusters = splitClusters,
@@ -372,6 +403,7 @@ c(mergedClusters2, mergedCoexDF2) %<-%
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",
     cores = 6L,
+    useDEA = TRUE,
     saveObj = TRUE,
     outDir = outDir
   )
@@ -387,13 +419,13 @@ c(mergedClusters2, mergedCoexDF2) %<-%
 obj <-
   addClusterization(
     obj,
-    clName = "merge2",
+    clName = "merge",
     override = TRUE,
-    clusters = mergedClusters2,
-    coexDF = mergedCoexDF2
+    clusters = mergedClusters,
+    coexDF = mergedCoexDF
   )
 
-table(mergedClusters2)
+table(mergedClusters)
 ```
 
 
@@ -439,23 +471,22 @@ Here is possible to visualize how the `split` clusters are merged in to
 c(mergeHeatmap, mergeScoresDF, mergePValuesDF) %<-%
   clustersMarkersHeatmapPlot(
     obj,
+    groupMarkers = layersGenes,
     clName = "merge",
-    condNameList = "split",
-    conditionsList = list(splitClusters)
+    condNameList = list("origin")
   )
 
 ComplexHeatmap::draw(mergeHeatmap)
 
-
-c(merge2Heatmap, merge2ScoresDF, merge2PValuesDF) %<-%
+c(mergeVsSplitHeatmap, ., .) %<-%
   clustersMarkersHeatmapPlot(
     obj,
-    clName = "merge2",
-    condNameList = "split",
+    clName = "merge",
+    condNameList = list("split"),
     conditionsList = list(splitClusters)
   )
 
-ComplexHeatmap::draw(merge2Heatmap)
+ComplexHeatmap::draw(mergeVsSplitHeatmap)
 ```
 
 In the following graph, it is possible to check that the found clusters align
@@ -463,17 +494,15 @@ very well to the expression of the layers' genes defined above...
 
 It is possible to plot the *clusterization* on a `UMAP` plot
 
-```{r Clusterization UMAP plot using Dimensionality Reduction, eval=FALSE}
-c(umapPlot, cellsRDM) %<-%
+```{r Clusterization UMAP plot using Dimensionality Reduction  (`merge`)}
+c(umapPlot, .) %<-%
   cellsUMAPPlot(
     obj,
-    clName = "merge2",
+    clName = "merge",
     clusters = NULL,
     useCoexEigen = TRUE,
     dataMethod = "LogLikelihood",
     numComp = 50L,
-    genesSel = "HGDI",
-    numGenes = 200L,
     colors = NULL,
     numNeighbors = 30L,
     minPointsDist = 0.3
