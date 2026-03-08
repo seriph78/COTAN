@@ -84,8 +84,6 @@ dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
 
 datasetFileName <-
   file.path(dataDir, GEO, "GSM2861514_E175_All_Cells_DGE.txt.gz")
-corticalCellsFileName <-
-  file.path(dataDir, GEO, "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
 
 if (!file.exists(datasetFileName)) {
   GEOquery::getGEOSuppFiles(
@@ -295,6 +293,8 @@ the following one.
 ```{r Heatmap plot of coex given primary marker genes}
 # take the first marker per layer
 layersMarkers <- lapply(layersGenes, \(gl){gl[[1L]]})
+# layersMarkers <- c("Satb2", "Bcl11b", "Vim", "Hes1")
+
 invisible(
   genesHeatmapPlot(
     obj,

@@ -575,6 +575,8 @@ calculate the *DEA* `data.frame` and add it to the `COTAN` object.
 ```{r Load pre-calculated clusterization, eval=TRUE, include=TRUE}
 data("vignette.split.clusters", package = "COTAN")
 splitClusters <- vignette.split.clusters[getCells(obj)]
+splitClusters[is.na(splitClusters)] <- "-1"
+names(splitClusters) <- getCells(obj)
 
 splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
 
@@ -589,7 +591,7 @@ obj <-
 ```
 
 It is possible to have some statistics about the *clusterization*
-```{r Extract clusterization summary, eval=TRUE, include=TRUE}
+```{r Extract clusterization summary}
 c(summaryData, summaryPlot) %<-%
   clustersSummaryPlot(
     obj,
@@ -602,14 +604,14 @@ summaryData
 
 The `ExpGenes` column contains the number of genes that are expressed in any
 cell of the relevant *cluster*, while the `ExpGenes25` column contains the number of genes expressed in at the least 25% of the cells of the relevant *cluster*
-```{r Summary as plot, eval=TRUE, include=TRUE}
+```{r Summary as plot}
 plot(summaryPlot)
 ```
 
 
 It is possible to visualize how relevant are the *marker genes'* `lists` with
 respect to the given *clusterization*
-```{r More complete clusterization data visualization, eval=TRUE, include=TRUE}
+```{r More complete clusterization data visualization}
 c(splitHeatmap, scoreDF, pValueDF) %<-%
   clustersMarkersHeatmapPlot(
     obj,
@@ -747,7 +749,7 @@ table(mergedClusters2)
 
 In the case one already has existing *clusterizations*, it is possible to
 calculate their *DEA* `data.frame` and add them to the `COTAN` object.
-```{r Calculate and store DEA using clusterizations, eval=FALSE, include=TRUE}
+```{r Calculate and store DEA using clusterizations, eval=FALSE}
 data("vignette.merge.clusters", package = "COTAN")
 mergedClusters <- vignette.merge.clusters[getCells(obj)]
 
@@ -783,7 +785,7 @@ table(mergedClusters2, mergedClusters)
 Here is possible to visualize how the `split` clusters are merged in to 
 `merge` and `merge2`
 
-```{r  Clusterizations data visualization, eval=FALSE, include=TRUE}
+```{r  Clusterizations data visualization, eval=FALSE}
 c(mergeHeatmap, mergeScoresDF, mergePValuesDF) %<-%
   clustersMarkersHeatmapPlot(
     obj,
