@@ -34,7 +34,7 @@ singleHeatmapDF <- function(objCOTAN,
   assert_that(!is_empty(genesLists), !is_empty(names(genesLists)),
               msg = "genesLists must be a named list of genes arrays")
 
-  assert_that(!is_empty(sets), is_integer(sets),
+  assert_that(!is_empty(sets), all(sets %% 1L == 0L),
               max(sets) <= length(genesLists),
               msg = "sets must be positions in the genes list")
 

@@ -253,24 +253,20 @@ calculateGDI <- function(objCOTAN,
 
   GDI <- calculateGDIGivenS(S, rowsFraction = rowsFraction,
                             cores = cores, chunkSize = chunkSize)
-  GDI <- set_names(as.data.frame(GDI), "GDI")
+
   gc()
 
-  sumRawNorm <- log(rowSums(getNuNormData(objCOTAN)))
-  GDI <- merge(GDI, as.data.frame(list(sumRawNorm), col.names = "sum.raw.norm"),
-               by = "row.names", all.x = TRUE)
-  GDI <- column_to_rownames(GDI, var = "Row.names")
-  rm(sumRawNorm)
-  gc()
-
+  # GDI <- set_names(as.data.frame(GDI), )
+  sumRawNorm <- log10(rowSums(getNuNormData(objCOTAN)))
   expCells <- getNumOfExpressingCells(objCOTAN) / getNumCells(objCOTAN) * 100.0
-  GDI <- merge(GDI, as.data.frame(list(expCells), col.names = "exp.cells"),
-               by = "row.names", all.x = TRUE)
-  GDI <- column_to_rownames(GDI, var = "Row.names")
-  rm(expCells)
-  gc()
 
-  GDI <- GDI[, c("sum.raw.norm", "GDI", "exp.cells")]
+  gdiDF <- as.data.frame(list(
+    "sum.raw.norm" = sumRawNorm,
+    "GDI" = GDI,
+    "exp.cells" = expCells
+  ))
+  assert_that(identical(colnames(gdiDF),
+                        c("sum.raw.norm", "GDI", "exp.cells")))
 
   endTime <- Sys.time()
 
@@ -280,7 +276,7 @@ calculateGDI <- function(objCOTAN,
 
   logThis("Calculate GDI dataframe: DONE", logLevel = 2L)
 
-  return(GDI)
+  return(gdiDF)
 }
 
 

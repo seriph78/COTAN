@@ -207,6 +207,8 @@ seuratClustering <- function(objCOTAN,
 #' @param numReducedComp the number of calculated **RDM** components
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
+#' @param minimumUTClusterSize the minimum number of cells for a cluster to be
+#'   deemed potentially *uniform transcript*
 #' @param initialClusters an existing *clusterization* to use as starting point:
 #'   the *clusters* deemed **uniform** will be kept and the remaining cells will
 #'   be processed as normal
@@ -269,6 +271,7 @@ cellsUniformClustering <- function(objCOTAN,
                                    numReducedComp = 25L,
                                    hclustMethod = "ward.D2",
                                    initialClusters = NULL,
+                                   minimumUTClusterSize = 50L,
                                    initialIteration = 1L,
                                    saveObj = TRUE,
                                    outDir = ".") {
@@ -410,7 +413,6 @@ cellsUniformClustering <- function(objCOTAN,
 
     globalClName <- ""
 
-    minimumUTClusterSize <- 20L
     maxClusterSize <- max(lengths(testClList))
 
     if (maxClusterSize >= minimumUTClusterSize) {
@@ -425,7 +427,7 @@ cellsUniformClustering <- function(objCOTAN,
                  str_pad(clName, width = 4L, pad = "0"))
 
         cells <- testClList[[clName]]
-        if (length(cells) < 20L) {
+        if (length(cells) < minimumUTClusterSize) {
           logThis(paste("cluster", globalClName, "has too few cells:",
                         "will be reclustered!"), logLevel = 2L)
 
