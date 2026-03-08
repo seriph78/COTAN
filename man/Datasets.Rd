@@ -8,9 +8,9 @@
 \alias{test.dataset}
 \alias{test.dataset.clusters1}
 \alias{test.dataset.clusters2}
+\alias{vignette.cells.origin}
 \alias{vignette.split.clusters}
 \alias{vignette.merge.clusters}
-\alias{vignette.merge2.clusters}
 \title{Data-sets}
 \format{
 \code{raw.dataset} is a data frame with \eqn{2000} genes and \eqn{815}
@@ -25,11 +25,11 @@ cells
 
 \code{test.dataset.clusters2} is a \verb{character array}
 
+\code{vignette.cells.origin} is a \code{factor}
+
 \code{vignette.split.clusters} is a \code{factor}
 
 \code{vignette.merge.clusters} is a \code{factor}
-
-\code{vignette.merge2.clusters} is a \code{factor}
 }
 \source{
 \code{GEO} \code{GSM2861514}
@@ -47,11 +47,11 @@ data(test.dataset.clusters1)
 
 data(test.dataset.clusters2)
 
+data(vignette.cells.origin)
+
 data(vignette.split.clusters)
 
 data(vignette.merge.clusters)
-
-data(vignette.merge2.clusters)
 }
 \value{
 Objects loaded by \code{data()}:
@@ -60,7 +60,7 @@ Objects loaded by \code{data()}:
 \item \code{test.dataset.clusters1}, \code{test.dataset.clusters2}:
 character vectors of cluster labels
 \item \code{vignette.split.clusters}, \code{vignette.merge.clusters},
-\code{vignette.merge2.clusters}: factors of cluster labels
+\code{vignette.cells.origin}: factors of cluster labels
 }
 }
 \description{
@@ -84,17 +84,18 @@ the same expression in both \emph{clusters}.
 \code{mergeUniformCellsClusters()} on the \code{test.dataset} using the previous
 \emph{clusterization}
 
+\code{vignette.cells.origin} is the factor discriminating between the
+\emph{cortical} cells and the \emph{other} cells. This was constructed from the
+following dataset: Mouse Cortex E17.5, \code{GEO}: \code{GSM2861514}
+\url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM2861514}
+
 \code{vignette.split.clusters} is the clusterization obtained running
 \code{cellsUniformClustering()} on the vignette dataset (mouse cortex E17.5,
 \code{GEO}: \code{GSM2861514})
 
 \code{vignette.merge.clusters} is the clusterization obtained running
 \code{mergeUniformCellsClusters()} on the vignette dataset (mouse cortex E17.5,
-\code{GEO}: \code{GSM2861514}) using the previous \emph{clusterization}
-
-\code{vignette.merge2.clusters} is the clusterization obtained re-running
-\code{mergeUniformCellsClusters()} on the vignette dataset (mouse cortex E17.5,
-\code{GEO}: \code{GSM2861514}) using the \code{vignette.split.clusters} \emph{clusterization},
-but with a sequence of progressively relaxed checks
+\code{GEO}: \code{GSM2861514}) starting from the \code{vignette.split.clusters}
+\emph{clusterization}, with a sequence of progressively relaxed \emph{UT} checks
 }
 \keyword{datasets}

@@ -95,6 +95,8 @@ if (!file.exists(datasetFileName)) {
   )
 }
 
+assertthat::assert_that(file.exists(datasetFileName))
+
 rawDataset <- read.csv(datasetFileName, sep = "\t", row.names = 1L)
 
 print(dim(rawDataset))
@@ -314,48 +316,6 @@ In order to avoid running the totality of the possible checks (as it can explode
 quickly with the number of *clusters*), the function relies on a *related*
 distance the find the cluster pairs that have the highest chance to be merged.
 
-```{r Merge potentially Uniform-Transcript clusters, eval=FALSE, include=TRUE}
-# default constructed checker is OK
-advChecker <- new("AdvancedGDIUniformityCheck")
-
-c(mergedClusters, mergedCoexDF) %<-%
-  mergeUniformCellsClusters(
-    obj,
-    clusters = splitClusters,
-    checkers = advChecker,
-    optimizeForSpeed = TRUE,
-    deviceStr = "cuda",
-    cores = 6L,
-    useCoexEigen = TRUE,
-    useDEA = TRUE,
-    dataMethod = "LogLikelihood",
-    numReducedComp = 50L,
-    saveObj = TRUE,
-    outDir = outDir
-  )
-
-# merges are:
-#  1 <- 06 + 07
-#  2 <- '-1' + 08 + 11
-#  3 <- 09
-#  4 <- 01
-#  5 <- 02
-#  6 <- 12
-#  7 <- 03 + 04 + 10 + 13
-#  8 <- 05
-
-obj <-
-  addClusterization(
-    obj,
-    clName = "merge",
-    override = TRUE,
-    clusters = mergedClusters,
-    coexDF = mergedCoexDF
-  )
-
-table(mergedClusters)
-```
-
 Again, here, the most important parameters for the users are the `GDIThreshold`s
 inside the **Uniform Transcript** checkers: they define how  strict is the
 check. Default constructed advance check gives a pretty strong guarantee of
@@ -380,9 +340,10 @@ prevCheckRes <- data.frame()
 # the split method, is also useful in the cases the execution is interrupted
 # prematurely...
 #
-if (FALSE) {
+if (TRUE) {
   # read from the last file among those named all_check_results_XX.csv
   mergeDir <- file.path(outDir, cond, "leafs_merge")
+
   resFiles <-
     list.files(
       path = mergeDir,
@@ -390,8 +351,10 @@ if (FALSE) {
       full.names = TRUE
     )
 
-  prevCheckRes <-
-    read.csv(resFiles[length(resFiles)], header = TRUE, row.names = 1L)
+  if (length(resFiles) != 0L) {
+    prevCheckRes <-
+      read.csv(resFiles[length(resFiles)], header = TRUE, row.names = 1L)
+  }
 }
 
 c(mergedClusters, mergedCoexDF) %<-%
@@ -408,14 +371,6 @@ c(mergedClusters, mergedCoexDF) %<-%
     outDir = outDir
   )
 
-# merges are:
-#  1 <- '-1' + 06 + 09
-#  2 <- 07
-#  3 <- 03  + 04 + 10 + 13
-#  4 <- 12
-#  5 <- 01 + 08 + 11
-#  6 <- 02 + 05
-
 obj <-
   addClusterization(
     obj,
@@ -431,7 +386,7 @@ table(mergedClusters)
 
 In the case one already has existing *clusterizations*, it is possible to
 calculate their *DEA* `data.frame` and add them to the `COTAN` object.
-```{r Calculate and store DEA using clusterizations, eval=FALSE}
+```{r Calculate and store DEA using clusterizations}
 data("vignette.merge.clusters", package = "COTAN")
 mergedClusters <- vignette.merge.clusters[getCells(obj)]
 
@@ -446,28 +401,14 @@ obj <-
     override = FALSE
   )
 
-data("vignette.merge2.clusters", package = "COTAN")
-mergedClusters2 <- vignette.merge2.clusters[getCells(obj)]
-
-mergedCoexDF2 <- DEAOnClusters(obj, clusters = mergedClusters2)
-
-obj <-
-  addClusterization(
-    obj,
-    clName = "merge2",
-    clusters = mergedClusters2,
-    coexDF = mergedCoexDF2,
-    override = FALSE
-  )
-
-table(mergedClusters2, mergedClusters)
+table(splitClusters, mergedClusters)
 ```
 
 
 Here is possible to visualize how the `split` clusters are merged in to 
-`merge` and `merge2`
+`merge`
 
-```{r  Clusterizations data visualization, eval=FALSE}
+```{r  Clusterizations data visualization}
 c(mergeHeatmap, mergeScoresDF, mergePValuesDF) %<-%
   clustersMarkersHeatmapPlot(
     obj,
@@ -478,7 +419,7 @@ c(mergeHeatmap, mergeScoresDF, mergePValuesDF) %<-%
 
 ComplexHeatmap::draw(mergeHeatmap)
 
-c(mergeVsSplitHeatmap, ., .) %<-%
+c(mergeVsSplitHeatmap, ..) %<-%
   clustersMarkersHeatmapPlot(
     obj,
     clName = "merge",

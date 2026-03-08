@@ -74,7 +74,11 @@ if (!file.exists(dataSetFile)) {
   )
 }
 
+assertthat::assert_that(file.exists(dataSetFile))
+
 sampleDataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
+
+print(dim(sampleDataset))
 ```
 
 Define a directory where the output will be stored.

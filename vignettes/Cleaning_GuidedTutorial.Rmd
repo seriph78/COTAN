@@ -96,6 +96,8 @@ if (!file.exists(datasetFileName)) {
   )
 }
 
+assertthat::assert_that(file.exists(datasetFileName))
+
 rawDataset <- read.csv(datasetFileName, sep = "\t", row.names = 1L)
 
 print(dim(rawDataset))
