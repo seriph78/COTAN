@@ -246,7 +246,10 @@ test_that("nuBisection", {
 
 
 test_that("plotTheme", {
-  expect_warning(plotTheme(plotKind = "Wrong", textSize = 12.0))
+  expect_warning(
+    plotTheme(plotKind = "Wrong", textSize = 12.0),
+    regexp = "plotTheme"
+  )
 })
 
 
