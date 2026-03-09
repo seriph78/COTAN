@@ -466,6 +466,11 @@ c(umapPlot, .) %<-%
 plot(umapPlot)
 ```
 
+```{r eval=FALSE}
+enrichment <- geneSetEnrichment(clustersCoex = coexDF,
+                                groupMarkers = groupMarkers)
+
+```
 
 ## Vignette clean-up stage
 
