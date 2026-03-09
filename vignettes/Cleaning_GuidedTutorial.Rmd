@@ -37,7 +37,7 @@ if (requireNamespace("ragg", quietly = TRUE)) {
 ```
 
 
-```{r Preamble, message=FALSE, warning=FALSE}
+```{r preamble, message=FALSE, warning=FALSE}
 library(COTAN)
 library(zeallot)
 
@@ -56,7 +56,7 @@ This tutorial shows the available tools in COTAN to help with datasets cleaning
 
 Define a directory where the data and the output will be stored.
 
-```{r Setup and log}
+```{r setup-and-log}
 dataDir <- tempdir()
 print(dataDir)
 
@@ -76,7 +76,7 @@ setLoggingFile(file.path(outDir, "vignette_dataset_cleaning.log"))
 Download the data-set for `r "mouse cortex E17.5"` from
 `r "Yuzwa et al."` (2017)
 
-```{r Download data, eval=TRUE, include=TRUE}
+```{r download-data}
 GEO <- "GSM2861514"
 
 dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
@@ -108,7 +108,7 @@ print(dim(rawDataset))
 Initialize the `COTAN` object with the row count table and
 the metadata from the experiment.
 
-```{r Create the COTAN object}
+```{r create-cotan-object}
 cond <- "mouse_cortex_E17.5"
 
 obj <- COTAN(raw = rawDataset)
@@ -124,9 +124,9 @@ logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
         logLevel = 1L)
 ```
 
-Assign to each cell its origin
+#### Assign to each cell its origin
 
-```{r Add origing to the COTAn object as a condition}
+```{r add-origin-to-the-cotan-object}
 # mark cells origin
 data(vignette.cells.origin)
 head(vignette.cells.origin, 18)
@@ -152,20 +152,20 @@ Distribution* function discriminating the cells by their origin
 Please note that in the following plots it is **not** necessary
 to specify a *condition*
 
-```{r ECD plot}
+```{r ecd-plot}
 plot(ECDPlot(obj, condName = "origin"))
 ```
 
 The we can also plot directly the distribution of the library size
 
-```{r Cells size plot}
+```{r cells-size-plot}
 plot(cellSizePlot(obj, condName = "origin"))
 ```
 
 and we can plot the distribution of the number of detected genes in each cell,
 useful to identify possible doublets
 
-```{r Number of detected genes}
+```{r number-detected-genes}
 plot(genesSizePlot(obj, condName = "origin"))
 ```
 
@@ -173,7 +173,7 @@ As last plot we can check the scatter plot between the library size and
 the number of detected genes: cells far away from the main group are usually
 problematic
 
-```{r Scatter plot: Cells size vs Number of detected genes}
+```{r scatter-plot}
 plot(scatterPlot(obj, condName = "origin"))
 ```
 
@@ -185,7 +185,7 @@ we can use the `dropGenesCells()` function.
 Drop cells with too many reads as they are probably doublets or multiplets
 and show the updated plot 
 
-```{r Cull probable doublets or multiplets}
+```{r cull-probable-doublets}
 # Store the used threshold in the COTAN object for later reference
 cellsSizeThr <- 6000L
 obj <- addElementToMetaDataset(obj, "Cells size threshold", cellsSizeThr)
@@ -198,7 +198,7 @@ plot(cellSizePlot(obj, condName = "origin"))
 
 To drop cells by gene number: high genes count might also indicate doublets...
 
-```{r Cull probable doublets or multiplets (2)}
+```{r cull-probable-doublets_2}
 # Store the used threshold in the COTAN object for later reference
 genesSizeHighThr <- 3000L
 obj <-
@@ -212,7 +212,7 @@ plot(genesSizePlot(obj, condName = "origin"))
 
 Drop cells with too low genes expression as they are probably dead
 
-```{r Cull probable dead cells}
+```{r cull-probable-dead-cells}
 # Store the used threshold in the COTAN object for later reference
 genesSizeLowThr <- 500L
 obj <- addElementToMetaDataset(obj, "Num genes low threshold", genesSizeLowThr)
@@ -227,14 +227,14 @@ plot(genesSizePlot(obj, condName = "origin"))
 Cells with a too high percentage of mitochondrial genes are
 likely dead (or at the last problematic) cells. So we drop them!
 
-```{r Calculate percentage of mitochondrial genes}
+```{r calculate-mitochondrial-genes-percentage}
 c(mitPlot, mitSizes) %<-%
   mitochondrialPercentagePlot(obj, genePrefix = "^mt-", condName = "origin")
 
 plot(mitPlot)
 ```
 
-```{r Cull probable dead cells (2)}
+```{r cull-probable-dead-cells_2}
 # Store the used threshold in the COTAN object for later reference
 mitPercThr <- 3.5
 obj <- addElementToMetaDataset(obj, "Mitoc. perc. threshold", mitPercThr)
@@ -252,21 +252,23 @@ As last plot we can check the scatter plot between the library size and
 the number of detected genes: cells far away from the main group are usually
 problematic
 
-```{r Scatter plot: Cells size vs Number of detected genes (2)}
+```{r scatter-plot_2}
 plot(scatterPlot(obj, condName = "origin"))
 ```
 
 We want also to log the current status.
 
-```{r Log current dataset status}
+```{r log-current-dataset-status}
 logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
+
+getDims(obj)
 ```
 
 The `clean()` function estimates the `nu` parameters from the data and drops genes/cells that do not satisfy the minimal expression thresholds.
 Therefore, it need to be run again every time any genes or cells are dropped
 from the data.
 
-```{r Calculate B group for spurious cells according to PCA}
+```{r calculate-b-group-from-pca}
 obj <- addElementToMetaDataset(obj, "Num drop B group", 0L)
 
 obj <- clean(obj)
@@ -282,13 +284,13 @@ the other cells
 With the plot below it is possible to see the most expressed genes
 in the cells of the `B` group
 
-```{r Show most expressed genes of B group}
+```{r show-most-expressed-genes-b-group}
 plot(genesPlot)
 ```
 
 To color the PCA based on `nu` (so the cells' efficiency)
 
-```{r Cells efficiency PCA plot}
+```{r cells-efficiency-pca-plot}
 plot(UDEPlot)
 ```
 
@@ -296,14 +298,14 @@ plot(UDEPlot)
 
 The next part is used to remove the cells with efficiency too low.
 
-```{r Cells efficiency plot}
+```{r cells-efficiency-plot}
 plot(nuPlot)
 ```
 
 We can zoom on the smallest values and, if COTAN detects a clear elbow,
 we can decide to remove the cells.
 
-```{r Cells efficiency plot (low tail)}
+```{r cells-efficiency-plot_low-tail}
 plot(zoomedNuPlot)
 ```
 
@@ -311,7 +313,7 @@ We can observe here that the `B` group cells are really enriched in hemoglobin
 genes so we prefer to remove them.
 They can be extracted from the `pcaCellsData` object and removed.
 
-```{r Cull B group cells and re-calculate, eval=TRUE, include=TRUE}
+```{r cull-b-group-and-recalculate}
 cellsToRem <- rownames(pcaCellsData)[pcaCellsData[["groups"]] == "B"]
 obj <- dropGenesCells(obj, cells = cellsToRem)
 
@@ -321,7 +323,7 @@ obj <- addElementToMetaDataset(obj, "Num drop B group", 1L)
 
 We also save the defined threshold in the metadata and re-run the estimation
 
-```{r Cull cells with too low efficiency}
+```{r cull-low-efficiency-cells}
 udeLowThr <- 0.34
 obj <- addElementToMetaDataset(obj, "Low UDE cells' threshold", udeLowThr)
 
@@ -337,7 +339,7 @@ We repeat all the plots now that the *low quality* cells are removed
 In many practical cases the last few steps are repeated multiple times until 
 deemed appropriate
 
-```{r Raw plots}
+```{r raw-plots}
 plot(ECDPlot(obj, condName = "origin"))
 
 plot(cellSizePlot(obj, condName = "origin"))
@@ -355,14 +357,14 @@ plot(mitPlot)
 Then we rerun also the cleaning and associated plots and
 notice that all is essentially fine
 
-```{r Re-calculate clean-plots}
+```{r recalculate-clean-plots}
 obj <- clean(obj)
 
 c(pcaCellsPlot, pcaCellsData, genesPlot,
   UDEPlot, nuPlot, zoomedNuPlot) %<-% cleanPlots(obj)
 ```
 
-```{r Show the clean plots}
+```{r show-clean-plots}
 plot(pcaCellsPlot)
 
 plot(genesPlot)
@@ -378,7 +380,7 @@ plot(pcaCellsData)
 
 Log the remaining number of cells
 
-```{r Log updated dataset status}
+```{r log-updated-dataset-status}
 logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
 
 table(getCondition(obj, condName = "origin"))
@@ -388,7 +390,7 @@ table(getCondition(obj, condName = "origin"))
 
 The next few lines are just to clean.
 
-```{r Clean-up}
+```{r final-clean-up}
 if (file.exists(file.path(outDir, paste0(cond, ".cotan.RDS")))) {
   # delete file if it exists
   file.remove(file.path(outDir, paste0(cond, ".cotan.RDS")))
@@ -411,7 +413,7 @@ file.remove(file.path(outDir, "vignette_dataset_cleaning.log"))
 options(prevOptState)
 ```
 
-```{r Closing}
+```{r closure}
 Sys.time()
 
 sessionInfo()

@@ -853,9 +853,9 @@ if (file.exists(file.path(outDir, paste0(cond, "_times.csv")))) {
 if (dir.exists(file.path(outDir, cond))) {
   unlink(file.path(outDir, cond), recursive = TRUE)
 }
-if (dir.exists(file.path(outDir, GEO))) {
-  unlink(file.path(outDir, GEO), recursive = TRUE)
-}
+#if (dir.exists(file.path(outDir, GEO))) {
+#  unlink(file.path(outDir, GEO), recursive = TRUE)
+#}
 
 # stop logging to file
 setLoggingFile("")

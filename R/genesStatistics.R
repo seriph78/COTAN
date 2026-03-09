@@ -136,8 +136,8 @@ calculateGDIGivenS  <- function(S,
   logThis("Calculate `GDI`: START", logLevel = 2L)
 
   # Beware S might not be square!
-  assertthat::assert_that(length(dim(S)) == 2L,
-                          rowsFraction > 0.0, rowsFraction <= 1.0)
+  assert_that(length(dim(S)) == 2L)
+  assert_that(rowsFraction > 0.0, rowsFraction <= 1.0)
 
   cores <- handleMultiCore(cores)
 

@@ -1,5 +1,5 @@
 ---
-title: "Guided tutorial to cells Uniform Transcipt cells clustering using COTAN"
+title: "Guided tutorial to cells Uniform Transcript cells' clustering using COTAN"
 author: 
 - name: "Silvia Giulia Galfrè"
   affiliation: "Department of Computer Science, University of Pisa"
@@ -37,7 +37,7 @@ if (requireNamespace("ragg", quietly = TRUE)) {
 ```
 
 
-```{r Preamble, message=FALSE, warning=FALSE}
+```{r preamble, message=FALSE, warning=FALSE}
 library(COTAN)
 library(zeallot)
 
@@ -56,7 +56,7 @@ This tutorial shows the available tools in COTAN to help with genes' clustering
 
 Define a directory where the data and the output will be stored
 
-```{r Setup and log}
+```{r setup-and-log}
 dataDir <- tempdir()
 print(dataDir)
 
@@ -77,7 +77,7 @@ setLoggingFile(file.path(outDir, "vignette_uniform_clustering.log"))
 Download the data-set for `r "mouse cortex E17.5"` from
 `r "Yuzwa et al."` (2017)
 
-```{r Download data, eval=TRUE, include=TRUE}
+```{r download-data}
 GEO <- "GSM2861514"
 
 dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
@@ -107,7 +107,7 @@ print(dim(rawDataset))
 Initialize the `COTAN` object with the row count table and
 the metadata from the experiment.
 
-```{r Create the COTAN object}
+```{r create-cotan-object}
 cond <- "mouse_cortex_E17.5"
 
 obj <- COTAN(raw = rawDataset)
@@ -125,7 +125,7 @@ logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
 
 Assign to each cell its origin
 
-```{r Add origing to the COTAn object as a condition}
+```{r add-origin-to-the-cotan-object}
 # mark cells origin
 data(vignette.cells.origin)
 head(vignette.cells.origin, 18)
@@ -137,7 +137,7 @@ obj <-
 
 ### Drop low quality cells
 
-```{r Drop low quality cells}
+```{r drop-low-quality-cells}
 # use previously established results to determine
 # which cells were dropped in the cleaning stage
 data(vignette.split.clusters)
@@ -164,7 +164,7 @@ In this part, the `COTAN` model is calibrated:
 all the contingency tables are computed and used to get
 the statistics necessary to `COEX` evaluation and storing
 
-```{r Calculate and store COEX matrix}
+```{r calculate-and-store-coex-matrix}
 obj <-
   proceedToCoex(
     obj,
@@ -175,7 +175,7 @@ obj <-
   )
 ```
 
-# Uniform Clustering
+## Uniform Clustering
 
 It is possible to obtain a cells' *clusterization* based on the concept of 
 *uniformity* of expression of the genes across the cells in each cluster.
@@ -191,7 +191,7 @@ Please note that the most important parameters for the users are the
 strict is the check. Default constructed advance check gives a pretty strong
 guarantee of uniformity for the *cluster*.
 
-```{r Create Uniform-Transcript clusterization, eval=FALSE, include=TRUE}
+```{r create-ut-clusterization, eval=FALSE, include=TRUE}
 # This code is a little too computationally heavy to be used in an example
 # So we stored the result and we can load it in the next section
 
@@ -227,7 +227,7 @@ table(splitClusters)
 
 In the case one already has an existing *clusterization*, it is possible to
 calculate the *DEA* `data.frame` and add it to the `COTAN` object.
-```{r Load pre-calculated clusterization}
+```{r load-pre-calculated-clusterization_split}
 data("vignette.split.clusters", package = "COTAN")
 splitClusters <- vignette.split.clusters
 
@@ -244,7 +244,7 @@ obj <-
 ```
 
 It is possible to have some statistics about the *clusterization*
-```{r Extract clusterization summary}
+```{r extract-clusterization-summary}
 c(summaryData, summaryPlot) %<-%
   clustersSummaryPlot(
     obj,
@@ -258,22 +258,27 @@ head(summaryData, n = 10L)
 
 The `ExpGenes` column contains the number of genes that are expressed in any
 cell of the relevant *cluster*, while the `ExpGenes25` column contains the number of genes expressed in at the least 25% of the cells of the relevant *cluster*
-```{r Summary as plot}
+```{r summary-as-plot}
 plot(summaryPlot)
 ```
 
 
 It is possible to visualize how relevant are the *marker genes'* `lists` with
 respect to the given *clusterization*
-```{r More complete clusterization data visualization}
+
+
+
+```{r define-layers-specific-genes}
 layersGenes <- list(
   "L1"   = c("Reln",   "Lhx5"),
-  "L2/3" = c("Satb2",  "Cux1"),
+  "L2/3" = c("Cux1",   "Satb2"),
   "L4"   = c("Rorb",   "Sox5"),
   "L5/6" = c("Bcl11b", "Fezf2"),
-  "Prog" = c("Vim",    "Hes1", "Dummy")
+  "Prog" = c("Hes1",    "Vim", "Dummy")
 )
+```
 
+```{r clusterization-data-visualization_split}
 c(splitHeatmap, scoreDF, pValueDF) %<-%
   clustersMarkersHeatmapPlot(
     obj,
@@ -286,7 +291,7 @@ c(splitHeatmap, scoreDF, pValueDF) %<-%
 ComplexHeatmap::draw(splitHeatmap)
 ```
 
-```{r Clusterization UMAP plot using Dimensionality Reduction (`split`)}
+```{r clusterization-umap-plot-via-drm_split}
 c(umapPlot, cellsRDM) %<-%
   cellsUMAPPlot(
     obj,
@@ -324,7 +329,7 @@ it is possible to define a sequence of checkers, each less stringent than the
 previous, that will be applied sequentially: First all the merges with the
 stricter checker are performed, than those that satisfy the second, and so on.
 
-```{r Load pre-calculated merged clusterization, eval=FALSE, include=TRUE}
+```{r merge-clusters-if-ut, eval=FALSE, include=TRUE}
 
 checkersList <-
   list(
@@ -386,7 +391,7 @@ table(mergedClusters)
 
 In the case one already has existing *clusterizations*, it is possible to
 calculate their *DEA* `data.frame` and add them to the `COTAN` object.
-```{r Calculate and store DEA using clusterizations}
+```{r load-pre-calculated-clusterization_merge}
 data("vignette.merge.clusters", package = "COTAN")
 mergedClusters <- vignette.merge.clusters[getCells(obj)]
 
@@ -408,7 +413,7 @@ table(splitClusters, mergedClusters)
 Here is possible to visualize how the `split` clusters are merged in to 
 `merge`
 
-```{r  Clusterizations data visualization}
+```{r  clusterization-data-visualization_merge}
 c(mergeHeatmap, mergeScoresDF, mergePValuesDF) %<-%
   clustersMarkersHeatmapPlot(
     obj,
@@ -435,7 +440,7 @@ very well to the expression of the layers' genes defined above...
 
 It is possible to plot the *clusterization* on a `UMAP` plot
 
-```{r Clusterization UMAP plot using Dimensionality Reduction  (`merge`)}
+```{r clusterization-umap-plot-via-drm_merge}
 c(umapPlot, .) %<-%
   cellsUMAPPlot(
     obj,
@@ -457,7 +462,7 @@ plot(umapPlot)
 
 The next few lines are just to clean.
 
-```{r Clean-up}
+```{r clean-up}
 if (file.exists(file.path(outDir, paste0(cond, ".cotan.RDS")))) {
   # delete file if it exists
   file.remove(file.path(outDir, paste0(cond, ".cotan.RDS")))
@@ -475,12 +480,12 @@ if (dir.exists(file.path(outDir, cond))) {
 
 # stop logging to file
 setLoggingFile("")
-file.remove(file.path(outDir, "vignette_v2.log"))
+file.remove(file.path(outDir, "vignette_uniform_clustering.log"))
 
 options(prevOptState)
 ```
 
-```{r Closing}
+```{r closure}
 Sys.time()
 
 sessionInfo()
