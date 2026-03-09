@@ -85,14 +85,23 @@ dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
 datasetFileName <-
   file.path(dataDir, GEO, "GSM2861514_E175_All_Cells_DGE.txt.gz")
 
-if (!file.exists(datasetFileName)) {
-  GEOquery::getGEOSuppFiles(
-    GEO,
-    makeDirectory = TRUE,
-    baseDir = dataDir,
-    filter_regex = basename(datasetFileName),
-    fetch_files = TRUE
-  )
+# retries up to 5 times to get the dataset
+attempts <- 0L
+repeat {
+  if (!file.exists(datasetFileName)) {
+    GEOquery::getGEOSuppFiles(
+      GEO,
+      makeDirectory = TRUE,
+      baseDir = dataDir,
+      filter_regex = base::basename(datasetFileName),
+      fetch_files = TRUE
+    )
+  }
+
+  attempts <- attempts + 1L
+  if (attempts >= 5L) {
+    break
+  }
 }
 
 assertthat::assert_that(file.exists(datasetFileName))

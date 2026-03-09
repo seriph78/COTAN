@@ -85,14 +85,23 @@ dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
 datasetFileName <-
   file.path(dataDir, GEO, "GSM2861514_E175_All_Cells_DGE.txt.gz")
 
-if (!file.exists(datasetFileName)) {
-  GEOquery::getGEOSuppFiles(
-    GEO,
-    makeDirectory = TRUE,
-    baseDir = dataDir,
-    filter_regex = basename(datasetFileName),
-    fetch_files = TRUE
-  )
+# retries up to 5 times to get the dataset
+attempts <- 0L
+repeat {
+  if (!file.exists(datasetFileName)) {
+    GEOquery::getGEOSuppFiles(
+      GEO,
+      makeDirectory = TRUE,
+      baseDir = dataDir,
+      filter_regex = base::basename(datasetFileName),
+      fetch_files = TRUE
+    )
+  }
+
+  attempts <- attempts + 1L
+  if (attempts >= 5L) {
+    break
+  }
 }
 
 assertthat::assert_that(file.exists(datasetFileName))
@@ -275,7 +284,7 @@ then we can choose which sets to use in the function parameter sets
 (for example, from 1 to 3).
 
 ```{r coex-heatmap-plot-for-selected-genes}
-plot(heatmapPlot(obj, genesLists = genesLists, sets = 1L:3L))
+plot(heatmapPlot(obj, genesLists = genesLists, sets = 1L:3L, cores = 3L))
 ```
 
 
@@ -293,29 +302,25 @@ We can also plot a general heatmap of `COEX` values based on some markers like
 the following one.
 
 ```{r coex-heatmap-plot-for-primary-marker-genes}
-# take the first marker per layer
-layersMarkers <- lapply(layersGenes, \(gl){gl[[1L]]})
-# layersMarkers <- c("Satb2", "Bcl11b", "Vim", "Hes1")
+layersMarkers <- c("Satb2", "Bcl11b", "Vim", "Hes1")
 
-invisible(
-  genesHeatmapPlot(
-    obj,
-    primaryMarkers = layersMarkers,
-    pValueThreshold = 0.0001,
-    symmetric = TRUE,
-  )
+genesHeatmapPlot(
+  obj,
+  primaryMarkers = layersMarkers,
+  pValueThreshold = 0.0001,
+  symmetric = TRUE,
+  cores = 3L
 )
 ```
 
 ```{r coex-heatmap-plot-two-genes-sets, eval=FALSE, include=TRUE}
-invisible(
-  genesHeatmapPlot(
-    obj,
-    primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
-    secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
-    pValueThreshold = 0.001,
-    symmetric = FALSE
-  )
+genesHeatmapPlot(
+  obj,
+  primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
+  secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
+  pValueThreshold = 0.001,
+  symmetric = FALSE,
+  cores = 3L
 )
 ```
 

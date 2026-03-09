@@ -50,7 +50,9 @@ calculatePValue(
   objCOTAN,
   statType = "S",
   geneSubsetCol = vector(mode = "character"),
-  geneSubsetRow = vector(mode = "character")
+  geneSubsetRow = vector(mode = "character"),
+  cores = 1L,
+  chunkSize = 1024L
 )
 
 calculatePDI(

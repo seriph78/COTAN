@@ -280,6 +280,63 @@ calculateGDI <- function(objCOTAN,
 }
 
 
+# local utility wrapper for parallel estimation of dispersion
+runPValueCalc <- function(genesBatches, S, cores) {
+
+  ##  worker: operate on one batch of columns
+  worker <- function(geneBatch, S) {
+    tryCatch({
+
+      ## slice columns (single read avoids copying the rest)
+      subPVals <- as.matrix(S[, geneBatch, drop = FALSE])
+
+      ## 3. p-value of χ²₁ for each entry
+      subPVals <- stats::pchisq(subPVals, df = 1L, lower.tail = FALSE)
+
+      return(subPVals)
+    }, error = function(e) {
+      structure(list(e), class = "try-error")
+    })
+  }
+
+  if (cores != 1L) {
+    ##  tiny sandbox env to keep each worker lean
+    mini <- new.env(parent = baseenv())
+    mini$logThis <- logThis
+    mini$worker <- worker
+
+    environment(mini$worker) <- mini
+
+    ##  fork once, stream tasks
+    res <- parallel::mclapply(genesBatches,
+                              worker,
+                              S = S,
+                              mc.cores       = cores,
+                              mc.preschedule = TRUE, # default
+                              mc.cleanup     = TRUE, # default
+                              mc.set.seed    = TRUE) # default
+
+    # spawned errors are stored as try-error classes
+    resError <- unlist(lapply(res, inherits, "try-error"))
+    if (any(resError)) {
+      stop(res[[which(resError)[[1L]]]], call. = FALSE)
+    }
+  } else {
+    res <- lapply(genesBatches,
+                  worker,
+                  S = S)
+
+  }
+
+  ## glue results
+  res <- do.call(cbind, res)
+
+  rownames(res) <- rownames(S)
+  colnames(res) <- colnames(S)
+
+  return(res)
+}
+
 #' @details `calculatePValue()` computes the p-values for genes in the `COTAN`
 #'   object. It can be used genome-wide or by setting some specific genes of
 #'   interest. By default it computes the *p-values* using the `S` statistics
@@ -293,6 +350,9 @@ calculateGDI <- function(objCOTAN,
 #'   empty the function will do it genome-wide.
 #' @param geneSubsetRow an array of genes. It will be put in rows. If left empty
 #'   the function will do it genome-wide.
+#' @param cores number of cores to use. Default is 1.
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
 #'
 #' @return `calculatePValue()` returns a *p-value* `matrix` as `dspMatrix`
 #'
@@ -305,9 +365,12 @@ calculateGDI <- function(objCOTAN,
 #'
 #' @rdname GenesStatistics
 #'
-calculatePValue <- function(objCOTAN, statType = "S",
+calculatePValue <- function(objCOTAN,
+                            statType      = "S",
                             geneSubsetCol = vector(mode = "character"),
-                            geneSubsetRow = vector(mode = "character")) {
+                            geneSubsetRow = vector(mode = "character"),
+                            cores         = 1L,
+                            chunkSize     = 1024L) {
   startTime <- Sys.time()
 
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
@@ -337,7 +400,22 @@ calculatePValue <- function(objCOTAN, statType = "S",
   logThis(paste("Get p-values", strCol, "on columns and", strRow, "on rows"),
           logLevel = 2L)
 
-  pValues <- pchisq(as.matrix(S), df = 1L, lower.tail = FALSE)
+  cores <- handleMultiCore(cores)
+
+  ##  split genes into batches
+  spIdx <- parallel::splitIndices(length(geneSubsetCol),
+                                  ceiling(length(geneSubsetCol) / chunkSize))
+
+  spGenes <- lapply(spIdx, \(x) geneSubsetCol[x])
+
+  cores <- min(cores, length(spGenes))
+
+  logThis(paste0("Executing ", length(spGenes), " genes batches"),
+          logLevel = 3L)
+
+  pValues <- runPValueCalc(genesBatches = spGenes,
+                           S = S,
+                           cores = cores)
 
   if (allCols && allRows) {
     pValues <- pack(forceSymmetric(pValues))

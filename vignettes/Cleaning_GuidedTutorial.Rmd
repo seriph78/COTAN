@@ -83,17 +83,24 @@ dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
 
 datasetFileName <-
   file.path(dataDir, GEO, "GSM2861514_E175_All_Cells_DGE.txt.gz")
-corticalCellsFileName <-
-  file.path(dataDir, GEO, "GSM2861514_E175_Only_Cortical_Cells_DGE.txt.gz")
 
-if (!file.exists(datasetFileName)) {
-  GEOquery::getGEOSuppFiles(
-    GEO,
-    makeDirectory = TRUE,
-    baseDir = dataDir,
-    filter_regex = basename(datasetFileName),
-    fetch_files = TRUE
-  )
+# retries up to 5 times to get the dataset
+attempts <- 0L
+repeat {
+  if (!file.exists(datasetFileName)) {
+    GEOquery::getGEOSuppFiles(
+      GEO,
+      makeDirectory = TRUE,
+      baseDir = dataDir,
+      filter_regex = base::basename(datasetFileName),
+      fetch_files = TRUE
+    )
+  }
+
+  attempts <- attempts + 1L
+  if (attempts >= 5L) {
+    break
+  }
 }
 
 assertthat::assert_that(file.exists(datasetFileName))
@@ -133,6 +140,15 @@ head(vignette.cells.origin, 18)
 
 obj <- 
   addCondition(obj, condName = "origin", conditions = vignette.cells.origin)
+
+# Sometimes the condition is encoded in the cells ID using some separator
+# so it is useful to use the following function to retrieve it
+if (FALSE) { # This is not the case with the dataset currently in use
+  batch <- COTAN::conditionsFromNames(
+    names = getCells(obj), splitPattern = "_", fragmentNum = 2L)
+  names(batch) <- getCells(obj)
+  obj <- addCondition(obj, condName = "batch", conditions = batch)
+}
 ```
 
 # Data cleaning

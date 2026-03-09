@@ -9,13 +9,14 @@
 \alias{plotTheme}
 \title{Heatmap Plots}
 \usage{
-singleHeatmapDF(objCOTAN, genesLists, sets, pValueThreshold = 0.01)
+singleHeatmapDF(objCOTAN, genesLists, sets, pValueThreshold = 0.01, cores = 1L)
 
 heatmapPlot(
   objCOTAN = NULL,
   genesLists,
   sets = NULL,
   pValueThreshold = 0.01,
+  cores = 1L,
   conditions = NULL,
   dir = "."
 )
@@ -25,7 +26,8 @@ genesHeatmapPlot(
   primaryMarkers,
   secondaryMarkers = vector(mode = "character"),
   pValueThreshold = 0.01,
-  symmetric = TRUE
+  symmetric = TRUE,
+  cores = 1L
 )
 
 cellsHeatmapPlot(objCOTAN, cells = NULL, clusters = NULL)
@@ -42,6 +44,8 @@ genes in the columns}
 should be used. Defaults to all fields}
 
 \item{pValueThreshold}{The p-value threshold. Default is 0.01}
+
+\item{cores}{number of cores to use. Default is 1.}
 
 \item{conditions}{An \code{array} of prefixes indicating the different files}
 
@@ -116,12 +120,12 @@ groupMarkers <- list(G1 = primaryMarkers,
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
 
-hPlot <- heatmapPlot(objCOTAN, pValueThreshold = 0.05,
+hPlot <- heatmapPlot(objCOTAN, pValueThreshold = 0.05, cores = 3L,
                      genesLists = groupMarkers, sets = 2L:3L)
 plot(hPlot)
 
 ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,
-                           secondaryMarkers = groupMarkers,
+                           secondaryMarkers = groupMarkers, cores = 3L,
                            pValueThreshold = 0.05, symmetric = FALSE)
 plot(ghPlot)
 

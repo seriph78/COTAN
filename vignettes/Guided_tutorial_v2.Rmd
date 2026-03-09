@@ -64,21 +64,30 @@ dataSetFile <- file.path(dataDir, GEO, fName)
 
 dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
 
-if (!file.exists(dataSetFile)) {
-  GEOquery::getGEOSuppFiles(
-    GEO,
-    makeDirectory = TRUE,
-    baseDir = dataDir,
-    fetch_files = TRUE,
-    filter_regex = fName
-  )
+# retries up to 5 times to get the dataset
+attempts <- 0L
+repeat {
+  if (!file.exists(dataSetFile)) {
+    GEOquery::getGEOSuppFiles(
+      GEO,
+      makeDirectory = TRUE,
+      baseDir = dataDir,
+      filter_regex = fName,
+      fetch_files = TRUE
+    )
+  }
+
+  attempts <- attempts + 1L
+  if (attempts >= 5L) {
+    break
+  }
 }
 
 assertthat::assert_that(file.exists(dataSetFile))
 
-sampleDataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
+rawDataset <- read.csv(dataSetFile, sep = "\t", row.names = 1L)
 
-print(dim(sampleDataset))
+print(dim(rawDataset))
 ```
 
 Define a directory where the output will be stored.

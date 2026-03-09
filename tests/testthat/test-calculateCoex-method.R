@@ -545,7 +545,7 @@ test_that("Coex with negative dispersion genes", {
                               "g-000570", "g-000590"))
 
   hmDF <- singleHeatmapDF(obj, genesLists = groupMarkers, sets = 2L:3L,
-                          pValueThreshold = 0.05)
+                          pValueThreshold = 0.05, cores = 3L)
 
   numOtherGenes <- sum(lengths(groupMarkers)[2L:3L])
   expectedColNames <- c("g2", "g1", "coex", "pValue",
