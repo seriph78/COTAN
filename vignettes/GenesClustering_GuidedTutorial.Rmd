@@ -160,6 +160,8 @@ head(vignette.cells.origin, 18)
 
 obj <- 
   addCondition(obj, condName = "origin", conditions = vignette.cells.origin)
+
+rm(vignette.cells.origin)
 ```
 
 

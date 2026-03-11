@@ -160,6 +160,8 @@ head(vignette.cells.origin, 18)
 
 obj <- 
   addCondition(obj, condName = "origin", conditions = vignette.cells.origin)
+
+rm(vignette.cells.origin)
 ```
 
 
@@ -184,13 +186,10 @@ table(getCondition(obj, condName = "origin"))
 rm(vignette.split.clusters)
 ```
 
-# Establish Uniform Transcript cells' clusters
-
 ## COTAN analysis
 
-In this part, the `COTAN` model is calibrated:
-all the contingency tables are computed and used to get
-the statistics necessary to `COEX` evaluation and storing
+In this part, the `COTAN` model is calibrated, but the `COEX` matrix is not
+evaluated as it is not strictly necessary
 
 ```{r calculate-and-store-coex-matrix}
 obj <-
@@ -204,58 +203,108 @@ obj <-
 ```
 
 
-## Uniform Clustering
+# Differential Expression Analysis
 
-It is possible to obtain a cells' *clusterization* based on the concept of 
-*uniformity* of expression of the genes across the cells in each cluster.
-That is the clusters satisfy the null hypothesis of the `COTAN` model:
-the genes expression is not dependent on the cell in consideration.
+TODO:
 
-### First UT clusterization
+### Existing clusterizations
 
-Loading pre-calculated *clusterization* from data
+Loading pre-calculated *clusterizations* from data and call the
+`DEAOnClusters()`. This method estimates assess the differential expression of genes when partitioning cells into two subsets: the cluster and all other cells in the dataset. For each cluster `COTAN` calculates a *correlation coefficient*
+based on contingency tables that counts whether each gene occurs or not in
+cells inside or outside of the cluster.
 
-```{r load-pre-calculated-clusterization_split}
+These numbers are organized as one column for each cluster with a row for each
+gene and are a measure of the enrichment or depletion of the genes inside the
+clusters.
+
+```{r load-pre-calculated-clusterizations}
 data("vignette.split.clusters", package = "COTAN")
-splitClusters <- vignette.split.clusters
+data("vignette.merge.clusters", package = "COTAN")
 
 # explicitly calculate the DEA of the clusterization to store it
-splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
+vignette.split.coexDF <- DEAOnClusters(obj, clusters = vignette.split.clusters)
+vignette.merge.coexDF <- DEAOnClusters(obj, clusters = vignette.merge.clusters)
 
 obj <-
   addClusterization(
     obj,
     clName = "split",
-    clusters = splitClusters,
-    coexDF = splitCoexDF,
+    clusters = vignette.split.clusters,
+    coexDF = vignette.split.coexDF,
     override = FALSE
   )
-```
 
-
-### Clusterization statistics
-
-It is possible to extract some statistics about a stored *clusterization*:
-
-```{r extract-clusterization-summary_split}
-c(summaryData, summaryPlot) %<-%
-  clustersSummaryPlot(
+obj <-
+  addClusterization(
     obj,
-    clName = "split",
-    plotTitle = "split summary",
-    condName = "origin"
+    clName = "merge",
+    clusters = vignette.merge.clusters,
+    coexDF = vignette.merge.coexDF,
+    override = FALSE
   )
 
-head(summaryData, n = 10L)
-
-plot(summaryPlot)
+# these will be recovered from the COTAN obj when required
+rm(vignette.split.clusters, vignette.split.coexDF)
+rm(vignette.merge.clusters, vignette.merge.coexDF)
 ```
-The `ExpGenes` column contains the number of genes that are expressed in any
-cell of the relevant *cluster*, while the `ExpGenes25` column contains the
-number of genes expressed in at the least 25% of the cells of the relevant
-*cluster*
 
-### Relevance of marker genes for the `split` clusters
+## Manipulate a clusterization
+
+It is possible to improve on the labels in a *clusterization*, so that they
+look nicer in plots and lists, for example to ensure all labels have the
+**same** length.
+
+Another improvement is to reorder the labels of the *clusterization* so that *near* clusters have *near* labels
+
+```{r}
+# COTAn always stores clusterizations as factors.
+splitClusters <- getClusters(obj, clName = "split")
+
+# Use the utility factorToVector() to properly decay any named factor
+# to a named char array
+# splitClusters <- factorToVector(splitClusters)
+
+# In this case the following calls are no-op since the clusterization
+# were created by COTAN and so they already made nice and reordered
+
+splitClusters <- niceFactorLevels(splitClusters)
+
+c(splitClusters, splitCoexDF, perm) %<-% 
+  reorderClusterization(
+    obj,
+    clName = "split",
+    reverse = FALSE, 
+    coexDF = NULL,
+    useDEA = TRUE, # will use DEA columns with cosine distance
+    distance = NULL,
+    hclustMethod = "ward.D2"
+  )
+
+mergeClusters <- getClusters(obj, clName = "merge")
+```
+
+`COTAN` provides also easy facility to convert a *clusterization* from a
+*factor* to a *list* of *array* of cells and vice-versa.
+This can come useful if one wants to iterate separately on the cells of each
+cluster.
+
+```{r}
+splitClustersAsList <- toClustersList(splitClusters)
+
+assertthat::assert_that(length(splitClustersAsList) == nlevels(splitClusters))
+
+for (clName in names(splitClustersAsList)) {
+  cluster <- splitClustersAsList[[clName]]
+  clRawData <- getRawData(obj)[, cluster, drop = FALSE]
+  clRawData <- clRawData[clRawData > 0.0]
+  print(paste("Cluster", clName,
+              "has an average non-zero expression of", mean(clRawData)))
+  rm(clRawData)
+}
+```
+
+## Relevance of marker genes
 
 It is possible to visualize how relevant are some *marker genes* for the
 *clusters* comprising a given *clusterization*
@@ -272,6 +321,7 @@ layersGenes <- list(
 ```
 
 
+
 ```{r clusterization-data-visualization_split}
 c(splitHeatmap, splitScoreDF, splitPValueDF) %<-%
   clustersMarkersHeatmapPlot(
@@ -279,7 +329,8 @@ c(splitHeatmap, splitScoreDF, splitPValueDF) %<-%
     groupMarkers = layersGenes,
     clName = "split",
     kCuts = 2L,
-    adjustmentMethod = "holm"
+    adjustmentMethod = "holm",
+    condNameList = list("origin")
   )
 
 ComplexHeatmap::draw(splitHeatmap)
@@ -289,11 +340,27 @@ In the above graph, it is possible to see that the found clusters align
 well to the expression of the layers' genes.
 
 ```{r eval=FALSE}
-enrichment <- geneSetEnrichment(clustersCoex = coexDF,
-                                groupMarkers = groupMarkers)
+splitCoexDF <- getClusterizationData(obj, clName = "split")[["coex"]]
 
+enrichment <- geneSetEnrichment(clustersCoex = splitCoexDF,
+                                groupMarkers = layersGenes)
+
+enrichmentVals <-
+  t(as.matrix(enrichment[, -((ncol(enrichment)-1):ncol(enrichment))]))
+stats::heatmap(enrichmentVals, Colv = NA)
+
+tmp <- logFoldChangeOnClusters(obj, clName = "merge", floorLambdaFraction = 0.05)
 ```
 
+```{r}
+tmp <- reorderClusterization(obj, clName = "split")
+
+treePlot <-
+  clustersTreePlot(obj, kCuts = 4, clName = "split",
+                   useDEA = TRUE, )[["dend"]]
+
+plot(treePlot)
+```
 
 ### Merged UT clusterization
 

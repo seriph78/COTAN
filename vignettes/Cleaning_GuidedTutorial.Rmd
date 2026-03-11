@@ -159,6 +159,8 @@ head(vignette.cells.origin, 18)
 obj <- 
   addCondition(obj, condName = "origin", conditions = vignette.cells.origin)
 
+rm(vignette.cells.origin)
+
 # Sometimes the condition is encoded in the cells ID using some separator
 # so it is useful to use the following function to retrieve it
 if (FALSE) { # This is not the case with the dataset currently in use
