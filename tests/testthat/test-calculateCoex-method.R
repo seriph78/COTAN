@@ -435,7 +435,8 @@ test_that("Coex vs saved results", {
 
   pval <- calculatePValue(obj,
                           geneSubsetCol = genesNamesTest,
-                          geneSubsetRow = genesNamesTest)
+                          geneSubsetRow = genesNamesTest,
+                          cores = 3L)
 
   pValExp <- readRDS(file.path(getwd(), "pvalues.test.RDS"))
   expect_equal(pval, pValExp, tolerance = tolerance)
@@ -465,9 +466,9 @@ test_that("Coex vs saved results", {
                             zeroDiagonal = FALSE),
                coexTest, tolerance = tolerance)
 
-  pval <- calculatePValue(obj3, geneSubsetCol = genesNamesTest)
+  pval <- calculatePValue(obj3, geneSubsetRow = genesNamesTest, cores = 3L)
 
-  expect_equal(pval[genesNamesTest, ], pValExp, tolerance = tolerance)
+  expect_equal(pval[, genesNamesTest], pValExp, tolerance = tolerance)
 
   GDI <- calculateGDI(obj3)[genesNamesTest, ]
 
