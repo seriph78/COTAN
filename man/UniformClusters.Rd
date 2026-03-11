@@ -36,6 +36,7 @@ cellsUniformClustering(
   numReducedComp = 25L,
   hclustMethod = "ward.D2",
   initialClusters = NULL,
+  minimumUTClusterSize = 50L,
   initialIteration = 1L,
   saveObj = TRUE,
   outDir = "."
@@ -140,6 +141,9 @@ defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
 \item{initialClusters}{an existing \emph{clusterization} to use as starting point:
 the \emph{clusters} deemed \strong{uniform} will be kept and the remaining cells will
 be processed as normal}
+
+\item{minimumUTClusterSize}{the minimum number of cells for a cluster to be
+deemed potentially \emph{uniform transcript}}
 
 \item{initialIteration}{the number associated tot he first iteration; it
 defaults to 1. Useful in case of restart of the procedure to avoid
