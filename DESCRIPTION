@@ -70,6 +70,8 @@ Suggests:
     proto,
     spelling,
     knitr,
+    ragg,
+    Cairo,
     conflicted,
     data.table,
     gsubfn,

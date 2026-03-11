@@ -9,7 +9,7 @@
 #'   - `test.dataset.clusters1`, `test.dataset.clusters2`:
 #'     character vectors of cluster labels
 #'   - `vignette.split.clusters`, `vignette.merge.clusters`,
-#'     `vignette.merge2.clusters`: factors of cluster labels
+#'     `vignette.cells.origin`: factors of cluster labels
 #'
 #' @name Datasets
 NULL
@@ -92,6 +92,22 @@ NULL
 "test.dataset.clusters2"
 
 
+#' @details `vignette.cells.origin` is the factor discriminating between the
+#'   *cortical* cells and the *other* cells. This was constructed from the
+#'   following dataset: Mouse Cortex E17.5, `GEO`: `GSM2861514`
+#'   \url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM2861514}
+#'
+#' @format `vignette.cells.origin` is a `factor`
+#'
+#' @docType data
+#'
+#' @usage data(vignette.cells.origin)
+#'
+#' @rdname Datasets
+#'
+"vignette.cells.origin"
+
+
 #' @details `vignette.split.clusters` is the clusterization obtained running
 #'   `cellsUniformClustering()` on the vignette dataset (mouse cortex E17.5,
 #'   `GEO`: `GSM2861514`)
@@ -109,7 +125,8 @@ NULL
 
 #' @details `vignette.merge.clusters` is the clusterization obtained running
 #'   `mergeUniformCellsClusters()` on the vignette dataset (mouse cortex E17.5,
-#'   `GEO`: `GSM2861514`) using the previous *clusterization*
+#'   `GEO`: `GSM2861514`) starting from the `vignette.split.clusters`
+#'   *clusterization*, with a sequence of progressively relaxed *UT* checks
 #'
 #' @format `vignette.merge.clusters` is a `factor`
 #'
@@ -122,20 +139,6 @@ NULL
 "vignette.merge.clusters"
 
 
-#' @details `vignette.merge2.clusters` is the clusterization obtained re-running
-#'   `mergeUniformCellsClusters()` on the vignette dataset (mouse cortex E17.5,
-#'   `GEO`: `GSM2861514`) using the `vignette.split.clusters` *clusterization*,
-#'   but with a sequence of progressively relaxed checks
-#'
-#' @format `vignette.merge2.clusters` is a `factor`
-#'
-#' @docType data
-#'
-#' @usage data(vignette.merge2.clusters)
-#'
-#' @rdname Datasets
-#'
-"vignette.merge2.clusters"
 
 # ---------- Torch library section ----------
 

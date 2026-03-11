@@ -1,0 +1,585 @@
+---
+title: "Guided tutorial to cells Uniform Transcript cells' clustering using COTAN"
+author: 
+- name: "Silvia Giulia Galfrè"
+  affiliation: "Department of Computer Science, University of Pisa"
+- name: "Marco Fantozzi"
+  affiliation: "University of Parma"
+
+package: COTAN
+output:
+  BiocStyle::html_document:
+    keep_md: true
+vignette: >
+  %\VignetteIndexEntry{Uniform clustering using COTAN}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Preamble
+
+```{r knitr options, echo = FALSE, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7L,
+  fig.height = 5L,
+  dpi = 100
+)
+
+if (requireNamespace("ragg", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "ragg_png")
+} else if (requireNamespace("Cairo", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "cairo_png")
+} else {
+  knitr::opts_chunk$set(dev = "png")
+}
+```
+
+
+```{r preamble, message=FALSE, warning=FALSE}
+library(COTAN)
+library(zeallot)
+
+# necessary to solve precedence of overloads
+conflicted::conflict_prefer("%<-%", "zeallot")
+
+# enable multi-processing (not on Windows)
+prevOptState <- options(parallelly.fork.enable = TRUE)
+```
+
+# Introduction
+
+This tutorial shows the available tools in COTAN to help with genes' clustering
+
+### Setup
+
+Define a directory where the data and the output will be stored
+
+```{r setup-and-log}
+dataDir <- tempdir()
+print(dataDir)
+
+outDir <- dataDir
+
+# Log-level 2 was chosen to showcase better how the package works
+# In normal usage a level of 0 or 1 is more appropriate
+setLoggingLevel(2L)
+
+# This file will contain all the logs produced by the package
+# as if at the highest logging level
+setLoggingFile(file.path(outDir, "vignette_uniform_clustering.log"))
+```
+
+
+## Retrieving the data-set
+
+Download the data-set for `r "mouse cortex E17.5"` from
+`r "Yuzwa et al."` (2017)
+
+```{r download-data}
+GEO <- "GSM2861514"
+
+dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
+
+datasetFileName <-
+  file.path(dataDir, GEO, "GSM2861514_E175_All_Cells_DGE.txt.gz")
+
+# retries up to 5 times to get the dataset
+attempts <- 0L
+repeat {
+  if (!file.exists(datasetFileName)) {
+    GEOquery::getGEOSuppFiles(
+      GEO,
+      makeDirectory = TRUE,
+      baseDir = dataDir,
+      filter_regex = base::basename(datasetFileName),
+      fetch_files = TRUE
+    )
+  }
+
+  attempts <- attempts + 1L
+  if (attempts >= 5L) {
+    break
+  }
+}
+
+assertthat::assert_that(file.exists(datasetFileName))
+
+rawDataset <- read.csv(datasetFileName, sep = "\t", row.names = 1L)
+
+print(dim(rawDataset))
+```
+
+### Create the COTAN object
+
+Initialize the `COTAN` object with the row count table and
+the metadata from the experiment.
+
+```{r create-cotan-object}
+cond <- "mouse_cortex_E17.5"
+
+obj <- COTAN(raw = rawDataset)
+obj <-
+  initializeMetaDataset(
+    obj,
+    GEO = GEO,
+    sequencingMethod = "Drop_seq",
+    sampleCondition = cond
+  )
+
+logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
+        logLevel = 1L)
+```
+
+Assign to each cell its origin
+
+```{r add-origin-to-the-cotan-object}
+# mark cells origin
+data(vignette.cells.origin)
+head(vignette.cells.origin, 18)
+
+obj <- 
+  addCondition(obj, condName = "origin", conditions = vignette.cells.origin)
+```
+
+
+### Drop low quality cells
+
+```{r drop-low-quality-cells}
+# use previously established results to determine
+# which cells were dropped in the cleaning stage
+data(vignette.split.clusters)
+
+cellsToDrop <-
+  getCells(obj)[!(getCells(obj) %in% names(vignette.split.clusters))]
+
+obj <- dropGenesCells(obj, cells = cellsToDrop)
+
+# Log the remaining number of cells
+
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
+
+table(getCondition(obj, condName = "origin"))
+
+rm(vignette.split.clusters)
+```
+
+# Establish Uniform Transcript cells' clusters
+
+## COTAN analysis
+
+In this part, the `COTAN` model is calibrated:
+all the contingency tables are computed and used to get
+the statistics necessary to `COEX` evaluation and storing
+
+```{r calculate-and-store-coex-matrix}
+obj <-
+  proceedToCoex(
+    obj,
+    calcCoex = TRUE,
+    optimizeForSpeed = TRUE,
+    cores = 3L,
+    deviceStr = "cuda"
+  )
+```
+
+## Uniform Clustering
+
+It is possible to obtain a cells' *clusterization* based on the concept of 
+*uniformity* of expression of the genes across the cells in each cluster.
+That is the clusters satisfy the null hypothesis of the `COTAN` model:
+the genes expression is not dependent on the cell in consideration.
+
+### First UT clusterization
+
+There are two functions involved into obtaining a proper *clusterization*:
+the first is `cellsUniformClustering`. This function uses standard tools
+*clusterization* methods via a `COTAN` specific data input and reduction.
+The function then discards and re-clusters any *non-uniform* cluster.
+
+Please note that the most important parameters for the users are the
+`GDIThreshold`s inside the **Uniform Transcript** checkers: they determine how 
+strict is the check. Default constructed advance checks give a pretty strong
+guarantee of uniformity for the *cluster*.
+
+```{r create-ut-clusterization, eval=FALSE, include=TRUE}
+# This code is a too computationally heavy to be used in a vignette [~20 min.]
+# So the result was stored and will be re-loaded in the next chunk
+
+
+initialClusters <- NULL
+
+if (TRUE) {
+  # read from the last file among those named all_check_results_XX.csv
+  mergeDir <- file.path(outDir, cond, "reclustering")
+
+  resFiles <-
+    list.files(
+      path = mergeDir,
+      pattern = "partial_clusterization_.*csv",
+      full.names = TRUE
+    )
+
+  if (length(resFiles) != 0L) {
+    prevClustRes <-
+      read.csv(resFiles[length(resFiles)], header = TRUE, row.names = 1L)
+    initialClusters <- getColumnFromDF(prevClustRes, 1L)
+    initialClusters[is.na(initialClusters)] <- "-1"
+    initialClusters <- niceFactorLevels(initialClusters)
+  }
+}
+
+
+# default constructed checker is OK
+advChecker <- new("AdvancedGDIUniformityCheck")
+
+c(splitClusters, splitCoexDF) %<-%
+  cellsUniformClustering(
+    obj,
+    initialResolution = 0.8,
+    checker = advChecker,
+    dataMethod = "LogLikelihood", # of observed against expected data
+    useCoexEigen = TRUE, # project on `COEX` eigenvectors instead doing a `PCA`
+    numReducedComp = 50L,
+    minimumUTClusterSize = 50L, # too large values imply many un-clustered cells
+    initialClusters = initialClusters,
+    initialIteration = 1L,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    cores = 3L,
+    saveObj = TRUE, # save intermediate data for log and restart
+    outDir = outDir
+  )
+
+# add the newly found clusterization to the `COTAN` object
+obj <-
+  addClusterization(
+    obj,
+    clName = "split",
+    clusters = splitClusters,
+    coexDF = splitCoexDF
+  )
+
+table(splitClusters)
+```
+
+Loading pre-calculated *clusterization* from data
+
+```{r load-pre-calculated-clusterization_split}
+data("vignette.split.clusters", package = "COTAN")
+splitClusters <- vignette.split.clusters
+
+# explicitly calculate the DEA of the clusterization to store it
+splitCoexDF <- DEAOnClusters(obj, clusters = splitClusters)
+
+obj <-
+  addClusterization(
+    obj,
+    clName = "split",
+    clusters = splitClusters,
+    coexDF = splitCoexDF,
+    override = FALSE
+  )
+```
+
+### Extract `split` clusters' statistics
+
+It is possible to extract some statistics about a stored *clusterization*:
+
+```{r extract-clusterization-summary_split}
+c(summaryData, summaryPlot) %<-%
+  clustersSummaryPlot(
+    obj,
+    clName = "split",
+    plotTitle = "split summary",
+    condName = "origin"
+  )
+
+head(summaryData, n = 10L)
+```
+The `ExpGenes` column contains the number of genes that are expressed in any
+cell of the relevant *cluster*, while the `ExpGenes25` column contains the
+number of genes expressed in at the least 25% of the cells of the relevant
+*cluster*
+
+```{r summary-as-plot}
+plot(summaryPlot)
+```
+
+### Relevance of marker genes for the `split` clusters
+
+It is possible to visualize how relevant are some *marker genes* for the
+*clusters* comprising a given *clusterization*
+
+```{r define-layers-specific-genes}
+# these are some genes associated to each cortical layer
+layersGenes <- list(
+  "L1"   = c("Reln",   "Lhx5"),
+  "L2/3" = c("Cux1",   "Satb2"),
+  "L4"   = c("Rorb",   "Sox5"),
+  "L5/6" = c("Bcl11b", "Fezf2"),
+  "Prog" = c("Hes1",    "Vim")
+)
+```
+
+```{r clusterization-data-visualization_split}
+c(splitHeatmap, splitScoreDF, splitPValueDF) %<-%
+  clustersMarkersHeatmapPlot(
+    obj,
+    groupMarkers = layersGenes,
+    clName = "split",
+    kCuts = 2L,
+    adjustmentMethod = "holm"
+  )
+
+ComplexHeatmap::draw(splitHeatmap)
+```
+
+In the above graph, it is possible to see that the found clusters align
+well to the expression of the layers' genes.
+
+
+### `UMAP` of the `split` clusterization
+
+It is also possible to check how the *clusters* are spread in a `UMAP` plot that
+uses the same (or other) data reduction methods as the one used in the creation
+of the *clusterization*
+
+```{r clusterization-umap-plot-via-drm_split}
+c(umapPlot, cellsRDM) %<-%
+  cellsUMAPPlot(
+    obj,
+    clName = "split",
+    clusters = NULL,
+    useCoexEigen = TRUE, # Aligning these to `split` generation gives best res.
+    dataMethod = "LogLikelihood", # "AdjBinarized" is also a good choice
+    numComp = 50L, # number of components of the data reduced matrix
+    colors = NULL, # a list of user defined colors for the various clusters
+    numNeighbors = 30L, # UMAP related parameters
+    minPointsDist = 0.3 # UMAP related parameters
+  )
+
+plot(umapPlot)
+```
+
+### Merged UT clusterization
+
+Since the algorithm that creates the *clusters* is not directly geared to
+achieve cluster uniformity, there might be some *clusters* that can be merged
+back together and still be **Uniform Transcript**.
+
+This is the purpose of the function `mergeUniformCellsClusters()` that takes a
+existing *clusterization* and tries to merge pairs of cluster.
+If a pair forms a uniform cluster (via the uniformity check) the pair is
+actually merged.
+
+Since the number of possible pairs grows quadratically with the number of
+clusters, in order to avoid running the totality of the possible checks,
+the function relies on a *related cluster distance* to select the *a-priori*
+most likely to be merged.
+
+Again, here, the most important parameters for the users are the `GDIThreshold`s
+inside the **Uniform Transcript** checkers: they define how strict is the
+check. Default constructed advance check gives a pretty strong guarantee of
+uniformity for the *cluster*.
+
+If one wants to achieve a more *relaxed* merge, and thus less clusters overall,
+it is possible to define a *sequence* of checkers, each less stringent than the
+previous, that will be applied one after the other: this allows to execute first
+the merges that result in the *most* uniform clusters and only later merge those
+that satisfy only the relaxed checks.
+
+```{r merge-clusters-if-ut, eval=FALSE, include=TRUE}
+
+checkersList <-
+  list(
+    advChecker,
+    shiftCheckerThresholds(advChecker, 0.01), # Sensible threshold shifts really
+    shiftCheckerThresholds(advChecker, 0.03)  # depend on the dataset
+  )
+
+prevCheckRes <- data.frame()
+
+# The following code shows the case when one wants to re-use the already
+# calculated checks from the saved intermediate outputs.
+# This can apply in cases one wants to add a new checker to the list above or
+# in the cases the execution is interrupted prematurely.
+#
+# Note that a similar facility exists for the `cellsUniformClustering()`
+# function above.
+#
+if (TRUE) {
+  # read from the last file among those named all_check_results_XX.csv
+  mergeDir <- file.path(outDir, cond, "leafs_merge")
+
+  resFiles <-
+    list.files(
+      path = mergeDir,
+      pattern = "all_check_results_.*csv",
+      full.names = TRUE
+    )
+
+  if (length(resFiles) != 0L) {
+    prevCheckRes <-
+      read.csv(resFiles[length(resFiles)], header = TRUE, row.names = 1L)
+  }
+}
+
+c(mergedClusters, mergedCoexDF) %<-%
+  mergeUniformCellsClusters(
+    obj,
+    clusters = splitClusters,
+    checkers = checkersList,
+    allCheckResults = prevCheckRes,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    cores = 6L,
+    useDEA = TRUE,
+    saveObj = TRUE,
+    outDir = outDir
+  )
+
+# add the newly found clusterization to the `COTAN` object
+obj <-
+  addClusterization(
+    obj,
+    clName = "merge",
+    override = TRUE,
+    clusters = mergedClusters,
+    coexDF = mergedCoexDF
+  )
+
+table(mergedClusters)
+```
+
+
+Loading pre-calculated *clusterization* from data
+
+```{r load-pre-calculated-clusterization_merge}
+data("vignette.merge.clusters", package = "COTAN")
+mergedClusters <- vignette.merge.clusters[getCells(obj)]
+
+# explicitly calculate the DEA of the clusterization to store it
+mergedCoexDF <- DEAOnClusters(obj, clusters = mergedClusters)
+
+obj <-
+  addClusterization(
+    obj,
+    clName = "merge",
+    clusters = mergedClusters,
+    coexDF = mergedCoexDF,
+    override = FALSE
+  )
+
+# this gives immediate visual information about which clusters were merged
+table(splitClusters, mergedClusters)
+```
+
+### Extract `merge` clusters' statistics
+
+It is possible to extract some statistics about a stored *clusterization*:
+
+```{r extract-clusterization-summary_merge}
+c(summaryData, summaryPlot) %<-%
+  clustersSummaryPlot(
+    obj,
+    clName = "merge",
+    plotTitle = "merge summary",
+    condName = "origin"
+  )
+
+head(summaryData, n = 10L)
+
+plot(summaryPlot)
+```
+
+### Relevance of marker genes for the `merge` clusters
+
+Again, it is possible to visualize how relevant are the *marker genes* from
+above:
+
+```{r  clusterization-data-visualization_merge}
+c(mergeHeatmap, mergeScoresDF, mergePValuesDF) %<-%
+  clustersMarkersHeatmapPlot(
+    obj,
+    groupMarkers = layersGenes,
+    clName = "merge",
+    condNameList = list("origin")
+  )
+
+ComplexHeatmap::draw(mergeHeatmap)
+```
+
+It is also possible to use any *clusterization* as if a condition:
+
+```{r}
+c(mergeVsSplitHeatmap, ..) %<-%
+  clustersMarkersHeatmapPlot(
+    obj,
+    clName = "merge",
+    condNameList = list("split"),
+    conditionsList = list(splitClusters)
+  )
+
+ComplexHeatmap::draw(mergeVsSplitHeatmap)
+```
+
+### `UMAP` of the `merge` clusterization
+
+It is also possible to check how the *clusters* are spread in a `UMAP` plot that
+uses the same (or other) data reduction methods as the one used in the creation
+of the *clusterization*
+
+Again it is possible to plot the *clusterization* on a `UMAP` plot
+
+```{r clusterization-umap-plot-via-drm_merge}
+c(umapPlot, .) %<-%
+  cellsUMAPPlot(
+    obj,
+    clName = "merge",
+    clusters = NULL,
+    useCoexEigen = TRUE,
+    dataMethod = "LogLikelihood", # "AdjBinarized" is also a good choice
+    numComp = 50L, # number of components of the data reduced matrix
+    colors = NULL, # a list of user defined colors for the various clusters
+    numNeighbors = 30L, # UMAP related parameters
+    minPointsDist = 0.3 # UMAP related parameters
+  )
+
+plot(umapPlot)
+```
+
+
+## Vignette clean-up stage
+
+The next few lines are just to clean.
+
+```{r clean-up}
+if (file.exists(file.path(outDir, paste0(cond, ".cotan.RDS")))) {
+  # delete file if it exists
+  file.remove(file.path(outDir, paste0(cond, ".cotan.RDS")))
+}
+if (file.exists(file.path(outDir, paste0(cond, "_times.csv")))) {
+  # delete file if it exists
+  file.remove(file.path(outDir, paste0(cond, "_times.csv")))
+}
+if (dir.exists(file.path(outDir, cond))) {
+  unlink(file.path(outDir, cond), recursive = TRUE)
+}
+# if (dir.exists(file.path(outDir, GEO))) {
+#   unlink(file.path(outDir, GEO), recursive = TRUE)
+# }
+
+# stop logging to file
+setLoggingFile("")
+file.remove(file.path(outDir, "vignette_uniform_clustering.log"))
+
+options(prevOptState)
+```
+
+```{r closure}
+Sys.time()
+
+sessionInfo()
+```

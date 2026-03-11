@@ -1,0 +1,397 @@
+---
+title: "Guided tutorial to genes' clustering using COTAN"
+author: 
+- name: "Silvia Giulia Galfrè"
+  affiliation: "Department of Computer Science, University of Pisa"
+- name: "Marco Fantozzi"
+  affiliation: "University of Parma"
+
+package: COTAN
+output:
+  BiocStyle::html_document:
+    keep_md: true
+vignette: >
+  %\VignetteIndexEntry{Genes' clustering using COTAN}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Preamble
+
+```{r knitr options, echo = FALSE, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7L,
+  fig.height = 5L,
+  dpi = 100
+)
+
+if (requireNamespace("ragg", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "ragg_png")
+} else if (requireNamespace("Cairo", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "cairo_png")
+} else {
+  knitr::opts_chunk$set(dev = "png")
+}
+```
+
+
+```{r preamble, message=FALSE, warning=FALSE}
+library(COTAN)
+library(zeallot)
+
+# necessary to solve precedence of overloads
+conflicted::conflict_prefer("%<-%", "zeallot")
+
+# enable multi-processing (not on Windows)
+prevOptState <- options(parallelly.fork.enable = TRUE)
+```
+
+# Introduction
+
+This tutorial shows the available tools in COTAN to help with genes' clustering
+
+### Setup
+
+Define a directory where the data and the output will be stored
+
+```{r setup-and-log}
+dataDir <- tempdir()
+print(dataDir)
+
+outDir <- dataDir
+
+# Log-level 2 was chosen to showcase better how the package works
+# In normal usage a level of 0 or 1 is more appropriate
+setLoggingLevel(2L)
+
+# This file will contain all the logs produced by the package
+# as if at the highest logging level
+setLoggingFile(file.path(outDir, "vignette_genes_clustering.log"))
+```
+
+
+## Retrieving the data-set
+
+Download the data-set for `r "mouse cortex E17.5"` from
+`r "Yuzwa et al."` (2017)
+
+```{r download-data}
+GEO <- "GSM2861514"
+
+dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
+
+datasetFileName <-
+  file.path(dataDir, GEO, "GSM2861514_E175_All_Cells_DGE.txt.gz")
+
+# retries up to 5 times to get the dataset
+attempts <- 0L
+repeat {
+  if (!file.exists(datasetFileName)) {
+    GEOquery::getGEOSuppFiles(
+      GEO,
+      makeDirectory = TRUE,
+      baseDir = dataDir,
+      filter_regex = base::basename(datasetFileName),
+      fetch_files = TRUE
+    )
+  }
+
+  attempts <- attempts + 1L
+  if (attempts >= 5L) {
+    break
+  }
+}
+
+assertthat::assert_that(file.exists(datasetFileName))
+
+rawDataset <- read.csv(datasetFileName, sep = "\t", row.names = 1L)
+
+print(dim(rawDataset))
+```
+
+### Create the COTAN object
+
+Initialize the `COTAN` object with the row count table and
+the metadata from the experiment.
+
+```{r create-cotan-object}
+cond <- "mouse_cortex_E17.5"
+
+obj <- COTAN(raw = rawDataset)
+obj <-
+  initializeMetaDataset(
+    obj,
+    GEO = GEO,
+    sequencingMethod = "Drop_seq",
+    sampleCondition = cond
+  )
+
+logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
+        logLevel = 1L)
+```
+
+Assign to each cell its origin
+
+```{r add-origin-to-the-cotan-object}
+# mark cells origin
+data(vignette.cells.origin)
+head(vignette.cells.origin, 18)
+
+obj <- 
+  addCondition(obj, condName = "origin", conditions = vignette.cells.origin)
+```
+
+
+### Drop low quality cells
+
+```{r drop-low-quality-cells}
+# use previously established results to determine
+# which cells were dropped in the cleaning stage
+data(vignette.split.clusters)
+
+cellsToDrop <-
+  getCells(obj)[!(getCells(obj) %in% names(vignette.split.clusters))]
+
+obj <- dropGenesCells(obj, cells = cellsToDrop)
+
+# Log the remaining number of cells
+
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
+
+table(getCondition(obj, condName = "origin"))
+
+rm(vignette.split.clusters)
+```
+
+# Establish genes' clusters
+
+## COTAN analysis
+
+In this part, the `COTAN` model is calibrated:
+all the contingency tables are computed and used to get
+the statistics necessary to `COEX` evaluation and storing
+
+```{r calculate-and-store-coex-matrix}
+obj <-
+  proceedToCoex(
+    obj,
+    calcCoex = TRUE,
+    optimizeForSpeed = TRUE,
+    cores = 3L,
+    deviceStr = "cuda"
+  )
+```
+
+### Get data tables and stored `COEX` 
+
+Sometimes we can also be interested in the numbers present directly in the
+contingency tables for two specific genes.
+
+```{r contingency-tables-and-coex-for-gene-pair}
+cat("Contingency Tables:")
+print(contingencyTables(obj, g1 = "Satb2", g2 = "Bcl11b"))
+
+cat(paste("Corresponding COEX value:",
+          getGenesCoex(obj, zeroDiagonal = FALSE)["Satb2", "Bcl11b"]))
+```
+
+Another useful function is `getGenesCoex()`. This can be used to extract
+the whole or a partial `COEX` matrix from a `COTAN` object.
+
+```{r display-small-chunk-of-coex-matrix}
+# Extract the whole matrix
+coex <- getGenesCoex(obj, zeroDiagonal = FALSE)
+coex[1000L:1005L, 1000L:1005L]
+```
+
+```{r get-coex-sub-matrix}
+# For a partial matrix
+coex_sm <- getGenesCoex(obj, genes = c("Satb2", "Bcl11b", "Fezf2"),
+                        zeroDiagonal = FALSE)
+coex_sm[2001:2010, ]
+```
+
+## Analysis of the elaborated data: `GDI`
+
+To calculate and store the *Global Differentiation Index* (`GDI`)
+use the following:
+
+```{r calculate-and-store-gdi}
+gdiDF <- calculateGDI(obj, cores = 3L)
+
+# Show the most *differentially expressed* genes
+perm <- order(gdiDF[["GDI"]], decreasing = TRUE)
+head(gdiDF[perm, ], n = 10)
+
+# This will store only the $GDI column
+obj <- storeGDI(obj, genesGDI = gdiDF)
+```
+
+The other two columns return the sum of the normalized data rows
+and the percentage of cells expressing the gene respectively.
+
+### Define genes lists
+
+```{r genes-list-definition}
+genesLists <- list(
+  # Neural Progenitor Genes
+  "NPGs" = c("Nes", "Vim", "Sox2", "Sox1", "Notch1", "Hes1", "Hes5", "Pax6"),
+  # Pan Neural Genes
+  "PNGs" = c("Map2", "Tubb3", "Neurod1", "Nefm", "Nefl", "Dcx", "Tbr1"),
+  # House Keeping
+  "hk"   = c("Calm1", "Cox6b1", "Ppia", "Rpl18", "Cox7c", "Erh", "H3f3a",
+             "Taf1", "Taf2", "Gapdh", "Actb", "Golph3", "Zfr", "Sub1",
+             "Tars", "Amacr")
+)
+```
+
+### `GDI` Plot
+
+The next function can either plot the `GDI` from the dataset directly or
+use the already stored data.
+
+It marks the given threshold 1.40 (in red) and
+the 50% and 75% quantiles (in blue).
+We can also specify some gene sets (three in this case) that
+we want to label explicitly in the `GDI` plot.
+
+```{r gdi-plot-with-marked-genes}
+GDIPlot(obj, genes = genesLists, GDIThreshold = 1.40)
+```
+
+In the picture above it is possible to see how, as expected,
+the house-keeping genes (`hk`) have generally a low `GDI` value.
+
+
+### Store the calibrated object for future analysis
+
+```{r save-cotan-obj, eval=FALSE}
+# saving the structure
+saveRDS(obj, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
+```
+
+
+## Heatmaps
+
+To perform the Gene Pair Analysis, we can plot a heatmap of the `COEX` values
+between two gene sets.
+
+We have to define the different gene sets (`list.genes`) in a list.
+The first set will be used to define the columns;
+then we can choose which sets to use in the function parameter sets
+(for example, from 1 to 3).
+
+```{r coex-heatmap-plot-for-selected-genes}
+plot(heatmapPlot(obj, genesLists = genesLists, sets = 1L:3L, cores = 3L))
+```
+
+
+```{r define-layers-specific-genes}
+layersGenes <- list(
+  "L1"   = c("Reln",   "Lhx5"),
+  "L2/3" = c("Cux1",   "Satb2"),
+  "L4"   = c("Rorb",   "Sox5"),
+  "L5/6" = c("Bcl11b", "Fezf2"),
+  "Prog" = c("Hes1",    "Vim", "Dummy")
+)
+```
+
+We can also plot a general heatmap of `COEX` values based on some markers like
+the following one.
+
+```{r coex-heatmap-plot-for-primary-marker-genes}
+layersMarkers <- c("Satb2", "Bcl11b", "Vim", "Hes1")
+
+genesHeatmapPlot(
+  obj,
+  primaryMarkers = layersMarkers,
+  pValueThreshold = 0.0001,
+  symmetric = TRUE,
+  cores = 3L
+)
+```
+
+```{r coex-heatmap-plot-two-genes-sets, eval=FALSE, include=TRUE}
+genesHeatmapPlot(
+  obj,
+  primaryMarkers = c("Satb2", "Bcl11b", "Fezf2"),
+  secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
+  pValueThreshold = 0.001,
+  symmetric = FALSE,
+  cores = 3L
+)
+```
+
+## Establishing genes' clusters
+
+`COTAN` provides a way to establish genes' clusters given some lists of markers
+
+```{r establish-genes-clusters}
+c(gSpace, eigPlot, pcaGenesClDF, treePlot) %<-%
+  establishGenesClusters(
+    obj,
+    groupMarkers = layersGenes,
+    numGenesPerMarker = 25L,
+    kCuts = 5L
+  )
+
+plot(eigPlot)
+```
+
+```{r genes-tree-plot}
+plot(treePlot)
+```
+
+### `UMAP` plot
+
+```{r genes-umap-plot}
+colSelection <- vapply(pcaGenesClDF, is.numeric, logical(1L))
+
+genesUmapPl <-
+  UMAPPlot(
+    pcaGenesClDF[, colSelection, drop = FALSE],
+    clusters = getColumnFromDF(pcaGenesClDF, "hclust"),
+    elements = layersGenes,
+    title = "Genes' clusters UMAP Plot",
+    numNeighbors = 32L,
+    minPointsDist = 0.25
+  )
+
+plot(genesUmapPl)
+```
+
+
+## Vignette clean-up stage
+
+The next few lines are just to clean.
+
+```{r final-clean-up}
+if (file.exists(file.path(outDir, paste0(cond, ".cotan.RDS")))) {
+  # delete file if it exists
+  file.remove(file.path(outDir, paste0(cond, ".cotan.RDS")))
+}
+if (file.exists(file.path(outDir, paste0(cond, "_times.csv")))) {
+  # delete file if it exists
+  file.remove(file.path(outDir, paste0(cond, "_times.csv")))
+}
+if (dir.exists(file.path(outDir, cond))) {
+  unlink(file.path(outDir, cond), recursive = TRUE)
+}
+# if (dir.exists(file.path(outDir, GEO))) {
+#   unlink(file.path(outDir, GEO), recursive = TRUE)
+# }
+
+# stop logging to file
+setLoggingFile("")
+file.remove(file.path(outDir, "vignette_genes_clustering.log"))
+
+options(prevOptState)
+```
+
+```{r closure}
+Sys.time()
+
+sessionInfo()
+```
