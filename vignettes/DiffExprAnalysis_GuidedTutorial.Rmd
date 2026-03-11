@@ -24,7 +24,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.width = 7L,
   fig.height = 5L,
-  dpi = 100
+  dpi = 100,
+  fig.crop = FALSE
 )
 
 if (requireNamespace("ragg", quietly = TRUE)) {
@@ -57,7 +58,9 @@ This tutorial shows the available tools in COTAN to help with genes' clustering
 Define a directory where the data and the output will be stored
 
 ```{r setup-and-log}
-dataDir <- tempdir()
+dataDir <- file.path(tempdir(), "COTAN_vignette_data")
+dir.create(dataDir, recursive = TRUE, showWarnings = FALSE)
+
 print(dataDir)
 
 outDir <- dataDir
@@ -85,26 +88,42 @@ dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
 datasetFileName <-
   file.path(dataDir, GEO, "GSM2861514_E175_All_Cells_DGE.txt.gz")
 
+
 # retries up to 5 times to get the dataset
 attempts <- 0L
-repeat {
+maxAttempts <- 5L
+ok <- FALSE
+
+while (attempts < maxAttempts && !ok) {
+  attempts <- attempts + 1L
+
   if (!file.exists(datasetFileName)) {
-    GEOquery::getGEOSuppFiles(
-      GEO,
-      makeDirectory = TRUE,
-      baseDir = dataDir,
-      filter_regex = base::basename(datasetFileName),
-      fetch_files = TRUE
+    res <- try(
+      GEOquery::getGEOSuppFiles(
+        GEO = GEO,
+        makeDirectory = TRUE,
+        baseDir = dataDir,
+        filter_regex = base::basename(datasetFileName),
+        fetch_files = TRUE
+      ),
+      silent = TRUE
     )
   }
 
-  attempts <- attempts + 1L
-  if (attempts >= 5L) {
-    break
+  ok <- file.exists(datasetFileName)
+
+  if (!ok && attempts < maxAttempts) {
+    Sys.sleep(1)
   }
 }
 
-assertthat::assert_that(file.exists(datasetFileName))
+assertthat::assert_that(
+  ok,
+  msg = paste0(
+    "Failed to retrieve file '", datasetFileName,
+    "' after ", maxAttempts, " attempts."
+  )
+)
 
 rawDataset <- read.csv(datasetFileName, sep = "\t", row.names = 1L)
 
