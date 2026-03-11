@@ -1,10 +1,17 @@
 
+Added new vignette for *Differential Expression Analysis*
+
+Refactored vignette into 3 separate files for improved theme focus
+
+Allowed the function `calculatePValue()` to run on multiple cores
+
+Added parameter `minimumUTClusterSize` to `cellsUniformClustering()` function
+
 ## 2.11.3
 
 Solved various linting issues and `BiocCheck` warning
 
 Now the function `canUseTorch()` is exported
-
 
 ## 2.11.2
 
