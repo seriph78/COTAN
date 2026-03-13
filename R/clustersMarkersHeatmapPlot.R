@@ -86,16 +86,12 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)
 
-  if (is_empty(coexDF)) {
-    if (clName %in% getClusterizations(objCOTAN)) {
-      coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
-    }
-    if (is_empty(coexDF)) {
-      coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
-    }
-  }
-
+  # these are empty datasets but with the right columns!
   genesGroupMap <- NULL
+  scoreDF <- as.data.frame(matrix(nrow = 0L, ncol = nlevels(clusters),
+                                  dimnames = list(NULL, levels(clusters))))
+  pValueDF <- scoreDF
+
   if (!is_empty(groupMarkers)) {
     genesGroupMap <-
       unlist(lapply(
@@ -107,16 +103,27 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
       ))
 
     genesGroupMap <- factor(genesGroupMap, levels = names(groupMarkers))
+
+    if (is_empty(coexDF)) {
+      if (clName %in% getClusterizations(objCOTAN)) {
+        coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
+      }
+      if (is_empty(coexDF)) {
+        coexDF <- DEAOnClusters(objCOTAN, clusters = clusters)
+      }
+    }
+
+    scoreDF <- coexDF[names(genesGroupMap), , drop = FALSE]
+
+    pValueDF <- pValueFromDEA(coexDF = coexDF, numCells = getNumCells(objCOTAN),
+                              adjustmentMethod = adjustmentMethod)
+    pValueDF <- pValueDF[names(genesGroupMap), , drop = FALSE]
+
+    # row-names must be unique
+    uniqueGeneNames <- make.unique(names = names(genesGroupMap), sep = "_")
+    rownames(scoreDF)  <- uniqueGeneNames
+    rownames(pValueDF) <- uniqueGeneNames
   }
-
-  scoreDF <- coexDF[names(genesGroupMap), , drop = FALSE]
-  rownames(scoreDF) <- names(genesGroupMap)
-
-  pValueDF <- pValueFromDEA(coexDF = coexDF, numCells = getNumCells(objCOTAN),
-                            adjustmentMethod = adjustmentMethod)
-  pValueDF <- pValueDF[names(genesGroupMap), , drop = FALSE]
-  rownames(pValueDF) <- names(genesGroupMap)
-
 
   dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
   dend <- set(dend, "branches_lwd", 2L)
@@ -149,7 +156,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
 
       condDF <- as.data.frame(condDF)
       rownames(condDF) <- condDF[[1L]]
-      condDF <- condDF[colnames(scoreDF), ]
+      condDF <- condDF[levels(clusters), ]
       condDF[is.na(condDF)] <- 0L
 
       conds <- colnames(condDF)[2L:nCols]
@@ -230,7 +237,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     row_dend_width = unit(2.0, "cm"),
     cluster_columns = FALSE,  # Columns are not clustered but grouped
     col = colorFunc,
-    column_split = genesGroupMap,      # Group columns by gene groups
+    column_split = genesGroupMap,        # Group columns by gene groups
     column_gap = unit(1.0, "mm"),        # Gap between gene groups
     column_names_gp = gpar(fontsize = 10L, angle = 45.0, hjust = 1.0),
     row_names_gp = gpar(fontsize = 10L),

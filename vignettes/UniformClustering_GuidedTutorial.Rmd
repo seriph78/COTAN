@@ -194,6 +194,10 @@ In this part, the `COTAN` model is calibrated:
 all the contingency tables are computed and used to get
 the statistics necessary to `COEX` evaluation and storing
 
+The `COEX` coefficient between the two genes, measures the deviation between
+the 2×2 contingency table of the joint occurrence of the genes in the cells,
+and their expected co-expression assuming independence.
+
 ```{r calculate-and-store-coex-matrix}
 obj <-
   proceedToCoex(
@@ -534,7 +538,7 @@ ComplexHeatmap::draw(mergeHeatmap)
 
 It is also possible to use any *clusterization* as if a condition:
 
-```{r}
+```{r clusterization-data-visualization_merge-vs-split}}
 c(mergeVsSplitHeatmap, ..) %<-%
   clustersMarkersHeatmapPlot(
     obj,

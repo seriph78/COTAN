@@ -1,6 +1,9 @@
 
 Added new vignette for *Differential Expression Analysis*
 
+Fixed minor bug in `clustersMarkersHeatmapPlot()` about genes duplication in
+markers' list
+
 Refactored vignette into 3 separate files for improved theme focus
 
 Allowed the function `calculatePValue()` to run on multiple cores
