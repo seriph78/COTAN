@@ -1,0 +1,592 @@
+---
+title: "Guided tutorial to Differential Expression Analysis using COTAN"
+author: 
+- name: "Silvia Giulia Galfrè"
+  affiliation: "Department of Computer Science, University of Pisa"
+- name: "Marco Fantozzi"
+  affiliation: "University of Parma"
+
+package: COTAN
+output:
+  BiocStyle::html_document:
+    keep_md: true
+vignette: >
+  %\VignetteIndexEntry{DEA using COTAN}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Preamble
+
+```{r knitr options, echo = FALSE, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7L,
+  fig.height = 5L,
+  dpi = 100,
+  fig.crop = FALSE
+)
+
+if (requireNamespace("ragg", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "ragg_png")
+} else if (requireNamespace("Cairo", quietly = TRUE)) {
+  knitr::opts_chunk$set(dev = "cairo_png")
+} else {
+  knitr::opts_chunk$set(dev = "png")
+}
+```
+
+```{r preamble, message=FALSE, warning=FALSE}
+library(COTAN)
+library(zeallot)
+
+# necessary to solve precedence of overloads
+conflicted::conflict_prefer("%<-%", "zeallot")
+
+# enable multi-processing (not on Windows)
+prevOptState <- options(parallelly.fork.enable = TRUE)
+```
+
+# Introduction
+
+This tutorial shows the available tools in COTAN to help with genes' clustering
+
+### Setup
+
+Define a directory where the data and the output will be stored
+
+```{r setup-and-log}
+dataDir <- file.path(tempdir(), "COTAN_vignette_data")
+dir.create(dataDir, recursive = TRUE, showWarnings = FALSE)
+
+print(dataDir)
+
+outDir <- dataDir
+
+# Log-level 2 was chosen to showcase better how the package works
+# In normal usage a level of 0 or 1 is more appropriate
+setLoggingLevel(2L)
+
+# This file will contain all the logs produced by the package
+# as if at the highest logging level
+setLoggingFile(file.path(outDir, "vignette_DEA.log"))
+```
+
+## Retrieving the data-set
+
+Download the data-set for `r "mouse cortex E17.5"` from `r "Yuzwa et al."` (2017)
+
+```{r download-data}
+GEO <- "GSM2861514"
+
+dir.create(file.path(dataDir, GEO), showWarnings = FALSE)
+
+datasetFileName <-
+  file.path(dataDir, GEO, "GSM2861514_E175_All_Cells_DGE.txt.gz")
+
+
+# retries up to 5 times to get the dataset
+attempts <- 0L
+maxAttempts <- 5L
+ok <- FALSE
+
+while (attempts < maxAttempts && !ok) {
+  attempts <- attempts + 1L
+
+  if (!file.exists(datasetFileName)) {
+    res <- try(
+      GEOquery::getGEOSuppFiles(
+        GEO = GEO,
+        makeDirectory = TRUE,
+        baseDir = dataDir,
+        filter_regex = base::basename(datasetFileName),
+        fetch_files = TRUE
+      ),
+      silent = TRUE
+    )
+  }
+
+  ok <- file.exists(datasetFileName)
+
+  if (!ok && attempts < maxAttempts) {
+    Sys.sleep(1)
+  }
+}
+
+assertthat::assert_that(
+  ok,
+  msg = paste0(
+    "Failed to retrieve file '", datasetFileName,
+    "' after ", maxAttempts, " attempts."
+  )
+)
+
+rawDataset <- read.csv(datasetFileName, sep = "\t", row.names = 1L)
+
+print(dim(rawDataset))
+```
+
+### Create the COTAN object
+
+Initialize the `COTAN` object with the row count table and the metadata from the experiment.
+
+```{r create-cotan-object}
+cond <- "mouse_cortex_E17.5"
+
+obj <- COTAN(raw = rawDataset)
+obj <-
+  initializeMetaDataset(
+    obj,
+    GEO = GEO,
+    sequencingMethod = "Drop_seq",
+    sampleCondition = cond
+  )
+
+logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
+        logLevel = 1L)
+```
+
+Assign to each cell its origin
+
+```{r add-origin-to-the-cotan-object}
+# mark cells origin
+data(vignette.cells.origin)
+head(vignette.cells.origin, 18)
+
+obj <- 
+  addCondition(obj, condName = "origin", conditions = vignette.cells.origin)
+
+rm(vignette.cells.origin)
+```
+
+### Drop low quality cells
+
+```{r drop-low-quality-cells}
+# use previously established results to determine
+# which cells were dropped in the cleaning stage
+data(vignette.split.clusters)
+
+cellsToDrop <-
+  getCells(obj)[!(getCells(obj) %in% names(vignette.split.clusters))]
+
+obj <- dropGenesCells(obj, cells = cellsToDrop)
+
+# Log the remaining number of cells
+
+logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
+
+table(getCondition(obj, condName = "origin"))
+
+rm(vignette.split.clusters)
+```
+
+## COTAN analysis
+
+In this part, the `COTAN` model is calibrated, but the `COEX` matrix is not evaluated as it is not strictly necessary
+
+```{r calculate-and-store-coex-matrix}
+obj <-
+  proceedToCoex(
+    obj,
+    calcCoex = FALSE,
+    optimizeForSpeed = TRUE,
+    cores = 3L,
+    deviceStr = "cuda"
+  )
+```
+
+# Differential Expression Analysis
+
+TODO:
+
+### Existing clusterizations
+
+Loading pre-calculated *clusterizations* from data and call the
+`DEAOnClusters()`. This method estimates assess the differential expression of
+genes when partitioning cells into two subsets: the cluster and all other cells
+in the dataset.
+For each cluster `COTAN` calculates a *correlation coefficient* based on
+contingency tables that counts whether each gene occurs or not in cells inside
+or outside of the cluster.
+
+These numbers are organized as one column for each cluster with a row for each
+gene and are a measure of the enrichment or depletion of the genes inside the
+clusters.
+
+```{r load-pre-calculated-clusterizations}
+data("vignette.split.clusters", package = "COTAN")
+data("vignette.merge.clusters", package = "COTAN")
+
+vignette.split.clusters <-
+  asClusterization(
+    vignette.split.clusters, # a named vector/factor/data.frame
+    allCells = getCells(obj) # used only to check names are coherent
+  )
+vignette.merge.clusters <-
+  asClusterization(
+    vignette.merge.clusters, # a named vector/factor/data.frame
+    allCells = getCells(obj) # used only to check names are coherent
+  )
+
+# explicitly calculate the DEA of the clusterization to store it
+vignette.split.coexDF <-
+  DEAOnClusters(obj, clusters = vignette.split.clusters)
+vignette.merge.coexDF <-
+  DEAOnClusters(obj, clusters = vignette.merge.clusters)
+
+obj <-
+  addClusterization(
+    obj,
+    clName = "split",
+    clusters = vignette.split.clusters,
+    coexDF = vignette.split.coexDF,
+    override = FALSE
+  )
+
+obj <-
+  addClusterization(
+    obj,
+    clName = "merge",
+    clusters = vignette.merge.clusters,
+    coexDF = vignette.merge.coexDF,
+    override = FALSE
+  )
+
+# these will be recovered from the COTAN obj as needed
+rm(vignette.split.clusters, vignette.split.coexDF)
+rm(vignette.merge.clusters, vignette.merge.coexDF)
+```
+
+## How to manipulate a clusterization
+
+It is possible to improve on the labels in a *clusterization*, so that they look nicer in plots and lists, for example to ensure all labels have the **same** length.
+
+Another improvement is to reorder the labels of the *clusterization* so that *near* clusters have *near* labels
+
+```{r extract-clusterizations}
+# COTAn always stores clusterizations as factors.
+splitClusters <- getClusters(obj, clName = "split")
+
+# Use the utility factorToVector() to properly decay any named factor
+# to a named char array
+# splitClusters <- factorToVector(splitClusters)
+
+# In this case the following calls are no-op since the clusterization
+# were created by COTAN and so they already made nice and reordered
+
+splitClusters <- niceFactorLevels(splitClusters)
+
+c(splitClusters, splitCoexDF, perm) %<-% 
+  reorderClusterization(
+    obj,
+    clName = "split",
+    reverse = FALSE, 
+    coexDF = NULL,
+    useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+    distance = NULL,
+    hclustMethod = "ward.D2"
+  )
+
+mergeClusters <- getClusters(obj, clName = "merge")
+
+table(splitClusters, mergeClusters)
+```
+
+`COTAN` provides also easy facility to convert a *clusterization* from a *factor* to a *list* of *array* of cells and vice-versa. This can come useful if one wants to iterate separately on the cells of each cluster.
+
+```{r clusterization-manipulation}
+# this has an inverse `fromClustersList()`
+splitClustersAsList <- toClustersList(splitClusters)
+
+assertthat::assert_that(length(splitClustersAsList) == nlevels(splitClusters))
+
+splitClustersOrigin <-
+  rlang::set_names(
+    rlang::rep_along(x = NA_character_, along = splitClustersAsList),
+    names(splitClustersAsList)
+  )
+
+origin <- getCondition(obj, "origin")
+
+for (clName in names(splitClustersAsList)) {
+  cluster <- splitClustersAsList[[clName]]
+
+  # assign most common origin to the cluster
+  splitClustersOrigin[[clName]] <- names(which.max(table(origin[cluster])))
+
+  # print the average non-zero expression in the cluster
+  clRawData <- getRawData(obj)[, cluster, drop = FALSE]
+  clRawData <- clRawData[clRawData > 0.0]
+
+  cat(
+    paste("Cluster", clName, "of", splitClustersOrigin[[clName]],
+          "\torigin - average non-zero expression:", mean(clRawData)), "\n")
+
+  rm(clRawData)
+}
+
+# If one needs to reorder the cells by cluster,
+# labels are ordered as in the clusterization
+orderCellsByMergeCluster <- groupByClusters(mergeClusters)
+
+plot(getNumExpressedGenes(obj)[orderCellsByMergeCluster],
+     ylab = "Num expressed genes", xlab = NA_character_)
+
+mergeClustersAsList <- toClustersList(mergeClusters)
+
+mergeClustersOrigin <- 
+  vapply(
+    mergeClustersAsList,
+    \(cluster, origin) {
+      names(which.max(table(origin[cluster])))
+    },
+    FUN.VALUE = character(1L),
+    origin
+  )
+names(mergeClustersOrigin) <- names(mergeClustersAsList)
+
+
+# It is also possible to reorder a subset of cells using
+orderCellsBySomeMergeClusters <- 
+  groupByClustersList(
+    getCells(obj),
+    mergeClustersAsList[c(2, 4, 6)]
+  )
+
+plot(getNumExpressedGenes(obj)[orderCellsBySomeMergeClusters],
+     ylab = "Library Size", xlab = NA_character_)
+```
+
+### Clusters dendogram
+
+It is possible to create a *dendogram* of the *clusterization* that uses a cluster distance based on the clusters' `COEX`.
+
+```{r clusters-in-a-tree}
+treePlot <-
+  clustersTreePlot(
+    obj,
+    kCuts = 2L,
+    clName = "split",
+    useDEA = TRUE  # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+  )[["dend"]]
+
+plot(treePlot)
+
+# use origin to mark the clusters
+dendextend::labels(treePlot) <- splitClustersOrigin[base::labels(treePlot)]
+
+plot(treePlot)
+```
+
+It is easy to see that the dendogram splits according to origin except for
+cluster `07` that is deemed more similar to the some of the non `cortical`
+cells.
+
+## Relevance of given marker genes
+
+It is possible to visualize how relevant are some *marker genes* for the
+clusters comprising a given *clusterization*
+
+```{r define-specific-genes-lists}
+# these are some genes associated to each cortical layer
+layersGenes <- list(
+  "L1"   = c("Reln",   "Lhx5"),
+  "L2/3" = c("Cux1",   "Satb2"),
+  "L4"   = c("Rorb",   "Sox5"),
+  "L5/6" = c("Bcl11b", "Fezf2"),
+  "Prog" = c("Hes1",    "Vim")
+)
+
+neuralTypeGenes <- list(
+  # Neural Progenitor Genes
+  "NPGs" = c("Nes", "Vim", "Sox2", "Sox1", "Notch1", "Hes1", "Hes5", "Pax6"),
+  # Pan Neural Genes
+  "PNGs" = c("Map2", "Tubb3", "Neurod1", "Nefm", "Nefl", "Dcx", "Tbr1"),
+  # House Keeping
+  "hk"   = c("Calm1", "Cox6b1", "Ppia", "Rpl18", "Cox7c", "Erh", "H3f3a",
+             "Taf1", "Taf2", "Gapdh", "Actb", "Golph3", "Zfr", "Sub1",
+             "Tars", "Amacr")
+)
+```
+
+The following is one of the most comprehensive plot available in `COTAN` to
+visually summarize whether any of the given genes is strongly over/under
+expressed in the clusters. The heat-map shows the `COEX` score and the
+characters signal the corresponding adjusted p-value:
+`***` for *p* \< 0.001, `**` for *p* \< 0.01,
+`*` for *p* \< 0.05, `.` for *p* \< 0.1.
+
+On the left it also allows to see how much each cluster is characterized by the
+passed conditions.
+
+```{r clusterization-data-visualization, fig.height=8, fig.width=20}
+c(splitHeatmap, splitScoreDF, splitPValueDF) %<-%
+  clustersMarkersHeatmapPlot(
+    obj,
+    groupMarkers = layersGenes,
+    clName = "split",
+    kCuts = 2L,
+    adjustmentMethod = "bonferroni",
+    condNameList = list("origin")
+  )
+
+ComplexHeatmap::draw(splitHeatmap)
+
+c(mergeHeatmap, mergeScoreDF, mergePValueDF) %<-%
+  clustersMarkersHeatmapPlot(
+    obj,
+    groupMarkers = neuralTypeGenes,
+    clName = "merge",
+    kCuts = 3L,
+    adjustmentMethod = "bonferroni",
+    condNameList = list("origin")
+  )
+
+ComplexHeatmap::draw(mergeHeatmap)
+```
+
+In the above graph, it is possible to see that the found clusters align well to
+the expression of the layers' genes. Again it is possible to see that cluster
+`07` of the `"split"` *clusterization* (`05` of the `"merge"`) is likely
+composed by a **progenitor** cells instead of **mature layers** cells, like it
+happens for cluster `08` and `09` (`06` of the `"merge"`) even if they have
+supposedly different *origin*.
+
+
+## Find differentially expressed genes
+
+The following function uses the calculated clusters' `COEX` to select, for
+each cluster, the *n* genes that are over-expressed and the *n* genes that are under-expressed with respect to a neutral model assumption.
+
+For each gene found, the function returns the `COEX` value, the adjusted *p-value* and the log-fold-change. It also flags whether the found gene is one of the markers provided by the user.
+
+```{r find-marge-markers}
+mergeClusterMarkers <-
+  findClustersMarkers(
+    obj,
+    clName = "merge",
+    n = 5L,
+    markers = unlist(layersGenes),
+    adjustmentMethod = "bonferroni"
+  )
+
+foundMarkers <- list()
+
+# All relevant genes with strong `p-values`
+geneIsEnriched <- mergeClusterMarkers[, "adjPVal"] < 1e-10
+
+for (clName in levels(mergeClusters)) {
+  geneIsInCluster <- mergeClusterMarkers[, "CL"] == clName
+  foundMarkers[[clName]] <-
+    mergeClusterMarkers[geneIsEnriched & geneIsInCluster, "Gene", drop = TRUE]
+}
+
+# number of genes per cluster
+lengths(foundMarkers)
+```
+
+
+### Relevance of marker genes for the `merge` clusters
+
+Again, it is possible to visualize how relevant are the *marker genes* from above:
+
+```{r clusterization-data-visualization_found-markers, fig.height=8, fig.width=20}
+c(mergeHeatmap, ..) %<-%
+  clustersMarkersHeatmapPlot(
+    obj,
+    groupMarkers = foundMarkers,
+    clName = "merge",
+    condNameList = list("origin")
+  )
+
+ComplexHeatmap::draw(mergeHeatmap)
+```
+
+## DEA cluster vs. cluster
+
+Sometimes it is useful to compare the genes' expression of a pair of clusters.
+
+In such cases the simplest thing to do is to *drop* all other cells so to
+obtain a leaner `COTAN` object with just the 2 clusters and then use the
+procedures shown above to analyze the resulting object.
+
+```{r create-sub-object}
+# We will focus on the clusters `03` (likely part of layers 5/6) and
+# `05` (likely part of layers 2/3) of the `split` clusterization
+
+cellsToDrop <- getCells(obj)[!(splitClusters %in% c("03", "05"))]
+
+obj2 <- dropGenesCells(obj, cells = cellsToDrop)
+
+obj2 <- proceedToCoex(obj2, calcCoex = FALSE)
+
+table(getClusters(obj2, clName = "split"))
+```
+
+```{r plot-sub-object-cluster-data, eval=FALSE, include=TRUE}
+# this does not give more information than the same full-plot above
+
+c(splitHeatmap2, ., .) %<-%
+  clustersMarkersHeatmapPlot(
+    obj2,
+    groupMarkers = layersGenes,
+    clName = "split",
+    kCuts = 2L,
+    adjustmentMethod = "bonferroni"
+  )
+
+ComplexHeatmap::draw(splitHeatmap2)
+```
+
+In the case of only two clusters, over-expressed genes in a cluster correspond exactly to under-expressed genes in the other, so one can just look at the former 
+
+```{r find-sub-object-markers}
+deaMarkers <- findClustersMarkers(
+  obj2,
+  n = 10L,
+  clName = "split",
+  adjustmentMethod = "bonferroni",
+  markers = layersGenes[c("L2/3", "L5/6")]
+)
+
+# over-expressed genes follow the under-expressed ones
+deaMarkers[11:20, ]
+deaMarkers[31:40, ]
+```
+
+We can see that in this case we recover the layers genes.
+
+
+## Vignette clean-up stage
+
+The next few lines are just to clean.
+
+```{r clean-up}
+if (file.exists(file.path(outDir, paste0(cond, ".cotan.RDS")))) {
+  # delete file if it exists
+  file.remove(file.path(outDir, paste0(cond, ".cotan.RDS")))
+}
+if (file.exists(file.path(outDir, paste0(cond, "_times.csv")))) {
+  # delete file if it exists
+  file.remove(file.path(outDir, paste0(cond, "_times.csv")))
+}
+if (dir.exists(file.path(outDir, cond))) {
+  unlink(file.path(outDir, cond), recursive = TRUE)
+}
+# if (dir.exists(file.path(outDir, GEO))) {
+#   unlink(file.path(outDir, GEO), recursive = TRUE)
+# }
+
+# stop logging to file
+setLoggingFile("")
+file.remove(file.path(outDir, "vignette_uniform_clustering.log"))
+
+options(prevOptState)
+```
+
+```{r closure}
+Sys.time()
+
+sessionInfo()
+```
