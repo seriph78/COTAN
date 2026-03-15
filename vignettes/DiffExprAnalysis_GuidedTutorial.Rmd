@@ -19,22 +19,23 @@ vignette: >
 ## Preamble
 
 ```{r knitr options, echo = FALSE, include = FALSE}
+plotDev <- if (requireNamespace("ragg", quietly = TRUE)) {
+  "ragg_png"
+} else if (requireNamespace("Cairo", quietly = TRUE)) {
+  "cairo_png"
+} else {
+  "png"
+}
+
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.width = 7L,
   fig.height = 5L,
-  dpi = 100,
-  fig.crop = FALSE
+  dev = plotDev,
+  fig.crop = FALSE,
+  dpi = 100L
 )
-
-if (requireNamespace("ragg", quietly = TRUE)) {
-  knitr::opts_chunk$set(dev = "ragg_png")
-} else if (requireNamespace("Cairo", quietly = TRUE)) {
-  knitr::opts_chunk$set(dev = "cairo_png")
-} else {
-  knitr::opts_chunk$set(dev = "png")
-}
 ```
 
 ```{r preamble, message=FALSE, warning=FALSE}

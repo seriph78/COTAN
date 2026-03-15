@@ -1,4 +1,6 @@
 
+## 2.11.4
+
 Added new vignette for *Differential Expression Analysis*
 
 Fixed minor bug in `clustersMarkersHeatmapPlot()` about genes duplication in
