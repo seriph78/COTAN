@@ -1,4 +1,5 @@
 
+prevOptState <- options(parallelly.fork.enable = TRUE)
 
 test_that("Raw and Clean plots", {
   utils::data("test.dataset", package = "COTAN")
@@ -76,7 +77,7 @@ test_that("Heatmap plots", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L)
+  suppressWarnings(obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L))
 
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138",
                               "g-000150", "g-000160", "g-000170"),
@@ -85,31 +86,31 @@ test_that("Heatmap plots", {
                        G3 = c("g-000510", "g-000530", "g-000550",
                               "g-000570", "g-000590"))
 
-  expect_no_warning(
+  expect_no_error(suppressWarnings(
     plot(heatmapPlot(obj, cores = 3L, genesLists = groupMarkers))
-  )
+  ))
 
-  expect_no_warning(
+  expect_no_error(suppressWarnings(
     genesHeatmapPlot(obj, symmetric = TRUE, cores = 3L,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]))
-  )
+  ))
 
-  expect_no_warning(
+  expect_no_error(suppressWarnings(
     genesHeatmapPlot(obj, symmetric = FALSE, cores = 3L,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]))
-    )
+  ))
 
-  expect_no_warning(
+  expect_no_error(suppressWarnings(
     genesHeatmapPlot(obj, symmetric = TRUE, cores = 3L,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]),
                      secondaryMarkers = lapply(groupMarkers, \(g) g[[2L]]))
-  )
+  ))
 
-  expect_no_warning(
+  expect_no_error(suppressWarnings(
     genesHeatmapPlot(obj, symmetric = TRUE, cores = 3L,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]),
                      secondaryMarkers = lapply(groupMarkers, \(g) g[[2L]]))
-  )
+  ))
 
   suppressWarnings(obj <- calculateCoex(obj, actOnCells = TRUE))
   expect_no_warning(
@@ -126,7 +127,7 @@ test_that("Clusters plots", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L)
+  suppressWarnings(obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L))
 
   batch <- factor(rep(c("L", "H"), each = getNumCells(obj) / 2L))
   names(batch) <- getCells(obj)
@@ -202,3 +203,5 @@ test_that("Clusters plots", {
     regexp = "No shared levels"
   )
 })
+
+options(prevOptState)

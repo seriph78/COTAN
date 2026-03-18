@@ -150,7 +150,29 @@ logThis(paste0("Condition ", getMetadataElement(obj, datasetTags()[["cond"]])),
         logLevel = 1L)
 ```
 
-#### Assign to each cell its origin
+#### Alternative ways to create a COTAN object
+
+It is also possible to create a `COTAN` object starting from a
+`SingleCellExperiment` object (and vice-versa).
+
+Note that default patterns try to look-up in the most common locations...
+
+```{r conversions-to-and-from-sce}
+sceObj <- convertToSingleCellExperiment(obj)
+
+obj2 <- convertFromSingleCellExperiment(
+  sceObj,
+  assayName = "counts",   # the assay that contains the raw counts
+  genesNamesPattern = "", # reg-exp to identify genes' names column
+  cellsIDsPattern = "",   # reg-exp to identify cells' ID column
+  clNamesPattern = "",    # reg-exp to identify clusterizations columns
+  condNamesPattern = ""   # reg-exp to identify cells' conditions columns
+)
+
+rm(sceObj, obj2)
+```
+
+### Assign to each cell its origin
 
 ```{r add-origin-to-the-cotan-object}
 # mark cells origin
@@ -301,7 +323,8 @@ logThis(paste("n cells", getNumCells(obj)), logLevel = 1L)
 getDims(obj)
 ```
 
-The `clean()` function estimates the `nu` parameters from the data and drops genes/cells that do not satisfy the minimal expression thresholds.
+The `clean()` function estimates the `nu` parameters from the data and drops
+genes/cells that do not satisfy the minimal expression thresholds.
 Therefore, it need to be run again every time any genes or cells are dropped
 from the data.
 
@@ -331,7 +354,8 @@ To color the PCA based on `nu` (so the cells' efficiency)
 plot(UDEPlot)
 ```
 
-`UDE` (color) should not correlate with principal components! This is very important.
+`UDE` (color) should **not** correlate with principal components!
+This is very important.
 
 The next part is used to remove the cells with efficiency too low.
 

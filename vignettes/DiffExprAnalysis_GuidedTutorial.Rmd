@@ -76,7 +76,8 @@ setLoggingFile(file.path(outDir, "vignette_DEA.log"))
 
 ## Retrieving the data-set
 
-Download the data-set for `r "mouse cortex E17.5"` from `r "Yuzwa et al."` (2017)
+Download the data-set for `r "mouse cortex E17.5"` from
+`r "Yuzwa et al."` (2017)
 
 ```{r download-data}
 GEO <- "GSM2861514"
@@ -130,7 +131,8 @@ print(dim(rawDataset))
 
 ### Create the COTAN object
 
-Initialize the `COTAN` object with the row count table and the metadata from the experiment.
+Initialize the `COTAN` object with the row count table and
+the metadata from the experiment.
 
 ```{r create-cotan-object}
 cond <- "mouse_cortex_E17.5"
@@ -184,7 +186,8 @@ rm(vignette.split.clusters)
 
 ## COTAN analysis
 
-In this part, the `COTAN` model is calibrated, but the `COEX` matrix is not evaluated as it is not strictly necessary
+In this part, the `COTAN` model is calibrated, but the `COEX` matrix
+is not evaluated as it is not strictly necessary
 
 ```{r calculate-and-store-coex-matrix}
 obj <-
@@ -261,9 +264,12 @@ rm(vignette.merge.clusters, vignette.merge.coexDF)
 
 ## How to manipulate a clusterization
 
-It is possible to improve on the labels in a *clusterization*, so that they look nicer in plots and lists, for example to ensure all labels have the **same** length.
+It is possible to improve on the labels in a *clusterization*, so that they
+look nicer in plots and lists, for example to ensure all labels have
+the **same** length.
 
-Another improvement is to reorder the labels of the *clusterization* so that *near* clusters have *near* labels
+Another improvement is to reorder the labels of the *clusterization* so that
+*near* clusters have *near* labels
 
 ```{r extract-clusterizations}
 # COTAn always stores clusterizations as factors.
@@ -294,7 +300,10 @@ mergeClusters <- getClusters(obj, clName = "merge")
 table(splitClusters, mergeClusters)
 ```
 
-`COTAN` provides also easy facility to convert a *clusterization* from a *factor* to a *list* of *array* of cells and vice-versa. This can come useful if one wants to iterate separately on the cells of each cluster.
+`COTAN` provides also easy facility to convert a *clusterization* from a
+*factor* to a *list* of *array* of cells and vice-versa.
+This can come useful if one wants to iterate separately
+on the cells of each cluster.
 
 ```{r clusterization-manipulation}
 # this has an inverse `fromClustersList()`
@@ -361,7 +370,8 @@ plot(getNumExpressedGenes(obj)[orderCellsBySomeMergeClusters],
 
 ### Clusters dendogram
 
-It is possible to create a *dendogram* of the *clusterization* that uses a cluster distance based on the clusters' `COEX`.
+It is possible to create a *dendogram* of the *clusterization* that uses
+a cluster distance based on the clusters' `COEX`.
 
 ```{r clusters-in-a-tree}
 treePlot <-
@@ -458,9 +468,13 @@ supposedly different *origin*.
 ## Find differentially expressed genes
 
 The following function uses the calculated clusters' `COEX` to select, for
-each cluster, the *n* genes that are over-expressed and the *n* genes that are under-expressed with respect to a neutral model assumption.
+each cluster, the *n* genes that are over-expressed and the *n* genes that are
+under-expressed with respect to a neutral model assumption.
 
-For each gene found, the function returns the `COEX` value, the adjusted *p-value* and the log-fold-change. It also flags whether the found gene is one of the markers provided by the user.
+For each gene found, the function returns the `COEX` value,
+the adjusted *p-value* and the log-fold-change.
+It also flags whether the found gene is one of the markers
+provided by the user.
 
 ```{r find-marge-markers}
 mergeClusterMarkers <-
@@ -490,9 +504,10 @@ lengths(foundMarkers)
 
 ### Relevance of marker genes for the `merge` clusters
 
-Again, it is possible to visualize how relevant are the *marker genes* from above:
+Again, it is possible to visualize how relevant are the *marker genes* from
+above:
 
-```{r clusterization-data-visualization_found-markers, fig.height=8, fig.width=20}
+```{r cl-data-visualization_found-markers, fig.height=8, fig.width=20}
 c(mergeHeatmap, ..) %<-%
   clustersMarkersHeatmapPlot(
     obj,
@@ -540,7 +555,9 @@ c(splitHeatmap2, ., .) %<-%
 ComplexHeatmap::draw(splitHeatmap2)
 ```
 
-In the case of only two clusters, over-expressed genes in a cluster correspond exactly to under-expressed genes in the other, so one can just look at the former 
+In the case of only two clusters, over-expressed genes in a cluster correspond
+exactly to under-expressed genes in the other,
+so one can just look at the former 
 
 ```{r find-sub-object-markers}
 deaMarkers <- findClustersMarkers(
