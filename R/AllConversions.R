@@ -72,26 +72,38 @@ convertToSingleCellExperiment <- function(objCOTAN) {
   assert_that(is(objCOTAN, "COTAN"), validObject(objCOTAN),
               msg = "Input object should be of type `COTAN`.")
 
-  # Identify clustering and condition columns
+  # Handle genes names
   genesMeta <- getMetadataGenes(objCOTAN)
+
+  if (is_empty(genesMeta)) {
+    genesMeta <- data.frame("GenesNames" = getGenes(objCOTAN))
+  }
 
   hasGenesNameCol <-
     !is_empty(grep(x = colnames(genesMeta), pattern = "Genes?[ -_]?Names?",
                    ignore.case = TRUE))
   if (!hasGenesNameCol) {
     genesMeta <- rownames_to_column(genesMeta, var = "GenesNames")
-    rownames(genesMeta) <- getGenes(objCOTAN)
   }
 
+  rownames(genesMeta) <- getGenes(objCOTAN)
+
+  # Handle cells IDs
+
   cellsMeta <- getMetadataCells(objCOTAN)
+
+  if (is_empty(cellsMeta)) {
+    cellsMeta <- data.frame("CellsIDs" = getCells(objCOTAN))
+  }
 
   hasCellsIDCol <-
     !is_empty(grep(colnames(cellsMeta), pattern = "Cells?[ -_]?IDs?",
                    ignore.case = TRUE))
   if (!hasCellsIDCol) {
     cellsMeta <- rownames_to_column(cellsMeta, var = "CellsIDs")
-    rownames(cellsMeta) <- getCells(objCOTAN)
   }
+
+  rownames(cellsMeta) <- getCells(objCOTAN)
 
   # Identify clustering and condition columns
 

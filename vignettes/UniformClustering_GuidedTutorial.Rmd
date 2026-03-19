@@ -1,5 +1,5 @@
 ---
-title: "Guided tutorial to cells Uniform Transcript cells' clustering using COTAN"
+title: "Guided tutorial to Uniform Transcript cells' clustering using COTAN"
 author: 
 - name: "Silvia Giulia Galfrè"
   affiliation: "Department of Computer Science, University of Pisa"
@@ -203,7 +203,7 @@ and their expected co-expression assuming independence.
 obj <-
   proceedToCoex(
     obj,
-    calcCoex = TRUE,
+    calcCoex = FALSE,
     optimizeForSpeed = TRUE,
     cores = 3L,
     deviceStr = "cuda"
@@ -368,11 +368,11 @@ well to the expression of the layers' genes.
 
 ### `UMAP` of the `split` clusterization
 
-It is also possible to check how the *clusters* are spread in a `UMAP` plot that
-uses the same (or other) data reduction methods as the one used in the creation
-of the *clusterization*
+It is also possible to check how the *clusters* are spread in a `UMAP` plot
+that uses the same data reduction methods as the one used in the creation of
+the *clusterization*
 
-```{r clusterization-umap-plot-via-drm_split}
+```{r clusterization-umap-plot-via-drm_split, eval=FALSE, include=TRUE}
 c(umapPlot, cellsRDM) %<-%
   cellsUMAPPlot(
     obj,
@@ -381,6 +381,30 @@ c(umapPlot, cellsRDM) %<-%
     useCoexEigen = TRUE, # Aligning these to `split` generation gives best res.
     dataMethod = "LogLikelihood", # "AdjBinarized" is also a good choice
     numComp = 50L, # number of components of the data reduced matrix
+    colors = NULL, # a list of user defined colors for the various clusters
+    numNeighbors = 30L, # UMAP related parameters
+    minPointsDist = 0.3 # UMAP related parameters
+  )
+
+plot(umapPlot)
+```
+
+Unfortunately, due to build-timeout limits, the above plot cannot be displayed,
+as no `COEX` matrix was calculated in the `COTAN` object,
+but we can show that the *clusterization* is good even changing the
+data reduction method, in this case the one from `Seurat`.
+
+```{r clusterization-umap-plot-via-drm_split_as-seurat}
+c(umapPlot, cellsRDM) %<-%
+  cellsUMAPPlot(
+    obj,
+    clName = "split",
+    clusters = NULL,
+    useCoexEigen = FALSE,
+    dataMethod = "LogNormalized", 
+    numComp = 50L, # number of components of the data reduced matrix
+    genesSel = "HVG_Seurat",
+    numGenes = 500L,
     colors = NULL, # a list of user defined colors for the various clusters
     numNeighbors = 30L, # UMAP related parameters
     minPointsDist = 0.3 # UMAP related parameters
@@ -553,13 +577,13 @@ ComplexHeatmap::draw(mergeVsSplitHeatmap)
 
 ### `UMAP` of the `merge` clusterization
 
-It is also possible to check how the *clusters* are spread in a `UMAP` plot that
-uses the same (or other) data reduction methods as the one used in the creation
-of the *clusterization*
+It is also possible to check how the *clusters* are spread in a `UMAP` plot
+that uses the same (or other) data reduction methods as the one used in the
+creation of the *clusterization*
 
 Again it is possible to plot the *clusterization* on a `UMAP` plot
 
-```{r clusterization-umap-plot-via-drm_merge}
+```{r clusterization-umap-plot-via-drm_merge, eval=FALSE, include=TRUE}
 c(umapPlot, .) %<-%
   cellsUMAPPlot(
     obj,
@@ -568,6 +592,30 @@ c(umapPlot, .) %<-%
     useCoexEigen = TRUE,
     dataMethod = "LogLikelihood", # "AdjBinarized" is also a good choice
     numComp = 50L, # number of components of the data reduced matrix
+    colors = NULL, # a list of user defined colors for the various clusters
+    numNeighbors = 30L, # UMAP related parameters
+    minPointsDist = 0.3 # UMAP related parameters
+  )
+
+plot(umapPlot)
+```
+
+Again, due to build-timeout limits, the above plot cannot be displayed,
+as no `COEX` matrix was calculated in the `COTAN` object,
+but we can show that the *clusterization* is good even changing the
+data reduction method, in this case the one from `scanpy`.
+
+```{r clusterization-umap-plot-via-drm_merge_as-seurat}
+c(umapPlot, .) %<-%
+  cellsUMAPPlot(
+    obj,
+    clName = "merge",
+    clusters = NULL,
+    useCoexEigen = FALSE,
+    dataMethod = "LogNormalized", # "AdjBinarized" is also a good choice
+    numComp = 50L, # number of components of the data reduced matrix
+    genesSel = "HVG_Scanpy",
+    numGenes = 500L,
     colors = NULL, # a list of user defined colors for the various clusters
     numNeighbors = 30L, # UMAP related parameters
     minPointsDist = 0.3 # UMAP related parameters
