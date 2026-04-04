@@ -261,8 +261,8 @@ setMethod(
 
 .estimateDispersionViaSolverImpl <-
   function(objCOTAN,
-           executionOptions,
            threshold = 0.001,
+           executionOptions,
            maxIterations = 100L,
            chunkSize = 1024L) {
     startTime <- Sys.time()
@@ -416,11 +416,7 @@ setMethod(
 estimateDispersionBisection <-
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
-    executionOptions <- legacyExecutionOptions(
-      cores = cores,
-      optimizeForSpeed = optimizeForSpeed,
-      deviceStr = deviceStr
-    )
+    executionOptions <- legacyExecutionOptions(cores = cores)
 
     .estimateDispersionViaSolverImpl(
       objCOTAN = objCOTAN,

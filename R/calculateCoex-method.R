@@ -1297,6 +1297,56 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
 ## ---- Calculate COEX ----
 
+.calculateCoexImpl <-
+  function(
+    objCOTAN,
+    actOnCells = FALSE,
+    returnPPFract = FALSE,
+    executionOptions = ExecutionOptions()
+  ) {
+
+    c(., useTorch, deviceStr) %<-% resolveExecutionOptions(executionOptions)
+
+    coex <- NULL
+    problematicPairsFraction <- NA
+
+    if (isTRUE(actOnCells)) {
+      if (isTRUE(useTorch)) {
+        warning("The 'torch' package is not supported yet for cells' COEX:",
+                " falling back to legacy code")
+      }
+      c(coex, problematicPairsFraction) %<-%
+        calculateCoex_Legacy(objCOTAN, actOnCells = TRUE,
+                             returnPPFract = returnPPFract)
+
+      objCOTAN@cellsCoex <- coex
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["csync"]], TRUE)
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["cbad"]],
+                                             problematicPairsFraction)
+    } else {
+      if (useTorch) {
+        c(coex, problematicPairsFraction) %<-%
+          calculateCoex_Torch(objCOTAN, deviceStr = deviceStr,
+                              returnPPFract = returnPPFract)
+      } else {
+        c(coex, problematicPairsFraction) %<-%
+          calculateCoex_Legacy(objCOTAN, actOnCells = FALSE,
+                               returnPPFract = returnPPFract)
+      }
+
+      objCOTAN@genesCoex <- coex
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["gsync"]], TRUE)
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["gbad"]],
+                                             problematicPairsFraction)
+    }
+
+    return(objCOTAN)
+  }
+
 #' @aliases calculateCoex
 #'
 #' @details `calculateCoex()` estimates and stores the `COEX` matrix in the
@@ -1336,48 +1386,23 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 setMethod(
   "calculateCoex",
   "COTAN",
-  function(objCOTAN, actOnCells = FALSE, returnPPFract = FALSE,
-           optimizeForSpeed = TRUE, deviceStr = "cuda") {
-    coex <- NULL
-    problematicPairsFraction <- NA
+  function(
+    objCOTAN,
+    actOnCells = FALSE,
+    returnPPFract = FALSE,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda") {
+    executionOptions <- legacyExecutionOptions(
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
 
-    if (isTRUE(actOnCells)) {
-      if (isTRUE(optimizeForSpeed)) {
-        warning("The 'torch' package is not supported yet for cells' COEX:",
-                " falling back to legacy code")
-      }
-      c(coex, problematicPairsFraction) %<-%
-        calculateCoex_Legacy(objCOTAN, actOnCells = TRUE,
-                             returnPPFract = returnPPFract)
-
-      objCOTAN@cellsCoex <- coex
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["csync"]], TRUE)
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["cbad"]],
-                                             problematicPairsFraction)
-    } else {
-      c(useTorch, deviceStr) %<-% canUseTorch(optimizeForSpeed, deviceStr)
-
-      if (useTorch) {
-        c(coex, problematicPairsFraction) %<-%
-          calculateCoex_Torch(objCOTAN, deviceStr = deviceStr,
-                              returnPPFract = returnPPFract)
-      } else {
-        c(coex, problematicPairsFraction) %<-%
-          calculateCoex_Legacy(objCOTAN, actOnCells = FALSE,
-                               returnPPFract = returnPPFract)
-      }
-
-      objCOTAN@genesCoex <- coex
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["gsync"]], TRUE)
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["gbad"]],
-                                             problematicPairsFraction)
-    }
-
-    return(objCOTAN)
+    .calculateCoexImpl(
+      objCOTAN = objCOTAN,
+      actOnCells = actOnCells,
+      returnPPFract = returnPPFract,
+      executionOptions = executionOptions
+    )
   }
 )
 

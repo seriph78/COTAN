@@ -212,7 +212,7 @@
 
 setMethod(
   "proceedToCoex",
-  "COTAN",
+  signature(objCOTAN = "COTAN", executionOptions = "NULL"),
   function(objCOTAN,
            calcCoex = TRUE,
            optimizeForSpeed = TRUE,
@@ -223,13 +223,51 @@ setMethod(
            cellsThreshold = 0.99,
            genesThreshold = 0.99,
            saveObj = FALSE,
-           outDir = ".") {
+           outDir = ".",
+           executionOptions = "NULL") {
 
     executionOptions <- legacyExecutionOptions(
       cores = cores,
       optimizeForSpeed = optimizeForSpeed,
       deviceStr = deviceStr
     )
+
+    .proceedToCoexImpl(
+      objCOTAN = objCOTAN,
+      calcCoex = calcCoex,
+      executionOptions = executionOptions,
+      cellsCutoff = cellsCutoff,
+      genesCutoff = genesCutoff,
+      cellsThreshold = cellsThreshold,
+      genesThreshold = genesThreshold,
+      saveObj = saveObj,
+      outDir = outDir
+    )
+  }
+)
+
+setMethod(
+  "proceedToCoex",
+  signature(objCOTAN = "COTAN", executionOptions = "ExecutionOptions"),
+  function(objCOTAN,
+           calcCoex = TRUE,
+           optimizeForSpeed = TRUE,
+           deviceStr = "cuda",
+           cores = 1L,
+           cellsCutoff = 0.003,
+           genesCutoff = 0.002,
+           cellsThreshold = 0.99,
+           genesThreshold = 0.99,
+           saveObj = FALSE,
+           outDir = ".",
+           executionOptions) {
+    assert_that(
+      identical(optimizeForSpeed, TRUE),
+      identical(deviceStr, "cuda"),
+      identical(as.integer(cores), 1L),
+      msg = paste("Do not mix `executionOptions` with",
+                  "legacy execution arguments",
+                  "(`cores`, `optimizeForSpeed`, `deviceStr`)."))
 
     .proceedToCoexImpl(
       objCOTAN = objCOTAN,
@@ -330,7 +368,7 @@ automaticCOTANObjectCreation <- function(raw,
       deviceStr = deviceStr
     )
 
-    objCOTAN <- .proceedToCoexImpl(
+    objCOTAN <- proceedToCoex(
       objCOTAN = objCOTAN,
       calcCoex = calcCoex,
       executionOptions = executionOptions,

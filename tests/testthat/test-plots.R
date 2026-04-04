@@ -1,7 +1,19 @@
 
 prevOptState <- options(parallelly.fork.enable = TRUE)
 
+local_null_pdf <- function() {
+  grDevices::pdf(NULL)
+  on.exit({
+    while (grDevices::dev.cur() > 1L) {
+      grDevices::dev.off()
+    }
+  }, add = TRUE)
+}
+
+
 test_that("Raw and Clean plots", {
+  local_null_pdf()
+
   utils::data("test.dataset", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset)
@@ -70,6 +82,8 @@ test_that("Raw and Clean plots", {
 
 
 test_that("Heatmap plots", {
+  local_null_pdf()
+
   utils::data("test.dataset", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset)
@@ -78,6 +92,12 @@ test_that("Heatmap plots", {
                                sampleCondition = "test")
 
   suppressWarnings(obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L))
+  suppressWarnings(
+    obj2 <- proceedToCoex(obj, calcCoex = TRUE,
+                          executionOptions = ExecutionOptions(cores = 3L))
+  )
+
+  expect_identical(obj, obj2)
 
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138",
                               "g-000150", "g-000160", "g-000170"),
@@ -120,6 +140,8 @@ test_that("Heatmap plots", {
 
 
 test_that("Clusters plots", {
+  local_null_pdf()
+
   utils::data("test.dataset", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset)

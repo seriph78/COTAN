@@ -3,14 +3,14 @@
 \name{COTAN_ObjectCreation}
 \alias{COTAN_ObjectCreation}
 \alias{COTAN}
-\alias{proceedToCoex,COTAN-method}
+\alias{proceedToCoex,COTAN,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,NULL-method}
 \alias{proceedToCoex}
 \alias{automaticCOTANObjectCreation}
 \title{\code{COTAN} shortcuts}
 \usage{
 COTAN(raw = "ANY")
 
-\S4method{proceedToCoex}{COTAN}(
+\S4method{proceedToCoex}{COTAN,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,NULL}(
   objCOTAN,
   calcCoex = TRUE,
   optimizeForSpeed = TRUE,
@@ -21,7 +21,8 @@ COTAN(raw = "ANY")
   cellsThreshold = 0.99,
   genesThreshold = 0.99,
   saveObj = FALSE,
-  outDir = "."
+  outDir = ".",
+  executionOptions = "NULL"
 )
 
 automaticCOTANObjectCreation(
