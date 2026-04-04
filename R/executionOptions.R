@@ -66,6 +66,7 @@ ExecutionOptions <- function(cores = 1L,
   )
 }
 
+
 # internal helper: build the object from legacy loose parameters
 legacyExecutionOptions <- function(cores = 1L,
                                    optimizeForSpeed = TRUE,
@@ -76,6 +77,7 @@ legacyExecutionOptions <- function(cores = 1L,
     deviceStr = deviceStr
   )
 }
+
 
 # internal helper: apply runtime feasibility checks
 resolveExecutionOptions <- function(executionOptions) {

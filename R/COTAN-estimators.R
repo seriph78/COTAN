@@ -165,8 +165,8 @@ setMethod(
 
 
 # local utility wrapper for parallel estimation of dispersion
-runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
-                          threshold, maxIterations, cores, useBisection) {
+.runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
+                           threshold, maxIterations, cores, useBisection) {
 
   ## forward caller that allows for logging progress
   worker <- function(genesBatch, sumZeros, lambda, nu,
@@ -259,6 +259,100 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 
 ### ------ estimateDispersionViaSolver -----
 
+.estimateDispersionViaSolverImpl <-
+  function(objCOTAN,
+           executionOptions,
+           threshold = 0.001,
+           maxIterations = 100L,
+           chunkSize = 1024L) {
+    startTime <- Sys.time()
+
+    logThis("Estimate `dispersion`: START", logLevel = 2L)
+
+    c(cores, ..) %<-% resolveExecutionOptions(executionOptions)
+
+    genes <- getGenes(objCOTAN)
+    sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)[genes]
+
+    lambda <- suppressWarnings(getLambda(objCOTAN))
+    assert_that(!is_empty(lambda),
+                msg = "`lambda` must not be empty, estimate it")
+
+    nu <- suppressWarnings(getNu(objCOTAN))
+    assert_that(!is_empty(nu),
+                msg = "`nu` must not be empty, estimate it")
+
+    dispList <- list()
+
+    spIdx <- parallel::splitIndices(length(genes),
+                                    ceiling(length(genes) / chunkSize))
+
+    spGenes <- lapply(spIdx, \(x) genes[x])
+
+    cores <- min(cores, length(spGenes))
+
+    logThis(paste0("Executing ", length(spGenes), " genes batches"),
+            logLevel = 3L)
+
+    dispList <- tryCatch(
+      .runDispSolver(
+        spGenes,
+        sumZeros      = sumZeros,
+        lambda        = lambda,
+        nu            = nu,
+        threshold     = threshold,
+        maxIterations = maxIterations,
+        cores         = cores,
+        useBisection  = FALSE
+      ),
+      error = function(eNewton) {
+        if (inherits(eNewton, "interrupt")) stop(eNewton)
+        msg <- paste0("Newton dispersion solver failed: ",
+                      conditionMessage(eNewton), " | retrying with bisection")
+        warning(msg)
+        logThis(msg, logLevel = 3L)
+
+        .runDispSolver(
+          spGenes,
+          sumZeros      = sumZeros,
+          lambda        = lambda,
+          nu            = nu,
+          threshold     = threshold,
+          maxIterations = maxIterations,
+          cores         = cores,
+          useBisection  = TRUE
+        )
+      }
+    )
+
+    gc()
+
+    endTime <- Sys.time()
+
+    logThis(paste("Total calculations elapsed time:",
+                  difftime(endTime, startTime, units = "secs")),
+            logLevel = 2L)
+
+    logThis("Estimate `dispersion`: DONE", logLevel = 2L)
+
+    dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
+
+    objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
+
+    logThis("Estimate `dispersion`: DONE", logLevel = 2L)
+
+    goodPos <- is.finite(getDispersion(objCOTAN))
+    logThis(paste("`dispersion`",
+                  "| min:", min(getDispersion(objCOTAN)[goodPos]),
+                  "| max:", max(getDispersion(objCOTAN)[goodPos]),
+                  "| % negative:", (sum(getDispersion(objCOTAN) < 0.0) * 100.0 /
+                                      getNumGenes(objCOTAN))),
+            logLevel = 1L)
+
+    return(objCOTAN)
+  }
+
+
 #' @aliases estimateDispersionViaSolver
 #' @aliases estimateDispersionBisection
 #'
@@ -301,93 +395,20 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 setMethod(
   "estimateDispersionViaSolver",
   "COTAN",
-  function(objCOTAN, threshold = 0.001, cores = 1L,
-           maxIterations = 100L, chunkSize = 1024L) {
-    startTime <- Sys.time()
+  function(objCOTAN,
+           threshold = 0.001,
+           cores = 1L,
+           maxIterations = 100L,
+           chunkSize = 1024L) {
+    executionOptions <- legacyExecutionOptions(cores = cores)
 
-    logThis("Estimate `dispersion`: START", logLevel = 2L)
-
-    cores <- handleMultiCore(cores)
-
-    genes <- getGenes(objCOTAN)
-    sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)[genes]
-
-    lambda <- suppressWarnings(getLambda(objCOTAN))
-    assert_that(!is_empty(lambda),
-                msg = "`lambda` must not be empty, estimate it")
-
-    nu <- suppressWarnings(getNu(objCOTAN))
-    assert_that(!is_empty(nu),
-                msg = "`nu` must not be empty, estimate it")
-
-    dispList <- list()
-
-    spIdx <- parallel::splitIndices(length(genes),
-                                    ceiling(length(genes) / chunkSize))
-
-    spGenes <- lapply(spIdx, \(x) genes[x])
-
-    cores <- min(cores, length(spGenes))
-
-    logThis(paste0("Executing ", length(spGenes), " genes batches"),
-            logLevel = 3L)
-
-    dispList <- tryCatch(
-      runDispSolver(
-        spGenes,
-        sumZeros      = sumZeros,
-        lambda        = lambda,
-        nu            = nu,
-        threshold     = threshold,
-        maxIterations = maxIterations,
-        cores         = cores,
-        useBisection  = FALSE
-      ),
-      error = function(eNewton) {
-        if (inherits(eNewton, "interrupt")) stop(eNewton)
-        msg <- paste0("Newton dispersion solver failed: ",
-                      conditionMessage(eNewton), " | retrying with bisection")
-        warning(msg)
-        logThis(msg, logLevel = 3L)
-
-        runDispSolver(
-          spGenes,
-          sumZeros      = sumZeros,
-          lambda        = lambda,
-          nu            = nu,
-          threshold     = threshold,
-          maxIterations = maxIterations,
-          cores         = cores,
-          useBisection  = TRUE
-        )
-      }
+    .estimateDispersionViaSolverImpl(
+      objCOTAN = objCOTAN,
+      executionOptions = executionOptions,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      chunkSize = chunkSize
     )
-
-    gc()
-
-    endTime <- Sys.time()
-
-    logThis(paste("Total calculations elapsed time:",
-                  difftime(endTime, startTime, units = "secs")),
-            logLevel = 2L)
-
-    logThis("Estimate `dispersion`: DONE", logLevel = 2L)
-
-    dispersion <- unlist(dispList, recursive = TRUE, use.names = FALSE)
-
-    objCOTAN <- setDispersion(objCOTAN, dispersion = dispersion)
-
-    logThis("Estimate `dispersion`: DONE", logLevel = 2L)
-
-    goodPos <- is.finite(getDispersion(objCOTAN))
-    logThis(paste("`dispersion`",
-                  "| min:", min(getDispersion(objCOTAN)[goodPos]),
-                  "| max:", max(getDispersion(objCOTAN)[goodPos]),
-                  "| % negative:", (sum(getDispersion(objCOTAN) < 0.0) * 100.0 /
-                                    getNumGenes(objCOTAN))),
-            logLevel = 1L)
-
-    return(objCOTAN)
   }
 )
 
@@ -395,18 +416,26 @@ setMethod(
 estimateDispersionBisection <-
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
-    return(estimateDispersionViaSolver(objCOTAN = objCOTAN,
-                                       threshold = threshold,
-                                       cores = cores,
-                                       maxIterations = maxIterations,
-                                       chunkSize = chunkSize))
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
+
+    .estimateDispersionViaSolverImpl(
+      objCOTAN = objCOTAN,
+      executionOptions = executionOptions,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      chunkSize = chunkSize
+    )
   }
 
 
 
 # local utility wrapper for parallel estimation of nu
-runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
-                        initialGuess, threshold, maxIterations, cores) {
+.runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
+                         initialGuess, threshold, maxIterations, cores) {
 
   ## forward caller that allows for logging progress
   worker <- function(batch, sumZeros, lambda, dispersion,
@@ -562,14 +591,15 @@ setMethod(
     logThis(paste0("Executing ", length(spCells), " cells batches"),
             logLevel = 3L)
 
-    nuList <- runNuSolver(spCells,
-                          sumZeros = sumZeros,
-                          lambda = lambda,
-                          dispersion = dispersion,
-                          initialGuess = initialGuess,
-                          threshold = threshold,
-                          maxIterations = maxIterations,
-                          cores = cores)
+    nuList <- .runNuSolver(
+      spCells,
+      sumZeros = sumZeros,
+      lambda = lambda,
+      dispersion = dispersion,
+      initialGuess = initialGuess,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      cores = cores)
 
     gc()
 

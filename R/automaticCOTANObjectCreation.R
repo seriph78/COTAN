@@ -2,7 +2,7 @@
 # internal implementation
 
 .proceedToCoexImpl <- function(objCOTAN,
-                                calcCoex = TRUE,
+                                calcCoex,
                                 executionOptions,
                                 cellsCutoff = 0.003,
                                 genesCutoff = 0.002,
