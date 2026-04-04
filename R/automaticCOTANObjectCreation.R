@@ -1,4 +1,142 @@
 
+# internal implementation
+
+.proceedToCoexImpl <- function(objCOTAN,
+                                calcCoex = TRUE,
+                                executionOptions,
+                                cellsCutoff = 0.003,
+                                genesCutoff = 0.002,
+                                cellsThreshold = 0.99,
+                                genesThreshold = 0.99,
+                                saveObj = FALSE,
+                                outDir = ".") {
+  startTime <- Sys.time()
+
+  logThis("COTAN dataset analysis: START", logLevel = 1L)
+
+  objCOTAN <- clean(objCOTAN, cellsCutoff, genesCutoff,
+                    cellsThreshold, genesThreshold)
+
+  if (isTRUE(saveObj)) tryCatch({
+    if (!dir.exists(outDir)) {
+      dir.create(file.path(outDir))
+    }
+
+    cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
+
+    outDirCond <- file.path(outDir, cond)
+    if (!dir.exists(outDirCond)) {
+      dir.create(outDirCond)
+    }
+
+    outDirCleaning <- file.path(outDirCond, "cleaning")
+    if (!dir.exists(outDirCleaning)) {
+      dir.create(outDirCleaning)
+    }
+
+    plots <- cleanPlots(objCOTAN)
+
+    if (TRUE) {
+      numIter <- 1L
+      pdf(file.path(outDirCleaning,
+                    paste0(cond, "_", numIter,
+                           "_plots_without_cleaning.pdf")))
+      plot(plots[["pcaCells"]])
+      plot(plots[["genes"]])
+      dev.off()
+    }
+
+    if (TRUE) {
+      pdf(file.path(outDirCleaning,
+                    paste0(cond, "_plots_PCA_efficiency_colored.pdf")))
+      plot(plots[["UDE"]])
+      dev.off()
+    }
+
+    if (TRUE) {
+      pdf(file.path(outDirCleaning,
+                    paste0(cond, "_plots_efficiency.pdf")))
+      plot(plots[["nu"]] +
+             annotate(geom = "text", x = 50L, y = 0.25,
+                      label = "nothing to remove ", color = "darkred"))
+      dev.off()
+    }
+
+    rm(plots)
+  }, error = function(err) {
+    logThis(paste("While saving the clean plots", err), logLevel = 1L)
+  }, finally = {
+    # Check for active device
+    if (dev.cur() > 1L) {
+      dev.off()
+    }
+  })
+
+  gc()
+
+  startEstimTime <- Sys.time()
+  cleanTime <- difftime(startEstimTime, startTime, units = "secs")
+  logThis(paste("Dataset cleaning elapsed time:", cleanTime),
+          logLevel = 3L)
+
+  objCOTAN <- estimateLambdaLinear(objCOTAN)
+  objCOTAN <- estimateDispersionViaSolver(objCOTAN,
+                                          cores = executionOptions@cores)
+
+  gc()
+
+  startCoexTime <- Sys.time()
+  analysisTime <- difftime(startCoexTime, startEstimTime, units = "secs")
+  logThis(paste("Model parameter estimation elapsed time:", analysisTime),
+          logLevel = 3L)
+
+  if (isTRUE(calcCoex)) {
+    logThis("COTAN genes' COEX estimation: START", logLevel = 2L)
+
+    objCOTAN <-
+      calculateCoex(
+        objCOTAN,
+        actOnCells = FALSE,
+        optimizeForSpeed = executionOptions@optimizeForSpeed,
+        deviceStr = executionOptions@deviceStr)
+  } else {
+    logThis("COTAN genes' COEX estimation not requested", logLevel = 2L)
+  }
+
+  gc()
+
+  endTime <- Sys.time()
+  genesCoexTime <- difftime(endTime, startCoexTime, units = "secs")
+  logThis(paste("Only genes' COEX elapsed time:", genesCoexTime),
+          logLevel = 3L)
+
+  totalTime <- difftime(endTime, startTime, units = "secs")
+  logThis(paste("Dataset analysis elapsed time:", totalTime), logLevel = 3L)
+
+  logThis("COTAN dataset analysis: DONE", logLevel = 1L)
+
+  if (saveObj) {
+    utils::write.csv(data.frame("type"  = c("total_time",
+                                            "clean_time",
+                                            "analysis_time",
+                                            "genes_coex_time"),
+                                "times" = c(as.numeric(totalTime),
+                                            as.numeric(cleanTime),
+                                            as.numeric(analysisTime),
+                                            as.numeric(genesCoexTime)),
+                                "n.cells" = getNumCells(objCOTAN),
+                                "n.genes" = getNumGenes(objCOTAN)),
+                     file = file.path(outDir, paste0(cond, "_times.csv")))
+
+    logThis(paste("Saving elaborated data locally at:",
+                  file.path(outDir, paste0(cond, ".cotan.RDS"))),
+            logLevel = 1L)
+    saveRDS(objCOTAN, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
+  }
+
+  return(objCOTAN)
+}
+
 #'
 #' @aliases proceedToCoex
 #'
@@ -71,6 +209,7 @@
 #'
 #' @rdname COTAN_ObjectCreation
 #'
+
 setMethod(
   "proceedToCoex",
   "COTAN",
@@ -85,131 +224,27 @@ setMethod(
            genesThreshold = 0.99,
            saveObj = FALSE,
            outDir = ".") {
-    startTime <- Sys.time()
 
-    logThis("COTAN dataset analysis: START", logLevel = 1L)
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
 
-    objCOTAN <- clean(objCOTAN, cellsCutoff, genesCutoff,
-                      cellsThreshold, genesThreshold)
-
-    if (isTRUE(saveObj)) tryCatch({
-      if (!dir.exists(outDir)) {
-        dir.create(file.path(outDir))
-      }
-
-      cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
-
-      outDirCond <- file.path(outDir, cond)
-      if (!dir.exists(outDirCond)) {
-        dir.create(outDirCond)
-      }
-
-      outDirCleaning <- file.path(outDirCond, "cleaning")
-      if (!dir.exists(outDirCleaning)) {
-        dir.create(outDirCleaning)
-      }
-
-      plots <- cleanPlots(objCOTAN)
-
-      if (TRUE) {
-        numIter <- 1L
-        pdf(file.path(outDirCleaning,
-                      paste0(cond, "_", numIter,
-                             "_plots_without_cleaning.pdf")))
-        plot(plots[["pcaCells"]])
-        plot(plots[["genes"]])
-        dev.off()
-      }
-
-      if (TRUE) {
-        pdf(file.path(outDirCleaning,
-                      paste0(cond, "_plots_PCA_efficiency_colored.pdf")))
-        plot(plots[["UDE"]])
-        dev.off()
-      }
-
-      if (TRUE) {
-        pdf(file.path(outDirCleaning,
-                      paste0(cond, "_plots_efficiency.pdf")))
-        plot(plots[["nu"]] +
-               annotate(geom = "text", x = 50L, y = 0.25,
-                        label = "nothing to remove ", color = "darkred"))
-        dev.off()
-      }
-
-      rm(plots)
-    }, error = function(err) {
-      logThis(paste("While saving the clean plots", err), logLevel = 1L)
-    }, finally = {
-      # Check for active device
-      if (dev.cur() > 1L) {
-        dev.off()
-      }
-    })
-
-    gc()
-
-    startEstimTime <- Sys.time()
-    cleanTime <- difftime(startEstimTime, startTime, units = "secs")
-    logThis(paste("Dataset cleaning elapsed time:", cleanTime),
-            logLevel = 3L)
-
-    objCOTAN <- estimateLambdaLinear(objCOTAN)
-    objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = cores)
-
-    gc()
-
-    startCoexTime <- Sys.time()
-    analysisTime <- difftime(startCoexTime, startEstimTime, units = "secs")
-    logThis(paste("Model parameter estimation elapsed time:", analysisTime),
-            logLevel = 3L)
-
-    if (isTRUE(calcCoex)) {
-      logThis("COTAN genes' COEX estimation: START", logLevel = 2L)
-
-      objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE,
-                                optimizeForSpeed = optimizeForSpeed,
-                                deviceStr = deviceStr)
-
-    } else {
-      logThis("COTAN genes' COEX estimation not requested", logLevel = 2L)
-    }
-
-    gc()
-
-    endTime <- Sys.time()
-    genesCoexTime <- difftime(endTime, startCoexTime, units = "secs")
-    logThis(paste("Only genes' COEX elapsed time:", genesCoexTime),
-            logLevel = 3L)
-
-    totalTime <- difftime(endTime, startTime, units = "secs")
-    logThis(paste("Dataset analysis elapsed time:", totalTime), logLevel = 3L)
-
-    logThis("COTAN dataset analysis: DONE", logLevel = 1L)
-
-    if (saveObj) {
-      utils::write.csv(data.frame("type"  = c("total_time",
-                                              "clean_time",
-                                              "analysis_time",
-                                              "genes_coex_time"),
-                                  "times" = c(as.numeric(totalTime),
-                                              as.numeric(cleanTime),
-                                              as.numeric(analysisTime),
-                                              as.numeric(genesCoexTime)),
-                                  "n.cells" = getNumCells(objCOTAN),
-                                  "n.genes" = getNumGenes(objCOTAN)),
-                       file = file.path(outDir, paste0(cond, "_times.csv")))
-
-      logThis(paste("Saving elaborated data locally at:",
-                    file.path(outDir, paste0(cond, ".cotan.RDS"))),
-              logLevel = 1L)
-      saveRDS(objCOTAN, file = file.path(outDir, paste0(cond, ".cotan.RDS")))
-    }
-
-
-    return(objCOTAN)
+    .proceedToCoexImpl(
+      objCOTAN = objCOTAN,
+      calcCoex = calcCoex,
+      executionOptions = executionOptions,
+      cellsCutoff = cellsCutoff,
+      genesCutoff = genesCutoff,
+      cellsThreshold = cellsThreshold,
+      genesThreshold = genesThreshold,
+      saveObj = saveObj,
+      outDir = outDir
+    )
   }
 )
+
 
 #' @details `automaticCOTANObjectCreation()` takes a raw dataset, creates and
 #'   initializes a `COTAN` object and runs [proceedToCoex()]
@@ -289,17 +324,23 @@ automaticCOTANObjectCreation <- function(raw,
     logThis(paste0("Condition ", sampleCondition), logLevel = 2L)
     logThis(paste("n cells", getNumCells(objCOTAN)), logLevel = 2L)
 
-    objCOTAN <- proceedToCoex(objCOTAN,
-                              calcCoex = calcCoex,
-                              optimizeForSpeed = optimizeForSpeed,
-                              deviceStr = deviceStr,
-                              cores = cores,
-                              cellsCutoff = cellsCutoff,
-                              genesCutoff = genesCutoff,
-                              cellsThreshold = cellsThreshold,
-                              genesThreshold = genesThreshold,
-                              saveObj = saveObj,
-                              outDir = outDir)
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
+
+    objCOTAN <- .proceedToCoexImpl(
+      objCOTAN = objCOTAN,
+      calcCoex = calcCoex,
+      executionOptions = executionOptions,
+      cellsCutoff = cellsCutoff,
+      genesCutoff = genesCutoff,
+      cellsThreshold = cellsThreshold,
+      genesThreshold = genesThreshold,
+      saveObj = saveObj,
+      outDir = outDir
+    )
 
     return(objCOTAN)
   }
