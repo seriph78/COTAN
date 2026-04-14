@@ -354,23 +354,24 @@ conditionsFromNames <-
   }
   names(conditions) <- names
   return(conditions)
-}
+  }
 
 
-#' @details `isEmptyName()` returns whether the passed name is not null and has
-#'   non-zero characters
+#' @details `isEmptyName()` returns whether the passed name is `NULL`, `NA`, or
+#'   equivalent to an empty string.
 #'
 #' @param name the name to check
 #'
-#' @returns `isEmptyName()` returns whether the passed name is equivalent to an
-#'   empty string
-#'
-#' @importFrom assertthat assert_that
+#' @returns `isEmptyName()` returns `TRUE` when `name` is `NULL`, `NA`, or an
+#'   empty string, and `FALSE` otherwise.
 #'
 #' @rdname HandleStrings
-#'
 isEmptyName <- function(name) {
-  return(!(length(name) && any(nzchar(name))))
+  if (is.null(name)) {
+    return(TRUE)
+  }
+  assert_that(length(name) == 1L, msg = "isEmptyName() accepts only one string")
+  return(is.na(name) || !nzchar(name))
 }
 
 
@@ -566,6 +567,94 @@ updateMetaInfo <- function(meta, tag, value) {
   meta[rowPos, seq_along(newLine)] <- newLine
 
   return(meta)
+}
+
+
+#------------------- function parameters utilities ----------
+
+#' @title Validate collected dots against a target function
+#'
+#' @description Internal utility to validate a list collected from `...` against
+#' the formal arguments of a target function.
+#'
+#' The matching is exact and uses the target function formal names as returned
+#' by [formals()]. Unnamed elements are rejected by default. The function
+#' returns the part of `dots` that is not consumed by the target signature.
+#'
+#' @param dots A `list`, typically obtained with `list(...)`.
+#' @param fun A function object or the name of a function.
+#' @param allowRemaining Logical scalar. When `FALSE`, any non-consumed argument
+#'   triggers an error. When `TRUE`, the non-consumed arguments are returned.
+#' @param allowUnnamed Logical scalar. When `FALSE`, unnamed elements of `dots`
+#'   trigger an error.
+#'
+#' @returns A named `list` containing the elements of `dots` that are not
+#' matched by the formal arguments of `fun`.
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @noRd
+#'
+#' @keywords internal
+checkDotsAgainstFunction <- function(dots,
+                                     fun,
+                                     allowRemaining = FALSE,
+                                     allowUnnamed = FALSE) {
+
+  assert_that(is.list(dots), msg = "`dots` must be a list")
+
+  if (is.character(fun)) {
+    assert_that(!isEmptyName(fun),
+                msg = "`fun` must be a non-empty function name")
+    funName <- fun
+    fun <- get(fun, mode = "function", inherits = TRUE)
+  } else {
+    fun <- match.fun(fun)
+    funName <- deparse1(substitute(fun))
+    if (isEmptyName(funName)) {
+      funName <- "<function>"
+    }
+  }
+
+  dotNames <- names(dots)
+  if (is.null(dotNames)) {
+    dotNames <- rep.int("", length(dots))
+    names(dots) <- dotNames
+  }
+
+  emptyDotNames <- vapply(dotNames, isEmptyName, logical(1L))
+  if (!isTRUE(allowUnnamed) && any(emptyDotNames)) {
+    stop(
+      "Unnamed argument(s) found in forwarded `...` at position(s): ",
+      paste(which(emptyDotNames), collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  formalNames <- names(formals(fun))
+  if (is.null(formalNames)) {
+    formalNames <- character()
+  }
+
+  if ("..." %in% formalNames) {
+    # The target can still absorb unmatched arguments via `...`,
+    # so at the signature level nothing remains unconsumed.
+    return(formalNames[NULL]) # empty list
+  }
+
+  matchedPos <- which(!emptyDotNames & dotNames %in% formalNames)
+
+  remaining <- dots[setdiff(seq_along(dots), matchedPos)]
+
+  if (!isTRUE(allowRemaining) && length(remaining) != 0L) {
+    stop(
+      "Argument(s) not accepted by `", funName, "`: ",
+      paste(names(remaining), collapse = ", "),
+      call. = FALSE
+    )
+  }
+
+  return(remaining)
 }
 
 
