@@ -336,10 +336,15 @@ setGeneric(
 
 setGeneric(
   "estimateDispersionViaSolver",
-  function(objCOTAN, threshold = 0.001, cores = 1L,
-           maxIterations = 100L, chunkSize = 1024L) {
+  function(objCOTAN,
+           threshold = 0.001,
+           cores = 1L,
+           maxIterations = 100L,
+           chunkSize = 1024L,
+           executionOptions = NULL) {
     standardGeneric("estimateDispersionViaSolver")
-  }
+  },
+  signature = c("objCOTAN", "executionOptions")
 )
 
 setGeneric(

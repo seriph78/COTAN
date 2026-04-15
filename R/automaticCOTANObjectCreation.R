@@ -80,8 +80,10 @@
           logLevel = 3L)
 
   objCOTAN <- estimateLambdaLinear(objCOTAN)
-  objCOTAN <- estimateDispersionViaSolver(objCOTAN,
-                                          cores = executionOptions@cores)
+  objCOTAN <- estimateDispersionViaSolver(
+    objCOTAN,
+    executionOptions = executionOptions
+  )
 
   gc()
 

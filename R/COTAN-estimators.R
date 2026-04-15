@@ -367,6 +367,8 @@ setMethod(
 #' @param maxIterations max number of iterations (avoids infinite loops)
 #' @param chunkSize number of elements to solve in batch in a single core.
 #'   Default is 1024.
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @returns `estimateDispersionViaSolver()` returns the updated `COTAN` object
 #'
@@ -394,12 +396,13 @@ setMethod(
 #'
 setMethod(
   "estimateDispersionViaSolver",
-  "COTAN",
+  signature(objCOTAN = "COTAN", executionOptions = "missing"),
   function(objCOTAN,
            threshold = 0.001,
            cores = 1L,
            maxIterations = 100L,
-           chunkSize = 1024L) {
+           chunkSize = 1024L,
+           executionOptions = NULL) {
     executionOptions <- legacyExecutionOptions(cores = cores)
 
     .estimateDispersionViaSolverImpl(
@@ -412,15 +415,56 @@ setMethod(
   }
 )
 
-# backward compatibility alias
-estimateDispersionBisection <-
-  function(objCOTAN, threshold = 0.001, cores = 1L,
-           maxIterations = 100L, chunkSize = 1024L) {
-    executionOptions <- legacyExecutionOptions(cores = cores)
+
+#' @details Alternative interface using an `ExecutionOptions` object.
+#'
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code. It must not be
+#'   mixed with the legacy execution argument `cores`.
+#'
+#' @rdname ParametersEstimations
+#'
+#' @aliases estimateDispersionViaSolver,COTAN,ExecutionOptions-method
+setMethod(
+  "estimateDispersionViaSolver",
+  signature(objCOTAN = "COTAN", executionOptions = "ExecutionOptions"),
+  function(objCOTAN,
+           threshold = 0.001,
+           cores = 1L,
+           maxIterations = 100L,
+           chunkSize = 1024L,
+           executionOptions = NULL) {
+
+    assert_that(
+      identical(cores, 1L),
+      msg = paste(
+        "Do not mix `executionOptions` with",
+        "the legacy execution argument `cores`."
+      )
+    )
 
     .estimateDispersionViaSolverImpl(
       objCOTAN = objCOTAN,
       executionOptions = executionOptions,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      chunkSize = chunkSize
+    )
+  }
+)
+
+
+#' @details Backward compatibility alias for [estimateDispersionViaSolver()].
+#'   Despite the name, it will call the new solver.
+#'
+#' @rdname ParametersEstimations
+#'
+estimateDispersionBisection <-
+  function(objCOTAN, threshold = 0.001, cores = 1L,
+           maxIterations = 100L, chunkSize = 1024L) {
+    estimateDispersionViaSolver(
+      objCOTAN = objCOTAN,
+      cores = cores,
       threshold = threshold,
       maxIterations = maxIterations,
       chunkSize = chunkSize

@@ -6,9 +6,10 @@
 \alias{estimateLambdaLinear}
 \alias{estimateNuLinear,COTAN-method}
 \alias{estimateNuLinear}
-\alias{estimateDispersionViaSolver,COTAN-method}
+\alias{estimateDispersionViaSolver,COTAN,missing-method}
 \alias{estimateDispersionViaSolver}
 \alias{estimateDispersionBisection}
+\alias{estimateDispersionViaSolver,COTAN,ExecutionOptions-method}
 \alias{estimateNuBisection,COTAN-method}
 \alias{estimateNuBisection}
 \alias{estimateDispersionNuBisection,COTAN-method}
@@ -32,7 +33,25 @@
 
 \S4method{estimateNuLinear}{COTAN}(objCOTAN)
 
-\S4method{estimateDispersionViaSolver}{COTAN}(
+\S4method{estimateDispersionViaSolver}{COTAN,missing}(
+  objCOTAN,
+  threshold = 0.001,
+  cores = 1L,
+  maxIterations = 100L,
+  chunkSize = 1024L,
+  executionOptions = NULL
+)
+
+\S4method{estimateDispersionViaSolver}{COTAN,ExecutionOptions}(
+  objCOTAN,
+  threshold = 0.001,
+  cores = 1L,
+  maxIterations = 100L,
+  chunkSize = 1024L,
+  executionOptions = NULL
+)
+
+estimateDispersionBisection(
   objCOTAN,
   threshold = 0.001,
   cores = 1L,
@@ -92,6 +111,10 @@ getProbabilityOfZero(objCOTAN)
 
 \item{chunkSize}{number of elements to solve in batch in a single core.
 Default is 1024.}
+
+\item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
+controls. This is the preferred interface for new code. It must not be
+mixed with the legacy execution argument \code{cores}.}
 
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
@@ -153,6 +176,11 @@ cells' counts averages)
 dispersion factor for each gene (\code{dispersion}). Determines the value such
 that, for each gene, the probability of zero count matches the number of
 observed zeros. It assumes \code{\link[=estimateNuLinear]{estimateNuLinear()}} being already run.
+
+Alternative interface using an \code{ExecutionOptions} object.
+
+Backward compatibility alias for \code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}}.
+Despite the name, it will call the new solver.
 
 \code{estimateNuBisection()} estimates the \code{nu} vector of a \code{COTAN}
 object by bisection. It determines the \code{nu} parameters such that, for each

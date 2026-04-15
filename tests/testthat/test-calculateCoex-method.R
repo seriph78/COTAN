@@ -98,7 +98,11 @@ test_that("Calculations on genes", {
                       ncol = getNumGenes(obj)),
                ignore_attr = TRUE)
 
-  obj <- estimateDispersionViaSolver(obj, cores = 4L, chunkSize = 4L)
+  obj <- estimateDispersionViaSolver(
+    obj,
+    chunkSize = 4L,
+    executionOptions = ExecutionOptions(cores = 4L)
+  )
 
   c(expectedNN, expectedN) %<-%
     expectedContingencyTablesNN(obj, actOnCells = FALSE, asDspMatrices = TRUE)
