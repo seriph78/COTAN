@@ -269,7 +269,7 @@ setMethod(
 
     logThis("Estimate `dispersion`: START", logLevel = 2L)
 
-    c(cores=) %<-% resolveExecutionOptions(executionOptions)
+    cores <- resolveExecutionOptions(executionOptions)[["cores"]]
 
     genes <- getGenes(objCOTAN)
     sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)[genes]
