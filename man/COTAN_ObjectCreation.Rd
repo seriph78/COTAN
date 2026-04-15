@@ -5,12 +5,28 @@
 \alias{COTAN}
 \alias{proceedToCoex,COTAN,missing-method}
 \alias{proceedToCoex}
+\alias{proceedToCoex,COTAN,ExecutionOptions-method}
 \alias{automaticCOTANObjectCreation}
 \title{\code{COTAN} shortcuts}
 \usage{
 COTAN(raw = "ANY")
 
 \S4method{proceedToCoex}{COTAN,missing}(
+  objCOTAN,
+  calcCoex = TRUE,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
+  cores = 1L,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99,
+  saveObj = FALSE,
+  outDir = ".",
+  executionOptions = NULL
+)
+
+\S4method{proceedToCoex}{COTAN,ExecutionOptions}(
   objCOTAN,
   calcCoex = TRUE,
   optimizeForSpeed = TRUE,
@@ -67,6 +83,11 @@ plots to file}
 
 \item{outDir}{an existing directory for the analysis output.}
 
+\item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
+controls. This is the preferred interface for new code. It must not be
+mixed with the legacy execution arguments \code{cores}, \code{optimizeForSpeed}, and
+\code{deviceStr}.}
+
 \item{GEO}{a code reporting the GEO identification or other specific dataset
 code}
 
@@ -96,6 +117,8 @@ Constructor of the class \code{COTAN}
 
 \code{proceedToCoex()} takes a newly created \code{COTAN} object (or the
 result of a call to \code{dropGenesCells()}) and runs \code{\link[=calculateCoex]{calculateCoex()}}
+
+Alternative interface using an \code{ExecutionOptions} object.
 
 \code{automaticCOTANObjectCreation()} creates a \code{COTAN} object,
 initializes its dataset metadata, and then calls \code{\link[=proceedToCoex]{proceedToCoex()}} on it.

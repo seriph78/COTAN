@@ -169,6 +169,10 @@
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
 #'   plots to file
 #' @param outDir an existing directory for the analysis output.
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code. It must not be
+#'   mixed with the legacy execution arguments `cores`, `optimizeForSpeed`, and
+#'   `deviceStr`.
 #'
 #' @returns `proceedToCoex()` returns the updated `COTAN` object with genes'
 #'   `COEX` calculated. If asked to, it will also store the object, along all
@@ -248,6 +252,11 @@ setMethod(
   }
 )
 
+
+#' @details Alternative interface using an `ExecutionOptions` object.
+#'
+#' @rdname COTAN_ObjectCreation
+#' @aliases proceedToCoex,COTAN,ExecutionOptions-method
 setMethod(
   "proceedToCoex",
   signature(objCOTAN = "COTAN", executionOptions = "ExecutionOptions"),

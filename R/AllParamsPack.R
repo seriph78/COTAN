@@ -3,16 +3,18 @@
 #' @title Execution options for heavy COTAN computations
 #'
 #' @description A small parameter object bundling execution-related controls
-#'   such as multi-core usage and the request to use `torch` on a given device.
+#' such as multi-core usage and the request to use `torch` on a given device.
 #'
-#' @name ExecutionOptions
-NULL
-
 #' @slot cores Integer scalar. Requested number of CPU cores.
 #' @slot optimizeForSpeed Logical scalar. Whether to try `torch` acceleration.
 #' @slot deviceStr Character scalar. Requested `torch` device string.
 #'
-#' @export
+#' @name ExecutionOptions-class
+#'
+#' @exportClass ExecutionOptions
+#'
+#' @rdname ExecutionOptions
+#'
 setClass(
   "ExecutionOptions",
   slots = c(
