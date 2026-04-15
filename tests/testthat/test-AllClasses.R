@@ -35,12 +35,10 @@ test_that("'scCOTAN' converters", {
   obj <- COTAN(raw = raw)
   obj <- initializeMetaDataset(obj, GEO = "V", sequencingMethod = "10X",
                                sampleCondition = "Test")
-  obj <- clean(obj)
-
-  obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionViaSolver(obj)
-
-  obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = FALSE)
+  obj <- proceedToCoex(
+    obj,
+    executionOptions = ExecutionOptions(cores = 1L, optimizeForSpeed = FALSE)
+  )
 
   coexDF <-
     set_names(as.data.frame(atan(getNuNormData(obj)[, 1L:2L] - 0.5) / pi * 2.0),
@@ -85,6 +83,49 @@ test_that("'scCOTAN' converters", {
   }
 
   expect_identical(obj2, obj)
+})
+
+
+test_that("ExecutionOptions stores defaults and explicit values", {
+  exec_default <- ExecutionOptions()
+
+  expect_s4_class(exec_default, "ExecutionOptions")
+  expect_identical(exec_default@cores, 1L)
+  expect_identical(exec_default@optimizeForSpeed, TRUE)
+  expect_identical(exec_default@deviceStr, "cuda")
+  expect_identical(exec_default@chunkSize, 1024L)
+
+  exec <- ExecutionOptions(
+    cores = 4.0,
+    optimizeForSpeed = FALSE,
+    deviceStr = "cpu",
+    chunkSize = 256.0
+  )
+
+  expect_s4_class(exec, "ExecutionOptions")
+  expect_type(exec@cores, "integer")
+  expect_identical(exec@cores, 4L)
+  expect_type(exec@optimizeForSpeed, "logical")
+  expect_identical(exec@optimizeForSpeed, FALSE)
+  expect_type(exec@deviceStr, "character")
+  expect_identical(exec@deviceStr, "cpu")
+  expect_type(exec@chunkSize, "integer")
+  expect_identical(exec@chunkSize, 256L)
+})
+
+test_that("ExecutionOptions rejects invalid values", {
+  expect_error(ExecutionOptions(cores = -1L))
+  expect_error(ExecutionOptions(cores = NA_integer_))
+
+  expect_error(ExecutionOptions(optimizeForSpeed = NA))
+  expect_error(ExecutionOptions(optimizeForSpeed = c(TRUE, FALSE)))
+
+  expect_error(ExecutionOptions(deviceStr = NA_character_))
+  expect_error(ExecutionOptions(deviceStr = c("cpu", "cuda")))
+
+  expect_error(ExecutionOptions(chunkSize = 0L))
+  expect_error(ExecutionOptions(chunkSize = -1L))
+  expect_error(ExecutionOptions(chunkSize = NA_integer_))
 })
 
 gc()

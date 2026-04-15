@@ -6,7 +6,12 @@
 \alias{ExecutionOptions}
 \title{Execution options for heavy COTAN computations}
 \usage{
-ExecutionOptions(cores = 1L, optimizeForSpeed = TRUE, deviceStr = "cuda")
+ExecutionOptions(
+  cores = 1L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
+  chunkSize = 1024L
+)
 }
 \arguments{
 \item{cores}{Requested number of CPU cores}
@@ -14,13 +19,16 @@ ExecutionOptions(cores = 1L, optimizeForSpeed = TRUE, deviceStr = "cuda")
 \item{optimizeForSpeed}{Whether to try \code{torch} acceleration}
 
 \item{deviceStr}{Requested \code{torch} device string}
+
+\item{chunkSize}{Integer scalar. Requested solver batch size.}
 }
 \value{
 An object of class \code{ExecutionOptions}
 }
 \description{
 A small parameter object bundling execution-related controls
-such as multi-core usage and the request to use \code{torch} on a given device.
+such as multi-core usage, \code{torch} device selection, and solver batching
+options. Some fields are only used by specific functions.
 }
 \section{Slots}{
 
@@ -30,5 +38,16 @@ such as multi-core usage and the request to use \code{torch} on a given device.
 \item{\code{optimizeForSpeed}}{Logical scalar. Whether to try \code{torch} acceleration.}
 
 \item{\code{deviceStr}}{Character scalar. Requested \code{torch} device string.}
+
+\item{\code{chunkSize}}{Integer scalar. Requested solver batch size.}
 }}
 
+\examples{
+  exec <- ExecutionOptions(
+    cores = 4L,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    chunkSize = 1024L
+  )
+
+}

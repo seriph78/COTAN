@@ -51,15 +51,14 @@ test_that("Bisection estimates", {
       obj,
       cores = 3L,
       chunkSize = 2L,
-      executionOptions = ExecutionOptions(cores = 3L)
+      executionOptions = ExecutionOptions(cores = 3L, chunkSize = 2L)
     ),
     regexp = "Do not mix `executionOptions` with the legacy execution argument"
   )
 
   obj <- estimateDispersionViaSolver(
     obj,
-    chunkSize = 2L,
-    executionOptions = ExecutionOptions(cores = 3L)
+    executionOptions = ExecutionOptions(cores = 3L, chunkSize = 2L)
   )
 
   expect_length(getDispersion(obj), getNumGenes(obj))

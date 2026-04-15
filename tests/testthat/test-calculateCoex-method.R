@@ -100,8 +100,7 @@ test_that("Calculations on genes", {
 
   obj <- estimateDispersionViaSolver(
     obj,
-    chunkSize = 4L,
-    executionOptions = ExecutionOptions(cores = 4L)
+    executionOptions = ExecutionOptions(cores = 4L, chunkSize = 4L)
   )
 
   c(expectedNN, expectedN) %<-%

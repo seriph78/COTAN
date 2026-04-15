@@ -262,14 +262,14 @@ setMethod(
 .estimateDispersionViaSolverImpl <-
   function(objCOTAN,
            threshold = 0.001,
-           executionOptions,
            maxIterations = 100L,
-           chunkSize = 1024L) {
+           executionOptions) {
     startTime <- Sys.time()
 
     logThis("Estimate `dispersion`: START", logLevel = 2L)
 
-    cores <- resolveExecutionOptions(executionOptions)[["cores"]]
+    c(cores, ., ., chunkSize) %<-%
+      resolveExecutionOptions(executionOptions)
 
     genes <- getGenes(objCOTAN)
     sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)[genes]
@@ -389,7 +389,10 @@ setMethod(
 #' @export
 #'
 #' @examples
-#' objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = 6L)
+#' objCOTAN <- estimateDispersionViaSolver(
+#'   objCOTAN,
+#'   executionOptions = ExecutionOptions(cores = 6L, chunkSize = 1024L)
+#' )
 #' dispersion <- getDispersion(objCOTAN)
 #'
 #' @rdname ParametersEstimations
@@ -403,14 +406,14 @@ setMethod(
            maxIterations = 100L,
            chunkSize = 1024L,
            executionOptions = NULL) {
-    executionOptions <- legacyExecutionOptions(cores = cores)
+    executionOptions <-
+      legacyExecutionOptions(cores = cores, chunkSize = chunkSize)
 
     .estimateDispersionViaSolverImpl(
       objCOTAN = objCOTAN,
-      executionOptions = executionOptions,
       threshold = threshold,
       maxIterations = maxIterations,
-      chunkSize = chunkSize
+      executionOptions = executionOptions
     )
   }
 )
@@ -419,8 +422,7 @@ setMethod(
 #' @details Alternative interface using an `ExecutionOptions` object.
 #'
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
-#'   controls. This is the preferred interface for new code. It must not be
-#'   mixed with the legacy execution argument `cores`.
+#'   controls. This is the preferred interface for new code.
 #'
 #' @rdname ParametersEstimations
 #'
@@ -437,18 +439,18 @@ setMethod(
 
     assert_that(
       identical(cores, 1L),
+      identical(chunkSize, 1024L),
       msg = paste(
         "Do not mix `executionOptions` with",
-        "the legacy execution argument `cores`."
+        "the legacy execution arguments `cores` and `chunkSize`."
       )
     )
 
     .estimateDispersionViaSolverImpl(
       objCOTAN = objCOTAN,
-      executionOptions = executionOptions,
       threshold = threshold,
       maxIterations = maxIterations,
-      chunkSize = chunkSize
+      executionOptions = executionOptions
     )
   }
 )

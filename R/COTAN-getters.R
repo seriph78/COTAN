@@ -918,10 +918,11 @@ NULL
 #' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
 #'                                   sequencingMethod = "distribution_sampling",
 #'                                   sampleCondition = "reconstructed_dataset")
-#' objCOTAN <- clean(objCOTAN)
-#'
-#' objCOTAN <- estimateLambdaLinear(objCOTAN)
-#' objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = 6L)
+#' objCOTAN <- proceedToCoex(
+#'   objCOTAN,
+#'   calcCoex = FALSE,
+#'   executionOptions = ExecutionOptions(cores = 6L, chunkSize = 1024L)
+#' )
 #'
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 #'

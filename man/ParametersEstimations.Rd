@@ -113,8 +113,7 @@ getProbabilityOfZero(objCOTAN)
 Default is 1024.}
 
 \item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
-controls. This is the preferred interface for new code. It must not be
-mixed with the legacy execution argument \code{cores}.}
+controls. This is the preferred interface for new code.}
 
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
@@ -234,7 +233,10 @@ lambda <- getLambda(objCOTAN)
 objCOTAN <- estimateNuLinear(objCOTAN)
 nu <- getNu(objCOTAN)
 
-objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = 6L)
+objCOTAN <- estimateDispersionViaSolver(
+  objCOTAN,
+  executionOptions = ExecutionOptions(cores = 6L, chunkSize = 1024L)
+)
 dispersion <- getDispersion(objCOTAN)
 
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L,

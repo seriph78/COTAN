@@ -144,19 +144,26 @@ if (FALSE) {
                                     sequencingMethod = "artificial",
                                     sampleCondition = "test dataset")
 #
-# doing all the cleaning...
+# doing all the cleaning and analysis...
 #
+  exec <- ExecutionOptions(cores = 6L,
+                           optimizeForSpeed = TRUE,
+                           deviceStr = "cuda",
+                           chunkSize = 1024L)
+
 # in case the genes' `COEX` is not needed it can be skipped
 # (e.g. when calling [cellsUniformClustering()])
+#
   objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-                            cores = 6L, optimizeForSpeed = TRUE,
-                            deviceStr = "cuda", saveObj = FALSE)
+                            executionOptions = exec, saveObj = FALSE)
 }
 
 
 ## Otherwise it is possible to run all at once.
-exec <- ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE,
-                         deviceStr = "cuda")
+exec <- ExecutionOptions(cores = 6L,
+                         optimizeForSpeed = TRUE,
+                         deviceStr = "cuda",
+                         chunkSize = 1024L)
 
 objCOTAN <- automaticCOTANObjectCreation(
   raw = test.dataset,
