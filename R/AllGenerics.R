@@ -332,7 +332,7 @@ setGeneric(
 setGeneric(
   "estimateDispersionViaSolver",
   function(objCOTAN, threshold = 0.001, cores = 1L,
-           maxIterations = 50L, chunkSize = 1024L) {
+           maxIterations = 100L, chunkSize = 1024L) {
     standardGeneric("estimateDispersionViaSolver")
   }
 )

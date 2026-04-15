@@ -639,7 +639,7 @@ checkDotsAgainstFunction <- function(dots,
   if ("..." %in% formalNames) {
     # The target can still absorb unmatched arguments via `...`,
     # so at the signature level nothing remains unconsumed.
-    return(formalNames[NULL]) # empty list
+    return(list())
   }
 
   matchedPos <- which(!emptyDotNames & dotNames %in% formalNames)
