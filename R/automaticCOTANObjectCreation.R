@@ -212,7 +212,7 @@
 
 setMethod(
   "proceedToCoex",
-  signature(objCOTAN = "COTAN", executionOptions = "NULL"),
+  signature(objCOTAN = "COTAN", executionOptions = "missing"),
   function(objCOTAN,
            calcCoex = TRUE,
            optimizeForSpeed = TRUE,
@@ -225,7 +225,7 @@ setMethod(
            saveObj = FALSE,
            outDir = ".",
            executionOptions = NULL) {
-    print("Legacy")
+
     executionOptions <- legacyExecutionOptions(
       cores = cores,
       optimizeForSpeed = optimizeForSpeed,
@@ -263,7 +263,7 @@ setMethod(
            saveObj = FALSE,
            outDir = ".",
            executionOptions) {
-    print("New")
+
     assert_that(
       identical(optimizeForSpeed, TRUE),
       identical(deviceStr, "cuda"),

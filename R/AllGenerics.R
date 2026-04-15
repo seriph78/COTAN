@@ -14,7 +14,8 @@ setGeneric(
            outDir = ".",
            executionOptions = NULL) {
     standardGeneric("proceedToCoex")
-  }
+  },
+  signature = c("objCOTAN", "executionOptions")
 )
 
 # -------- calculate COEX --------

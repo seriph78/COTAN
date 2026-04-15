@@ -3,14 +3,14 @@
 \name{COTAN_ObjectCreation}
 \alias{COTAN_ObjectCreation}
 \alias{COTAN}
-\alias{proceedToCoex,COTAN,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,NULL-method}
+\alias{proceedToCoex,COTAN,missing-method}
 \alias{proceedToCoex}
 \alias{automaticCOTANObjectCreation}
 \title{\code{COTAN} shortcuts}
 \usage{
 COTAN(raw = "ANY")
 
-\S4method{proceedToCoex}{COTAN,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,ANY,NULL}(
+\S4method{proceedToCoex}{COTAN,missing}(
   objCOTAN,
   calcCoex = TRUE,
   optimizeForSpeed = TRUE,
@@ -22,25 +22,10 @@ COTAN(raw = "ANY")
   genesThreshold = 0.99,
   saveObj = FALSE,
   outDir = ".",
-  executionOptions = "NULL"
+  executionOptions = NULL
 )
 
-automaticCOTANObjectCreation(
-  raw,
-  GEO,
-  sequencingMethod,
-  sampleCondition,
-  calcCoex = TRUE,
-  optimizeForSpeed = TRUE,
-  deviceStr = "cuda",
-  cores = 1L,
-  cellsCutoff = 0.003,
-  genesCutoff = 0.002,
-  cellsThreshold = 0.99,
-  genesThreshold = 0.99,
-  saveObj = FALSE,
-  outDir = "."
-)
+automaticCOTANObjectCreation(raw, GEO, sequencingMethod, sampleCondition, ...)
 }
 \arguments{
 \item{raw}{a matrix or dataframe with the raw counts}
@@ -48,7 +33,7 @@ automaticCOTANObjectCreation(
 \item{objCOTAN}{a newly created \code{COTAN} object}
 
 \item{calcCoex}{a Boolean to determine whether to calculate the genes' \code{COEX}
-or stop just after the \code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}} step}
+or stop just before at the \code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}} step}
 
 \item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
 library to run the matrix calculations. Otherwise, or when the library is
@@ -88,7 +73,9 @@ code}
 \item{sequencingMethod}{a string reporting the method used for the sequencing}
 
 \item{sampleCondition}{a string reporting the specific sample condition or
-time point.}
+time point}
+
+\item{...}{Additional arguments forwarded to \code{\link[=proceedToCoex]{proceedToCoex()}}}
 }
 \value{
 a \code{COTAN} object
@@ -97,9 +84,8 @@ a \code{COTAN} object
 \code{COEX} calculated. If asked to, it will also store the object, along all
 relevant clean-plots, in the output directory.
 
-\code{automaticCOTANObjectCreation()} returns the new \code{COTAN} object with
-genes' \code{COEX} calculated. When asked, it will also store the object, along
-all relevant clean-plots, in the output directory.
+\code{automaticCOTANObjectCreation()} returns a new \code{COTAN} object after
+initialization and analysis via \code{\link[=proceedToCoex]{proceedToCoex()}}.
 }
 \description{
 These functions create a \linkS4class{COTAN} object and/or also run
@@ -111,9 +97,15 @@ Constructor of the class \code{COTAN}
 \code{proceedToCoex()} takes a newly created \code{COTAN} object (or the
 result of a call to \code{dropGenesCells()}) and runs \code{\link[=calculateCoex]{calculateCoex()}}
 
-\code{automaticCOTANObjectCreation()} takes a raw dataset, creates and
-initializes a \code{COTAN} object and runs \code{\link[=proceedToCoex]{proceedToCoex()}}
+\code{automaticCOTANObjectCreation()} creates a \code{COTAN} object,
+initializes its dataset metadata, and then calls \code{\link[=proceedToCoex]{proceedToCoex()}} on it.
 }
+\section{Forwarded arguments}{
+
+Typical forwarded arguments include \code{calcCoex}, \code{saveObj}, \code{outDir}, the
+cleaning thresholds used by \code{\link[=clean]{clean()}} and the \code{ExecutionOptions} object.
+}
+
 \examples{
 data("test.dataset")
 obj <- COTAN(raw = test.dataset)
@@ -140,14 +132,17 @@ if (FALSE) {
 
 
 ## Otherwise it is possible to run all at once.
+exec <- ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE,
+                         deviceStr = "cuda")
+
 objCOTAN <- automaticCOTANObjectCreation(
   raw = test.dataset,
   GEO = "code",
   sequencingMethod = "10X",
   sampleCondition = "mouse_dataset",
   calcCoex = TRUE,
-  saveObj = FALSE,
-  outDir = tempdir(),
-  cores = 6L)
+  executionOptions = exec,
+  saveObj = FALSE
+)
 
 }
