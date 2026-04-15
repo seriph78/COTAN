@@ -1369,6 +1369,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @returns `calculateCoex()` returns the updated `COTAN` object
 #'
@@ -1385,16 +1387,54 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #'
 setMethod(
   "calculateCoex",
-  "COTAN",
+  signature(objCOTAN = "COTAN", executionOptions = "missing"),
   function(
     objCOTAN,
     actOnCells = FALSE,
     returnPPFract = FALSE,
     optimizeForSpeed = TRUE,
-    deviceStr = "cuda") {
+    deviceStr = "cuda",
+    executionOptions = NULL) {
+
     executionOptions <- legacyExecutionOptions(
       optimizeForSpeed = optimizeForSpeed,
       deviceStr = deviceStr
+    )
+
+    .calculateCoexImpl(
+      objCOTAN = objCOTAN,
+      actOnCells = actOnCells,
+      returnPPFract = returnPPFract,
+      executionOptions = executionOptions
+    )
+  }
+)
+
+#' @details Alternative interface using an `ExecutionOptions` object.
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname CalculatingCOEX
+#'
+#' @aliases calculateCoex,COTAN,ExecutionOptions-method
+#'
+setMethod(
+  "calculateCoex",
+  signature(objCOTAN = "COTAN", executionOptions = "ExecutionOptions"),
+  function(
+    objCOTAN,
+    actOnCells = FALSE,
+    returnPPFract = FALSE,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    executionOptions) {
+
+    assert_that(
+      identical(optimizeForSpeed, TRUE),
+      identical(deviceStr, "cuda"),
+      msg = paste("Do not mix `executionOptions` with",
+                  "legacy execution arguments",
+                  "(`optimizeForSpeed`, `deviceStr`).")
     )
 
     .calculateCoexImpl(

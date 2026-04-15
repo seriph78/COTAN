@@ -171,7 +171,14 @@ test_that("Calculations on genes", {
                    paste0(10.0 / 55.0))
 
   suppressWarnings({
-    obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
+    obj <- calculateCoex(
+      obj,
+      actOnCells = FALSE,
+      executionOptions = ExecutionOptions(
+        optimizeForSpeed = TRUE,
+        deviceStr = "cuda"
+      )
+    )
   })
 
   torchCoex <- getGenesCoex(obj, zeroDiagonal = FALSE)
@@ -191,6 +198,18 @@ test_that("Calculations on genes", {
                ignore_attr = TRUE)
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
                    paste0(NA))
+
+  expect_error(
+    calculateCoex(
+      obj,
+      actOnCells = FALSE,
+      executionOptions = ExecutionOptions(
+        optimizeForSpeed = FALSE
+      ),
+      optimizeForSpeed = FALSE
+    ),
+    regexp = "Do not mix `executionOptions` with legacy execution arguments"
+  )
 
   genesSample1 <- sample(getNumGenes(obj), 3L)
   partialCoex1 <- calculatePartialCoex(obj, genesSample1)
@@ -522,17 +541,30 @@ test_that("Coex with negative dispersion genes", {
   expect_true(any(getDispersion(obj) < 0.0))
 
   expect_no_warning({
-    obj <- calculateCoex(obj, optimizeForSpeed = FALSE, deviceStr = "cpu")
+    obj <- calculateCoex(
+      obj,
+      optimizeForSpeed = FALSE,
+      deviceStr = "cpu"
+    )
   })
   coex1 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
   suppressWarnings({
-    obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cpu")
+    obj <- calculateCoex(
+      obj,
+      executionOptions = ExecutionOptions(
+        optimizeForSpeed = TRUE,
+        deviceStr = "cpu"
+      )
+    )
   })
   coex2 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
   suppressWarnings({
-    obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cuda")
+    obj <- calculateCoex(
+      obj,
+      executionOptions = ExecutionOptions() # optimize = T, device = "cuda"
+    )
   })
   coex3 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 

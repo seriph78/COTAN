@@ -97,8 +97,8 @@
       calculateCoex(
         objCOTAN,
         actOnCells = FALSE,
-        optimizeForSpeed = executionOptions@optimizeForSpeed,
-        deviceStr = executionOptions@deviceStr)
+        executionOptions = executionOptions
+      )
   } else {
     logThis("COTAN genes' COEX estimation not requested", logLevel = 2L)
   }

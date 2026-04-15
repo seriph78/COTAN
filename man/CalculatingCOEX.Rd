@@ -26,8 +26,9 @@
 \alias{expectedContingencyTables}
 \alias{expectedPartialContingencyTables}
 \alias{contingencyTables}
-\alias{calculateCoex,COTAN-method}
+\alias{calculateCoex,COTAN,missing-method}
 \alias{calculateCoex}
+\alias{calculateCoex,COTAN,ExecutionOptions-method}
 \alias{calculatePartialCoex}
 \alias{calculateS}
 \alias{calculateG}
@@ -115,12 +116,22 @@ expectedPartialContingencyTables(
 
 contingencyTables(objCOTAN, g1, g2)
 
-\S4method{calculateCoex}{COTAN}(
+\S4method{calculateCoex}{COTAN,missing}(
   objCOTAN,
   actOnCells = FALSE,
   returnPPFract = FALSE,
   optimizeForSpeed = TRUE,
-  deviceStr = "cuda"
+  deviceStr = "cuda",
+  executionOptions = NULL
+)
+
+\S4method{calculateCoex}{COTAN,ExecutionOptions}(
+  objCOTAN,
+  actOnCells = FALSE,
+  returnPPFract = FALSE,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
+  executionOptions = NULL
 )
 
 calculatePartialCoex(
@@ -242,6 +253,9 @@ than \eqn{0.5}. Default is FALSE}
 the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
 \code{"cuda"} to use the system \emph{GPUs} or something like \code{"cuda:0"} to restrict
 to a specific device}
+
+\item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
+controls. This is the preferred interface for new code.}
 
 \item{geneSubsetCol}{an array of genes. It will be put in columns. If left
 empty the function will do it genome-wide.}
@@ -475,6 +489,8 @@ also calculates the percentage of \emph{problematic} genes/cells pairs. A pair
 is \emph{problematic} when one or more of the expected counts were significantly
 smaller than 1 (\eqn{< 0.5}). These small expected values signal that scant
 information is present for such a pair.
+
+Alternative interface using an \code{ExecutionOptions} object.
 
 \code{calculatePartialCoex()} estimates a sub-section of the \code{COEX}
 matrix in the \code{cellCoex} or \code{genesCoex} field depending on given

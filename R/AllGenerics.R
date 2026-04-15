@@ -22,10 +22,15 @@ setGeneric(
 
 setGeneric(
   "calculateCoex",
-  function(objCOTAN, actOnCells = FALSE, returnPPFract = FALSE,
-           optimizeForSpeed = TRUE, deviceStr = "cuda") {
+  function(objCOTAN,
+           actOnCells = FALSE,
+           returnPPFract = FALSE,
+           optimizeForSpeed = TRUE,
+           deviceStr = "cuda",
+           executionOptions = NULL) {
     standardGeneric("calculateCoex")
-  }
+  },
+  signature = c("objCOTAN", "executionOptions")
 )
 
 # -------- getters --------
