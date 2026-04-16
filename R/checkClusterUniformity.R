@@ -58,8 +58,6 @@ checkClusterUniformity <- function(
     saveObj = TRUE,
     outDir = ".",
     executionOptions = NULL) {
-  assert_that(is(checker, "BaseUniformityCheck"))
-
   if (is.null(executionOptions)) {
     executionOptions <- legacyExecutionOptions(
       cores = cores,
@@ -77,6 +75,32 @@ checkClusterUniformity <- function(
       )
     )
   }
+
+  .checkClusterUniformityImpl(
+    objCOTAN = objCOTAN,
+    clusterName = clusterName,
+    cells = cells,
+    checker = checker,
+    saveObj = saveObj,
+    outDir = outDir,
+    executionOptions = executionOptions
+  )
+}
+
+#' @noRd
+.checkClusterUniformityImpl <- function(
+    objCOTAN,
+    clusterName,
+    cells,
+    checker,
+    saveObj = TRUE,
+    outDir = ".",
+    executionOptions = ExecutionOptions()) {
+  assert_that(is(checker, "BaseUniformityCheck"))
+  assert_that(
+    is(executionOptions, "ExecutionOptions"),
+    msg = "`executionOptions` must be an `ExecutionOptions` object"
+  )
 
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 

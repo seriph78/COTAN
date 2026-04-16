@@ -143,10 +143,14 @@
 #' firstCluster <- getCells(objCOTAN)[clusters %in% clusters[[1L]]]
 #'
 #' checkerRes <-
-#'   checkClusterUniformity(objCOTAN, checker = checker2,
-#'                          clusterName = clusters[[1L]], cells = firstCluster,
-#'                          cores = 6L, optimizeForSpeed = TRUE,
-#'                          deviceStr = "cuda", saveObj = FALSE)
+#'   checkClusterUniformity(
+#'     objCOTAN,
+#'     checker = checker2,
+#'     clusterName = clusters[[1L]],
+#'     cells = firstCluster,
+#'     executionOptions = exec,
+#'     saveObj = FALSE
+#'   )
 #'
 #' objCOTAN <- addClusterization(objCOTAN,
 #'                               clName = "split",
