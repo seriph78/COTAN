@@ -91,10 +91,12 @@ test_that("Heatmap plots", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  suppressWarnings(obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L))
+  exec <- ExecutionOptions(cores = 3L)
+
   suppressWarnings(
-    obj2 <- proceedToCoex(obj, calcCoex = TRUE,
-                          executionOptions = ExecutionOptions(cores = 3L))
+    obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L))
+  suppressWarnings(
+    obj2 <- proceedToCoex(obj, calcCoex = TRUE, executionOptions = exec)
   )
 
   expect_identical(obj, obj2)
@@ -107,30 +109,50 @@ test_that("Heatmap plots", {
                               "g-000570", "g-000590"))
 
   expect_no_error(suppressWarnings(
-    plot(heatmapPlot(obj, cores = 3L, genesLists = groupMarkers))
+    plot(heatmapPlot(obj, genesLists = groupMarkers, executionOptions = exec))
   ))
 
   expect_no_error(suppressWarnings(
-    genesHeatmapPlot(obj, symmetric = TRUE, cores = 3L,
+    genesHeatmapPlot(obj, symmetric = TRUE, executionOptions = exec,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]))
   ))
 
   expect_no_error(suppressWarnings(
-    genesHeatmapPlot(obj, symmetric = FALSE, cores = 3L,
+    genesHeatmapPlot(obj, symmetric = FALSE, executionOptions = exec,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]))
   ))
 
   expect_no_error(suppressWarnings(
-    genesHeatmapPlot(obj, symmetric = TRUE, cores = 3L,
+    genesHeatmapPlot(obj, symmetric = TRUE, executionOptions = exec,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]),
                      secondaryMarkers = lapply(groupMarkers, \(g) g[[2L]]))
   ))
 
   expect_no_error(suppressWarnings(
-    genesHeatmapPlot(obj, symmetric = TRUE, cores = 3L,
+    genesHeatmapPlot(obj, symmetric = TRUE, executionOptions = exec,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]),
                      secondaryMarkers = lapply(groupMarkers, \(g) g[[2L]]))
   ))
+
+  expect_error(
+    heatmapPlot(
+      obj,
+      genesLists = groupMarkers,
+      executionOptions = ExecutionOptions(cores = 3L),
+      cores = 3L
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
+
+  expect_error(
+    genesHeatmapPlot(
+      obj,
+      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]),
+      executionOptions = ExecutionOptions(cores = 3L),
+      cores = 3L
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
 
   suppressWarnings(obj <- calculateCoex(obj, actOnCells = TRUE))
   expect_no_warning(
