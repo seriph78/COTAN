@@ -219,6 +219,8 @@ seuratClustering <- function(objCOTAN,
 #'   plots to file
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
+#' @param executionOptions optional `ExecutionOptions` object collecting
+#'   execution-related parameters.
 #'
 #' @returns `cellsUniformClustering()` returns a `list` with 2 elements:
 #'   * `"clusters"` the newly found cluster labels array
@@ -274,7 +276,26 @@ cellsUniformClustering <- function(objCOTAN,
                                    minimumUTClusterSize = 50L,
                                    initialIteration = 1L,
                                    saveObj = TRUE,
-                                   outDir = ".") {
+                                   outDir = ".",
+                                   executionOptions = NULL) {
+  if (is.null(executionOptions)) {
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
+  } else {
+    assert_that(
+      identical(cores, 1L),
+      identical(optimizeForSpeed, TRUE),
+      identical(deviceStr, "cuda"),
+      msg = paste(
+        "Do not mix `executionOptions` with the legacy",
+        "execution arguments `cores`, `optimizeForSpeed`, and `deviceStr`."
+      )
+    )
+  }
+
   startTime <- Sys.time()
 
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
@@ -342,10 +363,13 @@ cellsUniformClustering <- function(objCOTAN,
     if ((str_equal(genesSel, "HGDI") || isTRUE(useCoexEigen)) &&
       !isCoexAvailable(subObj)) {
       subObj <-
-        proceedToCoex(subObj, calcCoex = TRUE, cores = cores,
-                      optimizeForSpeed = optimizeForSpeed,
-                      deviceStr = deviceStr,
-                      saveObj = FALSE, outDir = outDirCond)
+        proceedToCoex(
+          subObj,
+          calcCoex = TRUE,
+          executionOptions = executionOptions,
+          saveObj = FALSE,
+          outDir = outDirCond
+        )
     }
 
     #Step 1
@@ -439,11 +463,9 @@ cellsUniformClustering <- function(objCOTAN,
                                    clusterName = globalClName,
                                    cells = cells,
                                    checker = checker,
-                                   cores = cores,
-                                   optimizeForSpeed = optimizeForSpeed,
-                                   deviceStr = deviceStr,
                                    saveObj = saveObj,
-                                   outDir = splitOutDir),
+                                   outDir = splitOutDir,
+                                   executionOptions = executionOptions),
             error = function(err) {
               logThis(paste("while checking cluster uniformity", err),
                       logLevel = 0L)

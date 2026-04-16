@@ -275,9 +275,7 @@ c(splitClusters, splitCoexDF) %<-%
     minimumUTClusterSize = 50L, # too large values imply many un-clustered cells
     initialClusters = initialClusters,
     initialIteration = 1L,
-    optimizeForSpeed = TRUE,
-    deviceStr = "cuda",
-    cores = 3L,
+    executionOptions = exec,
     saveObj = TRUE, # save intermediate data for log and restart
     outDir = outDir
   )
@@ -486,9 +484,7 @@ c(mergedClusters, mergedCoexDF) %<-%
     clusters = splitClusters,
     checkers = checkersList,
     allCheckResults = prevCheckRes,
-    optimizeForSpeed = TRUE,
-    deviceStr = "cuda",
-    cores = 6L,
+    executionOptions = exec,
     useDEA = TRUE,
     saveObj = TRUE,
     outDir = outDir
