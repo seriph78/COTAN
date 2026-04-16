@@ -401,7 +401,10 @@ test_that("Coex", {
   expect_equal(GDI_S[[3L]],
                c(100L, rep(50L, getNumGenes(obj) - 1L)), ignore_attr = TRUE)
 
-  GDI_S_2 <- calculateGDIGivenS(calculateS(obj))
+  GDI_S_2 <- calculateGDIGivenS(
+    calculateS(obj),
+    executionOptions = ExecutionOptions(cores = 3L, chunkSize = 1024L)
+  )
   GDI_S_3 <- calculateGDIGivenCorr(getGenesCoex(obj),
                                    numDegreesOfFreedom = getNumCells(obj))
 
@@ -455,10 +458,22 @@ test_that("Coex vs saved results", {
                             zeroDiagonal = FALSE),
                coexTest, tolerance = tolerance)
 
-  pval <- calculatePValue(obj,
-                          geneSubsetCol = genesNamesTest,
-                          geneSubsetRow = genesNamesTest,
-                          cores = 3L)
+  pval <- calculatePValue(
+    obj,
+    geneSubsetCol = genesNamesTest,
+    geneSubsetRow = genesNamesTest,
+    executionOptions = ExecutionOptions(cores = 3L)
+  )
+
+  expect_error(
+    calculatePValue(
+      obj,
+      geneSubsetCol = genesNamesTest,
+      cores = 3L,
+      executionOptions = ExecutionOptions(cores = 3L)
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
 
   pValExp <- readRDS(file.path(getwd(), "pvalues.test.RDS"))
   expect_equal(pval, pValExp, tolerance = tolerance)
@@ -488,11 +503,27 @@ test_that("Coex vs saved results", {
                             zeroDiagonal = FALSE),
                coexTest, tolerance = tolerance)
 
-  pval <- calculatePValue(obj3, geneSubsetRow = genesNamesTest, cores = 3L)
+  pval <- calculatePValue(
+    obj3,
+    geneSubsetRow = genesNamesTest,
+    executionOptions = ExecutionOptions(cores = 3L, chunkSize = 1024L)
+  )
 
   expect_equal(pval[, genesNamesTest], pValExp, tolerance = tolerance)
 
-  GDI <- calculateGDI(obj3)[genesNamesTest, ]
+  GDI <- calculateGDI(
+    obj3,
+    executionOptions = ExecutionOptions(cores = 3L, chunkSize = 1024L)
+  )[genesNamesTest, ]
+
+  expect_error(
+    calculateGDI(
+      obj3,
+      cores = 3L,
+      executionOptions = ExecutionOptions(cores = 3L, chunkSize = 1024L)
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
 
   expect_equal(GDI, gdiExp, tolerance = tolerance)
 

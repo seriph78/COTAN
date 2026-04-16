@@ -34,7 +34,13 @@ establishGenesClusters(
 
 calculateGenesCE(objCOTAN)
 
-calculateGDIGivenS(S, rowsFraction = 0.05, cores = 1L, chunkSize = 1024L)
+calculateGDIGivenS(
+  S,
+  rowsFraction = 0.05,
+  cores = 1L,
+  chunkSize = 1024L,
+  executionOptions = NULL
+)
 
 calculateGDIGivenCorr(corr, numDegreesOfFreedom, rowsFraction = 0.05)
 
@@ -43,7 +49,8 @@ calculateGDI(
   statType = "S",
   rowsFraction = 0.05,
   cores = 1L,
-  chunkSize = 1024L
+  chunkSize = 1024L,
+  executionOptions = NULL
 )
 
 calculatePValue(
@@ -52,7 +59,8 @@ calculatePValue(
   geneSubsetCol = vector(mode = "character"),
   geneSubsetRow = vector(mode = "character"),
   cores = 1L,
-  chunkSize = 1024L
+  chunkSize = 1024L,
+  executionOptions = NULL
 )
 
 calculatePDI(
@@ -94,6 +102,9 @@ the \code{GDI}. Defaults to \eqn{5\%}}
 
 \item{chunkSize}{number of elements to solve in batch in a single core.
 Default is 1024.}
+
+\item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
+controls. This is the preferred interface for new code.}
 
 \item{corr}{a \code{matrix} object, possibly a subset of the columns of the full
 symmetric matrix}
