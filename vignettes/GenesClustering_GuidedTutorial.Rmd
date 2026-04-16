@@ -310,7 +310,8 @@ then we can choose which sets to use in the function parameter sets
 (for example, from 1 to 3).
 
 ```{r coex-heatmap-plot-for-selected-genes}
-plot(heatmapPlot(obj, genesLists = genesLists, sets = 1L:3L, cores = 3L))
+plot(heatmapPlot(obj, genesLists = genesLists,
+                 sets = 1L:3L, executionOptions = exec))
 ```
 
 
@@ -335,7 +336,7 @@ genesHeatmapPlot(
   primaryMarkers = layersMarkers,
   pValueThreshold = 0.0001,
   symmetric = TRUE,
-  cores = 3L
+  executionOptions = exec
 )
 ```
 
@@ -346,7 +347,7 @@ genesHeatmapPlot(
   secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
   pValueThreshold = 0.001,
   symmetric = FALSE,
-  cores = 3L
+  executionOptions = exec
 )
 ```
 
