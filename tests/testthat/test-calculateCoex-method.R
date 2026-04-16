@@ -223,8 +223,7 @@ test_that("Calculations on genes", {
                tolerance = 1e-12)
 
   genesSample2 <- getGenes(obj)[sample(getNumGenes(obj), 3L)]
-  partialCoex2 <- calculatePartialCoex(obj, genesSample2,
-                                       optimizeForSpeed = FALSE)
+  partialCoex2 <- calculatePartialCoex(obj, genesSample2)
 
   expect_equal(partialCoex2, legacyCoex[, sort(genesSample2), drop = FALSE],
                tolerance = 1e-12)
@@ -334,8 +333,7 @@ test_that("Calculations on cells", {
                tolerance = 1e-12)
 
   cellsSample2 <- getCells(obj)[sample(getNumCells(obj), 3L)]
-  partialCoex2 <- calculatePartialCoex(obj, cellsSample2, actOnCells = TRUE,
-                                       optimizeForSpeed = FALSE)
+  partialCoex2 <- calculatePartialCoex(obj, cellsSample2, actOnCells = TRUE)
 
   expect_equal(partialCoex2,
                getCellsCoex(obj, cellsSample2, zeroDiagonal = FALSE),

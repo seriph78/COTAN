@@ -720,8 +720,7 @@ expectedContingencyTables <- function(objCOTAN,
   c(expectedNN, expectedN) %<-%
     expectedContingencyTablesNN(objCOTAN,
                                 actOnCells = actOnCells,
-                                asDspMatrices = FALSE,
-                                optimizeForSpeed = TRUE)
+                                asDspMatrices = FALSE)
 
   gc()
 
@@ -844,8 +843,7 @@ expectedPartialContingencyTables <-
 
   c(expectedNN, expectedN) %<-%
     expectedPartialContingencyTablesNN(objCOTAN, columnsSubset, probZero,
-                                       actOnCells = actOnCells,
-                                       optimizeForSpeed = TRUE)
+                                       actOnCells = actOnCells)
 
   gc()
 
@@ -1497,8 +1495,7 @@ calculatePartialCoex <- function(objCOTAN,
     c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
       expectedPartialContingencyTables(objCOTAN, columnsSubset,
                                        probZero = probZero,
-                                       actOnCells = actOnCells,
-                                       optimizeForSpeed = TRUE)
+                                       actOnCells = actOnCells)
 
     gc()
 

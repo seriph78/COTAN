@@ -41,9 +41,6 @@ NULL
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param numReducedComp the number of calculated **RDM** components
-#' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
 #'
 #' @returns a list with:
 #'   * `"SeuratClusters"` a `Seurat` *clusterization*
@@ -70,9 +67,7 @@ seuratClustering <- function(objCOTAN,
                              dataMethod,
                              genesSel,
                              numGenes,
-                             numReducedComp,
-                             cores = 1L,
-                             chunkSize = 1024L) {
+                             numReducedComp) {
   tryCatch({
     startTime <- Sys.time()
 
@@ -383,8 +378,7 @@ cellsUniformClustering <- function(objCOTAN,
                        dataMethod = dataMethod,
                        numReducedComp = numReducedComp,
                        genesSel = genesSel,
-                       numGenes = numGenes,
-                       cores = cores)
+                       numGenes = numGenes)
 
     if (is_null(testClusters)) {
       logThis(paste("NO new possible uniform clusters!",
