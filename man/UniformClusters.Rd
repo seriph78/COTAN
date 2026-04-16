@@ -51,7 +51,8 @@ checkClusterUniformity(
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   saveObj = TRUE,
-  outDir = "."
+  outDir = ".",
+  executionOptions = NULL
 )
 
 mergeUniformCellsClusters(
@@ -159,6 +160,9 @@ output will be paced in a sub-folder.}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
 
+\item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
+controls. This is the preferred interface for new code.}
+
 \item{clusters}{The \emph{clusterization} to merge. If not given the last
 available \emph{clusterization} will be used, as it is probably the most
 significant!}
@@ -237,14 +241,19 @@ single batch
 \examples{
 data("test.dataset")
 
+exec <- ExecutionOptions(cores = 6L)
+
 objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",
-                                         cores = 6L,
+                                         executionOptions = exec,
                                          saveObj = FALSE)
 
-objCOTAN <- storeGDI(objCOTAN, genesGDI = calculateGDI(objCOTAN, cores = 6L))
+objCOTAN <- storeGDI(
+  objCOTAN,
+  genesGDI = calculateGDI(objCOTAN, executionOptions = exec)
+)
 
 groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
                      G2 = c("g-000300", "g-000330"),

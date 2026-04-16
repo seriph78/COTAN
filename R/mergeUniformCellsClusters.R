@@ -87,14 +87,19 @@
 #' @examples
 #' data("test.dataset")
 #'
+#' exec <- ExecutionOptions(cores = 6L)
+#'
 #' objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
 #'                                          GEO = "S",
 #'                                          sequencingMethod = "10X",
 #'                                          sampleCondition = "Test",
-#'                                          cores = 6L,
+#'                                          executionOptions = exec,
 #'                                          saveObj = FALSE)
 #'
-#' objCOTAN <- storeGDI(objCOTAN, genesGDI = calculateGDI(objCOTAN, cores = 6L))
+#' objCOTAN <- storeGDI(
+#'   objCOTAN,
+#'   genesGDI = calculateGDI(objCOTAN, executionOptions = exec)
+#' )
 #'
 #' groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
 #'                      G2 = c("g-000300", "g-000330"),

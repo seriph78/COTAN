@@ -196,14 +196,18 @@ all the contingency tables are computed and used to get
 the statistics necessary to `COEX` evaluation and storing
 
 ```{r calculate-and-store-coex-matrix}
-obj <-
-  proceedToCoex(
-    obj,
-    calcCoex = TRUE,
-    optimizeForSpeed = TRUE,
-    cores = 3L,
-    deviceStr = "cuda"
-  )
+exec <- ExecutionOptions(
+  cores = 3L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
+  chunkSize = 1024L
+)
+
+obj <- proceedToCoex(
+  obj,
+  calcCoex = TRUE,
+  executionOptions = exec
+)
 ```
 
 ### Get data tables and stored `COEX` 
@@ -241,7 +245,7 @@ To calculate and store the *Global Differentiation Index* (`GDI`)
 use the following:
 
 ```{r calculate-and-store-gdi}
-gdiDF <- calculateGDI(obj, cores = 3L)
+gdiDF <- calculateGDI(obj, executionOptions = exec)
 
 # Show the most *differentially expressed* genes
 perm <- order(gdiDF[["GDI"]], decreasing = TRUE)

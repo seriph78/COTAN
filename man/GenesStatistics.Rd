@@ -223,7 +223,10 @@ Index}
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, saveObj = FALSE)
+
+exec <- ExecutionOptions(cores = 6L, chunkSize = 1024L)
+objCOTAN <- proceedToCoex(objCOTAN, saveObj = FALSE,
+                          executionOptions = exec)
 
 markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
 gCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
