@@ -15,10 +15,10 @@ an array of \code{RGB} colors of the wanted size
 }
 \description{
 This function returns a list of colors based on the
-\code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::brewer.pal()}} function
+\code{\link[RColorBrewer:brewer.pal]{RColorBrewer::brewer.pal()}} function
 }
 \details{
-The colors are taken from the \code{\link[RColorBrewer:ColorBrewer]{RColorBrewer::brewer.pal.info()}} sets
+The colors are taken from the \code{\link[RColorBrewer:brewer.pal.info]{RColorBrewer::brewer.pal.info()}} sets
 with \code{Set1}, \code{Set2}, \code{Set3} placed first.
 }
 \examples{

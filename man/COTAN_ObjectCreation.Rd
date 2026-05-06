@@ -101,7 +101,7 @@ genes' \code{COEX} calculated. When asked, it will also store the object, along
 all relevant clean-plots, in the output directory.
 }
 \description{
-These functions create a \linkS4class{COTAN} object and/or also run
+These functions create a \link[=COTAN-class]{COTAN} object and/or also run
 all the necessary steps until the genes' \code{COEX} matrix is calculated.
 }
 \details{
