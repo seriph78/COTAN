@@ -62,7 +62,7 @@ the names attached to each checker}
 given \code{data.frame}}
 
 \item{checker}{An checker object that defines how to check for \emph{uniform
-transcript}. It is derived from \linkS4class{BaseUniformityCheck}}
+transcript}. It is derived from \link[=BaseUniformityCheck-class]{BaseUniformityCheck}}
 
 \item{shift}{The amount by which to shift the \code{GDI} thresholds in the checker}
 }

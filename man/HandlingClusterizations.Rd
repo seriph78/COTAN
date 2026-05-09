@@ -201,7 +201,7 @@ data losses}
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
 \item{adjustmentMethod}{\emph{p-value} multi-test adjustment method, see
-\code{\link[stats:p.adjust]{stats::p.adjust.methods()}}. Defaults to \code{"bonferroni"}; use \code{"none"} for
+\code{\link[stats:p.adjust.methods]{stats::p.adjust.methods()}}. Defaults to \code{"bonferroni"}; use \code{"none"} for
 no adjustment}
 
 \item{floorLambdaFraction}{Indicates the lower bound to the average count
