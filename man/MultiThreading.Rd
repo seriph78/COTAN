@@ -49,6 +49,6 @@ influencing the multi-core support; e.g. the usage of \code{R} option
 \code{parallelly.fork.enable}.
 
 \code{\link[torch:install_torch]{torch::install_torch()}} and \code{\link[torch:torch_is_installed]{torch::torch_is_installed()}} for
-installation. Note the \code{\link[torch:threads]{torch::torch_set_num_threads()}} has effect also on
+installation. Note the \code{\link[torch:torch_set_num_threads]{torch::torch_set_num_threads()}} has effect also on
 the \pkg{Rfast} package methods
 }

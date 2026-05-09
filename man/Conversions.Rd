@@ -20,7 +20,7 @@ convertFromSingleCellExperiment(
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{objSCE}{A \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object to
+\item{objSCE}{A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment::SingleCellExperiment} object to
 be converted}
 
 \item{assayName}{Name of the assay in \code{objSCE} to be used as raw counts.
@@ -46,21 +46,21 @@ are available from the data matrix or the cells' data-set. Default supports
 is: \code{"^(Cells?[ -_]?IDs?|Barcodes?|Cells?)$"}}
 }
 \value{
-A \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object
-containing the data from the input \linkS4class{COTAN} object, with
+A \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment::SingleCellExperiment} object
+containing the data from the input \link[=COTAN-class]{COTAN} object, with
 \emph{clusterizations} and \emph{conditions} appropriately prefixed and stored in the
 cell metadata.
 
-A \linkS4class{COTAN} object containing the data extracted from the input
-\link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object
+A \link[=COTAN-class]{COTAN} object containing the data extracted from the input
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment::SingleCellExperiment} object
 }
 \description{
-All functions to convert a \linkS4class{COTAN} object to/from other
+All functions to convert a \link[=COTAN-class]{COTAN} object to/from other
 data classes used by the \code{BioConductor} analysis packages
 }
 \details{
-\code{convertToSingleCellExperiment()} converts a \linkS4class{COTAN} object
-into a \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object. Stores
+\code{convertToSingleCellExperiment()} converts a \link[=COTAN-class]{COTAN} object
+into a \link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment::SingleCellExperiment} object. Stores
 the raw counts in the \code{"counts"} \link[SummarizedExperiment:Assays-class]{SummarizedExperiment::Assays}, the
 metadata for genes and cells as \code{rowData} and \code{colData} slots respectively
 and finally the genes' and cells' \code{COEX} along the dataset metadata into
@@ -84,8 +84,8 @@ The resulting \code{SingleCellExperiment} object is compatible with downstream
 analysis packages and workflows within the Bioconductor ecosystem
 
 \code{convertFromSingleCellExperiment()} converts a
-\link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment} object back into a
-\linkS4class{COTAN} object. It supports \code{SCE} objects that were originally
+\link[SingleCellExperiment:SingleCellExperiment-class]{SingleCellExperiment::SingleCellExperiment} object back into a
+\link[=COTAN-class]{COTAN} object. It supports \code{SCE} objects that were originally
 created from either a \code{COTAN} object or a \code{Seurat} object. The function
 extracts the \code{"counts"} matrix, genes' metadata, cells' metadata,
 \emph{co-expression} matrices (if available), and reconstructs the \code{COTAN}
@@ -121,7 +121,5 @@ empty matrices
 
 }
 \seealso{
-\linkS4class{COTAN}, \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment}
-
-\linkS4class{COTAN}, \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment}
+\link[=COTAN-class]{COTAN}, \link[SingleCellExperiment:SingleCellExperiment]{SingleCellExperiment::SingleCellExperiment}
 }
