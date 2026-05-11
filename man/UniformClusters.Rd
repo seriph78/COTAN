@@ -88,7 +88,7 @@ only for the title).}
 chi-squared test statistics. "G" is G-test statistics}
 
 \item{GDIThreshold}{legacy. The threshold level that is used in a
-\linkS4class{SimpleGDIUniformityCheck}. It defaults to \eqn{1.43}}
+\link[=SimpleGDIUniformityCheck-class]{SimpleGDIUniformityCheck}. It defaults to \eqn{1.43}}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}

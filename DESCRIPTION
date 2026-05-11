@@ -1,7 +1,7 @@
 Package: COTAN
 Type: Package
 Title: COexpression Tables ANalysis 
-Version: 2.11.4
+Version: 2.13.0
 Authors@R: c(
   person("Galfrè", "Silvia Giulia",email = "silvia.galfre@di.unipi.it", role=c("aut","cre"),comment = c(ORCID = "0000-0002-2770-0344")),
   person("Morandin","Francesco", email = "francesco.morandin@unipr.it", role = "aut",comment = c(ORCID = "0000-0002-2022-2300")),
@@ -28,7 +28,6 @@ BugReports: https://github.com/seriph78/COTAN/issues
 Depends: R (>= 4.3)
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.3.3
 Roxygen: list(markdown = TRUE)
 Imports:
     stats,
@@ -48,6 +47,7 @@ Imports:
     BiocSingular,
     parallelDist,
     ComplexHeatmap,
+    BiocStyle,
     circlize,
     grid,
     scales,
@@ -59,12 +59,15 @@ Imports:
     Seurat,
     dendextend,
     zeallot,
+    conflicted,
     assertthat,
+    R.utils,
     withr,
     SummarizedExperiment,
     SingleCellExperiment,
     proxy,
-    RSpectra
+    RSpectra,
+    GEOquery
 Suggests: 
     testthat (>= 3.2.0),
     proto,
@@ -72,20 +75,16 @@ Suggests:
     knitr,
     ragg,
     Cairo,
-    conflicted,
     data.table,
     gsubfn,
-    R.utils,
     tidyverse,
     rmarkdown,
     htmlwidgets,
     MASS,
     Rtsne,
     plotly,
-    BiocStyle,
     cowplot,
     qpdf,
-    GEOquery,
     sf,
     torch,
     S4Vectors
@@ -101,3 +100,4 @@ biocViews:
     GPU
 VignetteBuilder: knitr
 LazyData: false
+Config/roxygen2/version: 8.0.0
