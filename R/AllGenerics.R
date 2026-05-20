@@ -1,23 +1,36 @@
 
 setGeneric(
   "proceedToCoex",
-  function(objCOTAN, calcCoex = TRUE,
-           optimizeForSpeed = TRUE, deviceStr = "cuda", cores = 1L,
-           cellsCutoff = 0.003, genesCutoff = 0.002,
-           cellsThreshold = 0.99, genesThreshold = 0.99,
-           saveObj = FALSE, outDir = ".") {
+  function(objCOTAN,
+           calcCoex = TRUE,
+           optimizeForSpeed = TRUE,
+           deviceStr = "cuda",
+           cores = 1L,
+           cellsCutoff = 0.003,
+           genesCutoff = 0.002,
+           cellsThreshold = 0.99,
+           genesThreshold = 0.99,
+           saveObj = FALSE,
+           outDir = ".",
+           executionOptions = NULL) {
     standardGeneric("proceedToCoex")
-  }
+  },
+  signature = c("objCOTAN", "executionOptions")
 )
 
 # -------- calculate COEX --------
 
 setGeneric(
   "calculateCoex",
-  function(objCOTAN, actOnCells = FALSE, returnPPFract = FALSE,
-           optimizeForSpeed = TRUE, deviceStr = "cuda") {
+  function(objCOTAN,
+           actOnCells = FALSE,
+           returnPPFract = FALSE,
+           optimizeForSpeed = TRUE,
+           deviceStr = "cuda",
+           executionOptions = NULL) {
     standardGeneric("calculateCoex")
-  }
+  },
+  signature = c("objCOTAN", "executionOptions")
 )
 
 # -------- getters --------
@@ -323,10 +336,15 @@ setGeneric(
 
 setGeneric(
   "estimateDispersionViaSolver",
-  function(objCOTAN, threshold = 0.001, cores = 1L,
-           maxIterations = 50L, chunkSize = 1024L) {
+  function(objCOTAN,
+           threshold = 0.001,
+           cores = 1L,
+           maxIterations = 100L,
+           chunkSize = 1024L,
+           executionOptions = NULL) {
     standardGeneric("estimateDispersionViaSolver")
-  }
+  },
+  signature = c("objCOTAN", "executionOptions")
 )
 
 setGeneric(

@@ -200,14 +200,18 @@ the 2×2 contingency table of the joint occurrence of the genes in the cells,
 and their expected co-expression assuming independence.
 
 ```{r calculate-and-store-coex-matrix}
-obj <-
-  proceedToCoex(
-    obj,
-    calcCoex = FALSE,
-    optimizeForSpeed = TRUE,
-    cores = 3L,
-    deviceStr = "cuda"
-  )
+exec <- ExecutionOptions(
+  cores = 3L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
+  chunkSize = 1024L
+)
+
+obj <- proceedToCoex(
+  obj,
+  calcCoex = FALSE,
+  executionOptions = exec
+)
 ```
 
 ## Uniform Clustering
@@ -271,9 +275,7 @@ c(splitClusters, splitCoexDF) %<-%
     minimumUTClusterSize = 50L, # too large values imply many un-clustered cells
     initialClusters = initialClusters,
     initialIteration = 1L,
-    optimizeForSpeed = TRUE,
-    deviceStr = "cuda",
-    cores = 3L,
+    executionOptions = exec,
     saveObj = TRUE, # save intermediate data for log and restart
     outDir = outDir
   )
@@ -482,9 +484,7 @@ c(mergedClusters, mergedCoexDF) %<-%
     clusters = splitClusters,
     checkers = checkersList,
     allCheckResults = prevCheckRes,
-    optimizeForSpeed = TRUE,
-    deviceStr = "cuda",
-    cores = 6L,
+    executionOptions = exec,
     useDEA = TRUE,
     saveObj = TRUE,
     outDir = outDir

@@ -720,8 +720,7 @@ expectedContingencyTables <- function(objCOTAN,
   c(expectedNN, expectedN) %<-%
     expectedContingencyTablesNN(objCOTAN,
                                 actOnCells = actOnCells,
-                                asDspMatrices = FALSE,
-                                optimizeForSpeed = TRUE)
+                                asDspMatrices = FALSE)
 
   gc()
 
@@ -844,8 +843,7 @@ expectedPartialContingencyTables <-
 
   c(expectedNN, expectedN) %<-%
     expectedPartialContingencyTablesNN(objCOTAN, columnsSubset, probZero,
-                                       actOnCells = actOnCells,
-                                       optimizeForSpeed = TRUE)
+                                       actOnCells = actOnCells)
 
   gc()
 
@@ -1297,6 +1295,56 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 
 ## ---- Calculate COEX ----
 
+.calculateCoexImpl <-
+  function(
+    objCOTAN,
+    actOnCells = FALSE,
+    returnPPFract = FALSE,
+    executionOptions = ExecutionOptions()
+  ) {
+
+    c(., useTorch, deviceStr) %<-% resolveExecutionOptions(executionOptions)
+
+    coex <- NULL
+    problematicPairsFraction <- NA
+
+    if (isTRUE(actOnCells)) {
+      if (isTRUE(useTorch)) {
+        warning("The 'torch' package is not supported yet for cells' COEX:",
+                " falling back to legacy code")
+      }
+      c(coex, problematicPairsFraction) %<-%
+        calculateCoex_Legacy(objCOTAN, actOnCells = TRUE,
+                             returnPPFract = returnPPFract)
+
+      objCOTAN@cellsCoex <- coex
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["csync"]], TRUE)
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["cbad"]],
+                                             problematicPairsFraction)
+    } else {
+      if (useTorch) {
+        c(coex, problematicPairsFraction) %<-%
+          calculateCoex_Torch(objCOTAN, deviceStr = deviceStr,
+                              returnPPFract = returnPPFract)
+      } else {
+        c(coex, problematicPairsFraction) %<-%
+          calculateCoex_Legacy(objCOTAN, actOnCells = FALSE,
+                               returnPPFract = returnPPFract)
+      }
+
+      objCOTAN@genesCoex <- coex
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["gsync"]], TRUE)
+      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
+                                             datasetTags()[["gbad"]],
+                                             problematicPairsFraction)
+    }
+
+    return(objCOTAN)
+  }
+
 #' @aliases calculateCoex
 #'
 #' @details `calculateCoex()` estimates and stores the `COEX` matrix in the
@@ -1319,6 +1367,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @returns `calculateCoex()` returns the updated `COTAN` object
 #'
@@ -1335,49 +1385,62 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #'
 setMethod(
   "calculateCoex",
-  "COTAN",
-  function(objCOTAN, actOnCells = FALSE, returnPPFract = FALSE,
-           optimizeForSpeed = TRUE, deviceStr = "cuda") {
-    coex <- NULL
-    problematicPairsFraction <- NA
+  signature(objCOTAN = "COTAN", executionOptions = "missing"),
+  function(
+    objCOTAN,
+    actOnCells = FALSE,
+    returnPPFract = FALSE,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    executionOptions = NULL) {
 
-    if (isTRUE(actOnCells)) {
-      if (isTRUE(optimizeForSpeed)) {
-        warning("The 'torch' package is not supported yet for cells' COEX:",
-                " falling back to legacy code")
-      }
-      c(coex, problematicPairsFraction) %<-%
-        calculateCoex_Legacy(objCOTAN, actOnCells = TRUE,
-                             returnPPFract = returnPPFract)
+    executionOptions <- legacyExecutionOptions(
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
 
-      objCOTAN@cellsCoex <- coex
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["csync"]], TRUE)
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["cbad"]],
-                                             problematicPairsFraction)
-    } else {
-      c(useTorch, deviceStr) %<-% canUseTorch(optimizeForSpeed, deviceStr)
+    .calculateCoexImpl(
+      objCOTAN = objCOTAN,
+      actOnCells = actOnCells,
+      returnPPFract = returnPPFract,
+      executionOptions = executionOptions
+    )
+  }
+)
 
-      if (useTorch) {
-        c(coex, problematicPairsFraction) %<-%
-          calculateCoex_Torch(objCOTAN, deviceStr = deviceStr,
-                              returnPPFract = returnPPFract)
-      } else {
-        c(coex, problematicPairsFraction) %<-%
-          calculateCoex_Legacy(objCOTAN, actOnCells = FALSE,
-                               returnPPFract = returnPPFract)
-      }
+#' @details Alternative interface using an `ExecutionOptions` object.
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @rdname CalculatingCOEX
+#'
+#' @aliases calculateCoex,COTAN,ExecutionOptions-method
+#'
+setMethod(
+  "calculateCoex",
+  signature(objCOTAN = "COTAN", executionOptions = "ExecutionOptions"),
+  function(
+    objCOTAN,
+    actOnCells = FALSE,
+    returnPPFract = FALSE,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    executionOptions) {
 
-      objCOTAN@genesCoex <- coex
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["gsync"]], TRUE)
-      objCOTAN@metaDataset <- updateMetaInfo(objCOTAN@metaDataset,
-                                             datasetTags()[["gbad"]],
-                                             problematicPairsFraction)
-    }
+    assert_that(
+      identical(optimizeForSpeed, TRUE),
+      identical(deviceStr, "cuda"),
+      msg = paste("Do not mix `executionOptions` with",
+                  "legacy execution arguments",
+                  "(`optimizeForSpeed`, `deviceStr`).")
+    )
 
-    return(objCOTAN)
+    .calculateCoexImpl(
+      objCOTAN = objCOTAN,
+      actOnCells = actOnCells,
+      returnPPFract = returnPPFract,
+      executionOptions = executionOptions
+    )
   }
 )
 
@@ -1432,8 +1495,7 @@ calculatePartialCoex <- function(objCOTAN,
     c(expectedNN, expectedNY, expectedYN, expectedYY) %<-%
       expectedPartialContingencyTables(objCOTAN, columnsSubset,
                                        probZero = probZero,
-                                       actOnCells = actOnCells,
-                                       optimizeForSpeed = TRUE)
+                                       actOnCells = actOnCells)
 
     gc()
 

@@ -41,8 +41,8 @@ reordered according to the given names' list
 
 \code{conditionsFromNames()} returns the extracted conditions
 
-\code{isEmptyName()} returns whether the passed name is equivalent to an
-empty string
+\code{isEmptyName()} returns \code{TRUE} when \code{name} is \code{NULL}, \code{NA}, or an
+empty string, and \code{FALSE} otherwise.
 
 \code{niceFactorLevels()} returns a \code{factor} that is preserving the
 \emph{names} of the input with the new nicer levels
@@ -62,8 +62,8 @@ of names if none were specified
 by picking the asked fragment after having them split according to the
 given pattern
 
-\code{isEmptyName()} returns whether the passed name is not null and has
-non-zero characters
+\code{isEmptyName()} returns whether the passed name is \code{NULL}, \code{NA}, or
+equivalent to an empty string.
 
 \code{niceFactorLevels()} provides \strong{nicer} \code{factor} labels that have
 all the same number of characters

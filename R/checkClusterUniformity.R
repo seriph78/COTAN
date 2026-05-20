@@ -22,6 +22,8 @@
 #'   plots to file(s)
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @returns `checkClusterUniformity` returns a checker object of the same type
 #'   as the input one, that contains both threshold and results of the check:
@@ -54,17 +56,63 @@ checkClusterUniformity <- function(
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",
     saveObj = TRUE,
-    outDir = ".") {
+    outDir = ".",
+    executionOptions = NULL) {
+  if (is.null(executionOptions)) {
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
+  } else {
+    assert_that(
+      identical(cores, 1L),
+      identical(optimizeForSpeed, TRUE),
+      identical(deviceStr, "cuda"),
+      msg = paste(
+        "Do not mix `executionOptions` with the legacy",
+        "execution arguments `cores`, `optimizeForSpeed`, and `deviceStr`."
+      )
+    )
+  }
+
+  .checkClusterUniformityImpl(
+    objCOTAN = objCOTAN,
+    clusterName = clusterName,
+    cells = cells,
+    checker = checker,
+    saveObj = saveObj,
+    outDir = outDir,
+    executionOptions = executionOptions
+  )
+}
+
+#' @noRd
+.checkClusterUniformityImpl <- function(
+    objCOTAN,
+    clusterName,
+    cells,
+    checker,
+    saveObj = TRUE,
+    outDir = ".",
+    executionOptions = ExecutionOptions()) {
   assert_that(is(checker, "BaseUniformityCheck"))
+  assert_that(
+    is(executionOptions, "ExecutionOptions"),
+    msg = "`executionOptions` must be an `ExecutionOptions` object"
+  )
 
   cellsToDrop <- getCells(objCOTAN)[!getCells(objCOTAN) %in% cells]
 
   objCOTAN <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
   if (!is_empty(cellsToDrop) || !isCoexAvailable(objCOTAN)) {
-    objCOTAN <- proceedToCoex(objCOTAN, cores = cores, calcCoex = TRUE,
-                              optimizeForSpeed = optimizeForSpeed,
-                              deviceStr = deviceStr, saveObj = FALSE)
+    objCOTAN <- proceedToCoex(
+      objCOTAN,
+      calcCoex = TRUE,
+      saveObj = FALSE,
+      executionOptions = executionOptions
+    )
     gc()
   }
 
@@ -74,7 +122,10 @@ checkClusterUniformity <- function(
                  "' with ", checker@clusterSize, " cells"), logLevel = 2L)
 
   if (is_empty(suppressWarnings(getGDI(objCOTAN)))) {
-    GDIData <- calculateGDI(objCOTAN, cores = cores)
+    GDIData <- calculateGDI(
+      objCOTAN,
+      executionOptions = executionOptions
+    )
     objCOTAN <- storeGDI(objCOTAN, GDIData)
   }
 

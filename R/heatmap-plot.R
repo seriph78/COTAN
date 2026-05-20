@@ -16,6 +16,8 @@ NULL
 #'   should be used. Defaults to all fields
 #' @param pValueThreshold The p-value threshold. Default is 0.01
 #' @param cores number of cores to use. Default is 1.
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @returns `singleHeatmapDF()` returns a `data.frame`
 #'
@@ -33,13 +35,26 @@ singleHeatmapDF <- function(objCOTAN,
                             genesLists,
                             sets,
                             pValueThreshold = 0.01,
-                            cores = 1L) {
+                            cores = 1L,
+                            executionOptions = NULL) {
   assert_that(!is_empty(genesLists), !is_empty(names(genesLists)),
               msg = "genesLists must be a named list of genes arrays")
 
   assert_that(!is_empty(sets), all(sets %% 1L == 0L),
               max(sets) <= length(genesLists),
               msg = "sets must be positions in the genes list")
+
+  if (is.null(executionOptions)) {
+    executionOptions <- legacyExecutionOptions(cores = cores)
+  } else {
+    assert_that(
+      identical(cores, 1L),
+      msg = paste(
+        "Do not mix `executionOptions` with the legacy",
+        "execution argument `cores`."
+      )
+    )
+  }
 
   cond <- getMetadataElement(objCOTAN, datasetTags()[["cond"]])
 
@@ -57,10 +72,12 @@ singleHeatmapDF <- function(objCOTAN,
 
   #---------------------------------------------------------
   pValue <-
-    calculatePValue(objCOTAN,
-                    geneSubsetCol = allGenes[allGenes %in% colGenes],
-                    geneSubsetRow = allGenes[allGenes %in% askedGenes],
-                    cores = cores)
+    calculatePValue(
+      objCOTAN,
+      geneSubsetCol = allGenes[allGenes %in% colGenes],
+      geneSubsetRow = allGenes[allGenes %in% askedGenes],
+      executionOptions = executionOptions
+    )
   pValue <- as.data.frame(pValue)
 
   pValue <- setColumnInDF(pValue, colToSet = rownames(pValue), colName = "g2")
@@ -141,6 +158,8 @@ singleHeatmapDF <- function(objCOTAN,
 #' @param conditions An `array` of prefixes indicating the different files
 #' @param dir The directory in which are all `COTAN` files (corresponding to the
 #'   previous prefixes)
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @returns `heatmapPlot()` returns a `ggplot2` object
 #'
@@ -163,12 +182,16 @@ singleHeatmapDF <- function(objCOTAN,
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
+#'
+#' exec <- ExecutionOptions(cores = 3L, optimizeForSpeed = FALSE)
+#'
 #' objCOTAN <- clean(objCOTAN)
 #' objCOTAN <- estimateLambdaLinear(objCOTAN)
 #' objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
-#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE,
+#'                           executionOptions = exec)
 #' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE,
-#'                           optimizeForSpeed = FALSE)
+#'                           executionOptions = exec)
 #'
 #' ## some genes
 #' primaryMarkers <- c("g-000010", "g-000020", "g-000138")
@@ -179,7 +202,8 @@ singleHeatmapDF <- function(objCOTAN,
 #'                      G3 = c("g-000510", "g-000530", "g-000550",
 #'                             "g-000570", "g-000590"))
 #'
-#' hPlot <- heatmapPlot(objCOTAN, pValueThreshold = 0.05, cores = 3L,
+#' hPlot <- heatmapPlot(objCOTAN, pValueThreshold = 0.05,
+#'                      executionOptions = exec,
 #'                      genesLists = groupMarkers, sets = 2L:3L)
 #' plot(hPlot)
 #'
@@ -191,7 +215,20 @@ heatmapPlot <- function(objCOTAN = NULL,
                         pValueThreshold = 0.01,
                         cores = 1L,
                         conditions = NULL,
-                        dir = ".") {
+                        dir = ".",
+                        executionOptions = NULL) {
+  if (is.null(executionOptions)) {
+    executionOptions <- legacyExecutionOptions(cores = cores)
+  } else {
+    assert_that(
+      identical(cores, 1L),
+      msg = paste(
+        "Do not mix `executionOptions` with the legacy",
+        "execution argument `cores`."
+      )
+    )
+  }
+
   startTime <- Sys.time()
 
   logThis("Heatmap plot: START", logLevel = 2L)
@@ -207,8 +244,13 @@ heatmapPlot <- function(objCOTAN = NULL,
   dfToPrint <- data.frame()
   if (!is.null(objCOTAN)) {
     dfToPrint <-
-      singleHeatmapDF(objCOTAN, genesLists = genesLists, cores = cores,
-                      sets = sets, pValueThreshold = pValueThreshold)
+      singleHeatmapDF(
+        objCOTAN,
+        genesLists = genesLists,
+        sets = sets,
+        pValueThreshold = pValueThreshold,
+        executionOptions = executionOptions
+      )
   } else {
     for (cond in conditions) {
       logThis(paste0("Loading condition '", cond, "'"), logLevel = 3L)
@@ -225,8 +267,13 @@ heatmapPlot <- function(objCOTAN = NULL,
         next
       }
       dfTemp <-
-        singleHeatmapDF(tempObj, genesLists = genesLists, cores = cores,
-                        sets = sets, pValueThreshold = pValueThreshold)
+        singleHeatmapDF(
+          objCOTAN,
+          genesLists = genesLists,
+          sets = sets,
+          pValueThreshold = pValueThreshold,
+          executionOptions = executionOptions
+        )
       rm(tempObj)
       dfToPrint <- rbind(dfToPrint, dfTemp)
     }
@@ -299,6 +346,8 @@ heatmapPlot <- function(objCOTAN = NULL,
 #'   `primaryMarkers` and `secondaryMarkers` is used for both rows and column
 #'   genes
 #' @param cores number of cores to use. Default is 1.
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @returns `genesHeatmapPlot()` returns a `ggplot2` object
 #'
@@ -317,9 +366,12 @@ heatmapPlot <- function(objCOTAN = NULL,
 #' @importFrom rlang is_empty
 #'
 #' @examples
-#' ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,
-#'                            secondaryMarkers = groupMarkers, cores = 3L,
-#'                            pValueThreshold = 0.05, symmetric = FALSE)
+#' ghPlot <- genesHeatmapPlot(objCOTAN,
+#'                            primaryMarkers = primaryMarkers,
+#'                            secondaryMarkers = groupMarkers,
+#'                            executionOptions = exec,
+#'                            pValueThreshold = 0.05,
+#'                            symmetric = FALSE)
 #' plot(ghPlot)
 #'
 #' @rdname HeatmapPlots
@@ -330,7 +382,20 @@ genesHeatmapPlot <-
            secondaryMarkers = vector(mode = "character"),
            pValueThreshold = 0.01,
            symmetric = TRUE,
-           cores = 1L) {
+           cores = 1L,
+           executionOptions = NULL) {
+    if (is.null(executionOptions)) {
+      executionOptions <- legacyExecutionOptions(cores = cores)
+    } else {
+      assert_that(
+        identical(cores, 1L),
+        msg = paste(
+          "Do not mix `executionOptions` with the legacy",
+          "execution argument `cores`."
+        )
+      )
+    }
+
     if (isTRUE(symmetric)) {
       secondaryMarkers <- as.list(c(unlist(primaryMarkers),
                                     unlist(secondaryMarkers)))
@@ -350,7 +415,11 @@ genesHeatmapPlot <-
               " are not present in the COTAN object!")
     }
 
-    pValue <- calculatePValue(objCOTAN, cores = cores)[, allMarkers]
+    pValue <-
+      calculatePValue(
+        objCOTAN,
+        executionOptions = executionOptions
+      )[, allMarkers]
 
     pvalFloored <- apply(pValue, 1.0, FUN = min)
     rowGenes <- names(pvalFloored)[pvalFloored < pValueThreshold]

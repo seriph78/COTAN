@@ -46,6 +46,51 @@ test_that("Logging", {
 })
 
 
+test_that("String and Function utils", {
+  expect_true(isEmptyName(NULL))
+  expect_true(isEmptyName(NA))
+  expect_true(isEmptyName(""))
+  expect_false(isEmptyName("test"))
+  expect_error(isEmptyName(c("test", "test2")))
+
+  dots <- list(arg1 = NULL, arg2 = NA, arg3 = "",
+               arg4 = TRUE, arg5 = 1L, arg6 = 1.0)
+  dots2 <- list(name = "", arg = 2.0, "Unnamed", NULL)
+
+  expect_identical(
+    checkDotsAgainstFunction(
+      dots = dots,
+      fun = "isEmptyName",
+      allowRemaining = TRUE,
+      allowUnnamed = FALSE),
+    dots)
+
+  expect_identical(
+    checkDotsAgainstFunction(
+      dots = dots2,
+      fun = "isEmptyName",
+      allowRemaining = TRUE,
+      allowUnnamed = TRUE),
+    dots2[-1])
+
+  expect_error(
+    checkDotsAgainstFunction(
+      dots = dots,
+      fun = "isEmptyName",
+      allowRemaining = FALSE,
+      allowUnnamed = FALSE),
+    regexp = "Argument\\(s\\) not accepted by `isEmptyName`")
+
+  expect_error(
+    checkDotsAgainstFunction(
+      dots = dots2,
+      fun = "isEmptyName",
+      allowRemaining = TRUE,
+      allowUnnamed = FALSE),
+    regexp = "Unnamed argument\\(s\\) found in forwarded `...`")
+})
+
+
 test_that("Clusterizations manipulations", {
   set.seed(1675787192L)
   elemValues <- paste0("", as.roman(sample.int(7L, 100L, replace = TRUE)))

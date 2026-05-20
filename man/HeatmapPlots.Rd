@@ -9,7 +9,14 @@
 \alias{plotTheme}
 \title{Heatmap Plots}
 \usage{
-singleHeatmapDF(objCOTAN, genesLists, sets, pValueThreshold = 0.01, cores = 1L)
+singleHeatmapDF(
+  objCOTAN,
+  genesLists,
+  sets,
+  pValueThreshold = 0.01,
+  cores = 1L,
+  executionOptions = NULL
+)
 
 heatmapPlot(
   objCOTAN = NULL,
@@ -18,7 +25,8 @@ heatmapPlot(
   pValueThreshold = 0.01,
   cores = 1L,
   conditions = NULL,
-  dir = "."
+  dir = ".",
+  executionOptions = NULL
 )
 
 genesHeatmapPlot(
@@ -27,7 +35,8 @@ genesHeatmapPlot(
   secondaryMarkers = vector(mode = "character"),
   pValueThreshold = 0.01,
   symmetric = TRUE,
-  cores = 1L
+  cores = 1L,
+  executionOptions = NULL
 )
 
 cellsHeatmapPlot(objCOTAN, cells = NULL, clusters = NULL)
@@ -46,6 +55,9 @@ should be used. Defaults to all fields}
 \item{pValueThreshold}{The p-value threshold. Default is 0.01}
 
 \item{cores}{number of cores to use. Default is 1.}
+
+\item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
+controls. This is the preferred interface for new code.}
 
 \item{conditions}{An \code{array} of prefixes indicating the different files}
 
@@ -104,12 +116,16 @@ kind. Supported kinds are:  \code{"common"}, \code{"pca"}, \code{"genes"}, \code
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
+
+exec <- ExecutionOptions(cores = 3L, optimizeForSpeed = FALSE)
+
 objCOTAN <- clean(objCOTAN)
 objCOTAN <- estimateLambdaLinear(objCOTAN)
 objCOTAN <- estimateDispersionNuBisection(objCOTAN, cores = 6L)
-objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE)
+objCOTAN <- calculateCoex(objCOTAN, actOnCells = FALSE,
+                          executionOptions = exec)
 objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE,
-                          optimizeForSpeed = FALSE)
+                          executionOptions = exec)
 
 ## some genes
 primaryMarkers <- c("g-000010", "g-000020", "g-000138")
@@ -120,13 +136,17 @@ groupMarkers <- list(G1 = primaryMarkers,
                      G3 = c("g-000510", "g-000530", "g-000550",
                             "g-000570", "g-000590"))
 
-hPlot <- heatmapPlot(objCOTAN, pValueThreshold = 0.05, cores = 3L,
+hPlot <- heatmapPlot(objCOTAN, pValueThreshold = 0.05,
+                     executionOptions = exec,
                      genesLists = groupMarkers, sets = 2L:3L)
 plot(hPlot)
 
-ghPlot <- genesHeatmapPlot(objCOTAN, primaryMarkers = primaryMarkers,
-                           secondaryMarkers = groupMarkers, cores = 3L,
-                           pValueThreshold = 0.05, symmetric = FALSE)
+ghPlot <- genesHeatmapPlot(objCOTAN,
+                           primaryMarkers = primaryMarkers,
+                           secondaryMarkers = groupMarkers,
+                           executionOptions = exec,
+                           pValueThreshold = 0.05,
+                           symmetric = FALSE)
 plot(ghPlot)
 
 clusters <- c(rep_len("1", getNumCells(objCOTAN)/2),

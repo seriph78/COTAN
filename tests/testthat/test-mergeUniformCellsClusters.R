@@ -85,12 +85,37 @@ test_that("Merge Uniform Cells Clusters", {
   suppressWarnings({
     c(mergedClusters, mergedCoexDF) %<-%
       mergeUniformCellsClusters(
-        objCOTAN = obj, clusters = clusters,
-        checkers = checkers, allCheckResults = data.frame(),
-        batchSize = 1L, distance = "cosine", hclustMethod = "ward.D2",
-        cores = 6L, optimizeForSpeed = TRUE, deviceStr = "cuda",
-        saveObj = TRUE, outDir = tm)
+        objCOTAN = obj,
+        clusters = clusters,
+        checkers = checkers,
+        allCheckResults = data.frame(),
+        batchSize = 1L,
+        distance = "cosine",
+        hclustMethod = "ward.D2",
+        executionOptions = ExecutionOptions(
+          cores = 6L,
+          optimizeForSpeed = TRUE,
+          deviceStr = "cuda",
+          chunkSize = 1024L
+        ),
+        saveObj = TRUE,
+        outDir = tm
+      )
   })
+
+  expect_error(
+    mergeUniformCellsClusters(
+      objCOTAN = obj,
+      clusters = clusters,
+      checkers = checkers,
+      executionOptions = ExecutionOptions(cores = 6L),
+      cores = 6L,
+      saveObj = FALSE,
+      outDir = tm
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
+
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "merge_clusterization_1.csv")))
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",

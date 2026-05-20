@@ -918,10 +918,11 @@ NULL
 #' objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
 #'                                   sequencingMethod = "distribution_sampling",
 #'                                   sampleCondition = "reconstructed_dataset")
-#' objCOTAN <- clean(objCOTAN)
 #'
-#' objCOTAN <- estimateLambdaLinear(objCOTAN)
-#' objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = 6L)
+#' exec <- ExecutionOptions(cores = 6L)
+#'
+#' objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
+#'                           executionOptions = exec)
 #'
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 #'
@@ -948,8 +949,8 @@ NULL
 #'
 #' ## S <- calculateS(objCOTAN)
 #' ## G <- calculateG(objCOTAN)
-#' ## pValue <- calculatePValue(objCOTAN)
-#' gdiDF <- calculateGDI(objCOTAN)
+#' ## pValue <- calculatePValue(objCOTAN, executionOptions = exec)
+#' gdiDF <- calculateGDI(objCOTAN, executionOptions = exec)
 #' objCOTAN <- storeGDI(objCOTAN, genesGDI = gdiDF)
 #'
 #' ## Touching any of the `lambda`/`nu`/`dispersion` parameters invalidates the
@@ -1200,8 +1201,10 @@ setMethod(
 #' @examples
 #' data("test.dataset")
 #' objCOTAN <- COTAN(raw = test.dataset)
-#' objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calcCoex = TRUE,
-#'                           optimizeForSpeed = TRUE, saveObj = FALSE)
+#'
+#' exec <- ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE)
+#' objCOTAN <- proceedToCoex(objCOTAN, calcCoex = TRUE,
+#'                           executionOptions = exec, saveObj = FALSE)
 #'
 #' data("test.dataset.clusters1")
 #' clusters <- test.dataset.clusters1

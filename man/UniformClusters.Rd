@@ -39,7 +39,8 @@ cellsUniformClustering(
   minimumUTClusterSize = 50L,
   initialIteration = 1L,
   saveObj = TRUE,
-  outDir = "."
+  outDir = ".",
+  executionOptions = NULL
 )
 
 checkClusterUniformity(
@@ -51,7 +52,8 @@ checkClusterUniformity(
   optimizeForSpeed = TRUE,
   deviceStr = "cuda",
   saveObj = TRUE,
-  outDir = "."
+  outDir = ".",
+  executionOptions = NULL
 )
 
 mergeUniformCellsClusters(
@@ -69,7 +71,8 @@ mergeUniformCellsClusters(
   allCheckResults = data.frame(),
   initialIteration = 1L,
   saveObj = TRUE,
-  outDir = "."
+  outDir = ".",
+  executionOptions = NULL
 )
 }
 \arguments{
@@ -155,6 +158,9 @@ plots to file}
 \item{outDir}{an existing directory for the analysis output. The effective
 output will be paced in a sub-folder.}
 
+\item{executionOptions}{optional \code{ExecutionOptions} object collecting
+execution-related parameters.}
+
 \item{clusterName}{the tag of the \emph{cluster}}
 
 \item{cells}{the cells belonging to the \emph{cluster}}
@@ -237,14 +243,25 @@ single batch
 \examples{
 data("test.dataset")
 
+exec <-
+  ExecutionOptions(
+    cores = 6L,
+    optimizeForSpeed = TRUE,
+    deviceStr = "cuda",
+    chunkSize = 1024L
+  )
+
 objCOTAN <- automaticCOTANObjectCreation(raw = test.dataset,
                                          GEO = "S",
                                          sequencingMethod = "10X",
                                          sampleCondition = "Test",
-                                         cores = 6L,
+                                         executionOptions = exec,
                                          saveObj = FALSE)
 
-objCOTAN <- storeGDI(objCOTAN, genesGDI = calculateGDI(objCOTAN, cores = 6L))
+objCOTAN <- storeGDI(
+  objCOTAN,
+  genesGDI = calculateGDI(objCOTAN, executionOptions = exec)
+)
 
 groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138"),
                      G2 = c("g-000300", "g-000330"),
@@ -273,25 +290,32 @@ stopifnot(identical(
   1.397
 ))
 
-splitList <- cellsUniformClustering(objCOTAN, cores = 6L,
-                                    dataMethod = "LogLikelihood",
-                                    useCoexEigen = TRUE,
-                                    genesSel = "HGDI",
-                                    numGenes = 2000L,
-                                    numReducedComp = 50L,
-                                    initialResolution = 0.8,
-                                    checker = checker2,
-                                    saveObj = FALSE)
+splitList <- cellsUniformClustering(
+  objCOTAN,
+  executionOptions = exec,
+  dataMethod = "LogLikelihood",
+  useCoexEigen = TRUE,
+  genesSel = "HGDI",
+  numGenes = 2000L,
+  numReducedComp = 50L,
+  initialResolution = 0.8,
+  checker = checker2,
+  saveObj = FALSE
+)
 
 clusters <- splitList[["clusters"]]
 
 firstCluster <- getCells(objCOTAN)[clusters \%in\% clusters[[1L]]]
 
 checkerRes <-
-  checkClusterUniformity(objCOTAN, checker = checker2,
-                         clusterName = clusters[[1L]], cells = firstCluster,
-                         cores = 6L, optimizeForSpeed = TRUE,
-                         deviceStr = "cuda", saveObj = FALSE)
+  checkClusterUniformity(
+    objCOTAN,
+    checker = checker2,
+    clusterName = clusters[[1L]],
+    cells = firstCluster,
+    executionOptions = exec,
+    saveObj = FALSE
+  )
 
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "split",
@@ -306,15 +330,15 @@ stopifnot(identical(reorderClusterization(objCOTAN)[["clusters"]], clusters))
 ## the previous checker. This ensures that the most similar clusters are
 ## merged first improving the overall performance
 
-mergedList <- mergeUniformCellsClusters(objCOTAN,
-                                        checkers = c(checker, checker2),
-                                        clusters = clusters,
-                                        cores = 6L,
-                                        optimizeForSpeed = TRUE,
-                                        deviceStr = "cpu",
-                                        distance = "cosine",
-                                        hclustMethod = "ward.D2",
-                                        saveObj = FALSE)
+mergedList <- mergeUniformCellsClusters(
+  objCOTAN,
+  checkers = c(checker, checker2),
+  clusters = clusters,
+  executionOptions = exec,
+  distance = "cosine",
+  hclustMethod = "ward.D2",
+  saveObj = FALSE
+)
 
 objCOTAN <- addClusterization(objCOTAN,
                               clName = "merged",
