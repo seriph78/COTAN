@@ -1,3 +1,10 @@
+## 2.13.1
+
+Updated package to support R version 4.6 and Roxygen 8.0
+
+## 2.13.0
+
+Moved to new version
 
 ## 2.11.4
 
