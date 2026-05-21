@@ -206,12 +206,11 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
-#'   distances between clusters are computed and how the hierarchical tree is
-#'   built. When this is supplied, legacy arguments `useDEA`, `distance`, and
-#'   `hclustMethod` must be left at their defaults.
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built.
 #'
 #' @returns `clustersTreePlot()` returns a list with 2 objects:
 #'  * `"dend"` a `ggplot2` object representing the `dendrogram` plot
@@ -245,8 +244,8 @@ clustersTreePlot <- function(objCOTAN,
                              clusters = NULL,
                              useDEA = TRUE,
                              distance = NULL,
-                             clusterTreeOptions = NULL,
-                             hclustMethod = "ward.D2") {
+                             hclustMethod = "ward.D2",
+                             clusterTreeOptions = NULL) {
   # pick last if no name was given
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%

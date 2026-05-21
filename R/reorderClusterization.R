@@ -19,12 +19,11 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
-#'   distances between clusters are computed and how the hierarchical tree is
-#'   built. When this is supplied, legacy arguments `useDEA`, `distance`, and
-#'   `hclustMethod` must be left at their defaults.
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built.
 #'
 #' @returns `reorderClusterization()` returns a `list` with 3 elements:
 #'   * `"clusters"` the newly reordered cluster labels array

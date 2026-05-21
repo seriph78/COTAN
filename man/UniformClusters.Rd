@@ -29,6 +29,7 @@ cellsUniformClustering(
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
+  hclustMethod = "ward.D2",
   clusterTreeOptions = NULL,
   useCoexEigen = FALSE,
   dataMethod = "",
@@ -36,7 +37,6 @@ cellsUniformClustering(
   numGenes = 2000L,
   numReducedComp = 25L,
   reductionOptions = NULL,
-  hclustMethod = "ward.D2",
   initialClusters = NULL,
   minimumUTClusterSize = 50L,
   initialIteration = 1L,
@@ -69,8 +69,8 @@ mergeUniformCellsClusters(
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
-  clusterTreeOptions = NULL,
   hclustMethod = "ward.D2",
+  clusterTreeOptions = NULL,
   allCheckResults = data.frame(),
   initialIteration = 1L,
   saveObj = TRUE,
@@ -126,6 +126,9 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
+\item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
+defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
+
 \item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
 distances between clusters are computed and how the hierarchical tree is
 built.}
@@ -147,9 +150,6 @@ ignored when an explicit list of genes has been passed in}
 
 \item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
 reduction controls. This is the preferred interface for new code.}
-
-\item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
-defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
 
 \item{initialClusters}{an existing \emph{clusterization} to use as starting point:
 the \emph{clusters} deemed \strong{uniform} will be kept and the remaining cells will

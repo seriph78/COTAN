@@ -39,11 +39,11 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
+#'   defined by the [stats::hclust()] function.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
 #'   built.
-#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
-#'   defined by the [stats::hclust()] function.
 #' @param allCheckResults An optional `data.frame` with the results of previous
 #'   checks about the merging of clusters. Useful to restart the *merging*
 #'   process after an interruption.
@@ -214,8 +214,8 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       deviceStr = "cuda",
                                       useDEA = TRUE,
                                       distance = NULL,
-                                      clusterTreeOptions = NULL,
                                       hclustMethod = "ward.D2",
+                                      clusterTreeOptions = NULL,
                                       allCheckResults = data.frame(),
                                       initialIteration = 1L,
                                       saveObj = TRUE,

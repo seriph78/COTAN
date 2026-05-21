@@ -22,8 +22,9 @@
 #'   of the *clusters* of the *clusterization*
 #' @param kCuts the number of estimated *cluster* (this defines the height for
 #'   the tree cut and the associated colors)
-#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
-#'   how distances between clusters are computed.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built.
 #' @param adjustmentMethod *p-value* multi-test adjustment method. Defaults to
 #'   `"bonferroni"`; use `"none"` for no adjustment
 #' @param condNameList a `list` of *conditions*' names to be used for additional
@@ -31,8 +32,6 @@
 #'   using data extracted via the function [clustersSummaryData()]
 #' @param conditionsList a `list` of *conditions* to use. If given they will
 #'   take precedence on the ones indicated by `condNameList`
-#' @param clusterTreeOptions optional `ClusterTreeOptions` object controlling the
-#'   cluster dendrogram.
 #'
 #' @returns `clustersMarkersHeatmapPlot()` returns a list with:
 #'  * `"heatmapPlot"` the complete heatmap plot
@@ -75,13 +74,16 @@
 #'
 #' @rdname HandlingClusterizations
 #'
-clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
-                                       clName = "", clusters = NULL,
-                                       coexDF = NULL, kCuts = 3L,
+clustersMarkersHeatmapPlot <- function(objCOTAN,
+                                       groupMarkers = list(),
+                                       clName = "",
+                                       clusters = NULL,
+                                       coexDF = NULL,
+                                       kCuts = 3L,
+                                       clusterTreeOptions = NULL,
                                        adjustmentMethod = "bonferroni",
                                        condNameList = NULL,
-                                       conditionsList = NULL,
-                                       clusterTreeOptions = NULL) {
+                                       conditionsList = NULL) {
   assert_that(is_empty(conditionsList) ||
                 length(conditionsList) == length(condNameList),
               msg = "Explicitly given conditions must have corresponding names")

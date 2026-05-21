@@ -189,10 +189,11 @@ seuratClustering <- function(objCOTAN,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
+#'   defined by the [stats::hclust()] function.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
-#'   built. When this is supplied, legacy arguments `useDEA`, `distance`, and
-#'   `hclustMethod` must be left at their defaults.
+#'   built.
 #' @param useCoexEigen Boolean to determine whether to project the data `matrix`
 #'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
 #'   the data `matrix` to the selected genes before applying the `PCA` reduction
@@ -205,8 +206,6 @@ seuratClustering <- function(objCOTAN,
 #' @param numReducedComp the number of calculated **RDM** components
 #' @param reductionOptions A `ReductionOptions` object bundling dimensionality
 #'   reduction controls. This is the preferred interface for new code.
-#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
-#'   defined by the [stats::hclust()] function.
 #' @param minimumUTClusterSize the minimum number of cells for a cluster to be
 #'   deemed potentially *uniform transcript*
 #' @param initialClusters an existing *clusterization* to use as starting point:
@@ -266,6 +265,7 @@ cellsUniformClustering <- function(objCOTAN,
                                    deviceStr = "cuda",
                                    useDEA = TRUE,
                                    distance = NULL,
+                                   hclustMethod = "ward.D2",
                                    clusterTreeOptions = NULL,
                                    useCoexEigen = FALSE,
                                    dataMethod = "",
@@ -273,7 +273,6 @@ cellsUniformClustering <- function(objCOTAN,
                                    numGenes = 2000L,
                                    numReducedComp = 25L,
                                    reductionOptions = NULL,
-                                   hclustMethod = "ward.D2",
                                    initialClusters = NULL,
                                    minimumUTClusterSize = 50L,
                                    initialIteration = 1L,

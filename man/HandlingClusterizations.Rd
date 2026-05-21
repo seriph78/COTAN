@@ -117,10 +117,10 @@ clustersMarkersHeatmapPlot(
   clusters = NULL,
   coexDF = NULL,
   kCuts = 3L,
+  clusterTreeOptions = NULL,
   adjustmentMethod = "bonferroni",
   condNameList = NULL,
-  conditionsList = NULL,
-  clusterTreeOptions = NULL
+  conditionsList = NULL
 )
 
 clustersSummaryData(
@@ -147,8 +147,8 @@ clustersTreePlot(
   clusters = NULL,
   useDEA = TRUE,
   distance = NULL,
-  clusterTreeOptions = NULL,
-  hclustMethod = "ward.D2"
+  hclustMethod = "ward.D2",
+  clusterTreeOptions = NULL
 )
 
 findClustersMarkers(
@@ -266,17 +266,16 @@ comprised of one or more marker genes}
 \item{kCuts}{the number of estimated \emph{cluster} (this defines the height for
 the tree cut)}
 
+\item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
+distances between clusters are computed and how the hierarchical tree is
+built.}
+
 \item{condNameList}{a \code{list} of \emph{conditions}' names to be used for additional
 columns in the final plot. When none are given no new columns will be added
 using data extracted via the function \code{\link[=clustersSummaryData]{clustersSummaryData()}}}
 
 \item{conditionsList}{a \code{list} of \emph{conditions} to use. If given they will
 take precedence on the ones indicated by \code{condNameList}}
-
-\item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
-distances between clusters are computed and how the hierarchical tree is
-built. When this is supplied, legacy arguments \code{useDEA}, \code{distance}, and
-\code{hclustMethod} must be left at their defaults.}
 
 \item{condName}{The name of a condition in the \code{COTAN} object to further
 separate the cells in more sub-groups. When no condition is given it is
