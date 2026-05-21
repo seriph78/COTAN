@@ -19,8 +19,10 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
-#'   how distances between clusters are computed.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built. When this is supplied, legacy arguments `useDEA`, `distance`, and
+#'   `hclustMethod` must be left at their defaults.
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #'
@@ -45,11 +47,12 @@ reorderClusterization <- function(objCOTAN,
                                   reverse = FALSE, keepMinusOne = TRUE,
                                   useDEA = TRUE, distance = NULL,
                                   hclustMethod = "ward.D2",
-                                  clusterDistanceOptions = NULL) {
-  clusterDistanceOptions <- resolveClusterDistanceOptions(
+                                  clusterTreeOptions = NULL) {
+  clusterTreeOptions <- resolveClusterTreeOptions(
     useDEA = useDEA,
     distance = distance,
-    clusterDistanceOptions = clusterDistanceOptions
+    hclustMethod = hclustMethod,
+    clusterTreeOptions = clusterTreeOptions
   )
 
   # picks up the last clusterization if none was given
@@ -62,7 +65,7 @@ reorderClusterization <- function(objCOTAN,
     clName = clName,
     clusters = clusters,
     coexDF = coexDF,
-    clusterDistanceOptions = clusterDistanceOptions
+    clusterDistanceOptions = clusterTreeOptions
   )
 
   dummyList <- list("clusters" = factor(clusters), "coex" = coexDF,
@@ -82,7 +85,7 @@ reorderClusterization <- function(objCOTAN,
     rm(dummyList)
   }
 
-  hc <- hclust(clDist, method = hclustMethod)
+  hc <- hclust(clDist, method = clusterTreeOptions@hclustMethod)
 
   # we exploit the rank(x) == order(order(x))
   perm <- order(hc[["order"]])

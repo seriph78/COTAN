@@ -183,6 +183,7 @@ test_that("ClusterDistanceOptions stores defaults and explicit values", {
   expect_s4_class(dist_default, "ClusterDistanceOptions")
   expect_identical(dist_default@useDEA, TRUE)
   expect_identical(dist_default@distance, "")
+  expect_identical(ClusterDistanceOptions(distance = NULL)@distance, "")
 
   dist_opt <- ClusterDistanceOptions(
     useDEA = FALSE,
@@ -207,6 +208,38 @@ test_that("ClusterDistanceOptions rejects invalid values", {
 
   expect_error(ClusterDistanceOptions(distance = NA_character_))
   expect_error(ClusterDistanceOptions(distance = c("cosine", "euclidean")))
+})
+
+
+test_that("ClusterTreeOptions extends distance options", {
+  tree_default <- ClusterTreeOptions()
+
+  expect_s4_class(tree_default, "ClusterTreeOptions")
+  expect_s4_class(tree_default, "ClusterDistanceOptions")
+  expect_identical(tree_default@useDEA, TRUE)
+  expect_identical(tree_default@distance, "")
+  expect_identical(tree_default@hclustMethod, "ward.D2")
+  expect_identical(ClusterTreeOptions(distance = NULL)@distance, "")
+
+  tree_opt <- ClusterTreeOptions(
+    useDEA = FALSE,
+    distance = "euclidean",
+    hclustMethod = "complete"
+  )
+
+  expect_s4_class(tree_opt, "ClusterTreeOptions")
+  expect_identical(tree_opt@useDEA, FALSE)
+  expect_identical(tree_opt@distance, "euclidean")
+  expect_identical(tree_opt@hclustMethod, "complete")
+})
+
+
+test_that("ClusterTreeOptions rejects invalid values", {
+  expect_error(ClusterTreeOptions(useDEA = NA))
+  expect_error(ClusterTreeOptions(distance = NA_character_))
+  expect_error(ClusterTreeOptions(hclustMethod = NA_character_))
+  expect_error(ClusterTreeOptions(hclustMethod = ""))
+  expect_error(ClusterTreeOptions(hclustMethod = c("ward.D2", "complete")))
 })
 
 

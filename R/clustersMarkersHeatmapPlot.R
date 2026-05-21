@@ -31,6 +31,8 @@
 #'   using data extracted via the function [clustersSummaryData()]
 #' @param conditionsList a `list` of *conditions* to use. If given they will
 #'   take precedence on the ones indicated by `condNameList`
+#' @param clusterTreeOptions optional `ClusterTreeOptions` object controlling the
+#'   cluster dendrogram.
 #'
 #' @returns `clustersMarkersHeatmapPlot()` returns a list with:
 #'  * `"heatmapPlot"` the complete heatmap plot
@@ -79,7 +81,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
                                        adjustmentMethod = "bonferroni",
                                        condNameList = NULL,
                                        conditionsList = NULL,
-                                       clusterDistanceOptions = NULL) {
+                                       clusterTreeOptions = NULL) {
   assert_that(is_empty(conditionsList) ||
                 length(conditionsList) == length(condNameList),
               msg = "Explicitly given conditions must have corresponding names")
@@ -133,7 +135,7 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     kCuts = kCuts,
     clName = clName,
     clusters = clusters,
-    clusterDistanceOptions = clusterDistanceOptions
+    clusterTreeOptions = clusterTreeOptions
   )[["dend"]]
   dend <- set(dend, "branches_lwd", 2L)
 

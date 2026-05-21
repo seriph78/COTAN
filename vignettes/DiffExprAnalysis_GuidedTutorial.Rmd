@@ -295,9 +295,8 @@ c(splitClusters, splitCoexDF, perm) %<-%
     reverse = FALSE, 
     coexDF = NULL,
     hclustMethod = "ward.D2",
-    clusterDistanceOptions = ClusterDistanceOptions(
-      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
-      distance = NULL
+    clusterTreeOptions = ClusterTreeOptions(
+      useDEA = TRUE # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
     ),
   )
 

@@ -127,7 +127,7 @@ test_that("Cell Uniform Clustering", {
   expect_identical(
     reorderClusterization(
       objCOTAN = obj,
-      clusterDistanceOptions = ClusterDistanceOptions()
+      clusterTreeOptions = ClusterTreeOptions()
     )[["clusters"]],
     clusters
   )
@@ -218,7 +218,7 @@ test_that("Cell Uniform Clustering", {
       keepMinusOne = TRUE,
       clusters = clusters3,
       coexDF = coexDF2,
-      clusterDistanceOptions = ClusterDistanceOptions(useDEA = FALSE)
+      clusterTreeOptions = ClusterTreeOptions(useDEA = FALSE)
     )
   clusters3 <- reorderRes3[["clusters"]]
 
@@ -236,26 +236,26 @@ test_that("Cell Uniform Clustering", {
     reorderClusterization(
       objCOTAN = obj,
       useDEA = FALSE,
-      clusterDistanceOptions = ClusterDistanceOptions()
+      clusterTreeOptions = ClusterTreeOptions()
     ),
-    regexp = "Do not mix `clusterDistanceOptions`"
+    regexp = "Do not mix `clusterTreeOptions`"
   )
 
   expect_error(
     reorderClusterization(
       objCOTAN = obj,
       distance = "euclidean",
-      clusterDistanceOptions = ClusterDistanceOptions()
+      clusterTreeOptions = ClusterTreeOptions()
     ),
-    regexp = "Do not mix `clusterDistanceOptions`"
+    regexp = "Do not mix `clusterTreeOptions`"
   )
 
   expect_error(
     reorderClusterization(
       objCOTAN = obj,
-      clusterDistanceOptions = ReductionOptions()
+      clusterTreeOptions = ReductionOptions()
     ),
-    regexp = "`clusterDistanceOptions` must be a `ClusterDistanceOptions` object"
+    regexp = "`clusterTreeOptions` must be a `ClusterTreeOptions` object"
   )
 
   clSize <- getNumCells(obj) / 2L
@@ -268,7 +268,7 @@ test_that("Cell Uniform Clustering", {
         checker = checker,
         initialResolution = initialResolution,
         initialClusters = exactClusters,
-        clusterDistanceOptions = ClusterDistanceOptions(),
+        clusterTreeOptions = ClusterTreeOptions(),
         executionOptions = ExecutionOptions(
           cores = 6L,
           optimizeForSpeed = TRUE,
@@ -286,11 +286,11 @@ test_that("Cell Uniform Clustering", {
       checker = checker,
       initialResolution = initialResolution,
       useDEA = FALSE,
-      clusterDistanceOptions = ClusterDistanceOptions(),
+      clusterTreeOptions = ClusterTreeOptions(),
       saveObj = FALSE,
       outDir = tm
     ),
-    regexp = "Do not mix `clusterDistanceOptions`"
+    regexp = "Do not mix `clusterTreeOptions`"
   )
 
   expect_identical(splitData2[["clusters"]], factor(exactClusters))

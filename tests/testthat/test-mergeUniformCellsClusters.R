@@ -90,7 +90,7 @@ test_that("Merge Uniform Cells Clusters", {
         checkers = checkers,
         allCheckResults = data.frame(),
         batchSize = 1L,
-        clusterDistanceOptions = ClusterDistanceOptions(distance = "cosine"),
+        clusterTreeOptions = ClusterTreeOptions(distance = "cosine"),
         hclustMethod = "ward.D2",
         executionOptions = ExecutionOptions(
           cores = 6L,
@@ -122,11 +122,11 @@ test_that("Merge Uniform Cells Clusters", {
       clusters = clusters,
       checkers = checkers,
       distance = "cosine",
-      clusterDistanceOptions = ClusterDistanceOptions(),
+      clusterTreeOptions = ClusterTreeOptions(),
       saveObj = FALSE,
       outDir = tm
     ),
-    regexp = "Do not mix `clusterDistanceOptions`"
+    regexp = "Do not mix `clusterTreeOptions`"
   )
   expect_true(file.exists(file.path(tm, "test", "leafs_merge",
                                     "merge_clusterization_1.csv")))

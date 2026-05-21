@@ -140,11 +140,11 @@ outputTestDatasetCreation <-
     checkers = checker,
     batchSize = 1L,
     executionOptions = executionOptions,
-    clusterDistanceOptions = ClusterDistanceOptions(
+    clusterTreeOptions = ClusterTreeOptions(
       useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
-      distance = "cosine"
+      distance = "cosine",
+      hclustMethod = "ward.D2"
     ),
-    hclustMethod = "ward.D2",
     saveObj = FALSE
   )
 

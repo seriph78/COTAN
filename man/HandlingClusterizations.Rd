@@ -120,7 +120,7 @@ clustersMarkersHeatmapPlot(
   adjustmentMethod = "bonferroni",
   condNameList = NULL,
   conditionsList = NULL,
-  clusterDistanceOptions = NULL
+  clusterTreeOptions = NULL
 )
 
 clustersSummaryData(
@@ -147,7 +147,7 @@ clustersTreePlot(
   clusters = NULL,
   useDEA = TRUE,
   distance = NULL,
-  clusterDistanceOptions = NULL,
+  clusterTreeOptions = NULL,
   hclustMethod = "ward.D2"
 )
 
@@ -173,7 +173,7 @@ reorderClusterization(
   useDEA = TRUE,
   distance = NULL,
   hclustMethod = "ward.D2",
-  clusterDistanceOptions = NULL
+  clusterTreeOptions = NULL
 )
 }
 \arguments{
@@ -272,6 +272,11 @@ using data extracted via the function \code{\link[=clustersSummaryData]{clusters
 
 \item{conditionsList}{a \code{list} of \emph{conditions} to use. If given they will
 take precedence on the ones indicated by \code{condNameList}}
+
+\item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
+distances between clusters are computed and how the hierarchical tree is
+built. When this is supplied, legacy arguments \code{useDEA}, \code{distance}, and
+\code{hclustMethod} must be left at their defaults.}
 
 \item{condName}{The name of a condition in the \code{COTAN} object to further
 separate the cells in more sub-groups. When no condition is given it is

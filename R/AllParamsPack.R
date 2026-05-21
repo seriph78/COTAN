@@ -386,3 +386,118 @@ resolveClusterDistanceOptions <- function(useDEA = TRUE,
 
   return(clusterDistanceOptions)
 }
+
+
+# ----------------- cluster tree options --------------------
+
+#' @title Cluster tree options
+#'
+#' @description Parameter object bundling the policy used to calculate
+#'   distances between cell clusters and to build the corresponding hierarchical
+#'   tree.
+#'
+#' @slot hclustMethod Character scalar. Clustering method passed to
+#'   [stats::hclust()].
+#'
+#' @name ClusterTreeOptions-class
+#'
+#' @exportClass ClusterTreeOptions
+#'
+#' @rdname ClusterTreeOptions
+#'
+setClass(
+  "ClusterTreeOptions",
+  contains = "ClusterDistanceOptions",
+  slots = c(
+    hclustMethod = "character"
+  ),
+  prototype = list(
+    hclustMethod = "ward.D2"
+  ),
+  validity = function(object) {
+    if (length(object@hclustMethod) != 1L ||
+        is.na(object@hclustMethod) ||
+        isEmptyName(object@hclustMethod)) {
+      return("`hclustMethod` must be a non-empty character scalar")
+    }
+
+    return(TRUE)
+  }
+)
+
+#' @title Build cluster tree options
+#'
+#' @param useDEA Whether to use DEA profiles to calculate cluster distances.
+#' @param distance Distance method passed to [parallelDist::parDist()]. Use
+#'   the empty string to keep the function-level default.
+#' @param hclustMethod Clustering method passed to [stats::hclust()].
+#'
+#' @returns An object of class `ClusterTreeOptions`
+#'
+#' @export
+#'
+#' @examples
+#'   clTreeOpt <- ClusterTreeOptions()
+#'
+#'   zeroOneTreeOpt <- ClusterTreeOptions(
+#'     useDEA = FALSE,
+#'     distance = "euclidean",
+#'     hclustMethod = "ward.D2"
+#'   )
+#'
+#' @rdname ClusterTreeOptions
+#'
+ClusterTreeOptions <- function(useDEA = TRUE,
+                               distance = "",
+                               hclustMethod = "ward.D2") {
+  if (is.null(distance)) {
+    distance <- ""
+  }
+
+  methods::new(
+    "ClusterTreeOptions",
+    useDEA = as.logical(useDEA),
+    distance = as.character(distance),
+    hclustMethod = as.character(hclustMethod)
+  )
+}
+
+legacyClusterTreeOptions <- function(useDEA = TRUE,
+                                     distance = NULL,
+                                     hclustMethod = "ward.D2") {
+  ClusterTreeOptions(
+    useDEA = useDEA,
+    distance = distance,
+    hclustMethod = hclustMethod
+  )
+}
+
+resolveClusterTreeOptions <- function(useDEA = TRUE,
+                                      distance = NULL,
+                                      hclustMethod = "ward.D2",
+                                      clusterTreeOptions = NULL) {
+  if (is.null(clusterTreeOptions)) {
+    return(legacyClusterTreeOptions(
+      useDEA = useDEA,
+      distance = distance,
+      hclustMethod = hclustMethod
+    ))
+  }
+
+  assertthat::assert_that(
+    methods::is(clusterTreeOptions, "ClusterTreeOptions"),
+    msg = "`clusterTreeOptions` must be a `ClusterTreeOptions` object"
+  )
+
+  assertthat::assert_that(
+    identical(useDEA, TRUE),
+    is.null(distance),
+    identical(hclustMethod, "ward.D2"),
+    msg = paste(
+      "Do not mix `clusterTreeOptions` with the legacy tree arguments",
+      "`useDEA`, `distance`, and `hclustMethod`."
+    )
+  )
+
+  return(clusterTreeOptions)
+}

@@ -39,8 +39,9 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
-#'   how distances between clusters are computed.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built.
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param allCheckResults An optional `data.frame` with the results of previous
@@ -187,8 +188,7 @@
 #'   checkers = c(checker, checker2),
 #'   clusters = clusters,
 #'   executionOptions = exec,
-#'   clusterDistanceOptions = ClusterDistanceOptions(distance = "cosine"),
-#'   hclustMethod = "ward.D2",
+#'   clusterTreeOptions = ClusterTreeOptions(distance = "cosine"),
 #'   saveObj = FALSE
 #' )
 #'
@@ -214,7 +214,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       deviceStr = "cuda",
                                       useDEA = TRUE,
                                       distance = NULL,
-                                      clusterDistanceOptions = NULL,
+                                      clusterTreeOptions = NULL,
                                       hclustMethod = "ward.D2",
                                       allCheckResults = data.frame(),
                                       initialIteration = 1L,
@@ -239,10 +239,11 @@ mergeUniformCellsClusters <- function(objCOTAN,
     )
   }
 
-  clusterDistanceOptions <- resolveClusterDistanceOptions(
+  clusterTreeOptions <- resolveClusterTreeOptions(
     useDEA = useDEA,
     distance = distance,
-    clusterDistanceOptions = clusterDistanceOptions
+    hclustMethod = hclustMethod,
+    clusterTreeOptions = clusterTreeOptions
   )
 
   # returns merged name given underlying names
@@ -535,7 +536,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
       clDist <- distancesBetweenClusters(
         objCOTAN,
         clusters = outputClusters,
-        clusterDistanceOptions = clusterDistanceOptions
+        clusterDistanceOptions = clusterTreeOptions
       )
       gc()
 
@@ -544,7 +545,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                         paste0("dend_iter_", iter, "_tau_",
                                getCheckerThreshold(checker), "_plot.pdf")))
 
-          hcNorm <- hclust(clDist, method = hclustMethod)
+          hcNorm <- hclust(clDist, method = clusterTreeOptions@hclustMethod)
           plot(as.dendrogram(hcNorm))
         }, error = function(err) {
           logThis(paste("While saving dendogram plot", err), logLevel = 0L)
@@ -666,8 +667,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
       coexDF = outputCoexDF,
       reverse = FALSE,
       keepMinusOne = TRUE,
-      hclustMethod = hclustMethod,
-      clusterDistanceOptions = clusterDistanceOptions
+      clusterTreeOptions = clusterTreeOptions
     ),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)

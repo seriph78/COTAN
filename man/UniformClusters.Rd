@@ -29,7 +29,7 @@ cellsUniformClustering(
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
-  clusterDistanceOptions = NULL,
+  clusterTreeOptions = NULL,
   useCoexEigen = FALSE,
   dataMethod = "",
   genesSel = "HVG_Seurat",
@@ -69,7 +69,7 @@ mergeUniformCellsClusters(
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
-  clusterDistanceOptions = NULL,
+  clusterTreeOptions = NULL,
   hclustMethod = "ward.D2",
   allCheckResults = data.frame(),
   initialIteration = 1L,
@@ -126,8 +126,9 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
-\item{clusterDistanceOptions}{a \code{ClusterDistanceOptions} object controlling
-how distances between clusters are computed.}
+\item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
+distances between clusters are computed and how the hierarchical tree is
+built.}
 
 \item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
 onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
@@ -348,8 +349,7 @@ mergedList <- mergeUniformCellsClusters(
   checkers = c(checker, checker2),
   clusters = clusters,
   executionOptions = exec,
-  clusterDistanceOptions = ClusterDistanceOptions(distance = "cosine"),
-  hclustMethod = "ward.D2",
+  clusterTreeOptions = ClusterTreeOptions(distance = "cosine"),
   saveObj = FALSE
 )
 

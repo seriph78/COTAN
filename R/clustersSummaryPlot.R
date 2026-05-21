@@ -206,8 +206,10 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
-#'   how distances between clusters are computed.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built. When this is supplied, legacy arguments `useDEA`, `distance`, and
+#'   `hclustMethod` must be left at their defaults.
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
 #'
@@ -243,7 +245,7 @@ clustersTreePlot <- function(objCOTAN,
                              clusters = NULL,
                              useDEA = TRUE,
                              distance = NULL,
-                             clusterDistanceOptions = NULL,
+                             clusterTreeOptions = NULL,
                              hclustMethod = "ward.D2") {
   # pick last if no name was given
   # picks up the last clusterization if none was given
@@ -253,10 +255,11 @@ clustersTreePlot <- function(objCOTAN,
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
-  clusterDistanceOptions <- resolveClusterDistanceOptions(
+  clusterTreeOptions <- resolveClusterTreeOptions(
     useDEA = useDEA,
     distance = distance,
-    clusterDistanceOptions = clusterDistanceOptions
+    hclustMethod = hclustMethod,
+    clusterTreeOptions = clusterTreeOptions
   )
 
   if (kCuts > nlevels(clusters)) {
@@ -272,11 +275,11 @@ clustersTreePlot <- function(objCOTAN,
     objCOTAN,
     clName = clName,
     clusters = clusters,
-    clusterDistanceOptions = clusterDistanceOptions
+    clusterDistanceOptions = clusterTreeOptions
   )
   rm(clusters)
 
-  hcNorm <- hclust(clDist, method = hclustMethod)
+  hcNorm <- hclust(clDist, method = clusterTreeOptions@hclustMethod)
 
   dend <- as.dendrogram(hcNorm)
   dend <- branches_color(dend, k = kCuts, col = colVector, groupLabels = TRUE)

@@ -189,9 +189,10 @@ seuratClustering <- function(objCOTAN,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
-#'   how distances between clusters are computed. When this is supplied, legacy
-#'   arguments `useDEA` and `distance` must be left at their defaults.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built. When this is supplied, legacy arguments `useDEA`, `distance`, and
+#'   `hclustMethod` must be left at their defaults.
 #' @param useCoexEigen Boolean to determine whether to project the data `matrix`
 #'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
 #'   the data `matrix` to the selected genes before applying the `PCA` reduction
@@ -265,7 +266,7 @@ cellsUniformClustering <- function(objCOTAN,
                                    deviceStr = "cuda",
                                    useDEA = TRUE,
                                    distance = NULL,
-                                   clusterDistanceOptions = NULL,
+                                   clusterTreeOptions = NULL,
                                    useCoexEigen = FALSE,
                                    dataMethod = "",
                                    genesSel = "HVG_Seurat",
@@ -297,10 +298,11 @@ cellsUniformClustering <- function(objCOTAN,
     )
   }
 
-  clusterDistanceOptions <- resolveClusterDistanceOptions(
+  clusterTreeOptions <- resolveClusterTreeOptions(
     useDEA = useDEA,
     distance = distance,
-    clusterDistanceOptions = clusterDistanceOptions
+    hclustMethod = hclustMethod,
+    clusterTreeOptions = clusterTreeOptions
   )
 
   if (is.null(reductionOptions)) {
@@ -667,8 +669,7 @@ cellsUniformClustering <- function(objCOTAN,
       coexDF = outputCoexDF,
       reverse = FALSE,
       keepMinusOne = TRUE,
-      hclustMethod = hclustMethod,
-      clusterDistanceOptions = clusterDistanceOptions
+      clusterTreeOptions = clusterTreeOptions
     ),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
