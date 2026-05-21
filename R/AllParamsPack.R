@@ -197,9 +197,14 @@ setClass(
       ))
     }
 
+    usesGeneSelector <-
+      length(object@genesSel) == 1L && !isEmptyName(object@genesSel)
+
     if (length(object@numGenes) != 1L || is.na(object@numGenes) ||
-        (isFALSE(object@useCoexEigen) && object@numGenes < 1L)) {
-      return("`numGenes` must be a positive integer scalar")
+        (isFALSE(object@useCoexEigen) && usesGeneSelector &&
+         object@numGenes < 1L)) {
+      return(paste("`numGenes` must be a positive integer scalar",
+                   "when a gene selector is used"))
     }
 
     return(TRUE)

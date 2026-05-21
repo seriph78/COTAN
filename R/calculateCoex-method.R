@@ -1303,7 +1303,9 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     executionOptions = ExecutionOptions()
   ) {
 
-    c(., useTorch, deviceStr) %<-% resolveExecutionOptions(executionOptions)
+    executionValues <- resolveExecutionOptions(executionOptions)
+    useTorch <- executionValues[["useTorch"]]
+    deviceStr <- executionValues[["deviceStr"]]
 
     coex <- NULL
     problematicPairsFraction <- NA
