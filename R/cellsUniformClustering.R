@@ -199,6 +199,8 @@ seuratClustering <- function(objCOTAN,
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param numReducedComp the number of calculated **RDM** components
+#' @param reductionOptions A `ReductionOptions` object bundling dimensionality
+#'   reduction controls. This is the preferred interface for new code.
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param minimumUTClusterSize the minimum number of cells for a cluster to be
@@ -265,6 +267,7 @@ cellsUniformClustering <- function(objCOTAN,
                                    genesSel = "HVG_Seurat",
                                    numGenes = 2000L,
                                    numReducedComp = 25L,
+                                   reductionOptions = NULL,
                                    hclustMethod = "ward.D2",
                                    initialClusters = NULL,
                                    minimumUTClusterSize = 50L,
@@ -289,6 +292,50 @@ cellsUniformClustering <- function(objCOTAN,
       )
     )
   }
+
+  if (is.null(reductionOptions)) {
+    if (isEmptyName(dataMethod)) {
+      dataMethod <- "LogNormalized"
+    }
+
+    reductionOptions <- legacyReductionOptions(
+      useCoexEigen = useCoexEigen,
+      dataMethod = dataMethod,
+      numComp = numReducedComp,
+      genesSel = genesSel,
+      numGenes = numGenes
+    )
+  } else {
+    assert_that(
+      methods::is(reductionOptions, "ReductionOptions"),
+      msg = "`reductionOptions` must be a `ReductionOptions` object"
+    )
+
+    assert_that(
+      identical(useCoexEigen, FALSE),
+      identical(dataMethod, ""),
+      identical(genesSel, "HVG_Seurat"),
+      identical(numGenes, 2000L),
+      identical(numReducedComp, 25L),
+      msg = paste(
+        "Do not mix `reductionOptions` with the legacy reduction arguments",
+        "`useCoexEigen`, `dataMethod`, `genesSel`, `numGenes`, and",
+        "`numReducedComp`."
+      )
+    )
+
+    if (isEmptyName(reductionOptions@dataMethod)) {
+      reductionOptions@dataMethod <- "LogNormalized"
+    }
+
+    if (length(reductionOptions@genesSel) == 1L &&
+        isEmptyName(reductionOptions@genesSel)) {
+      reductionOptions@genesSel <- "HVG_Seurat"
+    }
+  }
+
+  usesHGDI <- length(reductionOptions@genesSel) == 1L &&
+    str_equal(reductionOptions@genesSel, "HGDI")
 
   startTime <- Sys.time()
 
@@ -335,10 +382,6 @@ cellsUniformClustering <- function(objCOTAN,
                             "a legacy `GDIThreshold` must be given"))
   }
 
-  if (isEmptyName(dataMethod)) {
-    dataMethod <- "LogNormalized"
-  }
-
   repeat {
     iter <- iter + 1L
     startLoopTime <- Sys.time()
@@ -354,8 +397,8 @@ cellsUniformClustering <- function(objCOTAN,
     cellsToDrop <- getCells(objCOTAN)[!is.na(outputClusters)]
     subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-    if ((str_equal(genesSel, "HGDI") || isTRUE(useCoexEigen)) &&
-      !isCoexAvailable(subObj)) {
+    if ((usesHGDI || isTRUE(reductionOptions@useCoexEigen)) &&
+        !isCoexAvailable(subObj)) {
       subObj <-
         proceedToCoex(
           subObj,
@@ -373,11 +416,7 @@ cellsUniformClustering <- function(objCOTAN,
                        initialResolution = initialResolution,
                        resolutionStep = resolutionStep,
                        minNumClusters = minNumClusters,
-                       useCoexEigen = useCoexEigen,
-                       dataMethod = dataMethod,
-                       numReducedComp = numReducedComp,
-                       genesSel = genesSel,
-                       numGenes = numGenes)
+                       reductionOptions = reductionOptions)
 
     if (is_null(testClusters)) {
       logThis(paste("NO new possible uniform clusters!",

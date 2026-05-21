@@ -34,6 +34,7 @@ cellsUniformClustering(
   genesSel = "HVG_Seurat",
   numGenes = 2000L,
   numReducedComp = 25L,
+  reductionOptions = NULL,
   hclustMethod = "ward.D2",
   initialClusters = NULL,
   minimumUTClusterSize = 50L,
@@ -137,6 +138,9 @@ pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]
 ignored when an explicit list of genes has been passed in}
 
 \item{numReducedComp}{the number of calculated \strong{RDM} components}
+
+\item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
+reduction controls. This is the preferred interface for new code.}
 
 \item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
 defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
