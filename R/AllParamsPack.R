@@ -337,6 +337,10 @@ setClass(
 #'
 ClusterDistanceOptions <- function(useDEA = TRUE,
                                    distance = "") {
+  if (is.null(distance)) {
+    distance <- ""
+  }
+
   methods::new(
     "ClusterDistanceOptions",
     useDEA = as.logical(useDEA),

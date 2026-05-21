@@ -215,10 +215,16 @@ test_that("Clusters plots", {
   )
 
   suppressWarnings(
-    chpd2 <-
-      clustersMarkersHeatmapPlot(obj, clName = "batch", condNameList = "H/L",
-                                 groupMarkers = groupMarkers, kCuts = 2L)
+    chpd2 <- clustersMarkersHeatmapPlot(
+      obj,
+      clName = "batch",
+      groupMarkers = groupMarkers,
+      kCuts = 2L,
+      condNameList = "H/L",
+      clusterDistanceOptions = ClusterDistanceOptions(useDEA = FALSE)
+    )
   )
+
   expect_identical(names(chpd2), c("heatmapPlot", "dataScore", "pValues"))
   expect_identical(dim(chpd2[["dataScore"]]),
                    c(length(unlist(groupMarkers)), 2L))
@@ -227,6 +233,38 @@ test_that("Clusters plots", {
   expect_no_warning(
     plot(chpd2[["heatmapPlot"]])
   )
+
+
+  expect_error(
+    clustersTreePlot(
+      obj,
+      kCuts = 2L,
+      clName = "batch",
+      useDEA = FALSE,
+      clusterDistanceOptions = ClusterDistanceOptions()
+    ),
+    regexp = "Do not mix `clusterDistanceOptions`"
+  )
+
+  expect_error(
+    clustersTreePlot(
+      obj,
+      kCuts = 2L,
+      clName = "batch",
+      clusterDistanceOptions = ReductionOptions()
+    ),
+    regexp = "`clusterDistanceOptions` must be a `ClusterDistanceOptions`"
+  )
+
+  treePlot <- clustersTreePlot(
+    obj,
+    kCuts = 2L,
+    clName = "batch",
+    clusterDistanceOptions = ClusterDistanceOptions(useDEA = FALSE)
+  )
+
+  expect_identical(names(treePlot), c("dend", "objCOTAN"))
+  expect_s3_class(treePlot[["dend"]], "dendrogram")
 
   cupd1 <- cellsUMAPPlot(obj, dataMethod = "LogLikelihood", clName = "batch",
                          useCoexEigen = TRUE, numComp = 5L)

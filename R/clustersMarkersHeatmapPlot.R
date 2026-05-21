@@ -22,6 +22,8 @@
 #'   of the *clusters* of the *clusterization*
 #' @param kCuts the number of estimated *cluster* (this defines the height for
 #'   the tree cut and the associated colors)
+#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
+#'   how distances between clusters are computed.
 #' @param adjustmentMethod *p-value* multi-test adjustment method. Defaults to
 #'   `"bonferroni"`; use `"none"` for no adjustment
 #' @param condNameList a `list` of *conditions*' names to be used for additional
@@ -76,7 +78,8 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
                                        coexDF = NULL, kCuts = 3L,
                                        adjustmentMethod = "bonferroni",
                                        condNameList = NULL,
-                                       conditionsList = NULL) {
+                                       conditionsList = NULL,
+                                       clusterDistanceOptions = NULL) {
   assert_that(is_empty(conditionsList) ||
                 length(conditionsList) == length(condNameList),
               msg = "Explicitly given conditions must have corresponding names")
@@ -125,7 +128,13 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     rownames(pValueDF) <- uniqueGeneNames
   }
 
-  dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
+  dend <- clustersTreePlot(
+    objCOTAN,
+    kCuts = kCuts,
+    clName = clName,
+    clusters = clusters,
+    clusterDistanceOptions = clusterDistanceOptions
+  )[["dend"]]
   dend <- set(dend, "branches_lwd", 2L)
 
   hbList <- NULL

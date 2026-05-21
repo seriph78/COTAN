@@ -40,8 +40,7 @@
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
 #' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
-#'   how distances between clusters are computed. When this is supplied, legacy
-#'   arguments `useDEA` and `distance` must be left at their defaults.
+#'   how distances between clusters are computed.
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param allCheckResults An optional `data.frame` with the results of previous
@@ -188,7 +187,7 @@
 #'   checkers = c(checker, checker2),
 #'   clusters = clusters,
 #'   executionOptions = exec,
-#'   distance = "cosine",
+#'   clusterDistanceOptions = ClusterDistanceOptions(distance = "cosine"),
 #'   hclustMethod = "ward.D2",
 #'   saveObj = FALSE
 #' )

@@ -294,9 +294,11 @@ c(splitClusters, splitCoexDF, perm) %<-%
     clName = "split",
     reverse = FALSE, 
     coexDF = NULL,
-    useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
-    distance = NULL,
-    hclustMethod = "ward.D2"
+    hclustMethod = "ward.D2",
+    clusterDistanceOptions = ClusterDistanceOptions(
+      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+      distance = NULL
+    ),
   )
 
 mergeClusters <- getClusters(obj, clName = "merge")
@@ -383,7 +385,10 @@ treePlot <-
     obj,
     kCuts = 2L,
     clName = "split",
-    useDEA = TRUE  # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+    clusterDistanceOptions = ClusterDistanceOptions(
+      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+      distance = NULL
+    )
   )[["dend"]]
 
 plot(treePlot)
@@ -455,7 +460,11 @@ c(mergeHeatmap, mergeScoreDF, mergePValueDF) %<-%
     clName = "merge",
     kCuts = 3L,
     adjustmentMethod = "bonferroni",
-    condNameList = list("origin")
+    condNameList = list("origin"),
+    clusterDistanceOptions = ClusterDistanceOptions(
+      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+      distance = NULL
+    )
   )
 
 ComplexHeatmap::draw(mergeHeatmap)

@@ -305,6 +305,17 @@ test_that("Cell Uniform Clustering", {
   expect_identical(sum(clMarkersDF[["IsMarker"]]), 0L)
   expect_gt(min(clMarkersDF[["DEA"]] * clMarkersDF[["logFoldCh"]]), 0.0)
 
+  expect_error(
+    distancesBetweenClusters(
+      obj,
+      clName = "exact",
+      clusters = exactClusters,
+      useDEA = FALSE,
+      clusterDistanceOptions = ClusterDistanceOptions()
+    ),
+    regexp = "Do not mix `clusterDistanceOptions`"
+  )
+
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
   expect_gt(min(topGenesNum), 150L)
 

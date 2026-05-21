@@ -127,8 +127,7 @@ faster but less precise.}
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
 \item{clusterDistanceOptions}{a \code{ClusterDistanceOptions} object controlling
-how distances between clusters are computed. When this is supplied, legacy
-arguments \code{useDEA} and \code{distance} must be left at their defaults.}
+how distances between clusters are computed.}
 
 \item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
 onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
@@ -349,7 +348,7 @@ mergedList <- mergeUniformCellsClusters(
   checkers = c(checker, checker2),
   clusters = clusters,
   executionOptions = exec,
-  distance = "cosine",
+  clusterDistanceOptions = ClusterDistanceOptions(distance = "cosine"),
   hclustMethod = "ward.D2",
   saveObj = FALSE
 )

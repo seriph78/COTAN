@@ -194,6 +194,11 @@ test_that("ClusterDistanceOptions stores defaults and explicit values", {
   expect_identical(dist_opt@useDEA, FALSE)
   expect_type(dist_opt@distance, "character")
   expect_identical(dist_opt@distance, "euclidean")
+
+  expect_identical(
+    ClusterDistanceOptions(distance = NULL)@distance,
+    ""
+  )
 })
 
 test_that("ClusterDistanceOptions rejects invalid values", {
