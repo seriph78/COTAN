@@ -5,14 +5,47 @@
 \alias{COTAN}
 \alias{proceedToCoex,COTAN,missing,missing-method}
 \alias{proceedToCoex}
+\alias{proceedToCoex,COTAN,ExecutionOptions,missing-method}
+\alias{proceedToCoex,COTAN,missing,CleaningOptions-method}
 \alias{proceedToCoex,COTAN,ExecutionOptions,CleaningOptions-method}
-\alias{proceedToCoex,COTAN,ExecutionOptions-method}
 \alias{automaticCOTANObjectCreation}
 \title{\code{COTAN} shortcuts}
 \usage{
 COTAN(raw = "ANY")
 
 \S4method{proceedToCoex}{COTAN,missing,missing}(
+  objCOTAN,
+  calcCoex = TRUE,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
+  cores = 1L,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99,
+  cleaningOptions = NULL,
+  saveObj = FALSE,
+  outDir = ".",
+  executionOptions = NULL
+)
+
+\S4method{proceedToCoex}{COTAN,ExecutionOptions,missing}(
+  objCOTAN,
+  calcCoex = TRUE,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
+  cores = 1L,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99,
+  cleaningOptions = NULL,
+  saveObj = FALSE,
+  outDir = ".",
+  executionOptions = NULL
+)
+
+\S4method{proceedToCoex}{COTAN,missing,CleaningOptions}(
   objCOTAN,
   calcCoex = TRUE,
   optimizeForSpeed = TRUE,
@@ -122,6 +155,10 @@ Constructor of the class \code{COTAN}
 
 \code{proceedToCoex()} takes a newly created \code{COTAN} object (or the
 result of a call to \code{dropGenesCells()}) and runs \code{\link[=calculateCoex]{calculateCoex()}}
+
+Alternative interface using an \code{ExecutionOptions} object.
+
+Alternative interface using a \code{CleaningOptions} object.
 
 Alternative interface using \code{ExecutionOptions} and \code{CleaningOptions}
 objects.

@@ -135,6 +135,34 @@
   return(objCOTAN)
 }
 
+
+.assertDefaultCleaningArgs <- function(cellsCutoff,
+                                       genesCutoff,
+                                       cellsThreshold,
+                                       genesThreshold) {
+  assert_that(
+    identical(cellsCutoff, 0.003),
+    identical(genesCutoff, 0.002),
+    identical(cellsThreshold, 0.99),
+    identical(genesThreshold, 0.99),
+    msg = paste("Do not mix `cleaningOptions` with",
+                "legacy cleaning arguments",
+                "(`cellsCutoff`, `genesCutoff`,",
+                "`cellsThreshold`, `genesThreshold`)."))
+}
+
+.assertDefaultExecutionArgs <- function(cores,
+                                        optimizeForSpeed,
+                                        deviceStr) {
+  assert_that(
+    identical(optimizeForSpeed, TRUE),
+    identical(deviceStr, "cuda"),
+    identical(as.integer(cores), 1L),
+    msg = paste("Do not mix `executionOptions` with",
+                "legacy execution arguments",
+                "(`cores`, `optimizeForSpeed`, `deviceStr`)."))
+}
+
 #'
 #' @aliases proceedToCoex
 #'
@@ -266,6 +294,108 @@ setMethod(
 )
 
 
+
+#' @details Alternative interface using an `ExecutionOptions` object.
+#'
+#' @rdname COTAN_ObjectCreation
+#' @aliases proceedToCoex,COTAN,ExecutionOptions,missing-method
+setMethod(
+  "proceedToCoex",
+  signature(
+    objCOTAN = "COTAN",
+    executionOptions = "ExecutionOptions",
+    cleaningOptions = "missing"),
+  function(objCOTAN,
+           calcCoex = TRUE,
+           optimizeForSpeed = TRUE,
+           deviceStr = "cuda",
+           cores = 1L,
+           cellsCutoff = 0.003,
+           genesCutoff = 0.002,
+           cellsThreshold = 0.99,
+           genesThreshold = 0.99,
+           cleaningOptions = NULL,
+           saveObj = FALSE,
+           outDir = ".",
+           executionOptions) {
+    .assertDefaultExecutionArgs(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
+
+    cleaningOptions <- resolveCleaningOptions(
+      cellsCutoff = cellsCutoff,
+      genesCutoff = genesCutoff,
+      cellsThreshold = cellsThreshold,
+      genesThreshold = genesThreshold,
+      cleaningOptions = cleaningOptions
+    )
+
+    objCOTAN <- .proceedToCoexImpl(
+      objCOTAN = objCOTAN,
+      calcCoex = calcCoex,
+      executionOptions = executionOptions,
+      cleaningOptions = cleaningOptions,
+      saveObj = saveObj,
+      outDir = outDir
+    )
+
+    return(objCOTAN)
+  }
+)
+
+
+#' @details Alternative interface using a `CleaningOptions` object.
+#'
+#' @rdname COTAN_ObjectCreation
+#' @aliases proceedToCoex,COTAN,missing,CleaningOptions-method
+setMethod(
+  "proceedToCoex",
+  signature(
+    objCOTAN = "COTAN",
+    executionOptions = "missing",
+    cleaningOptions = "CleaningOptions"),
+  function(objCOTAN,
+           calcCoex = TRUE,
+           optimizeForSpeed = TRUE,
+           deviceStr = "cuda",
+           cores = 1L,
+           cellsCutoff = 0.003,
+           genesCutoff = 0.002,
+           cellsThreshold = 0.99,
+           genesThreshold = 0.99,
+           cleaningOptions,
+           saveObj = FALSE,
+           outDir = ".",
+           executionOptions = NULL) {
+    .assertDefaultCleaningArgs(
+      cellsCutoff = cellsCutoff,
+      genesCutoff = genesCutoff,
+      cellsThreshold = cellsThreshold,
+      genesThreshold = genesThreshold
+    )
+
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
+
+    objCOTAN <- .proceedToCoexImpl(
+      objCOTAN = objCOTAN,
+      calcCoex = calcCoex,
+      executionOptions = executionOptions,
+      cleaningOptions = cleaningOptions,
+      saveObj = saveObj,
+      outDir = outDir
+    )
+
+    return(objCOTAN)
+  }
+)
+
+
 #' @details Alternative interface using `ExecutionOptions` and `CleaningOptions`
 #'   objects.
 #'
@@ -290,23 +420,18 @@ setMethod(
            saveObj = FALSE,
            outDir = ".",
            executionOptions) {
-    assert_that(
-      identical(cellsCutoff, 0.003),
-      identical(genesCutoff, 0.002),
-      identical(cellsThreshold, 0.99),
-      identical(genesThreshold, 0.99),
-      msg = paste("Do not mix `cleaningOptions` with",
-                  "legacy execution arguments",
-                  "(`cellsCutoff`, `genesCutoff`,",
-                  "`cellsThreshold`, `genesThreshold`)."))
+    .assertDefaultCleaningArgs(
+      cellsCutoff = cellsCutoff,
+      genesCutoff = genesCutoff,
+      cellsThreshold = cellsThreshold,
+      genesThreshold = genesThreshold
+    )
 
-    assert_that(
-      identical(optimizeForSpeed, TRUE),
-      identical(deviceStr, "cuda"),
-      identical(as.integer(cores), 1L),
-      msg = paste("Do not mix `executionOptions` with",
-                  "legacy execution arguments",
-                  "(`cores`, `optimizeForSpeed`, `deviceStr`)."))
+    .assertDefaultExecutionArgs(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
 
     objCOTAN <- .proceedToCoexImpl(
       objCOTAN = objCOTAN,

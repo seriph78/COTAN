@@ -109,7 +109,7 @@ setMethod(
 #' @rdname RawDataCleaning
 #' @aliases clean,COTAN,CleaningOptions-method
 setMethod(
-  "proceedToCoex",
+  "clean",
   signature(
     objCOTAN = "COTAN",
     cleaningOptions = "CleaningOptions"),
@@ -122,7 +122,7 @@ setMethod(
       identical(cellsThreshold, 0.99),
       identical(genesThreshold, 0.99),
       msg = paste("Do not mix `cleaningOptions` with",
-                  "legacy execution arguments",
+                  "legacy cleaning arguments",
                   "(`cellsCutoff`, `genesCutoff`,",
                   "`cellsThreshold`, `genesThreshold`)."))
 

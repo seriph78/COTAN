@@ -78,4 +78,65 @@ test_that("clean accepts CleaningOptions and rejects mixed legacy arguments", {
   )
 })
 
+
+test_that("proceedToCoex accepts independent execution and cleaning option packs", {
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
+
+  obj <- COTAN(raw = raw)
+  obj <- initializeMetaDataset(obj, GEO = " ",
+                               sequencingMethod = "artificial",
+                               sampleCondition = "test")
+
+  exec <- ExecutionOptions(cores = 1L, optimizeForSpeed = FALSE)
+  cleanOpt <- CleaningOptions()
+
+  expect_true(validObject(proceedToCoex(
+    obj,
+    calcCoex = FALSE,
+    cleaningOptions = cleanOpt,
+    saveObj = FALSE
+  )))
+
+  expect_true(validObject(proceedToCoex(
+    obj,
+    calcCoex = FALSE,
+    executionOptions = exec,
+    saveObj = FALSE
+  )))
+
+  expect_true(validObject(proceedToCoex(
+    obj,
+    calcCoex = FALSE,
+    executionOptions = exec,
+    cleaningOptions = cleanOpt,
+    saveObj = FALSE
+  )))
+
+  expect_error(
+    proceedToCoex(
+      obj,
+      calcCoex = FALSE,
+      cellsCutoff = 0.005,
+      cleaningOptions = cleanOpt,
+      saveObj = FALSE
+    ),
+    regexp = "Do not mix `cleaningOptions`"
+  )
+
+  expect_error(
+    proceedToCoex(
+      obj,
+      calcCoex = FALSE,
+      cores = 2L,
+      executionOptions = exec,
+      saveObj = FALSE
+    ),
+    regexp = "Do not mix `executionOptions`"
+  )
+})
+
 options(prevOptState)

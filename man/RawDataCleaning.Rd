@@ -25,8 +25,9 @@
 \alias{dropGenesCells,COTAN-method}
 \alias{dropGenesCells}
 \alias{ECDPlot}
-\alias{clean,COTAN-method}
+\alias{clean,COTAN,missing-method}
 \alias{clean}
+\alias{clean,COTAN,CleaningOptions-method}
 \alias{cleanPlots}
 \alias{screePlot}
 \alias{cellSizePlot}
@@ -62,7 +63,16 @@
 
 ECDPlot(objCOTAN, yCut = NaN, condName = "", conditions = NULL)
 
-\S4method{clean}{COTAN}(
+\S4method{clean}{COTAN,missing}(
+  objCOTAN,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99,
+  cleaningOptions = NULL
+)
+
+\S4method{clean}{COTAN,CleaningOptions}(
   objCOTAN,
   cellsCutoff = 0.003,
   genesCutoff = 0.002,
@@ -275,6 +285,8 @@ that are simple background signal.
 dataset. It will discard any genes that has less than 3 non-zero counts per
 thousand cells and all cells expressing less than 2 per thousand genes.
 also produces and stores the estimators for \code{nu}
+
+Alternative interface using a \code{CleaningOptions} object.
 
 \code{cleanPlots()} creates the plots associated to the output of the
 \code{\link[=clean]{clean()}} method.
