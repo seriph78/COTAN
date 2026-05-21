@@ -1834,6 +1834,11 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
+#' @param reductionOptions A `ReductionOptions` object bundling dimensionality
+#'   reduction controls. This is the preferred interface for new code. It must
+#'   not be mixed with the legacy reduction arguments `useCoexEigen`,
+#'   `dataMethod`, `numComp`, `genesSel`, and `numGenes`.
+#'
 #'
 #' @returns `calculateReducedDataMatrix()` returns the reduced matrix. The
 #'   returned `matrix` has dimensions: (number of cells, number of components)
@@ -1849,22 +1854,64 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #'
 #' @rdname CalculatingCOEX
 #'
+
 calculateReducedDataMatrix <-
   function(objCOTAN, useCoexEigen = FALSE,
            dataMethod = "", numComp = 25L,
-           genesSel = "", numGenes = 2000L) {
+           genesSel = "", numGenes = 2000L,
+           reductionOptions = NULL) {
+    if (is.null(reductionOptions)) {
+      reductionOptions <- legacyReductionOptions(
+        useCoexEigen = useCoexEigen,
+        dataMethod = dataMethod,
+        numComp = numComp,
+        genesSel = genesSel,
+        numGenes = numGenes
+      )
+    } else {
+      assert_that(
+        methods::is(reductionOptions, "ReductionOptions"),
+        msg = "`reductionOptions` must be a `ReductionOptions` object"
+      )
+
+      assert_that(
+        identical(useCoexEigen, FALSE),
+        identical(dataMethod, ""),
+        identical(numComp, 25L),
+        identical(genesSel, ""),
+        identical(numGenes, 2000L),
+        msg = paste(
+          "Do not mix `reductionOptions` with the legacy reduction arguments",
+          "`useCoexEigen`, `dataMethod`, `numComp`, `genesSel`, and",
+          "`numGenes`."
+        )
+      )
+    }
+
+    return(.calculateReducedDataMatrixImpl(
+      objCOTAN = objCOTAN,
+      reductionOptions = reductionOptions
+    ))
+  }
+
+
+.calculateReducedDataMatrixImpl <- function(objCOTAN, reductionOptions) {
   startTime <- Sys.time()
 
   logThis("Elaborating Reduced dimensionality Data Matrix - START",
           logLevel = 2L)
 
-  numComp <- min(numComp, getNumGenes(objCOTAN))
+  useCoexEigen <- reductionOptions@useCoexEigen
+  dataMethod <- reductionOptions@dataMethod
+  numComp <- min(reductionOptions@numComp, getNumGenes(objCOTAN))
+  genesSel <- reductionOptions@genesSel
+  numGenes <- reductionOptions@numGenes
 
   cellsRDM <- NULL
   if (isTRUE(useCoexEigen)) {
     logThis("Elaborating COEX Eigen Vectors - START", logLevel = 3L)
 
-    # calculate the most relenvat eigen-vectors of the COEX matrix
+    # calculate the most relevant eigen-vectors of the COEX matrix
     res <- eigs_sym(as.matrix(getGenesCoex(objCOTAN, zeroDiagonal = FALSE)),
                     k = numComp, which = "LM")
     eigenVectors <- res$vectors[, seq_len(numComp)]
@@ -1873,9 +1920,9 @@ calculateReducedDataMatrix <-
 
     logThis("Elaborating COEX Eigen Vectors - DONE", logLevel = 3L)
 
-    # retrieve the the data matrix and project it onto the coex eigen-space
+    # retrieve the data matrix and project it onto the coex eigen-space
     dataMatrix <- t(eigenVectors) %*%
-                    getDataMatrix(objCOTAN, dataMethod = dataMethod)
+      getDataMatrix(objCOTAN, dataMethod = dataMethod)
 
     # re-scale in the cells direction
     cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))

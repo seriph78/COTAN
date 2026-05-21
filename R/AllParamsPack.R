@@ -191,8 +191,8 @@ setClass(
     }
 
     if (length(object@numGenes) != 1L || is.na(object@numGenes) ||
-        object@numGenes < 1L) {
-      return("`numGenes` must be a positive integer scalar")
+        (isFALSE(object@useCoexEigen) && object@numGenes < 1L)) {
+      return("`numGenes` must be a non-negative positive integer scalar")
     }
 
     return(TRUE)

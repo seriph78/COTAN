@@ -163,7 +163,8 @@ calculateReducedDataMatrix(
   dataMethod = "",
   numComp = 25L,
   genesSel = "",
-  numGenes = 2000L
+  numGenes = 2000L,
+  reductionOptions = NULL
 )
 }
 \arguments{
@@ -283,6 +284,11 @@ the data \code{matrix} to the selected genes before applying the \code{PCA} redu
 
 \item{numComp}{Number of components of the reduced \code{matrix}, it defaults to
 25L.}
+
+\item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
+reduction controls. This is the preferred interface for new code. It must
+not be mixed with the legacy reduction arguments \code{useCoexEigen},
+\code{dataMethod}, \code{numComp}, \code{genesSel}, and \code{numGenes}.}
 }
 \value{
 \code{getMu()} returns the \code{mu} matrix
