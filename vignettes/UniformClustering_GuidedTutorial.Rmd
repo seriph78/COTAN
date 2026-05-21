@@ -489,9 +489,8 @@ c(mergedClusters, mergedCoexDF) %<-%
     checkers = checkersList,
     allCheckResults = prevCheckRes,
     executionOptions = exec,
-    clusterDistanceOptions = ClusterDistanceOptions(
-      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
-      distance = NULL
+    clusterTreeOptions = ClusterTreeOptions(
+      useDEA = TRUE # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
     ),
     saveObj = TRUE,
     outDir = outDir

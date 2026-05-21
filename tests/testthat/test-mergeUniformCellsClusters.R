@@ -91,7 +91,6 @@ test_that("Merge Uniform Cells Clusters", {
         allCheckResults = data.frame(),
         batchSize = 1L,
         clusterTreeOptions = ClusterTreeOptions(distance = "cosine"),
-        hclustMethod = "ward.D2",
         executionOptions = ExecutionOptions(
           cores = 6L,
           optimizeForSpeed = TRUE,

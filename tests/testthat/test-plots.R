@@ -221,7 +221,7 @@ test_that("Clusters plots", {
       groupMarkers = groupMarkers,
       kCuts = 2L,
       condNameList = "H/L",
-      clusterDistanceOptions = ClusterDistanceOptions(useDEA = FALSE)
+      clusterTreeOptions = ClusterTreeOptions(useDEA = FALSE)
     )
   )
 
@@ -241,9 +241,9 @@ test_that("Clusters plots", {
       kCuts = 2L,
       clName = "batch",
       useDEA = FALSE,
-      clusterDistanceOptions = ClusterDistanceOptions()
+      clusterTreeOptions = ClusterTreeOptions()
     ),
-    regexp = "Do not mix `clusterDistanceOptions`"
+    regexp = "Do not mix `clusterTreeOptions`"
   )
 
   expect_error(
@@ -251,9 +251,9 @@ test_that("Clusters plots", {
       obj,
       kCuts = 2L,
       clName = "batch",
-      clusterDistanceOptions = ReductionOptions()
+      clusterTreeOptions = ReductionOptions()
     ),
-    regexp = "`clusterDistanceOptions` must be a `ClusterDistanceOptions`"
+    regexp = "`clusterTreeOptions` must be a `ClusterTreeOptions`"
   )
 
   treePlot <- clustersTreePlot(

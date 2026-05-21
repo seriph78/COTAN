@@ -288,16 +288,16 @@ splitClusters <- getClusters(obj, clName = "split")
 
 splitClusters <- niceFactorLevels(splitClusters)
 
-c(splitClusters, splitCoexDF, perm) %<-% 
+c(splitClusters, splitCoexDF, perm) %<-%
   reorderClusterization(
     obj,
     clName = "split",
-    reverse = FALSE, 
+    reverse = FALSE,
     coexDF = NULL,
-    hclustMethod = "ward.D2",
     clusterTreeOptions = ClusterTreeOptions(
-      useDEA = TRUE # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
-    ),
+      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+      hclustMethod = "ward.D2"
+    )
   )
 
 mergeClusters <- getClusters(obj, clName = "merge")
@@ -384,9 +384,8 @@ treePlot <-
     obj,
     kCuts = 2L,
     clName = "split",
-    clusterDistanceOptions = ClusterDistanceOptions(
-      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
-      distance = NULL
+    clusterTreeOptions = ClusterTreeOptions(
+      useDEA = TRUE # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
     )
   )[["dend"]]
 
@@ -460,9 +459,8 @@ c(mergeHeatmap, mergeScoreDF, mergePValueDF) %<-%
     kCuts = 3L,
     adjustmentMethod = "bonferroni",
     condNameList = list("origin"),
-    clusterDistanceOptions = ClusterDistanceOptions(
-      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
-      distance = NULL
+    clusterTreeOptions = ClusterTreeOptions(
+      useDEA = TRUE # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
     )
   )
 
