@@ -263,16 +263,35 @@ test_that("Cell Uniform Clustering", {
 
   suppressWarnings({
     splitData2 <-
-      cellsUniformClustering(objCOTAN = obj,
-                             checker = checker,
-                             initialResolution = initialResolution,
-                             initialClusters = exactClusters,
-                             cores = 6L,
-                             optimizeForSpeed = TRUE,
-                             deviceStr = "cuda",
-                             saveObj = TRUE,
-                             outDir = tm)
+      cellsUniformClustering(
+        objCOTAN = obj,
+        checker = checker,
+        initialResolution = initialResolution,
+        initialClusters = exactClusters,
+        clusterDistanceOptions = ClusterDistanceOptions(),
+        executionOptions = ExecutionOptions(
+          cores = 6L,
+          optimizeForSpeed = TRUE,
+          deviceStr = "cuda",
+          chunkSize = 1024L
+        ),
+        saveObj = TRUE,
+        outDir = tm
+      )
   })
+
+  expect_error(
+    cellsUniformClustering(
+      objCOTAN = obj,
+      checker = checker,
+      initialResolution = initialResolution,
+      useDEA = FALSE,
+      clusterDistanceOptions = ClusterDistanceOptions(),
+      saveObj = FALSE,
+      outDir = tm
+    ),
+    regexp = "Do not mix `clusterDistanceOptions`"
+  )
 
   expect_identical(splitData2[["clusters"]], factor(exactClusters))
 

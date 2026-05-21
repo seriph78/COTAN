@@ -176,4 +176,33 @@ test_that("ReductionOptions rejects invalid values", {
   expect_error(ReductionOptions(useCoexEigen = FALSE, numGenes = NA_integer_))
 })
 
+
+test_that("ClusterDistanceOptions stores defaults and explicit values", {
+  dist_default <- ClusterDistanceOptions()
+
+  expect_s4_class(dist_default, "ClusterDistanceOptions")
+  expect_identical(dist_default@useDEA, TRUE)
+  expect_identical(dist_default@distance, "")
+
+  dist_opt <- ClusterDistanceOptions(
+    useDEA = FALSE,
+    distance = "euclidean"
+  )
+
+  expect_s4_class(dist_opt, "ClusterDistanceOptions")
+  expect_type(dist_opt@useDEA, "logical")
+  expect_identical(dist_opt@useDEA, FALSE)
+  expect_type(dist_opt@distance, "character")
+  expect_identical(dist_opt@distance, "euclidean")
+})
+
+test_that("ClusterDistanceOptions rejects invalid values", {
+  expect_error(ClusterDistanceOptions(useDEA = NA))
+  expect_error(ClusterDistanceOptions(useDEA = c(TRUE, FALSE)))
+
+  expect_error(ClusterDistanceOptions(distance = NA_character_))
+  expect_error(ClusterDistanceOptions(distance = c("cosine", "euclidean")))
+})
+
+
 gc()

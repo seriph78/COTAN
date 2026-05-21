@@ -146,6 +146,7 @@ clustersTreePlot(
   clusters = NULL,
   useDEA = TRUE,
   distance = NULL,
+  clusterDistanceOptions = NULL,
   hclustMethod = "ward.D2"
 )
 

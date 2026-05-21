@@ -39,6 +39,9 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
+#'   how distances between clusters are computed. When this is supplied, legacy
+#'   arguments `useDEA` and `distance` must be left at their defaults.
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #' @param allCheckResults An optional `data.frame` with the results of previous
@@ -212,6 +215,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       deviceStr = "cuda",
                                       useDEA = TRUE,
                                       distance = NULL,
+                                      clusterDistanceOptions = NULL,
                                       hclustMethod = "ward.D2",
                                       allCheckResults = data.frame(),
                                       initialIteration = 1L,
@@ -235,6 +239,12 @@ mergeUniformCellsClusters <- function(objCOTAN,
       )
     )
   }
+
+  clusterDistanceOptions <- resolveClusterDistanceOptions(
+    useDEA = useDEA,
+    distance = distance,
+    clusterDistanceOptions = clusterDistanceOptions
+  )
 
   # returns merged name given underlying names
   toMergedName <- function(clName1, clName2) {
@@ -523,8 +533,11 @@ mergeUniformCellsClusters <- function(objCOTAN,
       firstBatch <- is_empty(allCheckResults)
       oldNumClusters <- length(unique(outputClusters))
 
-      clDist <- distancesBetweenClusters(objCOTAN, clusters = outputClusters,
-                                         useDEA = useDEA, distance = distance)
+      clDist <- distancesBetweenClusters(
+        objCOTAN,
+        clusters = outputClusters,
+        clusterDistanceOptions = clusterDistanceOptions
+      )
       gc()
 
       if (isTRUE(saveObj)) tryCatch({
@@ -648,10 +661,15 @@ mergeUniformCellsClusters <- function(objCOTAN,
              })
 
   c(outputClusters, outputCoexDF, permMap) %<-% tryCatch(
-    reorderClusterization(objCOTAN, clusters = outputClusters,
-                          coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = TRUE, useDEA = useDEA,
-                          distance = distance, hclustMethod = hclustMethod),
+    reorderClusterization(
+      objCOTAN,
+      clusters = outputClusters,
+      coexDF = outputCoexDF,
+      reverse = FALSE,
+      keepMinusOne = TRUE,
+      hclustMethod = hclustMethod,
+      clusterDistanceOptions = clusterDistanceOptions
+    ),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
       return(list(outputClusters, outputCoexDF))

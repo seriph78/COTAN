@@ -29,6 +29,7 @@ cellsUniformClustering(
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
+  clusterDistanceOptions = NULL,
   useCoexEigen = FALSE,
   dataMethod = "",
   genesSel = "HVG_Seurat",
@@ -68,6 +69,7 @@ mergeUniformCellsClusters(
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
+  clusterDistanceOptions = NULL,
   hclustMethod = "ward.D2",
   allCheckResults = data.frame(),
   initialIteration = 1L,
@@ -123,6 +125,10 @@ faster but less precise.}
 \item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+
+\item{clusterDistanceOptions}{a \code{ClusterDistanceOptions} object controlling
+how distances between clusters are computed. When this is supplied, legacy
+arguments \code{useDEA} and \code{distance} must be left at their defaults.}
 
 \item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
 onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict

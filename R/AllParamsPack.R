@@ -271,7 +271,27 @@ legacyReductionOptions <- function(useCoexEigen,
 
 
 # ----------------- cluster distance options --------------------
+# ----------------- cluster distance options --------------------
 
+#' @title Cluster distance options
+#'
+#' @description Parameter object bundling the policy used to calculate
+#'   distances between cell clusters.
+#'
+#' @slot useDEA Logical scalar. Whether to use DEA profiles to calculate
+#'   distances between clusters. When `FALSE`, distances are calculated from
+#'   average Zero-One counts.
+#' @slot distance Character scalar. Distance method passed to
+#'   [parallelDist::parDist()]. The empty string keeps the function-level
+#'   default: `"cosine"` for DEA distances and `"euclidean"` for Zero-One
+#'   distances.
+#'
+#' @name ClusterDistanceOptions-class
+#'
+#' @exportClass ClusterDistanceOptions
+#'
+#' @rdname ClusterDistanceOptions
+#'
 setClass(
   "ClusterDistanceOptions",
   slots = c(
@@ -295,6 +315,26 @@ setClass(
   }
 )
 
+#' @title Build cluster distance options
+#'
+#' @param useDEA Whether to use DEA profiles to calculate cluster distances.
+#' @param distance Distance method passed to [parallelDist::parDist()]. Use
+#'   the empty string to keep the function-level default.
+#'
+#' @returns An object of class `ClusterDistanceOptions`
+#'
+#' @export
+#'
+#' @examples
+#'   clDistOpt <- ClusterDistanceOptions()
+#'
+#'   zeroOneDistOpt <- ClusterDistanceOptions(
+#'     useDEA = FALSE,
+#'     distance = "euclidean"
+#'   )
+#'
+#' @rdname ClusterDistanceOptions
+#'
 ClusterDistanceOptions <- function(useDEA = TRUE,
                                    distance = "") {
   methods::new(
@@ -316,3 +356,29 @@ legacyClusterDistanceOptions <- function(useDEA = TRUE,
   )
 }
 
+resolveClusterDistanceOptions <- function(useDEA = TRUE,
+                                          distance = NULL,
+                                          clusterDistanceOptions = NULL) {
+  if (is.null(clusterDistanceOptions)) {
+    return(legacyClusterDistanceOptions(
+      useDEA = useDEA,
+      distance = distance
+    ))
+  }
+
+  assertthat::assert_that(
+    methods::is(clusterDistanceOptions, "ClusterDistanceOptions"),
+    msg = "`clusterDistanceOptions` must be a `ClusterDistanceOptions` object"
+  )
+
+  assertthat::assert_that(
+    identical(useDEA, TRUE),
+    is.null(distance),
+    msg = paste(
+      "Do not mix `clusterDistanceOptions` with the legacy distance arguments",
+      "`useDEA` and `distance`."
+    )
+  )
+
+  return(clusterDistanceOptions)
+}

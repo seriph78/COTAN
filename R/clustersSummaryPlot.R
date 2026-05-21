@@ -206,6 +206,8 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
+#'   how distances between clusters are computed.
 #' @param hclustMethod default is "ward.D2" but can be any method defined by
 #'   [stats::hclust()] function
 #'
@@ -241,6 +243,7 @@ clustersTreePlot <- function(objCOTAN,
                              clusters = NULL,
                              useDEA = TRUE,
                              distance = NULL,
+                             clusterDistanceOptions = NULL,
                              hclustMethod = "ward.D2") {
   # pick last if no name was given
   # picks up the last clusterization if none was given
@@ -249,6 +252,12 @@ clustersTreePlot <- function(objCOTAN,
                            labels = clusters, isCond = FALSE)
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
+
+  clusterDistanceOptions <- resolveClusterDistanceOptions(
+    useDEA = useDEA,
+    distance = distance,
+    clusterDistanceOptions = clusterDistanceOptions
+  )
 
   if (kCuts > nlevels(clusters)) {
     logThis("The number of cuts must be not more than the number of clusters",
@@ -259,9 +268,12 @@ clustersTreePlot <- function(objCOTAN,
   colVector <- getColorsVector(kCuts)
 
   # merge small cluster based on distances
-  clDist <- distancesBetweenClusters(objCOTAN,
-                                     clName = clName, clusters = clusters,
-                                     useDEA = useDEA, distance = distance)
+  clDist <- distancesBetweenClusters(
+    objCOTAN,
+    clName = clName,
+    clusters = clusters,
+    clusterDistanceOptions = clusterDistanceOptions
+  )
   rm(clusters)
 
   hcNorm <- hclust(clDist, method = hclustMethod)

@@ -389,26 +389,11 @@ distancesBetweenClusters <- function(objCOTAN,
                                      useDEA = TRUE,
                                      distance = NULL,
                                      clusterDistanceOptions = NULL) {
-  if (is.null(clusterDistanceOptions)) {
-    clusterDistanceOptions <- legacyClusterDistanceOptions(
-      useDEA = useDEA,
-      distance = distance
-    )
-  } else {
-    assert_that(
-      methods::is(clusterDistanceOptions, "ClusterDistanceOptions"),
-      msg = "`clusterDistanceOptions` must be a `ClusterDistanceOptions` object"
-    )
-
-    assert_that(
-      identical(useDEA, TRUE),
-      is.null(distance),
-      msg = paste(
-        "Do not mix `clusterDistanceOptions` with the legacy distance arguments",
-        "`useDEA` and `distance`."
-      )
-    )
-  }
+  clusterDistanceOptions <- resolveClusterDistanceOptions(
+    useDEA = useDEA,
+    distance = distance,
+    clusterDistanceOptions = clusterDistanceOptions
+  )
 
   useDEA <- clusterDistanceOptions@useDEA
   distance <- clusterDistanceOptions@distance
