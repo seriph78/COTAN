@@ -177,6 +177,44 @@ test_that("ReductionOptions rejects invalid values", {
 })
 
 
+
+
+test_that("CleaningOptions stores defaults and explicit values", {
+  clean_default <- CleaningOptions()
+
+  expect_s4_class(clean_default, "CleaningOptions")
+  expect_identical(clean_default@cellsCutoff, 0.003)
+  expect_identical(clean_default@genesCutoff, 0.002)
+  expect_identical(clean_default@cellsThreshold, 0.99)
+  expect_identical(clean_default@genesThreshold, 0.99)
+
+  clean_opt <- CleaningOptions(
+    cellsCutoff = 0.005,
+    genesCutoff = 0.003,
+    cellsThreshold = 0.98,
+    genesThreshold = 0.97
+  )
+
+  expect_s4_class(clean_opt, "CleaningOptions")
+  expect_identical(clean_opt@cellsCutoff, 0.005)
+  expect_identical(clean_opt@genesCutoff, 0.003)
+  expect_identical(clean_opt@cellsThreshold, 0.98)
+  expect_identical(clean_opt@genesThreshold, 0.97)
+})
+
+
+test_that("CleaningOptions rejects invalid values", {
+  expect_error(CleaningOptions(cellsCutoff = NA_real_))
+  expect_error(CleaningOptions(cellsCutoff = -0.001))
+  expect_error(CleaningOptions(cellsCutoff = c(0.001, 0.002)))
+  expect_error(CleaningOptions(genesCutoff = NA_real_))
+  expect_error(CleaningOptions(genesCutoff = -0.001))
+  expect_error(CleaningOptions(cellsThreshold = NA_real_))
+  expect_error(CleaningOptions(cellsThreshold = -0.1))
+  expect_error(CleaningOptions(genesThreshold = NA_real_))
+  expect_error(CleaningOptions(genesThreshold = -0.1))
+})
+
 test_that("ClusterDistanceOptions stores defaults and explicit values", {
   dist_default <- ClusterDistanceOptions()
 

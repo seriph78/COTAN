@@ -1,4 +1,6 @@
 
+# -------- COTAN object initialization --------
+
 setGeneric(
   "proceedToCoex",
   function(objCOTAN,
@@ -10,12 +12,13 @@ setGeneric(
            genesCutoff = 0.002,
            cellsThreshold = 0.99,
            genesThreshold = 0.99,
+           cleaningOptions = NULL,
            saveObj = FALSE,
            outDir = ".",
            executionOptions = NULL) {
     standardGeneric("proceedToCoex")
   },
-  signature = c("objCOTAN", "executionOptions")
+  signature = c("objCOTAN", "executionOptions", "cleaningOptions")
 )
 
 # -------- calculate COEX --------
@@ -270,9 +273,11 @@ setGeneric(
 setGeneric(
   "clean",
   function(objCOTAN, cellsCutoff = 0.003, genesCutoff = 0.002,
-           cellsThreshold = 0.99, genesThreshold = 0.99) {
+           cellsThreshold = 0.99, genesThreshold = 0.99,
+           cleaningOptions = NULL) {
     standardGeneric("clean")
-  }
+  },
+  signature = c("objCOTAN", "cleaningOptions")
 )
 
 setGeneric(

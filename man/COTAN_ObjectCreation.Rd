@@ -3,15 +3,16 @@
 \name{COTAN_ObjectCreation}
 \alias{COTAN_ObjectCreation}
 \alias{COTAN}
-\alias{proceedToCoex,COTAN,missing-method}
+\alias{proceedToCoex,COTAN,missing,missing-method}
 \alias{proceedToCoex}
+\alias{proceedToCoex,COTAN,ExecutionOptions,CleaningOptions-method}
 \alias{proceedToCoex,COTAN,ExecutionOptions-method}
 \alias{automaticCOTANObjectCreation}
 \title{\code{COTAN} shortcuts}
 \usage{
 COTAN(raw = "ANY")
 
-\S4method{proceedToCoex}{COTAN,missing}(
+\S4method{proceedToCoex}{COTAN,missing,missing}(
   objCOTAN,
   calcCoex = TRUE,
   optimizeForSpeed = TRUE,
@@ -21,12 +22,13 @@ COTAN(raw = "ANY")
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
   genesThreshold = 0.99,
+  cleaningOptions = NULL,
   saveObj = FALSE,
   outDir = ".",
   executionOptions = NULL
 )
 
-\S4method{proceedToCoex}{COTAN,ExecutionOptions}(
+\S4method{proceedToCoex}{COTAN,ExecutionOptions,CleaningOptions}(
   objCOTAN,
   calcCoex = TRUE,
   optimizeForSpeed = TRUE,
@@ -36,6 +38,7 @@ COTAN(raw = "ANY")
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
   genesThreshold = 0.99,
+  cleaningOptions = NULL,
   saveObj = FALSE,
   outDir = ".",
   executionOptions = NULL
@@ -78,15 +81,17 @@ Default threshold is \eqn{0.99 \; (99.0\%)}}
 times the total number of genes will be marked as \strong{fully-expressing}.
 Default threshold is \eqn{0.99 \; (99.0\%)}}
 
+\item{cleaningOptions}{A \code{CleaningOptions} object bundling cleaning cutoffs
+and fully-expressed / fully-expressing thresholds. This is the preferred
+interface for new code.}
+
 \item{saveObj}{Boolean flag; when \code{TRUE} saves intermediate analyses and
 plots to file}
 
 \item{outDir}{an existing directory for the analysis output.}
 
 \item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
-controls. This is the preferred interface for new code. It must not be
-mixed with the legacy execution arguments \code{cores}, \code{optimizeForSpeed}, and
-\code{deviceStr}.}
+controls. This is the preferred interface for new code.}
 
 \item{GEO}{a code reporting the GEO identification or other specific dataset
 code}
@@ -118,15 +123,17 @@ Constructor of the class \code{COTAN}
 \code{proceedToCoex()} takes a newly created \code{COTAN} object (or the
 result of a call to \code{dropGenesCells()}) and runs \code{\link[=calculateCoex]{calculateCoex()}}
 
-Alternative interface using an \code{ExecutionOptions} object.
+Alternative interface using \code{ExecutionOptions} and \code{CleaningOptions}
+objects.
 
 \code{automaticCOTANObjectCreation()} creates a \code{COTAN} object,
 initializes its dataset metadata, and then calls \code{\link[=proceedToCoex]{proceedToCoex()}} on it.
 }
 \section{Forwarded arguments}{
 
-Typical forwarded arguments include \code{calcCoex}, \code{saveObj}, \code{outDir}, the
-cleaning thresholds used by \code{\link[=clean]{clean()}} and the \code{ExecutionOptions} object.
+Typical forwarded arguments include \code{calcCoex}, \code{saveObj}, \code{outDir},
+\code{cleaningOptions} or the legacy cleaning thresholds used by \code{\link[=clean]{clean()}}, and
+the \code{ExecutionOptions} object.
 }
 
 \examples{
@@ -164,6 +171,7 @@ exec <- ExecutionOptions(cores = 6L,
                          optimizeForSpeed = TRUE,
                          deviceStr = "cuda",
                          chunkSize = 1024L)
+cleanOpt <- CleaningOptions()
 
 objCOTAN <- automaticCOTANObjectCreation(
   raw = test.dataset,
@@ -172,6 +180,7 @@ objCOTAN <- automaticCOTANObjectCreation(
   sampleCondition = "mouse_dataset",
   calcCoex = TRUE,
   executionOptions = exec,
+  cleaningOptions = cleanOpt,
   saveObj = FALSE
 )
 

@@ -48,4 +48,34 @@ test_that("Clean on test dataset", {
                dispersion, tolerance = 1.0e-10, ignore_attr = FALSE)
 })
 
+
+test_that("clean accepts CleaningOptions and rejects mixed legacy arguments", {
+  raw <- matrix(c(1L,  0L, 4L, 2L, 11L, 0L, 6L, 7L, 0L, 9L,
+                  10L, 8L, 0L, 0L,  0L, 3L, 0L, 0L, 2L, 0L),
+                nrow = 10L, ncol = 20L)
+  rownames(raw) <- LETTERS[1L:10L]
+  colnames(raw) <- letters[1L:20L]
+
+  obj <- COTAN(raw = raw)
+
+  expect_true(validObject(clean(obj, cleaningOptions = CleaningOptions())))
+
+  expect_error(
+    clean(
+      obj,
+      cellsCutoff = 0.005,
+      cleaningOptions = CleaningOptions()
+    ),
+    regexp = "Do not mix `cleaningOptions`"
+  )
+
+  expect_error(
+    clean(
+      obj,
+      cleaningOptions = ReductionOptions()
+    ),
+    regexp = "`cleaningOptions` must be a `CleaningOptions` object"
+  )
+})
+
 options(prevOptState)

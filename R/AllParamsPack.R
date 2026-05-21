@@ -270,6 +270,145 @@ legacyReductionOptions <- function(useCoexEigen,
 }
 
 
+
+
+# ----------------- cleaning options --------------------
+
+#' @title Cleaning options
+#'
+#' @description Parameter object bundling the thresholds used to clean a
+#'   `COTAN` object before the model-parameter and COEX estimation steps.
+#'
+#' @slot cellsCutoff Numeric scalar. Genes expressed in at most this fraction
+#'   of cells are dropped.
+#' @slot genesCutoff Numeric scalar. Cells expressing at most this fraction of
+#'   genes are dropped.
+#' @slot cellsThreshold Numeric scalar. Genes expressed in more than this
+#'   fraction of cells are marked as fully-expressed.
+#' @slot genesThreshold Numeric scalar. Cells expressing more than this fraction
+#'   of genes are marked as fully-expressing.
+#'
+#' @name CleaningOptions-class
+#'
+#' @exportClass CleaningOptions
+#'
+#' @rdname CleaningOptions
+#'
+setClass(
+  "CleaningOptions",
+  slots = c(
+    cellsCutoff = "numeric",
+    genesCutoff = "numeric",
+    cellsThreshold = "numeric",
+    genesThreshold = "numeric"
+  ),
+  prototype = list(
+    cellsCutoff = 0.003,
+    genesCutoff = 0.002,
+    cellsThreshold = 0.99,
+    genesThreshold = 0.99
+  ),
+  validity = function(object) {
+    numericSlots <- c("cellsCutoff", "genesCutoff",
+                      "cellsThreshold", "genesThreshold")
+
+    for (slotName in numericSlots) {
+      value <- methods::slot(object, slotName)
+      if (length(value) != 1L || is.na(value) || value < 0.0) {
+        return(paste0("`", slotName,
+                      "` must be a non-missing non-negative numeric scalar"))
+      }
+    }
+
+    return(TRUE)
+  }
+)
+
+#' @title Build cleaning options
+#'
+#' @param cellsCutoff Fraction of cells used as the low-expression cutoff for
+#'   genes.
+#' @param genesCutoff Fraction of genes used as the low-expression cutoff for
+#'   cells.
+#' @param cellsThreshold Fraction of cells used to mark fully-expressed genes.
+#' @param genesThreshold Fraction of genes used to mark fully-expressing cells.
+#'
+#' @returns An object of class `CleaningOptions`
+#'
+#' @export
+#'
+#' @examples
+#'   cleanOpt <- CleaningOptions()
+#'
+#'   stricterCleanOpt <- CleaningOptions(
+#'     cellsCutoff = 0.005,
+#'     genesCutoff = 0.003,
+#'     cellsThreshold = 0.98,
+#'     genesThreshold = 0.98
+#'   )
+#'
+#' @rdname CleaningOptions
+#'
+CleaningOptions <- function(cellsCutoff = 0.003,
+                            genesCutoff = 0.002,
+                            cellsThreshold = 0.99,
+                            genesThreshold = 0.99) {
+  methods::new(
+    "CleaningOptions",
+    cellsCutoff = as.numeric(cellsCutoff),
+    genesCutoff = as.numeric(genesCutoff),
+    cellsThreshold = as.numeric(cellsThreshold),
+    genesThreshold = as.numeric(genesThreshold)
+  )
+}
+
+legacyCleaningOptions <- function(cellsCutoff = 0.003,
+                                  genesCutoff = 0.002,
+                                  cellsThreshold = 0.99,
+                                  genesThreshold = 0.99) {
+  CleaningOptions(
+    cellsCutoff = cellsCutoff,
+    genesCutoff = genesCutoff,
+    cellsThreshold = cellsThreshold,
+    genesThreshold = genesThreshold
+  )
+}
+
+resolveCleaningOptions <- function(cellsCutoff = 0.003,
+                                   genesCutoff = 0.002,
+                                   cellsThreshold = 0.99,
+                                   genesThreshold = 0.99,
+                                   cleaningOptions = NULL) {
+  if (is.null(cleaningOptions)) {
+    return(legacyCleaningOptions(
+      cellsCutoff = cellsCutoff,
+      genesCutoff = genesCutoff,
+      cellsThreshold = cellsThreshold,
+      genesThreshold = genesThreshold
+    ))
+  }
+
+  assertthat::assert_that(
+    methods::is(cleaningOptions, "CleaningOptions"),
+    msg = "`cleaningOptions` must be a `CleaningOptions` object"
+  )
+
+  assertthat::assert_that(
+    identical(cellsCutoff, 0.003),
+    identical(genesCutoff, 0.002),
+    identical(cellsThreshold, 0.99),
+    identical(genesThreshold, 0.99),
+    msg = paste(
+      "Do not mix `cleaningOptions` with the legacy cleaning arguments",
+      "`cellsCutoff`, `genesCutoff`, `cellsThreshold`, and",
+      "`genesThreshold`."
+    )
+  )
+
+  return(cleaningOptions)
+}
+
+
 # ----------------- cluster distance options --------------------
 # ----------------- cluster distance options --------------------
 
