@@ -260,7 +260,7 @@ test_that("Clusters plots", {
     obj,
     kCuts = 2L,
     clName = "batch",
-    clusterDistanceOptions = ClusterDistanceOptions(useDEA = FALSE)
+    clusterTreeOptions = ClusterTreeOptions(useDEA = FALSE)
   )
 
   expect_identical(names(treePlot), c("dend", "objCOTAN"))
