@@ -125,3 +125,134 @@ resolveExecutionOptions <- function(executionOptions) {
   ))
 }
 
+
+# ----------------- reduction options --------------------
+
+#' @title Reduction options for COTAN dimensionality reduction
+#'
+#' @description A small parameter object bundling controls used to build the
+#' reduced data matrix used by clusterizations and UMAP plots.
+#'
+#' This object intentionally stores only dimensionality-reduction policy
+#' parameters. UMAP layout options and clustering-specific options should stay
+#' outside this class.
+#'
+#' @slot useCoexEigen Logical scalar. Whether to use the first COEX eigenvectors
+#'   instead of PCA on a selected gene matrix.
+#' @slot dataMethod Character scalar. Data matrix method to use. Empty string is
+#'   allowed during the compatibility phase and is resolved by the owning public
+#'   function.
+#' @slot numComp Integer scalar. Number of reduced components to calculate.
+#' @slot genesSel Character vector. Gene-selection method or explicit gene list.
+#'   Empty string is allowed during the compatibility phase and is resolved by
+#'   the owning public function.
+#' @slot numGenes Integer scalar. Number of genes to select when `genesSel`
+#'   names a selection method.
+#'
+#' @name ReductionOptions-class
+#'
+#' @exportClass ReductionOptions
+#'
+#' @rdname ReductionOptions
+#'
+setClass(
+  "ReductionOptions",
+  slots = c(
+    useCoexEigen = "logical",
+    dataMethod = "character",
+    numComp = "integer",
+    genesSel = "character",
+    numGenes = "integer"
+  ),
+  prototype = list(
+    useCoexEigen = TRUE,
+    dataMethod = "LogLikelihood",
+    numComp = 25L,
+    genesSel = "HGDI",
+    numGenes = 2000L
+  ),
+  validity = function(object) {
+    if (length(object@useCoexEigen) != 1L ||
+        is.na(object@useCoexEigen)) {
+      return("`useCoexEigen` must be a non-missing logical scalar")
+    }
+
+    if (length(object@dataMethod) != 1L || is.na(object@dataMethod)) {
+      return("`dataMethod` must be a non-missing character scalar")
+    }
+
+    if (length(object@numComp) != 1L || is.na(object@numComp) ||
+        object@numComp < 1L) {
+      return("`numComp` must be a positive integer scalar")
+    }
+
+    if (length(object@genesSel) < 1L || anyNA(object@genesSel)) {
+      return("`genesSel` must be a non-missing character vector")
+    }
+
+    if (length(object@numGenes) != 1L || is.na(object@numGenes) ||
+        object@numGenes < 1L) {
+      return("`numGenes` must be a positive integer scalar")
+    }
+
+    return(TRUE)
+  }
+)
+
+#' @title Build reduction options
+#'
+#' @param useCoexEigen Whether to use the first COEX eigenvectors instead of PCA
+#'   on a selected gene matrix.
+#' @param dataMethod Data matrix method to use.
+#' @param numComp Number of reduced components to calculate.
+#' @param genesSel Gene-selection method or explicit gene list.
+#' @param numGenes Number of genes to select when `genesSel` names a selection
+#'   method.
+#'
+#' @returns An object of class `ReductionOptions`
+#'
+#' @export
+#'
+#' @examples
+#'   redOpt <- ReductionOptions(
+#'     useCoexEigen = FALSE,
+#'     dataMethod = "LogNormalized",
+#'     numComp = 25L,
+#'     genesSel = "HGDI",
+#'     numGenes = 2000L
+#'   )
+#'
+#' @rdname ReductionOptions
+#'
+ReductionOptions <- function(useCoexEigen = TRUE,
+                             dataMethod = "LogLikelihood",
+                             numComp = 25L,
+                             genesSel = "HGDI",
+                             numGenes = 2000L) {
+  methods::new(
+    "ReductionOptions",
+    useCoexEigen = as.logical(useCoexEigen),
+    dataMethod = as.character(dataMethod),
+    numComp = as.integer(numComp),
+    genesSel = as.character(genesSel),
+    numGenes = as.integer(numGenes)
+  )
+}
+
+
+# internal helper: build the object from legacy loose parameters
+legacyReductionOptions <- function(useCoexEigen,
+                                   dataMethod,
+                                   numComp,
+                                   genesSel,
+                                   numGenes) {
+  ReductionOptions(
+    useCoexEigen = useCoexEigen,
+    dataMethod = dataMethod,
+    numComp = numComp,
+    genesSel = genesSel,
+    numGenes = numGenes
+  )
+}
+
+
