@@ -131,21 +131,20 @@ resolveExecutionOptions <- function(executionOptions) {
 #' @title Reduction options for COTAN dimensionality reduction
 #'
 #' @description A small parameter object bundling controls used to build the
-#' reduced data matrix used by clusterizations and UMAP plots.
+#'   reduced data matrix used by clusterizations and UMAP plots.
 #'
-#' This object intentionally stores only dimensionality-reduction policy
-#' parameters. UMAP layout options and clustering-specific options should stay
-#' outside this class.
+#'   This object intentionally stores only dimensionality-reduction policy
+#'   parameters. UMAP layout options and clustering-specific options should stay
+#'   outside this class.
 #'
-#' @slot useCoexEigen Logical scalar. Whether to use the first COEX eigenvectors
-#'   instead of PCA on a selected gene matrix.
+#' @slot useCoexEigen Logical scalar. Whether to use the first COEX
+#'   eigen-vectors instead of PCA on a selected gene matrix.
 #' @slot dataMethod Character scalar. Data matrix method to use. Empty string is
 #'   allowed during the compatibility phase and is resolved by the owning public
 #'   function.
 #' @slot numComp Integer scalar. Number of reduced components to calculate.
 #' @slot genesSel Character vector. Gene-selection method or explicit gene list.
-#'   Empty string is allowed during the compatibility phase and is resolved by
-#'   the owning public function.
+#'   Empty string is usually allowed as default.
 #' @slot numGenes Integer scalar. Number of genes to select when `genesSel`
 #'   names a selection method.
 #'

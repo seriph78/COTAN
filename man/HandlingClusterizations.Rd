@@ -251,9 +251,7 @@ pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]
 ignored when an explicit list of genes has been passed in}
 
 \item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
-reduction controls. This is the preferred interface for new code. It must
-not be mixed with the legacy reduction arguments \code{useCoexEigen},
-\code{dataMethod}, \code{numComp}, \code{genesSel}, and \code{numGenes}.}
+reduction controls. This is the preferred interface for new code.}
 
 \item{groupMarkers}{an optional named \code{list} with an element for each group
 comprised of one or more marker genes}

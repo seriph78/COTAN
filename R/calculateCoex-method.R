@@ -1835,10 +1835,7 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param reductionOptions A `ReductionOptions` object bundling dimensionality
-#'   reduction controls. This is the preferred interface for new code. It must
-#'   not be mixed with the legacy reduction arguments `useCoexEigen`,
-#'   `dataMethod`, `numComp`, `genesSel`, and `numGenes`.
-#'
+#'   reduction controls. This is the preferred interface for new code.
 #'
 #' @returns `calculateReducedDataMatrix()` returns the reduced matrix. The
 #'   returned `matrix` has dimensions: (number of cells, number of components)

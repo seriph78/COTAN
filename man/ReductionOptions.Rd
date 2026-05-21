@@ -41,8 +41,8 @@ outside this class.
 \section{Slots}{
 
 \describe{
-\item{\code{useCoexEigen}}{Logical scalar. Whether to use the first COEX eigenvectors
-instead of PCA on a selected gene matrix.}
+\item{\code{useCoexEigen}}{Logical scalar. Whether to use the first COEX
+eigen-vectors instead of PCA on a selected gene matrix.}
 
 \item{\code{dataMethod}}{Character scalar. Data matrix method to use. Empty string is
 allowed during the compatibility phase and is resolved by the owning public
@@ -51,8 +51,7 @@ function.}
 \item{\code{numComp}}{Integer scalar. Number of reduced components to calculate.}
 
 \item{\code{genesSel}}{Character vector. Gene-selection method or explicit gene list.
-Empty string is allowed during the compatibility phase and is resolved by
-the owning public function.}
+Empty string is usually allowed as default.}
 
 \item{\code{numGenes}}{Integer scalar. Number of genes to select when \code{genesSel}
 names a selection method.}

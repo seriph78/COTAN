@@ -31,16 +31,8 @@ NULL
 #' @param minNumClusters The minimum number of *clusters* expected from this
 #'   *clusterization*. In cases it is not reached, it will increase the
 #'   resolution of the *clusterization*
-#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
-#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
-#'   the data `matrix` to the selected genes before applying the `PCA` reduction
-#' @param dataMethod selects the method to use to create the `data.frame` to
-#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
-#' @param genesSel Decides whether and how to perform the gene-selection
-#'   (defaults to `"HVG_Seurat"`). See [getSelectedGenes()] for more details.
-#' @param numGenes the number of genes to select using the above method. Will be
-#'   ignored when an explicit list of genes has been passed in
-#' @param numReducedComp the number of calculated **RDM** components
+#' @param reductionOptions A `ReductionOptions` object bundling dimensionality
+#'   reduction controls. This is the preferred interface for new code.
 #'
 #' @returns a list with:
 #'   * `"SeuratClusters"` a `Seurat` *clusterization*
@@ -58,31 +50,38 @@ NULL
 #'
 #' @noRd
 #'
-
 seuratClustering <- function(objCOTAN,
                              initialResolution,
                              resolutionStep,
                              minNumClusters,
-                             useCoexEigen,
-                             dataMethod,
-                             genesSel,
-                             numGenes,
-                             numReducedComp) {
+                             reductionOptions) {
   tryCatch({
     startTime <- Sys.time()
 
     logThis("Creating new clusterization: START", logLevel = 2L)
 
-    assert_that(numReducedComp <= getNumGenes(objCOTAN))
+    assert_that(
+      methods::is(reductionOptions, "ReductionOptions"),
+      msg = "`reductionOptions` must be a `ReductionOptions` object"
+    )
 
-    numReducedCompToCalc <- numReducedComp + 15L
+    numReducedComp <- reductionOptions@numComp
+
+    # Calculate more components in the ruduction matrix
+    # in order to avoid numerical instabilities
+    reductionOptions@numComp <- as.integer(numReducedComp + 15L)
+
+    assert_that(reductionOptions@numComp <= getNumGenes(objCOTAN))
+
+    methods::validObject(reductionOptions)
+
     cellsRDM <- calculateReducedDataMatrix(
-      objCOTAN, useCoexEigen = useCoexEigen,
-      dataMethod = dataMethod, numComp = numReducedCompToCalc,
-      genesSel = genesSel, numGenes = numGenes)
+      objCOTAN,
+      reductionOptions = reductionOptions
+    )
 
     assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
-                ncol(cellsRDM) <= numReducedCompToCalc,
+                ncol(cellsRDM) <= reductionOptions@numComp,
                 msg = "Returned PCA matrix has wrong dimensions")
 
     # Create the Seurat object
@@ -139,8 +138,8 @@ seuratClustering <- function(objCOTAN,
     rm(srat)
     gc()
 
-    # returned objects
-    return(list("SeuratClusters" = seuratClusters, "CellsRDM" = cellsRDM,
+    return(list("SeuratClusters" = seuratClusters,
+                "CellsRDM" = cellsRDM,
                 "Resolution" = resolution,
                 "UsedMaxResolution" = usedMaxResolution))
   },

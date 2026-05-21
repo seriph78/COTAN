@@ -266,9 +266,7 @@ UMAPPlot <- function(dataIn,
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param reductionOptions A `ReductionOptions` object bundling dimensionality
-#'   reduction controls. This is the preferred interface for new code. It must
-#'   not be mixed with the legacy reduction arguments `useCoexEigen`,
-#'   `dataMethod`, `numComp`, `genesSel`, and `numGenes`.
+#'   reduction controls. This is the preferred interface for new code.
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]

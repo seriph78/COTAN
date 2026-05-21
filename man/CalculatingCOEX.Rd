@@ -286,9 +286,7 @@ the data \code{matrix} to the selected genes before applying the \code{PCA} redu
 25L.}
 
 \item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
-reduction controls. This is the preferred interface for new code. It must
-not be mixed with the legacy reduction arguments \code{useCoexEigen},
-\code{dataMethod}, \code{numComp}, \code{genesSel}, and \code{numGenes}.}
+reduction controls. This is the preferred interface for new code.}
 }
 \value{
 \code{getMu()} returns the \code{mu} matrix
