@@ -119,8 +119,18 @@ test_that("Cell Uniform Clustering", {
                            clusters = clusters, coexDF = coexDF)
 
   expect_equal(getClusters(objCOTAN = obj), clusters, ignore_attr = TRUE)
-  expect_identical(reorderClusterization(objCOTAN = obj)[["clusters"]],
-                   clusters)
+  expect_identical(
+    reorderClusterization(objCOTAN = obj)[["clusters"]],
+    clusters
+  )
+
+  expect_identical(
+    reorderClusterization(
+      objCOTAN = obj,
+      clusterDistanceOptions = ClusterDistanceOptions()
+    )[["clusters"]],
+    clusters
+  )
 
   firstCl <- clusters[[1L]]
 
@@ -202,9 +212,14 @@ test_that("Cell Uniform Clustering", {
   clusters3 <- factor(clusters, levels = c(levels(clusters), "-1"))
   clusters3[51L:100L] <- "-1"
   reorderRes3 <-
-    reorderClusterization(objCOTAN = obj, useDEA = FALSE,
-                          reverse = FALSE, keepMinusOne = TRUE,
-                          clusters = clusters3, coexDF = coexDF2)
+    reorderClusterization(
+      objCOTAN = obj,
+      reverse = FALSE,
+      keepMinusOne = TRUE,
+      clusters = clusters3,
+      coexDF = coexDF2,
+      clusterDistanceOptions = ClusterDistanceOptions(useDEA = FALSE)
+    )
   clusters3 <- reorderRes3[["clusters"]]
 
   expect_identical(levels(clusters3)[clusters3[51L:100L]],
@@ -215,6 +230,33 @@ test_that("Cell Uniform Clustering", {
   expect_identical(reorderRes3[["permMap"]],
                    set_names(paste0(c(1L:4L, -1L)),
                              nm = paste0(c(1L:4L, -1L))))
+
+
+  expect_error(
+    reorderClusterization(
+      objCOTAN = obj,
+      useDEA = FALSE,
+      clusterDistanceOptions = ClusterDistanceOptions()
+    ),
+    regexp = "Do not mix `clusterDistanceOptions`"
+  )
+
+  expect_error(
+    reorderClusterization(
+      objCOTAN = obj,
+      distance = "euclidean",
+      clusterDistanceOptions = ClusterDistanceOptions()
+    ),
+    regexp = "Do not mix `clusterDistanceOptions`"
+  )
+
+  expect_error(
+    reorderClusterization(
+      objCOTAN = obj,
+      clusterDistanceOptions = ReductionOptions()
+    ),
+    regexp = "`clusterDistanceOptions` must be a `ClusterDistanceOptions` object"
+  )
 
   clSize <- getNumCells(obj) / 2L
   exactClusters <- set_names(rep(1L:2L, each = clSize), nm = getCells(obj))

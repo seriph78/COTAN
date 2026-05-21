@@ -81,7 +81,8 @@ distancesBetweenClusters(
   clusters = NULL,
   coexDF = NULL,
   useDEA = TRUE,
-  distance = NULL
+  distance = NULL,
+  clusterDistanceOptions = NULL
 )
 
 UMAPPlot(
@@ -169,7 +170,8 @@ reorderClusterization(
   keepMinusOne = TRUE,
   useDEA = TRUE,
   distance = NULL,
-  hclustMethod = "ward.D2"
+  hclustMethod = "ward.D2",
+  clusterDistanceOptions = NULL
 )
 }
 \arguments{
@@ -216,6 +218,9 @@ faster but less precise.}
 \item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+
+\item{clusterDistanceOptions}{a \code{ClusterDistanceOptions} object controlling
+how distances between clusters are computed.}
 
 \item{dataIn}{The \code{matrix} to plot. It must have a row names containing the
 given elements (the columns are features)}
@@ -472,8 +477,8 @@ expression levels for each \emph{cluster} in the given \emph{clusterization} aga
 the rest of the data-set
 
 \code{distancesBetweenClusters()} is used to obtain a distance between
-the clusters. Depending on the value of the \code{useDEA} flag will base the
-distance on the \emph{DEA} columns or the averages of the \emph{Zero-One} matrix.
+the clusters. Depending on the effective \code{useDEA} setting, it bases the
+distance on the \emph{DEA} columns or on the averages of the \emph{Zero-One} matrix.
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
 information related to clusters after applying the \code{umap} transformation

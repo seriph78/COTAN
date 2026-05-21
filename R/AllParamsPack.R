@@ -270,3 +270,49 @@ legacyReductionOptions <- function(useCoexEigen,
 }
 
 
+# ----------------- cluster distance options --------------------
+
+setClass(
+  "ClusterDistanceOptions",
+  slots = c(
+    useDEA = "logical",
+    distance = "character"
+  ),
+  prototype = list(
+    useDEA = TRUE,
+    distance = ""
+  ),
+  validity = function(object) {
+    if (length(object@useDEA) != 1L || is.na(object@useDEA)) {
+      return("`useDEA` must be a non-missing logical scalar")
+    }
+
+    if (length(object@distance) != 1L || is.na(object@distance)) {
+      return("`distance` must be a non-missing character scalar")
+    }
+
+    return(TRUE)
+  }
+)
+
+ClusterDistanceOptions <- function(useDEA = TRUE,
+                                   distance = "") {
+  methods::new(
+    "ClusterDistanceOptions",
+    useDEA = as.logical(useDEA),
+    distance = as.character(distance)
+  )
+}
+
+legacyClusterDistanceOptions <- function(useDEA = TRUE,
+                                         distance = NULL) {
+  if (is.null(distance)) {
+    distance <- ""
+  }
+
+  ClusterDistanceOptions(
+    useDEA = useDEA,
+    distance = distance
+  )
+}
+

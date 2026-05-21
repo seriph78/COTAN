@@ -349,8 +349,8 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #'
 #' @details `distancesBetweenClusters()` is used to obtain a distance between
-#'   the clusters. Depending on the value of the `useDEA` flag will base the
-#'   distance on the *DEA* columns or the averages of the *Zero-One* matrix.
+#'   the clusters. Depending on the effective `useDEA` setting, it bases the
+#'   distance on the *DEA* columns or on the averages of the *Zero-One* matrix.
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param clName The name of the *clusterization*. If not given the last
@@ -366,6 +366,8 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
+#'   how distances between clusters are computed.
 #'
 #' @return `distancesBetweenClusters()` returns a `dist` object
 #'
@@ -380,9 +382,37 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'
 #' @rdname HandlingClusterizations
 #'
-distancesBetweenClusters <- function(objCOTAN, clName = "",
-                                     clusters = NULL, coexDF = NULL,
-                                     useDEA = TRUE, distance = NULL) {
+distancesBetweenClusters <- function(objCOTAN,
+                                     clName = "",
+                                     clusters = NULL,
+                                     coexDF = NULL,
+                                     useDEA = TRUE,
+                                     distance = NULL,
+                                     clusterDistanceOptions = NULL) {
+  if (is.null(clusterDistanceOptions)) {
+    clusterDistanceOptions <- legacyClusterDistanceOptions(
+      useDEA = useDEA,
+      distance = distance
+    )
+  } else {
+    assert_that(
+      methods::is(clusterDistanceOptions, "ClusterDistanceOptions"),
+      msg = "`clusterDistanceOptions` must be a `ClusterDistanceOptions` object"
+    )
+
+    assert_that(
+      identical(useDEA, TRUE),
+      is.null(distance),
+      msg = paste(
+        "Do not mix `clusterDistanceOptions` with the legacy distance arguments",
+        "`useDEA` and `distance`."
+      )
+    )
+  }
+
+  useDEA <- clusterDistanceOptions@useDEA
+  distance <- clusterDistanceOptions@distance
+
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
     normalizeNameAndLabels(objCOTAN, name = clName,
@@ -396,11 +426,11 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
     useDEA <- FALSE
   }
 
-  if (isTRUE(useDEA)) {
-    if (is_null(distance)) {
-      distance <- "cosine"
-    }
+  if (isEmptyName(distance)) {
+    distance <- if (isTRUE(useDEA)) "cosine" else "euclidean"
+  }
 
+  if (isTRUE(useDEA)) {
     if (is_empty(coexDF) && (clName %in% getClusterizations(objCOTAN))) {
         coexDF <- getClusterizationData(objCOTAN, clName = clName)[["coex"]]
     }
@@ -413,10 +443,6 @@ distancesBetweenClusters <- function(objCOTAN, clName = "",
     return(calcDist(t(as.matrix(coexDF)), method = distance,
                     diag = TRUE, upper = TRUE))
   } else {
-    if (is.null(distance)) {
-      distance <- "euclidean"
-    }
-
     zeroOne <- getZeroOneProj(objCOTAN)
 
     zeroOneClAvg <- data.frame(row.names = getGenes(objCOTAN))

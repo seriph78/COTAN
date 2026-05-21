@@ -19,6 +19,8 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
+#'   how distances between clusters are computed.
 #' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
 #'   defined by the [stats::hclust()] function.
 #'
@@ -29,28 +31,54 @@
 #'
 #' @export
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @importFrom rlang set_names
-#' @importFrom rlang is_null
 #'
 #' @importFrom stats hclust
 #' @importFrom stats as.dist
 #'
 #' @rdname HandlingClusterizations
 #'
-
 reorderClusterization <- function(objCOTAN,
                                   clName = "", clusters = NULL, coexDF = NULL,
                                   reverse = FALSE, keepMinusOne = TRUE,
                                   useDEA = TRUE, distance = NULL,
-                                  hclustMethod = "ward.D2") {
+                                  hclustMethod = "ward.D2",
+                                  clusterDistanceOptions = NULL) {
+  if (is.null(clusterDistanceOptions)) {
+    clusterDistanceOptions <- legacyClusterDistanceOptions(
+      useDEA = useDEA,
+      distance = distance
+    )
+  } else {
+    assert_that(
+      methods::is(clusterDistanceOptions, "ClusterDistanceOptions"),
+      msg = "`clusterDistanceOptions` must be a `ClusterDistanceOptions` object"
+    )
+
+    assert_that(
+      identical(useDEA, TRUE),
+      is.null(distance),
+      msg = paste(
+        "Do not mix `clusterDistanceOptions` with the legacy distance",
+        "arguments `useDEA` and `distance`."
+      )
+    )
+  }
+
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)
 
-  clDist <- distancesBetweenClusters(objCOTAN, clName = clName,
-                                     clusters = clusters, coexDF = coexDF,
-                                     useDEA = useDEA, distance = distance)
+  clDist <- distancesBetweenClusters(
+    objCOTAN,
+    clName = clName,
+    clusters = clusters,
+    coexDF = coexDF,
+    clusterDistanceOptions = clusterDistanceOptions
+  )
 
   dummyList <- list("clusters" = factor(clusters), "coex" = coexDF,
                     "permMap" = set_names(labels(clDist), labels(clDist)))
