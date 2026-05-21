@@ -65,23 +65,23 @@ seuratClustering <- function(objCOTAN,
       msg = "`reductionOptions` must be a `ReductionOptions` object"
     )
 
-    numReducedComp <- reductionOptions@numComp
-
-    # Calculate more components in the ruduction matrix
+    # Calculate more components in the reduction matrix
     # in order to avoid numerical instabilities
-    reductionOptions@numComp <- as.integer(numReducedComp + 15L)
+    numReducedCompToCalc <- reductionOptions@numComp + 15L
 
-    assert_that(reductionOptions@numComp <= getNumGenes(objCOTAN))
+    assert_that(numReducedCompToCalc <= getNumGenes(objCOTAN))
 
-    methods::validObject(reductionOptions)
+    calculationReductionOptions <- reductionOptions
+    calculationReductionOptions@numComp <- as.integer(numReducedCompToCalc)
+    methods::validObject(calculationReductionOptions)
 
     cellsRDM <- calculateReducedDataMatrix(
       objCOTAN,
-      reductionOptions = reductionOptions
+      reductionOptions = calculationReductionOptions
     )
 
     assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
-                ncol(cellsRDM) <= reductionOptions@numComp,
+                ncol(cellsRDM) <= numReducedCompToCalc,
                 msg = "Returned PCA matrix has wrong dimensions")
 
     # Create the Seurat object
@@ -94,7 +94,7 @@ seuratClustering <- function(objCOTAN,
                            key = "PC_",
                            assay = "RNA")
 
-    srat <- FindNeighbors(srat, dims = seq_len(numReducedComp))
+    srat <- FindNeighbors(srat, dims = seq_len(reductionOptions@numComp))
 
     resolution <- initialResolution
     maxResolution <- initialResolution + 30.0 * resolutionStep

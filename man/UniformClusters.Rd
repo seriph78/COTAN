@@ -294,14 +294,18 @@ stopifnot(identical(
   1.397
 ))
 
+redOpt <- ReductionOptions(
+  useCoexEigen = TRUE,
+  dataMethod = "LogLikelihood",
+  numComp = 50L,
+  genesSel = "HGDI",
+  numGenes = 2000L
+)
+
 splitList <- cellsUniformClustering(
   objCOTAN,
   executionOptions = exec,
-  dataMethod = "LogLikelihood",
-  useCoexEigen = TRUE,
-  genesSel = "HGDI",
-  numGenes = 2000L,
-  numReducedComp = 50L,
+  reductionOptions = redOpt,
   initialResolution = 0.8,
   checker = checker2,
   saveObj = FALSE

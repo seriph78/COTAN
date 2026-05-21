@@ -264,14 +264,18 @@ if (TRUE) {
 # default constructed checker is OK
 advChecker <- new("AdvancedGDIUniformityCheck")
 
+reductionOptions <- ReductionOptions(
+  useCoexEigen = TRUE,
+  dataMethod = "LogLikelihood", # observed against expected data
+  numComp = 50L
+)
+
 c(splitClusters, splitCoexDF) %<-%
   cellsUniformClustering(
     obj,
     initialResolution = 0.8,
     checker = advChecker,
-    dataMethod = "LogLikelihood", # of observed against expected data
-    useCoexEigen = TRUE, # project on `COEX` eigenvectors instead doing a `PCA`
-    numReducedComp = 50L,
+    reductionOptions = reductionOptions,
     minimumUTClusterSize = 50L, # too large values imply many un-clustered cells
     initialClusters = initialClusters,
     initialIteration = 1L,
@@ -380,9 +384,7 @@ c(umapPlot, cellsRDM) %<-%
     obj,
     clName = "split",
     clusters = NULL,
-    useCoexEigen = TRUE, # Aligning these to `split` generation gives best res.
-    dataMethod = "LogLikelihood", # "AdjBinarized" is also a good choice
-    numComp = 50L, # number of components of the data reduced matrix
+    reductionOptions = reductionOptions,
     colors = NULL, # a list of user defined colors for the various clusters
     numNeighbors = 30L, # UMAP related parameters
     minPointsDist = 0.3 # UMAP related parameters
@@ -402,11 +404,13 @@ c(umapPlot, cellsRDM) %<-%
     obj,
     clName = "split",
     clusters = NULL,
-    useCoexEigen = FALSE,
-    dataMethod = "LogNormalized", 
-    numComp = 50L, # number of components of the data reduced matrix
-    genesSel = "HVG_Seurat",
-    numGenes = 500L,
+    reductionOptions = ReductionOptions(
+      useCoexEigen = FALSE,
+      dataMethod = "LogNormalized",
+      numComp = 50L, # number of components of the data reduced matrix
+      genesSel = "HVG_Seurat",
+      numGenes = 500L
+    ),
     colors = NULL, # a list of user defined colors for the various clusters
     numNeighbors = 30L, # UMAP related parameters
     minPointsDist = 0.3 # UMAP related parameters
@@ -589,9 +593,7 @@ c(umapPlot, .) %<-%
     obj,
     clName = "merge",
     clusters = NULL,
-    useCoexEigen = TRUE,
-    dataMethod = "LogLikelihood", # "AdjBinarized" is also a good choice
-    numComp = 50L, # number of components of the data reduced matrix
+    reductionOptions = reductionOptions,
     colors = NULL, # a list of user defined colors for the various clusters
     numNeighbors = 30L, # UMAP related parameters
     minPointsDist = 0.3 # UMAP related parameters
@@ -611,11 +613,13 @@ c(umapPlot, .) %<-%
     obj,
     clName = "merge",
     clusters = NULL,
-    useCoexEigen = FALSE,
-    dataMethod = "LogNormalized", # "AdjBinarized" is also a good choice
-    numComp = 50L, # number of components of the data reduced matrix
-    genesSel = "HVG_Scanpy",
-    numGenes = 500L,
+    reductionOptions = ReductionOptions(
+      useCoexEigen = FALSE,
+      dataMethod = "LogNormalized", # "AdjBinarized" is also a good choice
+      numComp = 50L, # number of components of the data reduced matrix
+      genesSel = "HVG_Scanpy",
+      numGenes = 500L
+    ),
     colors = NULL, # a list of user defined colors for the various clusters
     numNeighbors = 30L, # UMAP related parameters
     minPointsDist = 0.3 # UMAP related parameters

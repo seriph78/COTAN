@@ -569,9 +569,20 @@ if (FALSE) {
 clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 stopifnot(length(clusterizations) == 1)
 
-cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, dataMethod = "LogLikelihood",
-                                    useCoexEigen = TRUE, numComp = 25L,
-                                    clName = "first_clusterization")
+umapRedOpt <- ReductionOptions(
+  useCoexEigen = TRUE,
+  dataMethod = "LogLikelihood",
+  numComp = 25L,
+  genesSel = "HGDI",
+  numGenes = 2000L
+)
+
+cellsUmapPlotAndDF <- cellsUMAPPlot(
+  objCOTAN,
+  reductionOptions = umapRedOpt,
+  clName = "first_clusterization"
+)
+
 plot(cellsUmapPlotAndDF[["plot"]])
 
 enrichment <- geneSetEnrichment(clustersCoex = coexDF,

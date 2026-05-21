@@ -58,7 +58,9 @@ names a selection method.}
 }}
 
 \examples{
-  redOpt <- ReductionOptions(
+  redOpt <- ReductionOptions()
+
+  pcaRedOpt <- ReductionOptions(
     useCoexEigen = FALSE,
     dataMethod = "LogNormalized",
     numComp = 25L,

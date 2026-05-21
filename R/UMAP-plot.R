@@ -351,7 +351,8 @@ cellsUMAPPlot <- function(objCOTAN,
       )
     )
 
-    if (isEmptyName(reductionOptions@genesSel)) {
+    if (length(reductionOptions@genesSel) == 1L &&
+        isEmptyName(reductionOptions@genesSel)) {
       reductionOptions@genesSel <- "HGDI"
     }
 
