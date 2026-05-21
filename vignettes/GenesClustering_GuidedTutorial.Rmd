@@ -203,10 +203,13 @@ exec <- ExecutionOptions(
   chunkSize = 1024L
 )
 
+cleanOpt <- CleaningOptions()
+
 obj <- proceedToCoex(
   obj,
   calcCoex = TRUE,
-  executionOptions = exec
+  executionOptions = exec,
+  cleaningOptions = cleanOpt
 )
 ```
 

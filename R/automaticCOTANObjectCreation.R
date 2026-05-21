@@ -235,12 +235,18 @@
 #'                            optimizeForSpeed = TRUE,
 #'                            deviceStr = "cuda",
 #'                            chunkSize = 1024L)
+#'   cleanOpt <- CleaningOptions()
 #'
 #' # in case the genes' `COEX` is not needed it can be skipped
 #' # (e.g. when calling [cellsUniformClustering()])
 #' #
-#'   objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-#'                             executionOptions = exec, saveObj = FALSE)
+#'   objCOTAN <- proceedToCoex(
+#'     objCOTAN,
+#'     calcCoex = FALSE,
+#'     executionOptions = exec,
+#'     cleaningOptions = cleanOpt,
+#'     saveObj = FALSE
+#'   )
 #' }
 #'
 #' @rdname COTAN_ObjectCreation

@@ -538,9 +538,11 @@ objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
                                   sampleCondition = "reconstructed_dataset")
 
 exec <- ExecutionOptions(cores = 6L)
+cleanOpt <- CleaningOptions()
 
 objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-                          executionOptions = exec)
+                          executionOptions = exec,
+                          cleaningOptions = cleanOpt)
 
 ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 

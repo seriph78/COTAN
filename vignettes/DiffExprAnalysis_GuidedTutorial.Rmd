@@ -197,10 +197,13 @@ exec <- ExecutionOptions(
   chunkSize = 1024L
 )
 
+cleanOpt <- CleaningOptions()
+
 obj <- proceedToCoex(
   obj,
   calcCoex = FALSE,
-  executionOptions = exec
+  executionOptions = exec,
+  cleaningOptions = cleanOpt
 )
 ```
 
@@ -545,7 +548,12 @@ cellsToDrop <- getCells(obj)[!(splitClusters %in% c("03", "05"))]
 
 obj2 <- dropGenesCells(obj, cells = cellsToDrop)
 
-obj2 <- proceedToCoex(obj2, calcCoex = FALSE)
+obj2 <- proceedToCoex(
+  obj2,
+  calcCoex = FALSE,
+  executionOptions = exec,
+  cleaningOptions = cleanOpt
+)
 
 table(getClusters(obj2, clName = "split"))
 ```

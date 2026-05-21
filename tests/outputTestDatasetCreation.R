@@ -17,9 +17,12 @@ outputTestDatasetCreation <-
     cores = 6L, optimizeForSpeed = TRUE,
     deviceStr = "cuda", chunkSize = 1024L)
 
+  cleaningOptions <- CleaningOptions()
+
   obj <- proceedToCoex(
     objCOTAN = obj,
     executionOptions = executionOptions,
+    cleaningOptions = cleaningOptions,
     saveObj = FALSE
   )
 

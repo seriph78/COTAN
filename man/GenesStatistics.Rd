@@ -226,7 +226,8 @@ objCOTAN <- COTAN(raw = test.dataset)
 
 exec <- ExecutionOptions(cores = 6L, chunkSize = 1024L)
 objCOTAN <- proceedToCoex(objCOTAN, saveObj = FALSE,
-                          executionOptions = exec)
+                          executionOptions = exec,
+                          cleaningOptions = cleanOpt)
 
 markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
 gCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,

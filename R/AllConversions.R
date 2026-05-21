@@ -10,7 +10,10 @@
 #' @examples
 #'   data("test.dataset")
 #'   obj <- COTAN(raw = test.dataset)
-#'   obj <- proceedToCoex(obj, calcCoex = FALSE, saveObj = FALSE)
+#'   cleanOpt <- CleaningOptions()
+#'   obj <- proceedToCoex(obj, calcCoex = FALSE,
+#'                         cleaningOptions = cleanOpt,
+#'                         saveObj = FALSE)
 #'
 #'   sce <- convertToSingleCellExperiment(objCOTAN = obj)
 #'

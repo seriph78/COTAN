@@ -537,7 +537,8 @@ objCOTAN <- COTAN(raw = test.dataset)
 
 exec <- ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE)
 objCOTAN <- proceedToCoex(objCOTAN, calcCoex = TRUE,
-                          executionOptions = exec, saveObj = FALSE)
+                          executionOptions = exec,
+                          cleaningOptions = cleanOpt, saveObj = FALSE)
 
 data("test.dataset.clusters1")
 clusters <- test.dataset.clusters1
