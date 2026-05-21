@@ -190,9 +190,17 @@ setClass(
       return("`genesSel` must be a non-missing character vector")
     }
 
+    if (length(object@genesSel) > 1L &&
+        any(sapply(object@genesSel, isEmptyName))) {
+      return(paste(
+        "`genesSel` can be an explicit vector of gene names,",
+        "but in that case all names must be non-empty strings"
+      ))
+    }
+
     if (length(object@numGenes) != 1L || is.na(object@numGenes) ||
         (isFALSE(object@useCoexEigen) && object@numGenes < 1L)) {
-      return("`numGenes` must be a non-negative positive integer scalar")
+      return("`numGenes` must be a positive integer scalar")
     }
 
     return(TRUE)

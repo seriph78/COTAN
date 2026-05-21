@@ -237,14 +237,29 @@ test_that("Clusters plots", {
     regexp = "No shared levels"
   )
 
-  cupd2 <- cellsUMAPPlot(obj, dataMethod = "AdjBinarized",  clName = "batch",
-                         useCoexEigen = FALSE, numComp = 5L,
-                         genesSel = "HGDI", numGenes = 100)
+  reductionOptions <- ReductionOptions(
+    useCoexEigen = FALSE,
+    dataMethod = "AdjBinarized",
+    numComp = 5L,
+    genesSel = "HGDI",
+    numGenes = 100L
+  )
+
+  cupd2 <- cellsUMAPPlot(obj, clName = "batch",
+                         reductionOptions = reductionOptions)
+
   expect_identical(names(cupd2), c("plot", "cellsRDM"))
   expect_identical(dim(cupd2[["cellsRDM"]]), c(getNumCells(obj), 5L))
   expect_warning(
     plot(cupd2[["plot"]]),
     regexp = "No shared levels"
+  )
+
+  expect_error(
+    cellsUMAPPlot(obj, clName = "batch",
+                  genesSel = "HGDI",
+                  reductionOptions = reductionOptions),
+    "Do not mix `reductionOptions`"
   )
 })
 
