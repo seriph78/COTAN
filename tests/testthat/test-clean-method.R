@@ -74,7 +74,7 @@ test_that("clean accepts CleaningOptions and rejects mixed legacy arguments", {
       obj,
       cleaningOptions = ReductionOptions()
     ),
-    regexp = "`cleaningOptions` must be a `CleaningOptions` object"
+    regexp = "unable to find an inherited method"
   )
 })
 

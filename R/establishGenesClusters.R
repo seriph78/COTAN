@@ -48,6 +48,7 @@ NULL
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
 #' exec <- ExecutionOptions(cores = 6L, chunkSize = 1024L)
+#' cleanOpt <- CleaningOptions()
 #' objCOTAN <- proceedToCoex(objCOTAN, saveObj = FALSE,
 #'                           executionOptions = exec,
 #'                           cleaningOptions = cleanOpt)
