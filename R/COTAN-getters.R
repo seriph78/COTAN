@@ -897,8 +897,7 @@ NULL
 #' @param genes The given genes' names to select the wanted `COEX` columns. If
 #'   missing all columns will be returned. When not empty a proper result is
 #'   provided by calculating the partial `COEX` matrix on the fly
-#' @param zeroDiagonal When TRUE the `COEX` of any element with itself is set to
-#'   zero
+#' @param zeroDiagonal When `TRUE`, set the diagonal to zero.
 #' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
 #'   have been updated since the `COEX` matrix was calculated.
 #'
@@ -1044,7 +1043,7 @@ setMethod(
 #' @param cells The given cells' names to select the wanted `COEX` columns. If
 #'   missing all columns will be returned. When not empty a proper result is
 #'   provided by calculating the partial `COEX` matrix on the fly
-#' @param zeroDiagonal When `TRUE` sets the diagonal to zero.
+#' @param zeroDiagonal When `TRUE`, set the diagonal to zero.
 #' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
 #'   have been updated since the `COEX` matrix was calculated.
 #'
@@ -1205,9 +1204,11 @@ setMethod(
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
 #' exec <- ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE)
+#' cleanOpt <- CleaningOptions()
 #' objCOTAN <- proceedToCoex(objCOTAN, calcCoex = TRUE,
 #'                           executionOptions = exec,
-#'                           cleaningOptions = cleanOpt, saveObj = FALSE)
+#'                           cleaningOptions = cleanOpt,
+#'                           saveObj = FALSE)
 #'
 #' data("test.dataset.clusters1")
 #' clusters <- test.dataset.clusters1

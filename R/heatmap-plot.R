@@ -14,7 +14,7 @@ NULL
 #'   genes in the columns
 #' @param sets A numeric array indicating which fields in the previous `list`
 #'   should be used. Defaults to all fields
-#' @param pValueThreshold The p-value threshold. Default is 0.01
+#' @param pValueThreshold The \eqn{p}-value threshold. Default is \eqn{0.01}
 #' @param cores number of cores to use. Default is 1.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
@@ -341,7 +341,7 @@ heatmapPlot <- function(objCOTAN = NULL,
 #' @param objCOTAN a `COTAN` object
 #' @param primaryMarkers A set of genes plotted as rows
 #' @param secondaryMarkers A set of genes plotted as columns
-#' @param pValueThreshold The p-value threshold. Default is 0.01
+#' @param pValueThreshold The \eqn{p}-value threshold. Default is \eqn{0.01}
 #' @param symmetric A Boolean: default `TRUE`. When `TRUE` the union of
 #'   `primaryMarkers` and `secondaryMarkers` is used for both rows and column
 #'   genes

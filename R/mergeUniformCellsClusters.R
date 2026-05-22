@@ -21,8 +21,8 @@
 #'   *increasing* thresholds to discriminate whether to merge two *clusters* if
 #'   deemed *uniform transcript*. See [UniformTranscriptCheckers] for more
 #'   details
-#' @param GDIThreshold legacy. The threshold level that is used in a
-#'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.43}
+#' @param GDIThreshold Threshold value used by uniformity-related GDI checks or
+#'   plots. See the function usage for the exact default.
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
 #' @param cores number of cores to use. Default is 1.
@@ -39,8 +39,8 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
-#'   defined by the [stats::hclust()] function.
+#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
+#'   function usage for the default.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
 #'   built.

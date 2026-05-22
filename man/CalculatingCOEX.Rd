@@ -174,7 +174,7 @@ calculateReducedDataMatrix(
 missing all columns will be returned. When not empty a proper result is
 provided by calculating the partial \code{COEX} matrix on the fly}
 
-\item{zeroDiagonal}{When \code{TRUE} sets the diagonal to zero.}
+\item{zeroDiagonal}{When \code{TRUE}, set the diagonal to zero.}
 
 \item{ignoreSync}{When \code{TRUE} ignores whether the \code{lambda}/\code{nu}/\code{dispersion}
 have been updated since the \code{COEX} matrix was calculated.}
@@ -237,7 +237,9 @@ returned}
 \item{zeroOne}{the raw count matrix projected to \code{0} or \code{1}. If not given the
 appropriate one will be calculated on the fly}
 
-\item{optimizeForSpeed}{Boolean; deprecated: always TRUE}
+\item{optimizeForSpeed}{Legacy execution scalar. In \code{calculateCoex()} it is
+converted into an \code{ExecutionOptions} object; in lower-level COEX helpers it
+is deprecated and always treated as \code{TRUE}}
 
 \item{probZero}{is the expected \strong{probability of zero} for each gene/cell
 pair. If not given the appropriate one will be calculated on the fly}

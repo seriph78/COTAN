@@ -78,8 +78,8 @@ calculatePDI(
 
 \item{primaryMarkers}{A vector of primary marker names.}
 
-\item{numGenesPerMarker}{the number of correlated genes to keep as other
-markers (default 25)}
+\item{numGenesPerMarker}{Number of correlated genes to keep for each
+primary marker. Defaults to 25.}
 
 \item{groupMarkers}{a named \code{list} with an element for each group comprised
 of one or more marker genes}
@@ -112,9 +112,8 @@ symmetric matrix}
 \item{numDegreesOfFreedom}{a \code{int} that determines the number of degree of
 freedom to use in the \eqn{\chi^{2}} test}
 
-\item{statType}{Which statistics to use to compute the p-values. By default
-it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
-(G-test)}
+\item{statType}{Statistic used to compute p-values. Use \code{"S"} for
+Pearson's \eqn{\chi^{2}} test or \code{"G"} for the G-test.}
 
 \item{geneSubsetCol}{an array of genes. It will be put in columns. If left
 empty the function will do it genome-wide.}

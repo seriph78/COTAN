@@ -197,9 +197,9 @@ getDataMatrix <- function(objCOTAN,
 #'   of the contingency table
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param actOnCells Boolean - when `TRUE` the function works for the cells,
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param asDspMatrices Boolean - when `TRUE` the function will return only
+#' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
 #'
 #' @returns `observedContingencyTablesYY()` returns a `list` with:
@@ -259,9 +259,9 @@ observedContingencyTablesYY <- function(objCOTAN,
 #'   returned
 #' @param zeroOne the raw count matrix projected to `0` or `1`. If not given the
 #'   appropriate one will be calculated on the fly
-#' @param actOnCells Boolean - when `TRUE` the function works for the cells,
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param asDspMatrices Boolean - when `TRUE` the function will return only
+#' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
 #'
 #' @returns `observedPartialContingencyTablesYY()` returns a `list` with:
@@ -529,7 +529,9 @@ observedPartialContingencyTables <-
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @returns `expectedContingencyTablesNN()` returns a `list` with:
 #'   * `expectedNN` the *No/No* expected contingency table as `matrix`
@@ -601,7 +603,9 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @returns `expectedPartialContingencyTablesNN()` returns a `list` with:
 #'   * `expectedNN` the *No/No* expected contingency table as `matrix`,
@@ -683,7 +687,9 @@ expectedPartialContingencyTablesNN <-
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @return `expectedContingencyTables()` returns the expected contingency tables
 #'   as named `list` with elements:
@@ -798,7 +804,9 @@ expectedContingencyTables <- function(objCOTAN,
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @return `expectedPartialContingencyTables()` returns the expected contingency
 #'   tables, restricted to the selected columns, as named `list` with elements:
@@ -1362,9 +1370,9 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #' @param returnPPFract Boolean; when `TRUE` the function returns the fraction
 #'   of genes/cells pairs for which the *expected contingency table* is smaller
 #'   than \eqn{0.5}. Default is FALSE
-#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
-#'   library to run the matrix calculations. Otherwise, or when the library is
-#'   not available will run the slower legacy code
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #' @param deviceStr On the `torch` library enforces which device to use to run
 #'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
@@ -1461,7 +1469,9 @@ setMethod(
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @returns `calculatePartialCoex()` returns the asked section of the `COEX`
 #'   matrix

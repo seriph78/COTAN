@@ -192,8 +192,8 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #'   needed calculates and stores the `DEA` of the relevant *clusterization*.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param kCuts the number of estimated *cluster* (this defines the height for
-#'   the tree cut)
+#' @param kCuts Number of estimated clusters used to cut the dendrogram and,
+#'   where applicable, define associated colors.
 #' @param clName The name of the *clusterization*. If not given the last
 #'   available *clusterization* will be returned, as it is probably the most
 #'   significant!
@@ -206,8 +206,8 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param hclustMethod default is "ward.D2" but can be any method defined by
-#'   [stats::hclust()] function
+#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
+#'   function usage for the default.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
 #'   built.

@@ -20,10 +20,10 @@ NULL
 #' @details `genesCoexSpace()` calculates genes groups based on the primary
 #'   markers and uses them to prepare the genes' `COEX` space `data.frame`.
 #'
-#' @param objCOTAN a `COTAN` object.
+#' @param objCOTAN a `COTAN` object
 #' @param primaryMarkers A vector of primary marker names.
-#' @param numGenesPerMarker The number of genes correlated with the primary
-#'   markers that we want to consider. By default this is set to 25.
+#' @param numGenesPerMarker Number of correlated genes to keep for each
+#'   primary marker. Defaults to 25.
 #'
 #' @returns `genesCoexSpace()` returns a `list` with:
 #'  * `"SecondaryMarkers"` a named `list` that for each secondary marker,
@@ -142,8 +142,8 @@ genesCoexSpace <-
 #' @param objCOTAN a `COTAN` object
 #' @param groupMarkers a named `list` with an element for each group comprised
 #'   of one or more marker genes
-#' @param numGenesPerMarker the number of correlated genes to keep as other
-#'   markers (default 25)
+#' @param numGenesPerMarker Number of correlated genes to keep for each
+#'   primary marker. Defaults to 25.
 #' @param kCuts the number of estimated *cluster* (this defines the height for
 #'   the tree cut)
 #' @param distance type of distance to use. Default is `"cosine"`. Can be chosen

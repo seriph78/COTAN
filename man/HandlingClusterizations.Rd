@@ -205,9 +205,8 @@ data losses}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
-\item{adjustmentMethod}{\emph{p-value} multi-test adjustment method, see
-\code{\link[stats:p.adjust.methods]{stats::p.adjust.methods()}}. Defaults to \code{"bonferroni"}; use \code{"none"} for
-no adjustment}
+\item{adjustmentMethod}{Method passed to \code{\link[stats:p.adjust]{stats::p.adjust()}} for multi-test
+p-value adjustment. See the function usage for the default.}
 
 \item{floorLambdaFraction}{Indicates the lower bound to the average count
 sums inside or outside the cluster for each gene as fraction of the
@@ -263,8 +262,8 @@ reduction controls. This is the preferred interface for new code.}
 \item{groupMarkers}{an optional named \code{list} with an element for each group
 comprised of one or more marker genes}
 
-\item{kCuts}{the number of estimated \emph{cluster} (this defines the height for
-the tree cut)}
+\item{kCuts}{Number of estimated clusters used to cut the dendrogram and,
+where applicable, define associated colors.}
 
 \item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
 distances between clusters are computed and how the hierarchical tree is
@@ -287,8 +286,8 @@ column name in the returned \code{data.frame}}
 
 \item{plotTitle}{The title to use for the returned plot}
 
-\item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
-defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
+\item{hclustMethod}{Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}. See
+function usage for the default.}
 
 \item{n}{the number of extreme \code{COEX} values to return}
 
@@ -536,9 +535,11 @@ data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
 
 exec <- ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE)
+cleanOpt <- CleaningOptions()
 objCOTAN <- proceedToCoex(objCOTAN, calcCoex = TRUE,
                           executionOptions = exec,
-                          cleaningOptions = cleanOpt, saveObj = FALSE)
+                          cleaningOptions = cleanOpt,
+                          saveObj = FALSE)
 
 data("test.dataset.clusters1")
 clusters <- test.dataset.clusters1

@@ -19,8 +19,8 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
-#'   defined by the [stats::hclust()] function.
+#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
+#'   function usage for the default.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
 #'   built.

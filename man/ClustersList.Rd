@@ -30,7 +30,8 @@ mergeClusters(clusters, names, mergedName = "")
 multiMergeClusters(clusters, namesList, mergedNames = NULL)
 }
 \arguments{
-\item{clusters}{A named \code{vector} or \code{factor} that defines the \emph{clusters}}
+\item{clusters}{A named \code{vector}, \code{factor}, or \code{data.frame} that defines
+the \emph{clusters}.}
 
 \item{allCells}{A \code{vector} of cells' names that should list the same names in
 the \code{clusters} in any order}

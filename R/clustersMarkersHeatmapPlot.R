@@ -20,13 +20,13 @@
 #'   the relevant column name in the returned `data.frame`
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
-#' @param kCuts the number of estimated *cluster* (this defines the height for
-#'   the tree cut and the associated colors)
+#' @param kCuts Number of estimated clusters used to cut the dendrogram and,
+#'   where applicable, define associated colors.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
 #'   built.
-#' @param adjustmentMethod *p-value* multi-test adjustment method. Defaults to
-#'   `"bonferroni"`; use `"none"` for no adjustment
+#' @param adjustmentMethod Method passed to [stats::p.adjust()] for multi-test
+#'   p-value adjustment. See the function usage for the default.
 #' @param condNameList a `list` of *conditions*' names to be used for additional
 #'   columns in the final plot. When none are given no new columns will be added
 #'   using data extracted via the function [clustersSummaryData()]

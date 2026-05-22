@@ -19,11 +19,11 @@
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
 #' @param saveObj Boolean flag; when `TRUE` saves intermediate analyses and
-#'   plots to file(s)
+#'   plots to file
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
-#' @param executionOptions An `ExecutionOptions` object bundling the execution
-#'   controls. This is the preferred interface for new code.
+#' @param executionOptions optional `ExecutionOptions` object collecting
+#'   execution-related parameters.
 #'
 #' @returns `checkClusterUniformity` returns a checker object of the same type
 #'   as the input one, that contains both threshold and results of the check:

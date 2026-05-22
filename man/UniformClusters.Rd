@@ -90,8 +90,8 @@ only for the title).}
 \item{statType}{type of statistic to be used. Default is "S": Pearson's
 chi-squared test statistics. "G" is G-test statistics}
 
-\item{GDIThreshold}{legacy. The threshold level that is used in a
-\link[=SimpleGDIUniformityCheck-class]{SimpleGDIUniformityCheck}. It defaults to \eqn{1.43}}
+\item{GDIThreshold}{Threshold value used by uniformity-related GDI checks or
+plots. See the function usage for the exact default.}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
@@ -126,8 +126,8 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
-\item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
-defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
+\item{hclustMethod}{Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}. See
+function usage for the default.}
 
 \item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
 distances between clusters are computed and how the hierarchical tree is

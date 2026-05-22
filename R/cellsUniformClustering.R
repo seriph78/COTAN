@@ -168,8 +168,8 @@ seuratClustering <- function(objCOTAN,
 #' @param checker the object that defines the method and the threshold to
 #'   discriminate whether a *cluster* is *uniform transcript*. See
 #'   [UniformTranscriptCheckers] for more details
-#' @param GDIThreshold legacy. The threshold level that is used in a
-#'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.40}
+#' @param GDIThreshold Threshold value used by uniformity-related GDI checks or
+#'   plots. See the function usage for the exact default.
 #' @param initialResolution a number indicating how refined are the clusters
 #'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
 #'   [Seurat::FindClusters()]
@@ -185,12 +185,12 @@ seuratClustering <- function(objCOTAN,
 #'   to a specific device
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
-#'   faster but less precise
+#'   faster but less precise.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
-#'   defined by the [stats::hclust()] function.
+#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
+#'   function usage for the default.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
 #'   built.
