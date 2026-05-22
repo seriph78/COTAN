@@ -658,7 +658,6 @@ getNuNormData <- function(objCOTAN) {
 #'   and returns it.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param retLog When `TRUE` returns
 #'
 #' @returns `getLogNormData()` returns a `data.frame` after applying the formula
 #'   \eqn{\log_{10}{(10^4 * x + 1)}} to the raw counts normalized by
@@ -684,7 +683,8 @@ getLogNormData <- function(objCOTAN) {
 #'   [getLogNormData()] directly as appropriate
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param retLog When `TRUE` calls [getLogNormData()], calls [getNuNormData()]
+#' @param retLog When `TRUE`, return [getLogNormData()]; otherwise return
+#'   [getNuNormData()].
 #'
 #' @returns `getNormalizedData()` returns a `data.frame`
 #'

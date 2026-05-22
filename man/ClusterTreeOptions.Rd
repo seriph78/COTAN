@@ -9,20 +9,28 @@
 ClusterTreeOptions(useDEA = TRUE, distance = "", hclustMethod = "ward.D2")
 }
 \arguments{
-\item{useDEA}{Whether to use DEA profiles to calculate cluster distances.}
+\item{useDEA}{Whether to calculate distances from DEA profiles. Inherited
+from \code{ClusterDistanceOptions}; see \code{\link[=distancesBetweenClusters]{distancesBetweenClusters()}}.}
 
-\item{distance}{Distance method passed to \code{\link[parallelDist:parDist]{parallelDist::parDist()}}. Use
-the empty string to keep the function-level default.}
+\item{distance}{Distance method passed to \code{\link[parallelDist:parDist]{parallelDist::parDist()}}. Use \code{""}
+to keep the COTAN function-level default. Inherited from
+\code{ClusterDistanceOptions}; see \code{\link[=distancesBetweenClusters]{distancesBetweenClusters()}}.}
 
-\item{hclustMethod}{Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}.}
+\item{hclustMethod}{Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}. See
+\code{\link[stats:hclust]{stats::hclust()}} for accepted values such as \code{"ward.D2"}, \code{"complete"},
+\code{"average"}, and \code{"single"}.}
 }
 \value{
 An object of class \code{ClusterTreeOptions}
 }
 \description{
-Parameter object bundling the policy used to calculate
-distances between cell clusters and to build the corresponding hierarchical
-tree.
+Parameter object bundling cell-cluster distance policy together
+with hierarchical-tree construction policy. It extends
+\code{ClusterDistanceOptions}, so it also carries \code{useDEA} and \code{distance}.
+}
+\details{
+Inherited slots \code{useDEA} and \code{distance} have the same meaning as in
+\code{\link[=ClusterDistanceOptions]{ClusterDistanceOptions()}}.
 }
 \section{Slots}{
 
@@ -40,4 +48,8 @@ tree.
     hclustMethod = "ward.D2"
   )
 
+}
+\seealso{
+\code{\link[=ClusterDistanceOptions]{ClusterDistanceOptions()}}, \code{\link[=distancesBetweenClusters]{distancesBetweenClusters()}},
+\code{\link[=reorderClusterization]{reorderClusterization()}}, \code{\link[=clustersTreePlot]{clustersTreePlot()}}, \code{\link[stats:hclust]{stats::hclust()}}
 }

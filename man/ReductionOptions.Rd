@@ -16,16 +16,23 @@ ReductionOptions(
 }
 \arguments{
 \item{useCoexEigen}{Whether to use the first COEX eigenvectors instead of PCA
-on a selected gene matrix.}
+on a selected gene matrix. See \code{\link[=calculateReducedDataMatrix]{calculateReducedDataMatrix()}} for the exact
+reduction path.}
 
-\item{dataMethod}{Data matrix method to use.}
+\item{dataMethod}{Data matrix method passed to \code{\link[=getDataMatrix]{getDataMatrix()}}. See
+\code{\link[=getDataMatrix]{getDataMatrix()}} for accepted aliases such as \code{"LogNormalized"} and
+\code{"LogLikelihood"}.}
 
-\item{numComp}{Number of reduced components to calculate.}
+\item{numComp}{Number of reduced components to calculate. See
+\code{\link[=calculateReducedDataMatrix]{calculateReducedDataMatrix()}} for how this is interpreted by the
+COEX-eigen and PCA branches.}
 
-\item{genesSel}{Gene-selection method or explicit gene list.}
+\item{genesSel}{Gene-selection method or explicit gene vector passed to
+\code{\link[=getSelectedGenes]{getSelectedGenes()}}. See \code{\link[=getSelectedGenes]{getSelectedGenes()}} for accepted selector names
+such as \code{"HGDI"}, \code{"HVG_Seurat"}, and \code{"HVG_Scanpy"}.}
 
-\item{numGenes}{Number of genes to select when \code{genesSel} names a selection
-method.}
+\item{numGenes}{Number of genes to select when \code{genesSel} names a selector
+method. Ignored when \code{genesSel} is an explicit vector of gene names.}
 }
 \value{
 An object of class \code{ReductionOptions}
@@ -44,14 +51,13 @@ outside this class.
 \item{\code{useCoexEigen}}{Logical scalar. Whether to use the first COEX
 eigen-vectors instead of PCA on a selected gene matrix.}
 
-\item{\code{dataMethod}}{Character scalar. Data matrix method to use. Empty string is
-allowed during the compatibility phase and is resolved by the owning public
-function.}
+\item{\code{dataMethod}}{Character scalar. Data matrix method passed to
+\code{\link[=getDataMatrix]{getDataMatrix()}}.}
 
 \item{\code{numComp}}{Integer scalar. Number of reduced components to calculate.}
 
-\item{\code{genesSel}}{Character vector. Gene-selection method or explicit gene list.
-Empty string is usually allowed as default.}
+\item{\code{genesSel}}{Character vector. Selector name or explicit gene list passed
+to \code{\link[=getSelectedGenes]{getSelectedGenes()}}. Empty string is usually allowed as default.}
 
 \item{\code{numGenes}}{Integer scalar. Number of genes to select when \code{genesSel}
 names a selection method.}
@@ -68,4 +74,8 @@ names a selection method.}
     numGenes = 2000L
   )
 
+}
+\seealso{
+\code{\link[=calculateReducedDataMatrix]{calculateReducedDataMatrix()}}, \code{\link[=getDataMatrix]{getDataMatrix()}},
+\code{\link[=getSelectedGenes]{getSelectedGenes()}}, \code{\link[=cellsUMAPPlot]{cellsUMAPPlot()}}, \code{\link[=cellsUniformClustering]{cellsUniformClustering()}}
 }

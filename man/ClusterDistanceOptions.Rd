@@ -9,10 +9,13 @@
 ClusterDistanceOptions(useDEA = TRUE, distance = "")
 }
 \arguments{
-\item{useDEA}{Whether to use DEA profiles to calculate cluster distances.}
+\item{useDEA}{Whether to calculate distances from DEA profiles. When \code{FALSE},
+distances are calculated from average Zero-One counts. See
+\code{\link[=distancesBetweenClusters]{distancesBetweenClusters()}}.}
 
-\item{distance}{Distance method passed to \code{\link[parallelDist:parDist]{parallelDist::parDist()}}. Use
-the empty string to keep the function-level default.}
+\item{distance}{Distance method passed to \code{\link[parallelDist:parDist]{parallelDist::parDist()}}. Use the
+empty string \code{""} to keep the \strong{COTAN} function-level default: \code{"cosine"}
+when \code{useDEA = TRUE}, \code{"euclidean"} when \code{useDEA = FALSE}.}
 }
 \value{
 An object of class \code{ClusterDistanceOptions}
@@ -29,9 +32,8 @@ distances between clusters. When \code{FALSE}, distances are calculated from
 average Zero-One counts.}
 
 \item{\code{distance}}{Character scalar. Distance method passed to
-\code{\link[parallelDist:parDist]{parallelDist::parDist()}}. The empty string keeps the function-level
-default: \code{"cosine"} for DEA distances and \code{"euclidean"} for Zero-One
-distances.}
+\code{\link[parallelDist:parDist]{parallelDist::parDist()}}, or \code{""} for the COTAN default selected by
+\code{\link[=distancesBetweenClusters]{distancesBetweenClusters()}}.}
 }}
 
 \examples{
@@ -42,4 +44,7 @@ distances.}
     distance = "euclidean"
   )
 
+}
+\seealso{
+\code{\link[=distancesBetweenClusters]{distancesBetweenClusters()}}, \code{\link[parallelDist:parDist]{parallelDist::parDist()}}
 }

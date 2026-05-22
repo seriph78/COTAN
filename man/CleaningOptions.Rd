@@ -15,21 +15,24 @@ CleaningOptions(
 }
 \arguments{
 \item{cellsCutoff}{Fraction of cells used as the low-expression cutoff for
-genes.}
+genes. Consumed by \code{\link[=clean]{clean()}}.}
 
 \item{genesCutoff}{Fraction of genes used as the low-expression cutoff for
-cells.}
+cells. Consumed by \code{\link[=clean]{clean()}}.}
 
-\item{cellsThreshold}{Fraction of cells used to mark fully-expressed genes.}
+\item{cellsThreshold}{Fraction of cells used to mark fully-expressed genes.
+Consumed by \code{\link[=clean]{clean()}} and related fully-expressed-gene utilities.}
 
-\item{genesThreshold}{Fraction of genes used to mark fully-expressing cells.}
+\item{genesThreshold}{Fraction of genes used to mark fully-expressing cells.
+Consumed by \code{\link[=clean]{clean()}} and related fully-expressing-cell utilities.}
 }
 \value{
 An object of class \code{CleaningOptions}
 }
 \description{
-Parameter object bundling the thresholds used to clean a
-\code{COTAN} object before the model-parameter and COEX estimation steps.
+Parameter object bundling the thresholds used by \code{\link[=clean]{clean()}}:
+low-expression cutoffs used to drop genes/cells and high-expression
+thresholds used to mark fully-expressed genes or fully-expressing cells.
 }
 \section{Slots}{
 
@@ -57,4 +60,7 @@ of genes are marked as fully-expressing.}
     genesThreshold = 0.98
   )
 
+}
+\seealso{
+\code{\link[=clean]{clean()}}, \code{\link[=findFullyExpressedGenes]{findFullyExpressedGenes()}}, \code{\link[=findFullyExpressingCells]{findFullyExpressingCells()}}
 }

@@ -14,13 +14,20 @@ ExecutionOptions(
 )
 }
 \arguments{
-\item{cores}{Requested number of CPU cores}
+\item{cores}{Requested number of CPU cores. The effective value is bounded by
+\code{\link[=handleMultiCore]{handleMultiCore()}}, using the current session capabilities reported by
+\pkg{parallelly}.}
 
-\item{optimizeForSpeed}{Whether to try \code{torch} acceleration}
+\item{optimizeForSpeed}{Whether to try accelerated computation through
+\pkg{torch}. See \code{\link[=canUseTorch]{canUseTorch()}} for the runtime checks and fallback rules.}
 
-\item{deviceStr}{Requested \code{torch} device string}
+\item{deviceStr}{Requested \pkg{torch} device string, for example \code{"cpu"},
+\code{"cuda"}, or \code{"cuda:0"}. See \code{\link[=canUseTorch]{canUseTorch()}} for fallback behavior when
+the requested device is unavailable.}
 
-\item{chunkSize}{Integer scalar. Requested solver batch size.}
+\item{chunkSize}{Integer scalar controlling solver batching where supported,
+in particular dispersion / p-value solver paths such as
+\code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}}.}
 }
 \value{
 An object of class \code{ExecutionOptions}
@@ -33,13 +40,17 @@ options. Some fields are only used by specific functions.
 \section{Slots}{
 
 \describe{
-\item{\code{cores}}{Integer scalar. Requested number of CPU cores.}
+\item{\code{cores}}{Integer scalar. Requested CPU core count; resolved by
+\code{\link[=handleMultiCore]{handleMultiCore()}}.}
 
-\item{\code{optimizeForSpeed}}{Logical scalar. Whether to try \code{torch} acceleration.}
+\item{\code{optimizeForSpeed}}{Logical scalar. Whether to try \pkg{torch}
+acceleration; resolved by \code{\link[=canUseTorch]{canUseTorch()}}.}
 
-\item{\code{deviceStr}}{Character scalar. Requested \code{torch} device string.}
+\item{\code{deviceStr}}{Character scalar. Requested \pkg{torch} device string;
+resolved by \code{\link[=canUseTorch]{canUseTorch()}}.}
 
-\item{\code{chunkSize}}{Integer scalar. Requested solver batch size.}
+\item{\code{chunkSize}}{Integer scalar. Solver batch size for solver paths that
+support batching.}
 }}
 
 \examples{
@@ -50,4 +61,8 @@ options. Some fields are only used by specific functions.
     chunkSize = 1024L
   )
 
+}
+\seealso{
+\code{\link[=handleMultiCore]{handleMultiCore()}}, \code{\link[=canUseTorch]{canUseTorch()}}, \code{\link[=calculateCoex]{calculateCoex()}},
+\code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}}
 }

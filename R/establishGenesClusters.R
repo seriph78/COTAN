@@ -53,9 +53,9 @@ NULL
 #'                           executionOptions = exec,
 #'                           cleaningOptions = cleanOpt)
 #'
-#' markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10)]
+#' markers <- getGenes(objCOTAN)[sample(getNumGenes(objCOTAN), 10L)]
 #' gCS <- genesCoexSpace(objCOTAN, primaryMarkers = markers,
-#'                       numGenesPerMarker = 15)
+#'                       numGenesPerMarker = 15L)
 #'
 #' @rdname GenesStatistics
 #'

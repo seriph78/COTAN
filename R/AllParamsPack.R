@@ -6,10 +6,14 @@
 #' such as multi-core usage, `torch` device selection, and solver batching
 #' options. Some fields are only used by specific functions.
 #'
-#' @slot cores Integer scalar. Requested number of CPU cores.
-#' @slot optimizeForSpeed Logical scalar. Whether to try `torch` acceleration.
-#' @slot deviceStr Character scalar. Requested `torch` device string.
-#' @slot chunkSize Integer scalar. Requested solver batch size.
+#' @slot cores Integer scalar. Requested CPU core count; resolved by
+#'   [handleMultiCore()].
+#' @slot optimizeForSpeed Logical scalar. Whether to try \pkg{torch}
+#'   acceleration; resolved by [canUseTorch()].
+#' @slot deviceStr Character scalar. Requested \pkg{torch} device string;
+#'   resolved by [canUseTorch()].
+#' @slot chunkSize Integer scalar. Solver batch size for solver paths that
+#'   support batching.
 #'
 #' @name ExecutionOptions-class
 #'
@@ -57,12 +61,22 @@ setClass(
 
 #' @title Build execution options
 #'
-#' @param cores Requested number of CPU cores
-#' @param optimizeForSpeed Whether to try `torch` acceleration
-#' @param deviceStr Requested `torch` device string
-#' @param chunkSize Integer scalar. Requested solver batch size.
+#' @param cores Requested number of CPU cores. The effective value is bounded by
+#'   [handleMultiCore()], using the current session capabilities reported by
+#'   \pkg{parallelly}.
+#' @param optimizeForSpeed Whether to try accelerated computation through
+#'   \pkg{torch}. See [canUseTorch()] for the runtime checks and fallback rules.
+#' @param deviceStr Requested \pkg{torch} device string, for example `"cpu"`,
+#'   `"cuda"`, or `"cuda:0"`. See [canUseTorch()] for fallback behavior when
+#'   the requested device is unavailable.
+#' @param chunkSize Integer scalar controlling solver batching where supported,
+#'   in particular dispersion / p-value solver paths such as
+#'   [estimateDispersionViaSolver()].
 #'
 #' @returns An object of class `ExecutionOptions`
+#'
+#' @seealso [handleMultiCore()], [canUseTorch()], [calculateCoex()],
+#'   [estimateDispersionViaSolver()]
 #'
 #' @export
 #'
@@ -139,12 +153,11 @@ resolveExecutionOptions <- function(executionOptions) {
 #'
 #' @slot useCoexEigen Logical scalar. Whether to use the first COEX
 #'   eigen-vectors instead of PCA on a selected gene matrix.
-#' @slot dataMethod Character scalar. Data matrix method to use. Empty string is
-#'   allowed during the compatibility phase and is resolved by the owning public
-#'   function.
+#' @slot dataMethod Character scalar. Data matrix method passed to
+#'   [getDataMatrix()].
 #' @slot numComp Integer scalar. Number of reduced components to calculate.
-#' @slot genesSel Character vector. Gene-selection method or explicit gene list.
-#'   Empty string is usually allowed as default.
+#' @slot genesSel Character vector. Selector name or explicit gene list passed
+#'   to [getSelectedGenes()]. Empty string is usually allowed as default.
 #' @slot numGenes Integer scalar. Number of genes to select when `genesSel`
 #'   names a selection method.
 #'
@@ -214,14 +227,24 @@ setClass(
 #' @title Build reduction options
 #'
 #' @param useCoexEigen Whether to use the first COEX eigenvectors instead of PCA
-#'   on a selected gene matrix.
-#' @param dataMethod Data matrix method to use.
-#' @param numComp Number of reduced components to calculate.
-#' @param genesSel Gene-selection method or explicit gene list.
-#' @param numGenes Number of genes to select when `genesSel` names a selection
-#'   method.
+#'   on a selected gene matrix. See [calculateReducedDataMatrix()] for the exact
+#'   reduction path.
+#' @param dataMethod Data matrix method passed to [getDataMatrix()]. See
+#'   [getDataMatrix()] for accepted aliases such as `"LogNormalized"` and
+#'   `"LogLikelihood"`.
+#' @param numComp Number of reduced components to calculate. See
+#'   [calculateReducedDataMatrix()] for how this is interpreted by the
+#'   COEX-eigen and PCA branches.
+#' @param genesSel Gene-selection method or explicit gene vector passed to
+#'   [getSelectedGenes()]. See [getSelectedGenes()] for accepted selector names
+#'   such as `"HGDI"`, `"HVG_Seurat"`, and `"HVG_Scanpy"`.
+#' @param numGenes Number of genes to select when `genesSel` names a selector
+#'   method. Ignored when `genesSel` is an explicit vector of gene names.
 #'
 #' @returns An object of class `ReductionOptions`
+#'
+#' @seealso [calculateReducedDataMatrix()], [getDataMatrix()],
+#'   [getSelectedGenes()], [cellsUMAPPlot()], [cellsUniformClustering()]
 #'
 #' @export
 #'
@@ -276,8 +299,9 @@ legacyReductionOptions <- function(useCoexEigen,
 
 #' @title Cleaning options
 #'
-#' @description Parameter object bundling the thresholds used to clean a
-#'   `COTAN` object before the model-parameter and COEX estimation steps.
+#' @description Parameter object bundling the thresholds used by [clean()]:
+#'   low-expression cutoffs used to drop genes/cells and high-expression
+#'   thresholds used to mark fully-expressed genes or fully-expressing cells.
 #'
 #' @slot cellsCutoff Numeric scalar. Genes expressed in at most this fraction
 #'   of cells are dropped.
@@ -327,13 +351,17 @@ setClass(
 #' @title Build cleaning options
 #'
 #' @param cellsCutoff Fraction of cells used as the low-expression cutoff for
-#'   genes.
+#'   genes. Consumed by [clean()].
 #' @param genesCutoff Fraction of genes used as the low-expression cutoff for
-#'   cells.
+#'   cells. Consumed by [clean()].
 #' @param cellsThreshold Fraction of cells used to mark fully-expressed genes.
+#'   Consumed by [clean()] and related fully-expressed-gene utilities.
 #' @param genesThreshold Fraction of genes used to mark fully-expressing cells.
+#'   Consumed by [clean()] and related fully-expressing-cell utilities.
 #'
 #' @returns An object of class `CleaningOptions`
+#'
+#' @seealso [clean()], [findFullyExpressedGenes()], [findFullyExpressingCells()]
 #'
 #' @export
 #'
@@ -410,7 +438,6 @@ resolveCleaningOptions <- function(cellsCutoff = 0.003,
 
 
 # ----------------- cluster distance options --------------------
-# ----------------- cluster distance options --------------------
 
 #' @title Cluster distance options
 #'
@@ -421,9 +448,8 @@ resolveCleaningOptions <- function(cellsCutoff = 0.003,
 #'   distances between clusters. When `FALSE`, distances are calculated from
 #'   average Zero-One counts.
 #' @slot distance Character scalar. Distance method passed to
-#'   [parallelDist::parDist()]. The empty string keeps the function-level
-#'   default: `"cosine"` for DEA distances and `"euclidean"` for Zero-One
-#'   distances.
+#'   [parallelDist::parDist()], or `""` for the COTAN default selected by
+#'   [distancesBetweenClusters()].
 #'
 #' @name ClusterDistanceOptions-class
 #'
@@ -456,11 +482,16 @@ setClass(
 
 #' @title Build cluster distance options
 #'
-#' @param useDEA Whether to use DEA profiles to calculate cluster distances.
-#' @param distance Distance method passed to [parallelDist::parDist()]. Use
-#'   the empty string to keep the function-level default.
+#' @param useDEA Whether to calculate distances from DEA profiles. When `FALSE`,
+#'   distances are calculated from average Zero-One counts. See
+#'   [distancesBetweenClusters()].
+#' @param distance Distance method passed to [parallelDist::parDist()]. Use the
+#'   empty string `""` to keep the **COTAN** function-level default: `"cosine"`
+#'   when `useDEA = TRUE`, `"euclidean"` when `useDEA = FALSE`.
 #'
 #' @returns An object of class `ClusterDistanceOptions`
+#'
+#' @seealso [distancesBetweenClusters()], [parallelDist::parDist()]
 #'
 #' @export
 #'
@@ -531,9 +562,12 @@ resolveClusterDistanceOptions <- function(useDEA = TRUE,
 
 #' @title Cluster tree options
 #'
-#' @description Parameter object bundling the policy used to calculate
-#'   distances between cell clusters and to build the corresponding hierarchical
-#'   tree.
+#' @description Parameter object bundling cell-cluster distance policy together
+#'   with hierarchical-tree construction policy. It extends
+#'   `ClusterDistanceOptions`, so it also carries `useDEA` and `distance`.
+#'
+#' @details Inherited slots `useDEA` and `distance` have the same meaning as in
+#'   [ClusterDistanceOptions()].
 #'
 #' @slot hclustMethod Character scalar. Clustering method passed to
 #'   [stats::hclust()].
@@ -566,12 +600,19 @@ setClass(
 
 #' @title Build cluster tree options
 #'
-#' @param useDEA Whether to use DEA profiles to calculate cluster distances.
-#' @param distance Distance method passed to [parallelDist::parDist()]. Use
-#'   the empty string to keep the function-level default.
-#' @param hclustMethod Clustering method passed to [stats::hclust()].
+#' @param useDEA Whether to calculate distances from DEA profiles. Inherited
+#'   from `ClusterDistanceOptions`; see [distancesBetweenClusters()].
+#' @param distance Distance method passed to [parallelDist::parDist()]. Use `""`
+#'   to keep the COTAN function-level default. Inherited from
+#'   `ClusterDistanceOptions`; see [distancesBetweenClusters()].
+#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
+#'   [stats::hclust()] for accepted values such as `"ward.D2"`, `"complete"`,
+#'   `"average"`, and `"single"`.
 #'
 #' @returns An object of class `ClusterTreeOptions`
+#'
+#' @seealso [ClusterDistanceOptions()], [distancesBetweenClusters()],
+#'   [reorderClusterization()], [clustersTreePlot()], [stats::hclust()]
 #'
 #' @export
 #'
