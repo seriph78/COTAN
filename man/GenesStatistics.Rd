@@ -122,7 +122,7 @@ empty the function will do it genome-wide.}
 the function will do it genome-wide.}
 }
 \value{
-\code{getGDI()} returns the genes' \verb{GDI`` array if available or }NULL`
+\code{getGDI()} returns the genes' \code{GDI} \code{array} if available or \code{NULL}
 otherwise
 
 \code{storeGDI()} returns the given \code{COTAN} object  with updated \code{GDI}

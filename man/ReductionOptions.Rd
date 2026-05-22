@@ -39,11 +39,11 @@ An object of class \code{ReductionOptions}
 }
 \description{
 A small parameter object bundling controls used to build the
-reduced data matrix used by clusterizations and UMAP plots.
+reduced data matrix used by clusterizations and \code{UMAP} plots.
 
 This object intentionally stores only dimensionality-reduction policy
-parameters. UMAP layout options and clustering-specific options should stay
-outside this class.
+parameters. \code{UMAP} layout options and clustering-specific options should
+stay outside this class.
 }
 \section{Slots}{
 

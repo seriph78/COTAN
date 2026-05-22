@@ -21,8 +21,8 @@
 #'   *increasing* thresholds to discriminate whether to merge two *clusters* if
 #'   deemed *uniform transcript*. See [UniformTranscriptCheckers] for more
 #'   details
-#' @param GDIThreshold Threshold value used by uniformity-related GDI checks or
-#'   plots. See the function usage for the exact default.
+#' @param GDIThreshold Threshold value used by uniformity-related `GDI` checks
+#'   or plots. See the function usage for the exact default.
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
 #' @param cores number of cores to use. Default is 1.

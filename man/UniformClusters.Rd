@@ -90,8 +90,8 @@ only for the title).}
 \item{statType}{type of statistic to be used. Default is "S": Pearson's
 chi-squared test statistics. "G" is G-test statistics}
 
-\item{GDIThreshold}{Threshold value used by uniformity-related GDI checks or
-plots. See the function usage for the exact default.}
+\item{GDIThreshold}{Threshold value used by uniformity-related \code{GDI} checks
+or plots. See the function usage for the exact default.}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}

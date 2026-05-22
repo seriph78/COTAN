@@ -168,8 +168,8 @@ seuratClustering <- function(objCOTAN,
 #' @param checker the object that defines the method and the threshold to
 #'   discriminate whether a *cluster* is *uniform transcript*. See
 #'   [UniformTranscriptCheckers] for more details
-#' @param GDIThreshold Threshold value used by uniformity-related GDI checks or
-#'   plots. See the function usage for the exact default.
+#' @param GDIThreshold Threshold value used by uniformity-related `GDI` checks
+#'   or plots. See the function usage for the exact default.
 #' @param initialResolution a number indicating how refined are the clusters
 #'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
 #'   [Seurat::FindClusters()]

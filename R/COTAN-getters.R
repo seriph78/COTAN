@@ -1151,7 +1151,7 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getGDI()` returns the genes' `GDI`` array if available or `NULL`
+#' @returns `getGDI()` returns the genes' `GDI` `array` if available or `NULL`
 #'   otherwise
 #'
 #' @importFrom rlang is_empty
