@@ -241,22 +241,35 @@ test_that("COTAN getters", {
   expect_identical(getSelectedGenes(obj, genesSel = c("C", "A", "D", "E", "B")),
                    LETTERS[1L:5L])
 
-  calcRDM <- function(objCOTAN, useCoexEigen, dataMethod,
-                      numComp, genesSel = "", numGenes = 2000L) {
-    return(suppressWarnings(
-      calculateReducedDataMatrix(objCOTAN = objCOTAN,
-                                 useCoexEigen = useCoexEigen,
-                                 dataMethod = dataMethod,
-                                 numComp = numComp,
-                                 genesSel = genesSel,
-                                 numGenes = numGenes)))
-  }
+  m0 <- abs(suppressWarnings(calculateReducedDataMatrix(
+    obj,
+    reductionOptions = ReductionOptions(
+      useCoexEigen = FALSE,
+      dataMethod = "LogNormalized",
+      numComp = 50L,
+      genesSel = "HGDI",
+      numGenes = 2000L
+    )
+  )))
 
-  expect_equal(suppressWarnings(abs(calculateReducedDataMatrix(obj))),
-               abs(calcRDM(obj, useCoexEigen = FALSE,
-                           dataMethod = "LogNormalized", numComp = 50L,
-                           genesSel = "HGDI", numGenes = 2000L)),
-               tolerance = 1.0e-12)
+  expect_equal(
+    m0,
+    abs(suppressWarnings(calculateReducedDataMatrix(obj))),
+    tolerance = 1.0e-12
+  )
+
+  expect_equal(
+    m0,
+    abs(suppressWarnings(calculateReducedDataMatrix(
+      obj,
+      useCoexEigen = FALSE,
+      dataMethod = "LogNormalized",
+      numComp = 50L,
+      genesSel = "HGDI",
+      numGenes = 2000L
+    ))),
+    tolerance = 1.0e-12
+  )
 
   m1 <- as.matrix(cbind(rep(2.756809750418045, times = 20L),
                         rep(0.0, times = 20L), rep(0.0, times = 20L),
@@ -264,15 +277,33 @@ test_that("COTAN getters", {
   colnames(m1) <- paste0("PC", 1L:5L)
   rownames(m1) <- letters[1L:20L]
 
-  expect_equal(abs(calcRDM(obj, useCoexEigen = FALSE,
-                           dataMethod = "AdjBinarized", numComp = 5L,
-                           genesSel = "HGDI", numGenes = 8L)),
-               m1, tolerance = 1.0e-12)
+  expect_equal(abs(suppressWarnings(
+    calculateReducedDataMatrix(
+      obj,
+      reductionOptions = ReductionOptions(
+        useCoexEigen = FALSE,
+        dataMethod = "AdjBinarized",
+        numComp = 5L,
+        genesSel = "HGDI",
+        numGenes = 8L
+      )
+    ))),
+    m1, tolerance = 1.0e-12)
 
-  expect_equal(abs(calcRDM(obj, useCoexEigen = FALSE,
-                           dataMethod = "LogLikelihood", numComp = 5L,
-                           genesSel = "HVG_Seurat", numGenes = 8L)),
-               m1, tolerance = 1.0e-12)
+  expect_equal(
+    abs(suppressWarnings(calculateReducedDataMatrix(
+      obj,
+      reductionOptions = ReductionOptions(
+        useCoexEigen = FALSE,
+        dataMethod = "LogLikelihood",
+        numComp = 5L,
+        genesSel = "HVG_Seurat",
+        numGenes = 8L
+      )
+    ))),
+    m1,
+    tolerance = 1.0e-12
+  )
 
   # nolint start: spaces_inside_linter
   m2 <- cbind(
@@ -282,9 +313,17 @@ test_that("COTAN getters", {
   colnames(m2) <- paste0("EC_", 1L:3L)
   rownames(m2) <- letters[1L:20L]
 
-  expect_equal(calcRDM(obj, useCoexEigen = TRUE,
-                       dataMethod = "BinDiscr", numComp = 5L)[, 1L:3L],
-               m2, tolerance = 5.0e-5)
+  expect_equal(
+    calculateReducedDataMatrix(
+      obj,
+      reductionOptions = ReductionOptions(
+        useCoexEigen = TRUE,
+        dataMethod = "BinDiscr",
+        numComp = 5L
+      ))[, 1L:3L],
+    m2,
+    tolerance = 5.0e-5
+  )
 
   m3 <- cbind(
     rep(c(-1.96537974590724,    1.96547022027574     ), times = 10L),
@@ -297,9 +336,18 @@ test_that("COTAN getters", {
       set_names(rep(c(3.020580325047483, 3.020462711979378), times = 10L),
                 letters[1L:20L])
   }
-  expect_equal(calcRDM(obj, useCoexEigen = TRUE,
-                       dataMethod = "DerLogL", numComp = 5L)[, 1L:3L],
-               m3, tolerance = 5.0e-4)
+  expect_equal(
+    calculateReducedDataMatrix(
+      obj,
+      reductionOptions = ReductionOptions(
+        useCoexEigen = TRUE,
+        dataMethod = "DerLogL",
+        numComp = 5L
+      ))[, 1L:3L],
+    m3,
+    tolerance = 5.0e-4
+  )
+
   # nolint end
 })
 

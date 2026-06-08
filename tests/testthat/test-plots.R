@@ -266,8 +266,16 @@ test_that("Clusters plots", {
   expect_identical(names(treePlot), c("dend", "objCOTAN"))
   expect_s3_class(treePlot[["dend"]], "dendrogram")
 
-  cupd1 <- cellsUMAPPlot(obj, dataMethod = "LogLikelihood", clName = "batch",
-                         useCoexEigen = TRUE, numComp = 5L)
+  cupd1 <- cellsUMAPPlot(
+    obj,
+    clName = "batch",
+    reductionOptions = ReductionOptions(
+      useCoexEigen = TRUE,
+      dataMethod = "LogLikelihood",
+      numComp = 5L
+    )
+  )
+
   expect_identical(names(cupd1), c("plot", "cellsRDM"))
   expect_identical(dim(cupd1[["cellsRDM"]]), c(getNumCells(obj), 5L))
   expect_warning(

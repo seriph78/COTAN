@@ -353,8 +353,8 @@ corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 \code{clustersMarkersHeatmapPlot()} returns a list with:
 \itemize{
 \item \code{"heatmapPlot"} the complete heatmap plot
-\item \code{"dataScore"} the \code{data.frame} with the score values
-\item \code{"pValueDF"}  the \code{data.frame} with the corresponding adjusted
+\item \code{"dataScore"}   the \code{data.frame} with the score values
+\item \code{"pValues"}     the \code{data.frame} with the corresponding adjusted
 \eqn{p-}values
 }
 

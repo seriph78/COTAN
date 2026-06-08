@@ -129,3 +129,24 @@ setMethod(
     return(.cleanImpl(objCOTAN = objCOTAN, cleaningOptions = cleaningOptions))
   }
 )
+
+
+#' @details Invalid non-missing `cleaningOptions` values are rejected
+#'   explicitly.
+#'
+#' @rdname RawDataCleaning
+#' @aliases clean,COTAN,ANY-method
+setMethod(
+  "clean",
+  signature(
+    objCOTAN = "COTAN",
+    cleaningOptions = "ANY"),
+  function(objCOTAN, cellsCutoff = 0.003, genesCutoff = 0.002,
+           cellsThreshold = 0.99, genesThreshold = 0.99,
+           cleaningOptions) {
+    assert_that(
+      methods::is(cleaningOptions, "CleaningOptions"),
+      msg = "`cleaningOptions` must be a `CleaningOptions` object"
+    )
+  }
+)

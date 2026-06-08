@@ -35,9 +35,9 @@
 #'
 #' @returns `clustersMarkersHeatmapPlot()` returns a list with:
 #'  * `"heatmapPlot"` the complete heatmap plot
-#'  * `"dataScore"` the `data.frame` with the score values
-#'  * `"pValueDF"`  the `data.frame` with the corresponding adjusted
-#'   \eqn{p-}values
+#'  * `"dataScore"`   the `data.frame` with the score values
+#'  * `"pValues"`     the `data.frame` with the corresponding adjusted
+#'    \eqn{p-}values
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names

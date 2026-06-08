@@ -28,6 +28,7 @@
 \alias{clean,COTAN,missing-method}
 \alias{clean}
 \alias{clean,COTAN,CleaningOptions-method}
+\alias{clean,COTAN,ANY-method}
 \alias{cleanPlots}
 \alias{screePlot}
 \alias{cellSizePlot}
@@ -73,6 +74,15 @@ ECDPlot(objCOTAN, yCut = NaN, condName = "", conditions = NULL)
 )
 
 \S4method{clean}{COTAN,CleaningOptions}(
+  objCOTAN,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99,
+  cleaningOptions = NULL
+)
+
+\S4method{clean}{COTAN,ANY}(
   objCOTAN,
   cellsCutoff = 0.003,
   genesCutoff = 0.002,
@@ -287,6 +297,9 @@ thousand cells and all cells expressing less than 2 per thousand genes.
 also produces and stores the estimators for \code{nu}
 
 Alternative interface using a \code{CleaningOptions} object.
+
+Invalid non-missing \code{cleaningOptions} values are rejected
+explicitly.
 
 \code{cleanPlots()} creates the plots associated to the output of the
 \code{\link[=clean]{clean()}} method.
