@@ -65,14 +65,16 @@ seuratClustering <- function(objCOTAN,
       msg = "`reductionOptions` must be a `ReductionOptions` object"
     )
 
+    numReducedComp <- as.integer(reductionOptions@numComp)
+
+    assert_that(numReducedComp <= getNumGenes(objCOTAN))
+
     # Calculate more components in the reduction matrix
     # in order to avoid numerical instabilities
-    numReducedCompToCalc <- reductionOptions@numComp + 15L
-
-    assert_that(numReducedCompToCalc <= getNumGenes(objCOTAN))
+    numReducedCompToCalc <- min(numReducedComp + 15L, getNumGenes(objCOTAN))
 
     calculationReductionOptions <- reductionOptions
-    calculationReductionOptions@numComp <- as.integer(numReducedCompToCalc)
+    calculationReductionOptions@numComp <- numReducedCompToCalc
     methods::validObject(calculationReductionOptions)
 
     cellsRDM <- calculateReducedDataMatrix(
@@ -80,9 +82,12 @@ seuratClustering <- function(objCOTAN,
       reductionOptions = calculationReductionOptions
     )
 
-    assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
-                ncol(cellsRDM) <= numReducedCompToCalc,
-                msg = "Returned PCA matrix has wrong dimensions")
+    assert_that(
+      nrow(cellsRDM) == getNumCells(objCOTAN),
+      ncol(cellsRDM) >= numReducedComp,
+      ncol(cellsRDM) <= numReducedCompToCalc,
+      msg = "Returned PCA matrix has wrong dimensions"
+    )
 
     # Create the Seurat object
     srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
