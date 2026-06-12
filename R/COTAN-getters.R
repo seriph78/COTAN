@@ -658,7 +658,6 @@ getNuNormData <- function(objCOTAN) {
 #'   and returns it.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param retLog When `TRUE` returns
 #'
 #' @returns `getLogNormData()` returns a `data.frame` after applying the formula
 #'   \eqn{\log_{10}{(10^4 * x + 1)}} to the raw counts normalized by
@@ -684,7 +683,8 @@ getLogNormData <- function(objCOTAN) {
 #'   [getLogNormData()] directly as appropriate
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param retLog When `TRUE` calls [getLogNormData()], calls [getNuNormData()]
+#' @param retLog When `TRUE`, return [getLogNormData()]; otherwise return
+#'   [getNuNormData()].
 #'
 #' @returns `getNormalizedData()` returns a `data.frame`
 #'
@@ -897,8 +897,7 @@ NULL
 #' @param genes The given genes' names to select the wanted `COEX` columns. If
 #'   missing all columns will be returned. When not empty a proper result is
 #'   provided by calculating the partial `COEX` matrix on the fly
-#' @param zeroDiagonal When TRUE the `COEX` of any element with itself is set to
-#'   zero
+#' @param zeroDiagonal When `TRUE`, set the diagonal to zero.
 #' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
 #'   have been updated since the `COEX` matrix was calculated.
 #'
@@ -920,9 +919,11 @@ NULL
 #'                                   sampleCondition = "reconstructed_dataset")
 #'
 #' exec <- ExecutionOptions(cores = 6L)
+#' cleanOpt <- CleaningOptions()
 #'
 #' objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-#'                           executionOptions = exec)
+#'                           executionOptions = exec,
+#'                           cleaningOptions = cleanOpt)
 #'
 #' ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 #'
@@ -1042,7 +1043,7 @@ setMethod(
 #' @param cells The given cells' names to select the wanted `COEX` columns. If
 #'   missing all columns will be returned. When not empty a proper result is
 #'   provided by calculating the partial `COEX` matrix on the fly
-#' @param zeroDiagonal When `TRUE` sets the diagonal to zero.
+#' @param zeroDiagonal When `TRUE`, set the diagonal to zero.
 #' @param ignoreSync When `TRUE` ignores whether the `lambda`/`nu`/`dispersion`
 #'   have been updated since the `COEX` matrix was calculated.
 #'
@@ -1150,7 +1151,7 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #'
-#' @returns `getGDI()` returns the genes' `GDI`` array if available or `NULL`
+#' @returns `getGDI()` returns the genes' `GDI` `array` if available or `NULL`
 #'   otherwise
 #'
 #' @importFrom rlang is_empty
@@ -1203,8 +1204,11 @@ setMethod(
 #' objCOTAN <- COTAN(raw = test.dataset)
 #'
 #' exec <- ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE)
+#' cleanOpt <- CleaningOptions()
 #' objCOTAN <- proceedToCoex(objCOTAN, calcCoex = TRUE,
-#'                           executionOptions = exec, saveObj = FALSE)
+#'                           executionOptions = exec,
+#'                           cleaningOptions = cleanOpt,
+#'                           saveObj = FALSE)
 #'
 #' data("test.dataset.clusters1")
 #' clusters <- test.dataset.clusters1
@@ -1247,9 +1251,20 @@ setMethod(
 #' clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 #' stopifnot(length(clusterizations) == 1)
 #'
-#' cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, dataMethod = "LogLikelihood",
-#'                                     useCoexEigen = TRUE, numComp = 25L,
-#'                                     clName = "first_clusterization")
+#' umapRedOpt <- ReductionOptions(
+#'   useCoexEigen = TRUE,
+#'   dataMethod = "LogLikelihood",
+#'   numComp = 25L,
+#'   genesSel = "HGDI",
+#'   numGenes = 2000L
+#' )
+#'
+#' cellsUmapPlotAndDF <- cellsUMAPPlot(
+#'   objCOTAN,
+#'   reductionOptions = umapRedOpt,
+#'   clName = "first_clusterization"
+#' )
+#'
 #' plot(cellsUmapPlotAndDF[["plot"]])
 #'
 #' enrichment <- geneSetEnrichment(clustersCoex = coexDF,

@@ -25,8 +25,10 @@
 \alias{dropGenesCells,COTAN-method}
 \alias{dropGenesCells}
 \alias{ECDPlot}
-\alias{clean,COTAN-method}
+\alias{clean,COTAN,missing-method}
 \alias{clean}
+\alias{clean,COTAN,CleaningOptions-method}
+\alias{clean,COTAN,ANY-method}
 \alias{cleanPlots}
 \alias{screePlot}
 \alias{cellSizePlot}
@@ -62,12 +64,31 @@
 
 ECDPlot(objCOTAN, yCut = NaN, condName = "", conditions = NULL)
 
-\S4method{clean}{COTAN}(
+\S4method{clean}{COTAN,missing}(
   objCOTAN,
   cellsCutoff = 0.003,
   genesCutoff = 0.002,
   cellsThreshold = 0.99,
-  genesThreshold = 0.99
+  genesThreshold = 0.99,
+  cleaningOptions = NULL
+)
+
+\S4method{clean}{COTAN,CleaningOptions}(
+  objCOTAN,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99,
+  cleaningOptions = NULL
+)
+
+\S4method{clean}{COTAN,ANY}(
+  objCOTAN,
+  cellsCutoff = 0.003,
+  genesCutoff = 0.002,
+  cellsThreshold = 0.99,
+  genesThreshold = 0.99,
+  cleaningOptions = NULL
 )
 
 cleanPlots(objCOTAN, includePCA = TRUE)
@@ -133,6 +154,12 @@ Default cutoff is \eqn{0.003 \; (0.3\%)}}
 \item{genesCutoff}{\code{clean()} will delete from the \code{raw} data any cell that is
 expressing less genes than threshold times the total number of genes.
 Default cutoff is \eqn{0.002 \; (0.2\%)}}
+
+\item{cleaningOptions}{A \code{CleaningOptions} object bundling cleaning cutoffs
+and fully-expressed / fully-expressing thresholds. This is the preferred
+interface for new code. It must not be mixed with the legacy cleaning
+arguments \code{cellsCutoff}, \code{genesCutoff}, \code{cellsThreshold}, and
+\code{genesThreshold}.}
 
 \item{includePCA}{a \code{Boolean} flag to determine whether to calculate the
 \emph{PCA} associated with the normalized matrix. When \code{TRUE} the first four
@@ -268,6 +295,11 @@ that are simple background signal.
 dataset. It will discard any genes that has less than 3 non-zero counts per
 thousand cells and all cells expressing less than 2 per thousand genes.
 also produces and stores the estimators for \code{nu}
+
+Alternative interface using a \code{CleaningOptions} object.
+
+Invalid non-missing \code{cleaningOptions} values are rejected
+explicitly.
 
 \code{cleanPlots()} creates the plots associated to the output of the
 \code{\link[=clean]{clean()}} method.

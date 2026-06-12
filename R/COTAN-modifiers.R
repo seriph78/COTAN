@@ -726,7 +726,7 @@ setMethod(
 #' @details `dropCellsCoex()` drops the `cellsCoex` member from the given
 #'   `COTAN` object
 #'
-#' @param objCOTAN A `COTAN` object
+#' @param objCOTAN a `COTAN` object
 #'
 #' @returns `dropCellsCoex()` returns the updated `COTAN` object
 #'

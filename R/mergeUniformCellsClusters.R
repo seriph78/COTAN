@@ -21,8 +21,8 @@
 #'   *increasing* thresholds to discriminate whether to merge two *clusters* if
 #'   deemed *uniform transcript*. See [UniformTranscriptCheckers] for more
 #'   details
-#' @param GDIThreshold legacy. The threshold level that is used in a
-#'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.43}
+#' @param GDIThreshold Threshold value used by uniformity-related `GDI` checks
+#'   or plots. See the function usage for the exact default.
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
 #' @param cores number of cores to use. Default is 1.
@@ -39,8 +39,11 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
-#'   defined by the [stats::hclust()] function.
+#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
+#'   function usage for the default.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built.
 #' @param allCheckResults An optional `data.frame` with the results of previous
 #'   checks about the merging of clusters. Useful to restart the *merging*
 #'   process after an interruption.
@@ -136,14 +139,18 @@
 #'   1.397
 #' ))
 #'
+#' redOpt <- ReductionOptions(
+#'   useCoexEigen = TRUE,
+#'   dataMethod = "LogLikelihood",
+#'   numComp = 50L,
+#'   genesSel = "HGDI",
+#'   numGenes = 2000L
+#' )
+#'
 #' splitList <- cellsUniformClustering(
 #'   objCOTAN,
 #'   executionOptions = exec,
-#'   dataMethod = "LogLikelihood",
-#'   useCoexEigen = TRUE,
-#'   genesSel = "HGDI",
-#'   numGenes = 2000L,
-#'   numReducedComp = 50L,
+#'   reductionOptions = redOpt,
 #'   initialResolution = 0.8,
 #'   checker = checker2,
 #'   saveObj = FALSE
@@ -181,8 +188,7 @@
 #'   checkers = c(checker, checker2),
 #'   clusters = clusters,
 #'   executionOptions = exec,
-#'   distance = "cosine",
-#'   hclustMethod = "ward.D2",
+#'   clusterTreeOptions = ClusterTreeOptions(distance = "cosine"),
 #'   saveObj = FALSE
 #' )
 #'
@@ -209,6 +215,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       useDEA = TRUE,
                                       distance = NULL,
                                       hclustMethod = "ward.D2",
+                                      clusterTreeOptions = NULL,
                                       allCheckResults = data.frame(),
                                       initialIteration = 1L,
                                       saveObj = TRUE,
@@ -231,6 +238,13 @@ mergeUniformCellsClusters <- function(objCOTAN,
       )
     )
   }
+
+  clusterTreeOptions <- resolveClusterTreeOptions(
+    useDEA = useDEA,
+    distance = distance,
+    hclustMethod = hclustMethod,
+    clusterTreeOptions = clusterTreeOptions
+  )
 
   # returns merged name given underlying names
   toMergedName <- function(clName1, clName2) {
@@ -519,8 +533,11 @@ mergeUniformCellsClusters <- function(objCOTAN,
       firstBatch <- is_empty(allCheckResults)
       oldNumClusters <- length(unique(outputClusters))
 
-      clDist <- distancesBetweenClusters(objCOTAN, clusters = outputClusters,
-                                         useDEA = useDEA, distance = distance)
+      clDist <- distancesBetweenClusters(
+        objCOTAN,
+        clusters = outputClusters,
+        clusterDistanceOptions = clusterTreeOptions
+      )
       gc()
 
       if (isTRUE(saveObj)) tryCatch({
@@ -528,7 +545,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
                         paste0("dend_iter_", iter, "_tau_",
                                getCheckerThreshold(checker), "_plot.pdf")))
 
-          hcNorm <- hclust(clDist, method = hclustMethod)
+          hcNorm <- hclust(clDist, method = clusterTreeOptions@hclustMethod)
           plot(as.dendrogram(hcNorm))
         }, error = function(err) {
           logThis(paste("While saving dendogram plot", err), logLevel = 0L)
@@ -644,10 +661,14 @@ mergeUniformCellsClusters <- function(objCOTAN,
              })
 
   c(outputClusters, outputCoexDF, permMap) %<-% tryCatch(
-    reorderClusterization(objCOTAN, clusters = outputClusters,
-                          coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = TRUE, useDEA = useDEA,
-                          distance = distance, hclustMethod = hclustMethod),
+    reorderClusterization(
+      objCOTAN,
+      clusters = outputClusters,
+      coexDF = outputCoexDF,
+      reverse = FALSE,
+      keepMinusOne = TRUE,
+      clusterTreeOptions = clusterTreeOptions
+    ),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
       return(list(outputClusters, outputCoexDF))

@@ -20,10 +20,13 @@
 #'   the relevant column name in the returned `data.frame`
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
-#' @param kCuts the number of estimated *cluster* (this defines the height for
-#'   the tree cut and the associated colors)
-#' @param adjustmentMethod *p-value* multi-test adjustment method. Defaults to
-#'   `"bonferroni"`; use `"none"` for no adjustment
+#' @param kCuts Number of estimated clusters used to cut the dendrogram and,
+#'   where applicable, define associated colors.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built.
+#' @param adjustmentMethod Method passed to [stats::p.adjust()] for multi-test
+#'   p-value adjustment. See the function usage for the default.
 #' @param condNameList a `list` of *conditions*' names to be used for additional
 #'   columns in the final plot. When none are given no new columns will be added
 #'   using data extracted via the function [clustersSummaryData()]
@@ -32,9 +35,9 @@
 #'
 #' @returns `clustersMarkersHeatmapPlot()` returns a list with:
 #'  * `"heatmapPlot"` the complete heatmap plot
-#'  * `"dataScore"` the `data.frame` with the score values
-#'  * `"pValueDF"`  the `data.frame` with the corresponding adjusted
-#'   \eqn{p-}values
+#'  * `"dataScore"`   the `data.frame` with the score values
+#'  * `"pValues"`     the `data.frame` with the corresponding adjusted
+#'    \eqn{p-}values
 #'
 #' @importFrom rlang is_empty
 #' @importFrom rlang set_names
@@ -71,9 +74,13 @@
 #'
 #' @rdname HandlingClusterizations
 #'
-clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
-                                       clName = "", clusters = NULL,
-                                       coexDF = NULL, kCuts = 3L,
+clustersMarkersHeatmapPlot <- function(objCOTAN,
+                                       groupMarkers = list(),
+                                       clName = "",
+                                       clusters = NULL,
+                                       coexDF = NULL,
+                                       kCuts = 3L,
+                                       clusterTreeOptions = NULL,
                                        adjustmentMethod = "bonferroni",
                                        condNameList = NULL,
                                        conditionsList = NULL) {
@@ -125,7 +132,13 @@ clustersMarkersHeatmapPlot <- function(objCOTAN, groupMarkers = list(),
     rownames(pValueDF) <- uniqueGeneNames
   }
 
-  dend <- clustersTreePlot(objCOTAN, kCuts = kCuts, clName = clName)[["dend"]]
+  dend <- clustersTreePlot(
+    objCOTAN,
+    kCuts = kCuts,
+    clName = clName,
+    clusters = clusters,
+    clusterTreeOptions = clusterTreeOptions
+  )[["dend"]]
   dend <- set(dend, "branches_lwd", 2L)
 
   hbList <- NULL

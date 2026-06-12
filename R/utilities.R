@@ -711,8 +711,8 @@ NULL
 #' @details `asClusterization()` given a *clusterization* in the form of a
 #'   `data.frame` or a `vector` or a `factor`, returns a named `factor`
 #'
-#' @param clusters A named `vector` or `factor` or `data.frame` that defines the
-#'   *clusters*
+#' @param clusters A named `vector`, `factor`, or `data.frame` that defines
+#'   the *clusters*.
 #' @param allCells A `vector` of cells' names that should list the same names in
 #'   the `clusters` in any order
 #'
@@ -761,8 +761,8 @@ asClusterization <- function(clusters, allCells = NULL) {
 #' @details `toClustersList()` given a *clusterization*, creates a `list` of
 #'   *clusters* (i.e. for each *cluster*, which elements compose the *cluster*)
 #'
-#' @param clusters A named `vector` or `factor` or `data.frame` that defines the
-#'   *clusters*
+#' @param clusters A named `vector`, `factor`, or `data.frame` that defines
+#'   the *clusters*.
 #'
 #' @returns `toClustersList()` returns a `list` of clusters
 #'
@@ -895,7 +895,8 @@ groupByClustersList <- function(elemNames, clustersList,
 #'   *clusters* returns a permutation, such that using the permutation on the
 #'   given names the *clusters* are grouped together.
 #'
-#' @param clusters A named `vector` or `factor` that defines the *clusters*.
+#' @param clusters A named `vector`, `factor`, or `data.frame` that defines
+#'   the *clusters*.
 #'
 #' @export
 #'
@@ -911,7 +912,8 @@ groupByClusters <- function(clusters) {
 #' @details `mergeClusters()` given a *clusterization*, creates a new one where
 #'   the given *clusters* are merged.
 #'
-#' @param clusters A named `vector` or `factor` that defines the *clusters*
+#' @param clusters A named `vector`, `factor`, or `data.frame` that defines
+#'   the *clusters*.
 #' @param names A list of *clusters* names to be merged
 #' @param mergedName The name of the new merged clusters
 #'
@@ -953,7 +955,8 @@ mergeClusters <- function(clusters, names, mergedName = "") {
 #' @details `multiMergeClusters()` given a *clusterization*, creates a new one
 #'   where the given sets of *clusters* are merged.
 #'
-#' @param clusters A named `vector` or `factor` that defines the *clusters*
+#' @param clusters A named `vector`, `factor`, or `data.frame` that defines
+#'   the *clusters*.
 #' @param namesList A `list` of `list`s of *clusters* names to be respectively
 #'   merged
 #' @param mergedNames The names of the new merged *clusters*

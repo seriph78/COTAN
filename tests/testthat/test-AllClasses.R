@@ -128,4 +128,157 @@ test_that("ExecutionOptions rejects invalid values", {
   expect_error(ExecutionOptions(chunkSize = NA_integer_))
 })
 
+test_that("ReductionOptions stores defaults and explicit values", {
+  red_default <- ReductionOptions()
+
+  expect_s4_class(red_default, "ReductionOptions")
+  expect_identical(red_default@useCoexEigen, TRUE)
+  expect_identical(red_default@dataMethod, "LogLikelihood")
+  expect_identical(red_default@numComp, 25L)
+  expect_identical(red_default@genesSel, "HGDI")
+  expect_identical(red_default@numGenes, 2000L)
+
+  red <- ReductionOptions(
+    useCoexEigen = FALSE,
+    dataMethod = "LogNormalized",
+    numComp = 12.0,
+    genesSel = c("GeneA", "GeneB"),
+    numGenes = 500.0
+  )
+
+  expect_s4_class(red, "ReductionOptions")
+  expect_type(red@useCoexEigen, "logical")
+  expect_identical(red@useCoexEigen, FALSE)
+  expect_identical(red@dataMethod, "LogNormalized")
+  expect_type(red@numComp, "integer")
+  expect_identical(red@numComp, 12L)
+  expect_identical(red@genesSel, c("GeneA", "GeneB"))
+  expect_type(red@numGenes, "integer")
+  expect_identical(red@numGenes, 500L)
+})
+
+test_that("ReductionOptions rejects invalid values", {
+  expect_error(ReductionOptions(useCoexEigen = NA))
+  expect_error(ReductionOptions(useCoexEigen = c(TRUE, FALSE)))
+
+  expect_error(ReductionOptions(dataMethod = NA_character_))
+  expect_error(ReductionOptions(dataMethod = c("Raw", "LogNormalized")))
+
+  expect_error(ReductionOptions(numComp = 0L))
+  expect_error(ReductionOptions(numComp = -1L))
+  expect_error(ReductionOptions(numComp = NA_integer_))
+
+  expect_error(ReductionOptions(genesSel = character()))
+  expect_error(ReductionOptions(genesSel = NA_character_))
+  expect_error(ReductionOptions(genesSel = c("GeneA", "")))
+
+  expect_error(ReductionOptions(useCoexEigen = FALSE, numGenes = 0L))
+  expect_error(ReductionOptions(useCoexEigen = FALSE, numGenes = NA_integer_))
+})
+
+
+
+
+test_that("CleaningOptions stores defaults and explicit values", {
+  clean_default <- CleaningOptions()
+
+  expect_s4_class(clean_default, "CleaningOptions")
+  expect_identical(clean_default@cellsCutoff, 0.003)
+  expect_identical(clean_default@genesCutoff, 0.002)
+  expect_identical(clean_default@cellsThreshold, 0.99)
+  expect_identical(clean_default@genesThreshold, 0.99)
+
+  clean_opt <- CleaningOptions(
+    cellsCutoff = 0.005,
+    genesCutoff = 0.003,
+    cellsThreshold = 0.98,
+    genesThreshold = 0.97
+  )
+
+  expect_s4_class(clean_opt, "CleaningOptions")
+  expect_identical(clean_opt@cellsCutoff, 0.005)
+  expect_identical(clean_opt@genesCutoff, 0.003)
+  expect_identical(clean_opt@cellsThreshold, 0.98)
+  expect_identical(clean_opt@genesThreshold, 0.97)
+})
+
+
+test_that("CleaningOptions rejects invalid values", {
+  expect_error(CleaningOptions(cellsCutoff = NA_real_))
+  expect_error(CleaningOptions(cellsCutoff = -0.001))
+  expect_error(CleaningOptions(cellsCutoff = c(0.001, 0.002)))
+  expect_error(CleaningOptions(genesCutoff = NA_real_))
+  expect_error(CleaningOptions(genesCutoff = -0.001))
+  expect_error(CleaningOptions(cellsThreshold = NA_real_))
+  expect_error(CleaningOptions(cellsThreshold = -0.1))
+  expect_error(CleaningOptions(genesThreshold = NA_real_))
+  expect_error(CleaningOptions(genesThreshold = -0.1))
+})
+
+test_that("ClusterDistanceOptions stores defaults and explicit values", {
+  dist_default <- ClusterDistanceOptions()
+
+  expect_s4_class(dist_default, "ClusterDistanceOptions")
+  expect_identical(dist_default@useDEA, TRUE)
+  expect_identical(dist_default@distance, "")
+  expect_identical(ClusterDistanceOptions(distance = NULL)@distance, "")
+
+  dist_opt <- ClusterDistanceOptions(
+    useDEA = FALSE,
+    distance = "euclidean"
+  )
+
+  expect_s4_class(dist_opt, "ClusterDistanceOptions")
+  expect_type(dist_opt@useDEA, "logical")
+  expect_identical(dist_opt@useDEA, FALSE)
+  expect_type(dist_opt@distance, "character")
+  expect_identical(dist_opt@distance, "euclidean")
+
+  expect_identical(
+    ClusterDistanceOptions(distance = NULL)@distance,
+    ""
+  )
+})
+
+test_that("ClusterDistanceOptions rejects invalid values", {
+  expect_error(ClusterDistanceOptions(useDEA = NA))
+  expect_error(ClusterDistanceOptions(useDEA = c(TRUE, FALSE)))
+
+  expect_error(ClusterDistanceOptions(distance = NA_character_))
+  expect_error(ClusterDistanceOptions(distance = c("cosine", "euclidean")))
+})
+
+
+test_that("ClusterTreeOptions extends distance options", {
+  tree_default <- ClusterTreeOptions()
+
+  expect_s4_class(tree_default, "ClusterTreeOptions")
+  expect_s4_class(tree_default, "ClusterDistanceOptions")
+  expect_identical(tree_default@useDEA, TRUE)
+  expect_identical(tree_default@distance, "")
+  expect_identical(tree_default@hclustMethod, "ward.D2")
+  expect_identical(ClusterTreeOptions(distance = NULL)@distance, "")
+
+  tree_opt <- ClusterTreeOptions(
+    useDEA = FALSE,
+    distance = "euclidean",
+    hclustMethod = "complete"
+  )
+
+  expect_s4_class(tree_opt, "ClusterTreeOptions")
+  expect_identical(tree_opt@useDEA, FALSE)
+  expect_identical(tree_opt@distance, "euclidean")
+  expect_identical(tree_opt@hclustMethod, "complete")
+})
+
+
+test_that("ClusterTreeOptions rejects invalid values", {
+  expect_error(ClusterTreeOptions(useDEA = NA))
+  expect_error(ClusterTreeOptions(distance = NA_character_))
+  expect_error(ClusterTreeOptions(hclustMethod = NA_character_))
+  expect_error(ClusterTreeOptions(hclustMethod = ""))
+  expect_error(ClusterTreeOptions(hclustMethod = c("ward.D2", "complete")))
+})
+
+
 gc()

@@ -81,7 +81,8 @@ distancesBetweenClusters(
   clusters = NULL,
   coexDF = NULL,
   useDEA = TRUE,
-  distance = NULL
+  distance = NULL,
+  clusterDistanceOptions = NULL
 )
 
 UMAPPlot(
@@ -103,6 +104,7 @@ cellsUMAPPlot(
   numComp = 25L,
   genesSel = "",
   numGenes = 200L,
+  reductionOptions = NULL,
   colors = NULL,
   numNeighbors = 0L,
   minPointsDist = NA
@@ -115,6 +117,7 @@ clustersMarkersHeatmapPlot(
   clusters = NULL,
   coexDF = NULL,
   kCuts = 3L,
+  clusterTreeOptions = NULL,
   adjustmentMethod = "bonferroni",
   condNameList = NULL,
   conditionsList = NULL
@@ -144,7 +147,8 @@ clustersTreePlot(
   clusters = NULL,
   useDEA = TRUE,
   distance = NULL,
-  hclustMethod = "ward.D2"
+  hclustMethod = "ward.D2",
+  clusterTreeOptions = NULL
 )
 
 findClustersMarkers(
@@ -168,7 +172,8 @@ reorderClusterization(
   keepMinusOne = TRUE,
   useDEA = TRUE,
   distance = NULL,
-  hclustMethod = "ward.D2"
+  hclustMethod = "ward.D2",
+  clusterTreeOptions = NULL
 )
 }
 \arguments{
@@ -200,9 +205,8 @@ data losses}
 
 \item{numCells}{the number of overall cells in all \emph{clusters}}
 
-\item{adjustmentMethod}{\emph{p-value} multi-test adjustment method, see
-\code{\link[stats:p.adjust.methods]{stats::p.adjust.methods()}}. Defaults to \code{"bonferroni"}; use \code{"none"} for
-no adjustment}
+\item{adjustmentMethod}{Method passed to \code{\link[stats:p.adjust]{stats::p.adjust()}} for multi-test
+p-value adjustment. See the function usage for the default.}
 
 \item{floorLambdaFraction}{Indicates the lower bound to the average count
 sums inside or outside the cluster for each gene as fraction of the
@@ -215,6 +219,9 @@ faster but less precise.}
 \item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+
+\item{clusterDistanceOptions}{a \code{ClusterDistanceOptions} object controlling
+how distances between clusters are computed.}
 
 \item{dataIn}{The \code{matrix} to plot. It must have a row names containing the
 given elements (the columns are features)}
@@ -249,11 +256,18 @@ pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]
 \item{numGenes}{the number of genes to select using the above method. Will be
 ignored when an explicit list of genes has been passed in}
 
+\item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
+reduction controls. This is the preferred interface for new code.}
+
 \item{groupMarkers}{an optional named \code{list} with an element for each group
 comprised of one or more marker genes}
 
-\item{kCuts}{the number of estimated \emph{cluster} (this defines the height for
-the tree cut)}
+\item{kCuts}{Number of estimated clusters used to cut the dendrogram and,
+where applicable, define associated colors.}
+
+\item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
+distances between clusters are computed and how the hierarchical tree is
+built.}
 
 \item{condNameList}{a \code{list} of \emph{conditions}' names to be used for additional
 columns in the final plot. When none are given no new columns will be added
@@ -272,8 +286,8 @@ column name in the returned \code{data.frame}}
 
 \item{plotTitle}{The title to use for the returned plot}
 
-\item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
-defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
+\item{hclustMethod}{Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}. See
+function usage for the default.}
 
 \item{n}{the number of extreme \code{COEX} values to return}
 
@@ -339,8 +353,8 @@ corresponding to the given \code{COEX} adjusted for \emph{multi-test}
 \code{clustersMarkersHeatmapPlot()} returns a list with:
 \itemize{
 \item \code{"heatmapPlot"} the complete heatmap plot
-\item \code{"dataScore"} the \code{data.frame} with the score values
-\item \code{"pValueDF"}  the \code{data.frame} with the corresponding adjusted
+\item \code{"dataScore"}   the \code{data.frame} with the score values
+\item \code{"pValues"}     the \code{data.frame} with the corresponding adjusted
 \eqn{p-}values
 }
 
@@ -468,8 +482,8 @@ expression levels for each \emph{cluster} in the given \emph{clusterization} aga
 the rest of the data-set
 
 \code{distancesBetweenClusters()} is used to obtain a distance between
-the clusters. Depending on the value of the \code{useDEA} flag will base the
-distance on the \emph{DEA} columns or the averages of the \emph{Zero-One} matrix.
+the clusters. Depending on the effective \code{useDEA} setting, it bases the
+distance on the \emph{DEA} columns or on the averages of the \emph{Zero-One} matrix.
 
 \code{UMAPPlot()} plots the given \code{data.frame} containing genes
 information related to clusters after applying the \code{umap} transformation
@@ -521,8 +535,11 @@ data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
 
 exec <- ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE)
+cleanOpt <- CleaningOptions()
 objCOTAN <- proceedToCoex(objCOTAN, calcCoex = TRUE,
-                          executionOptions = exec, saveObj = FALSE)
+                          executionOptions = exec,
+                          cleaningOptions = cleanOpt,
+                          saveObj = FALSE)
 
 data("test.dataset.clusters1")
 clusters <- test.dataset.clusters1
@@ -565,9 +582,20 @@ if (FALSE) {
 clusterizations <- getClusterizations(objCOTAN, dropNoCoex = TRUE)
 stopifnot(length(clusterizations) == 1)
 
-cellsUmapPlotAndDF <- cellsUMAPPlot(objCOTAN, dataMethod = "LogLikelihood",
-                                    useCoexEigen = TRUE, numComp = 25L,
-                                    clName = "first_clusterization")
+umapRedOpt <- ReductionOptions(
+  useCoexEigen = TRUE,
+  dataMethod = "LogLikelihood",
+  numComp = 25L,
+  genesSel = "HGDI",
+  numGenes = 2000L
+)
+
+cellsUmapPlotAndDF <- cellsUMAPPlot(
+  objCOTAN,
+  reductionOptions = umapRedOpt,
+  clName = "first_clusterization"
+)
+
 plot(cellsUmapPlotAndDF[["plot"]])
 
 enrichment <- geneSetEnrichment(clustersCoex = coexDF,

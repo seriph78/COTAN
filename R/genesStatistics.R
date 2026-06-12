@@ -241,9 +241,8 @@ calculateGDIGivenCorr <-
 #'   gene based on the `COEX` matrix
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param statType Which statistics to use to compute the p-values. By default
-#'   it will use the `S` (*Pearson's *\eqn{\chi^{2}}* test*) otherwise the `G`
-#'   (*G-test*)
+#' @param statType Statistic used to compute p-values. Use `"S"` for
+#'   Pearson's \eqn{\chi^{2}} test or `"G"` for the G-test.
 #' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
 #' @param cores number of cores to use. Default is 1.
@@ -411,9 +410,8 @@ runPValueCalc <- function(genesBatches, S, cores) {
 #'   (\eqn{\chi^{2}})
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param statType Which statistics to use to compute the p-values. By default
-#'   it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
-#'   (G-test)
+#' @param statType Statistic used to compute p-values. Use `"S"` for
+#'   Pearson's \eqn{\chi^{2}} test or `"G"` for the G-test.
 #' @param geneSubsetCol an array of genes. It will be put in columns. If left
 #'   empty the function will do it genome-wide.
 #' @param geneSubsetRow an array of genes. It will be put in rows. If left empty
@@ -543,9 +541,8 @@ calculatePValue <- function(objCOTAN,
 #'   Index*
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param statType Which statistics to use to compute the p-values. By default
-#'   it will use the "S" (Pearson's \eqn{\chi^{2}} test) otherwise the "G"
-#'   (G-test)
+#' @param statType Statistic used to compute p-values. Use `"S"` for
+#'   Pearson's \eqn{\chi^{2}} test or `"G"` for the G-test.
 #' @param geneSubsetCol an array of genes. It will be put in columns. If left
 #'   empty the function will do it genome-wide.
 #' @param geneSubsetRow an array of genes. It will be put in rows. If left empty

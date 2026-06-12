@@ -52,7 +52,7 @@ genes in the columns}
 \item{sets}{A numeric array indicating which fields in the previous \code{list}
 should be used. Defaults to all fields}
 
-\item{pValueThreshold}{The p-value threshold. Default is 0.01}
+\item{pValueThreshold}{The \eqn{p}-value threshold. Default is \eqn{0.01}}
 
 \item{cores}{number of cores to use. Default is 1.}
 

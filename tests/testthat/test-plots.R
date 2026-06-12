@@ -215,10 +215,16 @@ test_that("Clusters plots", {
   )
 
   suppressWarnings(
-    chpd2 <-
-      clustersMarkersHeatmapPlot(obj, clName = "batch", condNameList = "H/L",
-                                 groupMarkers = groupMarkers, kCuts = 2L)
+    chpd2 <- clustersMarkersHeatmapPlot(
+      obj,
+      clName = "batch",
+      groupMarkers = groupMarkers,
+      kCuts = 2L,
+      condNameList = "H/L",
+      clusterTreeOptions = ClusterTreeOptions(useDEA = FALSE)
+    )
   )
+
   expect_identical(names(chpd2), c("heatmapPlot", "dataScore", "pValues"))
   expect_identical(dim(chpd2[["dataScore"]]),
                    c(length(unlist(groupMarkers)), 2L))
@@ -228,8 +234,48 @@ test_that("Clusters plots", {
     plot(chpd2[["heatmapPlot"]])
   )
 
-  cupd1 <- cellsUMAPPlot(obj, dataMethod = "LogLikelihood", clName = "batch",
-                         useCoexEigen = TRUE, numComp = 5L)
+
+  expect_error(
+    clustersTreePlot(
+      obj,
+      kCuts = 2L,
+      clName = "batch",
+      useDEA = FALSE,
+      clusterTreeOptions = ClusterTreeOptions()
+    ),
+    regexp = "Do not mix `clusterTreeOptions`"
+  )
+
+  expect_error(
+    clustersTreePlot(
+      obj,
+      kCuts = 2L,
+      clName = "batch",
+      clusterTreeOptions = ReductionOptions()
+    ),
+    regexp = "`clusterTreeOptions` must be a `ClusterTreeOptions`"
+  )
+
+  treePlot <- clustersTreePlot(
+    obj,
+    kCuts = 2L,
+    clName = "batch",
+    clusterTreeOptions = ClusterTreeOptions(useDEA = FALSE)
+  )
+
+  expect_identical(names(treePlot), c("dend", "objCOTAN"))
+  expect_s3_class(treePlot[["dend"]], "dendrogram")
+
+  cupd1 <- cellsUMAPPlot(
+    obj,
+    clName = "batch",
+    reductionOptions = ReductionOptions(
+      useCoexEigen = TRUE,
+      dataMethod = "LogLikelihood",
+      numComp = 5L
+    )
+  )
+
   expect_identical(names(cupd1), c("plot", "cellsRDM"))
   expect_identical(dim(cupd1[["cellsRDM"]]), c(getNumCells(obj), 5L))
   expect_warning(
@@ -237,14 +283,29 @@ test_that("Clusters plots", {
     regexp = "No shared levels"
   )
 
-  cupd2 <- cellsUMAPPlot(obj, dataMethod = "AdjBinarized",  clName = "batch",
-                         useCoexEigen = FALSE, numComp = 5L,
-                         genesSel = "HGDI", numGenes = 100)
+  reductionOptions <- ReductionOptions(
+    useCoexEigen = FALSE,
+    dataMethod = "AdjBinarized",
+    numComp = 5L,
+    genesSel = "HGDI",
+    numGenes = 100L
+  )
+
+  cupd2 <- cellsUMAPPlot(obj, clName = "batch",
+                         reductionOptions = reductionOptions)
+
   expect_identical(names(cupd2), c("plot", "cellsRDM"))
   expect_identical(dim(cupd2[["cellsRDM"]]), c(getNumCells(obj), 5L))
   expect_warning(
     plot(cupd2[["plot"]]),
     regexp = "No shared levels"
+  )
+
+  expect_error(
+    cellsUMAPPlot(obj, clName = "batch",
+                  genesSel = "HGDI",
+                  reductionOptions = reductionOptions),
+    "Do not mix `reductionOptions`"
   )
 })
 

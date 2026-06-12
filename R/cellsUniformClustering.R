@@ -31,16 +31,8 @@ NULL
 #' @param minNumClusters The minimum number of *clusters* expected from this
 #'   *clusterization*. In cases it is not reached, it will increase the
 #'   resolution of the *clusterization*
-#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
-#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
-#'   the data `matrix` to the selected genes before applying the `PCA` reduction
-#' @param dataMethod selects the method to use to create the `data.frame` to
-#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
-#' @param genesSel Decides whether and how to perform the gene-selection
-#'   (defaults to `"HVG_Seurat"`). See [getSelectedGenes()] for more details.
-#' @param numGenes the number of genes to select using the above method. Will be
-#'   ignored when an explicit list of genes has been passed in
-#' @param numReducedComp the number of calculated **RDM** components
+#' @param reductionOptions A `ReductionOptions` object bundling dimensionality
+#'   reduction controls. This is the preferred interface for new code.
 #'
 #' @returns a list with:
 #'   * `"SeuratClusters"` a `Seurat` *clusterization*
@@ -58,32 +50,44 @@ NULL
 #'
 #' @noRd
 #'
-
 seuratClustering <- function(objCOTAN,
                              initialResolution,
                              resolutionStep,
                              minNumClusters,
-                             useCoexEigen,
-                             dataMethod,
-                             genesSel,
-                             numGenes,
-                             numReducedComp) {
+                             reductionOptions) {
   tryCatch({
     startTime <- Sys.time()
 
     logThis("Creating new clusterization: START", logLevel = 2L)
 
+    assert_that(
+      methods::is(reductionOptions, "ReductionOptions"),
+      msg = "`reductionOptions` must be a `ReductionOptions` object"
+    )
+
+    numReducedComp <- as.integer(reductionOptions@numComp)
+
     assert_that(numReducedComp <= getNumGenes(objCOTAN))
 
-    numReducedCompToCalc <- numReducedComp + 15L
-    cellsRDM <- calculateReducedDataMatrix(
-      objCOTAN, useCoexEigen = useCoexEigen,
-      dataMethod = dataMethod, numComp = numReducedCompToCalc,
-      genesSel = genesSel, numGenes = numGenes)
+    # Calculate more components in the reduction matrix
+    # in order to avoid numerical instabilities
+    numReducedCompToCalc <- min(numReducedComp + 15L, getNumGenes(objCOTAN))
 
-    assert_that(nrow(cellsRDM) == getNumCells(objCOTAN),
-                ncol(cellsRDM) <= numReducedCompToCalc,
-                msg = "Returned PCA matrix has wrong dimensions")
+    calculationReductionOptions <- reductionOptions
+    calculationReductionOptions@numComp <- numReducedCompToCalc
+    methods::validObject(calculationReductionOptions)
+
+    cellsRDM <- calculateReducedDataMatrix(
+      objCOTAN,
+      reductionOptions = calculationReductionOptions
+    )
+
+    assert_that(
+      nrow(cellsRDM) == getNumCells(objCOTAN),
+      ncol(cellsRDM) >= numReducedComp,
+      ncol(cellsRDM) <= numReducedCompToCalc,
+      msg = "Returned PCA matrix has wrong dimensions"
+    )
 
     # Create the Seurat object
     srat <- CreateSeuratObject(counts = getRawData(objCOTAN),
@@ -95,7 +99,7 @@ seuratClustering <- function(objCOTAN,
                            key = "PC_",
                            assay = "RNA")
 
-    srat <- FindNeighbors(srat, dims = seq_len(numReducedComp))
+    srat <- FindNeighbors(srat, dims = seq_len(reductionOptions@numComp))
 
     resolution <- initialResolution
     maxResolution <- initialResolution + 30.0 * resolutionStep
@@ -139,8 +143,8 @@ seuratClustering <- function(objCOTAN,
     rm(srat)
     gc()
 
-    # returned objects
-    return(list("SeuratClusters" = seuratClusters, "CellsRDM" = cellsRDM,
+    return(list("SeuratClusters" = seuratClusters,
+                "CellsRDM" = cellsRDM,
                 "Resolution" = resolution,
                 "UsedMaxResolution" = usedMaxResolution))
   },
@@ -169,8 +173,8 @@ seuratClustering <- function(objCOTAN,
 #' @param checker the object that defines the method and the threshold to
 #'   discriminate whether a *cluster* is *uniform transcript*. See
 #'   [UniformTranscriptCheckers] for more details
-#' @param GDIThreshold legacy. The threshold level that is used in a
-#'   [SimpleGDIUniformityCheck-class]. It defaults to \eqn{1.40}
+#' @param GDIThreshold Threshold value used by uniformity-related `GDI` checks
+#'   or plots. See the function usage for the exact default.
 #' @param initialResolution a number indicating how refined are the clusters
 #'   before checking for **uniformity**. It defaults to \eqn{0.8}, the same as
 #'   [Seurat::FindClusters()]
@@ -186,10 +190,15 @@ seuratClustering <- function(objCOTAN,
 #'   to a specific device
 #' @param useDEA Boolean indicating whether to use the *DEA* to define the
 #'   distance; alternatively it will use the average *Zero-One* counts, that is
-#'   faster but less precise
+#'   faster but less precise.
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
+#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
+#'   function usage for the default.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built.
 #' @param useCoexEigen Boolean to determine whether to project the data `matrix`
 #'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
 #'   the data `matrix` to the selected genes before applying the `PCA` reduction
@@ -200,8 +209,8 @@ seuratClustering <- function(objCOTAN,
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param numReducedComp the number of calculated **RDM** components
-#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
-#'   defined by the [stats::hclust()] function.
+#' @param reductionOptions A `ReductionOptions` object bundling dimensionality
+#'   reduction controls. This is the preferred interface for new code.
 #' @param minimumUTClusterSize the minimum number of cells for a cluster to be
 #'   deemed potentially *uniform transcript*
 #' @param initialClusters an existing *clusterization* to use as starting point:
@@ -261,12 +270,14 @@ cellsUniformClustering <- function(objCOTAN,
                                    deviceStr = "cuda",
                                    useDEA = TRUE,
                                    distance = NULL,
+                                   hclustMethod = "ward.D2",
+                                   clusterTreeOptions = NULL,
                                    useCoexEigen = FALSE,
                                    dataMethod = "",
                                    genesSel = "HVG_Seurat",
                                    numGenes = 2000L,
                                    numReducedComp = 25L,
-                                   hclustMethod = "ward.D2",
+                                   reductionOptions = NULL,
                                    initialClusters = NULL,
                                    minimumUTClusterSize = 50L,
                                    initialIteration = 1L,
@@ -290,6 +301,57 @@ cellsUniformClustering <- function(objCOTAN,
       )
     )
   }
+
+  clusterTreeOptions <- resolveClusterTreeOptions(
+    useDEA = useDEA,
+    distance = distance,
+    hclustMethod = hclustMethod,
+    clusterTreeOptions = clusterTreeOptions
+  )
+
+  if (is.null(reductionOptions)) {
+    if (isEmptyName(dataMethod)) {
+      dataMethod <- "LogNormalized"
+    }
+
+    reductionOptions <- legacyReductionOptions(
+      useCoexEigen = useCoexEigen,
+      dataMethod = dataMethod,
+      numComp = numReducedComp,
+      genesSel = genesSel,
+      numGenes = numGenes
+    )
+  } else {
+    assert_that(
+      methods::is(reductionOptions, "ReductionOptions"),
+      msg = "`reductionOptions` must be a `ReductionOptions` object"
+    )
+
+    assert_that(
+      identical(useCoexEigen, FALSE),
+      identical(dataMethod, ""),
+      identical(genesSel, "HVG_Seurat"),
+      identical(numGenes, 2000L),
+      identical(numReducedComp, 25L),
+      msg = paste(
+        "Do not mix `reductionOptions` with the legacy reduction arguments",
+        "`useCoexEigen`, `dataMethod`, `genesSel`, `numGenes`, and",
+        "`numReducedComp`."
+      )
+    )
+
+    if (isEmptyName(reductionOptions@dataMethod)) {
+      reductionOptions@dataMethod <- "LogNormalized"
+    }
+
+    if (length(reductionOptions@genesSel) == 1L &&
+        isEmptyName(reductionOptions@genesSel)) {
+      reductionOptions@genesSel <- "HVG_Seurat"
+    }
+  }
+
+  usesHGDI <- length(reductionOptions@genesSel) == 1L &&
+    str_equal(reductionOptions@genesSel, "HGDI")
 
   startTime <- Sys.time()
 
@@ -336,10 +398,6 @@ cellsUniformClustering <- function(objCOTAN,
                             "a legacy `GDIThreshold` must be given"))
   }
 
-  if (isEmptyName(dataMethod)) {
-    dataMethod <- "LogNormalized"
-  }
-
   repeat {
     iter <- iter + 1L
     startLoopTime <- Sys.time()
@@ -355,8 +413,8 @@ cellsUniformClustering <- function(objCOTAN,
     cellsToDrop <- getCells(objCOTAN)[!is.na(outputClusters)]
     subObj <- dropGenesCells(objCOTAN, cells = cellsToDrop)
 
-    if ((str_equal(genesSel, "HGDI") || isTRUE(useCoexEigen)) &&
-      !isCoexAvailable(subObj)) {
+    if ((usesHGDI || isTRUE(reductionOptions@useCoexEigen)) &&
+        !isCoexAvailable(subObj)) {
       subObj <-
         proceedToCoex(
           subObj,
@@ -374,11 +432,7 @@ cellsUniformClustering <- function(objCOTAN,
                        initialResolution = initialResolution,
                        resolutionStep = resolutionStep,
                        minNumClusters = minNumClusters,
-                       useCoexEigen = useCoexEigen,
-                       dataMethod = dataMethod,
-                       numReducedComp = numReducedComp,
-                       genesSel = genesSel,
-                       numGenes = numGenes)
+                       reductionOptions = reductionOptions)
 
     if (is_null(testClusters)) {
       logThis(paste("NO new possible uniform clusters!",
@@ -613,10 +667,14 @@ cellsUniformClustering <- function(objCOTAN,
              })
 
   c(outputClusters, outputCoexDF, permMap) %<-% tryCatch(
-    reorderClusterization(objCOTAN, clusters = outputClusters,
-                          coexDF = outputCoexDF, reverse = FALSE,
-                          keepMinusOne = TRUE, useDEA = useDEA,
-                          distance = distance, hclustMethod = hclustMethod),
+    reorderClusterization(
+      objCOTAN,
+      clusters = outputClusters,
+      coexDF = outputCoexDF,
+      reverse = FALSE,
+      keepMinusOne = TRUE,
+      clusterTreeOptions = clusterTreeOptions
+    ),
     error = function(err) {
       logThis(paste("Calling reorderClusterization", err), logLevel = 0L)
       return(list(outputClusters, outputCoexDF))

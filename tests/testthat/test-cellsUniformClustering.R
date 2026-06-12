@@ -17,16 +17,21 @@ test_that("Cell Uniform Clustering", {
                        cores = 6L, saveObj = TRUE, outDir = tm)
 
   initialResolution <- 1.3
+
+  reductionOptions <- ReductionOptions(
+    useCoexEigen = TRUE,
+    dataMethod = "AdjBin",
+    numComp = 25L,
+    genesSel = "",
+    numGenes = -1L
+  )
+
   c(sClusters, cellsRDM, resolution, usedMaxResolution) %<-%
     seuratClustering(objCOTAN = obj,
                      initialResolution = initialResolution,
                      resolutionStep = 0.5,
                      minNumClusters = 3L,
-                     useCoexEigen = TRUE,
-                     dataMethod = "AdjBin",
-                     numReducedComp = 25L,
-                     genesSel = "",
-                     numGenes = -1L)
+                     reductionOptions = reductionOptions)
 
   expect_identical(nlevels(sClusters), 4L)
   expect_identical(as.vector(table(sClusters)), c(321L, 284L, 214L, 181L))
@@ -44,11 +49,13 @@ test_that("Cell Uniform Clustering", {
         objCOTAN = obj,
         checker = checker,
         initialResolution = initialResolution,
-        dataMethod = "LogLikelihood",
-        useCoexEigen = TRUE,
-        genesSel = "HGDI",
-        numGenes = 2000L,
-        numReducedComp = 50L,
+        reductionOptions = ReductionOptions(
+          useCoexEigen = TRUE,
+          dataMethod = "LogLikelihood",
+          numComp = 50L,
+          genesSel = "HGDI",
+          numGenes = 2000L
+        ),
         executionOptions = ExecutionOptions(
           cores = 6L,
           optimizeForSpeed = TRUE,
@@ -59,6 +66,15 @@ test_that("Cell Uniform Clustering", {
         outDir = tm
       )
   })
+
+  expect_true(file.exists(file.path(tm, "test", "reclustering",
+                                    "pdf_umap_1.pdf")))
+  expect_true(file.exists(file.path(tm, "test", "reclustering",
+                                    "partial_clusterization_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "reclustering",
+                                    "all_check_results_1.csv")))
+  expect_true(file.exists(file.path(tm, "test", "split_check_results.csv")))
+  expect_true(file.exists(file.path(tm, "test", "split_clusterization.csv")))
 
   expect_error(
     cellsUniformClustering(
@@ -73,14 +89,24 @@ test_that("Cell Uniform Clustering", {
     regexp = "Do not mix `executionOptions` with"
   )
 
-  expect_true(file.exists(file.path(tm, "test", "reclustering",
-                                    "pdf_umap_1.pdf")))
-  expect_true(file.exists(file.path(tm, "test", "reclustering",
-                                    "partial_clusterization_1.csv")))
-  expect_true(file.exists(file.path(tm, "test", "reclustering",
-                                    "all_check_results_1.csv")))
-  expect_true(file.exists(file.path(tm, "test", "split_check_results.csv")))
-  expect_true(file.exists(file.path(tm, "test", "split_clusterization.csv")))
+  expect_error(
+    cellsUniformClustering(
+      objCOTAN = obj,
+      checker = checker,
+      initialResolution = initialResolution,
+      genesSel = "HGDI",
+      reductionOptions = ReductionOptions(
+        useCoexEigen = TRUE,
+        dataMethod = "LogLikelihood",
+        numComp = 50L,
+        genesSel = "HGDI",
+        numGenes = 2000L
+      ),
+      saveObj = FALSE,
+      outDir = tm
+    ),
+    regexp = "Do not mix `reductionOptions` with"
+  )
 
   gc()
 
@@ -93,8 +119,18 @@ test_that("Cell Uniform Clustering", {
                            clusters = clusters, coexDF = coexDF)
 
   expect_equal(getClusters(objCOTAN = obj), clusters, ignore_attr = TRUE)
-  expect_identical(reorderClusterization(objCOTAN = obj)[["clusters"]],
-                   clusters)
+  expect_identical(
+    reorderClusterization(objCOTAN = obj)[["clusters"]],
+    clusters
+  )
+
+  expect_identical(
+    reorderClusterization(
+      objCOTAN = obj,
+      clusterTreeOptions = ClusterTreeOptions()
+    )[["clusters"]],
+    clusters
+  )
 
   firstCl <- clusters[[1L]]
 
@@ -176,9 +212,14 @@ test_that("Cell Uniform Clustering", {
   clusters3 <- factor(clusters, levels = c(levels(clusters), "-1"))
   clusters3[51L:100L] <- "-1"
   reorderRes3 <-
-    reorderClusterization(objCOTAN = obj, useDEA = FALSE,
-                          reverse = FALSE, keepMinusOne = TRUE,
-                          clusters = clusters3, coexDF = coexDF2)
+    reorderClusterization(
+      objCOTAN = obj,
+      reverse = FALSE,
+      keepMinusOne = TRUE,
+      clusters = clusters3,
+      coexDF = coexDF2,
+      clusterTreeOptions = ClusterTreeOptions(useDEA = FALSE)
+    )
   clusters3 <- reorderRes3[["clusters"]]
 
   expect_identical(levels(clusters3)[clusters3[51L:100L]],
@@ -190,21 +231,67 @@ test_that("Cell Uniform Clustering", {
                    set_names(paste0(c(1L:4L, -1L)),
                              nm = paste0(c(1L:4L, -1L))))
 
+
+  expect_error(
+    reorderClusterization(
+      objCOTAN = obj,
+      useDEA = FALSE,
+      clusterTreeOptions = ClusterTreeOptions()
+    ),
+    regexp = "Do not mix `clusterTreeOptions`"
+  )
+
+  expect_error(
+    reorderClusterization(
+      objCOTAN = obj,
+      distance = "euclidean",
+      clusterTreeOptions = ClusterTreeOptions()
+    ),
+    regexp = "Do not mix `clusterTreeOptions`"
+  )
+
+  expect_error(
+    reorderClusterization(
+      objCOTAN = obj,
+      clusterTreeOptions = ReductionOptions()
+    ),
+    regexp = "`clusterTreeOptions` must be a `ClusterTreeOptions` object"
+  )
+
   clSize <- getNumCells(obj) / 2L
   exactClusters <- set_names(rep(1L:2L, each = clSize), nm = getCells(obj))
 
   suppressWarnings({
     splitData2 <-
-      cellsUniformClustering(objCOTAN = obj,
-                             checker = checker,
-                             initialResolution = initialResolution,
-                             initialClusters = exactClusters,
-                             cores = 6L,
-                             optimizeForSpeed = TRUE,
-                             deviceStr = "cuda",
-                             saveObj = TRUE,
-                             outDir = tm)
+      cellsUniformClustering(
+        objCOTAN = obj,
+        checker = checker,
+        initialResolution = initialResolution,
+        initialClusters = exactClusters,
+        clusterTreeOptions = ClusterTreeOptions(),
+        executionOptions = ExecutionOptions(
+          cores = 6L,
+          optimizeForSpeed = TRUE,
+          deviceStr = "cuda",
+          chunkSize = 1024L
+        ),
+        saveObj = TRUE,
+        outDir = tm
+      )
   })
+
+  expect_error(
+    cellsUniformClustering(
+      objCOTAN = obj,
+      checker = checker,
+      initialResolution = initialResolution,
+      useDEA = FALSE,
+      clusterTreeOptions = ClusterTreeOptions(),
+      saveObj = FALSE,
+      outDir = tm
+    ),
+    regexp = "Do not mix `clusterTreeOptions`"
+  )
 
   expect_identical(splitData2[["clusters"]], factor(exactClusters))
 
@@ -217,6 +304,17 @@ test_that("Cell Uniform Clustering", {
   expect_type(clMarkersDF[["IsMarker"]], "integer")
   expect_identical(sum(clMarkersDF[["IsMarker"]]), 0L)
   expect_gt(min(clMarkersDF[["DEA"]] * clMarkersDF[["logFoldCh"]]), 0.0)
+
+  expect_error(
+    distancesBetweenClusters(
+      obj,
+      clName = "exact",
+      clusters = exactClusters,
+      useDEA = FALSE,
+      clusterDistanceOptions = ClusterDistanceOptions()
+    ),
+    regexp = "Do not mix `clusterDistanceOptions`"
+  )
 
   topGenesNum <- as.integer(substring(clMarkersDF[["Gene"]], 6L))
   expect_gt(min(topGenesNum), 150L)

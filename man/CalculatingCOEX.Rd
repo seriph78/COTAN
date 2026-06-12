@@ -163,7 +163,8 @@ calculateReducedDataMatrix(
   dataMethod = "",
   numComp = 25L,
   genesSel = "",
-  numGenes = 2000L
+  numGenes = 2000L,
+  reductionOptions = NULL
 )
 }
 \arguments{
@@ -173,7 +174,7 @@ calculateReducedDataMatrix(
 missing all columns will be returned. When not empty a proper result is
 provided by calculating the partial \code{COEX} matrix on the fly}
 
-\item{zeroDiagonal}{When \code{TRUE} sets the diagonal to zero.}
+\item{zeroDiagonal}{When \code{TRUE}, set the diagonal to zero.}
 
 \item{ignoreSync}{When \code{TRUE} ignores whether the \code{lambda}/\code{nu}/\code{dispersion}
 have been updated since the \code{COEX} matrix was calculated.}
@@ -236,7 +237,9 @@ returned}
 \item{zeroOne}{the raw count matrix projected to \code{0} or \code{1}. If not given the
 appropriate one will be calculated on the fly}
 
-\item{optimizeForSpeed}{Boolean; deprecated: always TRUE}
+\item{optimizeForSpeed}{Legacy execution scalar. In \code{calculateCoex()} it is
+converted into an \code{ExecutionOptions} object; in lower-level COEX helpers it
+is deprecated and always treated as \code{TRUE}}
 
 \item{probZero}{is the expected \strong{probability of zero} for each gene/cell
 pair. If not given the appropriate one will be calculated on the fly}
@@ -283,6 +286,9 @@ the data \code{matrix} to the selected genes before applying the \code{PCA} redu
 
 \item{numComp}{Number of components of the reduced \code{matrix}, it defaults to
 25L.}
+
+\item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
+reduction controls. This is the preferred interface for new code.}
 }
 \value{
 \code{getMu()} returns the \code{mu} matrix
@@ -534,9 +540,11 @@ objCOTAN <- initializeMetaDataset(objCOTAN, GEO = "test_GEO",
                                   sampleCondition = "reconstructed_dataset")
 
 exec <- ExecutionOptions(cores = 6L)
+cleanOpt <- CleaningOptions()
 
 objCOTAN <- proceedToCoex(objCOTAN, calcCoex = FALSE,
-                          executionOptions = exec)
+                          executionOptions = exec,
+                          cleaningOptions = cleanOpt)
 
 ## Now the `COTAN` object is ready to calculate the genes' `COEX`
 

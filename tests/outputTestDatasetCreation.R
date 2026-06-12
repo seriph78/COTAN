@@ -13,7 +13,18 @@ outputTestDatasetCreation <-
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(objCOTAN = obj, cores = 6L, saveObj = FALSE)
+  executionOptions <- ExecutionOptions(
+    cores = 6L, optimizeForSpeed = TRUE,
+    deviceStr = "cuda", chunkSize = 1024L)
+
+  cleaningOptions <- CleaningOptions()
+
+  obj <- proceedToCoex(
+    objCOTAN = obj,
+    executionOptions = executionOptions,
+    cleaningOptions = cleaningOptions,
+    saveObj = FALSE
+  )
 
   if (FALSE) {
     saveRDS(obj, file = file.path(testsDir, "test.COTAN.RDS"))
@@ -87,14 +98,20 @@ outputTestDatasetCreation <-
   checker <- shiftCheckerThresholds(checker, 0.1)
 
   initialResolution <- 1.3
-  splitData <- cellsUniformClustering(objCOTAN = obj,
-                                      checker = checker,
-                                      initialResolution = initialResolution,
-                                      useCoexEigen = TRUE,
-                                      dataMethod = "LL",
-                                      numReducedComp = 50L,
-                                      cores = 6L, optimizeForSpeed = TRUE,
-                                      deviceStr = "cuda", saveObj = FALSE)
+
+  splitReductionOptions <- ReductionOptions(
+    useCoexEigen = TRUE,
+    dataMethod = "LL",
+    numComp = 50L)
+
+  splitData <- cellsUniformClustering(
+    objCOTAN = obj,
+    checker = checker,
+    initialResolution = initialResolution,
+    reductionOptions = splitReductionOptions,
+    executionOptions = executionOptions,
+    saveObj = FALSE
+  )
 
   split.clusters.test <- splitData[["clusters"]]
   saveRDS(split.clusters.test,
@@ -120,14 +137,19 @@ outputTestDatasetCreation <-
   saveRDS(pvalues.clusters.test,
           file.path(testsDir, "pvalues.clusters.test.RDS"))
 
-  mergedData <- mergeUniformCellsClusters(objCOTAN = obj,
-                                          clusters = splitData[["clusters"]],
-                                          checkers = checker,
-                                          batchSize = 1L,
-                                          cores = 6L,
-                                          distance = "cosine",
-                                          hclustMethod = "ward.D2",
-                                          saveObj = FALSE)
+  mergedData <- mergeUniformCellsClusters(
+    objCOTAN = obj,
+    clusters = splitData[["clusters"]],
+    checkers = checker,
+    batchSize = 1L,
+    executionOptions = executionOptions,
+    clusterTreeOptions = ClusterTreeOptions(
+      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+      distance = "cosine",
+      hclustMethod = "ward.D2"
+    ),
+    saveObj = FALSE
+  )
 
   merge.clusters.test <- mergedData[["clusters"]]
   saveRDS(merge.clusters.test,

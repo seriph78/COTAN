@@ -197,10 +197,13 @@ exec <- ExecutionOptions(
   chunkSize = 1024L
 )
 
+cleanOpt <- CleaningOptions()
+
 obj <- proceedToCoex(
   obj,
   calcCoex = FALSE,
-  executionOptions = exec
+  executionOptions = exec,
+  cleaningOptions = cleanOpt
 )
 ```
 
@@ -288,15 +291,16 @@ splitClusters <- getClusters(obj, clName = "split")
 
 splitClusters <- niceFactorLevels(splitClusters)
 
-c(splitClusters, splitCoexDF, perm) %<-% 
+c(splitClusters, splitCoexDF, perm) %<-%
   reorderClusterization(
     obj,
     clName = "split",
-    reverse = FALSE, 
+    reverse = FALSE,
     coexDF = NULL,
-    useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
-    distance = NULL,
-    hclustMethod = "ward.D2"
+    clusterTreeOptions = ClusterTreeOptions(
+      useDEA = TRUE, # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+      hclustMethod = "ward.D2"
+    )
   )
 
 mergeClusters <- getClusters(obj, clName = "merge")
@@ -383,7 +387,9 @@ treePlot <-
     obj,
     kCuts = 2L,
     clName = "split",
-    useDEA = TRUE  # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+    clusterTreeOptions = ClusterTreeOptions(
+      useDEA = TRUE # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+    )
   )[["dend"]]
 
 plot(treePlot)
@@ -455,7 +461,10 @@ c(mergeHeatmap, mergeScoreDF, mergePValueDF) %<-%
     clName = "merge",
     kCuts = 3L,
     adjustmentMethod = "bonferroni",
-    condNameList = list("origin")
+    condNameList = list("origin"),
+    clusterTreeOptions = ClusterTreeOptions(
+      useDEA = TRUE # T: Cosine dist. on DEA, F: Eucl. dist. on avg. zero/one
+    )
   )
 
 ComplexHeatmap::draw(mergeHeatmap)
@@ -539,7 +548,12 @@ cellsToDrop <- getCells(obj)[!(splitClusters %in% c("03", "05"))]
 
 obj2 <- dropGenesCells(obj, cells = cellsToDrop)
 
-obj2 <- proceedToCoex(obj2, calcCoex = FALSE)
+obj2 <- proceedToCoex(
+  obj2,
+  calcCoex = FALSE,
+  executionOptions = exec,
+  cleaningOptions = cleanOpt
+)
 
 table(getClusters(obj2, clName = "split"))
 ```

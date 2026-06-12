@@ -118,7 +118,8 @@ controls. This is the preferred interface for new code.}
 \item{enforceNuAverageToOne}{a Boolean on whether to keep the average \code{nu}
 equal to 1}
 
-\item{retLog}{When \code{TRUE} calls \code{\link[=getLogNormData]{getLogNormData()}}, calls \code{\link[=getNuNormData]{getNuNormData()}}}
+\item{retLog}{When \code{TRUE}, return \code{\link[=getLogNormData]{getLogNormData()}}; otherwise return
+\code{\link[=getNuNormData]{getNuNormData()}}.}
 }
 \value{
 \code{estimateLambdaLinear()} returns the updated \code{COTAN} object

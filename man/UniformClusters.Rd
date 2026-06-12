@@ -29,12 +29,14 @@ cellsUniformClustering(
   deviceStr = "cuda",
   useDEA = TRUE,
   distance = NULL,
+  hclustMethod = "ward.D2",
+  clusterTreeOptions = NULL,
   useCoexEigen = FALSE,
   dataMethod = "",
   genesSel = "HVG_Seurat",
   numGenes = 2000L,
   numReducedComp = 25L,
-  hclustMethod = "ward.D2",
+  reductionOptions = NULL,
   initialClusters = NULL,
   minimumUTClusterSize = 50L,
   initialIteration = 1L,
@@ -68,6 +70,7 @@ mergeUniformCellsClusters(
   useDEA = TRUE,
   distance = NULL,
   hclustMethod = "ward.D2",
+  clusterTreeOptions = NULL,
   allCheckResults = data.frame(),
   initialIteration = 1L,
   saveObj = TRUE,
@@ -87,8 +90,8 @@ only for the title).}
 \item{statType}{type of statistic to be used. Default is "S": Pearson's
 chi-squared test statistics. "G" is G-test statistics}
 
-\item{GDIThreshold}{legacy. The threshold level that is used in a
-\link[=SimpleGDIUniformityCheck-class]{SimpleGDIUniformityCheck}. It defaults to \eqn{1.43}}
+\item{GDIThreshold}{Threshold value used by uniformity-related \code{GDI} checks
+or plots. See the function usage for the exact default.}
 
 \item{GDIIn}{when the \code{GDI} data frame was already calculated, it can be put
 here to speed up the process (default is \code{NULL})}
@@ -123,6 +126,13 @@ faster but less precise.}
 \code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
 \code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
 
+\item{hclustMethod}{Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}. See
+function usage for the default.}
+
+\item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
+distances between clusters are computed and how the hierarchical tree is
+built.}
+
 \item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
 onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
 the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
@@ -138,8 +148,8 @@ ignored when an explicit list of genes has been passed in}
 
 \item{numReducedComp}{the number of calculated \strong{RDM} components}
 
-\item{hclustMethod}{It defaults is \code{"ward.D2"} but can be any of the methods
-defined by the \code{\link[stats:hclust]{stats::hclust()}} function.}
+\item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
+reduction controls. This is the preferred interface for new code.}
 
 \item{initialClusters}{an existing \emph{clusterization} to use as starting point:
 the \emph{clusters} deemed \strong{uniform} will be kept and the remaining cells will
@@ -290,14 +300,18 @@ stopifnot(identical(
   1.397
 ))
 
+redOpt <- ReductionOptions(
+  useCoexEigen = TRUE,
+  dataMethod = "LogLikelihood",
+  numComp = 50L,
+  genesSel = "HGDI",
+  numGenes = 2000L
+)
+
 splitList <- cellsUniformClustering(
   objCOTAN,
   executionOptions = exec,
-  dataMethod = "LogLikelihood",
-  useCoexEigen = TRUE,
-  genesSel = "HGDI",
-  numGenes = 2000L,
-  numReducedComp = 50L,
+  reductionOptions = redOpt,
   initialResolution = 0.8,
   checker = checker2,
   saveObj = FALSE
@@ -335,8 +349,7 @@ mergedList <- mergeUniformCellsClusters(
   checkers = c(checker, checker2),
   clusters = clusters,
   executionOptions = exec,
-  distance = "cosine",
-  hclustMethod = "ward.D2",
+  clusterTreeOptions = ClusterTreeOptions(distance = "cosine"),
   saveObj = FALSE
 )
 

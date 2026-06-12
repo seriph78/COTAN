@@ -19,8 +19,11 @@
 #' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
 #'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
 #'   [parallelDist::parDist()]
-#' @param hclustMethod It defaults is `"ward.D2"` but can be any of the methods
-#'   defined by the [stats::hclust()] function.
+#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
+#'   function usage for the default.
+#' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
+#'   distances between clusters are computed and how the hierarchical tree is
+#'   built.
 #'
 #' @returns `reorderClusterization()` returns a `list` with 3 elements:
 #'   * `"clusters"` the newly reordered cluster labels array
@@ -29,28 +32,40 @@
 #'
 #' @export
 #'
+#' @importFrom assertthat assert_that
+#'
 #' @importFrom rlang set_names
-#' @importFrom rlang is_null
 #'
 #' @importFrom stats hclust
 #' @importFrom stats as.dist
 #'
 #' @rdname HandlingClusterizations
 #'
-
 reorderClusterization <- function(objCOTAN,
                                   clName = "", clusters = NULL, coexDF = NULL,
                                   reverse = FALSE, keepMinusOne = TRUE,
                                   useDEA = TRUE, distance = NULL,
-                                  hclustMethod = "ward.D2") {
+                                  hclustMethod = "ward.D2",
+                                  clusterTreeOptions = NULL) {
+  clusterTreeOptions <- resolveClusterTreeOptions(
+    useDEA = useDEA,
+    distance = distance,
+    hclustMethod = hclustMethod,
+    clusterTreeOptions = clusterTreeOptions
+  )
+
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
     normalizeNameAndLabels(objCOTAN, name = clName,
                            labels = clusters, isCond = FALSE)
 
-  clDist <- distancesBetweenClusters(objCOTAN, clName = clName,
-                                     clusters = clusters, coexDF = coexDF,
-                                     useDEA = useDEA, distance = distance)
+  clDist <- distancesBetweenClusters(
+    objCOTAN,
+    clName = clName,
+    clusters = clusters,
+    coexDF = coexDF,
+    clusterDistanceOptions = clusterTreeOptions
+  )
 
   dummyList <- list("clusters" = factor(clusters), "coex" = coexDF,
                     "permMap" = set_names(labels(clDist), labels(clDist)))
@@ -69,7 +84,7 @@ reorderClusterization <- function(objCOTAN,
     rm(dummyList)
   }
 
-  hc <- hclust(clDist, method = hclustMethod)
+  hc <- hclust(clDist, method = clusterTreeOptions@hclustMethod)
 
   # we exploit the rank(x) == order(order(x))
   perm <- order(hc[["order"]])

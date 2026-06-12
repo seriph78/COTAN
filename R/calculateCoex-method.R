@@ -197,9 +197,9 @@ getDataMatrix <- function(objCOTAN,
 #'   of the contingency table
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param actOnCells Boolean - when `TRUE` the function works for the cells,
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param asDspMatrices Boolean - when `TRUE` the function will return only
+#' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
 #'
 #' @returns `observedContingencyTablesYY()` returns a `list` with:
@@ -259,9 +259,9 @@ observedContingencyTablesYY <- function(objCOTAN,
 #'   returned
 #' @param zeroOne the raw count matrix projected to `0` or `1`. If not given the
 #'   appropriate one will be calculated on the fly
-#' @param actOnCells Boolean - when `TRUE` the function works for the cells,
+#' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param asDspMatrices Boolean - when `TRUE` the function will return only
+#' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
 #'
 #' @returns `observedPartialContingencyTablesYY()` returns a `list` with:
@@ -529,7 +529,9 @@ observedPartialContingencyTables <-
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @returns `expectedContingencyTablesNN()` returns a `list` with:
 #'   * `expectedNN` the *No/No* expected contingency table as `matrix`
@@ -601,7 +603,9 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @returns `expectedPartialContingencyTablesNN()` returns a `list` with:
 #'   * `expectedNN` the *No/No* expected contingency table as `matrix`,
@@ -683,7 +687,9 @@ expectedPartialContingencyTablesNN <-
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @return `expectedContingencyTables()` returns the expected contingency tables
 #'   as named `list` with elements:
@@ -798,7 +804,9 @@ expectedContingencyTables <- function(objCOTAN,
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @return `expectedPartialContingencyTables()` returns the expected contingency
 #'   tables, restricted to the selected columns, as named `list` with elements:
@@ -1303,7 +1311,9 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     executionOptions = ExecutionOptions()
   ) {
 
-    c(., useTorch, deviceStr) %<-% resolveExecutionOptions(executionOptions)
+    executionValues <- resolveExecutionOptions(executionOptions)
+    useTorch <- executionValues[["useTorch"]]
+    deviceStr <- executionValues[["deviceStr"]]
 
     coex <- NULL
     problematicPairsFraction <- NA
@@ -1360,9 +1370,9 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #' @param returnPPFract Boolean; when `TRUE` the function returns the fraction
 #'   of genes/cells pairs for which the *expected contingency table* is smaller
 #'   than \eqn{0.5}. Default is FALSE
-#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
-#'   library to run the matrix calculations. Otherwise, or when the library is
-#'   not available will run the slower legacy code
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #' @param deviceStr On the `torch` library enforces which device to use to run
 #'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
@@ -1459,7 +1469,9 @@ setMethod(
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Boolean; deprecated: always TRUE
+#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
+#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
+#'   is deprecated and always treated as `TRUE`
 #'
 #' @returns `calculatePartialCoex()` returns the asked section of the `COEX`
 #'   matrix
@@ -1834,6 +1846,8 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
+#' @param reductionOptions A `ReductionOptions` object bundling dimensionality
+#'   reduction controls. This is the preferred interface for new code.
 #'
 #' @returns `calculateReducedDataMatrix()` returns the reduced matrix. The
 #'   returned `matrix` has dimensions: (number of cells, number of components)
@@ -1849,22 +1863,64 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #'
 #' @rdname CalculatingCOEX
 #'
+
 calculateReducedDataMatrix <-
   function(objCOTAN, useCoexEigen = FALSE,
            dataMethod = "", numComp = 25L,
-           genesSel = "", numGenes = 2000L) {
+           genesSel = "", numGenes = 2000L,
+           reductionOptions = NULL) {
+    if (is.null(reductionOptions)) {
+      reductionOptions <- legacyReductionOptions(
+        useCoexEigen = useCoexEigen,
+        dataMethod = dataMethod,
+        numComp = numComp,
+        genesSel = genesSel,
+        numGenes = numGenes
+      )
+    } else {
+      assert_that(
+        methods::is(reductionOptions, "ReductionOptions"),
+        msg = "`reductionOptions` must be a `ReductionOptions` object"
+      )
+
+      assert_that(
+        identical(useCoexEigen, FALSE),
+        identical(dataMethod, ""),
+        identical(numComp, 25L),
+        identical(genesSel, ""),
+        identical(numGenes, 2000L),
+        msg = paste(
+          "Do not mix `reductionOptions` with the legacy reduction arguments",
+          "`useCoexEigen`, `dataMethod`, `numComp`, `genesSel`, and",
+          "`numGenes`."
+        )
+      )
+    }
+
+    return(.calculateReducedDataMatrixImpl(
+      objCOTAN = objCOTAN,
+      reductionOptions = reductionOptions
+    ))
+  }
+
+
+.calculateReducedDataMatrixImpl <- function(objCOTAN, reductionOptions) {
   startTime <- Sys.time()
 
   logThis("Elaborating Reduced dimensionality Data Matrix - START",
           logLevel = 2L)
 
-  numComp <- min(numComp, getNumGenes(objCOTAN))
+  useCoexEigen <- reductionOptions@useCoexEigen
+  dataMethod <- reductionOptions@dataMethod
+  numComp <- min(reductionOptions@numComp, getNumGenes(objCOTAN))
+  genesSel <- reductionOptions@genesSel
+  numGenes <- reductionOptions@numGenes
 
   cellsRDM <- NULL
   if (isTRUE(useCoexEigen)) {
     logThis("Elaborating COEX Eigen Vectors - START", logLevel = 3L)
 
-    # calculate the most relenvat eigen-vectors of the COEX matrix
+    # calculate the most relevant eigen-vectors of the COEX matrix
     res <- eigs_sym(as.matrix(getGenesCoex(objCOTAN, zeroDiagonal = FALSE)),
                     k = numComp, which = "LM")
     eigenVectors <- res$vectors[, seq_len(numComp)]
@@ -1873,9 +1929,9 @@ calculateReducedDataMatrix <-
 
     logThis("Elaborating COEX Eigen Vectors - DONE", logLevel = 3L)
 
-    # retrieve the the data matrix and project it onto the coex eigen-space
+    # retrieve the data matrix and project it onto the coex eigen-space
     dataMatrix <- t(eigenVectors) %*%
-                    getDataMatrix(objCOTAN, dataMethod = dataMethod)
+      getDataMatrix(objCOTAN, dataMethod = dataMethod)
 
     # re-scale in the cells direction
     cellsRDM <- t(scale(dataMatrix, center = FALSE, scale = TRUE))

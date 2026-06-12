@@ -265,6 +265,8 @@ UMAPPlot <- function(dataIn,
 #'   [getSelectedGenes()] for more details.
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
+#' @param reductionOptions A `ReductionOptions` object bundling dimensionality
+#'   reduction controls. This is the preferred interface for new code.
 #' @param colors an `array` of colors to use in the plot. If not sufficient
 #'   colors are given it will complete the list using colors from
 #'   [getColorsVector()]
@@ -294,6 +296,7 @@ cellsUMAPPlot <- function(objCOTAN,
                           numComp = 25L,
                           genesSel = "",
                           numGenes = 200L,
+                          reductionOptions = NULL,
                           colors = NULL,
                           numNeighbors = 0L,
                           minPointsDist = NA) {
@@ -313,18 +316,59 @@ cellsUMAPPlot <- function(objCOTAN,
   assert_that(inherits(clusters, "factor"),
               msg = "Internal error - clusters must be factors")
 
-  if (isEmptyName(genesSel)) {
-    genesSel <- "HGDI" # this default could differ from the one in the selector
+  if (is.null(reductionOptions)) {
+    if (isEmptyName(genesSel)) {
+      genesSel <- "HGDI" # this default could differ from the one in the selector
+    }
+
+    if (isEmptyName(dataMethod)) {
+      dataMethod <- "LogNormalized"
+    }
+
+    reductionOptions <- legacyReductionOptions(
+      useCoexEigen = useCoexEigen,
+      dataMethod = dataMethod,
+      numComp = numComp,
+      genesSel = genesSel,
+      numGenes = numGenes
+    )
+  } else {
+    assert_that(
+      methods::is(reductionOptions, "ReductionOptions"),
+      msg = "`reductionOptions` must be a `ReductionOptions` object"
+    )
+
+    assert_that(
+      identical(useCoexEigen, FALSE),
+      identical(dataMethod, ""),
+      identical(numComp, 25L),
+      identical(genesSel, ""),
+      identical(numGenes, 200L),
+      msg = paste(
+        "Do not mix `reductionOptions` with the legacy reduction arguments",
+        "`useCoexEigen`, `dataMethod`, `numComp`, `genesSel`, and",
+        "`numGenes`."
+      )
+    )
+
+    if (length(reductionOptions@genesSel) == 1L &&
+        isEmptyName(reductionOptions@genesSel)) {
+      reductionOptions@genesSel <- "HGDI"
+    }
+
+    if (isEmptyName(reductionOptions@dataMethod)) {
+      reductionOptions@dataMethod <- "LogNormalized"
+    }
   }
 
-  if (isEmptyName(dataMethod)) {
-    dataMethod <- "LogNormalized"
-  }
+  useCoexEigen <- reductionOptions@useCoexEigen
+  dataMethod <- reductionOptions@dataMethod
+  genesSel <- reductionOptions@genesSel
 
   cellsRDM <- calculateReducedDataMatrix(
-    objCOTAN, useCoexEigen = useCoexEigen,
-    dataMethod = dataMethod, numComp = numComp,
-    genesSel = genesSel, numGenes = numGenes)
+    objCOTAN,
+    reductionOptions = reductionOptions
+  )
 
   tailMsg <-
     case_when(
