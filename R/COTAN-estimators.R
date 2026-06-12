@@ -165,8 +165,8 @@ setMethod(
 
 
 # local utility wrapper for parallel estimation of dispersion
-runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
-                          threshold, maxIterations, cores, useBisection) {
+.runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
+                           threshold, maxIterations, cores, useBisection) {
 
   ## forward caller that allows for logging progress
   worker <- function(genesBatch, sumZeros, lambda, nu,
@@ -259,55 +259,17 @@ runDispSolver <- function(genesBatches, sumZeros, lambda, nu,
 
 ### ------ estimateDispersionViaSolver -----
 
-#' @aliases estimateDispersionViaSolver
-#' @aliases estimateDispersionBisection
-#'
-#' @details `estimateDispersionViaSolver()` estimates the negative binomial
-#'   dispersion factor for each gene (`dispersion`). Determines the value such
-#'   that, for each gene, the probability of zero count matches the number of
-#'   observed zeros. It assumes [estimateNuLinear()] being already run.
-#'
-#' @param objCOTAN a `COTAN` object
-#' @param threshold minimal solution precision
-#' @param cores number of cores to use. Default is 1.
-#' @param maxIterations max number of iterations (avoids infinite loops)
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
-#'
-#' @returns `estimateDispersionViaSolver()` returns the updated `COTAN` object
-#'
-#' @importFrom rlang is_null
-#' @importFrom rlang is_empty
-#'
-#' @importFrom assertthat assert_that
-#'
-#' @importFrom parallel mclapply
-#' @importFrom parallel splitIndices
-#'
-#' @importFrom parallelly supportsMulticore
-#' @importFrom parallelly availableCores
-#'
-#' @importFrom zeallot %<-%
-#' @importFrom zeallot %->%
-#'
-#' @export
-#'
-#' @examples
-#' objCOTAN <- estimateDispersionViaSolver(objCOTAN, cores = 6L)
-#' dispersion <- getDispersion(objCOTAN)
-#'
-#' @rdname ParametersEstimations
-#'
-setMethod(
-  "estimateDispersionViaSolver",
-  "COTAN",
-  function(objCOTAN, threshold = 0.001, cores = 1L,
-           maxIterations = 100L, chunkSize = 1024L) {
+.estimateDispersionViaSolverImpl <-
+  function(objCOTAN,
+           threshold = 0.001,
+           maxIterations = 100L,
+           executionOptions) {
     startTime <- Sys.time()
 
     logThis("Estimate `dispersion`: START", logLevel = 2L)
 
-    cores <- handleMultiCore(cores)
+    c(cores, ., ., chunkSize) %<-%
+      resolveExecutionOptions(executionOptions)
 
     genes <- getGenes(objCOTAN)
     sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)[genes]
@@ -333,7 +295,7 @@ setMethod(
             logLevel = 3L)
 
     dispList <- tryCatch(
-      runDispSolver(
+      .runDispSolver(
         spGenes,
         sumZeros      = sumZeros,
         lambda        = lambda,
@@ -350,7 +312,7 @@ setMethod(
         warning(msg)
         logThis(msg, logLevel = 3L)
 
-        runDispSolver(
+        .runDispSolver(
           spGenes,
           sumZeros      = sumZeros,
           lambda        = lambda,
@@ -384,29 +346,138 @@ setMethod(
                   "| min:", min(getDispersion(objCOTAN)[goodPos]),
                   "| max:", max(getDispersion(objCOTAN)[goodPos]),
                   "| % negative:", (sum(getDispersion(objCOTAN) < 0.0) * 100.0 /
-                                    getNumGenes(objCOTAN))),
+                                      getNumGenes(objCOTAN))),
             logLevel = 1L)
 
     return(objCOTAN)
   }
+
+
+#' @aliases estimateDispersionViaSolver
+#' @aliases estimateDispersionBisection
+#'
+#' @details `estimateDispersionViaSolver()` estimates the negative binomial
+#'   dispersion factor for each gene (`dispersion`). Determines the value such
+#'   that, for each gene, the probability of zero count matches the number of
+#'   observed zeros. It assumes [estimateNuLinear()] being already run.
+#'
+#' @param objCOTAN a `COTAN` object
+#' @param threshold minimal solution precision
+#' @param cores number of cores to use. Default is 1.
+#' @param maxIterations max number of iterations (avoids infinite loops)
+#' @param chunkSize number of elements to solve in batch in a single core.
+#'   Default is 1024.
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
+#'
+#' @returns `estimateDispersionViaSolver()` returns the updated `COTAN` object
+#'
+#' @importFrom rlang is_null
+#' @importFrom rlang is_empty
+#'
+#' @importFrom assertthat assert_that
+#'
+#' @importFrom parallel mclapply
+#' @importFrom parallel splitIndices
+#'
+#' @importFrom parallelly supportsMulticore
+#' @importFrom parallelly availableCores
+#'
+#' @importFrom zeallot %<-%
+#' @importFrom zeallot %->%
+#'
+#' @export
+#'
+#' @examples
+#' objCOTAN <- estimateDispersionViaSolver(
+#'   objCOTAN,
+#'   executionOptions = ExecutionOptions(cores = 6L, chunkSize = 1024L)
+#' )
+#' dispersion <- getDispersion(objCOTAN)
+#'
+#' @rdname ParametersEstimations
+#'
+setMethod(
+  "estimateDispersionViaSolver",
+  signature(objCOTAN = "COTAN", executionOptions = "missing"),
+  function(objCOTAN,
+           threshold = 0.001,
+           cores = 1L,
+           maxIterations = 100L,
+           chunkSize = 1024L,
+           executionOptions = NULL) {
+    executionOptions <-
+      legacyExecutionOptions(cores = cores, chunkSize = chunkSize)
+
+    .estimateDispersionViaSolverImpl(
+      objCOTAN = objCOTAN,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      executionOptions = executionOptions
+    )
+  }
 )
 
-# backward compatibility alias
+
+#' @details Alternative interface using an `ExecutionOptions` object.
+#'
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
+#'
+#' @rdname ParametersEstimations
+#'
+#' @aliases estimateDispersionViaSolver,COTAN,ExecutionOptions-method
+setMethod(
+  "estimateDispersionViaSolver",
+  signature(objCOTAN = "COTAN", executionOptions = "ExecutionOptions"),
+  function(objCOTAN,
+           threshold = 0.001,
+           cores = 1L,
+           maxIterations = 100L,
+           chunkSize = 1024L,
+           executionOptions = NULL) {
+
+    assert_that(
+      identical(cores, 1L),
+      identical(chunkSize, 1024L),
+      msg = paste(
+        "Do not mix `executionOptions` with",
+        "the legacy execution arguments `cores` and `chunkSize`."
+      )
+    )
+
+    .estimateDispersionViaSolverImpl(
+      objCOTAN = objCOTAN,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      executionOptions = executionOptions
+    )
+  }
+)
+
+
+#' @details Backward compatibility alias for [estimateDispersionViaSolver()].
+#'   Despite the name, it will call the new solver.
+#'
+#' @rdname ParametersEstimations
+#'
 estimateDispersionBisection <-
   function(objCOTAN, threshold = 0.001, cores = 1L,
            maxIterations = 100L, chunkSize = 1024L) {
-    return(estimateDispersionViaSolver(objCOTAN = objCOTAN,
-                                       threshold = threshold,
-                                       cores = cores,
-                                       maxIterations = maxIterations,
-                                       chunkSize = chunkSize))
+    estimateDispersionViaSolver(
+      objCOTAN = objCOTAN,
+      cores = cores,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      chunkSize = chunkSize
+    )
   }
 
 
 
 # local utility wrapper for parallel estimation of nu
-runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
-                        initialGuess, threshold, maxIterations, cores) {
+.runNuSolver <- function(cellsBatches, sumZeros, lambda, dispersion,
+                         initialGuess, threshold, maxIterations, cores) {
 
   ## forward caller that allows for logging progress
   worker <- function(batch, sumZeros, lambda, dispersion,
@@ -562,14 +633,15 @@ setMethod(
     logThis(paste0("Executing ", length(spCells), " cells batches"),
             logLevel = 3L)
 
-    nuList <- runNuSolver(spCells,
-                          sumZeros = sumZeros,
-                          lambda = lambda,
-                          dispersion = dispersion,
-                          initialGuess = initialGuess,
-                          threshold = threshold,
-                          maxIterations = maxIterations,
-                          cores = cores)
+    nuList <- .runNuSolver(
+      spCells,
+      sumZeros = sumZeros,
+      lambda = lambda,
+      dispersion = dispersion,
+      initialGuess = initialGuess,
+      threshold = threshold,
+      maxIterations = maxIterations,
+      cores = cores)
 
     gc()
 

@@ -196,14 +196,18 @@ all the contingency tables are computed and used to get
 the statistics necessary to `COEX` evaluation and storing
 
 ```{r calculate-and-store-coex-matrix}
-obj <-
-  proceedToCoex(
-    obj,
-    calcCoex = TRUE,
-    optimizeForSpeed = TRUE,
-    cores = 3L,
-    deviceStr = "cuda"
-  )
+exec <- ExecutionOptions(
+  cores = 3L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
+  chunkSize = 1024L
+)
+
+obj <- proceedToCoex(
+  obj,
+  calcCoex = TRUE,
+  executionOptions = exec
+)
 ```
 
 ### Get data tables and stored `COEX` 
@@ -241,7 +245,7 @@ To calculate and store the *Global Differentiation Index* (`GDI`)
 use the following:
 
 ```{r calculate-and-store-gdi}
-gdiDF <- calculateGDI(obj, cores = 3L)
+gdiDF <- calculateGDI(obj, executionOptions = exec)
 
 # Show the most *differentially expressed* genes
 perm <- order(gdiDF[["GDI"]], decreasing = TRUE)
@@ -306,7 +310,8 @@ then we can choose which sets to use in the function parameter sets
 (for example, from 1 to 3).
 
 ```{r coex-heatmap-plot-for-selected-genes}
-plot(heatmapPlot(obj, genesLists = genesLists, sets = 1L:3L, cores = 3L))
+plot(heatmapPlot(obj, genesLists = genesLists,
+                 sets = 1L:3L, executionOptions = exec))
 ```
 
 
@@ -331,7 +336,7 @@ genesHeatmapPlot(
   primaryMarkers = layersMarkers,
   pValueThreshold = 0.0001,
   symmetric = TRUE,
-  cores = 3L
+  executionOptions = exec
 )
 ```
 
@@ -342,7 +347,7 @@ genesHeatmapPlot(
   secondaryMarkers = c("Gabra3", "Meg3", "Cux1", "Neurod6"),
   pValueThreshold = 0.001,
   symmetric = FALSE,
-  cores = 3L
+  executionOptions = exec
 )
 ```
 

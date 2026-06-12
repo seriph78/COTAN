@@ -110,6 +110,8 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
 #' @param cores number of cores to use. Default is 1.
 #' @param chunkSize number of elements to solve in batch in a single core.
 #'   Default is 1024.
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @returns `calculateGDIGivenS()` returns a `vector` with the `GDI` data for
 #'   each column of the input
@@ -127,10 +129,40 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
 #' @rdname GenesStatistics
 #'
 
-calculateGDIGivenS  <- function(S,
-                                rowsFraction = 0.05,
-                                cores        = 1L,
-                                chunkSize    = 1024L) {
+calculateGDIGivenS <- function(S,
+                               rowsFraction = 0.05,
+                               cores = 1L,
+                               chunkSize = 1024L,
+                               executionOptions = NULL) {
+  if (is.null(executionOptions)) {
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      chunkSize = chunkSize
+    )
+  } else {
+    assert_that(
+      identical(cores, 1L),
+      identical(chunkSize, 1024L),
+      msg = paste(
+        "Do not mix `executionOptions` with",
+        "the legacy execution arguments `cores` and `chunkSize`."
+      )
+    )
+  }
+
+  GDI <- .calculateGDIGivenSImpl(
+    S = S,
+    rowsFraction = rowsFraction,
+    executionOptions = executionOptions
+  )
+
+  return(GDI)
+}
+
+# Private implementation
+.calculateGDIGivenSImpl <- function(S,
+                                    rowsFraction = 0.05,
+                                    executionOptions = ExecutionOptions()) {
   startTime <- Sys.time()
 
   logThis("Calculate `GDI`: START", logLevel = 2L)
@@ -139,7 +171,9 @@ calculateGDIGivenS  <- function(S,
   assert_that(length(dim(S)) == 2L)
   assert_that(rowsFraction > 0.0, rowsFraction <= 1.0)
 
-  cores <- handleMultiCore(cores)
+  options <- resolveExecutionOptions(executionOptions)
+  cores <- handleMultiCore(options[["cores"]])
+  chunkSize <- options[["chunkSize"]]
 
   genes <- colnames(S)
 
@@ -215,6 +249,8 @@ calculateGDIGivenCorr <-
 #' @param cores number of cores to use. Default is 1.
 #' @param chunkSize number of elements to solve in batch in a single core.
 #'   Default is 1024.
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @returns `calculateGDI()` returns a `data.frame` with:
 #'  * `"sum.raw.norm"` the sum of the normalized data rows
@@ -233,10 +269,40 @@ calculateGDIGivenCorr <-
 #'
 
 calculateGDI <- function(objCOTAN,
-                         statType     = "S",
+                         statType = "S",
                          rowsFraction = 0.05,
-                         cores        = 1L,
-                         chunkSize    = 1024L) {
+                         cores = 1L,
+                         chunkSize = 1024L,
+                         executionOptions = NULL) {
+  if (is.null(executionOptions)) {
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      chunkSize = chunkSize
+    )
+  } else {
+    assert_that(
+      identical(cores, 1L),
+      identical(chunkSize, 1024L),
+      msg = paste(
+        "Do not mix `executionOptions` with",
+        "the legacy execution arguments `cores` and `chunkSize`."
+      )
+    )
+  }
+
+  .calculateGDIImpl(
+    objCOTAN = objCOTAN,
+    statType = statType,
+    rowsFraction = rowsFraction,
+    executionOptions = executionOptions
+  )
+}
+
+# Private implementation
+.calculateGDIImpl <- function(objCOTAN,
+                              statType = "S",
+                              rowsFraction = 0.05,
+                              executionOptions = ExecutionOptions()) {
   startTime <- Sys.time()
 
   logThis("Calculate GDI dataframe: START", logLevel = 2L)
@@ -251,8 +317,10 @@ calculateGDI <- function(objCOTAN,
     stop("Unrecognised stat type: must be either 'S' or 'G'")
   }
 
-  GDI <- calculateGDIGivenS(S, rowsFraction = rowsFraction,
-                            cores = cores, chunkSize = chunkSize)
+  GDI <- calculateGDIGivenS(
+    S,
+    rowsFraction = rowsFraction,
+    executionOptions = executionOptions)
 
   gc()
 
@@ -353,6 +421,8 @@ runPValueCalc <- function(genesBatches, S, cores) {
 #' @param cores number of cores to use. Default is 1.
 #' @param chunkSize number of elements to solve in batch in a single core.
 #'   Default is 1024.
+#' @param executionOptions An `ExecutionOptions` object bundling the execution
+#'   controls. This is the preferred interface for new code.
 #'
 #' @return `calculatePValue()` returns a *p-value* `matrix` as `dspMatrix`
 #'
@@ -370,7 +440,39 @@ calculatePValue <- function(objCOTAN,
                             geneSubsetCol = vector(mode = "character"),
                             geneSubsetRow = vector(mode = "character"),
                             cores         = 1L,
-                            chunkSize     = 1024L) {
+                            chunkSize     = 1024L,
+                            executionOptions = NULL) {
+  if (is.null(executionOptions)) {
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      chunkSize = chunkSize
+    )
+  } else {
+    assert_that(
+      identical(cores, 1L),
+      identical(chunkSize, 1024L),
+      msg = paste(
+        "Do not mix `executionOptions` with",
+        "the legacy execution arguments `cores` and `chunkSize`."
+      )
+    )
+  }
+
+  .calculatePValueImpl(
+    objCOTAN = objCOTAN,
+    statType = statType,
+    geneSubsetCol = geneSubsetCol,
+    geneSubsetRow = geneSubsetRow,
+    executionOptions = executionOptions
+  )
+}
+
+# Private implementation
+.calculatePValueImpl <- function(objCOTAN,
+                                 statType = "S",
+                                 geneSubsetCol = vector(mode = "character"),
+                                 geneSubsetRow = vector(mode = "character"),
+                                 executionOptions = ExecutionOptions()) {
   startTime <- Sys.time()
 
   geneSubsetCol <- handleNamesSubsets(getGenes(objCOTAN), geneSubsetCol)
@@ -400,7 +502,9 @@ calculatePValue <- function(objCOTAN,
   logThis(paste("Get p-values", strCol, "on columns and", strRow, "on rows"),
           logLevel = 2L)
 
-  cores <- handleMultiCore(cores)
+  options <- resolveExecutionOptions(executionOptions)
+  cores <- handleMultiCore(options[["cores"]])
+  chunkSize <- options[["chunkSize"]]
 
   ##  split genes into batches
   spIdx <- parallel::splitIndices(length(geneSubsetCol),

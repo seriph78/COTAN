@@ -41,9 +41,6 @@ NULL
 #' @param numGenes the number of genes to select using the above method. Will be
 #'   ignored when an explicit list of genes has been passed in
 #' @param numReducedComp the number of calculated **RDM** components
-#' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
 #'
 #' @returns a list with:
 #'   * `"SeuratClusters"` a `Seurat` *clusterization*
@@ -70,9 +67,7 @@ seuratClustering <- function(objCOTAN,
                              dataMethod,
                              genesSel,
                              numGenes,
-                             numReducedComp,
-                             cores = 1L,
-                             chunkSize = 1024L) {
+                             numReducedComp) {
   tryCatch({
     startTime <- Sys.time()
 
@@ -219,6 +214,8 @@ seuratClustering <- function(objCOTAN,
 #'   plots to file
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
+#' @param executionOptions optional `ExecutionOptions` object collecting
+#'   execution-related parameters.
 #'
 #' @returns `cellsUniformClustering()` returns a `list` with 2 elements:
 #'   * `"clusters"` the newly found cluster labels array
@@ -274,7 +271,26 @@ cellsUniformClustering <- function(objCOTAN,
                                    minimumUTClusterSize = 50L,
                                    initialIteration = 1L,
                                    saveObj = TRUE,
-                                   outDir = ".") {
+                                   outDir = ".",
+                                   executionOptions = NULL) {
+  if (is.null(executionOptions)) {
+    executionOptions <- legacyExecutionOptions(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
+    )
+  } else {
+    assert_that(
+      identical(cores, 1L),
+      identical(optimizeForSpeed, TRUE),
+      identical(deviceStr, "cuda"),
+      msg = paste(
+        "Do not mix `executionOptions` with the legacy",
+        "execution arguments `cores`, `optimizeForSpeed`, and `deviceStr`."
+      )
+    )
+  }
+
   startTime <- Sys.time()
 
   logThis("Creating cells' uniform clustering: START", logLevel = 2L)
@@ -342,10 +358,13 @@ cellsUniformClustering <- function(objCOTAN,
     if ((str_equal(genesSel, "HGDI") || isTRUE(useCoexEigen)) &&
       !isCoexAvailable(subObj)) {
       subObj <-
-        proceedToCoex(subObj, calcCoex = TRUE, cores = cores,
-                      optimizeForSpeed = optimizeForSpeed,
-                      deviceStr = deviceStr,
-                      saveObj = FALSE, outDir = outDirCond)
+        proceedToCoex(
+          subObj,
+          calcCoex = TRUE,
+          executionOptions = executionOptions,
+          saveObj = FALSE,
+          outDir = outDirCond
+        )
     }
 
     #Step 1
@@ -359,8 +378,7 @@ cellsUniformClustering <- function(objCOTAN,
                        dataMethod = dataMethod,
                        numReducedComp = numReducedComp,
                        genesSel = genesSel,
-                       numGenes = numGenes,
-                       cores = cores)
+                       numGenes = numGenes)
 
     if (is_null(testClusters)) {
       logThis(paste("NO new possible uniform clusters!",
@@ -439,11 +457,9 @@ cellsUniformClustering <- function(objCOTAN,
                                    clusterName = globalClName,
                                    cells = cells,
                                    checker = checker,
-                                   cores = cores,
-                                   optimizeForSpeed = optimizeForSpeed,
-                                   deviceStr = deviceStr,
                                    saveObj = saveObj,
-                                   outDir = splitOutDir),
+                                   outDir = splitOutDir,
+                                   executionOptions = executionOptions),
             error = function(err) {
               logThis(paste("while checking cluster uniformity", err),
                       logLevel = 0L)

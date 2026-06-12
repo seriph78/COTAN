@@ -40,17 +40,38 @@ test_that("Cell Uniform Clustering", {
 
   suppressWarnings({
     splitData <-
-      cellsUniformClustering(objCOTAN = obj,
-                             checker = checker,
-                             initialResolution = initialResolution,
-                             dataMethod = "LogLikelihood",
-                             useCoexEigen = TRUE,
-                             genesSel = "HGDI",
-                             numGenes = 2000L,
-                             numReducedComp = 50L,
-                             cores = 6L, optimizeForSpeed = TRUE,
-                             deviceStr = "cuda", saveObj = TRUE, outDir = tm)
+      cellsUniformClustering(
+        objCOTAN = obj,
+        checker = checker,
+        initialResolution = initialResolution,
+        dataMethod = "LogLikelihood",
+        useCoexEigen = TRUE,
+        genesSel = "HGDI",
+        numGenes = 2000L,
+        numReducedComp = 50L,
+        executionOptions = ExecutionOptions(
+          cores = 6L,
+          optimizeForSpeed = TRUE,
+          deviceStr = "cuda",
+          chunkSize = 1024L
+        ),
+        saveObj = TRUE,
+        outDir = tm
+      )
   })
+
+  expect_error(
+    cellsUniformClustering(
+      objCOTAN = obj,
+      checker = checker,
+      initialResolution = initialResolution,
+      executionOptions = ExecutionOptions(cores = 6L),
+      cores = 6L,
+      saveObj = FALSE,
+      outDir = tm
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
 
   expect_true(file.exists(file.path(tm, "test", "reclustering",
                                     "pdf_umap_1.pdf")))
@@ -78,13 +99,35 @@ test_that("Cell Uniform Clustering", {
   firstCl <- clusters[[1L]]
 
   suppressWarnings({
-      checkerRes <- checkClusterUniformity(
-        objCOTAN = obj, checker = checker,
-        clusterName = paste0("Cluster_", firstCl),
-        cells = names(clusters)[clusters == firstCl],
-        optimizeForSpeed = TRUE, deviceStr = "cuda",
-        saveObj = TRUE, outDir = tm)
+    checkerRes <- checkClusterUniformity(
+      objCOTAN = obj,
+      checker = checker,
+      clusterName = paste0("Cluster_", firstCl),
+      cells = names(clusters)[clusters == firstCl],
+      executionOptions = ExecutionOptions(
+        cores = 6L,
+        optimizeForSpeed = TRUE,
+        deviceStr = "cuda",
+        chunkSize = 1024L
+      ),
+      saveObj = TRUE,
+      outDir = tm
+    )
   })
+
+  expect_error(
+    checkClusterUniformity(
+      objCOTAN = obj,
+      checker = checker,
+      clusterName = paste0("Cluster_", firstCl),
+      cells = names(clusters)[clusters == firstCl],
+      cores = 2L,
+      executionOptions = ExecutionOptions(cores = 2L),
+      saveObj = FALSE,
+      outDir = tm
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
 
   expect_true(checkerRes@isUniform)
   expect_lte(checkerRes@firstCheck@fractionBeyond,

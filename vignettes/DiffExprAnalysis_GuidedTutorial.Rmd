@@ -190,14 +190,18 @@ In this part, the `COTAN` model is calibrated, but the `COEX` matrix
 is not evaluated as it is not strictly necessary
 
 ```{r calculate-and-store-coex-matrix}
-obj <-
-  proceedToCoex(
-    obj,
-    calcCoex = FALSE,
-    optimizeForSpeed = TRUE,
-    cores = 3L,
-    deviceStr = "cuda"
-  )
+exec <- ExecutionOptions(
+  cores = 3L,
+  optimizeForSpeed = TRUE,
+  deviceStr = "cuda",
+  chunkSize = 1024L
+)
+
+obj <- proceedToCoex(
+  obj,
+  calcCoex = FALSE,
+  executionOptions = exec
+)
 ```
 
 # Differential Expression Analysis

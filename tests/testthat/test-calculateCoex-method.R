@@ -98,7 +98,10 @@ test_that("Calculations on genes", {
                       ncol = getNumGenes(obj)),
                ignore_attr = TRUE)
 
-  obj <- estimateDispersionViaSolver(obj, cores = 4L, chunkSize = 4L)
+  obj <- estimateDispersionViaSolver(
+    obj,
+    executionOptions = ExecutionOptions(cores = 4L, chunkSize = 4L)
+  )
 
   c(expectedNN, expectedN) %<-%
     expectedContingencyTablesNN(obj, actOnCells = FALSE, asDspMatrices = TRUE)
@@ -171,7 +174,14 @@ test_that("Calculations on genes", {
                    paste0(10.0 / 55.0))
 
   suppressWarnings({
-    obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
+    obj <- calculateCoex(
+      obj,
+      actOnCells = FALSE,
+      executionOptions = ExecutionOptions(
+        optimizeForSpeed = TRUE,
+        deviceStr = "cuda"
+      )
+    )
   })
 
   torchCoex <- getGenesCoex(obj, zeroDiagonal = FALSE)
@@ -192,6 +202,18 @@ test_that("Calculations on genes", {
   expect_identical(getMetadataElement(obj, datasetTags()[["gbad"]]),
                    paste0(NA))
 
+  expect_error(
+    calculateCoex(
+      obj,
+      actOnCells = FALSE,
+      executionOptions = ExecutionOptions(
+        optimizeForSpeed = FALSE
+      ),
+      optimizeForSpeed = FALSE
+    ),
+    regexp = "Do not mix `executionOptions` with legacy execution arguments"
+  )
+
   genesSample1 <- sample(getNumGenes(obj), 3L)
   partialCoex1 <- calculatePartialCoex(obj, genesSample1)
 
@@ -201,8 +223,7 @@ test_that("Calculations on genes", {
                tolerance = 1e-12)
 
   genesSample2 <- getGenes(obj)[sample(getNumGenes(obj), 3L)]
-  partialCoex2 <- calculatePartialCoex(obj, genesSample2,
-                                       optimizeForSpeed = FALSE)
+  partialCoex2 <- calculatePartialCoex(obj, genesSample2)
 
   expect_equal(partialCoex2, legacyCoex[, sort(genesSample2), drop = FALSE],
                tolerance = 1e-12)
@@ -312,8 +333,7 @@ test_that("Calculations on cells", {
                tolerance = 1e-12)
 
   cellsSample2 <- getCells(obj)[sample(getNumCells(obj), 3L)]
-  partialCoex2 <- calculatePartialCoex(obj, cellsSample2, actOnCells = TRUE,
-                                       optimizeForSpeed = FALSE)
+  partialCoex2 <- calculatePartialCoex(obj, cellsSample2, actOnCells = TRUE)
 
   expect_equal(partialCoex2,
                getCellsCoex(obj, cellsSample2, zeroDiagonal = FALSE),
@@ -379,7 +399,10 @@ test_that("Coex", {
   expect_equal(GDI_S[[3L]],
                c(100L, rep(50L, getNumGenes(obj) - 1L)), ignore_attr = TRUE)
 
-  GDI_S_2 <- calculateGDIGivenS(calculateS(obj))
+  GDI_S_2 <- calculateGDIGivenS(
+    calculateS(obj),
+    executionOptions = ExecutionOptions(cores = 3L, chunkSize = 1024L)
+  )
   GDI_S_3 <- calculateGDIGivenCorr(getGenesCoex(obj),
                                    numDegreesOfFreedom = getNumCells(obj))
 
@@ -433,10 +456,22 @@ test_that("Coex vs saved results", {
                             zeroDiagonal = FALSE),
                coexTest, tolerance = tolerance)
 
-  pval <- calculatePValue(obj,
-                          geneSubsetCol = genesNamesTest,
-                          geneSubsetRow = genesNamesTest,
-                          cores = 3L)
+  pval <- calculatePValue(
+    obj,
+    geneSubsetCol = genesNamesTest,
+    geneSubsetRow = genesNamesTest,
+    executionOptions = ExecutionOptions(cores = 3L)
+  )
+
+  expect_error(
+    calculatePValue(
+      obj,
+      geneSubsetCol = genesNamesTest,
+      cores = 3L,
+      executionOptions = ExecutionOptions(cores = 3L)
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
 
   pValExp <- readRDS(file.path(getwd(), "pvalues.test.RDS"))
   expect_equal(pval, pValExp, tolerance = tolerance)
@@ -466,11 +501,27 @@ test_that("Coex vs saved results", {
                             zeroDiagonal = FALSE),
                coexTest, tolerance = tolerance)
 
-  pval <- calculatePValue(obj3, geneSubsetRow = genesNamesTest, cores = 3L)
+  pval <- calculatePValue(
+    obj3,
+    geneSubsetRow = genesNamesTest,
+    executionOptions = ExecutionOptions(cores = 3L, chunkSize = 1024L)
+  )
 
   expect_equal(pval[, genesNamesTest], pValExp, tolerance = tolerance)
 
-  GDI <- calculateGDI(obj3)[genesNamesTest, ]
+  GDI <- calculateGDI(
+    obj3,
+    executionOptions = ExecutionOptions(cores = 3L, chunkSize = 1024L)
+  )[genesNamesTest, ]
+
+  expect_error(
+    calculateGDI(
+      obj3,
+      cores = 3L,
+      executionOptions = ExecutionOptions(cores = 3L, chunkSize = 1024L)
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
 
   expect_equal(GDI, gdiExp, tolerance = tolerance)
 
@@ -522,17 +573,30 @@ test_that("Coex with negative dispersion genes", {
   expect_true(any(getDispersion(obj) < 0.0))
 
   expect_no_warning({
-    obj <- calculateCoex(obj, optimizeForSpeed = FALSE, deviceStr = "cpu")
+    obj <- calculateCoex(
+      obj,
+      optimizeForSpeed = FALSE,
+      deviceStr = "cpu"
+    )
   })
   coex1 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
   suppressWarnings({
-    obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cpu")
+    obj <- calculateCoex(
+      obj,
+      executionOptions = ExecutionOptions(
+        optimizeForSpeed = TRUE,
+        deviceStr = "cpu"
+      )
+    )
   })
   coex2 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 
   suppressWarnings({
-    obj <- calculateCoex(obj, optimizeForSpeed = TRUE, deviceStr = "cuda")
+    obj <- calculateCoex(
+      obj,
+      executionOptions = ExecutionOptions() # optimize = T, device = "cuda"
+    )
   })
   coex3 <- getGenesCoex(obj, zeroDiagonal = FALSE)
 

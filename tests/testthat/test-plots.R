@@ -1,7 +1,19 @@
 
 prevOptState <- options(parallelly.fork.enable = TRUE)
 
+local_null_pdf <- function() {
+  grDevices::pdf(NULL)
+  on.exit({
+    while (grDevices::dev.cur() > 1L) {
+      grDevices::dev.off()
+    }
+  }, add = TRUE)
+}
+
+
 test_that("Raw and Clean plots", {
+  local_null_pdf()
+
   utils::data("test.dataset", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset)
@@ -70,6 +82,8 @@ test_that("Raw and Clean plots", {
 
 
 test_that("Heatmap plots", {
+  local_null_pdf()
+
   utils::data("test.dataset", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset)
@@ -77,7 +91,15 @@ test_that("Heatmap plots", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  suppressWarnings(obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L))
+  exec <- ExecutionOptions(cores = 3L)
+
+  suppressWarnings(
+    obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L))
+  suppressWarnings(
+    obj2 <- proceedToCoex(obj, calcCoex = TRUE, executionOptions = exec)
+  )
+
+  expect_identical(obj, obj2)
 
   groupMarkers <- list(G1 = c("g-000010", "g-000020", "g-000138",
                               "g-000150", "g-000160", "g-000170"),
@@ -87,30 +109,50 @@ test_that("Heatmap plots", {
                               "g-000570", "g-000590"))
 
   expect_no_error(suppressWarnings(
-    plot(heatmapPlot(obj, cores = 3L, genesLists = groupMarkers))
+    plot(heatmapPlot(obj, genesLists = groupMarkers, executionOptions = exec))
   ))
 
   expect_no_error(suppressWarnings(
-    genesHeatmapPlot(obj, symmetric = TRUE, cores = 3L,
+    genesHeatmapPlot(obj, symmetric = TRUE, executionOptions = exec,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]))
   ))
 
   expect_no_error(suppressWarnings(
-    genesHeatmapPlot(obj, symmetric = FALSE, cores = 3L,
+    genesHeatmapPlot(obj, symmetric = FALSE, executionOptions = exec,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]))
   ))
 
   expect_no_error(suppressWarnings(
-    genesHeatmapPlot(obj, symmetric = TRUE, cores = 3L,
+    genesHeatmapPlot(obj, symmetric = TRUE, executionOptions = exec,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]),
                      secondaryMarkers = lapply(groupMarkers, \(g) g[[2L]]))
   ))
 
   expect_no_error(suppressWarnings(
-    genesHeatmapPlot(obj, symmetric = TRUE, cores = 3L,
+    genesHeatmapPlot(obj, symmetric = TRUE, executionOptions = exec,
                      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]),
                      secondaryMarkers = lapply(groupMarkers, \(g) g[[2L]]))
   ))
+
+  expect_error(
+    heatmapPlot(
+      obj,
+      genesLists = groupMarkers,
+      executionOptions = ExecutionOptions(cores = 3L),
+      cores = 3L
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
+
+  expect_error(
+    genesHeatmapPlot(
+      obj,
+      primaryMarkers = lapply(groupMarkers, \(g) g[[1L]]),
+      executionOptions = ExecutionOptions(cores = 3L),
+      cores = 3L
+    ),
+    regexp = "Do not mix `executionOptions` with"
+  )
 
   suppressWarnings(obj <- calculateCoex(obj, actOnCells = TRUE))
   expect_no_warning(
@@ -120,6 +162,8 @@ test_that("Heatmap plots", {
 
 
 test_that("Clusters plots", {
+  local_null_pdf()
+
   utils::data("test.dataset", package = "COTAN")
 
   obj <- COTAN(raw = test.dataset)

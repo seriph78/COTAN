@@ -519,8 +519,10 @@ according to a \emph{DEA} (or \emph{Zero-One}) based distance
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
-objCOTAN <- proceedToCoex(objCOTAN, cores = 6L, calcCoex = TRUE,
-                          optimizeForSpeed = TRUE, saveObj = FALSE)
+
+exec <- ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE)
+objCOTAN <- proceedToCoex(objCOTAN, calcCoex = TRUE,
+                          executionOptions = exec, saveObj = FALSE)
 
 data("test.dataset.clusters1")
 clusters <- test.dataset.clusters1
