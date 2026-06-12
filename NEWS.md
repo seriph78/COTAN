@@ -1,3 +1,9 @@
+
+Added function parameters' groups:
+`ExecutionOptions`, `ReductionOptions`, `CleaningOptions`, `ClusterTreeOptions`.
+The cose is still fully backward compatible, but these parameter packs
+will replace the separate function parameters in future versions.
+
 ## 2.13.1
 
 Updated package to support `R` version 4.6 and `Roxygen` 8.0
