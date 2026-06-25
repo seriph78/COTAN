@@ -406,6 +406,19 @@ setMethod(
            maxIterations = 100L,
            chunkSize = 1024L,
            executionOptions = NULL) {
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
+    .warnDeprecatedPackArgs(
+      functionName = "someFunction",
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "execution/backend parameters."
+      )
+    )
+
     executionOptions <-
       legacyExecutionOptions(cores = cores, chunkSize = chunkSize)
 

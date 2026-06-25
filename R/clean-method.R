@@ -91,6 +91,19 @@ setMethod(
            cellsThreshold = 0.99, genesThreshold = 0.99,
            cleaningOptions = NULL) {
 
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
+    .warnDeprecatedPackArgs(
+      functionName = "clean",
+      callArgs = callArgs,
+      packClass = "CleaningOptions",
+      replacementArg = "cleaningOptions",
+      details = paste(
+        "Use `cleaningOptions = CleaningOptions(...)` to configure",
+        "cleaning thresholds."
+      )
+    )
+
     cleaningOptions <- resolveCleaningOptions(
       cellsCutoff = cellsCutoff,
       genesCutoff = genesCutoff,

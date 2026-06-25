@@ -1403,6 +1403,18 @@ setMethod(
     optimizeForSpeed = TRUE,
     deviceStr = "cuda",
     executionOptions = NULL) {
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
+    .warnDeprecatedPackArgs(
+      functionName = "calculateCoex",
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "execution/backend parameters."
+      )
+    )
 
     executionOptions <- legacyExecutionOptions(
       optimizeForSpeed = optimizeForSpeed,

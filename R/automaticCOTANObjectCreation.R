@@ -271,6 +271,18 @@ setMethod(
            saveObj = FALSE,
            outDir = ".",
            executionOptions = NULL) {
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
+    .warnDeprecatedPackArgs(
+      functionName = "proceedToCoex",
+      callArgs = callArgs,
+      packClass = "CleaningOptions",
+      replacementArg = "cleaningOptions",
+      details = paste(
+        "Use `cleaningOptions = CleaningOptions(...)` to configure",
+        "cleaning thresholds."
+      )
+    )
 
     cleaningOptions <- resolveCleaningOptions(
       cellsCutoff = cellsCutoff,
@@ -278,6 +290,17 @@ setMethod(
       cellsThreshold = cellsThreshold,
       genesThreshold = genesThreshold,
       cleaningOptions = cleaningOptions
+    )
+
+    .warnDeprecatedPackArgs(
+      functionName = "proceedToCoex",
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "execution/backend parameters."
+      )
     )
 
     executionOptions <- legacyExecutionOptions(
@@ -324,10 +347,17 @@ setMethod(
            saveObj = FALSE,
            outDir = ".",
            executionOptions) {
-    .assertDefaultExecutionArgs(
-      cores = cores,
-      optimizeForSpeed = optimizeForSpeed,
-      deviceStr = deviceStr
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
+    .warnDeprecatedPackArgs(
+      functionName = "proceedToCoex",
+      callArgs = callArgs,
+      packClass = "CleaningOptions",
+      replacementArg = "cleaningOptions",
+      details = paste(
+        "Use `cleaningOptions = CleaningOptions(...)` to configure",
+        "cleaning thresholds."
+      )
     )
 
     cleaningOptions <- resolveCleaningOptions(
@@ -336,6 +366,12 @@ setMethod(
       cellsThreshold = cellsThreshold,
       genesThreshold = genesThreshold,
       cleaningOptions = cleaningOptions
+    )
+
+    .assertDefaultExecutionArgs(
+      cores = cores,
+      optimizeForSpeed = optimizeForSpeed,
+      deviceStr = deviceStr
     )
 
     objCOTAN <- .proceedToCoexImpl(
@@ -380,6 +416,19 @@ setMethod(
       genesCutoff = genesCutoff,
       cellsThreshold = cellsThreshold,
       genesThreshold = genesThreshold
+    )
+
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
+    .warnDeprecatedPackArgs(
+      functionName = "proceedToCoex",
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "execution/backend parameters."
+      )
     )
 
     executionOptions <- legacyExecutionOptions(

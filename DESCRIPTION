@@ -70,7 +70,8 @@ Imports:
     spatstat.sparse,
     spatstat.univar,
     RSpectra,
-    GEOquery
+    GEOquery,
+    lifecycle
 Suggests: 
     testthat (>= 3.2.0),
     proto,

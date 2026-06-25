@@ -681,3 +681,80 @@ resolveClusterTreeOptions <- function(useDEA = TRUE,
 
   return(clusterTreeOptions)
 }
+
+
+# ---------------- arguments' life cicle ----------------
+#' @noRd
+.cotanDeprecatedSince <- function() {
+  "2.13.3"
+}
+
+#' @noRd
+.optionPackSlotNames <- function(packClass) {
+  methods::slotNames(methods::new(packClass))
+}
+
+#' @noRd
+.usedDeprecatedPackArgs <- function(callArgs,
+                                    packClass,
+                                    aliases = character()) {
+  packArgs <- .optionPackSlotNames(packClass)
+  legacyArgs <- c(packArgs, names(aliases))
+
+  intersect(callArgs, legacyArgs)
+}
+
+#' @noRd
+.packSlotForLegacyArg <- function(argName, aliases = character()) {
+  if (argName %in% names(aliases)) {
+    return(unname(aliases[[argName]]))
+  }
+
+  argName
+}
+
+#' @noRd
+.warnDeprecatedPackArgs <- function(functionName,
+                                    callArgs,
+                                    packClass,
+                                    replacementArg,
+                                    replacementConstructor = packClass,
+                                    aliases = character(),
+                                    details = NULL,
+                                    when = .cotanDeprecatedSince(),
+                                    env = rlang::caller_env(),
+                                    user_env = rlang::caller_env(2)) {
+  usedArgs <- .usedDeprecatedPackArgs(
+    callArgs = callArgs,
+    packClass = packClass,
+    aliases = aliases
+  )
+
+  for (argName in usedArgs) {
+    packSlot <- .packSlotForLegacyArg(argName, aliases = aliases)
+
+    argDetails <- details
+
+    if (!identical(argName, packSlot)) {
+      aliasDetails <- paste0(
+        "`", argName, "` maps to `",
+        replacementConstructor, "(", packSlot, " = ...)`."
+      )
+
+      argDetails <- paste(c(details, aliasDetails), collapse = " ")
+    }
+
+    lifecycle::deprecate_soft(
+      when = when,
+      what = paste0(functionName, "(", argName, ")"),
+      with = paste0(functionName, "(", replacementArg, ")"),
+      details = argDetails,
+      id = paste0("COTAN-", functionName, "-", argName, "-to-",
+                  replacementArg),
+      env = env,
+      user_env = user_env
+    )
+  }
+
+  invisible(usedArgs)
+}

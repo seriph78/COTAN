@@ -59,6 +59,19 @@ checkClusterUniformity <- function(
     outDir = ".",
     executionOptions = NULL) {
   if (is.null(executionOptions)) {
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
+    .warnDeprecatedPackArgs(
+      functionName = "checkClusterUniformity",
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "`cores`, `optimizeForSpeed`, and `deviceStr`."
+      )
+    )
+
     executionOptions <- legacyExecutionOptions(
       cores = cores,
       optimizeForSpeed = optimizeForSpeed,
