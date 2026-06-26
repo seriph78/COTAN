@@ -202,31 +202,10 @@ actually returned. Supported formulas are:
 where \eqn{z} is the \emph{binarized projection} and \eqn{p} is the \emph{probability
 of zero}}
 
-\item{dataMethod}{selects the method to use to create the \code{data.frame} to
-pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. To calculate, for each cell, a statistic for each
-gene based on available data/model, the following methods are supported:
-\itemize{
-\item \verb{"RW", "Raw", "RawData"} uses the \emph{raw} counts
-\item \verb{"NN", "NuNorm", "Normalized"} uses the \eqn{\nu}\emph{-normalized} counts
-\item \verb{"LN", "LogNorm", "LogNormalized"} uses the \emph{log-normalized} counts
-(default)
-\item \verb{"BI", "Bin", "Binarized"} uses the \emph{binarized} data matrix
-\item \verb{"BD", "BinDiscr", "BinarizedDiscrepancy"} uses the \emph{difference} between
-the \emph{binarized} data matrix and the estimated \emph{probability of one}
-\item \verb{"AB", "AdjBin", "AdjBinarized"} uses the absolute value of
-the \emph{binarized discrepancy} above
-\item \verb{"LH", "Like", "Likelihood"} uses the \emph{likelihood} of \emph{binarized}
-data matrix
-\item \verb{"LL", "LogLike", "LogLikelihood"} uses the \emph{log-likelihood}
-of \emph{binarized} data matrix
-\item \verb{"DL", "DerLogL", "DerivativeLogLikelihood"} uses the \emph{derivative} of
-the \emph{log-likelihood} of \emph{binarized} data matrix
-\item \verb{"SL", "SignLogL", "SignedLogLikelihood"} uses the \emph{signed
-log-likelihood} of \emph{binarized} data matrix
-}
-
-For the last four options see \code{\link[=calculateLikelihoodOfObserved]{calculateLikelihoodOfObserved()}} for more
-details}
+\item{dataMethod}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction
+scalar selecting the method used to create the input data \code{matrix} for
+dimensionality reduction. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.
+Use \code{reductionOptions = ReductionOptions(dataMethod = ...)} instead.}
 
 \item{asDspMatrices}{Boolean; when \code{TRUE} the function will return only
 packed dense symmetric matrices}
@@ -266,26 +245,27 @@ empty the function will do it genome-wide.}
 \item{geneSubsetRow}{an array of genes. It will be put in rows. If left empty
 the function will do it genome-wide.}
 
-\item{genesSel}{Decides whether and how to perform the gene-selection. used
-for the clustering and the \code{UMAP}. It is a string indicating one of the
-following selection methods:
-\itemize{
-\item \code{"HGDI"} Will pick-up the genes with highest \code{GDI} (default)
-\item \code{"HVG_Seurat"} Will pick-up the genes with the highest variability
-via the \pkg{Seurat} package
-\item \code{"HVG_Scanpy"} Will pick-up the genes with the highest variability
-according to the \code{Scanpy} package (using the \pkg{Seurat} implementation)
-}}
+\item{genesSel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction
+scalar/vector deciding whether and how to perform gene selection. See
+\code{\link[=getSelectedGenes]{getSelectedGenes()}} for more details. It may also be an explicit character
+vector of gene names. Use
+\code{reductionOptions = ReductionOptions(genesSel = ...)} instead.}
 
-\item{numGenes}{the number of genes to select using the above method. Will be
-ignored when an explicit list of genes has been passed in}
+\item{numGenes}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction scalar
+giving the number of genes to select using the method specified by
+\code{genesSel}. It is ignored when an explicit list of genes is passed through
+\code{genesSel}. Use \code{reductionOptions = ReductionOptions(numGenes = ...)}
+instead.}
 
-\item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
-onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
-the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
+\item{useCoexEigen}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Boolean legacy
+reduction scalar. It determines whether to project the data \code{matrix} onto
+the first eigenvectors of the \strong{COEX} \code{matrix}, or instead restrict the
+data \code{matrix} to the selected genes before applying the \code{PCA} reduction.
+Use \code{reductionOptions = ReductionOptions(useCoexEigen = ...)} instead.}
 
-\item{numComp}{Number of components of the reduced \code{matrix}, it defaults to
-25L.}
+\item{numComp}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction scalar
+giving the number of components of the reduced \code{matrix}; it defaults to
+\code{25L}. Use \code{reductionOptions = ReductionOptions(numComp = ...)} instead.}
 
 \item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
 reduction controls. This is the preferred interface for new code.}
@@ -530,6 +510,12 @@ The sum of the matrices returned by the function
 the same value on all elements. This value is the number of genes/cells
 depending on the parameter \code{actOnCells} being \code{TRUE/FALSE}.
 }
+\section{Lifecycle}{
+
+The scalar dimensionality-reduction arguments are soft-deprecated as of
+COTAN 2.13.3. Use \code{reductionOptions = ReductionOptions(...)} in new code.
+}
+
 \examples{
 options(parallelly.fork.enable = TRUE)
 

@@ -1820,46 +1820,34 @@ getSelectedGenes <- function(objCOTAN, genesSel = "", numGenes = 2000L) {
 #'   their sub-space.
 #'
 #' @param objCOTAN a `COTAN` object
-#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
-#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
-#'   the data `matrix` to the selected genes before applying the `PCA` reduction
-#' @param dataMethod selects the method to use to create the `data.frame` to
-#'   pass to the [UMAPPlot()]. To calculate, for each cell, a statistic for each
-#'   gene based on available data/model, the following methods are supported:
-#'   * `"RW", "Raw", "RawData"` uses the *raw* counts
-#'   * `"NN", "NuNorm", "Normalized"` uses the \eqn{\nu}*-normalized* counts
-#'   * `"LN", "LogNorm", "LogNormalized"` uses the *log-normalized* counts
-#'   (default)
-#'   * `"BI", "Bin", "Binarized"` uses the *binarized* data matrix
-#'   * `"BD", "BinDiscr", "BinarizedDiscrepancy"` uses the *difference* between
-#'   the *binarized* data matrix and the estimated *probability of one*
-#'   * `"AB", "AdjBin", "AdjBinarized"` uses the absolute value of
-#'   the *binarized discrepancy* above
-#'   * `"LH", "Like", "Likelihood"` uses the *likelihood* of *binarized*
-#'   data matrix
-#'   * `"LL", "LogLike", "LogLikelihood"` uses the *log-likelihood*
-#'   of *binarized* data matrix
-#'   * `"DL", "DerLogL", "DerivativeLogLikelihood"` uses the *derivative* of
-#'   the *log-likelihood* of *binarized* data matrix
-#'   * `"SL", "SignLogL", "SignedLogLikelihood"` uses the *signed
-#'   log-likelihood* of *binarized* data matrix
-#'
-#'   For the last four options see [calculateLikelihoodOfObserved()] for more
-#'   details
-#' @param numComp Number of components of the reduced `matrix`, it defaults to
-#'   25L.
-#' @param genesSel Decides whether and how to perform the gene-selection. used
-#'   for the clustering and the `UMAP`. It is a string indicating one of the
-#'   following selection methods:
-#'   * `"HGDI"` Will pick-up the genes with highest `GDI` (default)
-#'   * `"HVG_Seurat"` Will pick-up the genes with the highest variability
-#'   via the \pkg{Seurat} package
-#'   * `"HVG_Scanpy"` Will pick-up the genes with the highest variability
-#'   according to the `Scanpy` package (using the \pkg{Seurat} implementation)
-#' @param numGenes the number of genes to select using the above method. Will be
-#'   ignored when an explicit list of genes has been passed in
+#' @param useCoexEigen `r lifecycle::badge("deprecated")` Boolean legacy
+#'   reduction scalar. It determines whether to project the data `matrix` onto
+#'   the first eigenvectors of the **COEX** `matrix`, or instead restrict the
+#'   data `matrix` to the selected genes before applying the `PCA` reduction.
+#'   Use `reductionOptions = ReductionOptions(useCoexEigen = ...)` instead.
+#' @param dataMethod `r lifecycle::badge("deprecated")` Legacy reduction
+#'   scalar selecting the method used to create the input data `matrix` for
+#'   dimensionality reduction. See [getDataMatrix()] for more details.
+#'   Use `reductionOptions = ReductionOptions(dataMethod = ...)` instead.
+#' @param numComp `r lifecycle::badge("deprecated")` Legacy reduction scalar
+#'   giving the number of components of the reduced `matrix`; it defaults to
+#'   `25L`. Use `reductionOptions = ReductionOptions(numComp = ...)` instead.
+#' @param genesSel `r lifecycle::badge("deprecated")` Legacy reduction
+#'   scalar/vector deciding whether and how to perform gene selection. See
+#'   [getSelectedGenes()] for more details. It may also be an explicit character
+#'   vector of gene names. Use
+#'   `reductionOptions = ReductionOptions(genesSel = ...)` instead.
+#' @param numGenes `r lifecycle::badge("deprecated")` Legacy reduction scalar
+#'   giving the number of genes to select using the method specified by
+#'   `genesSel`. It is ignored when an explicit list of genes is passed through
+#'   `genesSel`. Use `reductionOptions = ReductionOptions(numGenes = ...)`
+#'   instead.
 #' @param reductionOptions A `ReductionOptions` object bundling dimensionality
 #'   reduction controls. This is the preferred interface for new code.
+#'
+#' @section Lifecycle:
+#' The scalar dimensionality-reduction arguments are soft-deprecated as of
+#' COTAN 2.13.3. Use `reductionOptions = ReductionOptions(...)` in new code.
 #'
 #' @returns `calculateReducedDataMatrix()` returns the reduced matrix. The
 #'   returned `matrix` has dimensions: (number of cells, number of components)

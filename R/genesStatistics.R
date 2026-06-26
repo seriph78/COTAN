@@ -126,6 +126,8 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
 #' @importFrom parallel mclapply
 #' @importFrom parallel splitIndices
 #'
+#' @export
+#'
 #' @rdname GenesStatistics
 #'
 
@@ -134,7 +136,20 @@ calculateGDIGivenS <- function(S,
                                cores = 1L,
                                chunkSize = 1024L,
                                executionOptions = NULL) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
   if (is.null(executionOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = .currentFunctionName(),
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "`cores` and `chunkSize`."
+      )
+    )
+
     executionOptions <- legacyExecutionOptions(
       cores = cores,
       chunkSize = chunkSize
@@ -273,7 +288,20 @@ calculateGDI <- function(objCOTAN,
                          cores = 1L,
                          chunkSize = 1024L,
                          executionOptions = NULL) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
   if (is.null(executionOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = .currentFunctionName(),
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "`cores` and `chunkSize`."
+      )
+    )
+
     executionOptions <- legacyExecutionOptions(
       cores = cores,
       chunkSize = chunkSize
@@ -440,7 +468,20 @@ calculatePValue <- function(objCOTAN,
                             cores         = 1L,
                             chunkSize     = 1024L,
                             executionOptions = NULL) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
   if (is.null(executionOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = .currentFunctionName(),
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "`cores` and `chunkSize`."
+      )
+    )
+
     executionOptions <- legacyExecutionOptions(
       cores = cores,
       chunkSize = chunkSize

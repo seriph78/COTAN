@@ -199,16 +199,29 @@ seuratClustering <- function(objCOTAN,
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
 #'   built.
-#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
-#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
-#'   the data `matrix` to the selected genes before applying the `PCA` reduction
-#' @param dataMethod selects the method to use to create the `data.frame` to
-#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
-#' @param genesSel Decides whether and how to perform the gene-selection
-#'   (defaults to `"HVG_Seurat"`). See [getSelectedGenes()] for more details.
-#' @param numGenes the number of genes to select using the above method. Will be
-#'   ignored when an explicit list of genes has been passed in
-#' @param numReducedComp the number of calculated **RDM** components
+#' @param useCoexEigen `r lifecycle::badge("deprecated")` Boolean legacy
+#'   reduction scalar. It determines whether to project the data `matrix` onto
+#'   the first eigenvectors of the **COEX** `matrix`, or instead restrict the
+#'   data `matrix` to the selected genes before applying the `PCA` reduction.
+#'   Use `reductionOptions = ReductionOptions(useCoexEigen = ...)` instead.
+#' @param dataMethod `r lifecycle::badge("deprecated")` Legacy reduction
+#'   scalar selecting the method used to create the input data `matrix` for
+#'   dimensionality reduction. See [getDataMatrix()] for more details.
+#'   Use `reductionOptions = ReductionOptions(dataMethod = ...)` instead.
+#' @param numReducedComp `r lifecycle::badge("deprecated")` Legacy alias for
+#'   the number of components of the reduced `matrix`; it maps to
+#'   `ReductionOptions(numComp = ...)`. Use
+#'   `reductionOptions = ReductionOptions(numComp = ...)` instead.
+#' @param genesSel `r lifecycle::badge("deprecated")` Legacy reduction
+#'   scalar/vector deciding whether and how to perform gene selection. See
+#'   [getSelectedGenes()] for more details. It may also be an explicit character
+#'   vector of gene names. Use
+#'   `reductionOptions = ReductionOptions(genesSel = ...)` instead.
+#' @param numGenes `r lifecycle::badge("deprecated")` Legacy reduction scalar
+#'   giving the number of genes to select using the method specified by
+#'   `genesSel`. It is ignored when an explicit list of genes is passed through
+#'   `genesSel`. Use `reductionOptions = ReductionOptions(numGenes = ...)`
+#'   instead.
 #' @param reductionOptions A `ReductionOptions` object bundling dimensionality
 #'   reduction controls. This is the preferred interface for new code.
 #' @param minimumUTClusterSize the minimum number of cells for a cluster to be
@@ -225,6 +238,10 @@ seuratClustering <- function(objCOTAN,
 #'   output will be paced in a sub-folder.
 #' @param executionOptions optional `ExecutionOptions` object collecting
 #'   execution-related parameters.
+#'
+#' @section Lifecycle:
+#' The scalar dimensionality-reduction arguments are soft-deprecated as of
+#' COTAN 2.13.3. Use `reductionOptions = ReductionOptions(...)` in new code.
 #'
 #' @returns `cellsUniformClustering()` returns a `list` with 2 elements:
 #'   * `"clusters"` the newly found cluster labels array
@@ -287,6 +304,17 @@ cellsUniformClustering <- function(objCOTAN,
   callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
 
   if (is.null(executionOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = .currentFunctionName(),
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "`cores`, `optimizeForSpeed`, and `deviceStr`."
+      )
+    )
+
     executionOptions <- legacyExecutionOptions(
       cores = cores,
       optimizeForSpeed = optimizeForSpeed,

@@ -37,6 +37,8 @@ singleHeatmapDF <- function(objCOTAN,
                             pValueThreshold = 0.01,
                             cores = 1L,
                             executionOptions = NULL) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
   assert_that(!is_empty(genesLists), !is_empty(names(genesLists)),
               msg = "genesLists must be a named list of genes arrays")
 
@@ -45,6 +47,17 @@ singleHeatmapDF <- function(objCOTAN,
               msg = "sets must be positions in the genes list")
 
   if (is.null(executionOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = .currentFunctionName(),
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "`cores`."
+      )
+    )
+
     executionOptions <- legacyExecutionOptions(cores = cores)
   } else {
     assert_that(
@@ -217,7 +230,20 @@ heatmapPlot <- function(objCOTAN = NULL,
                         conditions = NULL,
                         dir = ".",
                         executionOptions = NULL) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
   if (is.null(executionOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = .currentFunctionName(),
+      callArgs = callArgs,
+      packClass = "ExecutionOptions",
+      replacementArg = "executionOptions",
+      details = paste(
+        "Use `executionOptions = ExecutionOptions(...)` to configure",
+        "`cores`."
+      )
+    )
+
     executionOptions <- legacyExecutionOptions(cores = cores)
   } else {
     assert_that(
@@ -384,7 +410,20 @@ genesHeatmapPlot <-
            symmetric = TRUE,
            cores = 1L,
            executionOptions = NULL) {
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
     if (is.null(executionOptions)) {
+      .warnDeprecatedPackArgs(
+        functionName = .currentFunctionName(),
+        callArgs = callArgs,
+        packClass = "ExecutionOptions",
+        replacementArg = "executionOptions",
+        details = paste(
+          "Use `executionOptions = ExecutionOptions(...)` to configure",
+          "`cores`."
+        )
+      )
+
       executionOptions <- legacyExecutionOptions(cores = cores)
     } else {
       assert_that(
@@ -539,7 +578,9 @@ genesHeatmapPlot <-
 #'
 #' @rdname HeatmapPlots
 #'
-cellsHeatmapPlot <- function(objCOTAN, cells = NULL, clusters = NULL) {
+cellsHeatmapPlot <- function(objCOTAN,
+                             cells = NULL,
+                             clusters = NULL) {
   coexMat <- as.matrix(getCellsCoex(objCOTAN))
   assert_that(!is_empty(coexMat), msg = "cells COEX not found in the COTAN")
 

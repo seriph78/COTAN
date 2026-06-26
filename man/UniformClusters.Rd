@@ -133,20 +133,33 @@ function usage for the default.}
 distances between clusters are computed and how the hierarchical tree is
 built.}
 
-\item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
-onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
-the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
+\item{useCoexEigen}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Boolean legacy
+reduction scalar. It determines whether to project the data \code{matrix} onto
+the first eigenvectors of the \strong{COEX} \code{matrix}, or instead restrict the
+data \code{matrix} to the selected genes before applying the \code{PCA} reduction.
+Use \code{reductionOptions = ReductionOptions(useCoexEigen = ...)} instead.}
 
-\item{dataMethod}{selects the method to use to create the \code{data.frame} to
-pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.}
+\item{dataMethod}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction
+scalar selecting the method used to create the input data \code{matrix} for
+dimensionality reduction. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.
+Use \code{reductionOptions = ReductionOptions(dataMethod = ...)} instead.}
 
-\item{genesSel}{Decides whether and how to perform the gene-selection
-(defaults to \code{"HVG_Seurat"}). See \code{\link[=getSelectedGenes]{getSelectedGenes()}} for more details.}
+\item{genesSel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction
+scalar/vector deciding whether and how to perform gene selection. See
+\code{\link[=getSelectedGenes]{getSelectedGenes()}} for more details. It may also be an explicit character
+vector of gene names. Use
+\code{reductionOptions = ReductionOptions(genesSel = ...)} instead.}
 
-\item{numGenes}{the number of genes to select using the above method. Will be
-ignored when an explicit list of genes has been passed in}
+\item{numGenes}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction scalar
+giving the number of genes to select using the method specified by
+\code{genesSel}. It is ignored when an explicit list of genes is passed through
+\code{genesSel}. Use \code{reductionOptions = ReductionOptions(numGenes = ...)}
+instead.}
 
-\item{numReducedComp}{the number of calculated \strong{RDM} components}
+\item{numReducedComp}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy alias for
+the number of components of the reduced \code{matrix}; it maps to
+\code{ReductionOptions(numComp = ...)}. Use
+\code{reductionOptions = ReductionOptions(numComp = ...)} instead.}
 
 \item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
 reduction controls. This is the preferred interface for new code.}
@@ -250,6 +263,12 @@ whether the merged \emph{clusters} are \strong{uniform}. The function will stop 
 no \emph{tested pairs} of clusters can be \emph{merged} after testing all pairs in a
 single batch
 }
+\section{Lifecycle}{
+
+The scalar dimensionality-reduction arguments are soft-deprecated as of
+COTAN 2.13.3. Use \code{reductionOptions = ReductionOptions(...)} in new code.
+}
+
 \examples{
 data("test.dataset")
 

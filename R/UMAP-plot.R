@@ -254,17 +254,28 @@ UMAPPlot <- function(dataIn,
 #' @param clusters A *clusterization* to use. If given it will take precedence
 #'   on the one indicated by `clName` that will only indicate the relevant
 #'   column name in the returned `data.frame`
-#' @param useCoexEigen Boolean to determine whether to project the data `matrix`
-#'   onto the first eigenvectors of the **COEX** `matrix` or instead restrict
-#'   the data `matrix` to the selected genes before applying the `PCA` reduction
-#' @param dataMethod selects the method to use to create the `data.frame` to
-#'   pass to the [UMAPPlot()]. See [getDataMatrix()] for more details.
-#' @param numComp Number of components of the reduced `matrix`, it defaults to
-#'   25L.
-#' @param genesSel Decides whether and how to perform gene-selection. See
-#'   [getSelectedGenes()] for more details.
-#' @param numGenes the number of genes to select using the above method. Will be
-#'   ignored when an explicit list of genes has been passed in
+#' @param useCoexEigen `r lifecycle::badge("deprecated")` Boolean legacy
+#'   reduction scalar. It determines whether to project the data `matrix` onto
+#'   the first eigenvectors of the **COEX** `matrix`, or instead restrict the
+#'   data `matrix` to the selected genes before applying the `PCA` reduction.
+#'   Use `reductionOptions = ReductionOptions(useCoexEigen = ...)` instead.
+#' @param dataMethod `r lifecycle::badge("deprecated")` Legacy reduction
+#'   scalar selecting the method used to create the input data `matrix` for
+#'   dimensionality reduction. See [getDataMatrix()] for more details.
+#'   Use `reductionOptions = ReductionOptions(dataMethod = ...)` instead.
+#' @param numComp `r lifecycle::badge("deprecated")` Legacy reduction scalar
+#'   giving the number of components of the reduced `matrix`; it defaults to
+#'   `25L`. Use `reductionOptions = ReductionOptions(numComp = ...)` instead.
+#' @param genesSel `r lifecycle::badge("deprecated")` Legacy reduction
+#'   scalar/vector deciding whether and how to perform gene selection. See
+#'   [getSelectedGenes()] for more details. It may also be an explicit character
+#'   vector of gene names. Use
+#'   `reductionOptions = ReductionOptions(genesSel = ...)` instead.
+#' @param numGenes `r lifecycle::badge("deprecated")` Legacy reduction scalar
+#'   giving the number of genes to select using the method specified by
+#'   `genesSel`. It is ignored when an explicit list of genes is passed through
+#'   `genesSel`. Use `reductionOptions = ReductionOptions(numGenes = ...)`
+#'   instead.
 #' @param reductionOptions A `ReductionOptions` object bundling dimensionality
 #'   reduction controls. This is the preferred interface for new code.
 #' @param colors an `array` of colors to use in the plot. If not sufficient
@@ -272,6 +283,10 @@ UMAPPlot <- function(dataIn,
 #'   [getColorsVector()]
 #' @param numNeighbors Overrides the default `n_neighbors` value
 #' @param minPointsDist Overrides the default `min_dist` value
+#'
+#' @section Lifecycle:
+#' The scalar dimensionality-reduction arguments are soft-deprecated as of
+#' COTAN 2.13.3. Use `reductionOptions = ReductionOptions(...)` in new code.
 #'
 #' @returns `cellsUMAPPlot()` returns a list with 2 objects:
 #'  * `"plot"` a `ggplot2` object representing the `umap` plot
@@ -320,7 +335,7 @@ cellsUMAPPlot <- function(objCOTAN,
 
   if (is.null(reductionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName =  .currentFunctionName(),
+      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ReductionOptions",
       replacementArg = "reductionOptions",

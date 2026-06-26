@@ -240,21 +240,32 @@ colors are given it will complete the list using colors from
 
 \item{minPointsDist}{Overrides the default \code{min_dist} value}
 
-\item{useCoexEigen}{Boolean to determine whether to project the data \code{matrix}
-onto the first eigenvectors of the \strong{COEX} \code{matrix} or instead restrict
-the data \code{matrix} to the selected genes before applying the \code{PCA} reduction}
+\item{useCoexEigen}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Boolean legacy
+reduction scalar. It determines whether to project the data \code{matrix} onto
+the first eigenvectors of the \strong{COEX} \code{matrix}, or instead restrict the
+data \code{matrix} to the selected genes before applying the \code{PCA} reduction.
+Use \code{reductionOptions = ReductionOptions(useCoexEigen = ...)} instead.}
 
-\item{dataMethod}{selects the method to use to create the \code{data.frame} to
-pass to the \code{\link[=UMAPPlot]{UMAPPlot()}}. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.}
+\item{dataMethod}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction
+scalar selecting the method used to create the input data \code{matrix} for
+dimensionality reduction. See \code{\link[=getDataMatrix]{getDataMatrix()}} for more details.
+Use \code{reductionOptions = ReductionOptions(dataMethod = ...)} instead.}
 
-\item{numComp}{Number of components of the reduced \code{matrix}, it defaults to
-25L.}
+\item{numComp}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction scalar
+giving the number of components of the reduced \code{matrix}; it defaults to
+\code{25L}. Use \code{reductionOptions = ReductionOptions(numComp = ...)} instead.}
 
-\item{genesSel}{Decides whether and how to perform gene-selection. See
-\code{\link[=getSelectedGenes]{getSelectedGenes()}} for more details.}
+\item{genesSel}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction
+scalar/vector deciding whether and how to perform gene selection. See
+\code{\link[=getSelectedGenes]{getSelectedGenes()}} for more details. It may also be an explicit character
+vector of gene names. Use
+\code{reductionOptions = ReductionOptions(genesSel = ...)} instead.}
 
-\item{numGenes}{the number of genes to select using the above method. Will be
-ignored when an explicit list of genes has been passed in}
+\item{numGenes}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy reduction scalar
+giving the number of genes to select using the method specified by
+\code{genesSel}. It is ignored when an explicit list of genes is passed through
+\code{genesSel}. Use \code{reductionOptions = ReductionOptions(numGenes = ...)}
+instead.}
 
 \item{reductionOptions}{A \code{ReductionOptions} object bundling dimensionality
 reduction controls. This is the preferred interface for new code.}
@@ -530,6 +541,12 @@ positive values from \code{\link[=DEAOnClusters]{DEAOnClusters()}} and \eqn{\the
 its labels so that in the new order near labels indicate near clusters
 according to a \emph{DEA} (or \emph{Zero-One}) based distance
 }
+\section{Lifecycle}{
+
+The scalar dimensionality-reduction arguments are soft-deprecated as of
+COTAN 2.13.3. Use \code{reductionOptions = ReductionOptions(...)} in new code.
+}
+
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)
