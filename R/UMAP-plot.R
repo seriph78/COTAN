@@ -320,7 +320,7 @@ cellsUMAPPlot <- function(objCOTAN,
 
   if (is.null(reductionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = "cellsUMAPPlot",
+      functionName =  .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ReductionOptions",
       replacementArg = "reductionOptions",

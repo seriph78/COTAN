@@ -313,7 +313,7 @@ cellsUniformClustering <- function(objCOTAN,
 
   if (is.null(reductionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = "cellsUniformClustering",
+      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ReductionOptions",
       replacementArg = "reductionOptions",

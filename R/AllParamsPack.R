@@ -713,6 +713,53 @@ resolveClusterTreeOptions <- function(useDEA = TRUE,
   argName
 }
 
+
+#' @noRd
+.currentFunctionName <- function(depth = 1L) {
+  call <- sys.call(-depth)
+  env <- parent.frame(depth)
+
+  name <- NA_character_
+
+  if (!is.null(call) && length(call) >= 1L) {
+    fun <- call[[1L]]
+
+    if (is.symbol(fun)) {
+      name <- as.character(fun)
+    } else if (is.call(fun) &&
+               length(fun) >= 3L &&
+               as.character(fun[[1L]]) %in% c("::", ":::")) {
+      name <- as.character(fun[[3L]])
+    }
+  }
+
+  badNames <- c("", ".local", ".nextMethod", "standardGeneric")
+
+  if (length(name) != 1L ||
+      is.na(name) ||
+      name %in% badNames) {
+    if (exists(".Generic", envir = env, inherits = FALSE)) {
+      genericName <- get(".Generic", envir = env, inherits = FALSE)
+
+      if (is.character(genericName) &&
+          length(genericName) == 1L &&
+          !is.na(genericName) &&
+          nzchar(genericName)) {
+        name <- genericName
+      }
+    }
+  }
+
+  if (length(name) != 1L ||
+      is.na(name) ||
+      !nzchar(name)) {
+    name <- "unknown"
+  }
+
+  name
+}
+
+
 #' @noRd
 .warnDeprecatedPackArgs <- function(functionName,
                                     callArgs,

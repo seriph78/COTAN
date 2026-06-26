@@ -226,7 +226,7 @@ mergeUniformCellsClusters <- function(objCOTAN,
   if (is.null(executionOptions)) {
 
     .warnDeprecatedPackArgs(
-      functionName = "mergeUniformCellsClusters",
+      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ExecutionOptions",
       replacementArg = "executionOptions",
