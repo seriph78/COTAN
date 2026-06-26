@@ -284,6 +284,8 @@ cellsUniformClustering <- function(objCOTAN,
                                    saveObj = TRUE,
                                    outDir = ".",
                                    executionOptions = NULL) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
   if (is.null(executionOptions)) {
     executionOptions <- legacyExecutionOptions(
       cores = cores,
@@ -310,6 +312,18 @@ cellsUniformClustering <- function(objCOTAN,
   )
 
   if (is.null(reductionOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = "cellsUniformClustering",
+      callArgs = callArgs,
+      packClass = "ReductionOptions",
+      replacementArg = "reductionOptions",
+      aliases = c(numReducedComp = "numComp"),
+      details = paste(
+        "Use `reductionOptions = ReductionOptions(...)` to configure",
+        "dimensionality-reduction parameters."
+      )
+    )
+
     if (isEmptyName(dataMethod)) {
       dataMethod <- "LogNormalized"
     }

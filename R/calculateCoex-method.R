@@ -1881,7 +1881,21 @@ calculateReducedDataMatrix <-
            dataMethod = "", numComp = 25L,
            genesSel = "", numGenes = 2000L,
            reductionOptions = NULL) {
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
     if (is.null(reductionOptions)) {
+
+      .warnDeprecatedPackArgs(
+        functionName = "calculateReducedDataMatrix",
+        callArgs = callArgs,
+        packClass = "ReductionOptions",
+        replacementArg = "reductionOptions",
+        details = paste(
+          "Use `reductionOptions = ReductionOptions(...)` to configure",
+          "dimensionality-reduction parameters."
+        )
+      )
+
       reductionOptions <- legacyReductionOptions(
         useCoexEigen = useCoexEigen,
         dataMethod = dataMethod,

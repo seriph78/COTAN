@@ -300,6 +300,8 @@ cellsUMAPPlot <- function(objCOTAN,
                           colors = NULL,
                           numNeighbors = 0L,
                           minPointsDist = NA) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
   # pick last if no name was given
   # picks up the last clusterization if none was given
   c(clName, clusters) %<-%
@@ -317,6 +319,17 @@ cellsUMAPPlot <- function(objCOTAN,
               msg = "Internal error - clusters must be factors")
 
   if (is.null(reductionOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = "cellsUMAPPlot",
+      callArgs = callArgs,
+      packClass = "ReductionOptions",
+      replacementArg = "reductionOptions",
+      details = paste(
+        "Use `reductionOptions = ReductionOptions(...)` to configure",
+        "dimensionality-reduction parameters."
+      )
+    )
+
     if (isEmptyName(genesSel)) {
       genesSel <- "HGDI" # this default could differ from the one in the selector
     }

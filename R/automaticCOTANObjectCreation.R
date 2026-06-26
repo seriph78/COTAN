@@ -411,14 +411,14 @@ setMethod(
            saveObj = FALSE,
            outDir = ".",
            executionOptions = NULL) {
+    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
     .assertDefaultCleaningArgs(
       cellsCutoff = cellsCutoff,
       genesCutoff = genesCutoff,
       cellsThreshold = cellsThreshold,
       genesThreshold = genesThreshold
     )
-
-    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
 
     .warnDeprecatedPackArgs(
       functionName = "proceedToCoex",

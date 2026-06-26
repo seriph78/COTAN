@@ -221,8 +221,9 @@ mergeUniformCellsClusters <- function(objCOTAN,
                                       saveObj = TRUE,
                                       outDir = ".",
                                       executionOptions = NULL) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
   if (is.null(executionOptions)) {
-    callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
 
     .warnDeprecatedPackArgs(
       functionName = "mergeUniformCellsClusters",

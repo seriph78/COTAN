@@ -683,7 +683,7 @@ resolveClusterTreeOptions <- function(useDEA = TRUE,
 }
 
 
-# ---------------- arguments' life cicle ----------------
+# ---------------- arguments' lifecycle ----------------
 #' @noRd
 .cotanDeprecatedSince <- function() {
   "2.13.3"

@@ -90,7 +90,6 @@ setMethod(
   function(objCOTAN, cellsCutoff = 0.003, genesCutoff = 0.002,
            cellsThreshold = 0.99, genesThreshold = 0.99,
            cleaningOptions = NULL) {
-
     callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
 
     .warnDeprecatedPackArgs(
