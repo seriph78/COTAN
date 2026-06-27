@@ -483,14 +483,20 @@ setMethod(
 #' @rdname ParametersEstimations
 #'
 estimateDispersionBisection <-
-  function(objCOTAN, threshold = 0.001, cores = 1L,
-           maxIterations = 100L, chunkSize = 1024L) {
+  function(objCOTAN,
+           threshold = 0.001,
+           cores = 1L,
+           maxIterations = 100L,
+           chunkSize = 1024L
+           ) {
     estimateDispersionViaSolver(
       objCOTAN = objCOTAN,
-      cores = cores,
       threshold = threshold,
       maxIterations = maxIterations,
-      chunkSize = chunkSize
+      executionOptions = legacyExecutionOptions(
+        cores = cores,
+        chunkSize = chunkSize
+      )
     )
   }
 
@@ -744,14 +750,20 @@ setMethod(
 
     sumZeros <- getNumCells(objCOTAN) - getNumOfExpressingCells(objCOTAN)
 
+    solverExecutionOptions <- legacyExecutionOptions(
+      cores = cores,
+      chunkSize = chunkSize
+    )
+
     iter <- 1L
     repeat {
       # a smaller threshold is used in order to ensure the global convergence
-      objCOTAN <- estimateDispersionViaSolver(objCOTAN,
-                                              threshold = threshold / 10.0,
-                                              cores = cores,
-                                              maxIterations = maxIterations,
-                                              chunkSize = chunkSize)
+      objCOTAN <- estimateDispersionViaSolver(
+        objCOTAN,
+        threshold = threshold / 10.0,
+        maxIterations = maxIterations,
+        executionOptions = solverExecutionOptions
+      )
 
       gc()
 

@@ -972,8 +972,11 @@ NULL
 #' tables <- contingencyTables(objCOTAN, g1 = g1, g2 = g2)
 #' tables
 #'
-#' objCOTAN <- calculateCoex(objCOTAN, actOnCells = TRUE,
-#'                           optimizeForSpeed = FALSE)
+#' objCOTAN <- calculateCoex(
+#'   objCOTAN,
+#'   actOnCells = TRUE,
+#'   executionOptions = ExecutionOptions(optimizeForSpeed = FALSE)
+#' )
 #' stopifnot(isCoexAvailable(objCOTAN, actOnCells = TRUE, ignoreSync = TRUE))
 #' cellsCoex <- getCellsCoex(objCOTAN, zeroDiagonal = FALSE)
 #'
