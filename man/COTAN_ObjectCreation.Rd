@@ -87,32 +87,45 @@ automaticCOTANObjectCreation(raw, GEO, sequencingMethod, sampleCondition, ...)
 \item{calcCoex}{a Boolean to determine whether to calculate the genes' \code{COEX}
 or stop just before at the \code{\link[=estimateDispersionViaSolver]{estimateDispersionViaSolver()}} step}
 
-\item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
-library to run the matrix calculations. Otherwise, or when the library is
-not available will run the slower legacy code}
+\item{optimizeForSpeed}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution
+scalar. When \code{TRUE}, \code{COTAN} tries to use accelerated \code{torch}-based matrix
+calculations when available; otherwise it falls back to the slower legacy
+code. Use
+\code{executionOptions = ExecutionOptions(optimizeForSpeed = ...)} instead.}
 
-\item{deviceStr}{On the \code{torch} library enforces which device to use to run
-the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
-\code{"cuda"} to use the system \emph{GPUs} or something like \code{"cuda:0"} to restrict
-to a specific device}
+\item{deviceStr}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution scalar.
+Requested \code{torch} device string, for example \code{"cpu"}, \code{"cuda"}, or
+\code{"cuda:0"}. Use \code{executionOptions = ExecutionOptions(deviceStr = ...)}
+instead.}
 
-\item{cores}{number of cores to use. Default is 1.}
+\item{cores}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution scalar.
+Requested number of CPU cores. The effective value is bounded by the
+available cores. Use \code{executionOptions = ExecutionOptions(cores = ...)}
+instead.}
 
-\item{cellsCutoff}{\code{clean()} will delete from the \code{raw} data any gene that is
-expressed in less cells than threshold times the total number of cells.
-Default cutoff is \eqn{0.003 \; (0.3\%)}}
+\item{cellsCutoff}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cleaning scalar.
+\code{clean()} deletes from the \code{raw} data any gene expressed in fewer cells than
+this fraction times the total number of cells. Default cutoff is
+\eqn{0.003 \; (0.3\%)}. Use
+\code{cleaningOptions = CleaningOptions(cellsCutoff = ...)} instead.}
 
-\item{genesCutoff}{\code{clean()} will delete from the \code{raw} data any cell that is
-expressing less genes than threshold times the total number of genes.
-Default cutoff is \eqn{0.002 \; (0.2\%)}}
+\item{genesCutoff}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cleaning scalar.
+\code{clean()} deletes from the \code{raw} data any cell expressing fewer genes than
+this fraction times the total number of genes. Default cutoff is
+\eqn{0.002 \; (0.2\%)}. Use
+\code{cleaningOptions = CleaningOptions(genesCutoff = ...)} instead.}
 
-\item{cellsThreshold}{any gene that is expressed in more cells than threshold
-times the total number of cells will be marked as \strong{fully-expressed}.
-Default threshold is \eqn{0.99 \; (99.0\%)}}
+\item{cellsThreshold}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cleaning
+scalar. Any gene expressed in more cells than this fraction times the total
+number of cells is marked as \strong{fully-expressed}. Default threshold is
+\eqn{0.99 \; (99.0\%)}. Use
+\code{cleaningOptions = CleaningOptions(cellsThreshold = ...)} instead.}
 
-\item{genesThreshold}{any cell that is expressing more genes than threshold
-times the total number of genes will be marked as \strong{fully-expressing}.
-Default threshold is \eqn{0.99 \; (99.0\%)}}
+\item{genesThreshold}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cleaning
+scalar. Any cell expressing more genes than this fraction times the total
+number of genes is marked as \strong{fully-expressing}. Default threshold is
+\eqn{0.99 \; (99.0\%)}. Use
+\code{cleaningOptions = CleaningOptions(genesThreshold = ...)} instead.}
 
 \item{cleaningOptions}{A \code{CleaningOptions} object bundling cleaning cutoffs
 and fully-expressed / fully-expressing thresholds. This is the preferred
@@ -166,11 +179,22 @@ objects.
 \code{automaticCOTANObjectCreation()} creates a \code{COTAN} object,
 initializes its dataset metadata, and then calls \code{\link[=proceedToCoex]{proceedToCoex()}} on it.
 }
+\section{Lifecycle}{
+
+Legacy scalar cleaning and execution arguments are soft-deprecated as of
+COTAN 2.13.3. Use \code{cleaningOptions = CleaningOptions(...)} and
+\code{executionOptions = ExecutionOptions(...)} in new code.
+}
+
 \section{Forwarded arguments}{
 
-Typical forwarded arguments include \code{calcCoex}, \code{saveObj}, \code{outDir},
-\code{cleaningOptions} or the legacy cleaning thresholds used by \code{\link[=clean]{clean()}}, and
-the \code{ExecutionOptions} object.
+Additional arguments are forwarded to \code{\link[=proceedToCoex]{proceedToCoex()}}. Typical forwarded
+arguments include \code{calcCoex}, \code{cleaningOptions}, \code{executionOptions},
+\code{saveObj} and \code{outDir}.
+
+Legacy scalar cleaning and execution arguments accepted by \code{\link[=proceedToCoex]{proceedToCoex()}}
+are still forwarded for compatibility, but are soft-deprecated as of COTAN
+2.13.3.
 }
 
 \examples{

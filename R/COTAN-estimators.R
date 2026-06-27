@@ -363,10 +363,14 @@ setMethod(
 #'
 #' @param objCOTAN a `COTAN` object
 #' @param threshold minimal solution precision
-#' @param cores number of cores to use. Default is 1.
+#' @param cores `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested number of CPU cores. The effective value is bounded by the
+#'   available cores. Use `executionOptions = ExecutionOptions(cores = ...)`
+#'   instead.
 #' @param maxIterations max number of iterations (avoids infinite loops)
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
+#' @param chunkSize `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Integer scalar controlling solver or matrix batching where supported.
+#'   Use `executionOptions = ExecutionOptions(chunkSize = ...)` instead.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
 #'

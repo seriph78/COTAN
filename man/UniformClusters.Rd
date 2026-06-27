@@ -107,31 +107,42 @@ before checking for \strong{uniformity}. It defaults to \eqn{0.8}, the same as
 \item{maxIterations}{max number of re-clustering iterations. It defaults to
 \eqn{25}}
 
-\item{cores}{number of cores to use. Default is 1.}
+\item{cores}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution scalar.
+Requested number of CPU cores. The effective value is bounded by the
+available cores. Use \code{executionOptions = ExecutionOptions(cores = ...)}
+instead.}
 
-\item{optimizeForSpeed}{Boolean; when \code{TRUE} \code{COTAN} tries to use the \code{torch}
-library to run the matrix calculations. Otherwise, or when the library is
-not available will run the slower legacy code}
+\item{optimizeForSpeed}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution
+scalar. When \code{TRUE}, \code{COTAN} tries to use accelerated \code{torch}-based matrix
+calculations when available; otherwise it falls back to the slower legacy
+code. Use
+\code{executionOptions = ExecutionOptions(optimizeForSpeed = ...)} instead.}
 
-\item{deviceStr}{On the \code{torch} library enforces which device to use to run
-the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
-\code{"cuda"} to use the system \emph{GPUs} or something like \code{"cuda:0"} to restrict
-to a specific device}
+\item{deviceStr}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution scalar.
+Requested \code{torch} device string, for example \code{"cpu"}, \code{"cuda"}, or
+\code{"cuda:0"}. Use \code{executionOptions = ExecutionOptions(deviceStr = ...)}
+instead.}
 
-\item{useDEA}{Boolean indicating whether to use the \emph{DEA} to define the
-distance; alternatively it will use the average \emph{Zero-One} counts, that is
-faster but less precise.}
+\item{useDEA}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cluster-tree scalar.
+Boolean indicating whether to use \emph{DEA} profiles to define cluster
+distances; when \code{FALSE}, average \emph{Zero-One} counts are used instead, which
+is faster but less precise. Use
+\code{clusterTreeOptions = ClusterTreeOptions(useDEA = ...)} instead.}
 
-\item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
-\code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
-\code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+\item{distance}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cluster-tree
+scalar. Distance method passed to \code{\link[parallelDist:parDist]{parallelDist::parDist()}}. The effective
+default is \code{"cosine"} for \emph{DEA} distances and \code{"euclidean"} for \emph{Zero-One}
+distances. Use
+\code{clusterTreeOptions = ClusterTreeOptions(distance = ...)} instead.}
 
-\item{hclustMethod}{Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}. See
-function usage for the default.}
+\item{hclustMethod}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cluster-tree
+scalar. Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}, with default
+\code{"ward.D2"}. Use
+\code{clusterTreeOptions = ClusterTreeOptions(hclustMethod = ...)} instead.}
 
 \item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
 distances between clusters are computed and how the hierarchical tree is
-built.}
+built. This is the preferred interface for new code.}
 
 \item{useCoexEigen}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Boolean legacy
 reduction scalar. It determines whether to project the data \code{matrix} onto
@@ -182,7 +193,7 @@ plots to file}
 output will be paced in a sub-folder.}
 
 \item{executionOptions}{optional \code{ExecutionOptions} object collecting
-execution-related parameters.}
+execution-related parameters. This is the preferred interface for new code.}
 
 \item{clusterName}{the tag of the \emph{cluster}}
 
@@ -267,6 +278,9 @@ single batch
 
 The scalar dimensionality-reduction arguments are soft-deprecated as of
 COTAN 2.13.3. Use \code{reductionOptions = ReductionOptions(...)} in new code.
+
+Legacy scalar cluster-tree arguments are also soft-deprecated as of COTAN
+2.13.3. Use \code{clusterTreeOptions = ClusterTreeOptions(...)} in new code.
 }
 
 \examples{

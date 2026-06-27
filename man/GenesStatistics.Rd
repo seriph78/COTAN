@@ -98,10 +98,14 @@ among those supported by \code{\link[parallelDist:parDist]{parallelDist::parDist
 \item{rowsFraction}{The fraction of rows that will be averaged to calculate
 the \code{GDI}. Defaults to \eqn{5\%}}
 
-\item{cores}{number of cores to use. Default is 1.}
+\item{cores}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution scalar.
+Requested number of CPU cores. The effective value is bounded by the
+available cores. Use \code{executionOptions = ExecutionOptions(cores = ...)}
+instead.}
 
-\item{chunkSize}{number of elements to solve in batch in a single core.
-Default is 1024.}
+\item{chunkSize}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution scalar.
+Integer scalar controlling solver or matrix batching where supported.
+Use \code{executionOptions = ExecutionOptions(chunkSize = ...)} instead.}
 
 \item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
 controls. This is the preferred interface for new code.}

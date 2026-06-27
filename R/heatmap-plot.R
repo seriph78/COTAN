@@ -15,7 +15,10 @@ NULL
 #' @param sets A numeric array indicating which fields in the previous `list`
 #'   should be used. Defaults to all fields
 #' @param pValueThreshold The \eqn{p}-value threshold. Default is \eqn{0.01}
-#' @param cores number of cores to use. Default is 1.
+#' @param cores `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested number of CPU cores. The effective value is bounded by the
+#'   available cores. Use `executionOptions = ExecutionOptions(cores = ...)`
+#'   instead.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
 #'
@@ -167,7 +170,10 @@ singleHeatmapDF <- function(objCOTAN,
 #' @param sets A numeric array indicating which fields in the previous `list`
 #'   should be used. Defaults to all fields
 #' @param pValueThreshold The \eqn{p}-value threshold. Default is \eqn{0.01}
-#' @param cores number of cores to use. Default is 1.
+#' @param cores `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested number of CPU cores. The effective value is bounded by the
+#'   available cores. Use `executionOptions = ExecutionOptions(cores = ...)`
+#'   instead.
 #' @param conditions An `array` of prefixes indicating the different files
 #' @param dir The directory in which are all `COTAN` files (corresponding to the
 #'   previous prefixes)
@@ -371,7 +377,10 @@ heatmapPlot <- function(objCOTAN = NULL,
 #' @param symmetric A Boolean: default `TRUE`. When `TRUE` the union of
 #'   `primaryMarkers` and `secondaryMarkers` is used for both rows and column
 #'   genes
-#' @param cores number of cores to use. Default is 1.
+#' @param cores `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested number of CPU cores. The effective value is bounded by the
+#'   available cores. Use `executionOptions = ExecutionOptions(cores = ...)`
+#'   instead.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
 #'

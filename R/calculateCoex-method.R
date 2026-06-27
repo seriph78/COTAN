@@ -1370,13 +1370,15 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #' @param returnPPFract Boolean; when `TRUE` the function returns the fraction
 #'   of genes/cells pairs for which the *expected contingency table* is smaller
 #'   than \eqn{0.5}. Default is FALSE
-#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
-#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
-#'   is deprecated and always treated as `TRUE`
-#' @param deviceStr On the `torch` library enforces which device to use to run
-#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
-#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
-#'   to a specific device
+#' @param optimizeForSpeed `r lifecycle::badge("deprecated")` Legacy execution
+#'   scalar. In `calculateCoex()` it is converted into an `ExecutionOptions`
+#'   object; in lower-level COEX helpers it is deprecated and always treated as
+#'   `TRUE`. Use
+#'   `executionOptions = ExecutionOptions(optimizeForSpeed = ...)` instead.
+#' @param deviceStr `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested `torch` device string, for example `"cpu"`, `"cuda"`, or
+#'   `"cuda:0"`. Use `executionOptions = ExecutionOptions(deviceStr = ...)`
+#'   instead.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
 #'

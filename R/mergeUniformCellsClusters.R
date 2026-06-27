@@ -25,14 +25,19 @@
 #'   or plots. See the function usage for the exact default.
 #' @param batchSize Number pairs to test in a single round. If none of them
 #'   succeeds the merge stops. Defaults to \eqn{2 (\#cl)^{2/3}}
-#' @param cores number of cores to use. Default is 1.
-#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
-#'   library to run the matrix calculations. Otherwise, or when the library is
-#'   not available will run the slower legacy code
-#' @param deviceStr On the `torch` library enforces which device to use to run
-#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
-#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
-#'   to a specific device
+#' @param cores `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested number of CPU cores. The effective value is bounded by the
+#'   available cores. Use `executionOptions = ExecutionOptions(cores = ...)`
+#'   instead.
+#' @param optimizeForSpeed `r lifecycle::badge("deprecated")` Legacy execution
+#'   scalar. When `TRUE`, `COTAN` tries to use accelerated `torch`-based matrix
+#'   calculations when available; otherwise it falls back to the slower legacy
+#'   code. Use
+#'   `executionOptions = ExecutionOptions(optimizeForSpeed = ...)` instead.
+#' @param deviceStr `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested `torch` device string, for example `"cpu"`, `"cuda"`, or
+#'   `"cuda:0"`. Use `executionOptions = ExecutionOptions(deviceStr = ...)`
+#'   instead.
 #' @param useDEA `r lifecycle::badge("deprecated")` Legacy cluster-tree scalar.
 #'   Boolean indicating whether to use *DEA* profiles to define cluster
 #'   distances; when `FALSE`, average *Zero-One* counts are used instead, which
@@ -49,7 +54,7 @@
 #'   `clusterTreeOptions = ClusterTreeOptions(hclustMethod = ...)` instead.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
-#'   built.
+#'   built. This is the preferred interface for new code.
 #' @param allCheckResults An optional `data.frame` with the results of previous
 #'   checks about the merging of clusters. Useful to restart the *merging*
 #'   process after an interruption.
@@ -61,7 +66,7 @@
 #' @param outDir an existing directory for the analysis output. The effective
 #'   output will be paced in a sub-folder.
 #' @param executionOptions optional `ExecutionOptions` object collecting
-#'   execution-related parameters.
+#'   execution-related parameters. This is the preferred interface for new code.
 #'
 #' @returns a `list` with:
 #'   * `"clusters"` the merged cluster labels array

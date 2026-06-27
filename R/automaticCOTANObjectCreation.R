@@ -163,6 +163,8 @@
                 "(`cores`, `optimizeForSpeed`, `deviceStr`)."))
 }
 
+# ------ proceedToCoex -------
+
 #'
 #' @aliases proceedToCoex
 #'
@@ -172,14 +174,19 @@
 #' @param objCOTAN a newly created `COTAN` object
 #' @param calcCoex a Boolean to determine whether to calculate the genes' `COEX`
 #'   or stop just before at the [estimateDispersionViaSolver()] step
-#' @param optimizeForSpeed Boolean; when `TRUE` `COTAN` tries to use the `torch`
-#'   library to run the matrix calculations. Otherwise, or when the library is
-#'   not available will run the slower legacy code
-#' @param deviceStr On the `torch` library enforces which device to use to run
-#'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
-#'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
-#'   to a specific device
-#' @param cores number of cores to use. Default is 1.
+#' @param optimizeForSpeed `r lifecycle::badge("deprecated")` Legacy execution
+#'   scalar. When `TRUE`, `COTAN` tries to use accelerated `torch`-based matrix
+#'   calculations when available; otherwise it falls back to the slower legacy
+#'   code. Use
+#'   `executionOptions = ExecutionOptions(optimizeForSpeed = ...)` instead.
+#' @param deviceStr `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested `torch` device string, for example `"cpu"`, `"cuda"`, or
+#'   `"cuda:0"`. Use `executionOptions = ExecutionOptions(deviceStr = ...)`
+#'   instead.
+#' @param cores `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested number of CPU cores. The effective value is bounded by the
+#'   available cores. Use `executionOptions = ExecutionOptions(cores = ...)`
+#'   instead.
 #' @param cellsCutoff `r lifecycle::badge("deprecated")` Legacy cleaning scalar.
 #'   `clean()` deletes from the `raw` data any gene expressed in fewer cells than
 #'   this fraction times the total number of cells. Default cutoff is
@@ -210,8 +217,9 @@
 #'   controls. This is the preferred interface for new code.
 #'
 #' @section Lifecycle:
-#' The scalar cleaning arguments are soft-deprecated as of COTAN 2.13.3. Use
-#' `cleaningOptions = CleaningOptions(...)` in new code.
+#' Legacy scalar cleaning and execution arguments are soft-deprecated as of
+#' COTAN 2.13.3. Use `cleaningOptions = CleaningOptions(...)` and
+#' `executionOptions = ExecutionOptions(...)` in new code.
 #'
 #' @returns `proceedToCoex()` returns the updated `COTAN` object with genes'
 #'   `COEX` calculated. If asked to, it will also store the object, along all
@@ -526,9 +534,13 @@ setMethod(
 #' @param ... Additional arguments forwarded to [proceedToCoex()]
 #'
 #' @section Forwarded arguments:
-#'   Typical forwarded arguments include `calcCoex`, `saveObj`, `outDir`,
-#'   `cleaningOptions` or the legacy cleaning thresholds used by [clean()], and
-#'   the `ExecutionOptions` object.
+#'   Additional arguments are forwarded to [proceedToCoex()]. Typical forwarded
+#'   arguments include `calcCoex`, `cleaningOptions`, `executionOptions`,
+#'   `saveObj` and `outDir`.
+#'
+#'   Legacy scalar cleaning and execution arguments accepted by [proceedToCoex()]
+#'   are still forwarded for compatibility, but are soft-deprecated as of COTAN
+#'   2.13.3.
 #'
 #' @returns `automaticCOTANObjectCreation()` returns a new `COTAN` object after
 #'   initialization and analysis via [proceedToCoex()].

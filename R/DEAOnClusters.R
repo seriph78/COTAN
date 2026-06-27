@@ -362,8 +362,8 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'   of the *clusters* of the *clusterization*
 #' @param useDEA `r lifecycle::badge("deprecated")` Legacy cluster-distance
 #'   scalar. Boolean indicating whether to use *DEA* profiles to define the
-#'   distance; when `FALSE`, average *Zero-One* counts are used instead, which is
-#'   faster but less precise. Use
+#'   distance; when `FALSE`, average *Zero-One* counts are used instead, which
+#'   is faster but less precise. Use
 #'   `clusterDistanceOptions = ClusterDistanceOptions(useDEA = ...)` instead.
 #' @param distance `r lifecycle::badge("deprecated")` Legacy cluster-distance
 #'   scalar. Distance method passed to [parallelDist::parDist()]. The effective
@@ -371,13 +371,14 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'   distances. Use
 #'   `clusterDistanceOptions = ClusterDistanceOptions(distance = ...)` instead.
 #' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
-#'   how distances between clusters are computed.
+#'   how distances between clusters are computed. This is the preferred
+#'   interface for new code.
 #'
-#' @section Lifecycle:
-#' Legacy scalar cluster-distance arguments are soft-deprecated as of COTAN
-#' 2.13.3. Use `clusterDistanceOptions = ClusterDistanceOptions(...)` for
-#' distance-only APIs and `clusterTreeOptions = ClusterTreeOptions(...)` for
-#' APIs that also build hierarchical cluster trees.
+#' @section Lifecycle: Legacy scalar cluster-distance arguments are
+#'   soft-deprecated as of COTAN 2.13.3. Use
+#'   `clusterDistanceOptions = ClusterDistanceOptions(...)` for distance-only
+#'   APIs and `clusterTreeOptions = ClusterTreeOptions(...)` for APIs that also
+#'   build hierarchical cluster trees.
 #'
 #' @return `distancesBetweenClusters()` returns a `dist` object
 #'

@@ -24,7 +24,7 @@
 #'   where applicable, define associated colors.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
-#'   built.
+#'   built. This is the preferred interface for new code.
 #' @param adjustmentMethod Method passed to [stats::p.adjust()] for multi-test
 #'   p-value adjustment. See the function usage for the default.
 #' @param condNameList a `list` of *conditions*' names to be used for additional

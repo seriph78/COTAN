@@ -78,9 +78,7 @@
 #'   `cleaningOptions = CleaningOptions(genesThreshold = ...)` instead.
 #' @param cleaningOptions A `CleaningOptions` object bundling cleaning cutoffs
 #'   and fully-expressed / fully-expressing thresholds. This is the preferred
-#'   interface for new code. It must not be mixed with the legacy cleaning
-#'   arguments `cellsCutoff`, `genesCutoff`, `cellsThreshold`, and
-#'   `genesThreshold`.
+#'   interface for new code.
 #'
 #' @section Lifecycle:
 #' The scalar cleaning arguments are soft-deprecated as of COTAN 2.13.3. Use

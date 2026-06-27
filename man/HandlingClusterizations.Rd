@@ -212,16 +212,21 @@ p-value adjustment. See the function usage for the default.}
 sums inside or outside the cluster for each gene as fraction of the
 relevant \code{lambda} parameter. Default is \eqn{5\%}}
 
-\item{useDEA}{Boolean indicating whether to use the \emph{DEA} to define the
-distance; alternatively it will use the average \emph{Zero-One} counts, that is
-faster but less precise.}
+\item{useDEA}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cluster-tree scalar.
+Boolean indicating whether to use \emph{DEA} profiles to define cluster
+distances; when \code{FALSE}, average \emph{Zero-One} counts are used instead, which
+is faster but less precise. Use
+\code{clusterTreeOptions = ClusterTreeOptions(useDEA = ...)} instead.}
 
-\item{distance}{type of distance to use. Default is \code{"cosine"} for \emph{DEA} and
-\code{"euclidean"} for \emph{Zero-One}. Can be chosen among those supported by
-\code{\link[parallelDist:parDist]{parallelDist::parDist()}}}
+\item{distance}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cluster-tree
+scalar. Distance method passed to \code{\link[parallelDist:parDist]{parallelDist::parDist()}}. The effective
+default is \code{"cosine"} for \emph{DEA} distances and \code{"euclidean"} for \emph{Zero-One}
+distances. Use
+\code{clusterTreeOptions = ClusterTreeOptions(distance = ...)} instead.}
 
 \item{clusterDistanceOptions}{a \code{ClusterDistanceOptions} object controlling
-how distances between clusters are computed.}
+how distances between clusters are computed. This is the preferred
+interface for new code.}
 
 \item{dataIn}{The \code{matrix} to plot. It must have a row names containing the
 given elements (the columns are features)}
@@ -278,7 +283,7 @@ where applicable, define associated colors.}
 
 \item{clusterTreeOptions}{a \code{ClusterTreeOptions} object controlling how
 distances between clusters are computed and how the hierarchical tree is
-built.}
+built. This is the preferred interface for new code.}
 
 \item{condNameList}{a \code{list} of \emph{conditions}' names to be used for additional
 columns in the final plot. When none are given no new columns will be added
@@ -297,8 +302,10 @@ column name in the returned \code{data.frame}}
 
 \item{plotTitle}{The title to use for the returned plot}
 
-\item{hclustMethod}{Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}. See
-function usage for the default.}
+\item{hclustMethod}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cluster-tree
+scalar. Clustering method passed to \code{\link[stats:hclust]{stats::hclust()}}, with default
+\code{"ward.D2"}. Use
+\code{clusterTreeOptions = ClusterTreeOptions(hclustMethod = ...)} instead.}
 
 \item{n}{the number of extreme \code{COEX} values to return}
 
@@ -542,6 +549,12 @@ its labels so that in the new order near labels indicate near clusters
 according to a \emph{DEA} (or \emph{Zero-One}) based distance
 }
 \section{Lifecycle}{
+ Legacy scalar cluster-distance arguments are
+soft-deprecated as of COTAN 2.13.3. Use
+\code{clusterDistanceOptions = ClusterDistanceOptions(...)} for distance-only
+APIs and \code{clusterTreeOptions = ClusterTreeOptions(...)} for APIs that also
+build hierarchical cluster trees.
+
 
 The scalar dimensionality-reduction arguments are soft-deprecated as of
 COTAN 2.13.3. Use \code{reductionOptions = ReductionOptions(...)} in new code.

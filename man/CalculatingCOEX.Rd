@@ -231,10 +231,10 @@ pair. If not given the appropriate one will be calculated on the fly}
 of genes/cells pairs for which the \emph{expected contingency table} is smaller
 than \eqn{0.5}. Default is FALSE}
 
-\item{deviceStr}{On the \code{torch} library enforces which device to use to run
-the calculations. Possible values are \code{"cpu"} to us the system \emph{CPU},
-\code{"cuda"} to use the system \emph{GPUs} or something like \code{"cuda:0"} to restrict
-to a specific device}
+\item{deviceStr}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution scalar.
+Requested \code{torch} device string, for example \code{"cpu"}, \code{"cuda"}, or
+\code{"cuda:0"}. Use \code{executionOptions = ExecutionOptions(deviceStr = ...)}
+instead.}
 
 \item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
 controls. This is the preferred interface for new code.}

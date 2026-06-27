@@ -107,9 +107,13 @@ runGDICalc <- function(genesBatches, S, topRows, cores) {
 #' @param S a `matrix` object
 #' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
-#' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
+#' @param cores `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested number of CPU cores. The effective value is bounded by the
+#'   available cores. Use `executionOptions = ExecutionOptions(cores = ...)`
+#'   instead.
+#' @param chunkSize `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Integer scalar controlling solver or matrix batching where supported.
+#'   Use `executionOptions = ExecutionOptions(chunkSize = ...)` instead.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
 #'
@@ -260,9 +264,13 @@ calculateGDIGivenCorr <-
 #'   Pearson's \eqn{\chi^{2}} test or `"G"` for the G-test.
 #' @param rowsFraction The fraction of rows that will be averaged to calculate
 #'   the `GDI`. Defaults to \eqn{5\%}
-#' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
+#' @param cores `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested number of CPU cores. The effective value is bounded by the
+#'   available cores. Use `executionOptions = ExecutionOptions(cores = ...)`
+#'   instead.
+#' @param chunkSize `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Integer scalar controlling solver or matrix batching where supported.
+#'   Use `executionOptions = ExecutionOptions(chunkSize = ...)` instead.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
 #'
@@ -444,9 +452,13 @@ runPValueCalc <- function(genesBatches, S, cores) {
 #'   empty the function will do it genome-wide.
 #' @param geneSubsetRow an array of genes. It will be put in rows. If left empty
 #'   the function will do it genome-wide.
-#' @param cores number of cores to use. Default is 1.
-#' @param chunkSize number of elements to solve in batch in a single core.
-#'   Default is 1024.
+#' @param cores `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Requested number of CPU cores. The effective value is bounded by the
+#'   available cores. Use `executionOptions = ExecutionOptions(cores = ...)`
+#'   instead.
+#' @param chunkSize `r lifecycle::badge("deprecated")` Legacy execution scalar.
+#'   Integer scalar controlling solver or matrix batching where supported.
+#'   Use `executionOptions = ExecutionOptions(chunkSize = ...)` instead.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
 #'

@@ -216,7 +216,7 @@ clustersSummaryPlot <- function(objCOTAN, clName = "", clusters = NULL,
 #'   `clusterTreeOptions = ClusterTreeOptions(hclustMethod = ...)` instead.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
-#'   built.
+#'   built. This is the preferred interface for new code.
 #'
 #' @returns `clustersTreePlot()` returns a list with 2 objects:
 #'  * `"dend"` a `ggplot2` object representing the `dendrogram` plot

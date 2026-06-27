@@ -54,7 +54,10 @@ should be used. Defaults to all fields}
 
 \item{pValueThreshold}{The \eqn{p}-value threshold. Default is \eqn{0.01}}
 
-\item{cores}{number of cores to use. Default is 1.}
+\item{cores}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy execution scalar.
+Requested number of CPU cores. The effective value is bounded by the
+available cores. Use \code{executionOptions = ExecutionOptions(cores = ...)}
+instead.}
 
 \item{executionOptions}{An \code{ExecutionOptions} object bundling the execution
 controls. This is the preferred interface for new code.}

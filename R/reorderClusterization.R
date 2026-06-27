@@ -29,7 +29,7 @@
 #'   `clusterTreeOptions = ClusterTreeOptions(hclustMethod = ...)` instead.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
-#'   built.
+#'   built. This is the preferred interface for new code.
 #'
 #' @returns `reorderClusterization()` returns a `list` with 3 elements:
 #'   * `"clusters"` the newly reordered cluster labels array

@@ -119,13 +119,17 @@ scatterPlot(objCOTAN, condName = "", conditions = NULL, splitSamples = TRUE)
 \arguments{
 \item{objCOTAN}{a \code{COTAN} object}
 
-\item{cellsThreshold}{any gene that is expressed in more cells than threshold
-times the total number of cells will be marked as \strong{fully-expressed}.
-Default threshold is \eqn{0.99 \; (99.0\%)}}
+\item{cellsThreshold}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cleaning
+scalar. Any gene expressed in more cells than this fraction times the total
+number of cells is marked as \strong{fully-expressed}. Default threshold is
+\eqn{0.99 \; (99.0\%)}. Use
+\code{cleaningOptions = CleaningOptions(cellsThreshold = ...)} instead.}
 
-\item{genesThreshold}{any cell that is expressing more genes than threshold
-times the total number of genes will be marked as \strong{fully-expressing}.
-Default threshold is \eqn{0.99 \; (99.0\%)}}
+\item{genesThreshold}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cleaning
+scalar. Any cell expressing more genes than this fraction times the total
+number of genes is marked as \strong{fully-expressing}. Default threshold is
+\eqn{0.99 \; (99.0\%)}. Use
+\code{cleaningOptions = CleaningOptions(genesThreshold = ...)} instead.}
 
 \item{lambda}{a named array that gives the values for lambda}
 
@@ -147,19 +151,21 @@ assumed to be the same for all cells (no further sub-divisions)}
 on the one indicated by \code{condName} that will only indicate the relevant
 column name in the returned \code{data.frame}}
 
-\item{cellsCutoff}{\code{clean()} will delete from the \code{raw} data any gene that is
-expressed in less cells than threshold times the total number of cells.
-Default cutoff is \eqn{0.003 \; (0.3\%)}}
+\item{cellsCutoff}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cleaning scalar.
+\code{clean()} deletes from the \code{raw} data any gene expressed in fewer cells than
+this fraction times the total number of cells. Default cutoff is
+\eqn{0.003 \; (0.3\%)}. Use
+\code{cleaningOptions = CleaningOptions(cellsCutoff = ...)} instead.}
 
-\item{genesCutoff}{\code{clean()} will delete from the \code{raw} data any cell that is
-expressing less genes than threshold times the total number of genes.
-Default cutoff is \eqn{0.002 \; (0.2\%)}}
+\item{genesCutoff}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy cleaning scalar.
+\code{clean()} deletes from the \code{raw} data any cell expressing fewer genes than
+this fraction times the total number of genes. Default cutoff is
+\eqn{0.002 \; (0.2\%)}. Use
+\code{cleaningOptions = CleaningOptions(genesCutoff = ...)} instead.}
 
 \item{cleaningOptions}{A \code{CleaningOptions} object bundling cleaning cutoffs
 and fully-expressed / fully-expressing thresholds. This is the preferred
-interface for new code. It must not be mixed with the legacy cleaning
-arguments \code{cellsCutoff}, \code{genesCutoff}, \code{cellsThreshold}, and
-\code{genesThreshold}.}
+interface for new code.}
 
 \item{includePCA}{a \code{Boolean} flag to determine whether to calculate the
 \emph{PCA} associated with the normalized matrix. When \code{TRUE} the first four
@@ -322,6 +328,12 @@ of the mitochondrial genes against the overall cell's library size
 \code{scatterPlot()} creates a plot that check the relation between the
 library size and the number of genes detected.
 }
+\section{Lifecycle}{
+
+The scalar cleaning arguments are soft-deprecated as of COTAN 2.13.3. Use
+\code{cleaningOptions = CleaningOptions(...)} in new code.
+}
+
 \examples{
 library(zeallot)
 
