@@ -103,7 +103,6 @@ setMethod(
     callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
 
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "CleaningOptions",
       replacementArg = "cleaningOptions",

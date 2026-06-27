@@ -51,7 +51,6 @@ singleHeatmapDF <- function(objCOTAN,
 
   if (is.null(executionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ExecutionOptions",
       replacementArg = "executionOptions",
@@ -240,7 +239,6 @@ heatmapPlot <- function(objCOTAN = NULL,
 
   if (is.null(executionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ExecutionOptions",
       replacementArg = "executionOptions",
@@ -423,7 +421,6 @@ genesHeatmapPlot <-
 
     if (is.null(executionOptions)) {
       .warnDeprecatedPackArgs(
-        functionName = .currentFunctionName(),
         callArgs = callArgs,
         packClass = "ExecutionOptions",
         replacementArg = "executionOptions",

@@ -61,7 +61,6 @@ reorderClusterization <- function(objCOTAN,
 
   if (is.null(clusterTreeOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ClusterTreeOptions",
       replacementArg = "clusterTreeOptions",

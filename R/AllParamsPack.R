@@ -761,16 +761,19 @@ resolveClusterTreeOptions <- function(useDEA = TRUE,
 
 
 #' @noRd
-.warnDeprecatedPackArgs <- function(functionName,
-                                    callArgs,
+.warnDeprecatedPackArgs <- function(callArgs,
                                     packClass,
                                     replacementArg,
                                     replacementConstructor = packClass,
                                     aliases = character(),
                                     details = NULL,
                                     when = .cotanDeprecatedSince(),
+                                    functionName =
+                                      .currentFunctionName(depth = 3L),
                                     env = rlang::caller_env(),
                                     user_env = rlang::caller_env(2)) {
+  functionName <- force(functionName)
+
   usedArgs <- .usedDeprecatedPackArgs(
     callArgs = callArgs,
     packClass = packClass,

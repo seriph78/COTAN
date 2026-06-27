@@ -144,7 +144,6 @@ calculateGDIGivenS <- function(S,
 
   if (is.null(executionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ExecutionOptions",
       replacementArg = "executionOptions",
@@ -300,7 +299,6 @@ calculateGDI <- function(objCOTAN,
 
   if (is.null(executionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ExecutionOptions",
       replacementArg = "executionOptions",
@@ -484,7 +482,6 @@ calculatePValue <- function(objCOTAN,
 
   if (is.null(executionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ExecutionOptions",
       replacementArg = "executionOptions",

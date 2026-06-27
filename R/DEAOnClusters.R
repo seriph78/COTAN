@@ -404,7 +404,6 @@ distancesBetweenClusters <- function(objCOTAN,
 
   if (is.null(clusterDistanceOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ClusterDistanceOptions",
       replacementArg = "clusterDistanceOptions",

@@ -1,18 +1,24 @@
 
 prevOptState <- options(parallelly.fork.enable = TRUE)
 
-local_null_pdf <- function() {
-  grDevices::pdf(NULL)
-  on.exit({
-    while (grDevices::dev.cur() > 1L) {
-      grDevices::dev.off()
+localTestPlotDevice <- function(env = parent.frame()) {
+  plotDeviceFile <- tempfile(fileext = ".pdf")
+  grDevices::pdf(plotDeviceFile)
+
+  withr::defer({
+    grDevices::dev.off()
+    unlink(plotDeviceFile)
+    if (file.exists("Rplots.pdf")) {
+      unlink("Rplots.pdf")
     }
-  }, add = TRUE)
+  }, envir = env)
+
+  invisible(plotDeviceFile)
 }
 
 
 test_that("Raw and Clean plots", {
-  local_null_pdf()
+  localTestPlotDevice()
 
   utils::data("test.dataset", package = "COTAN")
 
@@ -82,7 +88,7 @@ test_that("Raw and Clean plots", {
 
 
 test_that("Heatmap plots", {
-  local_null_pdf()
+  localTestPlotDevice()
 
   utils::data("test.dataset", package = "COTAN")
 
@@ -162,7 +168,7 @@ test_that("Heatmap plots", {
 
 
 test_that("Clusters plots", {
-  local_null_pdf()
+  localTestPlotDevice()
 
   utils::data("test.dataset", package = "COTAN")
 

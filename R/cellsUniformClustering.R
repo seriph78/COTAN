@@ -319,7 +319,6 @@ cellsUniformClustering <- function(objCOTAN,
 
   if (is.null(executionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ExecutionOptions",
       replacementArg = "executionOptions",
@@ -348,7 +347,6 @@ cellsUniformClustering <- function(objCOTAN,
 
   if (is.null(clusterTreeOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ClusterTreeOptions",
       replacementArg = "clusterTreeOptions",
@@ -368,7 +366,6 @@ cellsUniformClustering <- function(objCOTAN,
 
   if (is.null(reductionOptions)) {
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ReductionOptions",
       replacementArg = "reductionOptions",

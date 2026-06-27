@@ -272,22 +272,20 @@ test_that("COTAN getters", {
     tolerance = 1.0e-12
   )
 
-  legacyM0 <- NULL
-  lifecycle::expect_deprecated(
-    legacyM0 <- abs(calculateReducedDataMatrix(
+  legacyM0 <- suppressWarnings(
+    calculateReducedDataMatrix(
       obj,
       useCoexEigen = FALSE,
       dataMethod = "LogNormalized",
       numComp = 50L,
       genesSel = "HGDI",
       numGenes = 2000L
-    )),
-    regexp = "useCoexEigen"
+    )
   )
 
   expect_equal(
     m0,
-    legacyM0,
+    abs(legacyM0),
     tolerance = 1.0e-12
   )
 

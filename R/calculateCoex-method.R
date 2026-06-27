@@ -1418,7 +1418,6 @@ setMethod(
     callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
 
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ExecutionOptions",
       replacementArg = "executionOptions",
@@ -1887,7 +1886,6 @@ calculateReducedDataMatrix <-
     if (is.null(reductionOptions)) {
 
       .warnDeprecatedPackArgs(
-        functionName = .currentFunctionName(),
         callArgs = callArgs,
         packClass = "ReductionOptions",
         replacementArg = "reductionOptions",

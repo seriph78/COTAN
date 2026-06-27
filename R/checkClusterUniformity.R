@@ -68,7 +68,6 @@ checkClusterUniformity <- function(
   if (is.null(executionOptions)) {
 
     .warnDeprecatedPackArgs(
-      functionName = .currentFunctionName(),
       callArgs = callArgs,
       packClass = "ExecutionOptions",
       replacementArg = "executionOptions",
