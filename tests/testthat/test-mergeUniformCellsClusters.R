@@ -14,8 +14,12 @@ test_that("Merge Uniform Cells Clusters", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(objCOTAN = obj,
-                       calcCoex = FALSE, cores = 6L, saveObj = FALSE)
+  obj <- proceedToCoex(
+    objCOTAN = obj,
+    calcCoex = FALSE,
+    executionOptions = ExecutionOptions(cores = 6L),
+    saveObj = FALSE
+  )
 
   clusters <- factor(readRDS(file.path(getwd(), "split.clusters.test.RDS")))
   genesNamesTest <- readRDS(file.path(getwd(), "genes.names.test.RDS"))
@@ -183,7 +187,11 @@ test_that("Merge Uniform Cells Clusters", {
     tmpObj <- dropGenesCells(objCOTAN = obj, cells = cellsToDrop)
 
     suppressWarnings({
-      tmpObj <- proceedToCoex(objCOTAN = tmpObj, cores = 6L, saveObj = FALSE)
+      tmpObj <- proceedToCoex(
+        objCOTAN = tmpObj,
+        executionOptions = ExecutionOptions(cores = 6L),
+        saveObj = FALSE
+      )
     })
 
     gdiData <- calculateGDI(objCOTAN = tmpObj)

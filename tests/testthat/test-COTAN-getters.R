@@ -15,7 +15,10 @@ test_that("COTAN getters", {
   obj <- clean(obj)
 
   obj <- estimateLambdaLinear(obj)
-  obj <- estimateDispersionViaSolver(obj, cores = 2L)
+  obj <- estimateDispersionViaSolver(
+    obj,
+    executionOptions = ExecutionOptions(cores = 2L)
+  )
 
   # add second column to global meta-data
   obj <- addElementToMetaDataset(
@@ -26,12 +29,23 @@ test_that("COTAN getters", {
   obj@metaDataset[row, 1L:2L] <- c("genes' coex is in sync:", FALSE)
 
   suppressWarnings({
-    obj <- calculateCoex(obj, actOnCells = FALSE, returnPPFract = TRUE,
-                         optimizeForSpeed = TRUE, deviceStr = "cpu")
+    obj <- calculateCoex(
+      obj,
+      actOnCells = FALSE,
+      returnPPFract = TRUE,
+      executionOptions = ExecutionOptions(
+        optimizeForSpeed = TRUE,
+        deviceStr = "cpu"
+      )
+    )
   })
   expect_no_warning({
-    obj <- calculateCoex(obj, actOnCells = TRUE, returnPPFract = TRUE,
-                         optimizeForSpeed = FALSE)
+    obj <- calculateCoex(
+      obj,
+      actOnCells = TRUE,
+      returnPPFract = TRUE,
+      executionOptions = ExecutionOptions(optimizeForSpeed = FALSE)
+    )
   })
 
   obj <- storeGDI(obj, genesGDI = calculateGDI(obj))
@@ -258,16 +272,22 @@ test_that("COTAN getters", {
     tolerance = 1.0e-12
   )
 
-  expect_equal(
-    m0,
-    abs(suppressWarnings(calculateReducedDataMatrix(
+  legacyM0 <- NULL
+  lifecycle::expect_deprecated(
+    legacyM0 <- abs(calculateReducedDataMatrix(
       obj,
       useCoexEigen = FALSE,
       dataMethod = "LogNormalized",
       numComp = 50L,
       genesSel = "HGDI",
       numGenes = 2000L
-    ))),
+    )),
+    regexp = "useCoexEigen"
+  )
+
+  expect_equal(
+    m0,
+    legacyM0,
     tolerance = 1.0e-12
   )
 

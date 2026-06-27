@@ -94,7 +94,7 @@ test_that("Heatmap plots", {
   exec <- ExecutionOptions(cores = 3L)
 
   suppressWarnings(
-    obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L))
+    obj <- proceedToCoex(obj, calcCoex = TRUE, executionOptions = exec))
   suppressWarnings(
     obj2 <- proceedToCoex(obj, calcCoex = TRUE, executionOptions = exec)
   )
@@ -171,7 +171,11 @@ test_that("Clusters plots", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  suppressWarnings(obj <- proceedToCoex(obj, calcCoex = TRUE, cores = 3L))
+  suppressWarnings(obj <- proceedToCoex(
+    obj,
+    calcCoex = TRUE,
+    executionOptions = ExecutionOptions(cores = 3L)
+  ))
 
   batch <- factor(rep(c("L", "H"), each = getNumCells(obj) / 2L))
   names(batch) <- getCells(obj)

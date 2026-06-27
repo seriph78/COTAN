@@ -79,10 +79,18 @@ test_that("dropGenesCells", {
   obj <- estimateDispersionNuBisection(obj, cores = 4L,
                                        enforceNuAverageToOne = TRUE)
   suppressWarnings({
-    obj <- calculateCoex(obj, actOnCells = FALSE, optimizeForSpeed = TRUE)
+    obj <- calculateCoex(
+      obj,
+      actOnCells = FALSE,
+      executionOptions = ExecutionOptions(optimizeForSpeed = TRUE)
+    )
   })
   expect_no_warning({
-    obj <- calculateCoex(obj, actOnCells = TRUE, optimizeForSpeed = FALSE)
+    obj <- calculateCoex(
+      obj,
+      actOnCells = TRUE,
+      executionOptions = ExecutionOptions(optimizeForSpeed = FALSE)
+    )
   })
 
   gdiDF <- calculateGDI(obj)

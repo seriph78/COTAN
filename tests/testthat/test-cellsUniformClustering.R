@@ -13,8 +13,13 @@ test_that("Cell Uniform Clustering", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(objCOTAN = obj, calcCoex = TRUE,
-                       cores = 6L, saveObj = TRUE, outDir = tm)
+  obj <- proceedToCoex(
+    objCOTAN = obj,
+    calcCoex = TRUE,
+    executionOptions = ExecutionOptions(cores = 6L),
+    saveObj = TRUE,
+    outDir = tm
+  )
 
   initialResolution <- 1.3
 
@@ -365,7 +370,11 @@ test_that("Cell Uniform Clustering", {
     tmpObj <- dropGenesCells(objCOTAN = obj, cells = cellsToDrop)
 
     suppressWarnings({
-      tmpObj <- proceedToCoex(objCOTAN = tmpObj, cores = 6L, saveObj = FALSE)
+      tmpObj <- proceedToCoex(
+        objCOTAN = tmpObj,
+        executionOptions = ExecutionOptions(cores = 6L),
+        saveObj = FALSE
+      )
     })
 
     gdiData <- calculateGDI(objCOTAN = tmpObj)

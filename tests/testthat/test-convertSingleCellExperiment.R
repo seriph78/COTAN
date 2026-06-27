@@ -9,7 +9,12 @@ test_that("Convert COTAN to and from SCE on test dataset", {
                                sequencingMethod = "artificial",
                                sampleCondition = "test")
 
-  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 1L, saveObj = FALSE)
+  obj <- proceedToCoex(
+    obj,
+    calcCoex = FALSE,
+    executionOptions = ExecutionOptions(cores = 1L),
+    saveObj = FALSE
+  )
 
   coexTest <- readRDS(test_path("coex.test.RDS"))
 
@@ -109,7 +114,12 @@ test_that("Convert COTAN to and from Seurat via SCE on test dataset", {
                    asClusterization(Seurat::FetchData(srat, var = "orig.ident"),
                                     getCells(obj)))
 
-  obj <- proceedToCoex(obj, calcCoex = FALSE, cores = 1L, saveObj = FALSE)
+  obj <- proceedToCoex(
+    obj,
+    calcCoex = FALSE,
+    executionOptions = ExecutionOptions(cores = 1L),
+    saveObj = FALSE
+  )
 
   expect_identical(colnames(getMetadataGenes(obj)),
                    c("feGenes", "lambda", "dispersion"))

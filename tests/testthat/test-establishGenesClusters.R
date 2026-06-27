@@ -5,8 +5,11 @@ prevOptState <- options(parallelly.fork.enable = TRUE)
 test_that("Establish genes clusters", {
   data("test.dataset")
   objCOTAN <- COTAN(raw = test.dataset)
-  objCOTAN <- proceedToCoex(objCOTAN, cores = 6L,
-                            optimizeForSpeed = TRUE, saveObj = FALSE)
+  objCOTAN <- proceedToCoex(
+    objCOTAN,
+    executionOptions = ExecutionOptions(cores = 6L, optimizeForSpeed = TRUE),
+    saveObj = FALSE
+  )
 
   c(secondaryMarkers, gCS, rankGenes) %<-%
     genesCoexSpace(objCOTAN = objCOTAN,
