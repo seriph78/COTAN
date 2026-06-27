@@ -549,8 +549,8 @@ its labels so that in the new order near labels indicate near clusters
 according to a \emph{DEA} (or \emph{Zero-One}) based distance
 }
 \section{Lifecycle}{
- Legacy scalar cluster-distance arguments are
-soft-deprecated as of COTAN 2.13.3. Use
+ Legacy scalar cluster-distance and cluster-tree arguments
+are soft-deprecated as of COTAN 2.13.3. Use
 \code{clusterDistanceOptions = ClusterDistanceOptions(...)} for distance-only
 APIs and \code{clusterTreeOptions = ClusterTreeOptions(...)} for APIs that also
 build hierarchical cluster trees.

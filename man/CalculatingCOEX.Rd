@@ -216,9 +216,10 @@ returned}
 \item{zeroOne}{the raw count matrix projected to \code{0} or \code{1}. If not given the
 appropriate one will be calculated on the fly}
 
-\item{optimizeForSpeed}{Legacy execution scalar. In \code{calculateCoex()} it is
-converted into an \code{ExecutionOptions} object; in lower-level COEX helpers it
-is deprecated and always treated as \code{TRUE}}
+\item{optimizeForSpeed}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} Legacy
+compatibility scalar. In lower-level COEX helpers this argument is ignored
+and always treated as \code{TRUE}; it is retained only to avoid breaking old
+calls.}
 
 \item{probZero}{is the expected \strong{probability of zero} for each gene/cell
 pair. If not given the appropriate one will be calculated on the fly}
@@ -511,6 +512,10 @@ the same value on all elements. This value is the number of genes/cells
 depending on the parameter \code{actOnCells} being \code{TRUE/FALSE}.
 }
 \section{Lifecycle}{
+
+Legacy scalar execution arguments are soft-deprecated as of COTAN 2.13.3. Use
+\code{executionOptions = ExecutionOptions(...)} in new code.
+
 
 The scalar dimensionality-reduction arguments are soft-deprecated as of
 COTAN 2.13.3. Use \code{reductionOptions = ReductionOptions(...)} in new code.

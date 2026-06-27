@@ -224,6 +224,12 @@ and returns it.
 \code{getProbabilityOfZero()} gives for each cell and each gene the
 probability of observing zero reads
 }
+\section{Lifecycle}{
+
+Legacy scalar execution and batching arguments are soft-deprecated as of
+COTAN 2.13.3. Use \code{executionOptions = ExecutionOptions(...)} in new code.
+}
+
 \examples{
 data("test.dataset")
 objCOTAN <- COTAN(raw = test.dataset)

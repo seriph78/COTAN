@@ -529,9 +529,10 @@ observedPartialContingencyTables <-
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
-#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
-#'   is deprecated and always treated as `TRUE`
+#' @param optimizeForSpeed `r lifecycle::badge("deprecated")` Legacy
+#'   compatibility scalar. In lower-level COEX helpers this argument is ignored
+#'   and always treated as `TRUE`; it is retained only to avoid breaking old
+#'   calls.
 #'
 #' @returns `expectedContingencyTablesNN()` returns a `list` with:
 #'   * `expectedNN` the *No/No* expected contingency table as `matrix`
@@ -603,9 +604,10 @@ expectedContingencyTablesNN <- function(objCOTAN,
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
-#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
-#'   is deprecated and always treated as `TRUE`
+#' @param optimizeForSpeed `r lifecycle::badge("deprecated")` Legacy
+#'   compatibility scalar. In lower-level COEX helpers this argument is ignored
+#'   and always treated as `TRUE`; it is retained only to avoid breaking old
+#'   calls.
 #'
 #' @returns `expectedPartialContingencyTablesNN()` returns a `list` with:
 #'   * `expectedNN` the *No/No* expected contingency table as `matrix`,
@@ -687,9 +689,10 @@ expectedPartialContingencyTablesNN <-
 #'   otherwise for the genes
 #' @param asDspMatrices Boolean; when `TRUE` the function will return only
 #'   packed dense symmetric matrices
-#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
-#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
-#'   is deprecated and always treated as `TRUE`
+#' @param optimizeForSpeed `r lifecycle::badge("deprecated")` Legacy
+#'   compatibility scalar. In lower-level COEX helpers this argument is ignored
+#'   and always treated as `TRUE`; it is retained only to avoid breaking old
+#'   calls.
 #'
 #' @return `expectedContingencyTables()` returns the expected contingency tables
 #'   as named `list` with elements:
@@ -804,9 +807,10 @@ expectedContingencyTables <- function(objCOTAN,
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
-#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
-#'   is deprecated and always treated as `TRUE`
+#' @param optimizeForSpeed `r lifecycle::badge("deprecated")` Legacy
+#'   compatibility scalar. In lower-level COEX helpers this argument is ignored
+#'   and always treated as `TRUE`; it is retained only to avoid breaking old
+#'   calls.
 #'
 #' @return `expectedPartialContingencyTables()` returns the expected contingency
 #'   tables, restricted to the selected columns, as named `list` with elements:
@@ -1355,6 +1359,8 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
     return(objCOTAN)
   }
 
+## ----- calculateCoex ------
+
 #' @aliases calculateCoex
 #'
 #' @details `calculateCoex()` estimates and stores the `COEX` matrix in the
@@ -1381,6 +1387,10 @@ calculateCoex_Torch <- function(objCOTAN, returnPPFract, deviceStr) {
 #'   instead.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
+#'
+#' @section Lifecycle:
+#' Legacy scalar execution arguments are soft-deprecated as of COTAN 2.13.3. Use
+#' `executionOptions = ExecutionOptions(...)` in new code.
 #'
 #' @returns `calculateCoex()` returns the updated `COTAN` object
 #'
@@ -1483,9 +1493,10 @@ setMethod(
 #'   pair. If not given the appropriate one will be calculated on the fly
 #' @param actOnCells Boolean; when `TRUE` the function works for the cells,
 #'   otherwise for the genes
-#' @param optimizeForSpeed Legacy execution scalar. In `calculateCoex()` it is
-#'   converted into an `ExecutionOptions` object; in lower-level COEX helpers it
-#'   is deprecated and always treated as `TRUE`
+#' @param optimizeForSpeed `r lifecycle::badge("deprecated")` Legacy
+#'   compatibility scalar. In lower-level COEX helpers this argument is ignored
+#'   and always treated as `TRUE`; it is retained only to avoid breaking old
+#'   calls.
 #'
 #' @returns `calculatePartialCoex()` returns the asked section of the `COEX`
 #'   matrix

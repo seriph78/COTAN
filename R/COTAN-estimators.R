@@ -374,6 +374,10 @@ setMethod(
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
 #'
+#' @section Lifecycle:
+#' Legacy scalar execution and batching arguments are soft-deprecated as of
+#' COTAN 2.13.3. Use `executionOptions = ExecutionOptions(...)` in new code.
+#'
 #' @returns `estimateDispersionViaSolver()` returns the updated `COTAN` object
 #'
 #' @importFrom rlang is_null

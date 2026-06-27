@@ -374,8 +374,8 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'   how distances between clusters are computed. This is the preferred
 #'   interface for new code.
 #'
-#' @section Lifecycle: Legacy scalar cluster-distance arguments are
-#'   soft-deprecated as of COTAN 2.13.3. Use
+#' @section Lifecycle: Legacy scalar cluster-distance and cluster-tree arguments
+#'   are soft-deprecated as of COTAN 2.13.3. Use
 #'   `clusterDistanceOptions = ClusterDistanceOptions(...)` for distance-only
 #'   APIs and `clusterTreeOptions = ClusterTreeOptions(...)` for APIs that also
 #'   build hierarchical cluster trees.
