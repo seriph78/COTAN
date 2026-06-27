@@ -188,14 +188,20 @@ seuratClustering <- function(objCOTAN,
 #'   the calculations. Possible values are `"cpu"` to us the system *CPU*,
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
-#' @param useDEA Boolean indicating whether to use the *DEA* to define the
-#'   distance; alternatively it will use the average *Zero-One* counts, that is
-#'   faster but less precise.
-#' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
-#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
-#'   [parallelDist::parDist()]
-#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
-#'   function usage for the default.
+#' @param useDEA `r lifecycle::badge("deprecated")` Legacy cluster-tree scalar.
+#'   Boolean indicating whether to use *DEA* profiles to define cluster
+#'   distances; when `FALSE`, average *Zero-One* counts are used instead, which
+#'   is faster but less precise. Use
+#'   `clusterTreeOptions = ClusterTreeOptions(useDEA = ...)` instead.
+#' @param distance `r lifecycle::badge("deprecated")` Legacy cluster-tree
+#'   scalar. Distance method passed to [parallelDist::parDist()]. The effective
+#'   default is `"cosine"` for *DEA* distances and `"euclidean"` for *Zero-One*
+#'   distances. Use
+#'   `clusterTreeOptions = ClusterTreeOptions(distance = ...)` instead.
+#' @param hclustMethod `r lifecycle::badge("deprecated")` Legacy cluster-tree
+#'   scalar. Clustering method passed to [stats::hclust()], with default
+#'   `"ward.D2"`. Use
+#'   `clusterTreeOptions = ClusterTreeOptions(hclustMethod = ...)` instead.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
 #'   built.
@@ -242,6 +248,9 @@ seuratClustering <- function(objCOTAN,
 #' @section Lifecycle:
 #' The scalar dimensionality-reduction arguments are soft-deprecated as of
 #' COTAN 2.13.3. Use `reductionOptions = ReductionOptions(...)` in new code.
+#'
+#' Legacy scalar cluster-tree arguments are also soft-deprecated as of COTAN
+#' 2.13.3. Use `clusterTreeOptions = ClusterTreeOptions(...)` in new code.
 #'
 #' @returns `cellsUniformClustering()` returns a `list` with 2 elements:
 #'   * `"clusters"` the newly found cluster labels array
@@ -328,6 +337,19 @@ cellsUniformClustering <- function(objCOTAN,
       msg = paste(
         "Do not mix `executionOptions` with the legacy",
         "execution arguments `cores`, `optimizeForSpeed`, and `deviceStr`."
+      )
+    )
+  }
+
+  if (is.null(clusterTreeOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = .currentFunctionName(),
+      callArgs = callArgs,
+      packClass = "ClusterTreeOptions",
+      replacementArg = "clusterTreeOptions",
+      details = paste(
+        "Use `clusterTreeOptions = ClusterTreeOptions(...)` to configure",
+        "cluster-distance and hierarchical-tree parameters."
       )
     )
   }

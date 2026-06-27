@@ -360,14 +360,24 @@ logFoldChangeOnClusters <- function(objCOTAN, clName = "", clusters = NULL,
 #'   on the one indicated by `clName`
 #' @param coexDF a `data.frame` where each column indicates the `COEX` for each
 #'   of the *clusters* of the *clusterization*
-#' @param useDEA Boolean indicating whether to use the *DEA* to define the
-#'   distance; alternatively it will use the average *Zero-One* counts, that is
-#'   faster but less precise.
-#' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
-#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
-#'   [parallelDist::parDist()]
+#' @param useDEA `r lifecycle::badge("deprecated")` Legacy cluster-distance
+#'   scalar. Boolean indicating whether to use *DEA* profiles to define the
+#'   distance; when `FALSE`, average *Zero-One* counts are used instead, which is
+#'   faster but less precise. Use
+#'   `clusterDistanceOptions = ClusterDistanceOptions(useDEA = ...)` instead.
+#' @param distance `r lifecycle::badge("deprecated")` Legacy cluster-distance
+#'   scalar. Distance method passed to [parallelDist::parDist()]. The effective
+#'   default is `"cosine"` for *DEA* distances and `"euclidean"` for *Zero-One*
+#'   distances. Use
+#'   `clusterDistanceOptions = ClusterDistanceOptions(distance = ...)` instead.
 #' @param clusterDistanceOptions a `ClusterDistanceOptions` object controlling
 #'   how distances between clusters are computed.
+#'
+#' @section Lifecycle:
+#' Legacy scalar cluster-distance arguments are soft-deprecated as of COTAN
+#' 2.13.3. Use `clusterDistanceOptions = ClusterDistanceOptions(...)` for
+#' distance-only APIs and `clusterTreeOptions = ClusterTreeOptions(...)` for
+#' APIs that also build hierarchical cluster trees.
 #'
 #' @return `distancesBetweenClusters()` returns a `dist` object
 #'
@@ -389,6 +399,21 @@ distancesBetweenClusters <- function(objCOTAN,
                                      useDEA = TRUE,
                                      distance = NULL,
                                      clusterDistanceOptions = NULL) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
+  if (is.null(clusterDistanceOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = .currentFunctionName(),
+      callArgs = callArgs,
+      packClass = "ClusterDistanceOptions",
+      replacementArg = "clusterDistanceOptions",
+      details = paste(
+        "Use `clusterDistanceOptions = ClusterDistanceOptions(...)` to configure",
+        "cluster-distance parameters."
+      )
+    )
+  }
+
   clusterDistanceOptions <- resolveClusterDistanceOptions(
     useDEA = useDEA,
     distance = distance,

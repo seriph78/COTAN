@@ -180,18 +180,26 @@
 #'   `"cuda"` to use the system *GPUs* or something like `"cuda:0"` to restrict
 #'   to a specific device
 #' @param cores number of cores to use. Default is 1.
-#' @param cellsCutoff `clean()` will delete from the `raw` data any gene that is
-#'   expressed in less cells than threshold times the total number of cells.
-#'   Default cutoff is \eqn{0.003 \; (0.3\%)}
-#' @param genesCutoff `clean()` will delete from the `raw` data any cell that is
-#'   expressing less genes than threshold times the total number of genes.
-#'   Default cutoff is \eqn{0.002 \; (0.2\%)}
-#' @param cellsThreshold any gene that is expressed in more cells than threshold
-#'   times the total number of cells will be marked as **fully-expressed**.
-#'   Default threshold is \eqn{0.99 \; (99.0\%)}
-#' @param genesThreshold any cell that is expressing more genes than threshold
-#'   times the total number of genes will be marked as **fully-expressing**.
-#'   Default threshold is \eqn{0.99 \; (99.0\%)}
+#' @param cellsCutoff `r lifecycle::badge("deprecated")` Legacy cleaning scalar.
+#'   `clean()` deletes from the `raw` data any gene expressed in fewer cells than
+#'   this fraction times the total number of cells. Default cutoff is
+#'   \eqn{0.003 \; (0.3\%)}. Use
+#'   `cleaningOptions = CleaningOptions(cellsCutoff = ...)` instead.
+#' @param genesCutoff `r lifecycle::badge("deprecated")` Legacy cleaning scalar.
+#'   `clean()` deletes from the `raw` data any cell expressing fewer genes than
+#'   this fraction times the total number of genes. Default cutoff is
+#'   \eqn{0.002 \; (0.2\%)}. Use
+#'   `cleaningOptions = CleaningOptions(genesCutoff = ...)` instead.
+#' @param cellsThreshold `r lifecycle::badge("deprecated")` Legacy cleaning
+#'   scalar. Any gene expressed in more cells than this fraction times the total
+#'   number of cells is marked as **fully-expressed**. Default threshold is
+#'   \eqn{0.99 \; (99.0\%)}. Use
+#'   `cleaningOptions = CleaningOptions(cellsThreshold = ...)` instead.
+#' @param genesThreshold `r lifecycle::badge("deprecated")` Legacy cleaning
+#'   scalar. Any cell expressing more genes than this fraction times the total
+#'   number of genes is marked as **fully-expressing**. Default threshold is
+#'   \eqn{0.99 \; (99.0\%)}. Use
+#'   `cleaningOptions = CleaningOptions(genesThreshold = ...)` instead.
 #' @param cleaningOptions A `CleaningOptions` object bundling cleaning cutoffs
 #'   and fully-expressed / fully-expressing thresholds. This is the preferred
 #'   interface for new code.
@@ -200,6 +208,10 @@
 #' @param outDir an existing directory for the analysis output.
 #' @param executionOptions An `ExecutionOptions` object bundling the execution
 #'   controls. This is the preferred interface for new code.
+#'
+#' @section Lifecycle:
+#' The scalar cleaning arguments are soft-deprecated as of COTAN 2.13.3. Use
+#' `cleaningOptions = CleaningOptions(...)` in new code.
 #'
 #' @returns `proceedToCoex()` returns the updated `COTAN` object with genes'
 #'   `COEX` calculated. If asked to, it will also store the object, along all

@@ -13,14 +13,20 @@
 #' @param reverse a flag to the output order
 #' @param keepMinusOne a flag to decide whether to keep the cluster `"-1"`
 #'   (representing the non-clustered cells) untouched
-#' @param useDEA Boolean indicating whether to use the *DEA* to define the
-#'   distance; alternatively it will use the average *Zero-One* counts, that is
-#'   faster but less precise.
-#' @param distance type of distance to use. Default is `"cosine"` for *DEA* and
-#'   `"euclidean"` for *Zero-One*. Can be chosen among those supported by
-#'   [parallelDist::parDist()]
-#' @param hclustMethod Clustering method passed to [stats::hclust()]. See
-#'   function usage for the default.
+#' @param useDEA `r lifecycle::badge("deprecated")` Legacy cluster-tree scalar.
+#'   Boolean indicating whether to use *DEA* profiles to define cluster
+#'   distances; when `FALSE`, average *Zero-One* counts are used instead, which
+#'   is faster but less precise. Use
+#'   `clusterTreeOptions = ClusterTreeOptions(useDEA = ...)` instead.
+#' @param distance `r lifecycle::badge("deprecated")` Legacy cluster-tree
+#'   scalar. Distance method passed to [parallelDist::parDist()]. The effective
+#'   default is `"cosine"` for *DEA* distances and `"euclidean"` for *Zero-One*
+#'   distances. Use
+#'   `clusterTreeOptions = ClusterTreeOptions(distance = ...)` instead.
+#' @param hclustMethod `r lifecycle::badge("deprecated")` Legacy cluster-tree
+#'   scalar. Clustering method passed to [stats::hclust()], with default
+#'   `"ward.D2"`. Use
+#'   `clusterTreeOptions = ClusterTreeOptions(hclustMethod = ...)` instead.
 #' @param clusterTreeOptions a `ClusterTreeOptions` object controlling how
 #'   distances between clusters are computed and how the hierarchical tree is
 #'   built.
@@ -42,11 +48,30 @@
 #' @rdname HandlingClusterizations
 #'
 reorderClusterization <- function(objCOTAN,
-                                  clName = "", clusters = NULL, coexDF = NULL,
-                                  reverse = FALSE, keepMinusOne = TRUE,
-                                  useDEA = TRUE, distance = NULL,
+                                  clName = "",
+                                  clusters = NULL,
+                                  coexDF = NULL,
+                                  reverse = FALSE,
+                                  keepMinusOne = TRUE,
+                                  useDEA = TRUE,
+                                  distance = NULL,
                                   hclustMethod = "ward.D2",
                                   clusterTreeOptions = NULL) {
+  callArgs <- names(as.list(match.call(expand.dots = FALSE))[-1L])
+
+  if (is.null(clusterTreeOptions)) {
+    .warnDeprecatedPackArgs(
+      functionName = .currentFunctionName(),
+      callArgs = callArgs,
+      packClass = "ClusterTreeOptions",
+      replacementArg = "clusterTreeOptions",
+      details = paste(
+        "Use `clusterTreeOptions = ClusterTreeOptions(...)` to configure",
+        "cluster-distance and hierarchical-tree parameters."
+      )
+    )
+  }
+
   clusterTreeOptions <- resolveClusterTreeOptions(
     useDEA = useDEA,
     distance = distance,
